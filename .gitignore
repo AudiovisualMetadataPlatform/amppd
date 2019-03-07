@@ -1,4 +1,3 @@
-.project
 HELP.md
 /target/
 !.mvn/wrapper/maven-wrapper.jar
@@ -25,5 +24,3 @@ HELP.md
 /nbdist/
 /.nb-gradle/
 /build/
-/mvnw
-/mvnw.cmd
