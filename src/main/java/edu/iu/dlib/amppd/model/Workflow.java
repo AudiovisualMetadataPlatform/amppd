@@ -4,30 +4,31 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
+/**
+ * Workflow defines the directed graph with a single start and end node, where nodes represent MGMs, and links represent dependencies between MGMs. 
+ * @author yingfeng
+ *
+ */
 @Entity
-public class Item {
+public class Workflow extends Content {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+//    @Id
+//    @GeneratedValue(strategy=GenerationType.AUTO)
+//    private Long id;
+//    private String name;
+//    private String description;
+//    private String createdBy;
+//    private Date dateCreated;
     
-    private String name;
-    private String description;
-    private String creator;
-    private String owner;
-    private Date dateCreated;
+    private String unitId;
+    private Long startMgmModeId;
+    private Long endMgmModeId;
     
-    private Date startMgmModeId;
-    private Date endMgmModeId;
-
+    private Unit unit;
     private MgmMode startMgmMode;	
     private MgmMode endMgmMode;	
-    private ArrayList<RouteLink> routeLiks
-    
+    private ArrayList<RouteLink> routeLiks;    
     
 }
 

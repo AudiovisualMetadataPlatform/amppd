@@ -2,30 +2,32 @@ package edu.iu.dlib.amppd.model;
 
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
+/**
+ * Item represents an intellectual object that contains one or more master files and none or multiple supplement files.
+ * @author yingfeng
+ *
+ */
 @Entity
-public class Item {
+public class Item extends Content {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+//    @Id
+//    @GeneratedValue(strategy=GenerationType.AUTO)
+//    private Long id;
+//    
+//    private String name;
+//    private String description;
+//    private String createdBy;
+//    private Date dateCreated;
+
     private Long collectionId;
-    private Long groupId;
+    HashMap<String, String> externalIds;
     
-    private String name;
-    private String description;
-    private String creator;
-    private Date dateCreated;
-
     private Collection collection;	
-    private ArrayList<MasterFile> masterfiles;
+    private ArrayList<MasterFile> masterFiles;
     private ArrayList<SupplementFile> supplementFiles;
-    
-    
+        
 }

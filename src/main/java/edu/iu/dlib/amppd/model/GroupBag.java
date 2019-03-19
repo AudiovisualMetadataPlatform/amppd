@@ -5,13 +5,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+
+/**
+ * GroupBag represents the M:M relationship between groups and bags.
+ * @author yingfeng
+ *
+ */
 @Entity
-public class GroupItem {
+public class GroupBag {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;    
     private Long groupId;
-    private Long itemId;
+    private Long bagId;
 
 }
 

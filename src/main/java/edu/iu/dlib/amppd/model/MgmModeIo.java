@@ -8,6 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/**
+ * MgmModeIo defines properties related to an input/output of an MGM mode.
+ * @author yingfeng
+ *
+ */
 @Entity
 public class MgmModeIo {
 
@@ -25,7 +30,6 @@ public class MgmModeIo {
     private String semanticTag;
 
     private MgmMode mgmMode;
-
     
 }
 
