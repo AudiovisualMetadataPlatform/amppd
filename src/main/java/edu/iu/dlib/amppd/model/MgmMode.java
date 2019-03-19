@@ -8,6 +8,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+/**
+ * MgmMode defines properties related to a mode of an MGM, as well as the inputs/outputs for that mode.
+ * @author yingfeng
+ *
+ */
 @Entity
 public class MgmMode {
 
