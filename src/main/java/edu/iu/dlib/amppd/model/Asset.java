@@ -9,13 +9,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * MediaFile represents a file containing actual media content of any MIME type or annotation of some media file in text/json format, 
- * which can be the input/ouput of a workflow or MGM. 
+ * Asset represents a file containing either media content of any MIME type or annotation of a media file in text/json format, which can be the input/ouput of a workflow or MGM. 
  * @author yingfeng
  *
  */
 @Entity
-public class MediaFile {
+public class Asset {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

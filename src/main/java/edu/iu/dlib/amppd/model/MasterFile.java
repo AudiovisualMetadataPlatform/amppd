@@ -5,7 +5,7 @@ package edu.iu.dlib.amppd.model;
  * @author yingfeng
  *
  */
-public class MasterFile extends MediaFile {
+public class MasterFile extends Asset {
 
     private Long itemId;
     private Item item;

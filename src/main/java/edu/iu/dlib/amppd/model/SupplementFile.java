@@ -5,6 +5,6 @@ package edu.iu.dlib.amppd.model;
  * @author yingfeng
  *
  */
-public class SupplementFile extends MediaFile {
+public class SupplementFile extends Asset {
 
 }
