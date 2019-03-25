@@ -27,7 +27,7 @@ public class MgmMode {
     private String condition;	// TODO this can be a single String of compound boolean expression, or array of simple boolean expressions
 
     private Mgm mgm;
-    private ArrayList<mgmModeIo> mgmModeIoInputs;
-    private ArrayList<mgmModeIo> mgmModeIoOutputs;
+    private ArrayList<MgmModeIo> mgmModeIoInputs;
+    private ArrayList<MgmModeIo> mgmModeIoOutputs;
     
 }
