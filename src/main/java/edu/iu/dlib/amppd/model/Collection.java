@@ -5,12 +5,17 @@ import java.util.HashMap;
 
 import javax.persistence.Entity;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
  * Collection contains one or more items, and belongs to one and only one unit.
  * @author yingfeng
  *
  */
 @Entity
+@Getter @Setter @NoArgsConstructor
 public class Collection extends Content {
 
 //    @Id
