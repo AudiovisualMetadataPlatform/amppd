@@ -5,18 +5,25 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
- * BagSupplementFile represents the M:M relationship between bags and supplement files. 
+ * BagSupplement represents the M:M relationship between bags and supplements. 
  * @author yingfeng
  *
  */
 @Entity
-public class BagSupplementFile {
+@Getter @Setter @NoArgsConstructor
+public class BagSupplement {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;        
     private Long bagId;
-    private Long supplementFileId;
+    private Long supplementId;
        
 }
+
+// TODO this class may not be needed

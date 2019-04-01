@@ -2,32 +2,25 @@ package edu.iu.dlib.amppd.model;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.persistence.Entity;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
- * Item represents an intellectual object that contains one or more master files and none or multiple supplement files.
+ * Item represents an intellectual object that contains one or more masterfiles and none or multiple supplement files.
  * @author yingfeng
  *
  */
 @Entity
+@Getter @Setter @NoArgsConstructor
 public class Item extends Content {
 
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    
-//    private String name;
-//    private String description;
-//    private String createdBy;
-//    private Date dateCreated;
-
     private Long collectionId;
-    HashMap<String, String> externalIds;
-    
     private Collection collection;	
-    private ArrayList<MasterFile> masterFiles;
-    private ArrayList<SupplementFile> supplementFiles;
+    private ArrayList<Masterfile> masterfiles;
+    private ArrayList<SupplementOfItem> supplements;
         
 }

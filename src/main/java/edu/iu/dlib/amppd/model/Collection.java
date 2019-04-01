@@ -1,7 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.persistence.Entity;
 
@@ -18,18 +17,8 @@ import lombok.Setter;
 @Getter @Setter @NoArgsConstructor
 public class Collection extends Content {
 
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    
-//    private String name;
-//    private String description;
-//    private String createdBy;
-//    private Date dateCreated;
-
-    private Long unitId;
-	HashMap<String, String> externalIds;
-
+	private Long unitId;
 	private Unit unit;
-    private ArrayList<Item> items; // TODO may not need this
+    private ArrayList<Item> items; 
+    private ArrayList<SupplementOfCollection> supplements;
 }

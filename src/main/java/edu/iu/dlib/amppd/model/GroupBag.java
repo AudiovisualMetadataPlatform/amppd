@@ -21,3 +21,4 @@ public class GroupBag {
 
 }
 
+//TODO this class may not be needed
