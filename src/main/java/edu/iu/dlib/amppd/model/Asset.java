@@ -8,12 +8,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 /**
- * Asset represents a file containing either media content of any MIME type or annotation of a media file in text/json format, which can be the input/ouput of a workflow or MGM. 
+ * Asset represents a file containing either media content of any MIME type or annotation of a media file in pdf/text/json format, 
+ * which can be the input/output of a workflow or MGM. 
  * @author yingfeng
  *
  */
 @Entity
+@Getter @Setter @NoArgsConstructor
 public class Asset {
 
     @Id
@@ -21,5 +27,6 @@ public class Asset {
     private Long id;
    
     private URI uri;
-	HashMap<String, String> externalIds;
+    private HashMap<String, String> externalIds;
+    
 }
