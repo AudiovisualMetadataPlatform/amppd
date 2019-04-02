@@ -1,9 +1,12 @@
 package edu.iu.dlib.amppd.model;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.persistence.Entity;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Workflow defines the directed graph with a single start and end node, where nodes represent MGMs, and links represent dependencies between MGMs. 
@@ -11,15 +14,8 @@ import javax.persistence.Entity;
  *
  */
 @Entity
-public class Workflow extends Content {
-
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    private String name;
-//    private String description;
-//    private String createdBy;
-//    private Date dateCreated;
+@Getter @Setter @NoArgsConstructor
+public class Workflow extends Data {
     
     private String unitId;
     private Long startMgmModeId;

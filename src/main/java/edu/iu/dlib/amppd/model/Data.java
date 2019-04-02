@@ -1,7 +1,5 @@
 package edu.iu.dlib.amppd.model;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -14,27 +12,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Job represents an execution of a workflow against a bag.
+ * Super class for all data entities created in AMP. 
  * @author yingfeng
  *
  */
 @Entity
 @Getter @Setter @NoArgsConstructor
-public class Job {
+public abstract class Data {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private Long bagId;
-    private Long workflowId;
-        
-    private String submittedBy;
-    private String status;
-    private String errorMessage;
-    private Timestamp timeStarted;
-    private Timestamp timeEnded;
     
-    private Bag bag;
-    private Workflow workflow;
+    private String name;
+    private String description;
+    private String createdBy;
+    private Date dateCreated;
 
 }

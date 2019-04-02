@@ -11,7 +11,7 @@ import javax.persistence.ManyToMany;
  *
  */
 @Entity
-public class Group extends Content {
+public class Group extends Data {
 
     @ManyToMany(mappedBy = "groups")
     private ArrayList<Bag> bags;
