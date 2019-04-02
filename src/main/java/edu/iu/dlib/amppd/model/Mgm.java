@@ -4,9 +4,7 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Mgm defines the property related to a MGM tool. An MGM can have multiple modes, and is owned by a unit. 
@@ -14,8 +12,8 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
-public class Mgm extends Data {
+@Data
+public class Mgm extends BO {
 
     private String version;
     private String platform;

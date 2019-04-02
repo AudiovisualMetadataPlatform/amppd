@@ -7,9 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Super class for all data entities created in AMP. 
@@ -17,8 +15,8 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
-public abstract class Data {
+@Data
+public abstract class BO {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

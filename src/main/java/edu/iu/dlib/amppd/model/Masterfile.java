@@ -4,9 +4,7 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Masterfile is a file containing actual media content of any MIME type. A masterfile always associates with one and only one item.
@@ -14,7 +12,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Masterfile extends Asset {
 
     private Long itemId;

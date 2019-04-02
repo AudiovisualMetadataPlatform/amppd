@@ -4,9 +4,7 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Collection contains one or more items, and belongs to one and only one unit.
@@ -14,7 +12,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Collection extends Content {
 
 	private Long unitId;

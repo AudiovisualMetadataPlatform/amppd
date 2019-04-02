@@ -8,9 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * MgmMode defines properties related to a mode of an MGM, as well as the inputs/outputs for that mode.
@@ -18,7 +16,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class MgmMode {
 
     @Id

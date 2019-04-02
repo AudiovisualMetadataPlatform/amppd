@@ -5,9 +5,7 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Item represents an intellectual object that contains one or more masterfiles and none or multiple supplement files.
@@ -15,7 +13,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Item extends Content {
 
     private Long collectionId;

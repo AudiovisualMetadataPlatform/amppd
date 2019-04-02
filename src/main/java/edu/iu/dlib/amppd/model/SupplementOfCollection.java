@@ -2,9 +2,7 @@ package edu.iu.dlib.amppd.model;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * SupplementOfCollection is a supplemental file associated with a collection and shared by all items within that collection.
@@ -12,7 +10,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class SupplementOfCollection extends Supplement {
 
     private Long collectionId;

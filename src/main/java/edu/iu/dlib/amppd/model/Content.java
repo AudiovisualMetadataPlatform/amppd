@@ -4,9 +4,7 @@ import java.util.HashMap;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Super class for all content related entities. It provides a container at various levels for content materials.
@@ -14,8 +12,8 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
-public abstract class Content extends Data {
+@Data
+public abstract class Content extends BO {
 
     private HashMap<String, String> externalIds;
 
