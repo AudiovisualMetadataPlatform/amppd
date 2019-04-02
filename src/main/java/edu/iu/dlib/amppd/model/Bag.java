@@ -16,7 +16,7 @@ import lombok.Setter;
  */
 @Entity
 @Getter @Setter @NoArgsConstructor
-public class Bag extends Content {
+public class Bag extends Data {
 
     private Long masterfileId;	
     private Masterfile masterfile;	

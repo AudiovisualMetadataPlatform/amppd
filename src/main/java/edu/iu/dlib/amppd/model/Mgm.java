@@ -1,9 +1,12 @@
 package edu.iu.dlib.amppd.model;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import javax.persistence.Entity;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Mgm defines the property related to a MGM tool. An MGM can have multiple modes, and is owned by a unit. 
@@ -11,19 +14,13 @@ import javax.persistence.Entity;
  *
  */
 @Entity
-public class Mgm extends Content {
+@Getter @Setter @NoArgsConstructor
+public class Mgm extends Data {
 
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    private String name;
-//    private String description;
-//    private Date registrationDate;
-
-	private Long unitId;
     private String version;
     private String platform;
-
+	private Long unitId;
+	
 	private Unit unit;
     private ArrayList<MgmMode> modes;
         
