@@ -2,9 +2,7 @@ package edu.iu.dlib.amppd.model;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * SupplementOfItem is a supplemental file associated with an item and shared by all masterfiles within that item.
@@ -12,7 +10,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class SupplementOfItem extends Supplement {
 
     private Long itemId;

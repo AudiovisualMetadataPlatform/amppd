@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Bag represents the set of inputs to feed into a workflow. It contains one masterfile and none or multiple supplement files. 
@@ -15,8 +13,8 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
-public class Bag extends Data {
+@Data
+public class Bag extends BO {
 
     private Long masterfileId;	
     private Masterfile masterfile;	

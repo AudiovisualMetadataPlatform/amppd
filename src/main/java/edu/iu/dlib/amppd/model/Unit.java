@@ -4,9 +4,7 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Organization unit that owns collections and workflows.
@@ -14,7 +12,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Unit extends Content {
 	
     private ArrayList<Collection> collections;

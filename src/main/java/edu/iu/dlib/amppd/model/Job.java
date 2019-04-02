@@ -1,17 +1,13 @@
 package edu.iu.dlib.amppd.model;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  * Job represents an execution of a workflow against a bag.
@@ -19,7 +15,7 @@ import lombok.Setter;
  *
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Data
 public class Job {
 
     @Id
