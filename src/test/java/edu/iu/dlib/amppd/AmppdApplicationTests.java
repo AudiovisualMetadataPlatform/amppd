@@ -1,4 +1,4 @@
-package edu.iu.dlib;
+package edu.iu.dlib.amppd;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

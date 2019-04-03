@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Bag extends BO {
+public class Bag extends AmpData {
 
     private Long masterfileId;	
     private Masterfile masterfile;	

@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public abstract class Content extends BO {
+public abstract class Content extends AmpData {
 
     private HashMap<String, String> externalIds;
 

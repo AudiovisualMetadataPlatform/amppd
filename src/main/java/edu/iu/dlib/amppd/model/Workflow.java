@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Workflow extends BO {
+public class Workflow extends AmpData {
     
     private String unitId;
     private Long startMgmModeId;
