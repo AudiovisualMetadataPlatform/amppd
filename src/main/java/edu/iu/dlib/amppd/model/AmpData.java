@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public abstract class BO {
+public abstract class AmpData {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

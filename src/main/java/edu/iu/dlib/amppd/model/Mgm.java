@@ -13,7 +13,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Mgm extends BO {
+public class Mgm extends AmpData {
 
     private String version;
     private String platform;

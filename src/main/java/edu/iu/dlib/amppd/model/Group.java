@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Group extends BO {
+public class Group extends AmpData {
 
     @ManyToMany(mappedBy = "groups")
     private ArrayList<Bag> bags;
