@@ -4,11 +4,14 @@ import java.util.ArrayList;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import lombok.Data;
 
 /**
- * Bag represents the set of inputs to feed into a workflow. It contains one masterfile and none or multiple supplement files. 
+ * Bag represents the set of inputs to feed into a workflow. It contains one primary and none or multiple supplement files,
+ * which could be any combination of supplement files associated with the primary, item, or collection
  * @author yingfeng
  *
  */
@@ -16,13 +19,16 @@ import lombok.Data;
 @Data
 public class Bag extends AmpData {
 
-    private Long masterfileId;	
-    private Masterfile masterfile;	
+//    private Long primaryId;	
+	@ManyToOne
+    private Primary primary;	
     
     @ManyToMany(mappedBy = "bags")
-    private ArrayList<Supplement> supplements;    // could be any combination of supplement files associated with the masterfile, item, or collection
+    private ArrayList<Supplement> supplements;   
     
-    @ManyToMany(mappedBy = "bags")
+    @ManyToMany
     private ArrayList<Group> groups;      
     
+    @OneToMany(mappedBy="bag")
+    private ArrayList<Job> jobs;    
 }

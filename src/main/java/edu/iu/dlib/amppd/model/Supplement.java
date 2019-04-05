@@ -8,14 +8,14 @@ import javax.persistence.InheritanceType;
 import lombok.Data;
 
 /**
- * Supplement is a file (either media or annotation) used as supplemental material to assist metadata retrieval for a masterfile through a workflow.
+ * Supplement is a file (either media or annotation) used as supplemental material to assist metadata retrieval for a primary through a workflow.
  * @author yingfeng
  *
  */
 @Entity
 @Data
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "TYPE")
+@DiscriminatorColumn(name = "type")
 public class Supplement extends Asset {
 	
 }

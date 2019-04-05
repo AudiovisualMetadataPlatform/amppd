@@ -1,6 +1,7 @@
 package edu.iu.dlib.amppd.model;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 import lombok.Data;
 
@@ -13,7 +14,8 @@ import lombok.Data;
 @Data
 public class SupplementOfCollection extends Supplement {
 
-    private Long collectionId;
+//    private Long collectionId;
+	@ManyToOne
     private Collection collection;
     
 }

@@ -3,6 +3,9 @@ package edu.iu.dlib.amppd.model;
 import java.util.ArrayList;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 import lombok.Data;
 
@@ -15,14 +18,25 @@ import lombok.Data;
 @Data
 public class Workflow extends AmpData {
     
-    private String unitId;
-    private Long startMgmModeId;
-    private Long endMgmModeId;
-    
-    private Unit unit;
+	// TODO double check the relationship
+//    private Long startMgmModeId;
+	@ManyToOne
     private MgmMode startMgmMode;	
-    private MgmMode endMgmMode;	
+    
+	// TODO double check the relationship
+//    private Long endMgmModeId;    
+	@ManyToOne
+    private MgmMode endMgmMode;
+    
+    @OneToMany(mappedBy="workflow")
     private ArrayList<RouteLink> routeLiks;    
+    
+    @OneToMany(mappedBy="workflow")
+    private ArrayList<Job> jobs;    
+    
+    //  private String unitId;
+    @ManyToOne
+    private Unit unit;
     
 }
 

@@ -3,6 +3,7 @@ package edu.iu.dlib.amppd.model;
 import java.util.ArrayList;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 
 import lombok.Data;
 
@@ -17,9 +18,11 @@ public class Mgm extends AmpData {
 
     private String version;
     private String platform;
-	private Long unitId;
-	
-	private Unit unit;
+    
+//	private Long unitId;	
+//	private Unit unit;
+    
+    @OneToMany(mappedBy="mgm")
     private ArrayList<MgmMode> modes;
         
 }
