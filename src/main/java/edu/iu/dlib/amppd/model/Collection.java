@@ -3,6 +3,8 @@ package edu.iu.dlib.amppd.model;
 import java.util.ArrayList;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import lombok.Data;
 
@@ -15,8 +17,14 @@ import lombok.Data;
 @Data
 public class Collection extends Content {
 
-	private Long unitId;
-	private Unit unit;
+	@OneToMany(mappedBy="collection")
     private ArrayList<Item> items; 
+	
+	@OneToMany(mappedBy="collection")
     private ArrayList<SupplementOfCollection> supplements;
+	
+//	private Long unitId;
+	@ManyToOne
+	private Unit unit;
+	
 }

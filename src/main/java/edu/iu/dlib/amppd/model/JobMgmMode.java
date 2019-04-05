@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import lombok.Data;
 
@@ -23,8 +24,6 @@ public class JobMgmMode {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private Long jobId;
-    private Long mgmModeId;
     
     private HashMap<String, String> params;
     private Double percentage;
@@ -34,4 +33,12 @@ public class JobMgmMode {
     
     private HashMap<Integer, URI> mgmModeIoMap;
     
+//    private Long jobId;
+    @ManyToOne
+    private Job job;
+    
+//    private Long mgmModeId;
+    @ManyToOne
+    private MgmMode mgmMode;
+
 }
