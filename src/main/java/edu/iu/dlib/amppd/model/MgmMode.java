@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 
 import javax.persistence.Entity;
@@ -32,11 +32,11 @@ public class MgmMode {
 
     // TODO double check the relationship
     @OneToMany(mappedBy="mgmMode")
-    private ArrayList<MgmModeInput> mgmModeInputs;
+    private List<MgmModeInput> mgmModeInputs;
     
     // TODO double check the relationship
     @OneToMany(mappedBy="mgmMode")
-    private ArrayList<MgmModeOutput> mgmModeOutputs;
+    private List<MgmModeOutput> mgmModeOutputs;
     
     //  private Long mgmId;
     @ManyToOne

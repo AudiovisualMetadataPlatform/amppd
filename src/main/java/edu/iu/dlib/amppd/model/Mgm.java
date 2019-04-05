@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -23,7 +23,7 @@ public class Mgm extends AmpData {
 //	private Unit unit;
     
     @OneToMany(mappedBy="mgm")
-    private ArrayList<MgmMode> modes;
+    private List<MgmMode> modes;
         
 }
 

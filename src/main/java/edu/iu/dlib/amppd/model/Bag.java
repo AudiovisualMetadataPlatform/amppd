@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -24,11 +24,11 @@ public class Bag extends AmpData {
     private Primary primary;	
     
     @ManyToMany(mappedBy = "bags")
-    private ArrayList<Supplement> supplements;   
+    private List<Supplement> supplements;   
     
     @ManyToMany
-    private ArrayList<Group> groups;      
+    private List<Group> groups;      
     
     @OneToMany(mappedBy="bag")
-    private ArrayList<Job> jobs;    
+    private List<Job> jobs;    
 }
