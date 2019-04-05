@@ -7,21 +7,21 @@
 //
 //import lombok.Data;
 //
-//
 ///**
-// * GroupBag represents the M:M relationship between groups and bags.
+// * BagSupplement represents the M:M relationship between bags and supplements. 
 // * @author yingfeng
 // *
 // */
 //@Entity
 //@Data
-//public class GroupBag {
+//public class BagSupplement {
+//
 //    @Id
 //    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;    
-//    private Long groupId;
+//    private Long id;        
 //    private Long bagId;
-//
+//    private Long supplementId;
+//       
 //}
 //
-////TODO this class may not be needed
+//// TODO this class may not be needed
