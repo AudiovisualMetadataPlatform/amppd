@@ -1,9 +1,12 @@
 package edu.iu.dlib.amppd.model;
 
+import java.util.List;
+
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.persistence.ManyToMany;
 
 import lombok.Data;
 
@@ -17,5 +20,9 @@ import lombok.Data;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
 public class Supplement extends Asset {
+	
+	// TODO double check the relationship
+	@ManyToMany
+	private List<Bag> bags;
 	
 }

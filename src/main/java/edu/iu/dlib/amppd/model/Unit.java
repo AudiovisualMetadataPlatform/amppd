@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
@@ -17,9 +17,9 @@ import lombok.Data;
 public class Unit extends Content {
 	
 	@OneToMany(mappedBy="unit")
-    private ArrayList<Collection> collections;
+    private List<Collection> collections;
 
 	@OneToMany(mappedBy="unit")
-	private ArrayList<Workflow> workflows;
+	private List<Workflow> workflows;
 	
 }

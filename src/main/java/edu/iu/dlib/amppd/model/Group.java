@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
@@ -17,7 +17,7 @@ import lombok.Data;
 public class Group extends AmpData {
 
     @ManyToMany(mappedBy = "groups")
-    private ArrayList<Bag> bags;
+    private List<Bag> bags;
     
 }
 

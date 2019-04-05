@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -29,10 +29,10 @@ public class Workflow extends AmpData {
     private MgmMode endMgmMode;
     
     @OneToMany(mappedBy="workflow")
-    private ArrayList<RouteLink> routeLiks;    
+    private List<RouteLink> routeLiks;    
     
     @OneToMany(mappedBy="workflow")
-    private ArrayList<Job> jobs;    
+    private List<Job> jobs;    
     
     //  private String unitId;
     @ManyToOne

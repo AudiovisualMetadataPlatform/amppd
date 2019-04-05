@@ -1,6 +1,6 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -18,10 +18,10 @@ import lombok.Data;
 public class Collection extends Content {
 
 	@OneToMany(mappedBy="collection")
-    private ArrayList<Item> items; 
+    private List<Item> items; 
 	
 	@OneToMany(mappedBy="collection")
-    private ArrayList<SupplementOfCollection> supplements;
+    private List<SupplementOfCollection> supplements;
 	
 //	private Long unitId;
 	@ManyToOne

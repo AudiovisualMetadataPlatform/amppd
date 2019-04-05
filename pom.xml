@@ -110,11 +110,13 @@
     		<groupId>javax.persistence</groupId>
     		<artifactId>javax.persistence-api</artifactId>
 		</dependency>
+        <!-- TODO switch H2 to one of the followings
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
 			<version>2.23.1</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
