@@ -1,9 +1,11 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+
+import lombok.Data;
 
 /**
  * Organization unit that owns collections and workflows.
@@ -11,20 +13,13 @@ import javax.persistence.Entity;
  *
  */
 @Entity
+@Data
 public class Unit extends Content {
-
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    
-//    private String name;
-//    private String description;
-//    private String createdBy;
-//    private Date dateCreated;
-    
-	HashMap<String, String> externalIds;
 	
-    // TODO may not need these
-    private ArrayList<Collection> collections;
-    private ArrayList<Workflow> workflows;
+	@OneToMany(mappedBy="unit")
+    private List<Collection> collections;
+
+	@OneToMany(mappedBy="unit")
+	private List<Workflow> workflows;
+	
 }

@@ -1,9 +1,13 @@
 package edu.iu.dlib.amppd.model;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+import lombok.Data;
 
 /**
  * Workflow defines the directed graph with a single start and end node, where nodes represent MGMs, and links represent dependencies between MGMs. 
@@ -11,24 +15,28 @@ import javax.persistence.Entity;
  *
  */
 @Entity
-public class Workflow extends Content {
-
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    private String name;
-//    private String description;
-//    private String createdBy;
-//    private Date dateCreated;
+@Data
+public class Workflow extends AmpData {
     
-    private String unitId;
-    private Long startMgmModeId;
-    private Long endMgmModeId;
-    
-    private Unit unit;
+	// TODO double check the relationship
+//    private Long startMgmModeId;
+	@ManyToOne
     private MgmMode startMgmMode;	
-    private MgmMode endMgmMode;	
-    private ArrayList<RouteLink> routeLiks;    
+    
+	// TODO double check the relationship
+//    private Long endMgmModeId;    
+	@ManyToOne
+    private MgmMode endMgmMode;
+    
+    @OneToMany(mappedBy="workflow")
+    private List<RouteLink> routeLiks;    
+    
+    @OneToMany(mappedBy="workflow")
+    private List<Job> jobs;    
+    
+    //  private String unitId;
+    @ManyToOne
+    private Unit unit;
     
 }
 

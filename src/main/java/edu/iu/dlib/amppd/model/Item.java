@@ -1,33 +1,31 @@
 package edu.iu.dlib.amppd.model;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+import lombok.Data;
 
 /**
- * Item represents an intellectual object that contains one or more master files and none or multiple supplement files.
+ * Item represents an intellectual object that contains one or more primaries and none or multiple supplement files.
  * @author yingfeng
  *
  */
 @Entity
+@Data
 public class Item extends Content {
 
-//    @Id
-//    @GeneratedValue(strategy=GenerationType.AUTO)
-//    private Long id;
-//    
-//    private String name;
-//    private String description;
-//    private String createdBy;
-//    private Date dateCreated;
-
-    private Long collectionId;
-    HashMap<String, String> externalIds;
+	@OneToMany(mappedBy="item")
+    private List<Primary> primaries;
     
-    private Collection collection;	
-    private ArrayList<MasterFile> masterFiles;
-    private ArrayList<SupplementFile> supplementFiles;
-        
+	@OneToMany(mappedBy="item")
+    private List<SupplementOfItem> supplements;
+
+//	  private Long collectionId;
+	@ManyToOne
+	private Collection collection;	
+		
 }
