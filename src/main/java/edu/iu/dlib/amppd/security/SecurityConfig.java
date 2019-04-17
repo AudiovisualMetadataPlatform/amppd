@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @Configuration
-@EnableWebSecurity //Very important!
+@EnableWebSecurity 
 
 public class SecurityConfig extends WebSecurityConfigurerAdapter {  
 
@@ -16,10 +16,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception 
 	{
 		http.authorizeRequests().antMatchers("/").permitAll().and().authorizeRequests().antMatchers("/console/**").permitAll();
-	    http.authorizeRequests()
+		http.authorizeRequests()
 	    	.anyRequest()
 	        .permitAll()
 	        .and().csrf().disable();
-	    http.headers().frameOptions().disable();
+		http.headers().frameOptions().disable();
 	}
 }
