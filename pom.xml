@@ -9,7 +9,9 @@
 	<packaging>war</packaging>
 	<name>amppd</name>
 	<description>Audiovisual Metadata Platform</description>
-
+	
+	
+	
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -86,7 +88,19 @@
 			<groupId>org.springframework.session</groupId>
 			<artifactId>spring-session-jdbc</artifactId>
 		</dependency>
-		
+		<dependency>
+    		<groupId>org.springframework.security</groupId>
+   			<artifactId>spring-security-test</artifactId>
+    		<scope>test</scope>
+		</dependency>
+		<dependency>
+    		<groupId>org.springframework.security</groupId>
+   			 <artifactId>spring-security-web</artifactId>    
+		</dependency>
+		<dependency>
+    		<groupId>org.springframework.security</groupId>
+    		<artifactId>spring-security-config</artifactId>
+   		</dependency>
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -122,6 +136,14 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		
+		<dependency>
+    		<groupId>org.springframework.data</groupId>
+    		<artifactId>spring-data-rest-hal-browser</artifactId>
+    		<version>3.0.8.RELEASE</version>
+		</dependency>
+		
+        
 		
 	</dependencies>
 
