@@ -9,9 +9,7 @@
 	<packaging>war</packaging>
 	<name>amppd</name>
 	<description>Audiovisual Metadata Platform</description>
-	
-	
-	
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -135,16 +133,12 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
-		</dependency>
-		
+		</dependency>		
 		<dependency>
     		<groupId>org.springframework.data</groupId>
     		<artifactId>spring-data-rest-hal-browser</artifactId>
     		<version>3.0.8.RELEASE</version>
 		</dependency>
-		
-        
-		
 	</dependencies>
 
 	<build>

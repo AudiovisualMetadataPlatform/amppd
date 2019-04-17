@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 
 import lombok.Data;
 
@@ -16,10 +17,10 @@ import lombok.Data;
  * @author yingfeng
  *
  */
-@Entity
+@MappedSuperclass
 @Data
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type")
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@DiscriminatorColumn(name = "type")
 public abstract class MgmModeIo {
 
     @Id
