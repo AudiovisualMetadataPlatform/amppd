@@ -49,92 +49,85 @@ public class CollectionRepositoryTests {
 	@Autowired
 	private MockHttpServletRequest request;
 
-	
+
 	@Before 
 	public void deleteAllBeforeTests() throws Exception {
-	collectionRepository.deleteAll(); }
-  
- 
+		collectionRepository.deleteAll(); }
+
+
 	@Test public void shouldReturnRepositoryIndex() throws Exception {
-	mockMvc.perform(get("/")).andExpect(status().isOk()).
-	andExpect( jsonPath("$._links.collections").exists()); }
-  
-	/*
-	 * @Test public void shouldCreateCollection() throws Exception {
-	 * mockMvc.perform(post("/collections").content(
-	 * "{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-	 * status().isCreated()).andDo(MockMvcResultHandlers.print()).andExpect(
-	 * header().string("Location", containsString("collections/"))); }
-	 * 
-	 * @Test public void shouldRetrieveCollection() throws Exception {
-	 * mockMvc.perform(post("/collections").
-	 * content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
-	 * .andExpect(status().isCreated()).andReturn(); }
-	 */
+		mockMvc.perform(get("/")).andExpect(status().isOk()).
+		andExpect( jsonPath("$._links.collections").exists()); }
+
+
+	@Test public void shouldCreateCollection() throws Exception {
+		mockMvc.perform(post("/collections").content(
+				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
+						status().isCreated()).andDo(MockMvcResultHandlers.print()).andExpect(
+								header().string("Location", containsString("collections/"))); }
+
+	@Test public void shouldRetrieveCollection() throws Exception {
+		mockMvc.perform(post("/collections").
+				content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+		.andExpect(status().isCreated()).andReturn(); }
+
+
+	@Test public void shouldQueryCollection() throws Exception {
+		mockMvc.perform(post("/collections").content(
+				"{ \"name\": \"121\", \"description\":\"For test\"}")).andDo(
+						MockMvcResultHandlers.print()).andExpect( status().isCreated());
+
+		mockMvc.perform(
+				get("/collections/search/findByName?name=121")).andDo(MockMvcResultHandlers.
+						print()).andExpect( status().isOk()).andExpect(
+								jsonPath("$._embedded.collections[0].name").value( "121")) ; }
+
+
+
+	@Test public void shouldUpdateCollection() throws Exception { MvcResult
+		mvcResult = mockMvc.perform(post("/collections").content(
+				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
+						status().isCreated()).andReturn();
+
+	String location = mvcResult.getResponse().getHeader("Location");
+
+	mockMvc.perform(put(location).content(
+			"{\"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
+					status().isNoContent());
+
+	mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+			jsonPath("$.name").value("Collection 1.1")).andExpect(
+					jsonPath("$.description").value("For test")); }
+
+
+
+	@Test public void shouldPartiallyUpdateCollection() throws Exception {
+
+		MvcResult mvcResult = mockMvc.perform(post("/collections").content(
+				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
+						status().isCreated()).andReturn();
+
+		String location = mvcResult.getResponse().getHeader("Location");
+
+		mockMvc.perform(
+				patch(location).content("{\"name\": \"Collection 1.1.1\"}")).andExpect(
+						status().isNoContent());
+
+		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+				jsonPath("$.name").value("Collection 1.1.1")).andExpect(
+						jsonPath("$.description").value("For test")); }
+
 	
-	
-	
-	
-	/*
-	 * @Test public void shouldQueryCollection() throws Exception {
-	 * mockMvc.perform(post("/collections").content(
-	 * "{ \"name\": \"121\", \"description\":\"For test\"}")).andDo(
-	 * MockMvcResultHandlers.print()).andExpect( status().isCreated());
-	 * 
-	 * mockMvc.perform(
-	 * get("/collections/search/findByName?name=121")).andDo(MockMvcResultHandlers.
-	 * print()).andExpect( status().isOk()).andExpect(
-	 * jsonPath("$._embedded.collections[0].name").value( "121")) ; }
-	 * 
-	 * 
-	 * 
-	 * @Test public void shouldUpdateCollection() throws Exception { MvcResult
-	 * mvcResult = mockMvc.perform(post("/collections").content(
-	 * "{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-	 * status().isCreated()).andReturn();
-	 * 
-	 * String location = mvcResult.getResponse().getHeader("Location");
-	 * 
-	 * mockMvc.perform(put(location).content(
-	 * "{\"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
-	 * status().isNoContent());
-	 * 
-	 * mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-	 * jsonPath("$.name").value("Collection 1.1")).andExpect(
-	 * jsonPath("$.description").value("For test")); }
-	 * 
-	 * 
-	 * 
-	 * @Test public void shouldPartiallyUpdateCollection() throws Exception {
-	 * 
-	 * MvcResult mvcResult = mockMvc.perform(post("/collections").content(
-	 * "{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-	 * status().isCreated()).andReturn();
-	 * 
-	 * String location = mvcResult.getResponse().getHeader("Location");
-	 * 
-	 * mockMvc.perform(
-	 * patch(location).content("{\"name\": \"Collection 1.1.1\"}")).andExpect(
-	 * status().isNoContent());
-	 * 
-	 * mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-	 * jsonPath("$.name").value("Collection 1.1.1")).andExpect(
-	 * jsonPath("$.description").value("For test")); }
-	 */
-	 
-	  
-	  
-	/*
-	 * @Test public void shouldDeleteCollection() throws Exception {
-	 * 
-	 * MvcResult mvcResult = mockMvc.perform(post("/collections").content(
-	 * "{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
-	 * status().isCreated()).andReturn();
-	 * 
-	 * String location = mvcResult.getResponse().getHeader("Location");
-	 * mockMvc.perform(delete(location)).andExpect(status().isNoContent());
-	 * 
-	 * mockMvc.perform(get(location)).andExpect(status().isNotFound()); }
-	 */
-	 
+	@Test public void shouldDeleteCollection() throws Exception {
+
+		MvcResult mvcResult = mockMvc.perform(post("/collections").content(
+				"{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
+						status().isCreated()).andReturn();
+
+		String location = mvcResult.getResponse().getHeader("Location");
+		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+
+		mockMvc.perform(get(location)).andExpect(status().isNotFound()); }
+
+
 }
