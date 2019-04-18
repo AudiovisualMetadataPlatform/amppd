@@ -1,7 +1,5 @@
 package edu.iu.dlib.amppd.controller;
 
-import java.util.Optional;
-
 import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +11,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.iu.dlib.amppd.exception.StorageException;
 import edu.iu.dlib.amppd.model.Primary;
+import edu.iu.dlib.amppd.model.Supplement;
 import edu.iu.dlib.amppd.repository.PrimaryRepository;
+import edu.iu.dlib.amppd.repository.SupplementRepository;
 import edu.iu.dlib.amppd.service.FileStorageService;
 
 //TODO when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
@@ -28,13 +28,13 @@ public class FileUploadController {
 	
     private final FileStorageService fileStorageService;
     private final PrimaryRepository primaryRepository;
-//    private final SupplementRepository supplementRepository;
+    private final SupplementRepository supplementRepository;
 
     @Autowired
-    public FileUploadController(FileStorageService fileStorageService, PrimaryRepository primaryRepository) {
+    public FileUploadController(FileStorageService fileStorageService, PrimaryRepository primaryRepository, SupplementRepository supplementRepository) {
         this.fileStorageService = fileStorageService;
         this.primaryRepository = primaryRepository;
-//        this.supplementRepository = supplementRepository;
+        this.supplementRepository = supplementRepository;
     }
 
     @PostMapping("/primary/{id}/file")
@@ -50,6 +50,23 @@ public class FileUploadController {
 
         return "redirect:/";
     }
+
+    @PostMapping("/supplement/{id}/file")
+    public String handleSupplementUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+    	Supplement supplement = supplementRepository.findById(id).orElseThrow(() -> new StorageException("Supplement <" + id + "> does not exist!"));
+    	String targetPathName = fileStorageService.getFilePathName(supplement);    	
+    	
+    	fileStorageService.store(file, targetPathName);
+    	supplement.setUri(targetPathName);
+    	supplementRepository.save(supplement);
+    	
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded supplement " + file.getOriginalFilename() + "!");
+
+        return "redirect:/";
+    }
+    
+    
+    
     
 //  @GetMapping("/")
 //  public String listUploadedFiles(Model model) throws IOException {
