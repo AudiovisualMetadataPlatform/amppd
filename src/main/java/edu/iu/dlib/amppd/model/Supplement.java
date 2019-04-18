@@ -16,10 +16,9 @@ import lombok.Data;
  * @author yingfeng
  *
  */
-@MappedSuperclass
 @Data
-//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-//@DiscriminatorColumn(name = "type")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type")
 public class Supplement extends Asset {
 	
 	// TODO double check the relationship
