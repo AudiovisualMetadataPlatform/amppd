@@ -3,6 +3,7 @@ package edu.iu.dlib.amppd.model;
 import java.util.HashMap;
 
 import javax.persistence.Entity;
+import javax.persistence.MappedSuperclass;
 
 import lombok.Data;
 
@@ -11,7 +12,7 @@ import lombok.Data;
  * @author yingfeng
  *
  */
-@Entity
+@MappedSuperclass
 @Data
 public abstract class Content extends AmpData {
 
