@@ -10,7 +10,7 @@ import javax.persistence.MappedSuperclass;
 import lombok.Data;
 
 /**
- * Super class for all data entities created in AMP. 
+ * Super class for most data entities created in AMP. 
  * @author yingfeng
  *
  */
