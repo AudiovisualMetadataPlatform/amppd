@@ -1,5 +1,7 @@
 package edu.iu.dlib.amppd.controller;
 
+import java.util.Optional;
+
 import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import edu.iu.dlib.amppd.exception.StorageException;
+import edu.iu.dlib.amppd.model.Primary;
 import edu.iu.dlib.amppd.repository.PrimaryRepository;
 import edu.iu.dlib.amppd.service.FileStorageService;
 
@@ -30,14 +34,19 @@ public class FileUploadController {
     public FileUploadController(FileStorageService fileStorageService, PrimaryRepository primaryRepository) {
         this.fileStorageService = fileStorageService;
         this.primaryRepository = primaryRepository;
+//        this.supplementRepository = supplementRepository;
     }
 
-    @PostMapping("/primary/{id}")
-    public String handlePrimaryUpload(@PathParam("id") Long primaryId, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-        
-    	fileStorageService.store(file, );
-        redirectAttributes.addFlashAttribute("message",
-                "You successfully uploaded " + file.getOriginalFilename() + "!");
+    @PostMapping("/primary/{id}/file")
+    public String handlePrimaryUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+    	Primary primary = primaryRepository.findById(id).orElseThrow(() -> new StorageException("Primary <" + id + "> does not exist!"));
+    	String targetPathName = fileStorageService.getFilePathName(primary);    	
+    	
+    	fileStorageService.store(file, targetPathName);
+    	primary.setUri(targetPathName);
+    	primaryRepository.save(primary);
+    	
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded primary " + file.getOriginalFilename() + "!");
 
         return "redirect:/";
     }
