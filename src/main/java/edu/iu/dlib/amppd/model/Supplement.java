@@ -17,6 +17,7 @@ import lombok.Data;
  *
  */
 @Data
+@Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "type")
 public class Supplement extends Asset {
