@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import lombok.Data;
 
@@ -28,6 +29,9 @@ public class Job {
     private String errorMessage;
     private Timestamp timeStarted;
     private Timestamp timeEnded;
+    
+    @OneToMany(mappedBy="job")
+    private JobMgmMode jobMgmModes;
     
 //    private Long bagId;
     @ManyToOne

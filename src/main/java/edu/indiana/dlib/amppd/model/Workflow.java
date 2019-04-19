@@ -29,7 +29,7 @@ public class Workflow extends Dataentity {
     private MgmMode endMgmMode;
     
     @OneToMany(mappedBy="workflow")
-    private List<RouteLink> routeLiks;    
+    private List<RouteLink> routeLinks;    
     
     @OneToMany(mappedBy="workflow")
     private List<Job> jobs;    

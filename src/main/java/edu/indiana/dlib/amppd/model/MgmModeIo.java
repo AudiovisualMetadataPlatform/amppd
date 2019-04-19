@@ -20,7 +20,7 @@ import lombok.Data;
 @Entity
 @Data
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "type")
+//@DiscriminatorColumn(name = "type")
 public abstract class MgmModeIo {
 
     @Id

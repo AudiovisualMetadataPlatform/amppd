@@ -26,7 +26,7 @@ public class JobMgmMode {
     private Long id;
     
     private HashMap<String, String> params;
-    private Double percentage;
+    private Double percentage;	// value range is 0..100
     private String errorMessage;
     private Timestamp timeStarted;
     private Timestamp timeEnded;
@@ -41,4 +41,18 @@ public class JobMgmMode {
     @ManyToOne
     private MgmMode mgmMode;
 
+    // TODO add getStatus based on percentage.
+//    public String getStatus() {
+//    	if (percentage == 0.0 )
+//    		return "WAITING";
+//    	else if (errorMessage != null)
+//    		return "ERROR";
+//    	else if (percentage > 0 )
+//    		return "PROCESSING";
+//    	else if (percentage >= 100.0 )
+//    		return "cOMPLETED";
+//    	return null;
+//    }
+    	
+    }
 }

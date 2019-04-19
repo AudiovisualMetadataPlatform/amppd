@@ -19,14 +19,8 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class MgmMode {
+public class MgmMode extends Dataentity {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
-    
-    private String name;
-    private String description;
     private HashMap<String, String> defaultParams;
     private String condition;	// TODO this can be a single String of compound boolean expression, or array of simple boolean expressions
 
