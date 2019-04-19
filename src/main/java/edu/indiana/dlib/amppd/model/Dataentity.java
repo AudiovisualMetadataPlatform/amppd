@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @MappedSuperclass
 @Data
-public abstract class AmpData {
+public abstract class Dataentity {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

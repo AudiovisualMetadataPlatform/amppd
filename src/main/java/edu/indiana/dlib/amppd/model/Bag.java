@@ -17,7 +17,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Bag extends AmpData {
+public class Bag extends Dataentity {
 
 //    private Long primaryId;	
 	@ManyToOne
