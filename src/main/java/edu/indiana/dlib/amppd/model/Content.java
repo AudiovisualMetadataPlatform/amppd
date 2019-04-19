@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @MappedSuperclass
 @Data
-public abstract class Content extends AmpData {
+public abstract class Content extends Dataentity {
 
     private HashMap<String, String> externalIds;
 

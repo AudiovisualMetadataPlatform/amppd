@@ -14,7 +14,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Group extends AmpData {
+public class Group extends Dataentity {
 
     @ManyToMany(mappedBy = "groups")
     private List<Bag> bags;

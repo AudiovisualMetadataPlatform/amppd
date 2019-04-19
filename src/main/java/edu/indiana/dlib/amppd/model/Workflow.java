@@ -16,7 +16,7 @@ import lombok.Data;
  */
 @Entity
 @Data
-public class Workflow extends AmpData {
+public class Workflow extends Dataentity {
     
 	// TODO double check the relationship
 //    private Long startMgmModeId;
