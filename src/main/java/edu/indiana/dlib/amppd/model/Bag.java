@@ -10,8 +10,8 @@ import javax.persistence.OneToMany;
 import lombok.Data;
 
 /**
- * Bag represents the set of inputs to feed into a workflow. It contains one primary and none or multiple supplement files,
- * which could be any combination of supplement files associated with the primary, item, or collection
+ * Bag represents the set of inputs to feed into a workflow. It contains one primaryfile and none or multiple supplement files,
+ * which could be any combination of supplement files associated with the primaryfile, item, or collection
  * @author yingfeng
  *
  */
@@ -21,7 +21,7 @@ public class Bag extends Dataentity {
 
 //    private Long primaryId;	
 	@ManyToOne
-    private Primary primary;	
+    private Primaryfile primaryfile;	
     
     @ManyToMany(mappedBy = "bags")
     private List<Supplement> supplements;   

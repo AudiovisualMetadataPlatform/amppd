@@ -12,7 +12,7 @@ import javax.persistence.MappedSuperclass;
 import lombok.Data;
 
 /**
- * Supplement is a file (either media or annotation) used as supplemental material to assist metadata retrieval for a primary through a workflow.
+ * Supplement is a file (either media or annotation) used as supplemental material to assist metadata retrieval for a primaryfile through a workflow.
  * @author yingfeng
  *
  */

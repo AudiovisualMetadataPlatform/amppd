@@ -16,17 +16,17 @@ import org.springframework.web.multipart.MultipartFile;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.Primary;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.SupplementOfCollection;
 import edu.indiana.dlib.amppd.model.SupplementOfItem;
-import edu.indiana.dlib.amppd.model.SupplementOfPrimary;
+import edu.indiana.dlib.amppd.model.SupplementOfPrimaryfile;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 
 /**
  * Implementation of FileStorageService.
- * Directory hierarchy: Root - Unit - Collection - Item - Primary - Supplement
+ * Directory hierarchy: Root - Unit - Collection - Item - Primaryfile - Supplement
  * Naming convention: At each level of the above hierarchy, 
  * directory names abide to this format: <1st Letter of the entity class>-<ID of the entity>
  * file names abide to this format: <1st Letter of the entity class>-<ID of the entity>.<file extension>
@@ -108,19 +108,19 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Primary)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Primaryfile)
 	 */
-	public String getDirPathName(Primary primary) {
-		// directory path for primary: U-<unitID/C-<collectionId>/I-<itemId>/P--<primaryId>
-		return getDirPathName(primary.getItem()) + File.pathSeparator + "P-" + primary.getId();
+	public String getDirPathName(Primaryfile primaryfile) {
+		// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P--<primaryfileId>
+		return getDirPathName(primaryfile.getItem()) + File.pathSeparator + "P-" + primaryfile.getId();
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primary)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primaryfile)
 	 */
-	public String getFilePathName(Primary primary) {
-		// file path for primary: U-<unitID/C-<collectionId>/I-<itemId>/P--<primaryId>.<primaryExtension>
-		return getDirPathName(primary) + "."; // TODO add extension + primary.getExtension();
+	public String getFilePathName(Primaryfile primaryfile) {
+		// file path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>.<primaryExtension>
+		return getDirPathName(primaryfile) + "."; // TODO add extension + primaryfile.getExtension();
 	}
 
 	/**
@@ -128,9 +128,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */
 	public String getFilePathName(Supplement supplement) {
 		// file name for supplement: S-<supplementId>
-		String fileName = "S" + supplement.getId() + "."; // TODO add extension + primary.getExtension();
+		String fileName = "S" + supplement.getId() + "."; // TODO add extension + primaryfile.getExtension();
 		
-		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primary
+		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
 		String dirName = "";
 		
 		if (supplement instanceof SupplementOfCollection) {
@@ -139,7 +139,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 		else if (supplement instanceof SupplementOfItem) {
 			dirName = getDirPathName(supplement.getItem());
 		}
-		else if (supplement instanceof SupplementOfPrimary) {
+		else if (supplement instanceof SupplementOfPrimaryfile) {
 			dirName = getDirPathName(supplement.getPrimary());
 		}
 		

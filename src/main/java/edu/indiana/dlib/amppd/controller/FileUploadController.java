@@ -10,16 +10,16 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.Primary;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
-import edu.indiana.dlib.amppd.repository.PrimaryRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.SupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 
 //TODO when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
 
 /**
- * Controller to handle file upload for primaries and supplements.
+ * Controller to handle file upload for primaryfiles and supplements.
  * @author yingfeng
  *
  */
@@ -27,26 +27,26 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
 public class FileUploadController {
 	
     private final FileStorageService fileStorageService;
-    private final PrimaryRepository primaryRepository;
+    private final PrimaryfileRepository primaryfileRepository;
     private final SupplementRepository supplementRepository;
 
     @Autowired
-    public FileUploadController(FileStorageService fileStorageService, PrimaryRepository primaryRepository, SupplementRepository supplementRepository) {
+    public FileUploadController(FileStorageService fileStorageService, PrimaryfileRepository primaryfileRepository, SupplementRepository supplementRepository) {
         this.fileStorageService = fileStorageService;
-        this.primaryRepository = primaryRepository;
+        this.primaryfileRepository = primaryfileRepository;
         this.supplementRepository = supplementRepository;
     }
 
-    @PostMapping("/primary/{id}/file")
-    public String handlePrimaryUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-    	Primary primary = primaryRepository.findById(id).orElseThrow(() -> new StorageException("Primary <" + id + "> does not exist!"));
-    	String targetPathName = fileStorageService.getFilePathName(primary);    	
+    @PostMapping("/primaryfile/{id}/file")
+    public String handlePrimaryfileUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+    	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
+    	String targetPathName = fileStorageService.getFilePathName(primaryfile);    	
     	
     	fileStorageService.store(file, targetPathName);
-    	primary.setUri(targetPathName);
-    	primaryRepository.save(primary);
+    	primaryfile.setUri(targetPathName);
+    	primaryfileRepository.save(primaryfile);
     	
-        redirectAttributes.addFlashAttribute("message", "You successfully uploaded primary " + file.getOriginalFilename() + "!");
+        redirectAttributes.addFlashAttribute("message", "You successfully uploaded primaryfile " + file.getOriginalFilename() + "!");
 
         return "redirect:/";
     }

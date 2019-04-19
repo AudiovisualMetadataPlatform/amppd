@@ -9,16 +9,16 @@ import javax.persistence.OneToMany;
 import lombok.Data;
 
 /**
- * Primary is a file containing actual media content of any MIME type. A primary always associates with one and only one item.
+ * Primaryfile is a file containing actual media content of any MIME type. A primaryfile always associates with one and only one item.
  * @author yingfeng
  *
  */
 @Entity
 @Data
-public class Primary extends Asset {
+public class Primaryfile extends Asset {
 
-	@OneToMany(mappedBy="primary")
-    private List<SupplementOfPrimary> supplements;
+	@OneToMany(mappedBy="primaryfile")
+    private List<SupplementOfPrimaryfile> supplements;
 
 	//  private Long itemId;
 	@ManyToOne
