@@ -1,13 +1,8 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.net.URI;
-import java.util.HashMap;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+
+import org.json.JSONObject;
 
 import lombok.Data;
 
@@ -19,13 +14,9 @@ import lombok.Data;
  */
 @MappedSuperclass
 @Data
-public class Asset {
+public abstract class Asset extends Content {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
-   
-    private URI uri;
-    private HashMap<String, String> externalIds;
+    private String pathName;		// path name relative to storage root for the file associated with the asset
+    private JSONObject metainfo;	// technical meta data information extracted/associated from the asset file
     
 }
