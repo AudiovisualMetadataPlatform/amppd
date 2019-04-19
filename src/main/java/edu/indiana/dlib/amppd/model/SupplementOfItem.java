@@ -6,7 +6,7 @@ import javax.persistence.ManyToOne;
 import lombok.Data;
 
 /**
- * SupplementOfItem is a supplemental file associated with an item and shared by all primaries within that item.
+ * SupplementOfItem is a supplemental file associated with an item and shared by all primaryfiles within that item.
  * @author yingfeng
  *
  */

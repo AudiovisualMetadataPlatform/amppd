@@ -6,16 +6,16 @@ import javax.persistence.ManyToOne;
 import lombok.Data;
 
 /**
- * SupplementOfPrimary is a supplemental file associated with a primary and only available for this primary.
+ * SupplementOfPrimaryfile is a supplemental file associated with a primaryfile and only available for this primaryfile.
  * @author yingfeng
  *
  */
 @Entity
 @Data
-public class SupplementOfPrimary extends Supplement {
+public class SupplementOfPrimaryfile extends Supplement {
 
 //    private Long primaryId;
 	@ManyToOne
-    private Primary primary;
+    private Primaryfile primaryfile;
     
 }

@@ -10,7 +10,7 @@ import javax.persistence.OneToMany;
 import lombok.Data;
 
 /**
- * Item represents an intellectual object that contains one or more primaries and none or multiple supplement files.
+ * Item represents an intellectual object that contains one or more primaryfiles and none or multiple supplement files.
  * @author yingfeng
  *
  */
@@ -19,7 +19,7 @@ import lombok.Data;
 public class Item extends Content {
 
 	@OneToMany(mappedBy="item")
-    private List<Primary> primaries;
+    private List<Primaryfile> primaryfiles;
     
 	@OneToMany(mappedBy="item")
     private List<SupplementOfItem> supplements;
