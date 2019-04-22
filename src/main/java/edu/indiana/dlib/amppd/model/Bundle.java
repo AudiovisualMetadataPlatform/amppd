@@ -11,16 +11,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import lombok.Data;
 
 /**
- * Group is a container of one or multiple bags to which similar workflows can be applied.
+ * Bundle is a container of one or multiple bags to which similar workflows can be applied.
  * @author yingfeng
  *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
-public class Group extends Dataentity {
+public class Bundle extends Dataentity {
 
-    @ManyToMany(mappedBy = "groups")
+    @ManyToMany(mappedBy = "bundles")
     private List<Bag> bags;
     
 }

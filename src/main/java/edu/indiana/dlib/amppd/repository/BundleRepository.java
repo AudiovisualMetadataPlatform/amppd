@@ -6,11 +6,11 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import edu.indiana.dlib.amppd.model.Group;
+import edu.indiana.dlib.amppd.model.Bundle;
 
-@RepositoryRestResource(collectionResourceRel = "groups", path = "groups")
-public interface GroupRepository extends PagingAndSortingRepository<Group, Long> {
+@RepositoryRestResource(collectionResourceRel = "bundles", path = "bundles")
+public interface BundleRepository extends PagingAndSortingRepository<Bundle, Long> {
 
-	List<Group> findByName(@Param("name") String name);
+	List<Bundle> findByName(@Param("name") String name);
 	
 }
