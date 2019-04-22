@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,17 +11,20 @@ import java.nio.file.StandardCopyOption;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 
@@ -76,6 +80,33 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new StorageException("Failed to store file " + targetPathname, e);
 		}
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.load(MString)
+	 */
+    public Path load(String pathname) {
+        return root.resolve(pathname);
+    }
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.loadAsResource(String)
+	 */
+    public Resource loadAsResource(String pathname) {
+        try {
+            Path file = load(pathname);
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            }
+            else {
+                throw new StorageFileNotFoundException("Could not read file: " + pathname);
+
+            }
+        }
+        catch (MalformedURLException e) {
+            throw new StorageFileNotFoundException("Could not read file: " + pathname, e);
+        }
+    }	
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Unit)
@@ -111,7 +142,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Primaryfile)
 	 */
 	public String getDirPathName(Primaryfile primaryfile) {
-		// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P--<primaryfileId>
+		// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>
 		return getDirPathName(primaryfile.getItem()) + File.pathSeparator + "P-" + primaryfile.getId();
 	}
 	

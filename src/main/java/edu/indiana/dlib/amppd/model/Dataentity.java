@@ -40,4 +40,8 @@ public abstract class Dataentity {
     @LastModifiedBy
     private String modifiedBy;    
 
+    public Dataentity(String name, String description) {
+    	this.name = name;
+    	this.description = description;
+    }
 }
