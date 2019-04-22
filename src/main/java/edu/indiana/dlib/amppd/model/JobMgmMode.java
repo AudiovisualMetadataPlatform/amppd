@@ -35,25 +35,23 @@ public class JobMgmMode {
     // as we need to add "final" flag; also, for file relative path not URI shall be stored. 
     private HashMap<Integer, URI> mgmModeIoMap;
     
-//    private Long jobId;
     @ManyToOne
     private Job job;
     
-//    private Long mgmModeId;
     @ManyToOne
     private MgmMode mgmMode;
 
-    // TODO add getStatus based on percentage.
-//    public String getStatus() {
-//    	if (percentage == 0.0 )
-//    		return "WAITING";
-//    	else if (errorMessage != null)
-//    		return "ERROR";
-//    	else if (percentage > 0 )
-//    		return "PROCESSING";
-//    	else if (percentage >= 100.0 )
-//    		return "cOMPLETED";
-//    	return null;
-//    }
+    // TODO might need to rephrase the status constants
+    public String getStatus() {
+    	if (percentage == 0.0 )
+    		return "WAITING";
+    	else if (errorMessage != null)
+    		return "ERROR";
+    	else if (percentage > 0 )
+    		return "PROCESSING";
+    	else if (percentage >= 100.0 )
+    		return "cOMPLETED";
+    	return null;
+    }
     	    
 }

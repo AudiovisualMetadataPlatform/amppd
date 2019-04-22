@@ -7,10 +7,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
@@ -29,9 +25,8 @@ public class Collection extends Content {
     private List<Item> items; 
 	
 	@OneToMany(mappedBy="collection")
-    private List<SupplementOfCollection> supplements;
+    private List<CollectionSupplement> supplements;
 	
-//	private Long unitId;
 	@ManyToOne
 	private Unit unit;
 	

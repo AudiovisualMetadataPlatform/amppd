@@ -22,12 +22,10 @@ import lombok.Data;
 public class Workflow extends Dataentity {
     
 	// TODO double check the relationship
-//    private Long startMgmModeId;
 	@ManyToOne
     private MgmMode startMgmMode;	
     
-	// TODO double check the relationship
-//    private Long endMgmModeId;    
+	// TODO double check the relationship   
 	@ManyToOne
     private MgmMode endMgmMode;
     
@@ -36,8 +34,6 @@ public class Workflow extends Dataentity {
     
     @OneToMany(mappedBy="workflow")
     private List<Job> jobs;    
-    
-    //  private String unitId;
 
 	// TODO: Unit & Workflow do not have a 1;M ownership relation, but could have a M;M access relation. When we add access control we shall reconsider this mapping 
 //    @ManyToOne
