@@ -22,9 +22,8 @@ import lombok.Data;
 public class Primaryfile extends Asset {
 
 	@OneToMany(mappedBy="primaryfile")
-    private List<SupplementOfPrimaryfile> supplements;
+    private List<PrimaryfileSupplement> supplements;
 
-	//  private Long itemId;
 	@ManyToOne
 	private Item item;
 	

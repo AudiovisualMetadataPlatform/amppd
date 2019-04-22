@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.HashMap;
 
-import javax.persistence.Entity;
 import javax.persistence.MappedSuperclass;
 
 import lombok.Data;

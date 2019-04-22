@@ -8,10 +8,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
@@ -27,7 +23,6 @@ import lombok.Data;
 @Data
 public class Bag extends Dataentity {
 	
-//    private Long primaryId;	
 	@ManyToOne
     private Primaryfile primaryfile;	
     

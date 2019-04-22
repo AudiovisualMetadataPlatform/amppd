@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.Date;
-
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;

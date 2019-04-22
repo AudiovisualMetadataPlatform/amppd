@@ -21,7 +21,6 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
-//@DiscriminatorColumn(name = "type")
 public abstract class Supplement extends Asset {
 	
 	// TODO double check the relationship

@@ -18,9 +18,9 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
-import edu.indiana.dlib.amppd.model.SupplementOfCollection;
-import edu.indiana.dlib.amppd.model.SupplementOfItem;
-import edu.indiana.dlib.amppd.model.SupplementOfPrimaryfile;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 
@@ -133,13 +133,13 @@ public class FileStorageServiceImpl implements FileStorageService {
 		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
 		String dirName = "";
 		
-		if (supplement instanceof SupplementOfCollection) {
+		if (supplement instanceof CollectionSupplement) {
 			dirName = getDirPathName(supplement.getCollection());
 		}
-		else if (supplement instanceof SupplementOfItem) {
+		else if (supplement instanceof ItemSupplement) {
 			dirName = getDirPathName(supplement.getItem());
 		}
-		else if (supplement instanceof SupplementOfPrimaryfile) {
+		else if (supplement instanceof PrimaryfileSupplement) {
 			dirName = getDirPathName(supplement.getPrimary());
 		}
 		

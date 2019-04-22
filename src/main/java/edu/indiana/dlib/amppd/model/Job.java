@@ -3,14 +3,11 @@ package edu.indiana.dlib.amppd.model;
 import java.sql.Timestamp;
 
 import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 
@@ -36,11 +33,9 @@ public class Job {
     @OneToMany(mappedBy="job")
     private JobMgmMode jobMgmModes;
     
-//    private Long bagId;
     @ManyToOne
     private Bag bag;
 
-//    private Long workflowId;
     @ManyToOne
     private Workflow workflow;
 
