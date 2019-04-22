@@ -75,7 +75,7 @@ public class UnitRepositoryTests {
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/units/search/findByName?name={name}", "For test")).andExpect(
+				get("/units/search/findByName?name={name}", "Unit 1")).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.units[0].name").value(
 										"Unit 1"));
