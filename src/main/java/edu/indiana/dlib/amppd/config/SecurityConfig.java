@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.security;
+package edu.indiana.dlib.amppd.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

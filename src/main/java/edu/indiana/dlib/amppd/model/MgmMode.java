@@ -1,14 +1,18 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 
@@ -18,9 +22,10 @@ import lombok.Data;
  *
  */
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class MgmMode extends Dataentity {
-
+    
     private HashMap<String, String> defaultParams;
     private String condition;	// TODO this can be a single String of compound boolean expression, or array of simple boolean expressions
 
