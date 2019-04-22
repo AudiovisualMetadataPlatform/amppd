@@ -2,12 +2,13 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.List;
 
-import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.ManyToMany;
-import javax.persistence.MappedSuperclass;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 
@@ -17,8 +18,9 @@ import lombok.Data;
  *
  */
 @Entity
-@Data
+@EntityListeners(AuditingEntityListener.class)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Data
 //@DiscriminatorColumn(name = "type")
 public abstract class Supplement extends Asset {
 	

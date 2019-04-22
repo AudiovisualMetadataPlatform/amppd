@@ -31,6 +31,8 @@ public class JobMgmMode {
     private Timestamp timeStarted;
     private Timestamp timeEnded;
     
+    // TODO: the output could be a file or JSON blob; we might need a separate entity to represent this, 
+    // as we need to add "final" flag; also, for file relative path not URI shall be stored. 
     private HashMap<Integer, URI> mgmModeIoMap;
     
 //    private Long jobId;

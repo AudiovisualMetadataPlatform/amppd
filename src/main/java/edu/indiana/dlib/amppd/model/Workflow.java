@@ -3,9 +3,11 @@ package edu.indiana.dlib.amppd.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
 
@@ -15,6 +17,7 @@ import lombok.Data;
  *
  */
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class Workflow extends Dataentity {
     
@@ -35,8 +38,10 @@ public class Workflow extends Dataentity {
     private List<Job> jobs;    
     
     //  private String unitId;
-    @ManyToOne
-    private Unit unit;
+
+	// TODO: Unit & Workflow do not have a 1;M ownership relation, but could have a M;M access relation. When we add access control we shall reconsider this mapping 
+//    @ManyToOne
+//    private Unit unit;
     
 }
 
