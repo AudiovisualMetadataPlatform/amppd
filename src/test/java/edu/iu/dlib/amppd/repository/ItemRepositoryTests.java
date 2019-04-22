@@ -73,7 +73,7 @@ public class ItemRepositoryTests {
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/items/search/findByName?name={name}", "For test")).andExpect(
+				get("/items/search/findByName?name={name}", "Item 1")).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].name").value(
 										"Item 1"));
