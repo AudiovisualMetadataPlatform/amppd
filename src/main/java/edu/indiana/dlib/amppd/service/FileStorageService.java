@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.nio.file.Path;
+
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.model.Collection;
@@ -21,6 +24,20 @@ public interface FileStorageService {
 	 * @param targetPathname the specified target file path name relative to the storage root
 	 */
 	public void store(MultipartFile sourceFile, String targetPathname);
+	
+	/**
+	 * Loads the file with the specified pathname.
+	 * @param pathname
+	 * @return path of the loaded file
+	 */
+	public Path load(String pathname);
+	
+	/**
+	 * Loads the file with the specified pathname as a resource
+	 * @param pathname
+	 * @return resource loaded
+	 */
+	public Resource loadAsResource(String pathname);
 	
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified unit.
