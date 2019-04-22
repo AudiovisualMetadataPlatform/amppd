@@ -30,7 +30,7 @@ public class Bag extends Dataentity {
     private List<Supplement> supplements;   
     
     @ManyToMany
-    private List<Group> groups;      
+    private List<Bundle> bundles;      
     
     @OneToMany(mappedBy="bag")
     private List<Job> jobs;        

@@ -21,107 +21,107 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import edu.indiana.dlib.amppd.repository.GroupRepository;
+import edu.indiana.dlib.amppd.repository.BundleRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class GroupRepositoryTests {
+public class BundleRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
-	private GroupRepository groupRepository;
+	private BundleRepository bundleRepository;
 
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
-		groupRepository.deleteAll();
+		bundleRepository.deleteAll();
 	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
 
 		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
-				jsonPath("$._links.groups").exists());
+				jsonPath("$._links.bundles").exists());
 	}
 
 	@Test
-	public void shouldCreateGroup() throws Exception {
+	public void shouldCreateBundle() throws Exception {
 
-		mockMvc.perform(post("/groups").content(
-				"{\"name\": \"Group 1\", \"description\":\"For test\"}")).andExpect(
+		mockMvc.perform(post("/bundles").content(
+				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
-								header().string("Location", containsString("groups/")));
+								header().string("Location", containsString("bundles/")));
 	}
 
 	@Test
-	public void shouldRetrieveGroup() throws Exception {
+	public void shouldRetrieveBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/groups").content(
-				"{\"name\": \"Group 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").content(
+				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Group 1")).andExpect(
+				jsonPath("$.name").value("Bundle 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldQueryGroup() throws Exception {
+	public void shouldQueryBundle() throws Exception {
 
-		mockMvc.perform(post("/groups").content(
-				"{ \"name\": \"Group 1\", \"description\":\"For test\"}")).andExpect(
+		mockMvc.perform(post("/bundles").content(
+				"{ \"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/groups/search/findByName?name={name}", "For test")).andExpect(
+				get("/bundles/search/findByName?name={name}", "For test")).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.groups[0].name").value(
-										"Group 1"));
+								jsonPath("$._embedded.bundles[0].name").value(
+										"Bundle 1"));
 	}
 
 	@Test
-	public void shouldUpdateGroup() throws Exception {
+	public void shouldUpdateBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/groups").content(
-				"{\"name\": \"Group 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").content(
+				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(put(location).content(
-				"{\"name\": \"Group 1.1\", \"description\":\"For test\"}")).andExpect(
+				"{\"name\": \"Bundle 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Group 1.1")).andExpect(
+				jsonPath("$.name").value("Bundle 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldPartiallyUpdateGroup() throws Exception {
+	public void shouldPartiallyUpdateBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/groups").content(
-				"{\"name\": \"Group 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").content(
+				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"Group 1.1.1\"}")).andExpect(
+				patch(location).content("{\"name\": \"Bundle 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Group 1.1.1")).andExpect(
+				jsonPath("$.name").value("Bundle 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldDeleteGroup() throws Exception {
+	public void shouldDeleteBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/groups").content(
-				"{ \"name\": \"Group 1.1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").content(
+				"{ \"name\": \"Bundle 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
