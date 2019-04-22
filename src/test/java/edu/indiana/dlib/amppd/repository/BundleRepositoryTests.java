@@ -21,8 +21,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import edu.indiana.dlib.amppd.repository.BundleRepository;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -75,7 +73,7 @@ public class BundleRepositoryTests {
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/bundles/search/findByName?name={name}", "For test")).andExpect(
+				get("/bundles/search/findByName?name={name}", "Bundle 1")).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.bundles[0].name").value(
 										"Bundle 1"));
