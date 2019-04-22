@@ -138,7 +138,7 @@
 			<artifactId>json</artifactId>
 			<version>20180130</version>
 		</dependency>
-		<!-- TODO switch H2 to one of the followings
+		<!-- TODO uncomment later
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
