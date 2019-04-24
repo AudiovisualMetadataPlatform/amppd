@@ -17,11 +17,9 @@ package edu.indiana.dlib.amppd.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -35,7 +33,6 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.service.impl.FileStorageServiceImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -70,85 +67,89 @@ public class FileStorageServiceTests {
     @Test
     public void getPrimaryfilePathName() {
     	Unit unit = new Unit();
-    	unit.setId(1);
+    	unit.setId(1l);
     	
     	Collection collection = new Collection();
-    	collection.setId(2);
+    	collection.setId(2l);
     	collection.setUnit(unit);
     	
     	Item item = new Item();
-    	item.setId(3);
+    	item.setId(3l);
     	item.setCollection(collection);
     	
     	Primaryfile primaryfile = new Primaryfile();
-    	primaryfile.setId(4);
+    	primaryfile.setId(4l);
     	primaryfile.setItem(item);
+    	primaryfile.setOriginalFileName("primaryfiletest.mp4");
     	
-    	String pathname = fileStorageService.getFilePathName(primaryfile); 	    
-        assertThat(pathname.startsWith("1/2/3/4."));
+    	String pathname = fileStorageService.getFilePathName(primaryfile);
+        assertThat(pathname.equals("U-1/C-2/I-3/P-4.mp4"));
     }
 
     @Test
     public void getCollectionSupplementPathName() {
     	Unit unit = new Unit();
-    	unit.setId(1);
+    	unit.setId(1l);
     	
     	Collection collection = new Collection();
-    	collection.setId(2);
+    	collection.setId(2l);
     	collection.setUnit(unit);
     	    	
     	CollectionSupplement supplement = new CollectionSupplement();
-    	supplement.setId(3);
+    	supplement.setId(3l);
     	supplement.setCollection(collection);
-    	
-    	String pathname = fileStorageService.getFilePathName(supplement); 	    
-        assertThat(pathname.startsWith("1/2/3."));
+    	supplement.setOriginalFileName("supplementtest.pdf");
+  	
+    	String pathname = fileStorageService.getFilePathName(supplement);
+        assertThat(pathname.equals("U-1/C-2/S-3.pdf"));
     }
     
     @Test
     public void getItemSupplementPathName() {
     	Unit unit = new Unit();
-    	unit.setId(1);
+    	unit.setId(1l);
     	
     	Collection collection = new Collection();
-    	collection.setId(2);
+    	collection.setId(2l);
     	collection.setUnit(unit);
     	
     	Item item = new Item();
-    	item.setId(3);
+    	item.setId(3l);
     	item.setCollection(collection);
     	
     	ItemSupplement supplement = new ItemSupplement();
-    	supplement.setId(4);
+    	supplement.setId(4l);
     	supplement.setItem(item);
+    	supplement.setOriginalFileName("supplementtest.pdf");
     	
-    	String pathname = fileStorageService.getFilePathName(supplement); 	    
-        assertThat(pathname.startsWith("1/2/3/4."));
+    	String pathname = fileStorageService.getFilePathName(supplement);
+        assertThat(pathname.equals("U-1/C-2/I-3/S-4.pdf"));
     }
     
     @Test
     public void getPrimaryfileSupplementPathName() {
     	Unit unit = new Unit();
-    	unit.setId(1);
+    	unit.setId(1l);
     	
     	Collection collection = new Collection();
-    	collection.setId(2);
+    	collection.setId(2l);
     	collection.setUnit(unit);
     	
     	Item item = new Item();
-    	item.setId(3);
+    	item.setId(3l);
     	item.setCollection(collection);
     	
     	Primaryfile primaryfile = new Primaryfile();
-    	primaryfile.setId(4);
+    	primaryfile.setId(4l);
     	primaryfile.setItem(item);
     	
     	PrimaryfileSupplement supplement = new PrimaryfileSupplement();
-    	supplement.setId(5);
+    	supplement.setId(5l);
     	supplement.setPrimaryfile(primaryfile);
+    	supplement.setOriginalFileName("supplementtest.pdf");
     	
-    	String pathname = fileStorageService.getFilePathName(supplement); 	    
-        assertThat(pathname.startsWith("1/2/3/4/5."));
+    	String pathname = fileStorageService.getFilePathName(supplement);
+        assertThat(pathname.equals("U-1/C-2/I-3/P-4/S-5.pdf"));
     }
 
 

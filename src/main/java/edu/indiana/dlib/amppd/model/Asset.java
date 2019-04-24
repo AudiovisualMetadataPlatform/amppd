@@ -2,8 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.persistence.MappedSuperclass;
 
-import org.json.JSONObject;
-
 import lombok.Data;
 
 /**

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -143,31 +144,31 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primaryfile, String)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primaryfile)
 	 */
-	public String getFilePathName(Primaryfile primaryfile, String fileExtension) {
+	public String getFilePathName(Primaryfile primaryfile) {
 		// file path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>.<primaryExtension>
-		return getDirPathName(primaryfile) + "." + fileExtension;
+		return getDirPathName(primaryfile) + "." + FilenameUtils.getExtension(primaryfile.getOriginalFileName());
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Supplement, String)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Supplement)
 	 */
-	public String getFilePathName(Supplement supplement, String fileExtension) {
+	public String getFilePathName(Supplement supplement) {
 		// file name for supplement: S-<supplementId>
-		String fileName = "S" + supplement.getId() + "." + fileExtension;
+		String fileName = "S-" + supplement.getId() + "." + FilenameUtils.getExtension(supplement.getOriginalFileName());
 		
 		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
 		String dirName = "";
 		
 		if (supplement instanceof CollectionSupplement) {
-			dirName = getDirPathName(supplement.getCollection());
+			dirName = getDirPathName(((CollectionSupplement)supplement).getCollection());
 		}
 		else if (supplement instanceof ItemSupplement) {
-			dirName = getDirPathName(supplement.getItem());
+			dirName = getDirPathName(((ItemSupplement)supplement).getItem());
 		}
 		else if (supplement instanceof PrimaryfileSupplement) {
-			dirName = getDirPathName(supplement.getPrimary());
+			dirName = getDirPathName(((PrimaryfileSupplement)supplement).getPrimaryfile());
 		}
 		
 		return dirName + fileName;
