@@ -68,18 +68,20 @@ public interface FileStorageService {
 	public String getDirPathName(Primaryfile primaryfile);
 
 	/**
-	 * Returns the target storage file path name relative to the storage root for the specified primaryfile.
+	 * Returns the target storage file path name relative to the storage root for the specified primaryfile with the specified fileExtension.
 	 * @param primaryfile the specified primaryfile
-	 * @return the target storage file path
+	 * @param fileExtension the specified fileExtension
+	 * @return the target storage file path name
 	 */
-	public String getFilePathName(Primaryfile primaryfile);
+	public String getFilePathName(Primaryfile primaryfile, String fileExtension);
 
 	/**
-	 * Returns the target storage file path name relative to the storage root for the specified supplement.
+	 * Returns the target storage file path name relative to the storage root for the specified supplement with the specified fileExtension.
 	 * @param supplement the specified supplement
-	 * @return the target storage file path
+	 * @param fileExtension the specified fileExtension
+	 * @return the target storage file path name
 	 */
-	public String getFilePathName(Supplement supplement);
+	public String getFilePathName(Supplement supplement, String fileExtension);
 
 
 //	public Path load(String path);
