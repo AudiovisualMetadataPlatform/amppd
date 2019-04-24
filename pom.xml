@@ -103,7 +103,6 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-rest-hal-browser</artifactId>
-			<version>3.0.8.RELEASE</version>
 		</dependency>		
         <!-- TODO switch H2 to one of the followings
         <dependency>
