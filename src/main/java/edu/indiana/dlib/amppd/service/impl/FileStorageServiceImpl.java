@@ -60,20 +60,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)
 	 */
 	public void store(MultipartFile file, String targetPathname) {
-//		String filename = StringUtils.cleanPath(file.getOriginalFilename());
 		try {
 			if (file.isEmpty()) {
 				throw new StorageException("Failed to store empty file " + targetPathname);
 			}
 			if (targetPathname.contains("..")) {
 				// This is a security check
-				throw new StorageException(
-						"Cannot store file with relative path outside current directory "
-								+ targetPathname);
+				throw new StorageException("Cannot store file with relative path outside current directory " + targetPathname);
 			}
 			try (InputStream inputStream = file.getInputStream()) {
-				Files.copy(inputStream, root.resolve(targetPathname),
-						StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(inputStream, root.resolve(targetPathname), StandardCopyOption.REPLACE_EXISTING);
 			}
 		}
 		catch (IOException e) {
@@ -147,19 +143,19 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primaryfile)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primaryfile, String)
 	 */
-	public String getFilePathName(Primaryfile primaryfile) {
+	public String getFilePathName(Primaryfile primaryfile, String fileExtension) {
 		// file path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>.<primaryExtension>
-		return getDirPathName(primaryfile) + "."; // TODO add extension + primaryfile.getExtension();
+		return getDirPathName(primaryfile) + "." + fileExtension;
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Supplement)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Supplement, String)
 	 */
-	public String getFilePathName(Supplement supplement) {
+	public String getFilePathName(Supplement supplement, String fileExtension) {
 		// file name for supplement: S-<supplementId>
-		String fileName = "S" + supplement.getId() + "."; // TODO add extension + primaryfile.getExtension();
+		String fileName = "S" + supplement.getId() + "." + fileExtension;
 		
 		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
 		String dirName = "";

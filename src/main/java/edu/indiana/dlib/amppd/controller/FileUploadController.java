@@ -2,7 +2,9 @@ package edu.indiana.dlib.amppd.controller;
 
 import javax.websocket.server.PathParam;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,9 +41,15 @@ public class FileUploadController {
 
     @PostMapping("/primaryfile/{id}/file")
     public String handlePrimaryfileUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
-    	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
-    	String targetPathName = fileStorageService.getFilePathName(primaryfile);    	
+		String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());		
+    	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));    
+    	primaryfile.setOriginalFileName(originalFileName);
     	
+//    	if (StringUtils.isEmpty(primaryfile.getDescription())) {
+//    		primaryfile.setDescription(FilenameUtils.getBaseName(originalFileName));	
+//    	}
+    	
+    	String targetPathName = fileStorageService.getFilePathName(primaryfile, FilenameUtils.getExtension(originalFileName));    	    	
     	fileStorageService.store(file, targetPathName);
     	primaryfile.setUri(targetPathName);
     	primaryfileRepository.save(primaryfile);
@@ -53,9 +61,15 @@ public class FileUploadController {
 
     @PostMapping("/supplement/{id}/file")
     public String handleSupplementUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
+		String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());		
     	Supplement supplement = supplementRepository.findById(id).orElseThrow(() -> new StorageException("Supplement <" + id + "> does not exist!"));
-    	String targetPathName = fileStorageService.getFilePathName(supplement);    	
+    	supplement.setOriginalFileName(originalFileName);
+
+//    	if (StringUtils.isEmpty(supplement.getDescription())) {
+//    		supplement.setDescription(FilenameUtils.getBaseName(originalFileName));
+//    	}
     	
+    	String targetPathName = fileStorageService.getFilePathName(supplement, FilenameUtils.getExtension(originalFileName));    		    	
     	fileStorageService.store(file, targetPathName);
     	supplement.setUri(targetPathName);
     	supplementRepository.save(supplement);
