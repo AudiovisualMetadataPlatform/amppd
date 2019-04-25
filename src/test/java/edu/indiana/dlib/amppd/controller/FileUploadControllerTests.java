@@ -50,7 +50,7 @@ public class FileUploadControllerTests {
     	Primaryfile primaryfile = new Primaryfile();
     	primaryfile.setId(4l);
     	primaryfile.setItem(item);
-    	primaryfile.setOriginalFileName("primaryfiletest.mp4");   
+    	primaryfile.setOriginalFilename("primaryfiletest.mp4");   
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/primaryfile/4/file").file(multipartFile))
@@ -72,7 +72,7 @@ public class FileUploadControllerTests {
     	CollectionSupplement supplement = new CollectionSupplement();
     	supplement.setId(3l);
     	supplement.setCollection(collection);  
-    	supplement.setOriginalFileName("supplementtest.pdf");
+    	supplement.setOriginalFilename("supplementtest.pdf");
     	
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/supplement/3/file").file(multipartFile))
@@ -98,7 +98,7 @@ public class FileUploadControllerTests {
     	ItemSupplement supplement = new ItemSupplement();
     	supplement.setId(4l);
     	supplement.setItem(item);
-    	supplement.setOriginalFileName("supplementtest.pdf");    
+    	supplement.setOriginalFilename("supplementtest.pdf");    
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/supplement/4/file").file(multipartFile))
@@ -128,7 +128,7 @@ public class FileUploadControllerTests {
     	PrimaryfileSupplement supplement = new PrimaryfileSupplement();
     	supplement.setId(5l);
     	supplement.setPrimaryfile(primaryfile);
-    	supplement.setOriginalFileName("supplementtest.pdf");
+    	supplement.setOriginalFilename("supplementtest.pdf");
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/supplement/5/file").file(multipartFile))

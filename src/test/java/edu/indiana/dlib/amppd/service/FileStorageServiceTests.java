@@ -17,6 +17,7 @@ package edu.indiana.dlib.amppd.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.service.impl.FileStorageServiceImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,31 +43,31 @@ public class FileStorageServiceTests {
 	@Autowired
     private FileStorageService fileStorageService;
 
-	// TODO test if below is not needed
-//    @Before
-//    public void init() {
-//        fileStorageService = new FileStorageServiceImpl();
-//    }
+    @Before
+    public void init() {
+    	// start fresh with existing directories/files under root all cleaned up
+        fileStorageService.deleteAll();
+    }
 
     @Test
     public void saveAndLoad() {
-        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test");
-        assertThat(fileStorageService.load("foo.txt")).exists();
+        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test.txt");
+        assertThat(fileStorageService.load("test.txt")).exists();
     }
 
     @Test(expected = StorageException.class)
     public void saveNotPermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test");
+        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test0.txt");
     }
 
     @Test
     public void savePermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test");
-        assertThat(fileStorageService.load("bar/../foo.txt")).exists();
+        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test1.txt");
+        assertThat(fileStorageService.load("test1.txt")).exists();
     }
     
     @Test
-    public void getPrimaryfilePathName() {
+    public void getPrimaryfilePathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -80,14 +82,14 @@ public class FileStorageServiceTests {
     	Primaryfile primaryfile = new Primaryfile();
     	primaryfile.setId(4l);
     	primaryfile.setItem(item);
-    	primaryfile.setOriginalFileName("primaryfiletest.mp4");
+    	primaryfile.setOriginalFilename("primaryfiletest.mp4");
     	
-    	String pathname = fileStorageService.getFilePathName(primaryfile);
+    	String pathname = fileStorageService.getFilePathname(primaryfile);
         assertThat(pathname.equals("U-1/C-2/I-3/P-4.mp4"));
     }
 
     @Test
-    public void getCollectionSupplementPathName() {
+    public void getCollectionSupplementPathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -98,14 +100,14 @@ public class FileStorageServiceTests {
     	CollectionSupplement supplement = new CollectionSupplement();
     	supplement.setId(3l);
     	supplement.setCollection(collection);
-    	supplement.setOriginalFileName("supplementtest.pdf");
+    	supplement.setOriginalFilename("supplementtest.pdf");
   	
-    	String pathname = fileStorageService.getFilePathName(supplement);
+    	String pathname = fileStorageService.getFilePathname(supplement);
         assertThat(pathname.equals("U-1/C-2/S-3.pdf"));
     }
     
     @Test
-    public void getItemSupplementPathName() {
+    public void getItemSupplementPathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -120,14 +122,14 @@ public class FileStorageServiceTests {
     	ItemSupplement supplement = new ItemSupplement();
     	supplement.setId(4l);
     	supplement.setItem(item);
-    	supplement.setOriginalFileName("supplementtest.pdf");
+    	supplement.setOriginalFilename("supplementtest.pdf");
     	
-    	String pathname = fileStorageService.getFilePathName(supplement);
+    	String pathname = fileStorageService.getFilePathname(supplement);
         assertThat(pathname.equals("U-1/C-2/I-3/S-4.pdf"));
     }
     
     @Test
-    public void getPrimaryfileSupplementPathName() {
+    public void getPrimaryfileSupplementPathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -146,9 +148,9 @@ public class FileStorageServiceTests {
     	PrimaryfileSupplement supplement = new PrimaryfileSupplement();
     	supplement.setId(5l);
     	supplement.setPrimaryfile(primaryfile);
-    	supplement.setOriginalFileName("supplementtest.pdf");
+    	supplement.setOriginalFilename("supplementtest.pdf");
     	
-    	String pathname = fileStorageService.getFilePathName(supplement);
+    	String pathname = fileStorageService.getFilePathname(supplement);
         assertThat(pathname.equals("U-1/C-2/I-3/P-4/S-5.pdf"));
     }
 
