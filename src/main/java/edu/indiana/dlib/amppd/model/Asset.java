@@ -14,8 +14,8 @@ import lombok.Data;
 @Data
 public abstract class Asset extends Content {
 
-	private String originalFileName;	// the file name of the original file uploaded by user or batch
-    private String pathName;			// path name relative to storage root for the file associated with the asset
+	private String originalFilename;	// the file name of the original file uploaded by user or batch
+    private String pathname;			// path name relative to storage root for the file associated with the asset
     private String metainfo;			// technical meta data information extracted/associated from the asset file, to be stored as a JSON blob 
 //    private JSONObject metainfo;		// TODO: investigate how we can use JSONObject here
     

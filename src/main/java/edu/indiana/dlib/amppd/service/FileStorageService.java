@@ -27,65 +27,69 @@ public interface FileStorageService {
 	
 	/**
 	 * Loads the file with the specified pathname.
-	 * @param pathname
+	 * @param pathname the specified pathname
 	 * @return path of the loaded file
 	 */
 	public Path load(String pathname);
 	
 	/**
-	 * Loads the file with the specified pathname as a resource
-	 * @param pathname
+	 * Loads the file with the specified pathname as a resource.
+	 * @param pathname the specified pathname
 	 * @return resource loaded
 	 */
 	public Resource loadAsResource(String pathname);
+	
+	/**
+	 * Deletes the file with the specified pathname.
+	 * @param pathname the specified pathname
+	 */
+	public void delete(String pathname);
+	
+	/**
+	 * Deletes all directfiles under the file storage root.
+	 */
+	public void deleteAll();
 	
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified unit.
 	 * @param unit the specified unit
 	 * @return the target storage directory path name
 	 */
-	public String getDirPathName(Unit unit);
+	public String getDirPathname(Unit unit);
 
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified collection.
 	 * @param collection the specified collection
 	 * @return the target storage directory path name
 	 */
-	public String getDirPathName(Collection collection);
+	public String getDirPathname(Collection collection);
 
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified item.
 	 * @param item the specified item
 	 * @return the target storage directory path name
 	 */
-	public String getDirPathName(Item item);
+	public String getDirPathname(Item item);
 
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified primaryfile.
 	 * @param primaryfile the specified primaryfile
 	 * @return the target storage directory path name
 	 */
-	public String getDirPathName(Primaryfile primaryfile);
+	public String getDirPathname(Primaryfile primaryfile);
 
 	/**
-	 * Returns the target storage file path name relative to the storage root for the specified primaryfile with its originalFileName populated.
+	 * Returns the target storage file path name relative to the storage root for the specified primaryfile with its originalFilename populated.
 	 * @param primaryfile the specified primaryfile
 	 * @return the target storage file path name
 	 */
-	public String getFilePathName(Primaryfile primaryfile);
+	public String getFilePathname(Primaryfile primaryfile);
 
 	/**
-	 * Returns the target storage file path name relative to the storage root for the specified supplement with its originalFileName populated.
+	 * Returns the target storage file path name relative to the storage root for the specified supplement with its originalFilename populated.
 	 * @param supplement the specified supplement
 	 * @return the target storage file path name
 	 */
-	public String getFilePathName(Supplement supplement);
+	public String getFilePathname(Supplement supplement);
 
-
-//	public Path load(String path);
-//
-//	public Resource loadAsResource(String path);
-//
-//	public void delete(String path);
-	
 }
