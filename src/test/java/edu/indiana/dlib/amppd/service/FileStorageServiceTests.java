@@ -34,7 +34,6 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.service.impl.FileStorageServiceImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -44,26 +43,26 @@ public class FileStorageServiceTests {
     private FileStorageService fileStorageService;
 
     @Before
-    public void init() {
+    public void cleanAll() {
     	// start fresh with existing directories/files under root all cleaned up
-        fileStorageService.deleteAll();
+        fileStorageService.delete("unit");
     }
 
     @Test
     public void saveAndLoad() {
-        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test.txt");
-        assertThat(fileStorageService.load("test.txt")).exists();
+        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test.txt");
+        assertThat(fileStorageService.load("unit/test.txt")).exists();
     }
 
     @Test(expected = StorageException.class)
     public void saveNotPermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test0.txt");
+        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test0.txt");
     }
 
     @Test
     public void savePermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "test1.txt");
-        assertThat(fileStorageService.load("test1.txt")).exists();
+        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test1.txt");
+        assertThat(fileStorageService.load("unit/test1.txt")).exists();
     }
     
     @Test

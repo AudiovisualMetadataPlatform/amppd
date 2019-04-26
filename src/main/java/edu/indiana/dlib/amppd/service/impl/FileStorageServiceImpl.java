@@ -76,7 +76,13 @@ public class FileStorageServiceImpl implements FileStorageService {
 				throw new StorageException("Cannot store file " + originalFilename + " with relative path outside current directory to " + targetPathname);
 			}
 			try (InputStream inputStream = file.getInputStream()) {
-				Files.copy(inputStream, root.resolve(targetPathname), StandardCopyOption.REPLACE_EXISTING);
+				// TODO: consider FileAttributes for access control
+				Path path = root.resolve(targetPathname);
+				
+				// create parent directory for targetPathname if not exists yet
+				Files.createDirectories(path.getParent());
+				
+				Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
 				log.info("Successfully stored file " + originalFilename + " to " + targetPathname);
 			}
 		}
@@ -206,34 +212,5 @@ public class FileStorageServiceImpl implements FileStorageService {
 		
 		return dirname + filename;
 	}
-
-//	@Override
-//	public Path load(String path) {
-//		return root.resolve(path);
-//	}
-//
-//	@Override
-//	public Resource loadAsResource(String path) {
-//		try {
-//			Path file = load(path);
-//			Resource resource = new UrlResource(file.toUri());
-//			if (resource.exists() || resource.isReadable()) {
-//				return resource;
-//			}
-//			else {
-//				throw new StorageFileNotFoundException(
-//						"Could not read file: " + path);
-//
-//			}
-//		}
-//		catch (MalformedURLException e) {
-//			throw new StorageFileNotFoundException("Could not read file: " + path, e);
-//		}
-//	}
-//
-//    @Override
-//    public void delete(String path) {
-//        FileSystemUtils.deleteRecursively(rootLocation.toFile());
-//    }
 
 }
