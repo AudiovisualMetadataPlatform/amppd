@@ -11,6 +11,8 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 /**
  * Super class for most data entities created in AMP. 
@@ -19,13 +21,17 @@ import lombok.Data;
  */
 @MappedSuperclass
 @Data
+@NoArgsConstructor
 public abstract class Dataentity {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
+    @NonNull
     private String name;
+    
+    @NonNull
     private String description;
 
     @CreatedDate
@@ -40,4 +46,14 @@ public abstract class Dataentity {
     @LastModifiedBy
     private String modifiedBy;    
 
+    // TODO: research LomBok issue: whenever no arg constructor exists (whether defined by code or by Lombok annotation) other constructors won't be added by Lombok despite the annotation
+//    public Dataentity() {
+//    	super();
+//    }
+//    
+//    public Dataentity(String name, String description) {
+//    	this.name = name;
+//    	this.description = description;
+//    }
+    
 }

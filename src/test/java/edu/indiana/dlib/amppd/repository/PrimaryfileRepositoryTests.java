@@ -75,7 +75,7 @@ public class PrimaryfileRepositoryTests {
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/primaryfiles/search/findByName?name={name}", "For test")).andExpect(
+				get("/primaryfiles/search/findByName?name={name}", "Primaryfile 1")).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].name").value(
 										"Primaryfile 1"));

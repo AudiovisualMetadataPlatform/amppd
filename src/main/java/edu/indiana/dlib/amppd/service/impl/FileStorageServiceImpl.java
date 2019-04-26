@@ -3,26 +3,33 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import lombok.extern.java.Log;
 
 /**
  * Implementation of FileStorageService.
@@ -34,18 +41,21 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
  *
  */
 @Service
+@Log
 public class FileStorageServiceImpl implements FileStorageService {
 
 	@Value("${amppd.filesys.root:/tmp/amppd/}")
-	private String rootPathName;
+	private String rootPathname;
 
 	private Path root;
 
 	@Autowired
 	public FileStorageServiceImpl() {
-		try {
-			root = Paths.get(rootPathName);
+		try {			
+			if (rootPathname == null) rootPathname = "/tmp/amppd/"; // TODO: AMP-69 remove below, which is a tmp work-around for @Value not taking effect
+			root = Paths.get(rootPathname);
 			Files.createDirectories(root);	// creates root directory if not already exists
+			log.info("File storage root directory " + rootPathname + " has been created." );
 		}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize storage", e);
@@ -56,31 +66,88 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)
 	 */
 	public void store(MultipartFile file, String targetPathname) {
-//		String filename = StringUtils.cleanPath(file.getOriginalFilename());
+		String originalFilename = file.getOriginalFilename();
 		try {
 			if (file.isEmpty()) {
-				throw new StorageException("Failed to store empty file " + targetPathname);
+				throw new StorageException("Failed to store empty file "  + originalFilename + " to " + targetPathname);
 			}
-			if (targetPathname.contains("..")) {
+			if (originalFilename.startsWith("..")) {
 				// This is a security check
-				throw new StorageException(
-						"Cannot store file with relative path outside current directory "
-								+ targetPathname);
+				throw new StorageException("Cannot store file " + originalFilename + " with relative path outside current directory to " + targetPathname);
 			}
 			try (InputStream inputStream = file.getInputStream()) {
-				Files.copy(inputStream, root.resolve(targetPathname),
-						StandardCopyOption.REPLACE_EXISTING);
+				// TODO: consider FileAttributes for access control
+				Path path = root.resolve(targetPathname);
+				
+				// create parent directory for targetPathname if not exists yet
+				Files.createDirectories(path.getParent());
+				
+				Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+				log.info("Successfully stored file " + originalFilename + " to " + targetPathname);
 			}
 		}
 		catch (IOException e) {
-			throw new StorageException("Failed to store file " + targetPathname, e);
+			throw new StorageException("Failed to store file " + originalFilename + " to " + targetPathname, e);
 		}
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.load(MString)
+	 */
+    public Path load(String pathname) {
+        return root.resolve(pathname);
+    }
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Unit)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.loadAsResource(String)
 	 */
-	public String getDirPathName(Unit unit) {
+    public Resource loadAsResource(String pathname) {
+        try {
+            Path file = load(pathname);
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return resource;
+            }
+            else {
+                throw new StorageFileNotFoundException("Could not read file: " + pathname);
+
+            }
+        }
+        catch (MalformedURLException e) {
+            throw new StorageFileNotFoundException("Could not read file: " + pathname, e);
+        }
+    }	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.delete(String)
+	 */    
+    public void delete(String pathname) {
+    	try {
+    		Path path = load(pathname);
+    		FileSystemUtils.deleteRecursively(path);
+    	}
+    	catch (IOException e) {
+    		throw new StorageException("Could not delete file " + pathname, e);
+    	}
+    }
+    
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.deleteAll()
+	 */
+    public void deleteAll() {
+    	try {
+    		FileSystemUtils.deleteRecursively(root);
+    	}
+    	catch (IOException e) {
+    		throw new StorageException("Could not delete all directories/files under file storage root.");
+    	}  	
+    }
+
+    
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Unit)
+	 */
+	public String getDirPathname(Unit unit) {
 //		Path path = root.resolve("U-" + unit.getId());
 //		return path.toString();		
 		
@@ -89,90 +156,61 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Collection)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Collection)
 	 */
-	public String getDirPathName(Collection collection) {
+	public String getDirPathname(Collection collection) {
 //		Path path = root.resolve("U-" + unit.getId());
 //		return path.toString();		
 		
 		// directory path for collection: U-<unitID/C-<collectionId>
-		return getDirPathName(collection.getUnit()) + File.pathSeparator + "C-" + collection.getId();
+		return getDirPathname(collection.getUnit()) + File.separator + "C-" + collection.getId();
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Item)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Item)
 	 */
-	public String getDirPathName(Item item) {
+	public String getDirPathname(Item item) {
 		// directory path for item: U-<unitID/C-<collectionId>/I-<itemId>
-		return getDirPathName(item.getCollection()) + File.pathSeparator + "I-" + item.getId();
+		return getDirPathname(item.getCollection()) + File.separator + "I-" + item.getId();
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathName(Primaryfile)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Primaryfile)
 	 */
-	public String getDirPathName(Primaryfile primaryfile) {
-		// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P--<primaryfileId>
-		return getDirPathName(primaryfile.getItem()) + File.pathSeparator + "P-" + primaryfile.getId();
+	public String getDirPathname(Primaryfile primaryfile) {
+		// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>
+		return getDirPathname(primaryfile.getItem()) + File.separator + "P-" + primaryfile.getId();
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Primaryfile)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathname(Primaryfile)
 	 */
-	public String getFilePathName(Primaryfile primaryfile) {
+	public String getFilePathname(Primaryfile primaryfile) {
 		// file path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>.<primaryExtension>
-		return getDirPathName(primaryfile) + "."; // TODO add extension + primaryfile.getExtension();
+		return getDirPathname(primaryfile) + "." + FilenameUtils.getExtension(primaryfile.getOriginalFilename());
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathName(Supplement)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathname(Supplement)
 	 */
-	public String getFilePathName(Supplement supplement) {
+	public String getFilePathname(Supplement supplement) {
 		// file name for supplement: S-<supplementId>
-		String fileName = "S" + supplement.getId() + "."; // TODO add extension + primaryfile.getExtension();
+		String filename = "S-" + supplement.getId() + "." + FilenameUtils.getExtension(supplement.getOriginalFilename());
 		
 		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
-		String dirName = "";
+		String dirname = "";
 		
 		if (supplement instanceof CollectionSupplement) {
-			dirName = getDirPathName(supplement.getCollection());
+			dirname = getDirPathname(((CollectionSupplement)supplement).getCollection());
 		}
 		else if (supplement instanceof ItemSupplement) {
-			dirName = getDirPathName(supplement.getItem());
+			dirname = getDirPathname(((ItemSupplement)supplement).getItem());
 		}
 		else if (supplement instanceof PrimaryfileSupplement) {
-			dirName = getDirPathName(supplement.getPrimary());
+			dirname = getDirPathname(((PrimaryfileSupplement)supplement).getPrimaryfile());
 		}
 		
-		return dirName + fileName;
+		return dirname + filename;
 	}
-
-//	@Override
-//	public Path load(String path) {
-//		return root.resolve(path);
-//	}
-//
-//	@Override
-//	public Resource loadAsResource(String path) {
-//		try {
-//			Path file = load(path);
-//			Resource resource = new UrlResource(file.toUri());
-//			if (resource.exists() || resource.isReadable()) {
-//				return resource;
-//			}
-//			else {
-//				throw new StorageFileNotFoundException(
-//						"Could not read file: " + path);
-//
-//			}
-//		}
-//		catch (MalformedURLException e) {
-//			throw new StorageFileNotFoundException("Could not read file: " + path, e);
-//		}
-//	}
-//
-//    @Override
-//    public void delete(String path) {
-//        FileSystemUtils.deleteRecursively(rootLocation.toFile());
-//    }
 
 }
