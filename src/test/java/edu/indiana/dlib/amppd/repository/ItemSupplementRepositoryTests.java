@@ -21,17 +21,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import edu.indiana.dlib.amppd.repository.SupplementRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class SupplementRepositoryTests {
+public class ItemSupplementRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
-	private SupplementRepository supplementRepository;
+	private ItemSupplementRepository supplementRepository;
 
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
@@ -39,89 +39,90 @@ public class SupplementRepositoryTests {
 	}
 
 	@Test
-	public void shouldReturnRepositoryIndex() throws Exception {
+	public void shouldReturnItemSupplementRepositoryIndex() throws Exception {
 
 		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
-				jsonPath("$._links.supplements").exists());
+				jsonPath("$._links.itemSupplements").exists());
+
 	}
-
+	
 	@Test
-	public void shouldCreateSupplement() throws Exception {
+	public void shouldCreateItemSupplement() throws Exception {
 
-		mockMvc.perform(post("/supplements").content(
-				"{\"name\": \"Supplement 1\", \"description\":\"For test\"}")).andExpect(
+		mockMvc.perform(post("/itemSupplements").content(
+				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
-								header().string("Location", containsString("supplements/")));
+								header().string("Location", containsString("itemSupplements/")));
 	}
-
+	
 	@Test
-	public void shouldRetrieveSupplement() throws Exception {
+	public void shouldRetrieveItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/supplements").content(
-				"{\"name\": \"Supplement 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Supplement 1")).andExpect(
+				jsonPath("$.name").value("ItemSupplement 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldQuerySupplement() throws Exception {
+	public void shouldQueryItemSupplement() throws Exception {
 
-		mockMvc.perform(post("/supplements").content(
-				"{ \"name\": \"Supplement 1\", \"description\":\"For test\"}")).andExpect(
+		mockMvc.perform(post("/itemSupplements").content(
+				"{ \"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/supplements/search/findByName?name={name}", "Supplement 1")).andExpect(
+				get("/itemSupplements/search/findByName?name={name}", "ItemSupplement 1")).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.supplements[0].name").value(
-										"Supplement 1"));
+								jsonPath("$._embedded.itemSupplements[0].name").value(
+										"ItemSupplement 1"));
 	}
 
 	@Test
-	public void shouldUpdateSupplement() throws Exception {
+	public void shouldUpdateItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/supplements").content(
-				"{\"name\": \"Supplement 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(put(location).content(
-				"{\"name\": \"Supplement 1.1\", \"description\":\"For test\"}")).andExpect(
+				"{\"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Supplement 1.1")).andExpect(
+				jsonPath("$.name").value("ItemSupplement 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldPartiallyUpdateSupplement() throws Exception {
+	public void shouldPartiallyUpdateItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/supplements").content(
-				"{\"name\": \"Supplement 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"Supplement 1.1.1\"}")).andExpect(
+				patch(location).content("{\"name\": \"ItemSupplement 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Supplement 1.1.1")).andExpect(
+				jsonPath("$.name").value("ItemSupplement 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldDeleteSupplement() throws Exception {
+	public void shouldDeleteItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/supplements").content(
-				"{ \"name\": \"Supplement 1.1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+				"{ \"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
