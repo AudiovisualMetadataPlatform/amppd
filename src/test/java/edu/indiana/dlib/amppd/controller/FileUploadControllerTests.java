@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Iterator;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,13 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.ItemRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 
 @RunWith(SpringRunner.class)
@@ -33,27 +42,60 @@ public class FileUploadControllerTests {
 
 	@Autowired
     private FileStorageService fileStorageService;
+	
+	@Autowired
+	private UnitRepository unitRepository;
 
+	@Autowired
+	private CollectionRepository collectionRepository;
+
+	@Autowired
+	private ItemRepository itemRepository;
+
+	@Autowired
+	private PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
+	private CollectionSupplementRepository collectionSupplementRepository;
+	
+	@Autowired
+	private ItemSupplementRepository itemSupplementRepository;
+	
+	@Autowired
+	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	
     @Test
     public void shouldSaveUploadedPrimaryfile() throws Exception {
     	Unit unit = new Unit();
-    	unit.setId(1l);
+//    	unit.setId(1l);
+    	unitRepository.save(unit);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+//    	collection.setId(2l);
     	collection.setUnit(unit);
+    	collectionRepository.save(collection);
     	
     	Item item = new Item();
-    	item.setId(3l);
+//    	item.setId(3l);
     	item.setCollection(collection);
+    	itemRepository.save(item);
     	
     	Primaryfile primaryfile = new Primaryfile();
-    	primaryfile.setId(4l);
+//    	primaryfile.setId(4l);
     	primaryfile.setItem(item);
     	primaryfile.setOriginalFilename("primaryfiletest.mp4");   
-
+    	primaryfileRepository.save(primaryfile);
+    	
+    	Iterator<Primaryfile> pi = primaryfileRepository.findAll().iterator();
+    	if (pi.hasNext()) {
+    		primaryfile = pi.next();
+    	}
+    	long id = primaryfile.getId();   	
+    	
+//    	Mockito.when(primaryfileRepository.findById(4l)).thenReturn(Optional.of(primaryfile));
+    	
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/primaryfile/4/file").file(multipartFile))
+        this.mvc.perform(fileUpload("/primaryfile/" + id +"/file").file(multipartFile))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "U-1/C-2/I-3/P-4.mp4"));
 
@@ -61,21 +103,24 @@ public class FileUploadControllerTests {
     }
 
     @Test
-    public void shouldSaveUploadedCollectionSupplement() throws Exception {
+    public void shouldSaveUploadedCollectionSupplement() throws Exception {   	
     	Unit unit = new Unit();
-    	unit.setId(1l);
+//    	unit.setId(1l);
+    	unitRepository.save(unit);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+//    	collection.setId(2l);
     	collection.setUnit(unit);
+    	collectionRepository.save(collection);
     	
-    	CollectionSupplement supplement = new CollectionSupplement();
-    	supplement.setId(3l);
-    	supplement.setCollection(collection);  
-    	supplement.setOriginalFilename("supplementtest.pdf");
+    	CollectionSupplement collectionSupplement = new CollectionSupplement();
+//    	supplement.setId(3l);
+    	collectionSupplement.setCollection(collection);  
+    	collectionSupplement.setOriginalFilename("supplementtest.pdf");
+    	collectionSupplementRepository.save(collectionSupplement);
     	
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/supplement/3/file").file(multipartFile))
+        this.mvc.perform(fileUpload("collection/supplement/3/file").file(multipartFile))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "U-1/C-2/S-3.pdf"));
 
@@ -85,23 +130,26 @@ public class FileUploadControllerTests {
     @Test
     public void shouldSaveUploadedItemSupplement() throws Exception {
     	Unit unit = new Unit();
-    	unit.setId(1l);
+//    	unit.setId(1l);
+    	unitRepository.save(unit);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+//    	collection.setId(2l);
     	collection.setUnit(unit);
+    	collectionRepository.save(collection);
     	
     	Item item = new Item();
-    	item.setId(3l);
+//    	item.setId(3l);
     	item.setCollection(collection);
+    	itemRepository.save(item);    	    	
     	
-    	ItemSupplement supplement = new ItemSupplement();
-    	supplement.setId(4l);
-    	supplement.setItem(item);
-    	supplement.setOriginalFilename("supplementtest.pdf");    
+    	ItemSupplement itemSupplement = new ItemSupplement();
+    	itemSupplement.setId(4l);
+    	itemSupplement.setItem(item);
+    	itemSupplement.setOriginalFilename("supplementtest.pdf");    
 
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/supplement/4/file").file(multipartFile))
+        this.mvc.perform(fileUpload("/item/supplement/4/file").file(multipartFile))
                 .andExpect(status().isFound())
                 .andExpect(header().string("Location", "U-1/C-2/I-3/S-4.pdf"));
 

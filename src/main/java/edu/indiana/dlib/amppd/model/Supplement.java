@@ -21,7 +21,7 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
-public class Supplement extends Asset {
+public abstract class Supplement extends Asset {
 	
 	// TODO double check the relationship
 	@ManyToMany

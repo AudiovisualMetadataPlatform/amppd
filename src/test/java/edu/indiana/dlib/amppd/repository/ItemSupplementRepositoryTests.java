@@ -31,11 +31,11 @@ public class ItemSupplementRepositoryTests {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private ItemSupplementRepository supplementRepository;
+	private ItemSupplementRepository itemSupplementRepository;
 
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
-		supplementRepository.deleteAll();
+		itemSupplementRepository.deleteAll();
 	}
 
 	@Test
