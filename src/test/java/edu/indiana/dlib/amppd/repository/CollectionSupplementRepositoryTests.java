@@ -21,107 +21,108 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class PrimaryfileRepositoryTests {
+public class CollectionSupplementRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
-	private PrimaryfileRepository primaryfileRepository;
+	private CollectionSupplementRepository supplementRepository;
 
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
-		primaryfileRepository.deleteAll();
+		supplementRepository.deleteAll();
 	}
 
 	@Test
-	public void shouldReturnRepositoryIndex() throws Exception {
+	public void shouldReturnCollectionSupplementRepositoryIndex() throws Exception {
 
 		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
-				jsonPath("$._links.primaryfiles").exists());
+				jsonPath("$._links.collectionSupplements").exists());
+
 	}
-
+	
 	@Test
-	public void shouldCreatePrimaryfile() throws Exception {
+	public void shouldCreateCollectionSupplement() throws Exception {
 
-		mockMvc.perform(post("/primaryfiles").content(
-				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
+		mockMvc.perform(post("/collectionSupplements").content(
+				"{\"name\": \"CollectionSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
-								header().string("Location", containsString("primaryfiles/")));
+								header().string("Location", containsString("collectionSupplements/")));
 	}
-
+	
 	@Test
-	public void shouldRetrievePrimaryfile() throws Exception {
+	public void shouldRetrieveCollectionSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
-				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/collectionSupplements").content(
+				"{\"name\": \"CollectionSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Primaryfile 1")).andExpect(
+				jsonPath("$.name").value("CollectionSupplement 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldQueryPrimaryfileName() throws Exception {
+	public void shouldQueryCollectionSupplement() throws Exception {
 
-		mockMvc.perform(post("/primaryfiles").content(
-				"{ \"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
+		mockMvc.perform(post("/collectionSupplements").content(
+				"{ \"name\": \"CollectionSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/primaryfiles/search/findByName?name={name}", "Primaryfile 1")).andExpect(
+				get("/collectionSupplements/search/findByName?name={name}", "CollectionSupplement 1")).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.primaryfiles[0].name").value(
-										"Primaryfile 1"));
+								jsonPath("$._embedded.collectionSupplements[0].name").value(
+										"CollectionSupplement 1"));
 	}
 
 	@Test
-	public void shouldUpdatePrimaryfile() throws Exception {
+	public void shouldUpdateCollectionSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
-				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/collectionSupplements").content(
+				"{\"name\": \"CollectionSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(put(location).content(
-				"{\"name\": \"Primaryfile 1.1\", \"description\":\"For test\"}")).andExpect(
+				"{\"name\": \"CollectionSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Primaryfile 1.1")).andExpect(
+				jsonPath("$.name").value("CollectionSupplement 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldPartiallyUpdatePrimaryfile() throws Exception {
+	public void shouldPartiallyUpdateCollectionSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
-				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/collectionSupplements").content(
+				"{\"name\": \"CollectionSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"Primaryfile 1.1.1\"}")).andExpect(
+				patch(location).content("{\"name\": \"CollectionSupplement 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
 		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Primaryfile 1.1.1")).andExpect(
+				jsonPath("$.name").value("CollectionSupplement 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
 
 	@Test
-	public void shouldDeletePrimaryfile() throws Exception {
+	public void shouldDeleteCollectionSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
-				"{ \"name\": \"Primaryfile 1.1\", \"description\":\"For test\"}")).andExpect(
+		MvcResult mvcResult = mockMvc.perform(post("/collectionSupplements").content(
+				"{ \"name\": \"CollectionSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
