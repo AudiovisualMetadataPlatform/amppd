@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 import edu.indiana.dlib.amppd.model.Supplement;
 
 @NoRepositoryBean
-//@RepositoryRestResource(collectionResourceRel = "supplements", path = "supplements")
 public interface SupplementRepository<S extends Supplement> extends PagingAndSortingRepository<S, Long> {
 	List<S> findByName(@Param("name") String name);
 
