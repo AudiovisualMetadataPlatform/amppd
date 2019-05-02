@@ -31,8 +31,6 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 
-//@ActiveProfiles("FileUploadControllerTest")
-//@RunWith(SpringJUnit4ClassRunner.class)
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
@@ -43,18 +41,7 @@ public class FileUploadControllerTests {
 
 	@Autowired
     private FileStorageService fileStorageService;
-	
-	
-	
-//	@Autowired
-//	private UnitRepository unitRepository;
-//
-//	@Autowired
-//	private CollectionRepository collectionRepository;
-//
-//	@Autowired
-//	private ItemRepository itemRepository;
-//
+
 	@MockBean
 	private PrimaryfileRepository primaryfileRepository;
 
@@ -67,33 +54,25 @@ public class FileUploadControllerTests {
 	@MockBean
 	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 	
+	// TODO: verify redirect for all following tests
+	
     @Test
     public void shouldSaveUploadedPrimaryfile() throws Exception {
     	Unit unit = new Unit();
     	unit.setId(1l);
-//    	unitRepository.save(unit);
     	
     	Collection collection = new Collection();
     	collection.setId(2l);
     	collection.setUnit(unit);
-//    	collectionRepository.save(collection);
     	
     	Item item = new Item();
     	item.setId(3l);
     	item.setCollection(collection);
-//    	itemRepository.save(item);
     	
     	Primaryfile primaryfile = new Primaryfile();
     	primaryfile.setId(4l);
     	primaryfile.setItem(item);
     	primaryfile.setOriginalFilename("primaryfiletest.mp4");   
-//    	primaryfileRepository.save(primaryfile);
-    	
-//    	Iterator<Primaryfile> pi = primaryfileRepository.findAll().iterator();
-//    	if (pi.hasNext()) {
-//    		primaryfile = pi.next();
-//    	}
-//    	long id = primaryfile.getId();   	
     	
     	Mockito.when(primaryfileRepository.findById(4l)).thenReturn(Optional.of(primaryfile)); 
     	Mockito.when(primaryfileRepository.save(primaryfile)).thenReturn(primaryfile); 
@@ -101,7 +80,7 @@ public class FileUploadControllerTests {
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/primaryfiles/4/file").file(multipartFile))
                 .andExpect(status().isOk());
-//                .andExpect(header().string("Location", "U-1/C-2/I-3/P-4.mp4"));
+//                .andExpect(header().string("Location", "/primaryfiles/4/file"));
 //        then(fileStorageService).should().store(multipartFile, "U-1/C-2/I-3/P-4.mp4");
     }
 
@@ -109,18 +88,15 @@ public class FileUploadControllerTests {
     public void shouldSaveUploadedCollectionSupplement() throws Exception {   	
     	Unit unit = new Unit();
     	unit.setId(1l);
-//    	unitRepository.save(unit);
     	
     	Collection collection = new Collection();
     	collection.setId(2l);
     	collection.setUnit(unit);
-//    	collectionRepository.save(collection);
     	
     	CollectionSupplement collectionSupplement = new CollectionSupplement();
     	collectionSupplement.setId(3l);
     	collectionSupplement.setCollection(collection);  
     	collectionSupplement.setOriginalFilename("collectionsupplementtest.pdf");
-//    	collectionSupplementRepository.save(collectionSupplement);
     	
     	Mockito.when(collectionSupplementRepository.findById(3l)).thenReturn(Optional.of(collectionSupplement));
     	Mockito.when(collectionSupplementRepository.save(collectionSupplement)).thenReturn(collectionSupplement); 
@@ -128,7 +104,7 @@ public class FileUploadControllerTests {
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/collections/supplements/3/file").file(multipartFile))
                 .andExpect(status().isOk());
-//                .andExpect(header().string("Location", "U-1/C-2/S-3.pdf"));
+//                .andExpect(header().string("Location", "/collections/supplements/3/file"));
 //        then(fileStorageService).should().store(multipartFile, "U-1/C-2/S-3.pdf");
     }
 
@@ -136,17 +112,14 @@ public class FileUploadControllerTests {
     public void shouldSaveUploadedItemSupplement() throws Exception {
     	Unit unit = new Unit();
     	unit.setId(1l);
-//    	unitRepository.save(unit);
     	
     	Collection collection = new Collection();
     	collection.setId(2l);
     	collection.setUnit(unit);
-//    	collectionRepository.save(collection);
     	
     	Item item = new Item();
     	item.setId(3l);
     	item.setCollection(collection);
-//    	itemRepository.save(item);    	    	
     	
     	ItemSupplement itemSupplement = new ItemSupplement();
     	itemSupplement.setId(4l);
@@ -159,7 +132,7 @@ public class FileUploadControllerTests {
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/items/supplements/4/file").file(multipartFile))
                 .andExpect(status().isOk());
-//                .andExpect(header().string("Location", "U-1/C-2/I-3/S-4.pdf"));
+//                .andExpect(header().string("Location", "/items/supplements/4/file"));
 //        then(fileStorageService).should().store(multipartFile, "U-1/C-2/I-3/S-4.pdf");
     }
 
@@ -191,17 +164,8 @@ public class FileUploadControllerTests {
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", "text/plain", "Test file upload".getBytes());
         this.mvc.perform(fileUpload("/primaryfiles/supplements/5/file").file(multipartFile))
                 .andExpect(status().isOk());
-//                .andExpect(header().string("Location", "U-1/C-2/I-3/P-4/S-5.pdf"));
+//                .andExpect(header().string("Location", "/primaryfiles/supplements/5/file"));
 //        then(fileStorageService).should().store(multipartFile, "U-1/C-2/I-3/P-4/S-5.pdf");
     }
-
-//    @SuppressWarnings("unchecked")
-//    @Test
-//    public void should404WhenMissingFile() throws Exception {
-//        given(this.fileStorageService.loadAsResource("test.txt"))
-//                .willThrow(StorageFileNotFoundException.class);
-//
-//        this.mvc.perform(get("/files/test.txt")).andExpect(status().isNotFound());
-//    }
 
 }

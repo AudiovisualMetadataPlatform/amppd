@@ -109,12 +109,12 @@ public class FileStorageServiceImpl implements FileStorageService {
                 return resource;
             }
             else {
-                throw new StorageFileNotFoundException("Could not read file: " + pathname);
+                throw new StorageFileNotFoundException("Could not read file " + pathname);
 
             }
         }
         catch (MalformedURLException e) {
-            throw new StorageFileNotFoundException("Could not read file: " + pathname, e);
+            throw new StorageFileNotFoundException("Could not read file " + pathname, e);
         }
     }	
 
@@ -125,6 +125,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     	try {
     		Path path = load(pathname);
     		FileSystemUtils.deleteRecursively(path);
+    		log.info("Successfully deleted directory/file " + pathname);
     	}
     	catch (IOException e) {
     		throw new StorageException("Could not delete file " + pathname, e);
@@ -137,6 +138,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     public void deleteAll() {
     	try {
     		FileSystemUtils.deleteRecursively(root);
+    		log.info("Successfully deleted all directories/files under file storage root.");
     	}
     	catch (IOException e) {
     		throw new StorageException("Could not delete all directories/files under file storage root.");
@@ -148,9 +150,6 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Unit)
 	 */
 	public String getDirPathname(Unit unit) {
-//		Path path = root.resolve("U-" + unit.getId());
-//		return path.toString();		
-		
 		// directory path for unit: U-<unitID>
 		return "U-" + unit.getId();		
 	}
@@ -159,9 +158,6 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Collection)
 	 */
 	public String getDirPathname(Collection collection) {
-//		Path path = root.resolve("U-" + unit.getId());
-//		return path.toString();		
-		
 		// directory path for collection: U-<unitID/C-<collectionId>
 		return getDirPathname(collection.getUnit()) + File.separator + "C-" + collection.getId();
 	}

@@ -1,5 +1,9 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +23,8 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.impl.FileStorageServiceImpl;
+import lombok.extern.java.Log;
 
 // TODO: when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
 
@@ -28,6 +34,7 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
  *
  */
 @RestController
+@Log
 public class FileUploadController {
 	
 	@Autowired
@@ -45,20 +52,27 @@ public class FileUploadController {
 	@Autowired
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
+	// TODO: handle redirect for all following methods
+	// TODO: consider moving most logic in methods into FileStorageServiceImpl
+	
 	@PostMapping("/primaryfiles/{id}/file")
-    public String handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    public String handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, HttpServletResponse response, RedirectAttributes redirectAttributes) {		
     	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));    
     	primaryfile.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
     	String targetPathname = fileStorageService.getFilePathname(primaryfile);    	    	
     	primaryfile.setPathname(targetPathname);
-    	fileStorageService.store(file, targetPathname);
+    	fileStorageService.store(file, targetPathname);    	
+    	primaryfileRepository.save(primaryfile);  
     	
-//    	if (StringUtils.isEmpty(primaryfile.getDescription())) {
-//		primaryfile.setDescription(FilenameUtils.getBaseName(originalFilename));	
-//	}
-	    	
-    	primaryfileRepository.save(primaryfile);    	
-        redirectAttributes.addFlashAttribute("message", "You successfully uploaded primaryfile " + file.getOriginalFilename() + " to " + targetPathname + "!");
+    	String msg = "You successfully uploaded primaryfile " + file.getOriginalFilename() + " to " + targetPathname + "!";
+    	log.info(msg);
+        redirectAttributes.addFlashAttribute("message", msg);
+//        try {
+//        	response.sendRedirect("/primaryfiles/" + id + "/files");
+//        }
+//        catch (IOException e) {
+//        	throw new RuntimeException("Cannot redirect to after uploading file.", e);
+//        }
         return "redirect:/";
     }
 
@@ -69,13 +83,11 @@ public class FileUploadController {
     	String targetPathname = fileStorageService.getFilePathname(collectionSupplement);    		    	
     	collectionSupplement.setPathname(targetPathname);
     	fileStorageService.store(file, targetPathname);
-
-//    	if (StringUtils.isEmpty(collectionSupplement.getDescription())) {
-//		collectionSupplement.setDescription(FilenameUtils.getBaseName(originalFilename));
-//	}
-	    	
     	collectionSupplementRepository.save(collectionSupplement);   	
-        redirectAttributes.addFlashAttribute("message", "You successfully uploaded collectionSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!");
+	
+    	String msg = "You successfully uploaded collectionSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!";
+    	log.info(msg);
+        redirectAttributes.addFlashAttribute("message", msg);
         return "redirect:/";
     }
     
@@ -86,13 +98,11 @@ public class FileUploadController {
     	String targetPathname = fileStorageService.getFilePathname(itemSupplement);    		    	
     	itemSupplement.setPathname(targetPathname);
     	fileStorageService.store(file, targetPathname);
-
-//    	if (StringUtils.isEmpty(itemSupplement.getDescription())) {
-//		itemSupplement.setDescription(FilenameUtils.getBaseName(originalFilename));
-//	}
-	    	
     	itemSupplementRepository.save(itemSupplement);   	
-        redirectAttributes.addFlashAttribute("message", "You successfully uploaded itemSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!");
+	    	
+    	String msg = "You successfully uploaded itemSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!";
+    	log.info(msg);
+        redirectAttributes.addFlashAttribute("message", msg);
         return "redirect:/";
     }
     
@@ -103,18 +113,14 @@ public class FileUploadController {
     	String targetPathname = fileStorageService.getFilePathname(primaryfileSupplement);    		    	
     	primaryfileSupplement.setPathname(targetPathname);
     	fileStorageService.store(file, targetPathname);
-
-//    	if (StringUtils.isEmpty(primaryfileSupplement.getDescription())) {
-//		primaryfileSupplement.setDescription(FilenameUtils.getBaseName(originalFilename));
-//	}
-	    	
     	primaryfileSupplementRepository.save(primaryfileSupplement);   	
-        redirectAttributes.addFlashAttribute("message", "You successfully uploaded primaryfileSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!");
+
+    	String msg = "You successfully uploaded primaryfileSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!";
+    	log.info(msg);
+    	redirectAttributes.addFlashAttribute("message", msg);
         return "redirect:/";
     }
-    
-    
-    
+        
     
 //  @GetMapping("/")
 //  public String listUploadedFiles(Model model) throws IOException {
