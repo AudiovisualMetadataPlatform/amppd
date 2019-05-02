@@ -1,9 +1,8 @@
 package edu.indiana.dlib.amppd.controller;
 
-import javax.websocket.server.PathParam;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,8 +45,8 @@ public class FileUploadController {
 	@Autowired
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
-	@PostMapping("/primaryfile/{id}/file")
-    public String handlePrimaryfileUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+	@PostMapping("/primaryfiles/{id}/file")
+    public String handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
     	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));    
     	primaryfile.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
     	String targetPathname = fileStorageService.getFilePathname(primaryfile);    	    	
@@ -63,8 +62,8 @@ public class FileUploadController {
         return "redirect:/";
     }
 
-    @PostMapping("/collection/supplement/{id}/file")
-    public String handleCollectionSupplementUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    @PostMapping("/collections/supplements/{id}/file")
+    public String handleCollectionSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
     	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));
     	collectionSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));
     	String targetPathname = fileStorageService.getFilePathname(collectionSupplement);    		    	
@@ -80,8 +79,8 @@ public class FileUploadController {
         return "redirect:/";
     }
     
-    @PostMapping("/item/supplement/{id}/file")
-    public String handleItemSupplementUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    @PostMapping("/items/supplements/{id}/file")
+    public String handleItemSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
     	ItemSupplement itemSupplement = itemSupplementRepository.findById(id).orElseThrow(() -> new StorageException("itemSupplement <" + id + "> does not exist!"));
     	itemSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));
     	String targetPathname = fileStorageService.getFilePathname(itemSupplement);    		    	
@@ -97,8 +96,8 @@ public class FileUploadController {
         return "redirect:/";
     }
     
-    @PostMapping("/primaryfile/supplement/{id}/file")
-    public String handlePrimaryfileSupplementUpload(@PathParam("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    @PostMapping("/primaryfiles/supplements/{id}/file")
+    public String handlePrimaryfileSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
     	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(id).orElseThrow(() -> new StorageException("primaryfileSupplement <" + id + "> does not exist!"));
     	primaryfileSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));
     	String targetPathname = fileStorageService.getFilePathname(primaryfileSupplement);    		    	
