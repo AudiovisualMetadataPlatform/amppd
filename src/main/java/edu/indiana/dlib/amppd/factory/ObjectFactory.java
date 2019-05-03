@@ -1,9 +1,15 @@
 package edu.indiana.dlib.amppd.factory;
 
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.lang.reflect.*;
+
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Job;
@@ -22,6 +28,45 @@ import edu.indiana.dlib.amppd.model.Workflow;
 public class ObjectFactory implements BaseObjectFactory{
 
 	@Override
+	public Dataentity createDataEntityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException
+	{
+		Dataentity d = null;
+		//TODO: clean type so that it does not contain any special character
+		Class dataEntityObj = Class.forName("edu.indiana.dlib.amppd.model."+classname);
+		Field[] fields = dataEntityObj.getDeclaredFields();
+		System.out.println("Getdeclaredfields gives:"+ fields[0]);
+		//String keys = new String();
+		//String values = new String();
+		try 
+		{
+			d = (Dataentity)dataEntityObj.getConstructor().newInstance();
+			int i = 0;
+			for(Entry<?, ?> entry : args.entrySet())
+			{ 
+				if(entry.getKey().toString().equalsIgnoreCase(fields[i].getName()))
+				{
+					fields[i].setAccessible(true);
+					fields[i].set(d, entry.getValue());
+				}
+				
+				//keys+=entry.getKey().getClass() ;
+				//values += entry.getValue();
+				i += 1;
+			}
+
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception occurred in getting the new instance");
+		}
+		finally
+		{
+			return d;
+		}
+	}
+	
+	
+	@Override
 	public Object createModelObject(String type) {
 		// TODO Auto-generated method stub
 		Object obj;
@@ -32,6 +77,7 @@ public class ObjectFactory implements BaseObjectFactory{
 				break;
 				
 			case "collection":
+				
 				obj = new Collection();
 				break;
 			

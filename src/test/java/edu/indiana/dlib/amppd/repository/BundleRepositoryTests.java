@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import edu.indiana.dlib.amppd.factory.ObjectFactory;
+import edu.indiana.dlib.amppd.model.Bundle;
 
 
 
@@ -34,7 +35,7 @@ public class BundleRepositoryTests {
 
 	@Autowired
 	private BundleRepository bundleRepository;
-	private ObjectFactory objFactory;
+	
 	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
@@ -60,8 +61,6 @@ public class BundleRepositoryTests {
 	@Test
 	public void shouldRetrieveBundle() throws Exception {
 
-		Object o = objFactory.createModelObject("bundle");
-		
 		MvcResult mvcResult = mockMvc.perform(post("/bundles").content(
 				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();

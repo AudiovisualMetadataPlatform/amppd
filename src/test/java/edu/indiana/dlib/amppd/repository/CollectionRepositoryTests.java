@@ -10,6 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +24,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import edu.indiana.dlib.amppd.factory.ObjectFactory;
+import edu.indiana.dlib.amppd.model.Collection;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +36,8 @@ public class CollectionRepositoryTests {
 
 	@Autowired
 	private CollectionRepository collectionRepository;
+	
+	private ObjectFactory objFactory;
 
 	@Before 
 	public void deleteAllBeforeTests() throws Exception {
@@ -54,6 +62,9 @@ public class CollectionRepositoryTests {
 
 
 	@Test public void shouldQueryCollection() throws Exception {
+		HashMap params = new HashMap<String, String>();
+		Collection c = (Collection)objFactory.createDataEntityObject(params, "Collection");
+		
 		mockMvc.perform(post("/collections").content(
 				"{ \"name\": \"121\", \"description\":\"For test\"}")).andDo(
 						MockMvcResultHandlers.print()).andExpect( status().isCreated());
