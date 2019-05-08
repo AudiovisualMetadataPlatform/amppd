@@ -10,7 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -26,6 +28,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import edu.indiana.dlib.amppd.factory.ObjectFactory;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Unit;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -37,7 +42,8 @@ public class CollectionRepositoryTests {
 	@Autowired
 	private CollectionRepository collectionRepository;
 	
-	private ObjectFactory objFactory;
+	private ObjectFactory objFactory = new ObjectFactory();
+	
 
 	@Before 
 	public void deleteAllBeforeTests() throws Exception {
@@ -63,6 +69,14 @@ public class CollectionRepositoryTests {
 
 	@Test public void shouldQueryCollection() throws Exception {
 		HashMap params = new HashMap<String, String>();
+		Unit u = new Unit();
+		u.setCollections(new ArrayList<Collection>());
+		u.setName("Johnson");
+		u.setDescription("for factories testing");
+		
+		params.put("unit", u);
+		params.put("items", new ArrayList<Item>()); 
+		
 		Collection c = (Collection)objFactory.createDataEntityObject(params, "Collection");
 		
 		mockMvc.perform(post("/collections").content(
@@ -73,7 +87,6 @@ public class CollectionRepositoryTests {
 				get("/collections/search/findByName?name=121")).andDo(MockMvcResultHandlers.
 						print()).andExpect( status().isOk()).andExpect(
 								jsonPath("$._embedded.collections[0].name").value( "121")) ; }
-
 
 
 	@Test public void shouldUpdateCollection() throws Exception { MvcResult

@@ -27,42 +27,38 @@ import edu.indiana.dlib.amppd.model.Workflow;
 
 public class ObjectFactory implements BaseObjectFactory{
 
+	//public <obj extends Dataentity> obj;
+	//@SuppressWarnings("finally")
 	@Override
-	public Dataentity createDataEntityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException
+	public <O extends Dataentity> O createDataEntityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException
 	{
-		Dataentity d = null;
+		System.out.println("entered createDataEntityObject");
+		O res = null;
 		//TODO: clean type so that it does not contain any special character
-		Class dataEntityObj = Class.forName("edu.indiana.dlib.amppd.model."+classname);
-		Field[] fields = dataEntityObj.getDeclaredFields();
-		System.out.println("Getdeclaredfields gives:"+ fields[0]);
-		//String keys = new String();
-		//String values = new String();
+		Class<?> entityObj = Class.forName("edu.indiana.dlib.amppd.model."+classname);
+		System.out.println(entityObj.getCanonicalName());		
 		try 
 		{
-			d = (Dataentity)dataEntityObj.getConstructor().newInstance();
-			int i = 0;
+			res = (O)entityObj.getConstructor().newInstance();			
 			for(Entry<?, ?> entry : args.entrySet())
 			{ 
-				if(entry.getKey().toString().equalsIgnoreCase(fields[i].getName()))
+				Field field = entityObj.getDeclaredField(entry.getKey().toString());
+				//System.out.println("entered for loop "+field.getName()+" is the field name and "+entry.getKey()+" is the entry.key. and "+entry.getValue()+" is the value");
+				if(entry.getKey().toString().equalsIgnoreCase(field.getName()))
 				{
-					fields[i].setAccessible(true);
-					fields[i].set(d, entry.getValue());
+					//System.out.println("entered if");
+					field.setAccessible(true);
+					field.set(res, entry.getValue());
+					//System.out.println("instantiated name for d:"+res.getUnit().getName());
 				}
-				
-				//keys+=entry.getKey().getClass() ;
-				//values += entry.getValue();
-				i += 1;
 			}
-
 		}
 		catch(Exception e)
 		{
-			System.out.println("Exception occurred in getting the new instance");
+			System.out.println("Exception occurred in getting the new instance"+e);
 		}
-		finally
-		{
-			return d;
-		}
+		
+		return res;
 	}
 	
 	
