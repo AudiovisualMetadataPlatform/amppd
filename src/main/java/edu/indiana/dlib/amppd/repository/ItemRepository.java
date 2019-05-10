@@ -13,11 +13,13 @@ public interface ItemRepository extends PagingAndSortingRepository<Item, Long> {
 
 	List<Item> findByName(@Param("name") String name);
 	
-	List<Item> findByDescription(@Param("description") String description);
-	
-	List<Item> findByCreatedDate(@Param("createdDate") String createdDate);
-	
-	List<Item> findByCreatedBy(@Param("createdBy") String createdBy);
+	/*
+	 * List<Item> findByDescription(@Param("description") String description);
+	 * 
+	 * List<Item> findByCreatedDate(@Param("createdDate") String createdDate);
+	 * 
+	 * List<Item> findByCreatedBy(@Param("createdBy") String createdBy);
+	 */
 	
 	
 	

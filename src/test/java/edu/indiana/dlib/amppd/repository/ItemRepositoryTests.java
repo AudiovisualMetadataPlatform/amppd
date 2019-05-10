@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.junit.Before;
@@ -50,7 +49,7 @@ public class ItemRepositoryTests {
 	public void initiateBeforeTests() throws ClassNotFoundException
 	{
 		HashMap params = new HashMap<String, String>();
-		objItem= (Item)objFactory.createDataEntityObject(params, "Item");
+		objItem= (Item)objFactory.createDataentityObject(params, "Item");
 		
 	}
 	

@@ -73,7 +73,7 @@ public class CollectionRepositoryTests {
 		params.put("unit", u);
 		params.put("items", new ArrayList<Item>()); 
 		
-		Collection c = (Collection)objFactory.createDataEntityObject(params, "Collection");
+		Collection c = (Collection)objFactory.createDataentityObject(params, "Collection");
 		
 		mockMvc.perform(post("/collections").content(
 				"{ \"name\": \"121\", \"description\":\"For test\"}")).andDo(
