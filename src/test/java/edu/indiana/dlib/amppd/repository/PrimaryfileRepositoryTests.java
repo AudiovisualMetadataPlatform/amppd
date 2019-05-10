@@ -26,8 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.indiana.dlib.amppd.factory.ObjectFactory;
-import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.factory.ObjectFactory;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
