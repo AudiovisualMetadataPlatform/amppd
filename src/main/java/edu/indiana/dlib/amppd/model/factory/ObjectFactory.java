@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.factory;
+package edu.indiana.dlib.amppd.model.factory;
 
 
 import java.util.HashMap;
