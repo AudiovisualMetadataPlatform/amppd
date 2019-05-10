@@ -107,24 +107,20 @@ public class PrimaryfileRepositoryTests {
 	}
 
 	
-	@Test
-	public void shouldQueryItemCreatedDate() throws Exception {
-		
-		long createdDate = 1012019;
-		objPrimaryFile.setName("Primary File 200");
-		objPrimaryFile.setDescription("For testing Primary File Respository using Factories");
-		objPrimaryFile.setCreatedDate(createdDate);
-		String json = mapper.writeValueAsString(objPrimaryFile);
-		mockMvc.perform(post("/primaryfiles")
-				  .content(json)).andExpect(
-						  status().isCreated());
-		mockMvc.perform(
-				get("/primaryfiles/search/findByCreatedDate?createdDate={createdDate}", "1012019")).andDo(
-						MockMvcResultHandlers.print()).andExpect(
-						status().isOk()).andExpect(
-								jsonPath("$._embedded.primaryfiles[0].createdDate").value(
-										"1012019"));
-	}
+	/*
+	 * @Test public void shouldQueryItemCreatedDate() throws Exception {
+	 * 
+	 * objPrimaryFile.setName("Primary File 200"); objPrimaryFile.
+	 * setDescription("For testing Primary File Respository using Factories");
+	 * objPrimaryFile.setCreatedDate(1012019); String json =
+	 * mapper.writeValueAsString(objPrimaryFile);
+	 * mockMvc.perform(post("/primaryfiles") .content(json)).andExpect(
+	 * status().isCreated()); mockMvc.perform(
+	 * get("/primaryfiles/search/findByCreatedDate?createdDate={createdDate}",
+	 * "1012019")).andDo( MockMvcResultHandlers.print()).andExpect(
+	 * status().isOk()).andExpect(
+	 * jsonPath("$._embedded.primaryfiles[0].createdDate").value( "1012019")); }
+	 */
 
 	
 	@Test

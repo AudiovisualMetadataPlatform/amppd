@@ -144,24 +144,19 @@ public class ItemRepositoryTests {
 										"Developer"));
 	}
 	
-	@Test
-	public void shouldQueryItemCreatedDate() throws Exception {
-		
-		long createdDate = 1012019;
-		objItem.setName("Item 200");
-		objItem.setDescription("For testing Item Respository using Factories");
-		objItem.setCreatedDate(createdDate);
-		String json = mapper.writeValueAsString(objItem);
-		mockMvc.perform(post("/items")
-				  .content(json)).andExpect(
-						  status().isCreated());
-		mockMvc.perform(
-				get("/items/search/findByCreatedDate?createdDate={createdDate}", "1012019")).andDo(
-						MockMvcResultHandlers.print()).andExpect(
-						status().isOk()).andExpect(
-								jsonPath("$._embedded.items[0].createdDate").value(
-										"1012019"));
-	}
+	/*
+	 * @Test public void shouldQueryItemCreatedDate() throws Exception {
+	 * 
+	 * objItem.setName("Item 200");
+	 * objItem.setDescription("For testing Item Respository using Factories");
+	 * objItem.setCreatedDate(1012019); String json =
+	 * mapper.writeValueAsString(objItem); mockMvc.perform(post("/items")
+	 * .content(json)).andExpect( status().isCreated()); mockMvc.perform(
+	 * get("/items/search/findByCreatedDate?createdDate={createdDate}",
+	 * "1012019")).andDo( MockMvcResultHandlers.print()).andExpect(
+	 * status().isOk()).andExpect(
+	 * jsonPath("$._embedded.items[0].createdDate").value( "1012019")); }
+	 */
 
 	
 	
