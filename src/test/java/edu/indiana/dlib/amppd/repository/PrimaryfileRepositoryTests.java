@@ -49,7 +49,7 @@ public class PrimaryfileRepositoryTests {
 	public void initiateBeforeTests() throws ClassNotFoundException
 	{
 		HashMap params = new HashMap<String, String>();
-		objPrimaryFile= (Primaryfile)objFactory.createDataEntityObject(params, "Primaryfile");
+		objPrimaryFile= (Primaryfile)objFactory.createDataentityObject(params, "Primaryfile");
 		
 	}
 	

@@ -6,7 +6,7 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 
 public interface BaseObjectFactory {
 	
-	public abstract Object createModelObject(String type);
-	public <O extends Dataentity> O createDataEntityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException;
+	
+	public <O extends Dataentity> O createDataentityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException;
 
 }

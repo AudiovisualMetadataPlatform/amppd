@@ -27,29 +27,21 @@ import edu.indiana.dlib.amppd.model.Workflow;
 
 public class ObjectFactory implements BaseObjectFactory{
 
-	//public <obj extends Dataentity> obj;
-	//@SuppressWarnings("finally")
 	@Override
-	public <O extends Dataentity> O createDataEntityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException
+	public <O extends Dataentity> O createDataentityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException
 	{
-		System.out.println("entered createDataEntityObject");
 		O res = null;
-		//TODO: clean type so that it does not contain any special character
 		Class<?> entityObj = Class.forName("edu.indiana.dlib.amppd.model."+classname);
-		System.out.println(entityObj.getCanonicalName());		
 		try 
 		{
 			res = (O)entityObj.getConstructor().newInstance();			
 			for(Entry<?, ?> entry : args.entrySet())
 			{ 
 				Field field = entityObj.getDeclaredField(entry.getKey().toString());
-				//System.out.println("entered for loop "+field.getName()+" is the field name and "+entry.getKey()+" is the entry.key. and "+entry.getValue()+" is the value");
-				if(entry.getKey().toString().equalsIgnoreCase(field.getName()))
+				if(entry.getKey().toString().equals(field.getName()))
 				{
-					//System.out.println("entered if");
 					field.setAccessible(true);
 					field.set(res, entry.getValue());
-					//System.out.println("instantiated name for d:"+res.getUnit().getName());
 				}
 			}
 		}
@@ -62,89 +54,7 @@ public class ObjectFactory implements BaseObjectFactory{
 	}
 	
 	
-	@Override
-	public Object createModelObject(String type) {
-		// TODO Auto-generated method stub
-		Object obj;
-		switch(type.toLowerCase())
-		{
-			case "bundle":
-				obj = new Bundle();
-				break;
-				
-			case "collection":
-				
-				obj = new Collection();
-				break;
-			
-			case "collectionsupplement":
-				obj = new CollectionSupplement();
-				break;
-				
-			case "item":
-				obj = new Item();
-				break;
-				
-			case "itemsupplement":
-				obj = new ItemSupplement();
-				break;
-			
-			case "job":
-				obj = new Job();
-				break;
-				
-			case "jobmgmmode":
-				obj = new JobMgmMode();
-				break;
-				
-			case "mgm":
-				obj = new Mgm();
-				break;
-				
-			case "mgmmode":
-				obj = new MgmMode();
-				break;
-				
-			case "mgmmodeinput":
-				obj = new MgmModeInput();
-				break;
-			
-			case "mgmmodeoutput":
-				obj = new MgmModeOutput();
-				break;
-				
-		/*
-		 * case "mgmmodeio": obj = new MgmModeIo(); break;
-		 */
-			case "primaryfile":
-				obj = new Primaryfile();
-				break;
-				
-			case "primaryfilesupplement":
-				obj = new PrimaryfileSupplement();
-				break;
-				
-			case "routelink":
-				obj = new RouteLink();
-				break;
-				
-		/*
-		 * case "supplement": obj = new Supplement(); break;
-		 */
-				
-			case "unit":
-				obj = new Unit();
-				break;
-				
-			case "workflow":
-				obj = new Workflow();
-				break;
-			default:
-				throw new IllegalArgumentException("Could not identify Object type");
-		
-		}
-		return obj;
-	}
+	
 
 	
 	
