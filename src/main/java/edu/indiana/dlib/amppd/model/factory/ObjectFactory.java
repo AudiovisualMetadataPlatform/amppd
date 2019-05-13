@@ -32,7 +32,7 @@ public class ObjectFactory implements BaseObjectFactory{
 		}
 		catch(Exception e)
 		{
-			throw new RuntimeException("Unable to create Dataentity in ObjectFactory for "+classname+e);
+			throw new RuntimeException("Unable to create Dataentity in ObjectFactory for "+classname, e);
 		}
 		
 		return res;
