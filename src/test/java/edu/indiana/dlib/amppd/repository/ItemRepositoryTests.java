@@ -48,7 +48,7 @@ public class ItemRepositoryTests {
 	@Before
 	public void initiateBeforeTests() throws ClassNotFoundException
 	{
-		HashMap params = new HashMap<String, String>();
+		HashMap<String, String> params = new HashMap<String, String>();
 		objItem= (Item)objFactory.createDataentityObject(params, "Item");
 		
 	}
