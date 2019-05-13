@@ -24,5 +24,5 @@ public class Bundle extends Dataentity {
     private List<Bag> bags;
     
 }
-
+  
 

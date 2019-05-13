@@ -10,6 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.HashMap;
+
+//import org.apache.catalina.mapper.Mapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +24,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.indiana.dlib.amppd.model.factory.ObjectFactory;
+import edu.indiana.dlib.amppd.model.Collection;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +38,18 @@ public class CollectionRepositoryTests {
 
 	@Autowired
 	private CollectionRepository collectionRepository;
+	
+	private ObjectMapper mapper = new ObjectMapper();
+	private Collection objCollection ;
+	private ObjectFactory objFactory = new ObjectFactory();
+	
+	@Before
+	public void initiateBeforeTests() throws ClassNotFoundException
+	{
+		HashMap params = new HashMap<String, String>();
+		objCollection= (Collection)objFactory.createDataentityObject(params, "Collection");
+		
+	}
 
 	@Before 
 	public void deleteAllBeforeTests() throws Exception {
@@ -54,16 +74,21 @@ public class CollectionRepositoryTests {
 
 
 	@Test public void shouldQueryCollection() throws Exception {
-		mockMvc.perform(post("/collections").content(
-				"{ \"name\": \"121\", \"description\":\"For test\"}")).andDo(
-						MockMvcResultHandlers.print()).andExpect( status().isCreated());
+		
+		objCollection.setName("121");
+		objCollection.setDescription("For test 121");
+		
+		String json = mapper.writeValueAsString(objCollection);
+		mockMvc.perform(post("/collections")
+				  .content(json)).andExpect(
+						  status().isCreated());
 
 		mockMvc.perform(
 				get("/collections/search/findByName?name=121")).andDo(MockMvcResultHandlers.
 						print()).andExpect( status().isOk()).andExpect(
 								jsonPath("$._embedded.collections[0].name").value( "121")) ; }
 
-
+	
 
 	@Test public void shouldUpdateCollection() throws Exception { MvcResult
 		mvcResult = mockMvc.perform(post("/collections").content(
