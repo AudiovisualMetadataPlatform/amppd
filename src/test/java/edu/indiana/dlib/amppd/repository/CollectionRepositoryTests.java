@@ -44,7 +44,7 @@ public class CollectionRepositoryTests {
 	@Before
 	public void initiateBeforeTests() throws ClassNotFoundException
 	{
-		HashMap<String, String> params = new HashMap<String, String>();
+		HashMap params = new HashMap<String, String>();
 		objCollection= (Collection)objFactory.createDataentityObject(params, "Collection");
 		
 	}

@@ -8,4 +8,14 @@ import edu.indiana.dlib.amppd.model.Item;
 public interface ItemRepository extends ContentRepository<Item> {
 	
 	
+	/*
+	 * List<Item> findByDescription(@Param("description") String description);
+	 * 
+	 * List<Item> findByCreatedDate(@Param("createdDate") String createdDate);
+	 * 
+	 * List<Item> findByCreatedBy(@Param("createdBy") String createdBy);
+	 */
+	
+	
+	
 }
