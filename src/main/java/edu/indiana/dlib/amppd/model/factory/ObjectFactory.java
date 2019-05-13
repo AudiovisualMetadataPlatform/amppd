@@ -2,38 +2,23 @@ package edu.indiana.dlib.amppd.model.factory;
 
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.lang.reflect.*;
 
-import edu.indiana.dlib.amppd.model.Bundle;
-import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
+
 import edu.indiana.dlib.amppd.model.Dataentity;
-import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.ItemSupplement;
-import edu.indiana.dlib.amppd.model.Job;
-import edu.indiana.dlib.amppd.model.JobMgmMode;
-import edu.indiana.dlib.amppd.model.Mgm;
-import edu.indiana.dlib.amppd.model.MgmMode;
-import edu.indiana.dlib.amppd.model.MgmModeInput;
-import edu.indiana.dlib.amppd.model.MgmModeOutput;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
-import edu.indiana.dlib.amppd.model.RouteLink;
-import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.model.Workflow;
+
 
 
 public class ObjectFactory implements BaseObjectFactory{
 
 	@Override
-	public <O extends Dataentity> O createDataentityObject(HashMap<?,?> args, String classname) throws ClassNotFoundException
+	public <O extends Dataentity> O createDataentityObject(HashMap<?,?> args, String classname)
 	{
 		O res = null;
-		Class<?> entityObj = Class.forName("edu.indiana.dlib.amppd.model."+classname);
 		try 
 		{
+			Class<?> entityObj = Class.forName("edu.indiana.dlib.amppd.model."+classname);
 			res = (O)entityObj.getConstructor().newInstance();			
 			for(Entry<?, ?> entry : args.entrySet())
 			{ 
@@ -47,10 +32,9 @@ public class ObjectFactory implements BaseObjectFactory{
 		}
 		catch(Exception e)
 		{
-			System.out.println("Exception occurred in getting the new instance"+e);
+			throw new RuntimeException("Unable to create Dataentity in ObjectFactory for "+classname+e);
 		}
 		
 		return res;
 	}
-
 }
