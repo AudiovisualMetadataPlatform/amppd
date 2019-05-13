@@ -41,7 +41,7 @@ public class ItemRepositoryTests {
 	private ItemRepository itemRepository;
 	
 	@Autowired 
-	private ObjectMapper mapper;
+	private ObjectMapper mapper = new ObjectMapper();
 	private Item objItem ;
 	private ObjectFactory objFactory = new ObjectFactory();
 	
