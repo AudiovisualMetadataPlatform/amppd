@@ -8,6 +8,8 @@ import javax.persistence.ManyToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Data;
 
 /**
@@ -20,9 +22,14 @@ import lombok.Data;
 @Data
 public class Bundle extends Dataentity {
 
-    @ManyToMany(mappedBy = "bundles")
-    private List<Bag> bags;
+	@ManyToMany(mappedBy = "bundles")
+	// TODO following annotation was added to resolve a recursive reference issue due to M:M relationship with Item, but it causes exceptions in repository requests   
+//	@JsonManagedReference	
+    private List<Item> items;
     
+//    @ManyToMany(mappedBy = "bundles")
+//    private List<Bag> bags;
+
 }
   
 

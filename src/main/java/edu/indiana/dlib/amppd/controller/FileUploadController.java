@@ -1,9 +1,5 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -23,7 +18,6 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.service.impl.FileStorageServiceImpl;
 import lombok.extern.java.Log;
 
 // TODO: when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
@@ -54,9 +48,11 @@ public class FileUploadController {
 
 	// TODO: handle redirect for all following methods
 	// TODO: consider moving most logic in methods into FileStorageServiceImpl
+	// TODO: should use @PatchMapping instead of @PostMapping since it's not creating new entities but updating the properties of assets (the tests need to be updated too)?
 	
 	@PostMapping("/primaryfiles/{id}/file")
-    public String handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, HttpServletResponse response, RedirectAttributes redirectAttributes) {		
+//    public String handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, HttpServletResponse response, RedirectAttributes redirectAttributes) {		
+	public Primaryfile handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));    
     	primaryfile.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
     	String targetPathname = fileStorageService.getFilePathname(primaryfile);    	    	
@@ -66,18 +62,21 @@ public class FileUploadController {
     	
     	String msg = "You successfully uploaded primaryfile " + file.getOriginalFilename() + " to " + targetPathname + "!";
     	log.info(msg);
-        redirectAttributes.addFlashAttribute("message", msg);
+    	return primaryfile;
+    	
+//        redirectAttributes.addFlashAttribute("message", msg);               
 //        try {
 //        	response.sendRedirect("/primaryfiles/" + id + "/files");
 //        }
 //        catch (IOException e) {
 //        	throw new RuntimeException("Cannot redirect to after uploading file.", e);
 //        }
-        return "redirect:/";
+//        return "redirect:/";
     }
 
     @PostMapping("/collections/supplements/{id}/file")
-    public String handleCollectionSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+//    public String handleCollectionSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    public CollectionSupplement handleCollectionSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));
     	collectionSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));
     	String targetPathname = fileStorageService.getFilePathname(collectionSupplement);    		    	
@@ -87,12 +86,15 @@ public class FileUploadController {
 	
     	String msg = "You successfully uploaded collectionSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!";
     	log.info(msg);
-        redirectAttributes.addFlashAttribute("message", msg);
-        return "redirect:/";
+    	return collectionSupplement;
+
+//        redirectAttributes.addFlashAttribute("message", msg);
+//        return "redirect:/";
     }
     
     @PostMapping("/items/supplements/{id}/file")
-    public String handleItemSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+//    public String handleItemSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    public ItemSupplement handleItemSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	ItemSupplement itemSupplement = itemSupplementRepository.findById(id).orElseThrow(() -> new StorageException("itemSupplement <" + id + "> does not exist!"));
     	itemSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));
     	String targetPathname = fileStorageService.getFilePathname(itemSupplement);    		    	
@@ -102,12 +104,15 @@ public class FileUploadController {
 	    	
     	String msg = "You successfully uploaded itemSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!";
     	log.info(msg);
-        redirectAttributes.addFlashAttribute("message", msg);
-        return "redirect:/";
+    	return itemSupplement;
+
+//        redirectAttributes.addFlashAttribute("message", msg);
+//        return "redirect:/";
     }
     
     @PostMapping("/primaryfiles/supplements/{id}/file")
-    public String handlePrimaryfileSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+//    public String handlePrimaryfileSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {		
+    public PrimaryfileSupplement handlePrimaryfileSupplementUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(id).orElseThrow(() -> new StorageException("primaryfileSupplement <" + id + "> does not exist!"));
     	primaryfileSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));
     	String targetPathname = fileStorageService.getFilePathname(primaryfileSupplement);    		    	
@@ -117,8 +122,10 @@ public class FileUploadController {
 
     	String msg = "You successfully uploaded primaryfileSupplement " + file.getOriginalFilename() + " to " + targetPathname + "!";
     	log.info(msg);
-    	redirectAttributes.addFlashAttribute("message", msg);
-        return "redirect:/";
+    	return primaryfileSupplement;
+
+//    	redirectAttributes.addFlashAttribute("message", msg);
+//        return "redirect:/";
     }
         
     

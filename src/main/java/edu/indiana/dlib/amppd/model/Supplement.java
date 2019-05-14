@@ -24,7 +24,7 @@ import lombok.Data;
 public abstract class Supplement extends Asset {
 	
 	// TODO double check the relationship
-	@ManyToMany
-	private List<Bag> bags;
+//	@ManyToMany
+//	private List<Bag> bags;
 	
 }
