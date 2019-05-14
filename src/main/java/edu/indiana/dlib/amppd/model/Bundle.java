@@ -23,7 +23,8 @@ import lombok.Data;
 public class Bundle extends Dataentity {
 
 	@ManyToMany(mappedBy = "bundles")
-	@JsonManagedReference
+	// TODO following annotation was added to resolve a recursive reference issue due to M:M relationship with Item, but it causes exceptions in repository requests   
+//	@JsonManagedReference	
     private List<Item> items;
     
 //    @ManyToMany(mappedBy = "bundles")
