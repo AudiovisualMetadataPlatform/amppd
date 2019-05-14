@@ -20,9 +20,12 @@ import lombok.Data;
 @Data
 public class Bundle extends Dataentity {
 
-    @ManyToMany(mappedBy = "bundles")
-    private List<Bag> bags;
+	@ManyToMany(mappedBy = "bundles")
+    private List<Item> items;
     
+//    @ManyToMany(mappedBy = "bundles")
+//    private List<Bag> bags;
+
 }
   
 

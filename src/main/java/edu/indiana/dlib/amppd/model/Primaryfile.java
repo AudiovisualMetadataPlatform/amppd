@@ -26,5 +26,11 @@ public class Primaryfile extends Asset {
 
 	@ManyToOne
 	private Item item;
-	
+		
+    @OneToMany(mappedBy="primaryfile")
+    private List<Job> jobs;        
+    	
+//    @OneToMany(mappedBy="primaryfile")
+//    private List<Bag> bags;        
+
 }

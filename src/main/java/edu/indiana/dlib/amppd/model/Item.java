@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -28,4 +29,7 @@ public class Item extends Content {
 	@ManyToOne
 	private Collection collection;	
 		
+    @ManyToMany
+    private List<Bundle> bundles;      
+    	
 }

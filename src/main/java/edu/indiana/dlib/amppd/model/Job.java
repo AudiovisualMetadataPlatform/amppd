@@ -35,7 +35,10 @@ public class Job {
     private List<JobMgmMode> jobMgmModes;
     
     @ManyToOne
-    private Bag bag;
+    private Primaryfile primaryfile;
+
+//    @ManyToOne
+//    private Bag bag;
 
     @ManyToOne
     private Workflow workflow;

@@ -54,6 +54,7 @@ public class FileUploadController {
 
 	// TODO: handle redirect for all following methods
 	// TODO: consider moving most logic in methods into FileStorageServiceImpl
+	// TODO: should use @PatchMapping instead of @PostMapping since it's not creating new entities but updating the properties of assets (the tests need to be updated too)?
 	
 	@PostMapping("/primaryfiles/{id}/file")
     public String handlePrimaryfileUpload(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file, HttpServletResponse response, RedirectAttributes redirectAttributes) {		
