@@ -11,6 +11,8 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Data;
 
 /**
@@ -30,6 +32,7 @@ public class Item extends Content {
 	private Collection collection;	
 		
     @ManyToMany
+    @JsonBackReference
     private List<Bundle> bundles;      
     	
 }

@@ -8,6 +8,8 @@ import javax.persistence.ManyToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.Data;
 
 /**
@@ -21,6 +23,7 @@ import lombok.Data;
 public class Bundle extends Dataentity {
 
 	@ManyToMany(mappedBy = "bundles")
+	@JsonManagedReference
     private List<Item> items;
     
 //    @ManyToMany(mappedBy = "bundles")
