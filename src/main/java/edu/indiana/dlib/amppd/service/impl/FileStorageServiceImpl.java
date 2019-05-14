@@ -206,7 +206,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			dirname = getDirPathname(((PrimaryfileSupplement)supplement).getPrimaryfile());
 		}
 		
-		return dirname + filename;
+		return dirname + File.separator  + filename;
 	}
 
 }

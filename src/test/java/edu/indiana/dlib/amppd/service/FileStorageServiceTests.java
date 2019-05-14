@@ -15,7 +15,10 @@
  */
 package edu.indiana.dlib.amppd.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.junit.Assert.assertTrue;
+
+import java.nio.file.Files;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +54,7 @@ public class FileStorageServiceTests {
     @Test
     public void saveAndLoad() {
         fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test.txt");
-        assertThat(fileStorageService.load("unit/test.txt")).exists();
+        assertTrue(Files.exists(fileStorageService.load("unit/test.txt")));
     }
 
     @Test(expected = StorageException.class)
@@ -62,7 +65,7 @@ public class FileStorageServiceTests {
     @Test
     public void savePermitted() {
         fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test1.txt");
-        assertThat(fileStorageService.load("unit/test1.txt")).exists();
+        assertTrue(Files.exists(fileStorageService.load("unit/test1.txt")));
     }
     
     @Test
@@ -84,7 +87,7 @@ public class FileStorageServiceTests {
     	primaryfile.setOriginalFilename("primaryfiletest.mp4");
     	
     	String pathname = fileStorageService.getFilePathname(primaryfile);
-        assertThat(pathname.equals("U-1/C-2/I-3/P-4.mp4"));
+    	assertTrue(pathname.equals("U-1/C-2/I-3/P-4.mp4"));
     }
 
     @Test
@@ -102,7 +105,7 @@ public class FileStorageServiceTests {
     	supplement.setOriginalFilename("supplementtest.pdf");
   	
     	String pathname = fileStorageService.getFilePathname(supplement);
-        assertThat(pathname.equals("U-1/C-2/S-3.pdf"));
+    	assertTrue(pathname.equals("U-1/C-2/S-3.pdf"));
     }
     
     @Test
@@ -124,7 +127,7 @@ public class FileStorageServiceTests {
     	supplement.setOriginalFilename("supplementtest.pdf");
     	
     	String pathname = fileStorageService.getFilePathname(supplement);
-        assertThat(pathname.equals("U-1/C-2/I-3/S-4.pdf"));
+        assertTrue(pathname.equals("U-1/C-2/I-3/S-4.pdf"));
     }
     
     @Test
@@ -150,7 +153,7 @@ public class FileStorageServiceTests {
     	supplement.setOriginalFilename("supplementtest.pdf");
     	
     	String pathname = fileStorageService.getFilePathname(supplement);
-        assertThat(pathname.equals("U-1/C-2/I-3/P-4/S-5.pdf"));
+        assertTrue(pathname.equals("U-1/C-2/I-3/P-4/S-5.pdf"));
     }
 
 
