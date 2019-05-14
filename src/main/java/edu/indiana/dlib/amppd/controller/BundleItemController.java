@@ -19,7 +19,7 @@ import lombok.extern.java.Log;
  */
 @RestController
 @Log
-public class BundleController {
+public class BundleItemController {
 
 	@Autowired
     private BundleRepository bundleRepository;

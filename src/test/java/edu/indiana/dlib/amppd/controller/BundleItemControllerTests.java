@@ -25,7 +25,7 @@ import edu.indiana.dlib.amppd.repository.ItemRepository;
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-public class BundleControllerTests {
+public class BundleItemControllerTests {
 
     @Autowired
     private MockMvc mvc;
