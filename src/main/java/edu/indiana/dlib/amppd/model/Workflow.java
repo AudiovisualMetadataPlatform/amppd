@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -30,10 +30,10 @@ public class Workflow extends Dataentity {
     private MgmMode endMgmMode;
     
     @OneToMany(mappedBy="workflow")
-    private List<RouteLink> routeLinks;    
+    private Set<RouteLink> routeLinks;    
     
     @OneToMany(mappedBy="workflow")
-    private List<Job> jobs;    
+    private Set<Job> jobs;    
 
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 
 //    @ManyToOne

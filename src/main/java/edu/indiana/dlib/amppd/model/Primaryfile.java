@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -22,15 +22,15 @@ import lombok.Data;
 public class Primaryfile extends Asset {
 
 	@OneToMany(mappedBy="primaryfile")
-    private List<PrimaryfileSupplement> supplements;
+    private Set<PrimaryfileSupplement> supplements;
 
 	@ManyToOne
 	private Item item;
 		
     @OneToMany(mappedBy="primaryfile")
-    private List<Job> jobs;        
+    private Set<Job> jobs;        
     	
 //    @OneToMany(mappedBy="primaryfile")
-//    private List<Bag> bags;        
+//    private Set<Bag> bags;        
 
 }

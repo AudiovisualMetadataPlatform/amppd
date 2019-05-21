@@ -1,7 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -27,11 +27,11 @@ public class MgmMode extends Dataentity {
 
     // TODO double check the relationship
     @OneToMany(mappedBy="mgmMode")
-    private List<MgmModeInput> mgmModeInputs;
+    private Set<MgmModeInput> mgmModeInputs;
     
     // TODO double check the relationship
     @OneToMany(mappedBy="mgmMode")
-    private List<MgmModeOutput> mgmModeOutputs;
+    private Set<MgmModeOutput> mgmModeOutputs;
     
     @ManyToOne
     private Mgm mgm;

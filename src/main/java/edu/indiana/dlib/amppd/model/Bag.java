@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -32,12 +32,12 @@ public class Bag extends Dataentity {
 //    private Primaryfile primaryfile;	
 //    
 //    @ManyToMany(mappedBy = "bags")
-//    private List<Supplement> supplements;   
+//    private Set<Supplement> supplements;   
 //    
 //    @ManyToMany
-//    private List<Bundle> bundles;      
+//    private Set<Bundle> bundles;      
 //    
 //    @OneToMany(mappedBy="bag")
-//    private List<Job> jobs;        
+//    private Set<Job> jobs;        
     
 }

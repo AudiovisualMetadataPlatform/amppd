@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -22,10 +22,10 @@ import lombok.Data;
 public class Collection extends Content {
 
 	@OneToMany(mappedBy="collection")
-    private List<Item> items; 
+    private Set<Item> items; 
 	
 	@OneToMany(mappedBy="collection")
-    private List<CollectionSupplement> supplements;
+    private Set<CollectionSupplement> supplements;
 	
 	@ManyToOne
 	private Unit unit;

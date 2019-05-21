@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -24,7 +24,7 @@ public class Mgm extends Dataentity {
     private String platform;    
     
     @OneToMany(mappedBy="mgm")
-    private List<MgmMode> modes;
+    private Set<MgmMode> modes;
         
 }
 

@@ -1,7 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -32,7 +32,7 @@ public class Job {
     private Timestamp timeEnded;
     
     @OneToMany(mappedBy="job")
-    private List<JobMgmMode> jobMgmModes;
+    private Set<JobMgmMode> jobMgmModes;
     
     @ManyToOne
     private Primaryfile primaryfile;

@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -25,6 +25,6 @@ public abstract class Supplement extends Asset {
 	
 	// TODO double check the relationship
 //	@ManyToMany
-//	private List<Bag> bags;
+//	private Set<Bag> bags;
 	
 }

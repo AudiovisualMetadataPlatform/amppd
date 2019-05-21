@@ -4,7 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -42,11 +42,11 @@ public class BundleItemControllerTests {
     public void shouldAddItemToBundle() throws Exception {
     	Item item = new Item();
     	item.setId(1l);
-    	item.setBundles(new ArrayList<Bundle>());
+    	item.setBundles(new HashSet<Bundle>());
     	
     	Bundle bundle = new Bundle();
     	bundle.setId(1l);
-    	bundle.setItems(new ArrayList<Item>());
+    	bundle.setItems(new HashSet<Item>());
     	
     	Mockito.when(itemRepository.findById(1l)).thenReturn(Optional.of(item)); 
     	Mockito.when(itemRepository.save(item)).thenReturn(item); 
@@ -59,14 +59,14 @@ public class BundleItemControllerTests {
     }
 
     @Test
-    public void shouldSaveUploadedBundleSupplement() throws Exception {   	
+    public void shouldDeleteItemFromBundle() throws Exception {   	
     	Item item = new Item();
     	item.setId(1l);
-    	item.setBundles(new ArrayList<Bundle>());
+    	item.setBundles(new HashSet<Bundle>());
     	
     	Bundle bundle = new Bundle();
     	bundle.setId(1l);
-    	bundle.setItems(new ArrayList<Item>());
+    	bundle.setItems(new HashSet<Item>());
     	
     	item.getBundles().add(bundle);
     	bundle.getItems().add(item);    	
@@ -80,5 +80,34 @@ public class BundleItemControllerTests {
 //				jsonPath("$.items", hasSize(0))).andExpect( 
 						jsonPath("$.items[0].id").doesNotExist());    	
     }
+
+    @Test
+    public void shouldNotAddDuplicateItemToBundle() throws Exception {   	
+    	Item item = new Item();
+    	item.setId(1l);
+    	item.setBundles(new HashSet<Bundle>());
+    	
+    	Bundle bundle = new Bundle();
+    	bundle.setId(1l);
+    	bundle.setItems(new HashSet<Item>());
+    	
+    	item.getBundles().add(bundle);
+    	bundle.getItems().add(item);    	
+    	
+    	Mockito.when(itemRepository.findById(1l)).thenReturn(Optional.of(item)); 
+    	Mockito.when(itemRepository.save(item)).thenReturn(item); 
+    	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
+    	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle); 
+    	
+    	mvc.perform(post("/bundles/1/add/items/1")).andExpect(status().isOk()).andExpect(
+//				jsonPath("$.items", hasSize(1))).andExpect(	// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all
+						jsonPath("$.items[0].id").value(1));
+
+    	mvc.perform(post("/bundles/1/add/items/1")).andExpect(status().isOk()).andExpect(
+//				jsonPath("$.items", hasSize(1))).andExpect( 
+				jsonPath("$.items[0].id").value(1)).andExpect(
+						jsonPath("$.items[1].id").doesNotExist());    	
+    }
+
 
 }
