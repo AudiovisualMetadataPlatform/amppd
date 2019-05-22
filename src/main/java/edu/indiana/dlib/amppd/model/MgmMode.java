@@ -11,6 +11,8 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * MgmMode defines properties related to a mode of an MGM, as well as the inputs/outputs for that mode.
@@ -20,6 +22,8 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, exclude={"mgmModeInputs", "mgmModeOutputs", "mgm"})
+@ToString(callSuper=true, exclude= {"mgmModeInputs", "mgmModeOutputs", "mgm"})
 public class MgmMode extends Dataentity {
     
     private HashMap<String, String> defaultParams;

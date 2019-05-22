@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * JobMgmMode represents the status and the inputs/outputs of an MGM mode during a job execution.
@@ -19,6 +21,8 @@ import lombok.Data;
  */
 @Entity
 @Data
+@EqualsAndHashCode(exclude={"job", "mgmMode"})
+@ToString(exclude={"job", "mgmMode"})
 public class JobMgmMode {
 
     @Id

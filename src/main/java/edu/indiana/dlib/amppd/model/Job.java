@@ -11,6 +11,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Job represents an execution of a workflow against a bag.
@@ -19,6 +21,8 @@ import lombok.Data;
  */
 @Entity
 @Data
+@EqualsAndHashCode(exclude={"jobMgmModes", "primaryfile", "workflow"})
+@ToString(exclude={"jobMgmModes", "primaryfile", "workflow"})
 public class Job {
 
     @Id

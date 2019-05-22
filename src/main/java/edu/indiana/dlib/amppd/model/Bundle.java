@@ -8,9 +8,9 @@ import javax.persistence.ManyToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Bundle is a container of one or multiple bags to which similar workflows can be applied.
@@ -19,10 +19,10 @@ import lombok.Setter;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
-@RequiredArgsConstructor
-// Avoid using @Data here as Lombok's impl of toString, equals, and hashcode doesn't handle circular references as in Bunble and Item and will cause StackOverflow exception.
+@Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+// Avoid using @Data here as Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Bundle extends Dataentity {
 
 	@ManyToMany(mappedBy = "bundles")

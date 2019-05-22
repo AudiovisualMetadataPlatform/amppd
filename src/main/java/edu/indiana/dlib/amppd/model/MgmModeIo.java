@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * MgmModeIo defines properties related to an input/output of an MGM mode.
@@ -19,6 +21,8 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
+@EqualsAndHashCode(callSuper=true, exclude="mgmMode")
+@ToString(callSuper=true, exclude="mgmMode")
 public abstract class MgmModeIo extends Dataentity {
    
     private Integer seqNo;

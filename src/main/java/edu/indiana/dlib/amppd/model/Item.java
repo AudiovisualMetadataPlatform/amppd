@@ -13,9 +13,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Item represents an intellectual object that contains one or more primaryfiles and none or multiple supplement files.
@@ -24,10 +24,10 @@ import lombok.Setter;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Getter
-@Setter
-@RequiredArgsConstructor
-//Avoid using @Data here as Lombok's impl of toString, equals, and hashcode doesn't handle circular references as in Bunble and Item and will cause StackOverflow exception.
+@Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+// Avoid using @Data here as Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Item extends Content {
     
 	@OneToMany(mappedBy="item")

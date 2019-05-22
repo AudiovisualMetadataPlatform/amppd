@@ -11,6 +11,8 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 // TODO this class can be removed at some point
 // Currently we assume that bundle is associated with item (and thus all the primaryfiles belonging to that item) directly. 
@@ -26,6 +28,8 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Bag extends Dataentity {
 	
 //	  @ManyToOne

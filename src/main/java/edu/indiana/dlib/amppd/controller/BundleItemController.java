@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +35,7 @@ public class BundleItemController {
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));    
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    
 
-		// check if the item has been added to the bundle already
+		// don't add the item if it already exists in the bundle
 		if (bundle.getItems().contains(item)) {
 			// TODO the warning message shall be displayed back to the screen
 			String msg = "Item <" + itemId + "> has already been added to bundle<" + bundleId + ">!";
@@ -55,7 +58,7 @@ public class BundleItemController {
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));    
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    
 
-		// check if the item exists in the bundle
+		// don't delete anything if the item doesn't exist in the bundle
 		if (!bundle.getItems().contains(item)) {
 			// TODO the warning message shall be displayed back to the screen
 			String msg = "Item <" + itemId + "> doesn't exist bundle<" + bundleId + ">!";

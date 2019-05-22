@@ -11,6 +11,8 @@ import javax.persistence.ManyToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Supplement is a file (either media or annotation) used as supplemental material to assist metadata retrieval for a primaryfile through a workflow.
@@ -21,6 +23,8 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public abstract class Supplement extends Asset {
 	
 	// TODO double check the relationship

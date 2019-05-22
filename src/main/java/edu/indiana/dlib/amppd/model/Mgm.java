@@ -9,6 +9,8 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Mgm defines the property related to a MGM tool. An MGM can have multiple modes, and is owned by a unit. 
@@ -18,6 +20,8 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, exclude="modes")
+@ToString(callSuper=true, exclude="modes")
 public class Mgm extends Dataentity {
     
     private String version;
