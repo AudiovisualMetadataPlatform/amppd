@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * RouteLink defines the from/to nodes as well as the correspondence between the outputs of the from node and the inputs of the to node in a workflow route graph. 
@@ -17,6 +19,8 @@ import lombok.Data;
  */
 @Entity
 @Data
+@EqualsAndHashCode(exclude={"fromMgmMode", "toMgmMode", "workflow"})
+@ToString(exclude={"fromMgmMode", "toMgmMode", "workflow"})
 public class RouteLink {
 
     @Id

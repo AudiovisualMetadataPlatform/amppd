@@ -1,7 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -11,6 +11,8 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * MgmMode defines properties related to a mode of an MGM, as well as the inputs/outputs for that mode.
@@ -20,6 +22,8 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, exclude={"mgmModeInputs", "mgmModeOutputs", "mgm"})
+@ToString(callSuper=true, exclude= {"mgmModeInputs", "mgmModeOutputs", "mgm"})
 public class MgmMode extends Dataentity {
     
     private HashMap<String, String> defaultParams;
@@ -27,11 +31,11 @@ public class MgmMode extends Dataentity {
 
     // TODO double check the relationship
     @OneToMany(mappedBy="mgmMode")
-    private List<MgmModeInput> mgmModeInputs;
+    private Set<MgmModeInput> mgmModeInputs;
     
     // TODO double check the relationship
     @OneToMany(mappedBy="mgmMode")
-    private List<MgmModeOutput> mgmModeOutputs;
+    private Set<MgmModeOutput> mgmModeOutputs;
     
     @ManyToOne
     private Mgm mgm;

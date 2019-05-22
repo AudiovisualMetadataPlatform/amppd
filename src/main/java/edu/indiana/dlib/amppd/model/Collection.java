@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -10,6 +10,8 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Collection contains one or more items, and belongs to one and only one unit.
@@ -19,13 +21,15 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
 
 	@OneToMany(mappedBy="collection")
-    private List<Item> items; 
+    private Set<Item> items; 
 	
 	@OneToMany(mappedBy="collection")
-    private List<CollectionSupplement> supplements;
+    private Set<CollectionSupplement> supplements;
 	
 	@ManyToOne
 	private Unit unit;

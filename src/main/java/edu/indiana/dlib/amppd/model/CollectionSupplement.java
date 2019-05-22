@@ -7,6 +7,8 @@ import javax.persistence.ManyToOne;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * CollectionSupplement is a supplemental file associated with a collection and shared by all items within that collection.
@@ -16,6 +18,8 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class CollectionSupplement extends Supplement {
 
 	@ManyToOne
