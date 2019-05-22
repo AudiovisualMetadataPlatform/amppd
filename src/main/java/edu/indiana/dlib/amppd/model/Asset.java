@@ -3,6 +3,8 @@ package edu.indiana.dlib.amppd.model;
 import javax.persistence.MappedSuperclass;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Asset represents a file containing either media content of any MIME type or annotation of a media file in pdf/text/json format, 
@@ -12,6 +14,8 @@ import lombok.Data;
  */
 @MappedSuperclass
 @Data
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public abstract class Asset extends Content {
 
 	private String originalFilename;	// the file name of the original file uploaded by user or batch

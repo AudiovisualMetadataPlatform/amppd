@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -11,6 +11,8 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 // TODO this class can be removed at some point
 // Currently we assume that bundle is associated with item (and thus all the primaryfiles belonging to that item) directly. 
@@ -26,18 +28,20 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Bag extends Dataentity {
 	
 //	  @ManyToOne
 //    private Primaryfile primaryfile;	
 //    
 //    @ManyToMany(mappedBy = "bags")
-//    private List<Supplement> supplements;   
+//    private Set<Supplement> supplements;   
 //    
 //    @ManyToMany
-//    private List<Bundle> bundles;      
+//    private Set<Bundle> bundles;      
 //    
 //    @OneToMany(mappedBy="bag")
-//    private List<Job> jobs;        
+//    private Set<Job> jobs;        
     
 }
