@@ -11,9 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.HashMap;
-
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.indiana.dlib.amppd.model.factory.ObjectFactory;
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
@@ -42,15 +42,21 @@ public class PrimaryfileRepositoryTests {
 	
 	@Autowired 
 	private ObjectMapper mapper;
-	private Primaryfile objPrimaryFile ;
-	private ObjectFactory objFactory = new ObjectFactory();
-
-	@Before
-	public void initiateBeforeTests() throws ClassNotFoundException
+	private Primaryfile obj ;
+	/*
+	 * private ObjectFactory objFactory = new ObjectFactory();
+	 * 
+	 * @Before public void initiateBeforeTests() throws ClassNotFoundException {
+	 * HashMap params = new HashMap<String, String>(); objPrimaryFile=
+	 * (Primaryfile)objFactory.createDataentityObject(params, "Primaryfile");
+	 * 
+	 * }
+	 */
+	
+	@BeforeClass
+	public static void setupTest() 
 	{
-		HashMap params = new HashMap<String, String>();
-		objPrimaryFile= (Primaryfile)objFactory.createDataentityObject(params, "Primaryfile");
-		
+	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
 	}
 	
 	@Before
@@ -91,18 +97,18 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldQueryItemDescription() throws Exception {
 		
-		objPrimaryFile.setName("Primary File 200");
-		objPrimaryFile.setDescription("For testing Primary File Respository using Factories");
-		String json = mapper.writeValueAsString(objPrimaryFile);
+		obj = Fixture.from(Primaryfile.class).gimme("valid");
+		
+		String json = mapper.writeValueAsString(obj);
 		mockMvc.perform(post("/primaryfiles")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		mockMvc.perform(
-				get("/primaryfiles/search/findByDescription?description={description}", "For testing Primary File Respository using Factories")).andDo(
+				get("/primaryfiles/search/findByDescription?description={description}", obj.getDescription())).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].description").value(
-										"For testing Primary File Respository using Factories"));
+										obj.getDescription()));
 	}
 
 	
@@ -125,10 +131,10 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldQueryItemCreatedBy() throws Exception {
 		
-		objPrimaryFile.setName("Primary File 200");
-		objPrimaryFile.setDescription("For testing Primary File Respository using Factories");
-		objPrimaryFile.setCreatedBy("Developer");
-		String json = mapper.writeValueAsString(objPrimaryFile);
+		obj.setName("Primary File 200");
+		obj.setDescription("For testing Primary File Respository using Factories");
+		obj.setCreatedBy("Developer");
+		String json = mapper.writeValueAsString(obj);
 		mockMvc.perform(post("/primaryfiles")
 				  .content(json)).andExpect(
 						  status().isCreated());
