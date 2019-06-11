@@ -113,7 +113,7 @@ public class ModelTemplates implements TemplateLoader {
 		 
 	    
 	    Fixture.of(Bundle.class).addTemplate("valid", new Rule() {{
-	    	add("items", has(2).of(Item.class, "valid"));	
+	    	//add("items", has(2).of(Item.class, "valid"));	
 	    	add("id", random(Long.class, range(1L, 200L)));
 			add("name", firstName());
 	    	add("description", "Description for ${name}'s test case");	
@@ -142,7 +142,7 @@ public class ModelTemplates implements TemplateLoader {
 		 
 	  
 	    Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
-	    	add("collections", has(3).of(Collection.class, "valid")); 
+	    	//add("collections", has(3).of(Collection.class, "valid")); 
 	    	add("externalIds", new HashMap<String, String>());
 	    	add("id", random(Long.class, range(1L, 200L)));
 			add("name", firstName());
