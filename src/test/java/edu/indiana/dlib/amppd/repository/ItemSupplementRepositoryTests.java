@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 
 @RunWith(SpringRunner.class)
@@ -33,6 +40,25 @@ public class ItemSupplementRepositoryTests {
 	@Autowired
 	private ItemSupplementRepository itemSupplementRepository;
 
+	@Autowired 
+	private ObjectMapper mapper = new ObjectMapper();
+	private ItemSupplement obj ;
+	//private ObjectFactory objFactory = new ObjectFactory();
+	
+	@BeforeClass
+	public static void setupTest() 
+	{
+	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
+	}
+	
+	/*
+	 * @Before public void initiateBeforeTests() { HashMap params = new
+	 * HashMap<String, String>(); objItem=
+	 * (Item)objFactory.createDataentityObject(params, "Item");
+	 * 
+	 * }
+	 */
+	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
 		itemSupplementRepository.deleteAll();
@@ -71,15 +97,18 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldQueryItemSupplement() throws Exception {
 
-		mockMvc.perform(post("/itemSupplements").content(
-				"{ \"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated());
+		obj = Fixture.from(ItemSupplement.class).gimme("valid");
+		
+		String json = mapper.writeValueAsString(obj);
+		mockMvc.perform(post("/itemSupplements")
+				  .content(json)).andExpect(
+						  status().isCreated());
 
 		mockMvc.perform(
-				get("/itemSupplements/search/findByName?name={name}", "ItemSupplement 1")).andExpect(
+				get("/itemSupplements/search/findByName?name={name}", obj.getName())).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.itemSupplements[0].name").value(
-										"ItemSupplement 1"));
+										obj.getName()));
 	}
 
 	@Test

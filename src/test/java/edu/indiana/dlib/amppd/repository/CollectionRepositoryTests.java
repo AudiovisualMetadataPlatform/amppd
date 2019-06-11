@@ -32,6 +32,7 @@ import br.com.six2six.fixturefactory.Rule;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.factory.ObjectFactory;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Dataentity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -44,8 +45,8 @@ public class CollectionRepositoryTests {
 	private CollectionRepository collectionRepository;
 	
 	private ObjectMapper mapper = new ObjectMapper();
-	private Collection objCollection ;
-	private ObjectFactory objFactory = new ObjectFactory();
+	private Collection obj;
+	//private ObjectFactory objFactory = new ObjectFactory();
 	
 	
 	@BeforeClass
@@ -54,13 +55,13 @@ public class CollectionRepositoryTests {
 	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
 	}
 	
-	@Before
-	public void initiateBeforeTests() throws Exception
-	{
-		HashMap params = new HashMap<String, String>();
-		objCollection= (Collection)objFactory.createDataentityObject(params, "Collection");
-		
-	}
+	/*
+	 * @Before public void initiateBeforeTests() throws Exception { HashMap params =
+	 * new HashMap<String, String>(); objCollection=
+	 * (Collection)objFactory.createDataentityObject(params, "Collection");
+	 * 
+	 * }
+	 */
 
 	@Before 
 	public void deleteAllBeforeTests() throws Exception {
@@ -88,17 +89,17 @@ public class CollectionRepositoryTests {
 	
 
 	@Test public void shouldQueryCollection() throws Exception {
-		objCollection = Fixture.from(Collection.class).gimme("valid");
+		obj = Fixture.from(Collection.class).gimme("valid");
 		
-		String json = mapper.writeValueAsString(objCollection);
+		String json = mapper.writeValueAsString(obj);
 		mockMvc.perform(post("/collections")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/collections/search/findByName?name={name}", objCollection.getName())).andDo(MockMvcResultHandlers.
+				get("/collections/search/findByName?name={name}", obj.getName())).andDo(MockMvcResultHandlers.
 						print()).andExpect( status().isOk()).andExpect(
-								jsonPath("$._embedded.collections[0].name").value( objCollection.getName())) ; }
+								jsonPath("$._embedded.collections[0].name").value( obj.getName())) ; }
 	
 
 	@Test public void shouldUpdateCollection() throws Exception { 
