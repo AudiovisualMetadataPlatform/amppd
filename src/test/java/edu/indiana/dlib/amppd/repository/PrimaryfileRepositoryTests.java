@@ -131,19 +131,18 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldQueryItemCreatedBy() throws Exception {
 		
-		obj.setName("Primary File 200");
-		obj.setDescription("For testing Primary File Respository using Factories");
-		obj.setCreatedBy("Developer");
+		obj = Fixture.from(Primaryfile.class).gimme("valid");
+		
 		String json = mapper.writeValueAsString(obj);
 		mockMvc.perform(post("/primaryfiles")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		mockMvc.perform(
-				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", "Developer")).andDo(
+				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", obj.getCreatedBy())).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].createdBy").value(
-										"Developer"));
+										obj.getCreatedBy()));
 	}
 	
 
