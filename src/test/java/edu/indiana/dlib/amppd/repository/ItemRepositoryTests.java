@@ -101,11 +101,9 @@ public class ItemRepositoryTests {
 		obj = Fixture.from(Item.class).gimme("valid");
 		
 		//Example implementation of Item->Collection->Unit hierarchy using Fixtures
-		Collection obj_col = Fixture.from(Collection.class).gimme("valid");
-		obj.setCollection(obj_col);
+		//obj.setCollection(Fixture.from(Collection.class).gimme("valid"));
+		//obj.getCollection().setUnit(Fixture.from(Unit.class).gimme("valid"));
 		
-		Unit obj_unit = Fixture.from(Unit.class).gimme("valid");
-		obj_col.setUnit(obj_unit);
 		
 		String json = mapper.writeValueAsString(obj);
 		mockMvc.perform(post("/items")
