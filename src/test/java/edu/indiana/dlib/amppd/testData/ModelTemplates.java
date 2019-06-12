@@ -24,17 +24,7 @@ public class ModelTemplates implements TemplateLoader {
 	@Override
 	public void load() {
 		// TODO Auto-generated method stub
-		
-		Fixture.of(Dataentity.class).addTemplate("valid", new Rule() {{
-			add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
-			add("createdDate", 20170101L); 
-			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
-		}});
-		
+				
 		    Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
 	    	add("externalIds", new HashMap<String, String>());
 		    add("id", random(Long.class, range(1L, 200L)));
