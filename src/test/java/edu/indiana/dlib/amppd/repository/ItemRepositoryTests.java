@@ -96,33 +96,6 @@ public class ItemRepositoryTests {
 	}
 
 	@Test
-	public void shouldQueryItem() throws Exception {
-
-		obj = Fixture.from(Item.class).gimme("valid");
-		
-		//An example of creating item->Collection->Unit hierarchy
-		Collection objCollection = Fixture.from(Collection.class).gimme("valid");
-		obj.setCollection(objCollection);
-		
-		Unit objUnit = Fixture.from(Unit.class).gimme("valid");
-		objCollection.setUnit(objUnit);
-		
-		
-		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/items")
-				  .content(json)).andExpect(
-						  status().isCreated());
-		 
-
-		mockMvc.perform(
-				get("/items/search/findByName?name={name}", obj.getName())).andExpect(
-						status().isOk()).andExpect(
-								jsonPath("$._embedded.items[0].name").value(
-										obj.getName()));
-	}
-	
-	
-	@Test
 	public void shouldQueryItemDescription() throws Exception {
 		
 		obj = Fixture.from(Item.class).gimme("valid");
