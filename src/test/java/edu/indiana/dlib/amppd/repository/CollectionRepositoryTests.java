@@ -14,6 +14,7 @@ import java.util.HashMap;
 
 //import org.apache.catalina.mapper.Mapper;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +27,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.Rule;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.factory.ObjectFactory;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Dataentity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -40,16 +45,23 @@ public class CollectionRepositoryTests {
 	private CollectionRepository collectionRepository;
 	
 	private ObjectMapper mapper = new ObjectMapper();
-	private Collection objCollection ;
-	private ObjectFactory objFactory = new ObjectFactory();
+	private Collection obj;
+	//private ObjectFactory objFactory = new ObjectFactory();
 	
-	@Before
-	public void initiateBeforeTests() throws ClassNotFoundException
+	
+	@BeforeClass
+	public static void setupTest() 
 	{
-		HashMap params = new HashMap<String, String>();
-		objCollection= (Collection)objFactory.createDataentityObject(params, "Collection");
-		
+	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
 	}
+	
+	/*
+	 * @Before public void initiateBeforeTests() throws Exception { HashMap params =
+	 * new HashMap<String, String>(); objCollection=
+	 * (Collection)objFactory.createDataentityObject(params, "Collection");
+	 * 
+	 * }
+	 */
 
 	@Before 
 	public void deleteAllBeforeTests() throws Exception {
@@ -66,42 +78,43 @@ public class CollectionRepositoryTests {
 				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andDo(MockMvcResultHandlers.print()).andExpect(
 								header().string("Location", containsString("collections/"))); }
+	
 
 	@Test public void shouldRetrieveCollection() throws Exception {
+		
+		
 		mockMvc.perform(post("/collections").
 				content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 		.andExpect(status().isCreated()).andReturn(); }
-
+	
 
 	@Test public void shouldQueryCollection() throws Exception {
+		obj = Fixture.from(Collection.class).gimme("valid");
 		
-		objCollection.setName("121");
-		objCollection.setDescription("For test 121");
-		
-		String json = mapper.writeValueAsString(objCollection);
+		String json = mapper.writeValueAsString(obj);
 		mockMvc.perform(post("/collections")
 				  .content(json)).andExpect(
 						  status().isCreated());
-
+		
 		mockMvc.perform(
-				get("/collections/search/findByName?name=121")).andDo(MockMvcResultHandlers.
+				get("/collections/search/findByName?name={name}", obj.getName())).andDo(MockMvcResultHandlers.
 						print()).andExpect( status().isOk()).andExpect(
-								jsonPath("$._embedded.collections[0].name").value( "121")) ; }
-
+								jsonPath("$._embedded.collections[0].name").value( obj.getName())) ; }
 	
 
-	@Test public void shouldUpdateCollection() throws Exception { MvcResult
-		mvcResult = mockMvc.perform(post("/collections").content(
-				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
-
-	String location = mvcResult.getResponse().getHeader("Location");
-
-	mockMvc.perform(put(location).content(
-			"{\"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
-					status().isNoContent());
-
-	mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+	@Test public void shouldUpdateCollection() throws Exception { 
+	
+		  MvcResult mvcResult = mockMvc.perform(post("/collections").content(
+		  "{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
+		  status().isCreated()).andReturn();
+		 
+		String location = mvcResult.getResponse().getHeader("Location");
+		
+		mockMvc.perform(put(location).content(
+				"{\"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
+						status().isNoContent());
+		 
+		 mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
 			jsonPath("$.name").value("Collection 1.1")).andExpect(
 					jsonPath("$.description").value("For test")); }
 
