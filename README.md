@@ -8,7 +8,7 @@ The latest information about project can be found on the [Wiki](https://wiki.dli
 
 # Quick Start
 
-[Setup Development Envirement](https://github.com/AudiovisualMetadataPlatform/amppd/wiki/Set-up-dev-environment)
+[Setup Development Environment](https://github.com/AudiovisualMetadataPlatform/amppd/wiki/Set-up-dev-environment)
 
 ## Run tests
 `mvn integration-test`
