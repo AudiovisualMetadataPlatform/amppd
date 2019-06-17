@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import br.com.six2six.fixturefactory.Fixture;
+import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 
 @RunWith(SpringRunner.class)
@@ -33,6 +40,25 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Autowired
 	private PrimaryfileSupplementRepository supplementRepository;
 
+	@Autowired 
+	private ObjectMapper mapper;
+	private PrimaryfileSupplement obj ;
+	/*
+	 * private ObjectFactory objFactory = new ObjectFactory();
+	 * 
+	 * @Before public void initiateBeforeTests() throws ClassNotFoundException {
+	 * HashMap params = new HashMap<String, String>(); objPrimaryFile=
+	 * (Primaryfile)objFactory.createDataentityObject(params, "Primaryfile");
+	 * 
+	 * }
+	 */
+	
+	@BeforeClass
+	public static void setupTest() 
+	{
+	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
+	}
+	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
 		supplementRepository.deleteAll();
@@ -71,15 +97,18 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Test
 	public void shouldQueryPrimaryfileSupplement() throws Exception {
 
-		mockMvc.perform(post("/primaryfileSupplements").content(
-				"{ \"name\": \"PrimaryfileSupplement 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated());
+		obj = Fixture.from(PrimaryfileSupplement.class).gimme("valid");
+		
+		String json = mapper.writeValueAsString(obj);
+		mockMvc.perform(post("/primaryfileSupplements")
+				  .content(json)).andExpect(
+						  status().isCreated());
 
 		mockMvc.perform(
-				get("/primaryfileSupplements/search/findByName?name={name}", "PrimaryfileSupplement 1")).andExpect(
+				get("/primaryfileSupplements/search/findByName?name={name}", obj.getName())).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfileSupplements[0].name").value(
-										"PrimaryfileSupplement 1"));
+										obj.getName()));
 	}
 
 	@Test
