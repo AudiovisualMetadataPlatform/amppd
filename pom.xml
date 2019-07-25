@@ -107,7 +107,17 @@
 		<dependency>
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-rest-hal-browser</artifactId>
-		</dependency>		
+		</dependency>
+		<dependency>
+			<groupId>com.github.jmchilton.blend4j</groupId>
+			<artifactId>blend4j</artifactId>
+			<version>0.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.16.Final</version>
+		</dependency>
         <!-- TODO switch H2 to one of the followings
         <dependency>
          		<groupId>org.springframework.boot</groupId>
