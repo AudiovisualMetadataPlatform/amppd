@@ -5,9 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +21,10 @@ import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
-import lombok.extern.java.Log;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-@Log
 public class BundleItemControllerTests {
 
     @Autowired
