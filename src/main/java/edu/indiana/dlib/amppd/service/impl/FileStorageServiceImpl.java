@@ -50,7 +50,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */
 
 	
-	private ConfigProperties config = new ConfigProperties(); 
+	private ConfigProperties config; 
 	
 	private Path root;
 
