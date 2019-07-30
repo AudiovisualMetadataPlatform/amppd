@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import edu.indiana.dlib.amppd.config.ConfigProperties;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -44,18 +45,32 @@ import lombok.extern.java.Log;
 @Log
 public class FileStorageServiceImpl implements FileStorageService {
 
-	@Value("${amppd.filesys.root:/tmp/amppd/}")
-	private String rootPathname;
+	/*
+	 * @Value("${amppd.filesys.root:/tmp/amppd/}") private String rootPathname;
+	 */
 
+	
+	private ConfigProperties config = new ConfigProperties(); 
+	
 	private Path root;
 
 	@Autowired
 	public FileStorageServiceImpl() {
-		try {			
-			if (rootPathname == null) rootPathname = "/tmp/amppd/"; // TODO: AMP-69 remove below, which is a tmp work-around for @Value not taking effect
-			root = Paths.get(rootPathname);
+		try {
+			config = new ConfigProperties();
+			if (config.getFilesysroot() == null) 
+				config.setFilesysroot("/tmp/amppd/"); // TODO: AMP-69 remove below, which is a tmp work-around for @Value not taking effect
+			root = Paths.get(config.getFilesysroot());
 			Files.createDirectories(root);	// creates root directory if not already exists
-			log.info("File storage root directory " + rootPathname + " has been created." );
+			log.info("File storage root directory " + config.getFilesysroot() + " has been created." );
+			
+			/*
+			 * if (rootPathname == null) rootPathname = "/tmp/amppd/"; // TODO: AMP-69
+			 * remove below, which is a tmp work-around for @Value not taking effect root =
+			 * Paths.get(rootPathname); Files.createDirectories(root); // creates root
+			 * directory if not already exists log.info("File storage root directory " +
+			 * rootPathname + " has been created." );
+			 */
 		}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize storage", e);
