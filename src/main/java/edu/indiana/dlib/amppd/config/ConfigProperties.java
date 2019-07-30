@@ -21,6 +21,8 @@ public class ConfigProperties {
     @NotNull private String galaxyhost;
     @NotNull private String galaxyport;
     @NotNull private String galaxykey;
+    
+    @NotNull private String filesysroot;
 
     //getters and setters
 }
