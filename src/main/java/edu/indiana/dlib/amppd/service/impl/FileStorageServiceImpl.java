@@ -45,33 +45,18 @@ import lombok.extern.java.Log;
 @Log
 public class FileStorageServiceImpl implements FileStorageService {
 
-	/*
-	 * @Value("${amppd.filesys.root:/tmp/amppd/}") private String rootPathname;
-	 */
-
-	
 	private ConfigProperties config; 
 	
 	private Path root;
 
 	@Autowired
-	public FileStorageServiceImpl() {
+	public FileStorageServiceImpl(ConfigProperties config) {
+		this.config = config;
 		try {
-			config = new ConfigProperties();
-			if (config.getFilesysroot() == null) 
-				config.setFilesysroot("/tmp/amppd/"); // TODO: AMP-69 remove below, which is a tmp work-around for @Value not taking effect
-			root = Paths.get(config.getFilesysroot());
-			Files.createDirectories(root);	// creates root directory if not already exists
-			log.info("File storage root directory " + config.getFilesysroot() + " has been created." );
-			
-			/*
-			 * if (rootPathname == null) rootPathname = "/tmp/amppd/"; // TODO: AMP-69
-			 * remove below, which is a tmp work-around for @Value not taking effect root =
-			 * Paths.get(rootPathname); Files.createDirectories(root); // creates root
-			 * directory if not already exists log.info("File storage root directory " +
-			 * rootPathname + " has been created." );
-			 */
-		}
+				root = Paths.get(this.config.getFilesysroot());
+				Files.createDirectories(root);	// creates root directory if not already exists
+				log.info("File storage root directory " + this.config.getFilesysroot() + " has been created." );
+			}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize storage", e);
 		}
