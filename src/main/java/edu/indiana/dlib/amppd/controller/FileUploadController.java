@@ -19,7 +19,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.sun.jersey.api.client.ClientResponse;
 
-import edu.indiana.dlib.amppd.config.ConfigProperties;
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
@@ -59,7 +59,7 @@ public class FileUploadController {
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
 	@Autowired
-	private ConfigProperties config;
+	private GalaxyPropertyConfig config;
 
 	// TODO: handle redirect for all following methods
 	// TODO: consider moving most logic in methods into FileStorageServiceImpl
@@ -147,14 +147,12 @@ public class FileUploadController {
 	@ResponseBody
 	public String HandleGalaxyImport(@PathVariable("id") String lib_name){
 
-		final String galaxyInstanceUrl = "http://"+config.getGalaxyhost()+':'+config.getGalaxyport();
+		final String galaxyInstanceUrl = config.getBaseUrl();
 
-		final String galaxyApiKey = config.getGalaxykey();
+		final String galaxyApiKey = config.getKey();
 		GalaxyInstance galaxyInstance = GalaxyInstanceFactory.get(galaxyInstanceUrl, galaxyApiKey, true);
 
 		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
-
-
 
 		String msg = "Galaxy Instance: "+galaxyInstanceUrl+"" +
 				"t Lib:"+libraryClient.getLibraries().toString();
@@ -182,8 +180,6 @@ public class FileUploadController {
 		} else {
 			log.info("Unable to find lib"+lib_name);
 		}
-
-
 
 		log.info(msg);
 		return msg;

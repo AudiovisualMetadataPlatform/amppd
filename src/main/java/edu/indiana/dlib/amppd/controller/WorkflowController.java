@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.model.GalaxyWorkflow;
 import lombok.extern.java.Log;
 
@@ -18,19 +19,22 @@ import lombok.extern.java.Log;
 @Log
 public class WorkflowController {
 	
+	@Autowired
+	private GalaxyPropertyConfig config;
+
     private RestTemplate restTemplate = new RestTemplate();
 	
-	@Value("${galaxy.workflow.url:http://localhost:8300/api/workflows}")
-	private String workflowUrl;
-	
-	/**
-	 * Helper method to return the base URL of Galaxy REST service.
-	 * @return
-	 */
-	public String getWorkflowUrl() {
-		if (workflowUrl == null) workflowUrl = "http://localhost:8080/api/workflows"; // TODO remove this line, which is a work-around for @Value not taking effect
-		return workflowUrl;
-	}
+//	@Value("${galaxy.workflow.url:http://localhost:8300/api/workflows}")
+//	private String workflowUrl;
+//	
+//	/**
+//	 * Helper method to return the base URL of Galaxy REST service.
+//	 * @return
+//	 */
+//	public String getWorkflowUrl() {
+//		if (workflowUrl == null) workflowUrl = "http://localhost:8080/api/workflows"; // TODO remove this line, which is a work-around for @Value not taking effect
+//		return workflowUrl;
+//	}
 	
 	/**
 	 * Helper method to retrieve the API key for the current user from Galaxy. The key is used as a token for every REST request made to Galaxy.
@@ -51,7 +55,7 @@ public class WorkflowController {
 	 */
 	@GetMapping("/workflows")
 	public GalaxyWorkflow[] getWorkflows() {		
-		String url = getWorkflowUrl() + "?=" + getApiKey();
+		String url = config.getWorkflowUrl() + "?=" + getApiKey();
 		GalaxyWorkflow[] workflows = restTemplate.getForObject(url, GalaxyWorkflow[].class);
 		log.info("Current workflows in Galaxy: " + workflows);
 		return workflows;
