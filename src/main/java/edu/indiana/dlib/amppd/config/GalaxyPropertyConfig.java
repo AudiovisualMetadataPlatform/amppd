@@ -26,7 +26,7 @@ public class GalaxyPropertyConfig {
     @NotNull private String username;
     @NotNull private String password;
     @NotNull private String key;
-    @NotNull private String workflowrApi = "/api/workflows";
+//    @NotNull private String workflowrApi = "/api/workflows";
     
     /**
      * Get the base URL of Galaxy application.
@@ -37,19 +37,11 @@ public class GalaxyPropertyConfig {
     }
     
     /**
-     * Get the base URL of Galaxy application.
+     * Get the base REST API URL of Galaxy application.
      * @return
      */
     public String getApiUrl() {
-    	return "http://" + host + ':' + "/api";
+    	return getBaseUrl() + "/api";
     }
-    
-    /**
-     * Get the URL for workflow Rest API.
-     * @return
-     */
-    public String getWorkflowUrl() {
-    	return getBaseUrl() + workflowrApi;
-    }
-    
+        
 }
