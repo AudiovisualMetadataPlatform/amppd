@@ -22,11 +22,13 @@ public class WorkflowControllerTests {
     private MockMvc mvc;
 
     // TODO remove @Ignore once Galaxy is set up for CI env
-    @Ignore
+//    @Ignore
     @Test
     public void shouldReturnWorkflows() throws Exception {
     	mvc.perform(get("/workflows")).andExpect(status().isOk()).andExpect(
-//				jsonPath("$", hasSize(1))).andExpect(	// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all
+    			// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all, 
+    			// TODO also need to add boolean expression for the case when no workflow exists
+//				jsonPath("$", hasSize(1))).andExpect(	
 						jsonPath("$[0].model_class").value("StoredWorkflow"));
     }
 
