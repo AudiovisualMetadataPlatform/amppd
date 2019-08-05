@@ -25,7 +25,6 @@ public class GalaxyPropertyConfig {
     @NotNull private Integer port = 8300;
     @NotNull private String username;
     @NotNull private String password;
-    @NotNull private String key;
     
     /**
      * Get the base URL of Galaxy application.
