@@ -19,40 +19,8 @@ import lombok.extern.java.Log;
 public class WorkflowController {
 	
 	@Autowired
-	private GalaxyPropertyConfig config;
-	
-	@Autowired
 	private GalaxyApiService galaxyApiService;
 
-//    private RestTemplate restTemplate = new RestTemplate();
-	
-//	@Value("${galaxy.workflow.url:http://localhost:8300/api/workflows}")
-//	private String workflowUrl;
-//	
-//	/**
-//	 * Helper method to return the base URL of Galaxy REST service.
-//	 * @return
-//	 */
-//	public String getWorkflowUrl() {
-//		if (workflowUrl == null) workflowUrl = "http://localhost:8080/api/workflows"; // TODO remove this line, which is a work-around for @Value not taking effect
-//		return workflowUrl;
-//	}
-	
-//	/**
-//	 * Helper method to retrieve the API key for the current user from Galaxy. The key is used as a token for every REST request made to Galaxy.
-//	 * @return
-//	 */
-//	public String getApiKey() {
-//		RestTemplateFactory.
-//		
-//		String key = "ffe172319385ae7644a65bc59d5052dc";
-//		/* TODO get api key with following 
-//		request: curl –user zipzap@foo.com:password http://localhost:8080/api/authenticate/baseauth
-//		response: {“api_key”: “baa4d6e3a156d3033f05736255f195f9” }
-//		 */
-//		return key;
-//	}
-	
 	/**
 	 * Retrieve all workflows from Galaxy through its REST API.
 	 * @return
@@ -60,11 +28,6 @@ public class WorkflowController {
 	@GetMapping("/workflows")
 	public GalaxyWorkflow[] getWorkflows() {		
 		return galaxyApiService.getWorkflows();
-		
-//		String url = config.getWorkflowUrl() + "?=" + getApiKey();
-//		GalaxyWorkflow[] workflows = restTemplate.getForObject(url, GalaxyWorkflow[].class);
-//		log.info("Current workflows in Galaxy: " + workflows);
-//		return workflows;
 	}
 
 }
