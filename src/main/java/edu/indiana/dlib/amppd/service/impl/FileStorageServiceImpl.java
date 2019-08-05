@@ -11,14 +11,14 @@ import java.nio.file.StandardCopyOption;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import edu.indiana.dlib.amppd.config.ConfigProperties;
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -45,20 +45,20 @@ import lombok.extern.java.Log;
 @Log
 public class FileStorageServiceImpl implements FileStorageService {
 
-	private ConfigProperties config; 
+	private AmppdPropertyConfig config; 
 	
 	private Path root;
 
 	@Autowired
-	public FileStorageServiceImpl(ConfigProperties config) {
-		this.config = config;
+	public FileStorageServiceImpl(AmppdPropertyConfig amppdconfig) {
+		config = amppdconfig;
 		try {
-				root = Paths.get(this.config.getFilesysroot());
+				root = Paths.get(config.getFileStorageRoot());
 				Files.createDirectories(root);	// creates root directory if not already exists
-				log.info("File storage root directory " + this.config.getFilesysroot() + " has been created." );
+				log.info("File storage root directory " + config.getFileStorageRoot() + " has been created." );
 			}
 		catch (IOException e) {
-			throw new StorageException("Could not initialize storage", e);
+			throw new StorageException("Could not initialize file storage root directory " + config.getFileStorageRoot(), e);
 		}
 	}
 

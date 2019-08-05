@@ -1,15 +1,17 @@
 package edu.indiana.dlib.amppd;
 
-import edu.indiana.dlib.amppd.config.ConfigProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+
 @SpringBootApplication
 @EnableJpaRepositories("edu.indiana.dlib.amppd.repository")
-@EnableConfigurationProperties(ConfigProperties.class)
+@EnableConfigurationProperties({GalaxyPropertyConfig.class, AmppdPropertyConfig.class})
 public class AmppdApplication {
 	
     private static ApplicationContext applicationContext;
