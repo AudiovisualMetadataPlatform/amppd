@@ -1,16 +1,25 @@
 package edu.indiana.dlib.amppd.controller;
 
-import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
-import edu.indiana.dlib.amppd.config.ConfigProperties;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
+import com.github.jmchilton.blend4j.galaxy.GalaxyInstanceFactory;
+import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
+import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
+import com.github.jmchilton.blend4j.galaxy.beans.Library;
+import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
+import com.sun.jersey.api.client.ClientResponse;
+
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
@@ -21,20 +30,8 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.java.Log;
-
-
-import com.github.jmchilton.blend4j.Config;
-import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
-import com.github.jmchilton.blend4j.galaxy.GalaxyInstanceFactory;
-import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
-import com.github.jmchilton.blend4j.galaxy.beans.FileLibraryUpload;
-import com.github.jmchilton.blend4j.galaxy.beans.Library;
-import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
-import com.sun.jersey.api.client.ClientResponse;
-
-import java.util.List;
-import java.util.Properties;
 
 // TODO: when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
 
@@ -51,6 +48,9 @@ public class FileUploadController {
     private FileStorageService fileStorageService;
 	
 	@Autowired
+	private GalaxyApiService galaxyApiService;
+	
+	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
@@ -63,7 +63,7 @@ public class FileUploadController {
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
 	@Autowired
-	private ConfigProperties config;
+	private GalaxyPropertyConfig config;
 
 	// TODO: handle redirect for all following methods
 	// TODO: consider moving most logic in methods into FileStorageServiceImpl
@@ -151,14 +151,12 @@ public class FileUploadController {
 	@ResponseBody
 	public String HandleGalaxyImport(@PathVariable("id") String lib_name){
 
-		final String galaxyInstanceUrl = "http://"+config.getGalaxyhost()+':'+config.getGalaxyport();
+		final String galaxyInstanceUrl = config.getBaseUrl();
 
-		final String galaxyApiKey = config.getGalaxykey();
+		final String galaxyApiKey = galaxyApiService.getApiKey();
 		GalaxyInstance galaxyInstance = GalaxyInstanceFactory.get(galaxyInstanceUrl, galaxyApiKey, true);
 
 		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
-
-
 
 		String msg = "Galaxy Instance: "+galaxyInstanceUrl+"" +
 				"t Lib:"+libraryClient.getLibraries().toString();
@@ -186,8 +184,6 @@ public class FileUploadController {
 		} else {
 			log.info("Unable to find lib"+lib_name);
 		}
-
-
 
 		log.info(msg);
 		return msg;

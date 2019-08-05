@@ -1,13 +1,12 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.galaxy;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 /**
- * Class containing all the fields received when querying Galaxy Workflow vis REST API.
+ * Wrapper class containing all the fields received when querying Galaxy Workflow vis REST API.
  * @author yingfeng
- *
  */
 @Data
 @NoArgsConstructor
