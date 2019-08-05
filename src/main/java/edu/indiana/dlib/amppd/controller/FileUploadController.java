@@ -30,6 +30,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.java.Log;
 
 // TODO: when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
@@ -45,6 +46,9 @@ public class FileUploadController {
 	
 	@Autowired
     private FileStorageService fileStorageService;
+	
+	@Autowired
+	private GalaxyApiService galaxyApiService;
 	
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
@@ -149,7 +153,7 @@ public class FileUploadController {
 
 		final String galaxyInstanceUrl = config.getBaseUrl();
 
-		final String galaxyApiKey = config.getKey();
+		final String galaxyApiKey = galaxyApiService.getApiKey();
 		GalaxyInstance galaxyInstance = GalaxyInstanceFactory.get(galaxyInstanceUrl, galaxyApiKey, true);
 
 		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
