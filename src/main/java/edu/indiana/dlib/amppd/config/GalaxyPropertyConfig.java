@@ -26,7 +26,6 @@ public class GalaxyPropertyConfig {
     @NotNull private String username;
     @NotNull private String password;
     @NotNull private String key;
-//    @NotNull private String workflowrApi = "/api/workflows";
     
     /**
      * Get the base URL of Galaxy application.
