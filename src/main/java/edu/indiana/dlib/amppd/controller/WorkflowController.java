@@ -1,13 +1,13 @@
 package edu.indiana.dlib.amppd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.model.GalaxyWorkflow;
+import edu.indiana.dlib.amppd.web.RestTemplateFactory;
 import lombok.extern.java.Log;
 
 /**
@@ -41,6 +41,8 @@ public class WorkflowController {
 	 * @return
 	 */
 	public String getApiKey() {
+		RestTemplateFactory.
+		
 		String key = "ffe172319385ae7644a65bc59d5052dc";
 		/* TODO get api key with following 
 		request: curl –user zipzap@foo.com:password http://localhost:8080/api/authenticate/baseauth
