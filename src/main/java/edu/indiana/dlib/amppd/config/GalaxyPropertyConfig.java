@@ -22,8 +22,9 @@ import lombok.Setter;
 public class GalaxyPropertyConfig {
 
     @NotNull private String host = "localhost";
-    @NotNull private String port = "8300";
-    @NotNull private String user = "amppd";
+    @NotNull private Integer port = 8300;
+    @NotNull private String username;
+    @NotNull private String password;
     @NotNull private String key;
     @NotNull private String workflowrApi = "/api/workflows";
     
@@ -33,6 +34,14 @@ public class GalaxyPropertyConfig {
      */
     public String getBaseUrl() {
     	return "http://" + host + ':' + port;
+    }
+    
+    /**
+     * Get the base URL of Galaxy application.
+     * @return
+     */
+    public String getApiUrl() {
+    	return "http://" + host + ':' + "/api";
     }
     
     /**
