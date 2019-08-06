@@ -26,3 +26,6 @@ HELP.md
 /build/
 /mvnw
 /mvnw.cmd
+
+### application-env.properties shall not be included in VCS as it contains sensitive info
+application-*.properties
