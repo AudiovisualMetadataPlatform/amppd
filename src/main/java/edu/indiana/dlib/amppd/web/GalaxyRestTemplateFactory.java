@@ -11,6 +11,8 @@ import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import lombok.Getter;
 import lombok.Setter;
 
+// TODO This class is not used anymore and can probably be removed.
+
 /**
  * Spring FactoryBean to allow flexibility on Bootstrapping the RestTemplate into the Spring context with Basic Authentication
  * @author yingfeng

@@ -1,11 +1,13 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import edu.indiana.dlib.amppd.model.galaxy.GalaxyWorkflow;
+import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.java.Log;
 
@@ -26,8 +28,19 @@ public class WorkflowController {
 	 * @return
 	 */
 	@GetMapping("/workflows")
-	public GalaxyWorkflow[] getWorkflows() {		
-		return galaxyApiService.getWorkflows();
+	public List<Workflow> getWorkflows() {		
+		List<Workflow> workflows = galaxyApiService.getInstance().getWorkflowsClient().getWorkflows();
+		log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
+		return workflows;
 	}
+
+//	/**
+//	 * Retrieve all workflows from Galaxy through its REST API.
+//	 * @return
+//	 */
+//	@GetMapping("/workflows")
+//	public GalaxyWorkflow[] getWorkflows() {		
+//		return galaxyApiService.getWorkflows();
+//	}
 
 }
