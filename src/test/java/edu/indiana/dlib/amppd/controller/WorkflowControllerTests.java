@@ -4,7 +4,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +27,9 @@ public class WorkflowControllerTests {
     	mvc.perform(get("/workflows")).andExpect(status().isOk()).andExpect(
     			// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all, 
     			// TODO also need to add boolean expression for the case when no workflow exists
-//				jsonPath("$", hasSize(1))).andExpect(	
-						jsonPath("$[0].model_class").value("StoredWorkflow"));
+    			//jsonPath("$", hasSize(1))).andExpect(	
+    			//jsonPath("$[0].model_class").value("StoredWorkflow"));
+    			jsonPath("$[0].name").isNotEmpty());
     }
 
 }

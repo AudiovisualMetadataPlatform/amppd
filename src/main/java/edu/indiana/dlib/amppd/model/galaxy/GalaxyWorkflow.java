@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+// TODO This class is not used anymore and can probably be removed.
+
 /**
  * Wrapper class containing all the fields received when querying Galaxy Workflow vis REST API.
  * @author yingfeng

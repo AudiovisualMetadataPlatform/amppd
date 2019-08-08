@@ -1,10 +1,11 @@
 package edu.indiana.dlib.amppd.service;
 
+import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
+
 import edu.indiana.dlib.amppd.model.galaxy.GalaxyUser;
-import edu.indiana.dlib.amppd.model.galaxy.GalaxyWorkflow;
 
 /**
- * Service to provide various requests to Galaxy instance via Galaxy REST API. 
+ * Service to provide convenient application level helpers to access Galaxy REST API.  
  * @author yingfeng
  */
 public interface GalaxyApiService {
@@ -16,6 +17,11 @@ public interface GalaxyApiService {
 	 * @return
 	 */
 	public GalaxyUser getCurrentUser();
+	
+	/**
+	 * Returns Galaxy instance for the current user.
+	 */
+	public GalaxyInstance getInstance();
 
 	/**
 	 * Retrieve the API key for the current user from Galaxy. The key is used as a token for every REST request made to Galaxy.
@@ -23,16 +29,16 @@ public interface GalaxyApiService {
 	 */
 	public String getApiKey();
 		
-    /**
-     * Get the URL for Galaxy workflow Rest API.
-     * @return
-     */
-    public String getWorkflowUrl();
-	
-	/**
-	 * Retrieve all currently existing workflows from Galaxy through its REST API.
-	 * @return
-	 */
-	public GalaxyWorkflow[] getWorkflows();
+//    /**
+//     * Get the URL for Galaxy workflow Rest API.
+//     * @return
+//     */
+//    public String getWorkflowUrl();
+//	
+//	/**
+//	 * Retrieve all currently existing workflows from Galaxy through its REST API.
+//	 * @return
+//	 */
+//	public GalaxyWorkflow[] getWorkflows();
 
 }
