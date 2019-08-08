@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
+import edu.indiana.dlib.amppd.model.galaxy.GalaxyUser;
 import edu.indiana.dlib.amppd.model.galaxy.GalaxyWorkflow;
 
 /**
@@ -10,6 +11,12 @@ public interface GalaxyApiService {
     
 	// TODO further divide Galaxy related services into each own class, for ex, all workflow related methods can be moved into a separate GalaxyWorkflowService.
 	
+	/**
+	 * Retrieve the Galaxy user information for the current AMP user.
+	 * @return
+	 */
+	public GalaxyUser getCurrentUser();
+
 	/**
 	 * Retrieve the API key for the current user from Galaxy. The key is used as a token for every REST request made to Galaxy.
 	 * @return

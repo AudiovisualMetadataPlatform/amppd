@@ -22,7 +22,7 @@ public class WorkflowControllerTests {
     private MockMvc mvc;
 
     // TODO remove @Ignore once Galaxy is set up for CI env
-    @Ignore
+//    @Ignore
     @Test
     public void shouldReturnWorkflows() throws Exception {
     	mvc.perform(get("/workflows")).andExpect(status().isOk()).andExpect(
