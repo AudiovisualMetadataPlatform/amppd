@@ -53,7 +53,7 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		 */
 		GalaxyUser user = new GalaxyUser();
 		user.setUsername(config.getUsername());
-		user.setUsername(config.getPassword());
+		user.setPassword(config.getPassword());
 		return user;		
 	}
 	
@@ -63,18 +63,16 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 	public String getApiKey() {
 		// the current user info is stored in the current session, supposedly we only need to retrieve the API key once and it will be stored in the current user afterwards
 		GalaxyUser user = getCurrentUser();
-		if (!user.getApiKey().isEmpty()) {
+		if (user.getApiKey() != null) {
 			return user.getApiKey();
 		}
 		
+
+
 		/* Galaxy api key can be obtained via a GET request with baseauth, for ex.
 		request: curl –user zipzap@foo.com:password http://localhost:8080/api/authenticate/baseauth
 		response: {“api_key”: “baa4d6e3a156d3033f05736255f195f9” }
 		 */
-		/* TODO 
-		 * For now we use a master amppd user for all API requests; 
-		 * in the future we shall retrieve user/password from current AMP session, assuming the user already has a Galaxy account set up with same credentials as in AMP.
-		 */ 
 		RestTemplate authRestTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactoryBasicAuth(new HttpHost(config.getHost(), config.getPort(), "http")));
 		authRestTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(user.getUsername(), user.getPassword()));
 		String url = config.getApiUrl() + "/authenticate/baseauth";
