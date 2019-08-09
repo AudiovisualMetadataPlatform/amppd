@@ -21,4 +21,9 @@ public class GalaxyUser {
 	private String apiKey;
 	private GalaxyInstance instance;
 	
+	public GalaxyUser(String username, String password) {
+		this.username = username;
+		this.password = password;		
+	}
+	
 }

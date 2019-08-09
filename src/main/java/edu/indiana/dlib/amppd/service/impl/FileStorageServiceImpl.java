@@ -53,16 +53,20 @@ import lombok.extern.java.Log;
 @Service
 @Log
 public class FileStorageServiceImpl implements FileStorageService {
+	public static String GALAXY_LIBARY_NAME = "amppd";
 
-	private AmppdPropertyConfig config; 
-	
 	@Autowired
 	private GalaxyApiService galaxyApiService;
-	
+	private GalaxyInstance galaxyInstance;
+	private LibrariesClient libraryClient;
+	private Library galaxyLibrary;
+
+	private AmppdPropertyConfig config; 	
 	private Path root;
 
 	@Autowired
 	public FileStorageServiceImpl(AmppdPropertyConfig amppdconfig) {
+		// initialize Amppd file system 
 		config = amppdconfig;
 		try {
 				root = Paths.get(config.getFileStorageRoot());
@@ -72,8 +76,23 @@ public class FileStorageServiceImpl implements FileStorageService {
 		catch (IOException e) {
 			throw new StorageException("Could not initialize file storage root directory " + config.getFileStorageRoot(), e);
 		}
+		
+		// initialize Galaxy data library, which is shared by all amppd users
+		galaxyInstance = galaxyApiService.getInstance();
+		libraryClient = galaxyInstance.getLibrariesClient();
+		Library galaxyLibrary = new Library(GALAXY_LIBARY_NAME);
+		galaxyLibrary.setDescription("Amppd Shared Library");
+		try {
+			libraryClient.createLibrary(galaxyLibrary);
+			log.info("Initialized shared Galaxy data library for AMP users: " + galaxyLibrary.getName());
+		}
+		catch (Exception e) {
+			String msg = "Cannot create shared Galaxy data library for AMP users.";
+			log.severe(msg);
+			throw new RuntimeException(msg, e);
+		}
 	}
-
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)
 	 */
@@ -225,9 +244,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadFileToGalaxy(String,String)
 	 */
 	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
-		GalaxyInstance galaxyInstance = galaxyApiService.getInstance();
-		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
-		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Instance: " + galaxyInstance.getGalaxyUrl() + "\t Galaxy Library:" + libraryName;
+		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
 		log.info(msg);
 
 		final List<Library> libraries = libraryClient.getLibraries();
