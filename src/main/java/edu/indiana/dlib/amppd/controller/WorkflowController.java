@@ -28,19 +28,20 @@ public class WorkflowController {
 	 * @return
 	 */
 	@GetMapping("/workflows")
-	public List<Workflow> getWorkflows() {		
-		List<Workflow> workflows = galaxyApiService.getInstance().getWorkflowsClient().getWorkflows();
-		log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
+	public List<Workflow> getWorkflows() {	
+		List<Workflow> workflows = null;
+	
+		try {
+			workflows = galaxyApiService.getInstance().getWorkflowsClient().getWorkflows();
+			log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
+		}
+		catch (Exception e) {
+			String msg = "Unable to retrieve workflows from Galaxy instance.";
+			log.severe(msg);
+			throw new RuntimeException(msg, e);
+		}
+		
 		return workflows;
 	}
-
-//	/**
-//	 * Retrieve all workflows from Galaxy through its REST API.
-//	 * @return
-//	 */
-//	@GetMapping("/workflows")
-//	public GalaxyWorkflow[] getWorkflows() {		
-//		return galaxyApiService.getWorkflows();
-//	}
 
 }

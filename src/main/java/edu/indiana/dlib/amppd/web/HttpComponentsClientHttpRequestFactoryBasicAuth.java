@@ -12,8 +12,6 @@ import org.apache.http.protocol.HttpContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
-// TODO This class is not used anymore and can probably be removed.
-
 /**
  * Extension to HttpComponentsClientHttpRequestFactory, to override createHttpContext for Basic Authentication supports.
  * @author yingfeng

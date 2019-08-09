@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import lombok.Getter;
-import lombok.Setter;
-
-// TODO This class is not used anymore and can probably be removed.
+import lombok.Data;
 
 /**
  * Spring FactoryBean to allow flexibility on Bootstrapping the RestTemplate into the Spring context with Basic Authentication
@@ -19,21 +16,19 @@ import lombok.Setter;
  *
  */
 @Component
-@Getter
-@Setter
-public class GalaxyRestTemplateFactory implements FactoryBean<RestTemplate>, InitializingBean {
+@Data
+public class RestTemplateFactory implements FactoryBean<RestTemplate>, InitializingBean {
 	@Autowired
 	private GalaxyPropertyConfig config;
 
-    private RestTemplate restTemplate;
- 
-//	private String host;
-//	private Integer port;
+    private RestTemplate restTemplate; 
+	private String host;
+	private Integer port;
 	
-//    public GalaxyRestTemplateFactory(String host, RestTemplate restTemplate) {
-//    	this.host = host;
-//    	this.port = port;
-//    }
+    public RestTemplateFactory(String host, Integer port) {
+    	this.host = host;
+    	this.port = port;
+    }
     
     public RestTemplate getObject() {
         return restTemplate;
@@ -48,8 +43,7 @@ public class GalaxyRestTemplateFactory implements FactoryBean<RestTemplate>, Ini
     }
  
     public void afterPropertiesSet() {
-//        HttpHost hhost = new HttpHost(host, port, "http");
-        HttpHost hhost = new HttpHost(config.getHost(), config.getPort(), "http");
+        HttpHost hhost = new HttpHost(host, port, "http");
         restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactoryBasicAuth(hhost));
     }
     

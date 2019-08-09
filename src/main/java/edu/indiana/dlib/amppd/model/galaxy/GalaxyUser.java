@@ -20,4 +20,5 @@ public class GalaxyUser {
 	private String password;
 	private String apiKey;
 	private GalaxyInstance instance;
+	
 }

@@ -247,11 +247,18 @@ public class FileStorageServiceImpl implements FileStorageService {
 			upload.setLinkData(true);
 			upload.setFolderId(rootFolder.getId());
 			// TODO catch exception for uploadFileFromUrl and rethrow as GalaxyFileUploadException
-			uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
-			msg = "\t Upload completed.";
-			log.info(msg);
+			try {
+				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
+				msg = "Upload completed.";
+				log.info(msg);
+			}
+			catch (Exception e) {
+				msg = "Upload failed. " + e.getMessage();
+				log.severe(msg);
+				throw new GalaxyFileUploadException(msg, e);
+			}
 		} else {
-			msg = "\t Upload failed, unable to find the data library " + libraryName;
+			msg = "Upload failed, unable to find the data library " + libraryName;
 			log.severe(msg);
 			throw new GalaxyFileUploadException(msg);
 		}

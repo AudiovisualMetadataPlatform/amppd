@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstanceFactory;
@@ -25,9 +24,6 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 
 	@Autowired
 	private GalaxyPropertyConfig config;
-
-//	@Autowired
-	private RestTemplate restTemplate = new RestTemplate();
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyApiService.getApiKey()
@@ -55,7 +51,16 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		}		
 		
 		// otherwise create a new Galaxy instance using user's credentials and store it for the current user
-		GalaxyInstance instance = GalaxyInstanceFactory.getFromCredentials(config.getBaseUrl(), config.getUsername(), config.getPassword());
+		GalaxyInstance instance = null;
+		try {
+			instance = GalaxyInstanceFactory.getFromCredentials(config.getBaseUrl(), user.getUsername(), user.getPassword());
+		}
+		catch (Exception e) {
+			String msg = "Unable to acquire Galaxy instance for user " + user.getUsername() + " at " + config.getBaseUrl();
+			log.severe(msg);
+			throw new RuntimeException(msg, e);
+		}
+		
 		user.setInstance(instance);
 		return instance;
 	}
@@ -74,35 +79,6 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		String key = getInstance().getApiKey();
 		user.setApiKey(key);
 		return key;
-
-//		/* Galaxy api key can be obtained via a GET request with baseauth, for ex.
-//		request: curl –user zipzap@foo.com:password http://localhost:8080/api/authenticate/baseauth
-//		response: {“api_key”: “baa4d6e3a156d3033f05736255f195f9” }
-//		 */
-//		RestTemplate authRestTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactoryBasicAuth(new HttpHost(config.getHost(), config.getPort(), "http")));
-//		authRestTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(user.getUsername(), user.getPassword()));
-//		String url = config.getApiUrl() + "/authenticate/baseauth";
-//		GalaxyApiKey key = authRestTemplate.getForObject(url, GalaxyApiKey.class);			
-//		user.setApiKey(key.getApi_key());
-//		return key.getApi_key();
 	}
-		
-//    /**
-//     * @see edu.indiana.dlib.amppd.service.GalaxyApiService.getWorkflowUrl()
-//     */
-//    public String getWorkflowUrl() {
-//    	return config.getApiUrl() + "/workflows";
-//    }
-//
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.GalaxyApiService.getWorkflows()
-//	 */
-//	@GetMapping("/workflows")
-//	public GalaxyWorkflow[] getWorkflows() {		
-//		String url = getWorkflowUrl() + "?key=" + getApiKey();
-//		GalaxyWorkflow[] workflows = restTemplate.getForObject(url, GalaxyWorkflow[].class);
-//		log.info("Current workflows in Galaxy: " + workflows);
-//		return workflows;
-//	}
 
 }
