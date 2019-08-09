@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
+import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
+import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
+import com.github.jmchilton.blend4j.galaxy.beans.Library;
+import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
+import com.sun.jersey.api.client.ClientResponse;
+
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -30,6 +38,7 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.java.Log;
 
 /**
@@ -46,6 +55,9 @@ import lombok.extern.java.Log;
 public class FileStorageServiceImpl implements FileStorageService {
 
 	private AmppdPropertyConfig config; 
+	
+	@Autowired
+	private GalaxyApiService galaxyApiService;
 	
 	private Path root;
 
@@ -207,6 +219,51 @@ public class FileStorageServiceImpl implements FileStorageService {
 		}
 		
 		return dirname + File.separator  + filename;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadFileToGalaxy(String,String)
+	 */
+	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
+		GalaxyInstance galaxyInstance = galaxyApiService.getInstance();
+		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
+		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Instance: " + galaxyInstance.getGalaxyUrl() + "\t Galaxy Library:" + libraryName;
+		log.info(msg);
+
+		final List<Library> libraries = libraryClient.getLibraries();
+		Library matchingLibrary = null;
+		for(final Library library : libraries) {
+			if (library.getName().equals(libraryName)) {
+				matchingLibrary = library;
+				break;
+			}
+		}
+
+		ClientResponse uploadResponse = null;
+		if (!matchingLibrary.equals(null)) {
+			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
+			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
+			upload.setContent(filePath);
+			upload.setLinkData(true);
+			upload.setFolderId(rootFolder.getId());
+			// TODO catch exception for uploadFileFromUrl and rethrow as GalaxyFileUploadException
+			try {
+				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
+				msg = "Upload completed.";
+				log.info(msg);
+			}
+			catch (Exception e) {
+				msg = "Upload failed. " + e.getMessage();
+				log.severe(msg);
+				throw new GalaxyFileUploadException(msg, e);
+			}
+		} else {
+			msg = "Upload failed, unable to find the data library " + libraryName;
+			log.severe(msg);
+			throw new GalaxyFileUploadException(msg);
+		}
+
+		return uploadResponse;
 	}
 
 }

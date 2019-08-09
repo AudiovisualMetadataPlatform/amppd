@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.sun.jersey.api.client.ClientResponse;
+
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -92,4 +94,10 @@ public interface FileStorageService {
 	 */
 	public String getFilePathname(Supplement supplement);
 
+	/**
+	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
+	 * 
+	 */
+	public ClientResponse uploadFileToGalaxy(String filePath, String lib_name);
+	
 }
