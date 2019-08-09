@@ -1,23 +1,12 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
-import com.github.jmchilton.blend4j.galaxy.GalaxyInstanceFactory;
-import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
-import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
-import com.github.jmchilton.blend4j.galaxy.beans.Library;
-import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
-import com.sun.jersey.api.client.ClientResponse;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -146,74 +135,5 @@ public class FileUploadController {
 //    	redirectAttributes.addFlashAttribute("message", msg);
 //        return "redirect:/";
     }
-
-    @PostMapping("/datalib/import/{id}")
-	@ResponseBody
-	public String HandleGalaxyImport(@PathVariable("id") String lib_name){
-
-		final String galaxyInstanceUrl = config.getBaseUrl();
-
-		final String galaxyApiKey = galaxyApiService.getApiKey();
-		GalaxyInstance galaxyInstance = GalaxyInstanceFactory.get(galaxyInstanceUrl, galaxyApiKey, true);
-
-		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
-
-		String msg = "Galaxy Instance: "+galaxyInstanceUrl+"" +
-				"t Lib:"+libraryClient.getLibraries().toString();
-
-		final List<Library> libraries = libraryClient.getLibraries();
-		Library matchingLibrary = null;
-		for(final Library library : libraries) {
-			if (library.getName().equals(lib_name)) {
-				matchingLibrary = library;
-			}
-		}
-
-		if (!matchingLibrary.equals(null)) {
-
-			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
-			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
-			upload.setContent("/Users/aahmad/Desktop/new_b1_visa");
-			upload.setLinkData(true);
-			upload.setFolderId(rootFolder.getId());
-
-			final ClientResponse uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
-
-			msg+="\t Upload Completed.";
-
-		} else {
-			log.info("Unable to find lib"+lib_name);
-		}
-
-		log.info(msg);
-		return msg;
-	}
-
-
-
-//  @GetMapping("/")
-//  public String listUploadedFiles(Model model) throws IOException {
-//
-//      model.addAttribute("files", fileStorageService.loadAll().map(
-//              path -> MvcUriComponentsBuilder.fromMethodName(PrimaryController.class,
-//                      "serveFile", path.getFilename().toString()).build().toString())
-//              .collect(Collectors.toList()));
-//
-//      return "uploadForm";
-//  }
-
-//  @GetMapping("/files/{filename:.+}")
-//  @ResponseBody
-//  public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-//
-//      Resource file = fileStorageService.loadAsResource(filename);
-//      return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-//              "attachment; filename=\"" + file.getFilename() + "\"").body(file);
-//  }    
-
-//    @ExceptionHandler(StorageFileNotFoundException.class)
-//    public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
-//        return ResponseEntity.notFound().build();
-//    }
 
 }
