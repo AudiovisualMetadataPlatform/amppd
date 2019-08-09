@@ -26,6 +26,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.sun.jersey.api.client.ClientResponse;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -223,15 +224,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadFileToGalaxy(String,String)
 	 */
-	public ClientResponse uploadFileToGalaxy(String filePath, String lib_name) {
+	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
 		GalaxyInstance galaxyInstance = galaxyApiService.getInstance();
 		final LibrariesClient libraryClient = galaxyInstance.getLibrariesClient();
-		String msg = "File path: " + filePath + "\t Galaxy Instance: " + galaxyInstance.getGalaxyUrl() + "\t Galaxy Library:" + lib_name;
+		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Instance: " + galaxyInstance.getGalaxyUrl() + "\t Galaxy Library:" + libraryName;
+		log.info(msg);
 
 		final List<Library> libraries = libraryClient.getLibraries();
 		Library matchingLibrary = null;
 		for(final Library library : libraries) {
-			if (library.getName().equals(lib_name)) {
+			if (library.getName().equals(libraryName)) {
 				matchingLibrary = library;
 				break;
 			}
@@ -244,13 +246,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 			upload.setContent(filePath);
 			upload.setLinkData(true);
 			upload.setFolderId(rootFolder.getId());
+			// TODO catch exception for uploadFileFromUrl and rethrow as GalaxyFileUploadException
 			uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
-			msg += "\t Upload Completed.";
+			msg = "\t Upload completed.";
+			log.info(msg);
 		} else {
-			msg += "\t Upload Failed, unable to find the library.";
+			msg = "\t Upload failed, unable to find the data library " + libraryName;
+			log.severe(msg);
+			throw new GalaxyFileUploadException(msg);
 		}
 
-		log.info(msg);
 		return uploadResponse;
 	}
 
