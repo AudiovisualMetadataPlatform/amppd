@@ -29,16 +29,10 @@ public interface GalaxyApiService {
 	 */
 	public String getApiKey();
 		
-//    /**
-//     * Get the URL for Galaxy workflow Rest API.
-//     * @return
-//     */
-//    public String getWorkflowUrl();
-//	
-//	/**
-//	 * Retrieve all currently existing workflows from Galaxy through its REST API.
-//	 * @return
-//	 */
-//	public GalaxyWorkflow[] getWorkflows();
+	/**
+	 * Returns the Galaxy data library for the given library ID.
+	 * Note: This method is a convenient helper as it's missing from blend4j LibraryClient.
+	 */
+
 
 }
