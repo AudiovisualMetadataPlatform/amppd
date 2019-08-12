@@ -266,6 +266,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			// TODO catch exception for uploadFileFromUrl and rethrow as GalaxyFileUploadException
 			try {
 				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
+				uploadResponse.
 				msg = "Upload completed.";
 				log.info(msg);
 			}

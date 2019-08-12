@@ -29,10 +29,4 @@ public interface GalaxyApiService {
 	 */
 	public String getApiKey();
 		
-	/**
-	 * Returns the Galaxy data library for the given library ID.
-	 * Note: This method is a convenient helper as it's missing from blend4j LibraryClient.
-	 */
-
-
 }
