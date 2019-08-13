@@ -15,6 +15,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.sun.jersey.api.client.ClientResponse;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
+import lombok.Getter;
 import lombok.extern.java.Log;
 
 /**
@@ -28,45 +29,48 @@ import lombok.extern.java.Log;
 @Log
 public class GalaxyDataServiceImpl implements GalaxyDataService {
 	
-	public static String GALAXY_LIBARY_NAME = "amppd";
+	public static String SHARED_LIBARY_NAME = "amppd";
 	
 	@Autowired
 	private GalaxyApiService galaxyApiService;
 	
 	private GalaxyInstance galaxyInstance;
+	
+	@Getter
 	private LibrariesClient libraryClient;
-	private Library galaxyLibrary;
+	
+	@Getter
+	private Library sharedLibrary;
 
 	/**
-	 *  initialize Galaxy data library, which is shared by all Amppd users
+	 *  initialize Galaxy data library, which is shared by all AMPPD users.
 	 */
 	@PostConstruct
 	public void init() {
-		galaxyInstance = galaxyApiService.getInstance();
+		galaxyInstance = galaxyApiService.getGalaxyInstance();
 		libraryClient = galaxyInstance.getLibrariesClient();
 
 		// if the amppd shared data library already exists, don't create another one
-		Library library = getLibrary(GALAXY_LIBARY_NAME);
+		Library library = getLibrary(SHARED_LIBARY_NAME);
 		if (library != null) {
-			log.info("The shared Galaxy data library for AMP users already exists: " + GALAXY_LIBARY_NAME);
-			galaxyLibrary = library;
+			log.info("The shared Galaxy data library for AMPPD users already exists: " + SHARED_LIBARY_NAME);
+			sharedLibrary = library;
 			return;
 		}
 		
 		// otherwise create a new data library shared by all Amppd users
-		library = new Library(GALAXY_LIBARY_NAME);
-		galaxyLibrary.setDescription("Amppd Shared Library");
+		library = new Library(SHARED_LIBARY_NAME);
+		library.setDescription("AMPPD Shared Library");
 		try {
-			galaxyLibrary = libraryClient.createLibrary(galaxyLibrary);
-			log.info("Initialized shared Galaxy data library for AMP users: " + galaxyLibrary.getName());
+			sharedLibrary = libraryClient.createLibrary(library);
+			log.info("Initialized shared Galaxy data library for AMPPD users: " + sharedLibrary.getName());
 		}
 		catch (Exception e) {
-			String msg = "Cannot create shared Galaxy data library for AMP users.";
+			String msg = "Cannot create shared Galaxy data library for AMPPD users.";
 			log.severe(msg);
 			throw new RuntimeException(msg, e);
 		}		
 	}
-
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.getLibrary(String)
@@ -93,8 +97,8 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
 		log.info(msg);
 
-		// if the target library is the shared ammpd (i.e. galaxyLibrary), just no need to retrieve by name
-		Library matchingLibrary = GALAXY_LIBARY_NAME.equalsIgnoreCase(libraryName) ? galaxyLibrary : getLibrary(libraryName);
+		// if the target library is the shared amppd (i.e. sharedLibrary), no need to retrieve by name
+		Library matchingLibrary = SHARED_LIBARY_NAME.equals(libraryName) ? sharedLibrary : getLibrary(libraryName);
 		
 		if (!matchingLibrary.equals(null)) {
 			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
@@ -125,7 +129,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String)
 	 */
 	public ClientResponse uploadFileToGalaxy(String filePath) {
-		return uploadFileToGalaxy(filePath, GALAXY_LIBARY_NAME);
+		return uploadFileToGalaxy(filePath, SHARED_LIBARY_NAME);
 	}
 	
 }

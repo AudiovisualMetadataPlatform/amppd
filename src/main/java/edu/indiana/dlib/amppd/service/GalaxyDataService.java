@@ -17,9 +17,9 @@ public interface GalaxyDataService {
 	public Library getLibrary(String name);
 
 	/**
-	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
+	 * Upload a file/folder from AMP file system to a Galaxy data library without copying the physical file. 
 	 * @param filePath the path of the source file/folder to be uploaded
-	 * @param libraryName the name of the target library to upload to  
+	 * @param libraryName the name of the target library to upload file to  
 	 */
 	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName);
 

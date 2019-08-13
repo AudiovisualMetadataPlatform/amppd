@@ -21,7 +21,7 @@ public interface GalaxyApiService {
 	/**
 	 * Returns Galaxy instance for the current user.
 	 */
-	public GalaxyInstance getInstance();
+	public GalaxyInstance getGalaxyInstance();
 
 	/**
 	 * Retrieve the API key for the current user from Galaxy. The key is used as a token for every REST request made to Galaxy.

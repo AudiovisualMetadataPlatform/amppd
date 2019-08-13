@@ -44,7 +44,7 @@ public class GalaxyApiServiceTests {
     @Test
     public void shouldReturnInstanceForValidUser() {
 //    	Mockito.when(galaxyApiService.getCurrentUser()).thenReturn(new GalaxyUser(config.getUsername(), config.getPassword()));
-    	GalaxyInstance instance = galaxyApiService.getInstance();
+    	GalaxyInstance instance = galaxyApiService.getGalaxyInstance();
     	Assert.assertNotNull(instance);
     	Assert.assertEquals(instance.getGalaxyUrl(), config.getBaseUrl());
     }

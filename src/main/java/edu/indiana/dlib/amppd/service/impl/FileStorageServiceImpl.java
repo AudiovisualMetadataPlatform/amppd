@@ -54,7 +54,7 @@ import lombok.extern.java.Log;
 @Log
 public class FileStorageServiceImpl implements FileStorageService {
 	
-//	public static String GALAXY_LIBARY_NAME = "amppd";
+//	public static String SHARED_LIBARY_NAME = "amppd";
 
 //	@Autowired
 //	private GalaxyApiService galaxyApiService;
@@ -81,7 +81,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 //		// initialize Galaxy data library, which is shared by all amppd users
 //		galaxyInstance = galaxyApiService.getInstance();
 //		libraryClient = galaxyInstance.getLibrariesClient();
-//		Library galaxyLibrary = new Library(GALAXY_LIBARY_NAME);
+//		Library galaxyLibrary = new Library(SHARED_LIBARY_NAME);
 //		galaxyLibrary.setDescription("Amppd Shared Library");
 //		try {
 //			libraryClient.createLibrary(galaxyLibrary);
