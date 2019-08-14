@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
+import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
+import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
-import com.sun.jersey.api.client.ClientResponse;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
 import lombok.Getter;
@@ -92,8 +93,8 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)
 	 */
-	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
-		ClientResponse uploadResponse = null;
+	public Dataset uploadFileToGalaxy(String filePath, String libraryName) {
+		GalaxyObject uploadData = null;
 		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
 		log.info(msg);
 
@@ -107,7 +108,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			upload.setLinkData(true);
 			upload.setFolderId(rootFolder.getId());
 			try {
-				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
+				uploadData = libraryClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
 				msg = "Upload completed.";
 				log.info(msg);
 			}
@@ -122,13 +123,49 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			throw new GalaxyFileUploadException(msg);
 		}
 
-		return uploadResponse;
+		return (Dataset)uploadData;
 	}	
+	
+//	/**
+//	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)
+//	 */
+//	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
+//		ClientResponse uploadResponse = null;
+//		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
+//		log.info(msg);
+//
+//		// if the target library is the shared amppd (i.e. sharedLibrary), no need to retrieve by name
+//		Library matchingLibrary = SHARED_LIBARY_NAME.equals(libraryName) ? sharedLibrary : getLibrary(libraryName);
+//		
+//		if (!matchingLibrary.equals(null)) {
+//			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
+//			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
+//			upload.setContent(filePath);
+//			upload.setLinkData(true);
+//			upload.setFolderId(rootFolder.getId());
+//			try {
+//				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
+//				msg = "Upload completed.";
+//				log.info(msg);
+//			}
+//			catch (Exception e) {
+//				msg = "Upload failed. " + e.getMessage();
+//				log.severe(msg);
+//				throw new GalaxyFileUploadException(msg, e);
+//			}
+//		} else {
+//			msg = "Upload failed, unable to find the data library " + libraryName;
+//			log.severe(msg);
+//			throw new GalaxyFileUploadException(msg);
+//		}
+//
+//		return uploadResponse;
+//	}	
 			
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String)
 	 */
-	public ClientResponse uploadFileToGalaxy(String filePath) {
+	public Dataset uploadFileToGalaxy(String filePath) {
 		return uploadFileToGalaxy(filePath, SHARED_LIBARY_NAME);
 	}
 	
