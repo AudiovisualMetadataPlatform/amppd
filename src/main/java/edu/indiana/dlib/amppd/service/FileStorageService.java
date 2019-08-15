@@ -5,9 +5,6 @@ import java.nio.file.Path;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.github.jmchilton.blend4j.galaxy.beans.Library;
-import com.sun.jersey.api.client.ClientResponse;
-
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -29,12 +26,12 @@ public interface FileStorageService {
 	public void store(MultipartFile sourceFile, String targetPathname);
 	
 	/**
-	 * Loads the file with the specified pathname.
-	 * @param pathname the specified pathname
-	 * @return path of the loaded file
+	 * Resolve the path for the given pathname relative to the amppd file system root.
+	 * @param pathname the given pathname 
+	 * @return the path object for the given pathname
 	 */
-	public Path load(String pathname);
-	
+	public Path resolve(String pathname);	
+
 	/**
 	 * Loads the file with the specified pathname as a resource.
 	 * @param pathname the specified pathname
@@ -49,10 +46,10 @@ public interface FileStorageService {
 	public void delete(String pathname);
 	
 	/**
-	 * Deletes all directfiles under the file storage root.
+	 * Deletes all files under the file storage root.
 	 */
 	public void deleteAll();
-	
+		
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified unit.
 	 * @param unit the specified unit

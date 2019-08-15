@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
-import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
 import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
@@ -93,7 +92,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)
 	 */
-	public Dataset uploadFileToGalaxy(String filePath, String libraryName) {
+	public GalaxyObject uploadFileToGalaxy(String filePath, String libraryName) {
 		GalaxyObject uploadData = null;
 		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
 		log.info(msg);
@@ -101,7 +100,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		// if the target library is the shared amppd (i.e. sharedLibrary), no need to retrieve by name
 		Library matchingLibrary = SHARED_LIBARY_NAME.equals(libraryName) ? sharedLibrary : getLibrary(libraryName);
 		
-		if (!matchingLibrary.equals(null)) {
+		if (matchingLibrary != null) {
 			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
 			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
 			upload.setContent(filePath);
@@ -123,7 +122,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			throw new GalaxyFileUploadException(msg);
 		}
 
-		return (Dataset)uploadData;
+		return uploadData;
 	}	
 	
 //	/**
@@ -165,7 +164,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String)
 	 */
-	public Dataset uploadFileToGalaxy(String filePath) {
+	public GalaxyObject uploadFileToGalaxy(String filePath) {
 		return uploadFileToGalaxy(filePath, SHARED_LIBARY_NAME);
 	}
 	

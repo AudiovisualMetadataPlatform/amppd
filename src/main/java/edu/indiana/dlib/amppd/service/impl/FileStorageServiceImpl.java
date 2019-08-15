@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
-import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
-import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
-import com.github.jmchilton.blend4j.galaxy.beans.Library;
-import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
-import com.sun.jersey.api.client.ClientResponse;
-
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -38,7 +29,6 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.java.Log;
 
 /**
@@ -109,7 +99,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			}
 			try (InputStream inputStream = file.getInputStream()) {
 				// TODO: consider FileAttributes for access control
-				Path path = root.resolve(targetPathname);
+				Path path = resolve(targetPathname);
 				
 				// create parent directory for targetPathname if not exists yet
 				Files.createDirectories(path.getParent());
@@ -124,9 +114,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.load(MString)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.resolve(String)
 	 */
-    public Path load(String pathname) {
+    public Path resolve(String pathname) {
         return root.resolve(pathname);
     }
 
@@ -135,7 +125,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */
     public Resource loadAsResource(String pathname) {
         try {
-            Path file = load(pathname);
+            Path file = resolve(pathname);
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
                 return resource;
@@ -155,7 +145,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */    
     public void delete(String pathname) {
     	try {
-    		Path path = load(pathname);
+    		Path path = resolve(pathname);
     		FileSystemUtils.deleteRecursively(path);
     		log.info("Successfully deleted directory/file " + pathname);
     	}
@@ -176,7 +166,6 @@ public class FileStorageServiceImpl implements FileStorageService {
     		throw new StorageException("Could not delete all directories/files under file storage root.");
     	}  	
     }
-
     
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Unit)

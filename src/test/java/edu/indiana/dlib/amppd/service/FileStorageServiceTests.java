@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Files;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,30 +42,32 @@ import edu.indiana.dlib.amppd.model.Unit;
 @SpringBootTest
 public class FileStorageServiceTests {
 
+	public static String UNIT_TEST_DIR = "ut";
+	
 	@Autowired
     private FileStorageService fileStorageService;
 
-    @Before
+    @After
     public void cleanAll() {
-    	// start fresh with existing directories/files under root all cleaned up
-        fileStorageService.delete("unit");
+    	// clean up unit test directory after unit tests done
+        fileStorageService.delete(UNIT_TEST_DIR);
     }
 
     @Test
     public void saveAndLoad() {
-        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test.txt");
-        assertTrue(Files.exists(fileStorageService.load("unit/test.txt")));
+        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), UNIT_TEST_DIR + "/test.txt");
+        assertTrue(Files.exists(fileStorageService.resolve("unit/test.txt")));
     }
 
     @Test(expected = StorageException.class)
     public void saveNotPermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test0.txt");
+        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), UNIT_TEST_DIR + "/test0.txt");
     }
 
     @Test
     public void savePermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), "unit/test1.txt");
-        assertTrue(Files.exists(fileStorageService.load("unit/test1.txt")));
+        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), UNIT_TEST_DIR + "/test1.txt");
+        assertTrue(Files.exists(fileStorageService.resolve(UNIT_TEST_DIR + "/test1.txt")));
     }
     
     @Test
