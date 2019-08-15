@@ -56,7 +56,7 @@ public class FileStorageServiceTests {
     @Test
     public void saveAndLoad() {
         fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test.txt");
-        assertTrue(Files.exists(fileStorageService.resolve("unit/test.txt")));
+        assertTrue(Files.exists(fileStorageService.resolve(TEST_DIR_NAME + "/test.txt")));
     }
 
     @Test(expected = StorageException.class)
