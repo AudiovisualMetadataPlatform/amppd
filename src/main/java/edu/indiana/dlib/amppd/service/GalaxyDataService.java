@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
+import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
@@ -9,6 +10,16 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
  *
  */
 public interface GalaxyDataService {
+
+	/**
+	 * Return the libraryClient instance.
+	 */
+	public LibrariesClient getLibraryClient();
+	
+	/**
+	 * Return the shared amppd data library.
+	 */
+	public Library getSharedLibrary();
 
 	/**
 	 * Return the data library for the given name, or null if not found.
@@ -28,18 +39,5 @@ public interface GalaxyDataService {
 	 * @param filePath the path of the source file/folder to be uploaded
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath);
-
-//	/**
-//	 * Upload a file/folder from AMP file system to a Galaxy data library without copying the physical file. 
-//	 * @param filePath the path of the source file/folder to be uploaded
-//	 * @param libraryName the name of the target library to upload file to  
-//	 */
-//	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName);
-//
-//	/**
-//	 * Upload a file/folder from AMP file system to the shared amppd Galaxy data library without copying the physical file. 
-//	 * @param filePath the path of the source file/folder to be uploaded
-//	 */
-//	public ClientResponse uploadFileToGalaxy(String filePath);
 
 }

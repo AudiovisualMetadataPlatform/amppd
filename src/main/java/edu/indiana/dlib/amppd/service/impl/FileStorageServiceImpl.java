@@ -42,15 +42,7 @@ import lombok.extern.java.Log;
  */
 @Service
 @Log
-public class FileStorageServiceImpl implements FileStorageService {
-	
-//	public static String SHARED_LIBARY_NAME = "amppd";
-
-//	@Autowired
-//	private GalaxyApiService galaxyApiService;
-//	private GalaxyInstance galaxyInstance;
-//	private LibrariesClient libraryClient;
-//	private Library galaxyLibrary;
+public class FileStorageServiceImpl implements FileStorageService {	
 
 	private AmppdPropertyConfig config; 	
 	private Path root;
@@ -66,22 +58,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize file storage root directory " + config.getFileStorageRoot(), e);
-		}
-		
-//		// initialize Galaxy data library, which is shared by all amppd users
-//		galaxyInstance = galaxyApiService.getInstance();
-//		libraryClient = galaxyInstance.getLibrariesClient();
-//		Library galaxyLibrary = new Library(SHARED_LIBARY_NAME);
-//		galaxyLibrary.setDescription("Amppd Shared Library");
-//		try {
-//			libraryClient.createLibrary(galaxyLibrary);
-//			log.info("Initialized shared Galaxy data library for AMP users: " + galaxyLibrary.getName());
-//		}
-//		catch (Exception e) {
-//			String msg = "Cannot create shared Galaxy data library for AMP users.";
-//			log.severe(msg);
-//			throw new RuntimeException(msg, e);
-//		}
+		}		
 	}
 	
 	/**
@@ -230,47 +207,4 @@ public class FileStorageServiceImpl implements FileStorageService {
 		return dirname + File.separator  + filename;
 	}
 
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadFileToGalaxy(String,String)
-//	 */
-//	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
-//		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
-//		log.info(msg);
-//
-//		final List<Library> libraries = libraryClient.getLibraries();
-//		Library matchingLibrary = null;
-//		for(final Library library : libraries) {
-//			if (library.getName().equals(libraryName)) {
-//				matchingLibrary = library;
-//				break;
-//			}
-//		}
-//
-//		ClientResponse uploadResponse = null;
-//		if (!matchingLibrary.equals(null)) {
-//			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
-//			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
-//			upload.setContent(filePath);
-//			upload.setLinkData(true);
-//			upload.setFolderId(rootFolder.getId());
-//			// TODO catch exception for uploadFileFromUrl and rethrow as GalaxyFileUploadException
-//			try {
-//				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
-//				msg = "Upload completed.";
-//				log.info(msg);
-//			}
-//			catch (Exception e) {
-//				msg = "Upload failed. " + e.getMessage();
-//				log.severe(msg);
-//				throw new GalaxyFileUploadException(msg, e);
-//			}
-//		} else {
-//			msg = "Upload failed, unable to find the data library " + libraryName;
-//			log.severe(msg);
-//			throw new GalaxyFileUploadException(msg);
-//		}
-//
-//		return uploadResponse;
-//	}
-//
 }

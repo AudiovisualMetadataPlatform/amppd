@@ -42,7 +42,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 @SpringBootTest
 public class FileStorageServiceTests {
 
-	public static String UNIT_TEST_DIR = "ut";
+	public static final String TEST_DIR_NAME = "test";
 	
 	@Autowired
     private FileStorageService fileStorageService;
@@ -50,24 +50,24 @@ public class FileStorageServiceTests {
     @After
     public void cleanAll() {
     	// clean up unit test directory after unit tests done
-        fileStorageService.delete(UNIT_TEST_DIR);
+        fileStorageService.delete(TEST_DIR_NAME);
     }
 
     @Test
     public void saveAndLoad() {
-        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), UNIT_TEST_DIR + "/test.txt");
+        fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test.txt");
         assertTrue(Files.exists(fileStorageService.resolve("unit/test.txt")));
     }
 
     @Test(expected = StorageException.class)
     public void saveNotPermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), UNIT_TEST_DIR + "/test0.txt");
+        fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test0.txt");
     }
 
     @Test
     public void savePermitted() {
-        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), UNIT_TEST_DIR + "/test1.txt");
-        assertTrue(Files.exists(fileStorageService.resolve(UNIT_TEST_DIR + "/test1.txt")));
+        fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test1.txt");
+        assertTrue(Files.exists(fileStorageService.resolve(TEST_DIR_NAME + "/test1.txt")));
     }
     
     @Test

@@ -29,7 +29,7 @@ import lombok.extern.java.Log;
 @Log
 public class GalaxyDataServiceImpl implements GalaxyDataService {
 	
-	public static String SHARED_LIBARY_NAME = "amppd";
+	public static final String SHARED_LIBARY_NAME = "amppd";
 	
 	@Autowired
 	private GalaxyApiService galaxyApiService;
@@ -123,43 +123,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		}
 
 		return uploadData;
-	}	
-	
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)
-//	 */
-//	public ClientResponse uploadFileToGalaxy(String filePath, String libraryName) {
-//		ClientResponse uploadResponse = null;
-//		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
-//		log.info(msg);
-//
-//		// if the target library is the shared amppd (i.e. sharedLibrary), no need to retrieve by name
-//		Library matchingLibrary = SHARED_LIBARY_NAME.equals(libraryName) ? sharedLibrary : getLibrary(libraryName);
-//		
-//		if (!matchingLibrary.equals(null)) {
-//			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
-//			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
-//			upload.setContent(filePath);
-//			upload.setLinkData(true);
-//			upload.setFolderId(rootFolder.getId());
-//			try {
-//				uploadResponse = libraryClient.uploadFileFromUrl(matchingLibrary.getId(), upload);
-//				msg = "Upload completed.";
-//				log.info(msg);
-//			}
-//			catch (Exception e) {
-//				msg = "Upload failed. " + e.getMessage();
-//				log.severe(msg);
-//				throw new GalaxyFileUploadException(msg, e);
-//			}
-//		} else {
-//			msg = "Upload failed, unable to find the data library " + libraryName;
-//			log.severe(msg);
-//			throw new GalaxyFileUploadException(msg);
-//		}
-//
-//		return uploadResponse;
-//	}	
+	}		
 			
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String)
