@@ -37,7 +37,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	private GalaxyInstance galaxyInstance;
 	
 	@Getter
-	private LibrariesClient libraryClient;
+	private LibrariesClient librariesClient;
 	
 	@Getter
 	private Library sharedLibrary;
@@ -48,7 +48,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	@PostConstruct
 	public void init() {
 		galaxyInstance = galaxyApiService.getGalaxyInstance();
-		libraryClient = galaxyInstance.getLibrariesClient();
+		librariesClient = galaxyInstance.getLibrariesClient();
 
 		// if the amppd shared data library already exists, don't create another one
 		Library library = getLibrary(SHARED_LIBARY_NAME);
@@ -62,7 +62,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		library = new Library(SHARED_LIBARY_NAME);
 		library.setDescription("AMPPD Shared Library");
 		try {
-			sharedLibrary = libraryClient.createLibrary(library);
+			sharedLibrary = librariesClient.createLibrary(library);
 			log.info("Initialized shared Galaxy data library for AMPPD users: " + sharedLibrary.getName());
 		}
 		catch (Exception e) {
@@ -77,7 +77,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	 */
 	public Library getLibrary(String name) {
 		Library matchingLibrary = null;		
-		List<Library> libraries = libraryClient.getLibraries();
+		List<Library> libraries = librariesClient.getLibraries();
 
 		for(Library library : libraries) {
 			if (library.getName().equals(name)) {
@@ -101,13 +101,13 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		Library matchingLibrary = SHARED_LIBARY_NAME.equals(libraryName) ? sharedLibrary : getLibrary(libraryName);
 		
 		if (matchingLibrary != null) {
-			final LibraryContent rootFolder = libraryClient.getRootFolder(matchingLibrary.getId());
+			final LibraryContent rootFolder = librariesClient.getRootFolder(matchingLibrary.getId());
 			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
 			upload.setContent(filePath);
 			upload.setLinkData(true);
 			upload.setFolderId(rootFolder.getId());
 			try {
-				uploadData = libraryClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
+				uploadData = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
 				msg = "Upload completed.";
 				log.info(msg);
 			}

@@ -14,7 +14,7 @@ public interface GalaxyDataService {
 	/**
 	 * Return the libraryClient instance.
 	 */
-	public LibrariesClient getLibraryClient();
+	public LibrariesClient getLibrariesClient();
 	
 	/**
 	 * Return the shared amppd data library.

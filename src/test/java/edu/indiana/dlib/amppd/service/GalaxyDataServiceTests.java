@@ -114,7 +114,7 @@ public class GalaxyDataServiceTests {
 		library = new Library(TEST_LIB_NAME);
 		library.setDescription("AMPPD Test Library");
 		try {
-			testLibrary = galaxyDataService.getLibraryClient().createLibrary(library);
+			testLibrary = galaxyDataService.getLibrariesClient().createLibrary(library);
 		}
 		catch (Exception e) {
 			String msg = "Cannot create test Galaxy data library for GalaxyDataServiceTests.";
