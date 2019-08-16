@@ -21,7 +21,7 @@ public interface GalaxyApiService {
 	/**
 	 * Returns Galaxy instance for the current user.
 	 */
-	public GalaxyInstance getInstance();
+	public GalaxyInstance getGalaxyInstance();
 
 	/**
 	 * Retrieve the API key for the current user from Galaxy. The key is used as a token for every REST request made to Galaxy.
@@ -29,16 +29,4 @@ public interface GalaxyApiService {
 	 */
 	public String getApiKey();
 		
-//    /**
-//     * Get the URL for Galaxy workflow Rest API.
-//     * @return
-//     */
-//    public String getWorkflowUrl();
-//	
-//	/**
-//	 * Retrieve all currently existing workflows from Galaxy through its REST API.
-//	 * @return
-//	 */
-//	public GalaxyWorkflow[] getWorkflows();
-
 }

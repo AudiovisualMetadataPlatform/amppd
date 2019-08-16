@@ -45,6 +45,11 @@ public class RestTemplateFactory implements FactoryBean<RestTemplate>, Initializ
     }
  
     public void afterPropertiesSet() {
+    	/* TODO
+    	 * Somehow this part doesn't work because the constructor with host/port never got called upon SpringContext init, thus the host/port are always null.
+    	 * Once this issue is fixed, the below commented code shall replace the hardcoded host/port from config. The purpose of having customizable host/port 
+    	 * is so that this class can be used for other service than what's specified in the config (for ex, for both Amppd and Galaxy REST Template)
+    	 */
 //        HttpHost hhost = new HttpHost(host, port, "http");
     	HttpHost hhost = new HttpHost(config.getHost(), config.getPort(), "http");
         restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactoryBasicAuth(hhost));
