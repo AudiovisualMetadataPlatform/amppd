@@ -32,6 +32,7 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		/* TODO
 		 * Below is a stub for the real implementation: for now we will return a new instance of the amppd master user as the current user;
 		 * once we set up user management and access control in AMP, we shall retrieve this info from the current user session.  
+		 * Also, once we implement Amppd User, this method can be moved to UserService.
 		 */
 		GalaxyUser user = new GalaxyUser();
 		user.setUsername(config.getUsername());
@@ -42,7 +43,7 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyApiService.getInstance()
 	 */
-	public GalaxyInstance getInstance() {
+	public GalaxyInstance getGalaxyInstance() {
 		GalaxyUser user = getCurrentUser();
 		
 		// if the galaxy instance has already been retrieved and stored in the current user, no need to retrieve again 
@@ -76,7 +77,7 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		}
 		
 		// otherwise create a new Galaxy instance using user's credentials and store it for the current user
-		String key = getInstance().getApiKey();
+		String key = getGalaxyInstance().getApiKey();
 		user.setApiKey(key);
 		return key;
 	}

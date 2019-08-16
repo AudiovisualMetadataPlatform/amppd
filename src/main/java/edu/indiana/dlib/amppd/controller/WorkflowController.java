@@ -32,7 +32,7 @@ public class WorkflowController {
 		List<Workflow> workflows = null;
 	
 		try {
-			workflows = galaxyApiService.getInstance().getWorkflowsClient().getWorkflows();
+			workflows = galaxyApiService.getGalaxyInstance().getWorkflowsClient().getWorkflows();
 			log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
 		}
 		catch (Exception e) {
