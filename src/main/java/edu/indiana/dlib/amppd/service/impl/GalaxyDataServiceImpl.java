@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.service;
+package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.List;
 
@@ -15,6 +15,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
+import edu.indiana.dlib.amppd.service.GalaxyApiService;
+import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import lombok.Getter;
 import lombok.extern.java.Log;
 

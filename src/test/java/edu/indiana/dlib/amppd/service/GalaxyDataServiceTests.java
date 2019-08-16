@@ -17,6 +17,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
+import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
