@@ -28,15 +28,17 @@ public interface GalaxyDataService {
 	public Library getLibrary(String name);
 
 	/**
-	 * Upload a file/folder from AMP file system to a Galaxy data library without copying the physical file. 
+	 * Upload a file/folder from AMP file system to a Galaxy data library without copying the physical file, which results in a dataset being created for the file in the library. 
 	 * @param filePath the path of the source file/folder to be uploaded
 	 * @param libraryName the name of the target library to upload file to  
+	 * @return the GalaxyObject instance containing the ID and URL of the dataset being created in the library for the uploaded file 
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath, String libraryName);
 
 	/**
 	 * Upload a file/folder from AMP file system to the shared amppd Galaxy data library without copying the physical file. 
 	 * @param filePath the path of the source file/folder to be uploaded
+	 * @return the GalaxyObject instance containing the ID and URL of the dataset being created in the library for the uploaded file 
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath);
 

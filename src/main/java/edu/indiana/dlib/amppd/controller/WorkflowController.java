@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,10 +10,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
-import edu.indiana.dlib.amppd.service.GalaxyApiService;
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.GalaxyDataService;
+import edu.indiana.dlib.amppd.service.WorkflowService;
 import lombok.extern.java.Log;
 
 /**
@@ -24,9 +32,21 @@ import lombok.extern.java.Log;
 @Log
 public class WorkflowController {
 	
-	@Autowired
-	private GalaxyApiService galaxyApiService;
+//	@Autowired
+//	private GalaxyApiService galaxyApiService;
 
+	@Autowired
+    private PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
+	private GalaxyDataService galaxyDataService;
+
+	@Autowired
+	private WorkflowService workflowService;
+
+	@Autowired
+    private FileStorageService fileStorageService;
+	
 	/**
 	 * Retrieve all workflows from Galaxy through its REST API.
 	 * @return
@@ -36,7 +56,8 @@ public class WorkflowController {
 		List<Workflow> workflows = null;
 	
 		try {
-			workflows = galaxyApiService.getGalaxyInstance().getWorkflowsClient().getWorkflows();
+//			workflows = galaxyApiService.getGalaxyInstance().getWorkflowsClient().getWorkflows();
+			workflows = workflowService.getWorkflowsClient().getWorkflows();
 			log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
 		}
 		catch (Exception e) {
@@ -53,8 +74,37 @@ public class WorkflowController {
 	 * @return outputs of the job run
 	 */
 	@PostMapping("/workflow/{workflowId}/primaryfile/{primaryfileId}")
-	public WorkflowOutputs runWorkflow(@PathVariable("workflowId") Long workflowId, @RequestParam("primaryfileId") Long primaryfileId) {
+	public WorkflowOutputs runWorkflow(@PathVariable("workflowId") String workflowId, 
+			@RequestParam("primaryfileId") Long primaryfileId, 
+			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {
+		WorkflowOutputs woutputs = null;
 		
+    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
+    	Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));    
+    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
+    		throw new StorageException("Primaryfile " + primaryfileId + " hasn't been uploaded to AMPPD file system");
+    	}
+    	
+    	/* Note: 
+    	 * we do a lazy upload from Amppd to Galaxy, i.e. we do it at workflow is invoked, rather than when the file is uploaded to Amppd.
+    	 * The pros is that we won't upload to Galaxy unnecessarily if the primaryfile is never going to be processed through workflow;
+    	 * the cons is that it might slow down workflow execution when running in batch.
+    	 */
+
+    	// upload the primaryfile into Galaxy data library, the returned result is an GalaxyObject containing the ID and URL of the dataset uploaded
+    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
+    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);		
+		
+    	// invoke the workflow 
+    	try {
+    		WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflowId, go.getId(), parameters);
+    		return workflowService.getWorkflowsClient().runWorkflow(winputs);
+    	}
+    	catch (Exception e) {
+    		String msg = "Error running workflow " + workflowId + " on primaryfile " + primaryfileId;
+    		log.severe(msg);
+    		throw new RuntimeException(e);
+    	}
 	}
 
 }
