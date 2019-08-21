@@ -19,11 +19,6 @@ public interface WorkflowService {
 	public WorkflowsClient getWorkflowsClient();
 	
 	/**
-	 * Return the shared history for all workflow executions.
-	 */
-	public WorkflowDestination getSharedHistory();
-	
-	/**
 	 * Build the workflow inputs to feed the given dataset along with the given parameters into the given  Galaxy workflow.
 	 * @param workflowId ID of the given workflow
 	 * @param datasetId ID of the given dataset

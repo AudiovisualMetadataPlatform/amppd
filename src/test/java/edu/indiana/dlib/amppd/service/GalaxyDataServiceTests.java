@@ -31,7 +31,7 @@ public class GalaxyDataServiceTests {
     private FileStorageService fileStorageService;
 
 	@Autowired
-	private GalaxyDataServiceImpl galaxyDataService;   
+	private GalaxyDataService galaxyDataService;   
 	
 	private String testFile;
 	private Library testLibrary;	

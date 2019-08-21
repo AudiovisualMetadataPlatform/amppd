@@ -86,7 +86,7 @@ public class WorkflowController {
     	}
     	
     	/* Note: 
-    	 * we do a lazy upload from Amppd to Galaxy, i.e. we do it at workflow is invoked, rather than when the file is uploaded to Amppd.
+    	 * We do a lazy upload from Amppd to Galaxy, i.e. we do it when workflow is invoked in Galaxy, rather than when the file is uploaded to Amppd.
     	 * The pros is that we won't upload to Galaxy unnecessarily if the primaryfile is never going to be processed through workflow;
     	 * the cons is that it might slow down workflow execution when running in batch.
     	 */

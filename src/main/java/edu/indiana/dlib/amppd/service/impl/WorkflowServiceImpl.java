@@ -29,8 +29,6 @@ import lombok.extern.java.Log;
 @Log
 public class WorkflowServiceImpl implements WorkflowService {
 	
-	public static final String SHARED_HISTORY_NAME = "amppd";
-	
 	@Autowired
 	private GalaxyApiService galaxyApiService;
 	

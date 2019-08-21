@@ -1,7 +1,9 @@
 package edu.indiana.dlib.amppd.service;
 
+import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
+import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
 /**
@@ -12,20 +14,36 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 public interface GalaxyDataService {
 
 	/**
-	 * Return the libraryClient instance.
+	 * Return the librariesClient instance.
 	 */
 	public LibrariesClient getLibrariesClient();
+	
+	/**
+	 * Return the HistoriesClient instance.
+	 */
+	public HistoriesClient getHistoriesClient();
 	
 	/**
 	 * Return the shared amppd data library.
 	 */
 	public Library getSharedLibrary();
+	
+	/**
+	 * Return the shared history for all workflow executions.
+	 */
+	public History getSharedHistory();	
 
 	/**
 	 * Return the data library for the given name, or null if not found.
 	 * @param name the the given library name
 	 */
 	public Library getLibrary(String name);
+
+	/**
+	 * Return the data history for the given name, or null if not found.
+	 * @param name the the given history name
+	 */
+	public History getHistory(String name);
 
 	/**
 	 * Upload a file/folder from AMP file system to a Galaxy data library without copying the physical file, which results in a dataset being created for the file in the library. 
