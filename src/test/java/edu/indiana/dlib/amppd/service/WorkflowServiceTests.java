@@ -69,5 +69,4 @@ public class WorkflowServiceTests {
     	workflowService.buildWorkflowInputs("foobar", "", new HashMap<String, Map<String, String>>());
     }
 
-
 }

@@ -76,18 +76,26 @@ public class WorkflowServiceImpl implements WorkflowService {
 			return null;
 		}
 		
-		// search for the steps with type 'data_input'
-		int size = wdetails.getSteps().size();
+		// the following code doesn't work either, because the workflow can contain only 'tool' type steps, in which case no step is of type 'data-input'
+//		// search for the steps with type 'data_input'
+//		int size = wdetails.getSteps().size();
+//		for (Map.Entry<String, WorkflowStepDefinition> step : wdetails.getSteps().entrySet()) {
+//			String type = step.getValue().getType();
+//			Map<String, WorkflowStepOutput> sin = step.getValue().getInputSteps();
+//			for (Map.Entry<String, WorkflowStepOutput> sentry : sin.entrySet()) {
+//				String id = sentry.getKey();
+//				WorkflowStepOutput wso =  sentry.getValue();
+//			}
+//			if (step.getValue().getType().equals(GALAXY_WORKFLOW_INPUT_STEP_TYPE)) {
+//				inputs.add(step.getKey());
+//			}
+//		}
+		
+		// search for steps with empty input steps, which shall be identified as those need original inputs when workflow is invoked
 		for (Map.Entry<String, WorkflowStepDefinition> step : wdetails.getSteps().entrySet()) {
-			String type = step.getValue().getType();
-			Map<String, WorkflowStepOutput> sin = step.getValue().getInputSteps();
-			for (Map.Entry<String, WorkflowStepOutput> sentry : sin.entrySet()) {
-				String id = sentry.getKey();
-				WorkflowStepOutput wso =  sentry.getValue();
-			}
-			if (step.getValue().getType().equals(GALAXY_WORKFLOW_INPUT_STEP_TYPE)) {
+			if (step.getValue().getInputSteps().isEmpty()) {
 				inputs.add(step.getKey());
-			}
+			}		
 		}
 		
 		return inputs;
@@ -103,8 +111,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 		winputs.setWorkflowId(workflowId);
 		
 		// assume all workflows only take one primaryfile as input
-		String iname;
+		String inputStepId;
 		try {
+			// the following code doesn't work because the inputs returned in workflow details is always empty
 //			WorkflowDetails wdetails = workflowsClient.showWorkflow(workflowId);
 //			if (wdetails == null) {
 //				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
@@ -122,14 +131,21 @@ public class WorkflowServiceImpl implements WorkflowService {
 			if (inputs.size() != 1) {
 				throw new GalaxyWorkflowException("Workflow " + workflowId + " doesn't have exactly one input.");
 			}
-			iname = (String)inputs.get(0);
+			inputStepId = (String)inputs.get(0);
 		}
 		catch (Exception e) {
 			throw new GalaxyWorkflowException("Exception when retrieving details for workflow " + workflowId);
 		}
 		
+		/* TODO
+		 * There is one remaining question about setting workflow inputs: all the APIs we know so far (blend4, bioblend, Galaxy REST API) indicates that 
+		 * the inputs is a dictionary mapping each input step id to a dictionary with 2 keys: ‘src’ (which can be ‘ldda’, ‘ld’ or ‘hda’) and ‘id’ (the dataset ID).
+		 * However, what if a step has multiple inputs? How to indicate which input of the step is referred to? There seems to be one key missing: the input label,
+		 * which is seen on Galaxy API when querying a particular workflow: each input has a stepId, a label, and a value. 
+		 * This might be an issue and shall be tested out if we have an MGM that accepts multiple inputs and it's an initial node in the workflow. 
+		 */
 		WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
-		winputs.setInput(iname, winput);		
+		winputs.setInput(inputStepId, winput);		
 		
 		parameters.forEach((stepId, stepParams) -> {
 			stepParams.forEach((paramName, paramValue) -> {
