@@ -9,3 +9,5 @@ public class GalaxyWorkflowException extends RuntimeException {
     public GalaxyWorkflowException(String message, Throwable cause) {
         super(message, cause);
     }
+
+}

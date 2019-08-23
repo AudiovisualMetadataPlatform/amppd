@@ -60,28 +60,29 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	public void init() {
 		galaxyInstance = galaxyApiService.getGalaxyInstance();
 		librariesClient = galaxyInstance.getLibrariesClient();
+		historiesClient = galaxyInstance.getHistoriesClient();
 
 		// if the amppd shared data library already exists, don't create another one
 		Library library = getLibrary(SHARED_LIBARY_NAME);
 		if (library != null) {
 			log.info("The shared Galaxy data library for AMPPD users already exists: " + SHARED_LIBARY_NAME);
 			sharedLibrary = library;
-			return;
 		}
-		
-		// otherwise create a new data library shared by all Amppd users
-		library = new Library(SHARED_LIBARY_NAME);
-		library.setDescription("AMPPD Shared Library");
-		try {
-			sharedLibrary = librariesClient.createLibrary(library);
-			log.info("Initialized shared Galaxy data library for AMPPD users: " + sharedLibrary.getName());
+		else {
+			// otherwise create a new data library shared by all Amppd users
+			library = new Library(SHARED_LIBARY_NAME);
+			library.setDescription("AMPPD Shared Library");
+			try {
+				sharedLibrary = librariesClient.createLibrary(library);
+				log.info("Initialized shared Galaxy data library for AMPPD users: " + sharedLibrary.getName());
+			}
+			catch (Exception e) {
+				String msg = "Cannot create shared Galaxy data library for AMPPD users.";
+				log.severe(msg);
+				throw new RuntimeException(msg, e);
+			}	
 		}
-		catch (Exception e) {
-			String msg = "Cannot create shared Galaxy data library for AMPPD users.";
-			log.severe(msg);
-			throw new RuntimeException(msg, e);
-		}	
-		
+
 		// if the amppd shared data history already exists, don't create another one
 		History history = getHistory(SHARED_HISTORY_NAME);
 		if (history != null) {
@@ -89,19 +90,19 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			sharedHistory = history;
 			return;
 		}
-		
-		// otherwise create a new data history shared by all Amppd users
-		history = new History(SHARED_HISTORY_NAME);
-		try {
-			sharedHistory = historiesClient.create(history);
-			log.info("Initialized shared Galaxy data history for AMPPD users: " + sharedHistory.getName());
+		else {
+			// otherwise create a new data history shared by all Amppd users
+			history = new History(SHARED_HISTORY_NAME);
+			try {
+				sharedHistory = historiesClient.create(history);
+				log.info("Initialized shared Galaxy data history for AMPPD users: " + sharedHistory.getName());
+			}
+			catch (Exception e) {
+				String msg = "Cannot create shared Galaxy data history for AMPPD users.";
+				log.severe(msg);
+				throw new RuntimeException(msg, e);
+			}		
 		}
-		catch (Exception e) {
-			String msg = "Cannot create shared Galaxy data history for AMPPD users.";
-			log.severe(msg);
-			throw new RuntimeException(msg, e);
-		}		
-		
 	}
 	
 	/**

@@ -69,11 +69,12 @@ public class WorkflowController {
 		return workflows;
 	}
 	
+	// TODO To be more consistent with REST best practice, the following method should probably be moved to JobController, since this is essentially creating a new job. 	
 	/**
 	 * Run the given workflow against the given primaryfile.
 	 * @return outputs of the job run
 	 */
-	@PostMapping("/workflow/{workflowId}/primaryfile/{primaryfileId}")
+	@PostMapping("/workflows/{workflowId}/run")
 	public WorkflowOutputs runWorkflow(@PathVariable("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId, 
 			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {

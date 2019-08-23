@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,17 @@ public class WorkflowControllerTests {
     @Autowired
     private MockMvc mvc;
 
+	@Before
+	public void setup() {
+		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
+		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
+ 	}
+	
+    
     @Test
-    public void shouldReturnWorkflows() throws Exception {
+    public void shouldReturnWorkflows() throws Exception {    	
     	mvc.perform(get("/workflows")).andExpect(status().isOk()).andExpect(
     			// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all, 
-    			// TODO use factory of bootstrap to create/load some workflow for testing
     			//jsonPath("$", hasSize(1))).andExpect(	
     			//jsonPath("$[0].model_class").value("StoredWorkflow"));
     			jsonPath("$[0].name").isNotEmpty());
