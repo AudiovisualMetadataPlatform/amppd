@@ -36,7 +36,7 @@ import lombok.extern.java.Log;
 @Log
 public class WorkflowServiceImpl implements WorkflowService {
 	
-	public static final String GALAXY_WORKFLOW_INPUT_STEP_TYPE = "data_input";
+//	public static final String GALAXY_WORKFLOW_INPUT_STEP_TYPE = "data_input";
 	
 	@Autowired
 	private GalaxyApiService galaxyApiService;

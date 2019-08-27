@@ -33,8 +33,8 @@ import lombok.extern.java.Log;
 @Log
 public class GalaxyDataServiceImpl implements GalaxyDataService {
 	
-	public static final String SHARED_LIBARY_NAME = "amppd";
-	public static final String SHARED_HISTORY_NAME = "amppd";
+	public static final String SHARED_LIBARY_NAME = "Amppd Library";
+	public static final String SHARED_HISTORY_NAME = "Amppd History";
 	
 	@Autowired
 	private GalaxyApiService galaxyApiService;

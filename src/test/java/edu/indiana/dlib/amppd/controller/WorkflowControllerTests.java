@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -9,8 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,16 +21,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 
-import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
@@ -77,15 +81,45 @@ public class WorkflowControllerTests {
     			jsonPath("$[0].name").isNotEmpty());
     }
     
+
+	@Autowired
+	private GalaxyDataService galaxyDataService;
+    
     @Test
     public void shouldRunWorkflows() throws Exception {    	              
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = workflowService.getWorkflowsClient().getWorkflows().get(0); 
 
-    	mvc.perform(post("/workflows/" + workflow.getId() + "/run").param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
-    			.andExpect(status().isOk()).andExpect(
-    					jsonPath("$.historyId").isNotEmpty()).andExpect(
-    							jsonPath("$.outputIds").isNotEmpty());
+//    	mvc.perform(post("/workflows/" + workflow.getId() + "/run").param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
+//    			.andExpect(status().isOk()).andExpect(
+//    					jsonPath("$.historyId").isNotEmpty()).andExpect(
+//    							jsonPath("$.outputIds").isNotEmpty());    	
+		
+    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
+//    	Primaryfile primaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));    
+    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
+    		throw new StorageException("Primaryfile " + primaryfile.getId() + " hasn't been uploaded to AMPPD file system");
+    	}
+    	
+    	/* Note: 
+    	 * We do a lazy upload from Amppd to Galaxy, i.e. we do it when workflow is invoked in Galaxy, rather than when the file is uploaded to Amppd.
+    	 * The pros is that we won't upload to Galaxy unnecessarily if the primaryfile is never going to be processed through workflow;
+    	 * the cons is that it might slow down workflow execution when running in batch.
+    	 */
+
+    	// upload the primaryfile into Galaxy data library, the returned result is an GalaxyObject containing the ID and URL of the dataset uploaded
+    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
+    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);		
+		
+    	// invoke the workflow 
+    	WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflow.getId(), go.getId(), new HashMap<String, Map<String, String>>());
+//    	WorkflowInput winput = new WorkflowInput("0d16186aaff7cbfd", InputSourceType.HDA);
+//		winputs.setInput("0", winput);		
+
+    	WorkflowOutputs woutputs = workflowService.getWorkflowsClient().runWorkflow(winputs);
+    	Assert.assertNotNull(woutputs);
+    	Assert.assertNotNull(woutputs.getHistoryId());
+
     }
     
     /**
