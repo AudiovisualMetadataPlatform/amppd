@@ -112,7 +112,13 @@ public class WorkflowControllerTests {
     	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);		
 		
     	// invoke the workflow 
-    	WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflow.getId(), go.getId(), new HashMap<String, Map<String, String>>());
+    	Map<String, Map<String, String>> params = new HashMap<String, Map<String, String>>();
+    	Map<String, String> param = new HashMap<String, String>();
+    	param.put("channels", "2");
+    	param.put("samplesize", "pcm_s24le");
+    	params.put("1", param);
+    	WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflow.getId(), go.getId(), params);
+//    	WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflow.getId(), go.getId(), new HashMap<String, Map<String, String>>());
 //    	WorkflowInput winput = new WorkflowInput("0d16186aaff7cbfd", InputSourceType.HDA);
 //		winputs.setInput("0", winput);		
 
