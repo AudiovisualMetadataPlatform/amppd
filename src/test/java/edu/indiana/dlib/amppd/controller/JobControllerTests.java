@@ -33,12 +33,12 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
-import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.service.JobService;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-public class WorkflowControllerTests {
+public class JobControllerTests {
 
 	public static final String TEST_DIRECTORY_NAME = "test";
 	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
@@ -51,7 +51,7 @@ public class WorkflowControllerTests {
     private FileStorageService fileStorageService;
 		
 	@Autowired
-	private WorkflowService workflowService;   
+	private JobService jobService;   
 		
     @Autowired
     private MockMvc mvc;
@@ -85,7 +85,7 @@ public class WorkflowControllerTests {
     @Test
     public void shouldRunWorkflows() throws Exception {    	              
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
-    	Workflow workflow = workflowService.getWorkflowsClient().getWorkflows().get(0); 
+    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
 
 //    	mvc.perform(post("/workflows/" + workflow.getId() + "/run").param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
 //    			.andExpect(status().isOk()).andExpect(
@@ -114,12 +114,12 @@ public class WorkflowControllerTests {
     	param.put("channels", "2");
     	param.put("samplesize", "pcm_s24le");
     	params.put("1", param);
-    	WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflow.getId(), go.getId(), params);
-//    	WorkflowInputs winputs = workflowService.buildWorkflowInputs(workflow.getId(), go.getId(), new HashMap<String, Map<String, String>>());
+    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), go.getId(), params);
+//    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), go.getId(), new HashMap<String, Map<String, String>>());
 //    	WorkflowInput winput = new WorkflowInput("0d16186aaff7cbfd", InputSourceType.HDA);
 //		winputs.setInput("0", winput);		
 
-    	WorkflowOutputs woutputs = workflowService.getWorkflowsClient().runWorkflow(winputs);
+    	WorkflowOutputs woutputs = jobService.getWorkflowsClient().runWorkflow(winputs);
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
 
