@@ -77,7 +77,7 @@ public class JobControllerTests {
      */
     private void setUpPrimaryFile() {
     	primaryfile = new Primaryfile();
-    	primaryfile.setId(1l);
+    	primaryfile.setId(PRIMARYFILE_ID);
     	primaryfile.setPathname(TEST_DIRECTORY_NAME + "/" + PRIMARYFILE_NAME);
     	
     	Path unitpath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
@@ -94,7 +94,7 @@ public class JobControllerTests {
     		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
     	} 	
     	
-    	Mockito.when(primaryfileRepository.findById(4l)).thenReturn(Optional.of(primaryfile));     	    	
+    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
     }
 
 }
