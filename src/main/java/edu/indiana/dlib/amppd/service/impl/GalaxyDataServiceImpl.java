@@ -54,7 +54,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	private History sharedHistory;
 
 	/**
-	 *  initialize Galaxy data library, which is shared by all AMPPD users.
+	 *  initialize GalaxyDataService bean.
 	 */
 	@PostConstruct
 	public void init() {

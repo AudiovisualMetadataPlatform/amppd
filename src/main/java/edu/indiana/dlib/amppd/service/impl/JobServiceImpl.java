@@ -53,7 +53,7 @@ public class JobServiceImpl implements JobService {
 	private WorkflowsClient workflowsClient;
 		
 	/**
-	 * Initialize Galaxy data library, which is shared by all AMPPD users.
+	 * Initialize the JobServiceImpl bean.
 	 */
 	@PostConstruct
 	public void init() {
