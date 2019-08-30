@@ -1,14 +1,20 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
@@ -16,21 +22,39 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class JobServiceTests {
 
+	public static final String TEST_DIRECTORY_NAME = "test";
+	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
+	public static final Long PRIMARYFILE_ID = 1l;
+	
+	@MockBean
+    private PrimaryfileRepository primaryfileRepository;
+	
+	@Autowired
+    private FileStorageService fileStorageService;
+	
 	@Autowired
 	private GalaxyDataService galaxyDataService;   
 		
 	@Autowired
 	private JobService jobService;   
 		
+    private Primaryfile primaryfile;
+	
 	@Before
 	public void setup() {
+		setUpPrimaryFile();
+		
 		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
 		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
 		
@@ -40,7 +64,7 @@ public class JobServiceTests {
  	}
 		
     @Test
-    public void shouldBuildWorkflowInputs() {
+    public void shouldBuildWorkflowInputsOnValidInputs() {
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
 
@@ -65,8 +89,55 @@ public class JobServiceTests {
     }
 
     @Test(expected = GalaxyWorkflowException.class)
-    public void shouldThrowExceptionBuildingInputsForNonExistingWorkflow() {
+    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
     	jobService.buildWorkflowInputs("foobar", "", new HashMap<String, Map<String, String>>());
     }
 
+    @Test
+    public void shouldCreateJobOnValidInputs() throws Exception {    	              
+    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
+    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
+
+    	// use the dummy primaryfile we set up for this test
+    	WorkflowOutputs woutputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+
+    	Assert.assertNotNull(woutputs);
+    	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertNotNull(woutputs.getOutputIds());
+    }
+    
+    @Test(expected = StorageException.class)
+    public void shouldThrowExceptionCreateJobForNonExistingPrimaryfile() {
+    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
+    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
+
+    	jobService.createJob(workflow.getId(), 0l, new HashMap<String, Map<String, String>>());
+    }
+    
+    /**
+     * Set up a dummy primaryfile in Amppd for testing workflow.
+     */
+    private void setUpPrimaryFile() {
+    	primaryfile = new Primaryfile();
+    	primaryfile.setId(PRIMARYFILE_ID);
+    	primaryfile.setPathname(TEST_DIRECTORY_NAME + "/" + PRIMARYFILE_NAME);
+    	
+    	Path unitpath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
+    	Path path = fileStorageService.resolve(primaryfile.getPathname());
+    	
+    	try {
+    		Files.createDirectories(unitpath);
+    		Files.createFile(path);
+    	}        
+    	catch (FileAlreadyExistsException e) {
+        	// if the file already exists do nothing
+    	}
+    	catch (Exception e) {
+    		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
+    	} 	
+    	
+    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
+    }
+
+    
 }
