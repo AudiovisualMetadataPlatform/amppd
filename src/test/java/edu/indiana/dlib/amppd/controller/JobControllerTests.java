@@ -66,7 +66,7 @@ public class JobControllerTests {
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
 
-    	mvc.perform(post("/jobs").param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
+    	mvc.perform(post("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$.historyId").isNotEmpty()).andExpect(
     							jsonPath("$.outputIds").isNotEmpty());    			

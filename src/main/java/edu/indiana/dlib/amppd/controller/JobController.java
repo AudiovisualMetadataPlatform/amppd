@@ -25,14 +25,15 @@ public class JobController {
 	private JobService jobService;
 	
 	/**
-	 * Run the given workflow against the given primaryfile.
-	 * @return outputs of the job run
+	 * Creating a Amppd job to invoke the given workflow in Galaxy against the given primaryfile with the given parameters.
+	 * @return outputs of the invocation returned by Galaxy
 	 */
-	@PostMapping("/jobs/")
-	public WorkflowOutputs runWorkflow(
+	@PostMapping("/jobs")
+	public WorkflowOutputs createJob(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId, 
-			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {		
+			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+		log.info("Creating Amppd job for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters);
 		return jobService.createJob(workflowId, primaryfileId, parameters);
 	}
 
