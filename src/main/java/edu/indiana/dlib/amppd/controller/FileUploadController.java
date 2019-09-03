@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
@@ -19,7 +18,6 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.java.Log;
 
 // TODO: when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
@@ -37,9 +35,6 @@ public class FileUploadController {
     private FileStorageService fileStorageService;
 	
 	@Autowired
-	private GalaxyApiService galaxyApiService;
-	
-	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
@@ -50,9 +45,6 @@ public class FileUploadController {
 
 	@Autowired
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
-
-	@Autowired
-	private GalaxyPropertyConfig config;
 
 	// TODO: handle redirect for all following methods
 	// TODO: consider moving most logic in methods into FileStorageServiceImpl

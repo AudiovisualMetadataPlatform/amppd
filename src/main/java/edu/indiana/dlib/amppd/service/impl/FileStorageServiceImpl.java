@@ -98,6 +98,13 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.resolve(String)
+	 */
+    public String absolutePathName(String pathname) {
+        return resolve(pathname).toAbsolutePath().toString();
+    }
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.loadAsResource(String)
 	 */
     public Resource loadAsResource(String pathname) {
