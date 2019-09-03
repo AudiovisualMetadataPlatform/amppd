@@ -8,7 +8,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 
 /**
- * Service for job related functionalities.
+ * Service for Amppd job related functionalities. 
+ * Note: unless otherwise noted, all references of job in Amppd refer to Amppd jobs. An Amppd job is an execution of a Galaxy workflow on a Amppd primaryfile.
  * @author yingfeng
  *
  */

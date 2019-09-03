@@ -13,7 +13,7 @@ import edu.indiana.dlib.amppd.service.JobService;
 import lombok.extern.java.Log;
 
 /**
- * Controller for REST operations on Workflow.
+ * Controller for REST operations on Amppd jobs.
  * @author yingfeng
  *
  */
@@ -25,7 +25,7 @@ public class JobController {
 	private JobService jobService;
 	
 	/**
-	 * Creating a Amppd job to invoke the given workflow in Galaxy against the given primaryfile with the given parameters.
+	 * Creating an Amppd job to invoke the given workflow in Galaxy against the given primaryfile with the given parameters.
 	 * @return outputs of the invocation returned by Galaxy
 	 */
 	@PostMapping("/jobs")
