@@ -33,6 +33,13 @@ public interface FileStorageService {
 	public Path resolve(String pathname);	
 
 	/**
+	 * Returns the absolute pathname for the given pathname relative to the Amppd file system root.
+	 * @param pathname the given relative pathname 
+	 * @return the absolute pathname resolved
+	 */
+	public String absolutePathName(String pathname);	
+
+	/**
 	 * Loads the file with the specified pathname as a resource.
 	 * @param pathname the specified pathname
 	 * @return resource loaded

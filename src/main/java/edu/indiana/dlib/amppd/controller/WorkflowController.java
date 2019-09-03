@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
-import edu.indiana.dlib.amppd.service.GalaxyApiService;
+import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.service.WorkflowService;
 import lombok.extern.java.Log;
 
 /**
@@ -19,10 +20,10 @@ import lombok.extern.java.Log;
 @RestController
 @Log
 public class WorkflowController {
-	
-	@Autowired
-	private GalaxyApiService galaxyApiService;
 
+	@Autowired
+	private WorkflowService workflowService;
+	
 	/**
 	 * Retrieve all workflows from Galaxy through its REST API.
 	 * @return
@@ -32,16 +33,14 @@ public class WorkflowController {
 		List<Workflow> workflows = null;
 	
 		try {
-			workflows = galaxyApiService.getGalaxyInstance().getWorkflowsClient().getWorkflows();
+			workflows = workflowService.getWorkflowsClient().getWorkflows();
 			log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
 		}
 		catch (Exception e) {
-			String msg = "Unable to retrieve workflows from Galaxy instance.";
-			log.severe(msg);
-			throw new RuntimeException(msg, e);
+			log.throwing("WorkflowController", "getWorkflows", new GalaxyWorkflowException("Unable to retrieve workflows from Galaxy.", e));
 		}
 		
 		return workflows;
 	}
-
+	
 }
