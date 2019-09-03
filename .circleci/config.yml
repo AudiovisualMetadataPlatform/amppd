@@ -7,12 +7,14 @@ jobs:
   build:
     docker:
       # specify the version you desire here
+      - image: circleci/postgres:9.4
       - image: circleci/openjdk:11.0.2-jdk
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
+        environment:
+          DATABASE_URL: jdbc:postgresql://127.0.0.1:5432/amppd
+          DATABASE_USER: username
+          DATABASE_PASSWORD: password
+          POSTGRES_USER: username
+          POSTGRES_DB: password
 
     working_directory: ~/repo
 
@@ -24,11 +26,11 @@ jobs:
       - checkout
 
       # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "pom.xml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+      #- restore_cache:
+      #    keys:
+      #      - v1-dependencies-{{ checksum "pom.xml" }}
+      #      # fallback to using the latest cache if no exact match is found
+      #      - v1-dependencies-
 
       - run: mvn dependency:go-offline
 
