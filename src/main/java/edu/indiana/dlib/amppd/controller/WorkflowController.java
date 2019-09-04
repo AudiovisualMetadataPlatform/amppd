@@ -65,11 +65,7 @@ public class WorkflowController {
 			log.severe(msg);
 			throw new GalaxyWorkflowException(msg, e);
 		}
-		
-//		if (workflow == null || workflow.getId() == null) {
-//			log.throwing("WorkflowController", "showWorkflow", new GalaxyWorkflowException("Workflow for ID " + workflowId + " does not exist in Galaxy."));
-//		}
-		
+
 		return workflow;
 	}
 	

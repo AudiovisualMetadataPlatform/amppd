@@ -40,24 +40,17 @@ public class WorkflowControllerTests {
     @Test
     public void shouldListWorkflows() throws Exception {    	
     	mvc.perform(get("/workflows")).andExpect(status().isOk()).andExpect(
-    			// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all, 
-    			//jsonPath("$", hasSize(1))).andExpect(	
     			jsonPath("$[0]").exists());
     }
 
 
     @Test
-    public void shouldShowDetailsOnValidWorkflow() throws Exception {    	
+    public void shouldShowWorkflowDetails() throws Exception {    	
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = workflowService.getWorkflowsClient().getWorkflows().get(0); 
 
     	mvc.perform(get("/workflows/{workflowId}", workflow.getId())).andExpect(status().isOk()).andExpect(
     			jsonPath("$.id").value(workflow.getId()));
-    }
-
-    @Test(expected = GalaxyWorkflowException.class)
-    public void shouldErrorOnNonExistingWorkflow() throws Exception {    	
-    	mvc.perform(get("/workflows/{workflowId}", "0"));
     }
 
 }
