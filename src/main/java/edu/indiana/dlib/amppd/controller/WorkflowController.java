@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -27,8 +27,8 @@ public class WorkflowController {
 	private WorkflowService workflowService;
 	
 	/**
-	 * List all workflows from Galaxy through its REST API.
-	 * @return
+	 * List all workflows currently existing in Galaxy.
+	 * @return a list of workflows with name, ID, and URL.
 	 */
 	@GetMapping("/workflows")
 	public List<Workflow> listWorkflows() {	
@@ -36,32 +36,41 @@ public class WorkflowController {
 	
 		try {
 			workflows = workflowService.getWorkflowsClient().getWorkflows();
-			log.info("Listed " + workflows.size() + " current workflows in Galaxy: " + workflows);
+			log.info("Listing " + workflows.size() + " workflows currently existing in Galaxy: " + workflows);
 		}
 		catch (Exception e) {
-			log.throwing("WorkflowController", "listWorkflows", new GalaxyWorkflowException("Unable to retrieve workflows from Galaxy.", e));
+			String msg = "Unable to retrieve workflows from Galaxy.";
+			log.severe(msg);
+			throw new GalaxyWorkflowException(msg, e);
 		}
 		
 		return workflows;
 	}
 	
 	/**
-	 * Retrieve details of a workflow from Galaxy through its REST API.
-	 * @return
+	 * Show details of a workflow based on information retrieved from Galaxy.
+	 * @param workflowId ID of the queried workflow
+	 * @return all the details information of the queried workflow
 	 */
 	@GetMapping("/workflows/{workflowId}")
-	public List<Workflow> showWorkflow(@PathVariable("workflowId") String workflowId) {	
-		List<Workflow> workflows = null;
+	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId) {	
+		WorkflowDetails workflow = null;
 	
 		try {
-			workflows = workflowService.getWorkflowsClient().getWorkflows();
-			log.info("Retrieved " + workflows.size() + " current workflows in Galaxy: " + workflows);
+			workflow = workflowService.getWorkflowsClient().showWorkflow(workflowId);
+			log.info("Showing workflow detail for ID: " +  workflowId);
 		}
 		catch (Exception e) {
-			log.throwing("WorkflowController", "getWorkflows", new GalaxyWorkflowException("Unable to retrieve workflows from Galaxy.", e));
+			String msg = "Unable to retrieve workflow detail for ID " + workflowId + " from Galaxy.";
+			log.severe(msg);
+			throw new GalaxyWorkflowException(msg, e);
 		}
 		
-		return workflows;
+//		if (workflow == null || workflow.getId() == null) {
+//			log.throwing("WorkflowController", "showWorkflow", new GalaxyWorkflowException("Workflow for ID " + workflowId + " does not exist in Galaxy."));
+//		}
+		
+		return workflow;
 	}
 	
 	
