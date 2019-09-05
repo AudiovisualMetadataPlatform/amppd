@@ -116,7 +116,6 @@ public class FileStorageServiceImpl implements FileStorageService {
             }
             else {
                 throw new StorageFileNotFoundException("Could not read file " + pathname);
-
             }
         }
         catch (MalformedURLException e) {

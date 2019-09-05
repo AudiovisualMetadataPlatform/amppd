@@ -132,8 +132,9 @@ public class JobServiceImpl implements JobService {
     		WorkflowInputs winputs = buildWorkflowInputs(workflowId, go.getId(), parameters);
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
-    	catch (Exception e) {
-    		log.throwing("JobServiceImpl", "createJob", new GalaxyWorkflowException("Error creating " + msg, e));
+    	catch (Exception e) {    	
+    		log.severe("Error creating " + msg);
+    		throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
 		log.info("Successfully created " + msg);
