@@ -42,7 +42,7 @@ public class JobController {
 	}
 
 	/**
-	 * Creating multiple Amppd jobs, one for each primaryfile of the items included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
+	 * Creating a bundle of multiple Amppd jobs, one for each primaryfile of the items included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
