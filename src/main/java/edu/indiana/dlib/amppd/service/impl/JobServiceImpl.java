@@ -172,13 +172,11 @@ public class JobServiceImpl implements JobService {
     	}
     	else { 
 	    	for (Item item : bundle.getItems()) {
-	//    		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("Item <" + itemId + "> does not exist!"));        	
 	        	if (item.getPrimaryfiles() == null || item.getPrimaryfiles().isEmpty()) {
 	        		log.warning("Item <\" + itemId + \"> does not contain any primaryfile.");
 	        	}        	
 	        	else {
 		        	for (Primaryfile primaryfile : item.getPrimaryfiles() ) {
-		//        	Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));    
 		        		try {
 		        			woutputsList.add(createJob(workflowId, primaryfile.getId(), parameters));
 		        			nSuccess++;
