@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.util.List;
 import java.util.Map;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
@@ -30,13 +31,22 @@ public interface JobService {
 	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, Map<String, Map<String, String>> parameters);
 	
 	/**
-	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
+	 * Create a new Amppd jobs, one for each primaryfile of the items included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileId ID of the given primaryfile
 	 * @param parameters step parameters for running the workflow
 	 * @return the WorkflowOutputs returned from Galaxy
 	 */
 	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
+	
+	/**
+	 * Create a bundle of Amppd jobs, one job for each  by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
+	 * @param workflowId the ID of the specified workflow 
+	 * @param bundleId the ID of the specified bundle
+	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @return list outputs of the invocation returned by Galaxy
+	 */
+	public List<WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
 	
 
 }

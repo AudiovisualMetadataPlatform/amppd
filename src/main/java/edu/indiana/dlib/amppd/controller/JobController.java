@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,22 @@ public class JobController {
 			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
 		log.info("Creating Amppd job for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters);
 		return jobService.createJob(workflowId, primaryfileId, parameters);
+	}
+
+	/**
+	 * Creating multiple Amppd jobs, one for each primaryfile of the items included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
+	 * @param workflowId the ID of the specified workflow 
+	 * @param bundleId the ID of the specified bundle
+	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @return list outputs of the invocation returned by Galaxy
+	 */
+	@PostMapping("/jobs/bundle")
+	public List<WorkflowOutputs> createJobBundle(
+			@RequestParam("workflowId") String workflowId, 
+			@RequestParam("bundleId") Long bundleId, 
+			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+		log.info("Creating a bundle Amppd jobs for: workflow ID: " + workflowId + ", bundleId: " + bundleId + " parameters: " + parameters);		
+		return jobService.createJobBundle(workflowId, bundleId, parameters);
 	}
 
 }

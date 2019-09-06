@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
+import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -50,28 +51,8 @@ public class JobControllerTests {
     
     private Primaryfile primaryfile;
 
-	@Before
-	public void setup() {
-		// make sure there're some existing primaryfile uploaded in Amppd for testing
-		setUpPrimaryFile();
-		
-		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
-		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
-		
-		// TODO alternatively we could use mock workflowsClient, in which case we won't require any existing data in Galaxy
- 	}
-    
-    @Test
-    public void shouldRunWorkflows() throws Exception {    	              
-    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
-    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
+    private Bundle bundle;
 
-    	mvc.perform(post("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
-    			.andExpect(status().isOk()).andExpect(
-    					jsonPath("$.historyId").isNotEmpty()).andExpect(
-    							jsonPath("$.outputIds").isNotEmpty());    			
-    }
-    
     /**
      * Set up a dummy primaryfile in Amppd for testing workflow.
      */
@@ -97,4 +78,40 @@ public class JobControllerTests {
     	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
     }
 
+	@Before
+	public void setup() {
+		// make sure there're some existing primaryfile uploaded in Amppd for testing
+		setUpPrimaryFile();
+		
+		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
+		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
+		
+		// TODO alternatively we could use mock workflowsClient, in which case we won't require any existing data in Galaxy
+ 	}
+	
+    
+    @Test
+    public void shouldCreateJob() throws Exception {    	              
+    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
+    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
+
+    	mvc.perform(post("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
+    			.andExpect(status().isOk()).andExpect(
+    					jsonPath("$.historyId").isNotEmpty()).andExpect(
+    							jsonPath("$.outputIds").isNotEmpty());    			
+    }
+    
+    @Test
+    public void shouldCreateJobBundle() throws Exception {    	              
+    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
+    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
+
+    	mvc.perform(post("/jobs/bundle").param("workflowId", workflow.getId()).param("bundleId", bundle.getId().toString()).param("parameters", "{}"))
+    			.andExpect(status().isOk()).andExpect(
+    					jsonPath("$.historyId").isNotEmpty()).andExpect(
+    							jsonPath("$.outputIds").isNotEmpty());    			
+    }
+    
+        
+    
 }
