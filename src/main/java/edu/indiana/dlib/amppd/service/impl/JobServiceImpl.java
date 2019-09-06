@@ -181,7 +181,7 @@ public class JobServiceImpl implements JobService {
 		        			woutputsList.add(createJob(workflowId, primaryfile.getId(), parameters));
 		        			nSuccess++;
 		        		}
-		        		catch (GalaxyWorkflowException e) {
+		        		catch (Exception e) {
 		        			// if error occurs with this primaryfile we still want to continue with other primaryfiles
 		        			log.severe(e.getStackTrace().toString());	
 		        			nFailed++;

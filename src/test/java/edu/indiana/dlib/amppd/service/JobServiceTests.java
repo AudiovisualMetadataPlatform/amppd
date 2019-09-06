@@ -49,9 +49,6 @@ public class JobServiceTests {
     private BundleRepository bundleRepository;
 
 	@MockBean
-    private ItemRepository itemRepository;
-
-	@MockBean
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
@@ -97,14 +94,22 @@ public class JobServiceTests {
     private void setUpBundle() {    	
     	Item item = new Item();
     	Set<Primaryfile> primaryfiles = new HashSet<Primaryfile>();
-    	primaryfiles.add(primaryfile);    	
+    	primaryfiles.add(primaryfile);
     	item.setPrimaryfiles(primaryfiles);
+
+    	// add some invalid primaryfile to the item
+    	Primaryfile pf = new Primaryfile();
+    	pf.setId(0l);;
+    	primaryfiles.add(pf);
     	
     	bundle = new Bundle();
     	Set<Item> items = new HashSet<Item>();
     	items.add(item);
     	bundle.setItems(items); 	
-    	
+
+    	// add some invalid item to the bundle
+    	items.add(new Item());
+
     	bundle.setId(BUNDLE_ID);
     	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	    	
     }
@@ -187,6 +192,7 @@ public class JobServiceTests {
     	// use the dummy bundle we set up for this test
     	List<WorkflowOutputs> woutputsList = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
 
+    	// only one primaryfile is valid, so only one workflow outputs shall exist in the list returned
     	Assert.assertNotNull(woutputsList);
     	Assert.assertEquals(woutputsList.size(), 1);
     	Assert.assertNotNull(woutputsList.get(0));
