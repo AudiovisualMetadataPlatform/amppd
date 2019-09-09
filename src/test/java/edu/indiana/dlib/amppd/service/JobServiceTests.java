@@ -4,8 +4,11 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,7 +29,10 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Bundle;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
 @RunWith(SpringRunner.class)
@@ -36,7 +42,11 @@ public class JobServiceTests {
 	public static final String TEST_DIRECTORY_NAME = "test";
 	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
 	public static final Long PRIMARYFILE_ID = 1l;
+	public static final Long BUNDLE_ID = 2l;
 	
+	@MockBean
+    private BundleRepository bundleRepository;
+
 	@MockBean
     private PrimaryfileRepository primaryfileRepository;
 	
@@ -50,10 +60,63 @@ public class JobServiceTests {
 	private JobService jobService;   
 		
     private Primaryfile primaryfile;
+    private Bundle bundle;
 	
+    /**
+     * Set up a dummy primaryfile in Amppd for testing Amppd job creation.
+     */
+    private void setUpPrimaryFile() {
+    	primaryfile = new Primaryfile();
+    	primaryfile.setId(PRIMARYFILE_ID);
+    	primaryfile.setPathname(TEST_DIRECTORY_NAME + "/" + PRIMARYFILE_NAME);
+    	
+    	Path unitpath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
+    	Path path = fileStorageService.resolve(primaryfile.getPathname());
+    	
+    	try {
+    		Files.createDirectories(unitpath);
+    		Files.createFile(path);
+    	}        
+    	catch (FileAlreadyExistsException e) {
+        	// if the file already exists do nothing
+    	}
+    	catch (Exception e) {
+    		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
+    	} 	
+    	
+    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
+    }
+
+    /**
+     * Set up a dummy bundle in Amppd for testing Amppd job bundle creation.
+     */
+    private void setUpBundle() {    	
+    	Item item = new Item();
+    	Set<Primaryfile> primaryfiles = new HashSet<Primaryfile>();
+    	primaryfiles.add(primaryfile);
+    	item.setPrimaryfiles(primaryfiles);
+
+    	// add some invalid primaryfile to the item
+    	Primaryfile pf = new Primaryfile();
+    	pf.setId(0l);;
+    	primaryfiles.add(pf);
+    	
+    	bundle = new Bundle();
+    	Set<Item> items = new HashSet<Item>();
+    	items.add(item);
+    	bundle.setItems(items); 	
+
+    	// add some invalid item to the bundle
+    	items.add(new Item());
+
+    	bundle.setId(BUNDLE_ID);
+    	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	    	
+    }
+    
 	@Before
 	public void setup() {
 		setUpPrimaryFile();
+		setUpBundle();
 		
 		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
 		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
@@ -65,6 +128,7 @@ public class JobServiceTests {
 		
     @Test
     public void shouldBuildWorkflowInputsOnValidInputs() {
+    	
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
 
@@ -94,7 +158,7 @@ public class JobServiceTests {
     }
 
     @Test
-    public void shouldCreateJobOnValidInputs() throws Exception {    	              
+    public void shouldCreateJobOnValidInputs() {    	              
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
 
@@ -107,37 +171,30 @@ public class JobServiceTests {
     }
     
     @Test(expected = StorageException.class)
-    public void shouldThrowExceptionCreateJobForNonExistingPrimaryfile() {
+    public void shouldThrowStorageExceptionCreateJobForNonExistingPrimaryfile() {
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
 
     	jobService.createJob(workflow.getId(), 0l, new HashMap<String, Map<String, String>>());
     }
     
-    /**
-     * Set up a dummy primaryfile in Amppd for testing workflow.
-     */
-    private void setUpPrimaryFile() {
-    	primaryfile = new Primaryfile();
-    	primaryfile.setId(PRIMARYFILE_ID);
-    	primaryfile.setPathname(TEST_DIRECTORY_NAME + "/" + PRIMARYFILE_NAME);
-    	
-    	Path unitpath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
-    	Path path = fileStorageService.resolve(primaryfile.getPathname());
-    	
-    	try {
-    		Files.createDirectories(unitpath);
-    		Files.createFile(path);
-    	}        
-    	catch (FileAlreadyExistsException e) {
-        	// if the file already exists do nothing
-    	}
-    	catch (Exception e) {
-    		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
-    	} 	
-    	
-    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
+    @Test(expected = GalaxyWorkflowException.class)
+    public void shouldThrowGalaxyWorkflowExceptionExceptionCreateJobForNonExistingWorkflow() { 	
+    	jobService.createJob("0", primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    }
+    
+    @Test
+    public void shouldCreateJobBundle() {    	              
+    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
+    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
+
+    	// use the dummy bundle we set up for this test
+    	List<WorkflowOutputs> woutputsList = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
+
+    	// only one primaryfile is valid, so only one workflow outputs shall exist in the list returned
+    	Assert.assertNotNull(woutputsList);
+    	Assert.assertEquals(woutputsList.size(), 1);
+    	Assert.assertNotNull(woutputsList.get(0));
     }
 
-    
 }
