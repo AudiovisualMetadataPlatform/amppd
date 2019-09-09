@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,7 +21,11 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Bundle;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.repository.BundleRepository;
+import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
@@ -37,6 +43,12 @@ import lombok.extern.java.Log;
 @Log
 public class JobServiceImpl implements JobService {
 	
+	@Autowired
+    private BundleRepository bundleRepository;
+
+	@Autowired
+    private ItemRepository itemRepository;
+
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 
@@ -110,6 +122,7 @@ public class JobServiceImpl implements JobService {
 	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
 		WorkflowOutputs woutputs = null;
 		String msg = "Amppd job for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters;
+		log.info("Creating " + msg);
 		
     	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
     	Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));    
@@ -142,4 +155,44 @@ public class JobServiceImpl implements JobService {
     	return woutputs;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String,Long,Map<String, Map<String, String>>)
+	 */	
+	@Override
+	public List<WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
+		List<WorkflowOutputs> woutputsList = new ArrayList<WorkflowOutputs>();
+		String msg = "a bundle of Amppd jobs for: workflow ID: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
+		log.info("Creating " + msg);
+		
+		int nSuccess = 0;
+		int nFailed = 0;
+		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("Bundle <" + bundleId + "> does not exist!"));        	
+    	if (bundle.getItems() == null || bundle.getItems().isEmpty()) {
+    		log.warning("Bundle <\" + bundleId + \"> does not contain any item.");
+    	}
+    	else { 
+	    	for (Item item : bundle.getItems()) {
+	        	if (item.getPrimaryfiles() == null || item.getPrimaryfiles().isEmpty()) {
+	        		log.warning("Item <\" + itemId + \"> does not contain any primaryfile.");
+	        	}        	
+	        	else {
+		        	for (Primaryfile primaryfile : item.getPrimaryfiles() ) {
+		        		try {
+		        			woutputsList.add(createJob(workflowId, primaryfile.getId(), parameters));
+		        			nSuccess++;
+		        		}
+		        		catch (Exception e) {
+		        			// if error occurs with this primaryfile we still want to continue with other primaryfiles
+		        			log.severe(e.getStackTrace().toString());	
+		        			nFailed++;
+		        		}
+		        	}
+	        	}
+	    	}    		
+    	}
+
+		log.info("Number of Amppd jobs successfully created for the bundle: " + nSuccess);    	
+		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
+    	return woutputsList;
+	}	
 }
