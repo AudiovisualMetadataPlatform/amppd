@@ -6,6 +6,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
+import edu.indiana.dlib.amppd.model.Primaryfile;
+
 /**
  * Service to provide convenient helpers to operate on Galaxy data libraries, datasets, histories etc. 
  * @author yingfeng
@@ -59,5 +61,14 @@ public interface GalaxyDataService {
 	 * @return the GalaxyObject instance containing the ID and URL of the dataset being created in the library for the uploaded file 
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath);
+	
+//	/**
+//	 * Upload a primaryfile from AMP file system to the shared amppd Galaxy data library, if it hasn't been uploaded before,
+//	 * and save the dataset ID created in Galaxy back to the primaryfile.
+//	 * @param primaryfileId ID of the primaryfile to be uploaded to Galaxy
+//	 * @return the Primaryfile instance with Galaxy dataset ID populated
+//	 */
+//	public Primaryfile uploadPrimaryfileToGalaxy(Long primaryfileId);
+
 
 }

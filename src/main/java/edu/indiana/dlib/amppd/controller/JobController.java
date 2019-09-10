@@ -53,7 +53,7 @@ public class JobController {
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("bundleId") Long bundleId, 
 			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
-		log.info("Creating a bundle Amppd jobs for: workflow ID: " + workflowId + ", bundleId: " + bundleId + " parameters: " + parameters);		
+		log.info("Creating a bundle of Amppd jobs for: workflow ID: " + workflowId + ", bundleId: " + bundleId + " parameters: " + parameters);		
 		return jobService.createJobBundle(workflowId, bundleId, parameters);
 	}
 
