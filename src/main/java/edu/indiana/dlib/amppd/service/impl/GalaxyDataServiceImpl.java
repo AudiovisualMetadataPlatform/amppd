@@ -17,7 +17,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import lombok.Getter;
@@ -53,9 +52,6 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 
 	@Getter
 	private History sharedHistory;
-
-	@Autowired
-    private PrimaryfileRepository primaryfileRepository;
 	
 	/**
 	 *  initialize GalaxyDataService bean.
