@@ -6,8 +6,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
-import edu.indiana.dlib.amppd.model.Primaryfile;
-
 /**
  * Service to provide convenient helpers to operate on Galaxy data libraries, datasets, histories etc. 
  * @author yingfeng
