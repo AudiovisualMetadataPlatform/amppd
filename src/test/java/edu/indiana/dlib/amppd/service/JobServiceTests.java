@@ -85,6 +85,7 @@ public class JobServiceTests {
     	} 	
     	
     	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
+    	Mockito.when(primaryfileRepository.save(primaryfile)).thenReturn(primaryfile);     	    	
     }
 
     /**
@@ -162,12 +163,24 @@ public class JobServiceTests {
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
 
+    	// before creating the job for the firs time on the primaryfile, the dataset ID is not set yet
+    	Assert.assertNull(primaryfile.getDatasetId());
+
     	// use the dummy primaryfile we set up for this test
     	WorkflowOutputs woutputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
+    	// now the dataset ID shall be set
+    	Assert.assertNotNull(primaryfile.getDatasetId());
+    	
+    	// returned workflow outputs shall have contents
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
     	Assert.assertNotNull(woutputs.getOutputIds());
+    	
+    	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
+    	String datasetId = primaryfile.getDatasetId();
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	Assert.assertEquals(primaryfile.getDatasetId(), datasetId);
     }
     
     @Test(expected = StorageException.class)
