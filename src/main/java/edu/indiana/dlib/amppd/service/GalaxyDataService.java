@@ -62,13 +62,4 @@ public interface GalaxyDataService {
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath);
 	
-//	/**
-//	 * Upload a primaryfile from AMP file system to the shared amppd Galaxy data library, if it hasn't been uploaded before,
-//	 * and save the dataset ID created in Galaxy back to the primaryfile.
-//	 * @param primaryfileId ID of the primaryfile to be uploaded to Galaxy
-//	 * @return the Primaryfile instance with Galaxy dataset ID populated
-//	 */
-//	public Primaryfile uploadPrimaryfileToGalaxy(Long primaryfileId);
-
-
 }
