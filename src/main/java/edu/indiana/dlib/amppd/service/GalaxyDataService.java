@@ -59,5 +59,5 @@ public interface GalaxyDataService {
 	 * @return the GalaxyObject instance containing the ID and URL of the dataset being created in the library for the uploaded file 
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath);
-
+	
 }
