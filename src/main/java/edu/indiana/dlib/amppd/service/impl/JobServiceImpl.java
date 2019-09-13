@@ -25,7 +25,6 @@ import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
-import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
@@ -45,9 +44,6 @@ public class JobServiceImpl implements JobService {
 	
 	@Autowired
     private BundleRepository bundleRepository;
-
-	@Autowired
-    private ItemRepository itemRepository;
 
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
@@ -124,25 +120,35 @@ public class JobServiceImpl implements JobService {
 		String msg = "Amppd job for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters;
 		log.info("Creating " + msg);
 		
-    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
-    	Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));    
-    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
-    		throw new StorageException("Primaryfile " + primaryfileId + " hasn't been uploaded to AMPPD file system");
-    	}
-    	
-    	/* Note: 
-    	 * We do a lazy upload from Amppd to Galaxy, i.e. we do it when workflow is invoked in Galaxy, rather than when the file is uploaded to Amppd.
+		// retrieve primaryfile via ID
+		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+
+		/* Note: 
+    	 * We do a lazy upload from Amppd to Galaxy, i.e. we only upload the primaryfile to Galaxy when a workflow is invoked in Galaxy against the primaryfile, 
+    	 * rather than when the primaryfile is uploaded to Amppd.
     	 * The pros is that we won't upload to Galaxy unnecessarily if the primaryfile is never going to be processed through workflow;
     	 * the cons is that it might slow down workflow execution when running in batch.
-    	 */
-
-    	// upload the primaryfile into Galaxy data library, the returned result is an GalaxyObject containing the ID and URL of the dataset uploaded
-    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
-    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);		
+		 * Furthermore, we only do this upload once, i.e. if the primaryfile has never been uploaded to Galaxy. 
+		 * Later invocation of workflows on this primaryfile will just reuse the result from the first upload in Galaxy.
+		 */
+		if (primaryfile.getDatasetId() == null) {    	
+	    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
+	    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
+	    		throw new StorageException("Primaryfile " + primaryfileId + " hasn't been uploaded to AMPPD file system");
+	    	}
+	    	
+	    	// upload the primaryfile into Galaxy data library, the returned result is a GalaxyObject containing the ID and URL of the dataset uploaded
+	    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
+	    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);	
+	    	
+	    	// save the dataset ID in primaryfile for future reuse
+	    	primaryfile.setDatasetId(go.getId());
+	    	primaryfileRepository.save(primaryfile);
+		}
 		
     	// invoke the workflow 
     	try {
-    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, go.getId(), parameters);
+    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), parameters);
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	

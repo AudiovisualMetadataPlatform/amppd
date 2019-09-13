@@ -52,7 +52,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 
 	@Getter
 	private History sharedHistory;
-
+	
 	/**
 	 *  initialize GalaxyDataService bean.
 	 */
