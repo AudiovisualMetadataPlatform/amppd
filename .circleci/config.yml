@@ -8,13 +8,13 @@ jobs:
     docker:
       # specify the version you desire here
       - image: circleci/openjdk:11.0.2-jdk
-      - image: circleci/postgres:9.4
         environment:
           DATABASE_URL: jdbc:postgresql://127.0.0.1:5432/amppd
           DATABASE_USER: username
           DATABASE_PASSWORD: password
           POSTGRES_USER: username
           POSTGRES_DB: password
+      - image: circleci/postgres:9.4
 
     working_directory: ~/repo
 
