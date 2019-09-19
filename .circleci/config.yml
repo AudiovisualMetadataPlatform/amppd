@@ -17,7 +17,12 @@ jobs: # basic units of work in a run
 #          DATABASE_PASSWORD: password
 #          POSTGRES_USER: username
 #          POSTGRES_DB: password
-      - image: circleci/postgres:latest
+#      - image: circleci/postgres:latest
+      - image: postgres:11-alpine
+        environment:
+          POSTGRES_DB: jdbc:postgresql://localhost:5432/username
+          POSTGRES_USER: username
+          POSTGRES_PASSWORD: password
 
     working_directory: ~/amppd
 
