@@ -9,7 +9,7 @@ jobs: # basic units of work in a run
       # specify the version you desire here
       - image: circleci/openjdk:11.0.2-jdk
         environment:
-          AMPPD_DB_URL: jdbc:postgresql://root@localhost:5432/circle_test
+          AMPPD_DB_URL: jdbc:postgresql://localhost:5432/circle_test
           AMPPD_DB_DDL: create
           AMPPD_FILE_ROOT: ~/amppd/files/          
 #          DATABASE_URL: jdbc:postgresql://127.0.0.1:5432/amppd
