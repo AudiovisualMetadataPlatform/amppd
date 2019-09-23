@@ -11,12 +11,6 @@ jobs: # basic units of work in a run
         environment:
           AMPPD_DB_DDL: create
           AMPPD_FILE_ROOT: ~/amppd/files/          
-#          DATABASE_URL: jdbc:postgresql://127.0.0.1:5432/amppd
-#          DATABASE_USER: username
-#          DATABASE_PASSWORD: password
-#          POSTGRES_USER: username
-#          POSTGRES_DB: password
-#      - image: circleci/postgres:latest
       - image: postgres:11-alpine
         environment:
           POSTGRES_DB: username
