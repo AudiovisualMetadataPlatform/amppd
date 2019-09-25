@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -158,6 +159,8 @@ public class JobServiceTests {
     	jobService.buildWorkflowInputs("foobar", "", new HashMap<String, Map<String, String>>());
     }
 
+    // TODO remove ignore once sample media file is added to repository
+    @Ignore
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
@@ -191,11 +194,15 @@ public class JobServiceTests {
     	jobService.createJob(workflow.getId(), 0l, new HashMap<String, Map<String, String>>());
     }
     
+    // TODO remove ignore once sample media file is added to repository
+    @Ignore
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowGalaxyWorkflowExceptionExceptionCreateJobForNonExistingWorkflow() { 	
     	jobService.createJob("0", primaryfile.getId(), new HashMap<String, Map<String, String>>());
     }
     
+    // TODO remove ignore once sample media file is added to repository
+    @Ignore
     @Test
     public void shouldCreateJobBundle() {    	              
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
