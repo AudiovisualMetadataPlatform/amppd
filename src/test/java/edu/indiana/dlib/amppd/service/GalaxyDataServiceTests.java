@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,8 @@ public class GalaxyDataServiceTests {
     	Assert.assertNull(history);
     }
 
+    // TODO remove ignore once sample media file is added to repository
+    @Ignore
     @Test
     public void shouldUploadFileToExistingLibrary() {
     	GalaxyObject dataset = galaxyDataService.uploadFileToGalaxy(testFile, TEST_LIBRARY_NAME);
