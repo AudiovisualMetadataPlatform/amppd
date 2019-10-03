@@ -164,15 +164,22 @@
   			<version>3.1.0</version>
   			<scope>test</scope>
 		</dependency>
+<!-- 	
 		<dependency>
 			<groupId>com.github.jmchilton.blend4j</groupId>
 			<artifactId>blend4j</artifactId>
 			<version>0.2.0</version>
 		</dependency>
+ -->		
+ 		<dependency>
+			<groupId>com.github.AudiovisualMetadataPlatform</groupId>
+			<artifactId>blend4j</artifactId>
+			<version>master-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>com.github.AudiovisualMetadataPlatform</groupId>
 			<artifactId>galaxy-bootstrap</artifactId>
-			<version>galaxybootstrap-0.7.0</version>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
