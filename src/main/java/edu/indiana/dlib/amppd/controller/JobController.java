@@ -5,11 +5,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.InvocationBriefs;
+import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.service.JobService;
@@ -71,4 +74,35 @@ public class JobController {
 		return jobService.listJobs(workflowId, primaryfileId);
 	}
 	
+	/**
+	 * Show brief information of the inquired AMP job, which includes basic information of each step within the job. 
+	 * @param workflowId the ID of the workflow associated with the inquired AMP job 
+	 * @param invocationId the ID of the Galaxy workflow invocation corresponding to the inquired AMP job
+	 * @return an instance of InvocationBriefs containing brief information of the inquired AMP job 
+	 */
+	@GetMapping("/jobs/{invocationId}")
+	public InvocationBriefs showJob(
+			@RequestParam("workflowId") String workflowId, 
+			@PathVariable("invocationId") String invocationId) {
+		log.info("Showing information of the AMP jobs for: workflow ID: " + workflowId + ", invocationId: " + invocationId);		
+		return (InvocationBriefs)jobService.getWorkflowsClient().showInvocation(workflowId, invocationId, false);
+	}
+	
+	/**
+	 * Show detailed information of the inquired step within the inquired AMP job. 
+	 * @param workflowId the ID of the workflow associated with the inquired AMP job 
+	 * @param invocationId the ID of the Galaxy workflow invocation corresponding to the inquired AMP job
+	 * @param stepId the ID of the inquired Galaxy workflow invocation step within the inquired AMP job
+	 * @return an instance of InvocationStepDetails containing detailed information of the inquired AMP job step
+	 */
+	@GetMapping("/jobs/{invocationId}/steps/{stepId}")
+	public InvocationStepDetails showJobStep(
+			@RequestParam("workflowId") String workflowId, 
+			@PathVariable("invocationId") String invocationId,
+			@PathVariable("stepId") String stepId) {
+		log.info("Showing information of the AMP jobs for: workflow ID: " + workflowId + ", invocationId: " + invocationId);		
+		return jobService.getWorkflowsClient().showInvocationStep(workflowId, invocationId, stepId);
+	}
+	
+
 }

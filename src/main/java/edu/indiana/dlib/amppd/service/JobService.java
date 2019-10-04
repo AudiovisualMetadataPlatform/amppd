@@ -23,13 +23,14 @@ public interface JobService {
 	public WorkflowsClient getWorkflowsClient();
 	
 	/**
-	 * Build the workflow inputs to feed the given dataset along with the given parameters into the given Galaxy workflow.
+	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
 	 * @param workflowId ID of the given workflow
 	 * @param datasetId ID of the given dataset
+	 * @param historyId ID of the given history
 	 * @param parameters step parameters for running the workflow
 	 * @return the built WorkflowInputs instance
 	 */
-	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, Map<String, Map<String, String>> parameters);
+	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters);
 	
 	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
@@ -56,5 +57,6 @@ public interface JobService {
 	 * @return a list of Invocations each containing basic information of an AMP job 
 	 */
 	public List<Invocation> listJobs(String workflowId, Long primaryfileId);
+		
 
 }

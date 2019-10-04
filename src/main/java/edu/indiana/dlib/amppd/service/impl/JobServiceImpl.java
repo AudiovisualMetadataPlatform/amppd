@@ -73,12 +73,13 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(String,String,Map<String, Map<String, String>>)
+	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(String,String,String,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, Map<String, Map<String, String>> parameters) {
+	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
 		WorkflowInputs winputs = new WorkflowInputs();
-		winputs.setDestination(new ExistingHistory(galaxyDataService.getSharedHistory().getId()));
+//		winputs.setDestination(new ExistingHistory(galaxyDataService.getSharedHistory().getId()));
+		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
 		winputs.setWorkflowId(workflowId);
 		
@@ -177,7 +178,7 @@ public class JobServiceImpl implements JobService {
 
 		// invoke the workflow 
     	try {
-    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), parameters);
+    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	

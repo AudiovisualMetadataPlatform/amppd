@@ -21,9 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
@@ -137,15 +139,19 @@ public class JobServiceTests {
     	// we assume there is at least one dataset existing in Galaxy, and we can use one of these
     	LibraryContent dataset = galaxyDataService.getLibrariesClient().getLibraryContents(galaxyDataService.getSharedLibrary().getId()).get(0);
 
+    	// we assume there is at least one history existing in Galaxy, and we can use one of these
+    	History history = galaxyDataService.getHistoriesClient().getHistories().get(0);
+
     	// set up some dummy parameters
     	HashMap<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
     	HashMap<String, String> param1 = new  HashMap<String, String>();
     	param1.put("name1", "value1");
     	parameters.put("step1", param1);
     	
-    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), dataset.getId(), parameters);
+    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), dataset.getId(), history.getId(), parameters);
     	
     	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
+    	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
     	Assert.assertEquals(winputs.getInputs().size(), 1);
     	WorkflowInput winput = (WorkflowInput)winputs.getInputs().values().toArray()[0];
     	Assert.assertEquals(winput.getId(), dataset.getId());
@@ -156,7 +162,7 @@ public class JobServiceTests {
 
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
-    	jobService.buildWorkflowInputs("foobar", "", new HashMap<String, Map<String, String>>());
+    	jobService.buildWorkflowInputs("foobar", "", "", new HashMap<String, Map<String, String>>());
     }
 
     // TODO remove ignore once sample media file is added to repository
