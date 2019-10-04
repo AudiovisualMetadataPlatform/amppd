@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
+import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
@@ -41,6 +43,8 @@ import lombok.extern.java.Log;
 @Service
 @Log
 public class JobServiceImpl implements JobService {
+	
+	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	
 	@Autowired
     private BundleRepository bundleRepository;
@@ -122,6 +126,7 @@ public class JobServiceImpl implements JobService {
 		
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+		boolean save = false;
 
 		/* Note: 
     	 * We do a lazy upload from Amppd to Galaxy, i.e. we only upload the primaryfile to Galaxy when a workflow is invoked in Galaxy against the primaryfile, 
@@ -141,12 +146,36 @@ public class JobServiceImpl implements JobService {
 	    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
 	    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);	
 	    	
-	    	// save the dataset ID in primaryfile for future reuse
+	    	// set flag to save the dataset ID in primaryfile for future reuse
 	    	primaryfile.setDatasetId(go.getId());
-	    	primaryfileRepository.save(primaryfile);
+	    	save = true;
 		}
 		
-    	// invoke the workflow 
+		// if the output history hasn't been created for this primaryfile, i.e. it's the first time any workflow is run against it, create a new history for it
+		if (primaryfile.getHistoryId() == null) {   
+			// since we use primaryfile ID in the output history name, we can assume that the name is unique, 
+			// thus, if the historyId is null, it means the output history for this primaryfile doesn't exist in Galaxy yet, and vice versa
+			History history = new History(PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX + primaryfile.getId());
+			try {
+				history = galaxyDataService.getHistoriesClient().create(history);
+		    	primaryfile.setHistoryId(history.getId());		
+		    	save = true;
+				log.info("Initialized the Galaxy output history " + history.getId() + " for primaryfile " + primaryfile.getId());
+			}
+			catch (Exception e) {
+				throw new RuntimeException("Cannot create Galaxy output history for primaryfile " + primaryfile.getId(), e);
+			}		
+		}			
+		else {
+			log.info("The Galaxy output history " + primaryfile.getHistoryId() + " for Primaryfile " + primaryfile.getId() + " already exists.");			
+		}
+
+		// if dataset or history IDs have been changed in primaryfile, persist it in DB 
+		if (save) {
+			primaryfileRepository.save(primaryfile);
+		}
+
+		// invoke the workflow 
     	try {
     		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), parameters);
     		woutputs = workflowsClient.runWorkflow(winputs);
@@ -201,4 +230,22 @@ public class JobServiceImpl implements JobService {
 		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
     	return woutputsList;
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.listJobs(String,Long)
+	 */	
+	@Override	
+	public List<Invocation> listJobs(String workflowId, Long primaryfileId) {
+		// retrieve primaryfile via ID
+		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+
+		// return an empty list if no AMP job as been run on the workflow-primaryfile
+		if (primaryfile.getHistoryId() == null) {
+			log.info("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
+			return new ArrayList<Invocation>();
+		}
+
+		return workflowsClient.indexInvocations(workflowId, primaryfile.getHistoryId());
+	}
+	
 }

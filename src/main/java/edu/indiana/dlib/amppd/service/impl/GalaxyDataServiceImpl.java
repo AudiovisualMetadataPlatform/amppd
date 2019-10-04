@@ -17,6 +17,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import lombok.Getter;
@@ -138,6 +140,14 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 
 		return matchingHistory;
 	}
+	
+//	/**
+//	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.createHistory(Long)
+//	 */
+//	public History createHistory(Long primaryfileId) {
+//		// retrieve primaryfile via ID
+//		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+//	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)

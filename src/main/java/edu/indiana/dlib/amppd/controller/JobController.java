@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.service.JobService;
@@ -57,4 +59,16 @@ public class JobController {
 		return jobService.createJobBundle(workflowId, bundleId, parameters);
 	}
 
+	/**
+	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
+	 * @return a list of Invocations each containing basic information of an AMP job 
+	 */
+	@GetMapping("/jobs")
+	public List<Invocation> listJobs(
+			@RequestParam("workflowId") String workflowId, 
+			@RequestParam("primaryfileId") Long primaryfileId) {
+		log.info("List all AMP jobs for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId);		
+		return jobService.listJobs(workflowId, primaryfileId);
+	}
+	
 }

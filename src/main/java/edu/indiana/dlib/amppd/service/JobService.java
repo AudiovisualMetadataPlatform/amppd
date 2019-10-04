@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
@@ -48,5 +49,12 @@ public interface JobService {
 	 */
 	public List<WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
 	
+	/**
+	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
+	 * @param workflowId ID of the given workflow
+	 * @param(primaryfileId ID of the given primaryfile 
+	 * @return a list of Invocations each containing basic information of an AMP job 
+	 */
+	public List<Invocation> listJobs(String workflowId, Long primaryfileId);
 
 }
