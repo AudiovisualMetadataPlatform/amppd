@@ -67,7 +67,7 @@ public class JobController {
 	public List<Invocation> listJobs(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId) {
-		log.info("List all AMP jobs for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId);		
+		log.info("Listing all AMP jobs for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId);		
 		return jobService.listJobs(workflowId, primaryfileId);
 	}
 	

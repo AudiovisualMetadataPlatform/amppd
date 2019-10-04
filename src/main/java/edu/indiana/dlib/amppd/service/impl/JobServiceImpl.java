@@ -236,16 +236,19 @@ public class JobServiceImpl implements JobService {
 	 */	
 	@Override	
 	public List<Invocation> listJobs(String workflowId, Long primaryfileId) {
+		List<Invocation> invocations =  new ArrayList<Invocation>();
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
 
 		// return an empty list if no AMP job as been run on the workflow-primaryfile
 		if (primaryfile.getHistoryId() == null) {
 			log.info("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
-			return new ArrayList<Invocation>();
+			return invocations;
 		}
 
-		return workflowsClient.indexInvocations(workflowId, primaryfile.getHistoryId());
+		invocations = workflowsClient.indexInvocations(workflowId, primaryfile.getHistoryId());
+		log.info("Found " + invocations.size() + " invocations for: workflow ID: " + workflowId + ", primaryfile ID: " + primaryfileId);
+		return invocations;
 	}
 	
 }
