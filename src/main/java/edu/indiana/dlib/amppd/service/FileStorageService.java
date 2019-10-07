@@ -17,6 +17,22 @@ import edu.indiana.dlib.amppd.model.Unit;
  *
  */
 public interface FileStorageService {
+	
+	/**
+	 * Upload the given file for the given primaryfile.
+	 * @param id ID of the given primaryfile
+	 * @param file the media file to be uploaded
+	 * @return the primaryfile with media file uploaded
+	 */
+	public Primaryfile uploadPrimaryfile(Long id, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @param file the media file to be uploaded
+	 * @return the primaryfile with media file uploaded
+	 */
+	public Primaryfile uploadPrimaryfile(Primaryfile primaryfile, MultipartFile file);
 
 	/**
 	 * Stores the specified sourceFile to the specified targetPathname on the file system.

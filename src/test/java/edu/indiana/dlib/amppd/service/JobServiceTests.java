@@ -37,6 +37,7 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -46,7 +47,9 @@ public class JobServiceTests {
 	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
 	public static final Long PRIMARYFILE_ID = 1l;
 	public static final Long BUNDLE_ID = 2l;
-	
+
+
+
 	@MockBean
     private BundleRepository bundleRepository;
 
@@ -61,6 +64,9 @@ public class JobServiceTests {
 		
 	@Autowired
 	private JobService jobService;   
+		
+	@Autowired
+	private TestHelper testHelper;   
 		
     private Primaryfile primaryfile;
     private Bundle bundle;
@@ -172,7 +178,7 @@ public class JobServiceTests {
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
 
-    	// before creating the job for the firs time on the primaryfile, the dataset ID is not set yet
+    	// before creating the job for the first time on the primaryfile, the dataset ID is not set yet
     	Assert.assertNull(primaryfile.getDatasetId());
 
     	// use the dummy primaryfile we set up for this test
@@ -223,4 +229,9 @@ public class JobServiceTests {
     	Assert.assertNotNull(woutputsList.get(0));
     }
 
+    @Test
+    public void testListJobs() {
+    	
+    }
+    
 }
