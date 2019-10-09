@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -7,7 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,9 +25,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.jayway.jsonpath.JsonPath;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -32,6 +38,7 @@ import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 // TODO remove ignore once sample media file is added to repository
 @Ignore
@@ -56,7 +63,10 @@ public class JobControllerTests {
 		
 	@Autowired
 	private JobService jobService;   
-		
+			
+	@Autowired
+	private TestHelper testHelper;   
+
     @Autowired
     private MockMvc mvc;
     
@@ -149,4 +159,74 @@ public class JobControllerTests {
     	    							jsonPath("$[1]").doesNotExist());    			
     }
     
+    @Test
+    public void shouldListJobs() throws Exception {    	              
+    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
+    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
+    	Primaryfile savedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+
+    	mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    			.andExpect(status().isOk()).andExpect(
+    					jsonPath("$[0].historyId").value(savedPrimaryfile.getHistoryId())).andExpect(
+    							jsonPath("$[0].id").isNotEmpty()).andExpect(
+    	    							jsonPath("$[1]").doesNotExist());    			
+    }
+    
+    @Test
+    public void shouldShowJob() throws Exception {    	              
+    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
+    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
+
+    	// request to list the jobs and retrieve invocationId from the response
+    	MvcResult result = mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    			.andExpect(status().isOk()).andReturn();    	
+    	String invocationId = JsonPath.read(result.getResponse().getContentAsString(), "$[0].id");
+    	
+    	// request to show the job with the retrieved invocationId
+    	mvc.perform(get("/jobs/{invocationId}", invocationId).param("workflowId", workflow.getId()))
+    		.andExpect(status().isOk()).andExpect(
+    			jsonPath("$.id").value(invocationId)).andExpect(
+    				jsonPath("$.inputs").isNotEmpty()).andExpect(
+    	    			jsonPath("$.steps[2].id").isNotEmpty()).andExpect(
+   	    	    			jsonPath("$.steps[2].updateTime").isNotEmpty()).andExpect(
+   	   	    	    			jsonPath("$.steps[2].jobId").isNotEmpty()).andExpect(
+ 	    	   	    	    		jsonPath("$.steps[2].orderIndex").value(2)).andExpect(
+ 	    	    	   	    	    	jsonPath("$.steps[2].state").value("scheduled")).andExpect(
+ 	    	    	   	    	    		jsonPath("$.steps[3]").doesNotExist());
+    }
+    
+    @Test
+    public void shouldShowJobStep() throws Exception {    	              
+    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
+    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
+
+    	// request to list the jobs and retrieve the invocationId from the response
+    	MvcResult result1 = mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    			.andExpect(status().isOk()).andReturn();    	
+    	String invocationId = JsonPath.read(result1.getResponse().getContentAsString(), "$[0].id");
+    	    	
+    	// request to show the job with the retrieved invocationId
+    	MvcResult result2 = mvc.perform(get("/jobs/{invocationId}", invocationId).param("workflowId", workflow.getId()))
+    		.andExpect(status().isOk()).andReturn();   
+    	String stepId = JsonPath.read(result2.getResponse().getContentAsString(), "$.steps[2].id");
+
+    	// request to show the step with the retrieved invocationId and stepId
+    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}", invocationId, stepId).param("workflowId", workflow.getId()))
+    		.andExpect(status().isOk()).andExpect(
+    			jsonPath("$.id").value(stepId)).andExpect(
+    				jsonPath("$.jobs").isNotEmpty()).andExpect(
+    	    	    	jsonPath("$.jobs[0].id").isNotEmpty()).andExpect(
+    	    	    		jsonPath("$.jobs[0].toolId").value("ES-1")).andExpect(
+    	    	    			jsonPath("$.jobs[0].updated").isNotEmpty()).andExpect(
+    	        	    	    		jsonPath("$.jobs[0].state").value("ok")).andExpect(
+    	    		jsonPath("$.outputs").isNotEmpty());
+    }
+       
+
 }

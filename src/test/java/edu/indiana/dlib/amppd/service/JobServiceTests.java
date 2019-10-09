@@ -229,19 +229,44 @@ public class JobServiceTests {
     }
 
     @Test
-    public void testListJobs() {
-    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
+    public void shouldListJobs() {
+    	// prepare the primaryfile and workflow for testing
     	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    	
-    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	Workflow workflow = testHelper.ensureTestWorkflow();    
     	
-    	// now there shall be one invocation listed for this primaryfile and workflow
+    	// before running any AMP job on the workflow-primaryfile, there shall be no invocation for this combo	
     	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+    	Assert.assertEquals(invocations.size(), 0);
+    	    	
+    	// after running the AMP job once on the workflow-primaryfile, there shall be one invocation listed for this combo
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
     	Assert.assertEquals(invocations.size(), 1);
     	
-    	// and the historyId stored in the primaryfile shall be the same as that in the invocation
-    	Assert.assertEquals(invocations.get(0).getHistoryId(), primaryfile.getHistoryId());
+    	// and the historyId stored in the updated primaryfile shall be the same as that in the invocation
+    	Primaryfile updatedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertEquals(invocations.get(0).getHistoryId(), updatedPrimaryfile.getHistoryId());
     	Assert.assertNotNull(invocations.get(0).getId());    	
+    	Assert.assertNotNull(invocations.get(0).getUpdateTime());    	
+    	Assert.assertNotNull(invocations.get(0).getState());    	
+    }
+    
+    @Test(expected = StorageException.class)
+    public void shouldThrowExceptionListJobsOnInvalidPrimaryfile() {
+    	// prepare the workflow for testing
+    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+
+    	// then list AMP jobs on a non-existing primaryfile
+    	jobService.listJobs(workflow.getId(), 0L);
+    }
+    
+    @Test(expected = GalaxyWorkflowException.class)
+    public void shouldThrowExceptionListJobsOnInvalidWorkflow() {
+    	// prepare the primaryfile for testing
+    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+  	
+    	// then list AMP jobs on a non-existing workflow
+    	jobService.listJobs("foobar", primaryfile.getId());
     }
     
     

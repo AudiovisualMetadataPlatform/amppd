@@ -111,7 +111,8 @@ public class TestHelper {
 		if (workflow == null) {
 			String workflowContents;
 			try {
-				workflowContents = Resources.asCharSource(getClass().getResource(workflowName + ".ga"), Charsets.UTF_8).read();
+				workflowContents = Resources.asCharSource(new ClassPathResource(workflowName + ".ga").getURL(), Charsets.UTF_8).read();
+//				workflowContents = Resources.asCharSource(getClass().getResource(workflowName + ".ga"), Charsets.UTF_8).read();
 			} catch (IOException e) {
 				throw new RuntimeException("Unable to upload workflow " + workflowName + " from resource file into Galaxy.", e);
 			}
