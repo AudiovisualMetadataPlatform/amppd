@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
@@ -47,7 +48,6 @@ public class JobServiceTests {
 	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
 	public static final Long PRIMARYFILE_ID = 1l;
 	public static final Long BUNDLE_ID = 2l;
-
 
 
 	@MockBean
@@ -137,8 +137,7 @@ public class JobServiceTests {
  	}
 		
     @Test
-    public void shouldBuildWorkflowInputsOnValidInputs() {
-    	
+    public void shouldBuildWorkflowInputsOnValidInputs() {    	
     	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
 
@@ -231,7 +230,19 @@ public class JobServiceTests {
 
     @Test
     public void testListJobs() {
+    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
+    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
     	
+    	// now there shall be one invocation listed for this primaryfile and workflow
+    	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+    	Assert.assertEquals(invocations.size(), 1);
+    	
+    	// and the historyId stored in the primaryfile shall be the same as that in the invocation
+    	Assert.assertEquals(invocations.get(0).getHistoryId(), primaryfile.getHistoryId());
+    	Assert.assertNotNull(invocations.get(0).getId());    	
     }
+    
     
 }
