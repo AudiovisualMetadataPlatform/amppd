@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- Include Bootstrap -->
+		<meta charset="UTF-8">
+	    <link rel="stylesheet" href="index.css">
+	    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<title>AMP Login</title>
+	</head>
+	<body>
+	<form action="login_page" method="post">
+		<div class="container">
+		<div class="row">
+		<div class="imgcontainer">
+		 	<img src="amp_horizontal_color.jpg" height=200 width=700 style="align:center">
+		</div>
+		<div class="container" id="login">
+			    <input type="text" placeholder="Enter Username" name="uname" required> 
+			    <input type="password" placeholder="Enter Password" name="psw" required> 
+		 		<button v-on:click="submitLogin">Login</button>
+			    <label><input type="checkbox" checked="checked" name="remember"> Remember me</label>
+		</div>
+		</div>
+		</div>
+		
+		<div class="container" style="background-color:#f1f1f1">
+		  <button type="button" class="cancelbtn">Cancel</button>
+		  <span class="psw">Forgot <a href="#">password?</a></span>
+		</div>
+		
+		<script src="index.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>		
+		</form>
+	</body>
+</html>
