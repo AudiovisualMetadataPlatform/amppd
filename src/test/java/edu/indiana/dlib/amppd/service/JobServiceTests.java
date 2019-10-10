@@ -49,13 +49,15 @@ public class JobServiceTests {
 	public static final Long PRIMARYFILE_ID = 1l;
 	public static final Long BUNDLE_ID = 2l;
 
-
 	@MockBean
-    private BundleRepository bundleRepository;
+    private BundleRepository bundleRepositoryMock;
 
-	@MockBean
-    private PrimaryfileRepository primaryfileRepository;
+//	@MockBean
+//    private PrimaryfileRepository primaryfileRepositoryMock;
 	
+	@Autowired
+    private PrimaryfileRepository primaryfileRepository;
+		
 	@Autowired
     private FileStorageService fileStorageService;
 	
@@ -93,8 +95,8 @@ public class JobServiceTests {
     		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
     	} 	
     	
-    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
-    	Mockito.when(primaryfileRepository.save(primaryfile)).thenReturn(primaryfile);     	    	
+//    	Mockito.when(primaryfileRepositoryMock.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
+//    	Mockito.when(primaryfileRepositoryMock.save(primaryfile)).thenReturn(primaryfile);     	    	
     }
 
     /**
@@ -120,7 +122,7 @@ public class JobServiceTests {
     	items.add(new Item());
 
     	bundle.setId(BUNDLE_ID);
-    	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	    	
+    	Mockito.when(bundleRepositoryMock.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	    	
     }
     
 	@Before

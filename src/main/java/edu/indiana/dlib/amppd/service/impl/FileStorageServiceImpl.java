@@ -88,13 +88,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     	String targetPathname = getFilePathname(primaryfile);    	    	
     	primaryfile.setPathname(targetPathname);
     	store(file, targetPathname);    	
-    	primaryfileRepository.save(primaryfile);  
+    	primaryfile = primaryfileRepository.save(primaryfile);  
     	
     	String msg = "Primaryfile " + primaryfile.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
     	log.info(msg);
     	return primaryfile;
-	}
-	
+	}	
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)

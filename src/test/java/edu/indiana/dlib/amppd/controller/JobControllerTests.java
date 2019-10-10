@@ -55,7 +55,7 @@ public class JobControllerTests {
 	@MockBean
     private BundleRepository bundleRepository;
 
-	@MockBean
+	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
@@ -95,7 +95,7 @@ public class JobControllerTests {
     		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
     	} 	
     	
-    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
+//    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
     }
 
     /**

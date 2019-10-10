@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -73,7 +72,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldCreatePrimaryfile() throws Exception {
-
 		mockMvc.perform(post("/primaryfiles").content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
