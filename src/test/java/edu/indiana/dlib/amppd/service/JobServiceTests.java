@@ -49,12 +49,15 @@ public class JobServiceTests {
 	public static final Long PRIMARYFILE_ID = 1l;
 	public static final Long BUNDLE_ID = 2l;
 
-	@MockBean
-    private BundleRepository bundleRepositoryMock;
+//	@MockBean
+//    private BundleRepository bundleRepositoryMock;
 
 //	@MockBean
 //    private PrimaryfileRepository primaryfileRepositoryMock;
 	
+	@Autowired
+    private BundleRepository bundleRepositoryMock;
+
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 		
