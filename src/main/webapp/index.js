@@ -1,13 +1,16 @@
 var app = new Vue({
 	el: '#login',
 	data: {
-		username:'',
-		password:''
+		username_form:'',
+		password_form:''
+		
 	},
 	methods: {
-		submitLogin: function(){
-			if(this.username == null)
-		      {}
+		submitSignUp: function(){
+			if(this.username_form == null && this.password_form)
+		    {
+				
+			}
  		}
 	}
 })
