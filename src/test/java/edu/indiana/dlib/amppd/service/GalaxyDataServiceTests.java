@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ public class GalaxyDataServiceTests {
 	public static final String TEST_DIRECTORY_NAME = "test";
 	public static final String TEST_FILE_NAME = "test.txt";
 	public static final String TEST_LIBRARY_NAME = "ammpd-test";
-	public static final String TEST_HISTORY_NAME = "ammpd-test";
 	
 	@Autowired
     private FileStorageService fileStorageService;
@@ -37,7 +35,6 @@ public class GalaxyDataServiceTests {
 	private GalaxyDataService galaxyDataService;   
 	
 	private String testFile;
-	private Library testLibrary;	
 
 	@Before
 	public void setup() {
@@ -119,17 +116,16 @@ public class GalaxyDataServiceTests {
     /**
      * Create a temporary Galaxy data library for testing.
      */
-    private void createTestLibrary() {
+    private Library createTestLibrary() {
 		Library library = galaxyDataService.getLibrary(TEST_LIBRARY_NAME);
 		if (library != null) {
-			testLibrary = library;
-			return;
+			return library;
 		}
 
 		library = new Library(TEST_LIBRARY_NAME);
 		library.setDescription("AMPPD Test Library");
 		try {
-			testLibrary = galaxyDataService.getLibrariesClient().createLibrary(library);
+			return galaxyDataService.getLibrariesClient().createLibrary(library);
 		}
 		catch (Exception e) {
 			String msg = "Cannot create test Galaxy data library for GalaxyDataServiceTests.";

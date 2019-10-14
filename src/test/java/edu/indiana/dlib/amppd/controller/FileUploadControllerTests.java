@@ -34,6 +34,8 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 @SpringBootTest
 public class FileUploadControllerTests {
 
+	public static final Long TEST_ASSET_ID = 0l;
+
     @Autowired
     private MockMvc mvc;
 
@@ -49,122 +51,112 @@ public class FileUploadControllerTests {
 	@MockBean
 	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 	
-	// TODO: verify redirect for all following tests
-	
     @Test
     public void shouldSaveUploadedPrimaryfile() throws Exception {
     	Unit unit = new Unit();
-    	unit.setId(1l);
+    	unit.setId(TEST_ASSET_ID);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+    	collection.setId(TEST_ASSET_ID);
     	collection.setUnit(unit);
     	
     	Item item = new Item();
-    	item.setId(3l);
+    	item.setId(TEST_ASSET_ID);
     	item.setCollection(collection);
     	
     	Primaryfile primaryfile = new Primaryfile();
-    	primaryfile.setId(4l);
+    	primaryfile.setId(TEST_ASSET_ID);
     	primaryfile.setItem(item);
     	
-    	Mockito.when(primaryfileRepository.findById(4l)).thenReturn(Optional.of(primaryfile)); 
+    	Mockito.when(primaryfileRepository.findById(TEST_ASSET_ID)).thenReturn(Optional.of(primaryfile)); 
     	Mockito.when(primaryfileRepository.save(primaryfile)).thenReturn(primaryfile); 
     	
         MockMultipartFile multipartFile = new MockMultipartFile("file", "primaryfiletest.mp4", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/primaryfiles/4/file").file(multipartFile))
+        this.mvc.perform(fileUpload("/primaryfiles/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("primaryfiletest.mp4")).andExpect(
-        						jsonPath("$.pathname").value("U-1/C-2/I-3/P-4.mp4"));
-//                .andExpect(header().string("Location", "/primaryfiles/4/file"));
-//        then(fileStorageService).should().store(multipartFile, "U-1/C-2/I-3/P-4.mp4");
+        						jsonPath("$.pathname").value("U-0/C-0/I-0/P-0.mp4"));
     }
 
     @Test
     public void shouldSaveUploadedCollectionSupplement() throws Exception {   	
     	Unit unit = new Unit();
-    	unit.setId(1l);
+    	unit.setId(TEST_ASSET_ID);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+    	collection.setId(TEST_ASSET_ID);
     	collection.setUnit(unit);
     	
     	CollectionSupplement collectionSupplement = new CollectionSupplement();
-    	collectionSupplement.setId(3l);
+    	collectionSupplement.setId(TEST_ASSET_ID);
     	collectionSupplement.setCollection(collection);  
     	
-    	Mockito.when(collectionSupplementRepository.findById(3l)).thenReturn(Optional.of(collectionSupplement));
+    	Mockito.when(collectionSupplementRepository.findById(TEST_ASSET_ID)).thenReturn(Optional.of(collectionSupplement));
     	Mockito.when(collectionSupplementRepository.save(collectionSupplement)).thenReturn(collectionSupplement); 
 
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "collectionsupplementtest.pdf", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/collections/supplements/3/file").file(multipartFile))
+        this.mvc.perform(fileUpload("/collections/supplements/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("collectionsupplementtest.pdf")).andExpect(
-        						jsonPath("$.pathname").value("U-1/C-2/S-3.pdf"));
-//                .andExpect(header().string("Location", "/collections/supplements/3/file"));
-//        then(fileStorageService).should().store(multipartFile, "U-1/C-2/S-3.pdf");
+        						jsonPath("$.pathname").value("U-0/C-0/S-0.pdf"));
     }
 
     @Test
     public void shouldSaveUploadedItemSupplement() throws Exception {
     	Unit unit = new Unit();
-    	unit.setId(1l);
+    	unit.setId(TEST_ASSET_ID);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+    	collection.setId(TEST_ASSET_ID);
     	collection.setUnit(unit);
     	
     	Item item = new Item();
-    	item.setId(3l);
+    	item.setId(TEST_ASSET_ID);
     	item.setCollection(collection);
     	
     	ItemSupplement itemSupplement = new ItemSupplement();
-    	itemSupplement.setId(4l);
+    	itemSupplement.setId(TEST_ASSET_ID);
     	itemSupplement.setItem(item);
 
-    	Mockito.when(itemSupplementRepository.findById(4l)).thenReturn(Optional.of(itemSupplement));
+    	Mockito.when(itemSupplementRepository.findById(TEST_ASSET_ID)).thenReturn(Optional.of(itemSupplement));
     	Mockito.when(itemSupplementRepository.save(itemSupplement)).thenReturn(itemSupplement);
     	
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "itemsupplementtest.pdf", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/items/supplements/4/file").file(multipartFile))
+        this.mvc.perform(fileUpload("/items/supplements/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("itemsupplementtest.pdf")).andExpect(
-        						jsonPath("$.pathname").value("U-1/C-2/I-3/S-4.pdf"));
-//                .andExpect(header().string("Location", "/items/supplements/4/file"));
-//        then(fileStorageService).should().store(multipartFile, "U-1/C-2/I-3/S-4.pdf");
+        						jsonPath("$.pathname").value("U-0/C-0/I-0/S-0.pdf"));
     }
 
     @Test
     public void shouldSaveUploadedPrimaryfileSupplement() throws Exception {
     	Unit unit = new Unit();
-    	unit.setId(1l);
+    	unit.setId(TEST_ASSET_ID);
     	
     	Collection collection = new Collection();
-    	collection.setId(2l);
+    	collection.setId(TEST_ASSET_ID);
     	collection.setUnit(unit);
     	
     	Item item = new Item();
-    	item.setId(3l);
+    	item.setId(TEST_ASSET_ID);
     	item.setCollection(collection);
     	
     	Primaryfile primaryfile = new Primaryfile();
-    	primaryfile.setId(4l);
+    	primaryfile.setId(TEST_ASSET_ID);
     	primaryfile.setItem(item);
     	
     	PrimaryfileSupplement primaryfileSupplement = new PrimaryfileSupplement();
-    	primaryfileSupplement.setId(5l);
+    	primaryfileSupplement.setId(TEST_ASSET_ID);
     	primaryfileSupplement.setPrimaryfile(primaryfile);
 
-    	Mockito.when(primaryfileSupplementRepository.findById(5l)).thenReturn(Optional.of(primaryfileSupplement));
+    	Mockito.when(primaryfileSupplementRepository.findById(TEST_ASSET_ID)).thenReturn(Optional.of(primaryfileSupplement));
     	Mockito.when(primaryfileSupplementRepository.save(primaryfileSupplement)).thenReturn(primaryfileSupplement);
 
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "primaryfilesupplementtest.pdf", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/primaryfiles/supplements/5/file").file(multipartFile))
+        this.mvc.perform(fileUpload("/primaryfiles/supplements/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("primaryfilesupplementtest.pdf")).andExpect(
-        						jsonPath("$.pathname").value("U-1/C-2/I-3/P-4/S-5.pdf"));
-//                .andExpect(header().string("Location", "/primaryfiles/supplements/5/file"));
-//        then(fileStorageService).should().store(multipartFile, "U-1/C-2/I-3/P-4/S-5.pdf");
+        						jsonPath("$.pathname").value("U-0/C-0/I-0/P-0/S-0.pdf"));
     }
 
 }
