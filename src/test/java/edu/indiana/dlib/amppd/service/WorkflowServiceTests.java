@@ -35,4 +35,14 @@ public class WorkflowServiceTests {
     	Assert.assertEquals(workflowUploaded.getName(), workflowRetrieved.getName());
     }
 
+    @Test
+    public void shouldReturnNullOnNonExistingWorkflow() {  
+    	// retrieve the workflow by name
+    	Workflow workflowRetrieved = workflowService.getWorkflow("foo");
+    	
+    	// verify the retrieved workflow
+    	Assert.assertNull(workflowRetrieved);
+    }
+
+
 }
