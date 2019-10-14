@@ -39,7 +39,7 @@ public class TestHelper {
 	public static final List<String> AUDIO_TYPES = new ArrayList<>(List.of("mp3", "wav", "m4a", "ogg"));
 	public static final List<String> VIDEO_TYPES = new ArrayList<>(List.of("mp4", "mov", "avi", "wmv"));
 	public static final String TEST_AUDIO = "TestAudio";
-	public static final String TEST_VIDEO = "TestVideo";
+	public static final String TEST_VIDEO = "TestVideo";	// TODO put a small sample TestVideo.mp4 into repository test resources
 	public static final String TEST_WORKFLOW = "TestWorkflow";
 	
 	@Autowired

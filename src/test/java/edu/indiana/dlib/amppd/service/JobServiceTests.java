@@ -40,114 +40,22 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 @SpringBootTest
 public class JobServiceTests {
 
-	public static final String TEST_DIRECTORY_NAME = "test";
-	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
-	public static final Long PRIMARYFILE_ID = 1l;
 	public static final Long BUNDLE_ID = 2l;
 
 	@MockBean
-    private BundleRepository bundleRepositoryMock;
-
-//	@MockBean
-//    private PrimaryfileRepository primaryfileRepositoryMock;	
+    private BundleRepository bundleRepository;
 
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
-		
-//	@Autowired
-//    private FileStorageService fileStorageService;
-//	
-//	@Autowired
-//	private GalaxyDataService galaxyDataService;   
 		
 	@Autowired
 	private JobService jobService;   
 		
 	@Autowired
 	private TestHelper testHelper;   
-		
-//    private Primaryfile primaryfile;
-//    private Bundle bundle;
-//    private Workflow workflow;
-//
-//	
-//    /**
-//     * Set up a dummy primaryfile in Amppd for testing Amppd job creation.
-//     */
-//    private void setUpPrimaryFile() {
-//    	primaryfile = new Primaryfile();
-//    	primaryfile.setId(PRIMARYFILE_ID);
-//    	primaryfile.setPathname(TEST_DIRECTORY_NAME + "/" + PRIMARYFILE_NAME);
-//    	
-//    	Path unitpath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
-//    	Path path = fileStorageService.resolve(primaryfile.getPathname());
-//    	
-//    	try {
-//    		Files.createDirectories(unitpath);
-//    		Files.createFile(path);
-//    	}        
-//    	catch (FileAlreadyExistsException e) {
-//        	// if the file already exists do nothing
-//    	}
-//    	catch (Exception e) {
-//    		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
-//    	} 	
-//    	
-////    	Mockito.when(primaryfileRepositoryMock.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
-////    	Mockito.when(primaryfileRepositoryMock.save(primaryfile)).thenReturn(primaryfile);     	    	
-//    }
-//
-//    /**
-//     * Set up a dummy bundle in Amppd for testing Amppd job bundle creation.
-//     */
-//    private void setUpBundle() {    	
-//    	Item item = new Item();
-//    	Set<Primaryfile> primaryfiles = new HashSet<Primaryfile>();
-//    	primaryfiles.add(primaryfile);
-//    	item.setPrimaryfiles(primaryfiles);
-//
-//    	// add some invalid primaryfile to the item
-//    	Primaryfile pf = new Primaryfile();
-//    	pf.setId(0l);;
-//    	primaryfiles.add(pf);
-//    	
-//    	bundle = new Bundle();
-//    	Set<Item> items = new HashSet<Item>();
-//    	items.add(item);
-//    	bundle.setItems(items); 	
-//
-//    	// add some invalid item to the bundle
-//    	items.add(new Item());
-//
-//    	bundle.setId(BUNDLE_ID);
-//    	Mockito.when(bundleRepositoryMock.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	    	
-//    }
-//    
-//	@Before
-//	public void setup() {
-//		setUpPrimaryFile();
-//		setUpBundle();
-//		
-//		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
-//		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
-//		
-//		// TODO We need to make sure there're some existing dataset in Galaxy for testing
-//		
-//		// TODO alternatively we could use mock workflowsClient, in which case we won't require any existing data in Galaxy
-// 	}
-
-    	
+		    	
     @Test
     public void shouldBuildWorkflowInputsOnValidInputs() {    	
-//    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
-//    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
-//
-//    	// we assume there is at least one dataset existing in Galaxy, and we can use one of these
-//    	LibraryContent dataset = galaxyDataService.getLibrariesClient().getLibraryContents(galaxyDataService.getSharedLibrary().getId()).get(0);
-//
-//    	// we assume there is at least one history existing in Galaxy, and we can use one of these
-//    	History history = galaxyDataService.getHistoriesClient().getHistories().get(0);
-
     	// prepare the workflow for testing
     	Workflow workflow = testHelper.ensureTestWorkflow();    
     	
@@ -180,15 +88,8 @@ public class JobServiceTests {
     	jobService.buildWorkflowInputs("foobar", "", "", new HashMap<String, Map<String, String>>());
     }
 
-    // TODO remove ignore once sample media file is added to repository
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
-//    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
-//    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
-//
-//    	// before creating the job for the first time on the primaryfile, the dataset ID is not set yet
-//    	Assert.assertNull(primaryfile.getDatasetId());
-
     	// prepare the primaryfile and workflow for testing
     	Primaryfile primaryfile = testHelper.ensureTestAudio();
     	Workflow workflow = testHelper.ensureTestWorkflow();        	
@@ -217,7 +118,6 @@ public class JobServiceTests {
     	jobService.createJob(workflow.getId(), 0l, new HashMap<String, Map<String, String>>());
     }
     
-    // TODO remove ignore once sample media file is added to repository
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowGalaxyWorkflowExceptionExceptionCreateJobForNonExistingWorkflow() { 	
     	// prepare the primaryfile for testing
@@ -225,13 +125,9 @@ public class JobServiceTests {
     	jobService.createJob("0", primaryfile.getId(), new HashMap<String, Map<String, String>>());
     }
     
-    // TODO remove ignore once sample media file is added to repository
     @Test
     @Transactional
     public void shouldCreateJobBundle() {    	              
-//    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
-//    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
-
     	// prepare the primaryfile and workflow for testing
     	Primaryfile primaryfile = testHelper.ensureTestAudio();
     	Workflow workflow = testHelper.ensureTestWorkflow();    
@@ -239,12 +135,12 @@ public class JobServiceTests {
     	// add some invalid primaryfile to the valid primaryfile's item
     	Primaryfile pf = new Primaryfile();
     	pf.setId(0l);;
-    	primaryfile.getItem().getPrimaryfiles().add(pf);
+    	primaryfile.getItem().getPrimaryfiles().add(pf); // this requires the method to be transactional otherwise Hibernate will throw LazyInitializationException
     	
     	// create a dummy bundle containing both the above item and some invalid item
     	Bundle bundle = new Bundle();
     	bundle.setId(BUNDLE_ID);
-    	Mockito.when(bundleRepositoryMock.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	     	
+    	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	     	
     	Set<Item> items = new HashSet<Item>();
     	items.add(primaryfile.getItem());
     	items.add(new Item());

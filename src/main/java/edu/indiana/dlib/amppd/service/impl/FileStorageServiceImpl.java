@@ -29,7 +29,10 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.java.Log;
 
@@ -46,12 +49,21 @@ import lombok.extern.java.Log;
 @Log
 public class FileStorageServiceImpl implements FileStorageService {	
 
+	@Autowired
+    private PrimaryfileRepository primaryfileRepository;
+		
+	@Autowired
+    private CollectionSupplementRepository collectionSupplementRepository;
+
+	@Autowired
+    private ItemSupplementRepository itemSupplementRepository;
+
+	@Autowired
+    private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	
 	private AmppdPropertyConfig config; 	
 	private Path root;
 
-	@Autowired
-    private PrimaryfileRepository primaryfileRepository;
-	
 	@Autowired
 	public FileStorageServiceImpl(AmppdPropertyConfig amppdconfig) {
 		// initialize Amppd file system 
@@ -67,7 +79,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfile(Long, MultipartFile)
 	 */
 	@Override
 	public Primaryfile uploadPrimaryfile(Long id, MultipartFile file) {		
@@ -93,6 +105,93 @@ public class FileStorageServiceImpl implements FileStorageService {
     	String msg = "Primaryfile " + primaryfile.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
     	log.info(msg);
     	return primaryfile;
+	}	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadCollectionSupplement(Long, MultipartFile)
+	 */
+	@Override
+	public CollectionSupplement uploadCollectionSupplement(Long id, MultipartFile file) {		
+    	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));        	
+    	return uploadCollectionSupplement(collectionSupplement, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadCollectionSupplement(CollectionSupplement, MultipartFile)
+	 */
+	@Override
+	public CollectionSupplement uploadCollectionSupplement(CollectionSupplement collectionSupplement, MultipartFile file) {		
+    	if (collectionSupplement == null) {
+    		throw new RuntimeException("The given collectionSupplement for uploading media file is null.");
+    	}
+    	
+    	collectionSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(collectionSupplement);    	    	
+    	collectionSupplement.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);  
+    	
+    	String msg = "CollectionSupplement " + collectionSupplement.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return collectionSupplement;
+	}	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadItemSupplement(Long, MultipartFile)
+	 */
+	@Override
+	public ItemSupplement uploadItemSupplement(Long id, MultipartFile file) {		
+    	ItemSupplement itemSupplement = itemSupplementRepository.findById(id).orElseThrow(() -> new StorageException("ItemSupplement <" + id + "> does not exist!"));        	
+    	return uploadItemSupplement(itemSupplement, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadItemSupplement(ItemSupplement, MultipartFile)
+	 */
+	@Override
+	public ItemSupplement uploadItemSupplement(ItemSupplement itemSupplement, MultipartFile file) {		
+    	if (itemSupplement == null) {
+    		throw new RuntimeException("The given itemSupplement for uploading media file is null.");
+    	}
+    	
+    	itemSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(itemSupplement);    	    	
+    	itemSupplement.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	itemSupplement = itemSupplementRepository.save(itemSupplement);  
+    	
+    	String msg = "ItemSupplement " + itemSupplement.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return itemSupplement;
+	}	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfileSupplement(Long, MultipartFile)
+	 */
+	@Override
+	public PrimaryfileSupplement uploadPrimaryfileSupplement(Long id, MultipartFile file) {		
+    	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(id).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + id + "> does not exist!"));        	
+    	return uploadPrimaryfileSupplement(primaryfileSupplement, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfileSupplement(PrimaryfileSupplement, MultipartFile)
+	 */
+	@Override
+	public PrimaryfileSupplement uploadPrimaryfileSupplement(PrimaryfileSupplement primaryfileSupplement, MultipartFile file) {		
+    	if (primaryfileSupplement == null) {
+    		throw new RuntimeException("The given primaryfileSupplement for uploading media file is null.");
+    	}
+    	
+    	primaryfileSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(primaryfileSupplement);    	    	
+    	primaryfileSupplement.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	primaryfileSupplement = primaryfileSupplementRepository.save(primaryfileSupplement);  
+    	
+    	String msg = "PrimaryfileSupplement " + primaryfileSupplement.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return primaryfileSupplement;
 	}	
 
 	/**

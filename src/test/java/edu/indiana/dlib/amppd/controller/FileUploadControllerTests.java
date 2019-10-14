@@ -28,7 +28,6 @@ import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
-import edu.indiana.dlib.amppd.service.FileStorageService;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -37,9 +36,6 @@ public class FileUploadControllerTests {
 
     @Autowired
     private MockMvc mvc;
-
-	@Autowired
-    private FileStorageService fileStorageService;
 
 	@MockBean
 	private PrimaryfileRepository primaryfileRepository;

@@ -81,8 +81,6 @@ public class GalaxyDataServiceTests {
     	Assert.assertNull(history);
     }
 
-    // TODO remove ignore once sample media file is added to repository
-    @Ignore
     @Test
     public void shouldUploadFileToExistingLibrary() {
     	GalaxyObject dataset = galaxyDataService.uploadFileToGalaxy(testFile, TEST_LIBRARY_NAME);
@@ -97,7 +95,7 @@ public class GalaxyDataServiceTests {
     }
     
     /**
-     * Create a temporary file under amppd file system root for unit tests and return the absolute pathname.
+     * Create a temporary empty file under amppd file system root for unit tests and return the absolute pathname.
      */
     private void createTestFile() {
     	Path unitPath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
