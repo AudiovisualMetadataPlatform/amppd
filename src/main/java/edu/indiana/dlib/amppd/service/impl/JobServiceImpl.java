@@ -241,13 +241,21 @@ public class JobServiceImpl implements JobService {
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
 
-		// return an empty list if no AMP job as been run on the workflow-primaryfile
+		// return an empty list if no AMP job has been run on the workflow-primaryfile
 		if (primaryfile.getHistoryId() == null) {
-			log.info("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
+			log.warning("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
 			return invocations;
 		}
 
-		invocations = workflowsClient.indexInvocations(workflowId, primaryfile.getHistoryId());
+		try {
+			invocations = workflowsClient.indexInvocations(workflowId, primaryfile.getHistoryId());
+		} 
+		catch(Exception e) {
+			String msg = "Unable to index invocations for: workflow ID: " + workflowId + ", priamryfile ID: " + primaryfileId;
+			log.severe(msg);
+			throw new GalaxyWorkflowException(msg, e);
+		}
+		
 		log.info("Found " + invocations.size() + " invocations for: workflow ID: " + workflowId + ", primaryfile ID: " + primaryfileId);
 		return invocations;
 	}
