@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -24,6 +26,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import com.jayway.jsonpath.JsonPath;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -57,13 +60,24 @@ public class JobControllerTests {
 
     @Autowired
     private MockMvc mvc;
+    
+	private Primaryfile primaryfile;
+	private Workflow workflow;	
 
+	@Before
+	public void setup() {
+    	// prepare the primaryfile and workflow for testing
+    	primaryfile = testHelper.ensureTestAudio();
+    	workflow = testHelper.ensureTestWorkflow();    
+	}
+		
+	@After
+	public void cleanupHistories() {
+		testHelper.cleanupHistories();
+	}
+		    	    
     @Test
     public void shouldCreateJob() throws Exception {    	              
-    	// prepare the primaryfile and workflow for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();        	
-    	
     	mvc.perform(post("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$.historyId").isNotEmpty()).andExpect(
@@ -73,10 +87,6 @@ public class JobControllerTests {
     @Test
     @Transactional
     public void shouldCreateJobBundle() throws Exception {    	              
-    	// prepare the primaryfile and workflow for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    
-    	
     	// add some invalid primaryfile to the valid primaryfile's item
     	Primaryfile pf = new Primaryfile();
     	pf.setId(0l);;
@@ -100,10 +110,7 @@ public class JobControllerTests {
     }
     
     @Test
-    public void shouldListJobs() throws Exception {    	              
-    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    public void shouldListJobs() throws Exception {    	               	
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
     	Primaryfile savedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
 
@@ -115,10 +122,7 @@ public class JobControllerTests {
     }
     
     @Test
-    public void shouldShowJob() throws Exception {    	              
-    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    public void shouldShowJob() throws Exception {    	              	
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
 
     	// request to list the jobs and retrieve invocationId from the response
@@ -140,10 +144,7 @@ public class JobControllerTests {
     }
     
     @Test
-    public void shouldShowJobStep() throws Exception {    	              
-    	// prepare the primaryfile and workflow for testing, then run the AMP job once on them
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+    public void shouldShowJobStep() throws Exception {    	               	
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
 
     	// request to list the jobs and retrieve the invocationId from the response
@@ -166,6 +167,18 @@ public class JobControllerTests {
     	    	    			jsonPath("$.jobs[0].updated").isNotEmpty()).andExpect(
     	        	    	    		jsonPath("$.jobs[0].state").isNotEmpty()).andExpect(
     	    		jsonPath("$.outputs").isNotEmpty());
+    }
+       
+    @Test
+    public void shouldShowJobStepOutput() throws Exception {    	               	
+    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
+
+    	// request to show the step output with the returned invocationId, stepId, and datasetId
+    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}", workflow.getId(), outputs.getId(), outputs.getSteps().get(2).getId(), outputs.getOutputIds().get(1)))
+    		.andExpect(status().isOk()).andExpect(
+    			jsonPath("$.id").value(outputs.getOutputIds().get(1))).andExpect(
+    	    			jsonPath("$.historyId").value(outputs.getHistoryId())).andExpect(
+    	    	    			jsonPath("$.fileName").isNotEmpty());
     }
        
 
