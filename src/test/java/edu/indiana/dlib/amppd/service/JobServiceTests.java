@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -53,11 +55,26 @@ public class JobServiceTests {
 		
 	@Autowired
 	private TestHelper testHelper;   
+	
+	private Primaryfile primaryfile;
+	private Workflow workflow;
+	
+	@Before
+	public void setup() {
+    	// prepare the primaryfile and workflow for testing
+    	primaryfile = testHelper.ensureTestAudio();
+    	workflow = testHelper.ensureTestWorkflow();    
+	}
+		
+	@After
+	public void cleanupHistories() {
+		testHelper.cleanupHistories();
+	}
 		    	
     @Test
     public void shouldBuildWorkflowInputsOnValidInputs() {    	
-    	// prepare the workflow for testing
-    	Workflow workflow = testHelper.ensureTestWorkflow();    
+//    	// prepare the workflow for testing
+//    	Workflow workflow = testHelper.ensureTestWorkflow();    
     	
     	// set up some dummy history and dataset
     	History history = new History();
@@ -90,9 +107,9 @@ public class JobServiceTests {
 
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
-    	// prepare the primaryfile and workflow for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();        	
+//    	// prepare the primaryfile and workflow for testing
+//    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+//    	Workflow workflow = testHelper.ensureTestWorkflow();        	
     	
     	WorkflowOutputs woutputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
@@ -112,25 +129,24 @@ public class JobServiceTests {
     
     @Test(expected = StorageException.class)
     public void shouldThrowStorageExceptionCreateJobForNonExistingPrimaryfile() {
-    	// prepare the workflow for testing
-    	Workflow workflow = testHelper.ensureTestWorkflow();    
-
+//    	// prepare the workflow for testing
+//    	Workflow workflow = testHelper.ensureTestWorkflow();    
     	jobService.createJob(workflow.getId(), 0l, new HashMap<String, Map<String, String>>());
     }
     
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowGalaxyWorkflowExceptionExceptionCreateJobForNonExistingWorkflow() { 	
-    	// prepare the primaryfile for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+//    	// prepare the primaryfile for testing
+//    	Primaryfile primaryfile = testHelper.ensureTestAudio();
     	jobService.createJob("0", primaryfile.getId(), new HashMap<String, Map<String, String>>());
     }
     
     @Test
     @Transactional
     public void shouldCreateJobBundle() {    	              
-    	// prepare the primaryfile and workflow for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    
+//    	// prepare the primaryfile and workflow for testing
+//    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+//    	Workflow workflow = testHelper.ensureTestWorkflow();    
     	
     	// add some invalid primaryfile to the valid primaryfile's item
     	Primaryfile pf = new Primaryfile();
@@ -154,13 +170,53 @@ public class JobServiceTests {
     	Assert.assertEquals(woutputsList.size(), 1);
     	Assert.assertNotNull(woutputsList.get(0));
     }
-
     
     @Test
     public void shouldListJobs() {
-    	// prepare the primaryfile and workflow for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-    	Workflow workflow = testHelper.ensureTestWorkflow();    
+//    	// prepare the primaryfile and workflow for testing
+//    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+//    	Workflow workflow = testHelper.ensureTestWorkflow();    
+    	
+    	// before running any AMP job on the workflow-primaryfile, there shall be no invocation for this combo	
+    	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+    	Assert.assertEquals(invocations.size(), 0);
+    	    	
+    	// after running the AMP job once on the workflow-primaryfile, there shall be one invocation listed for this combo
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+    	Assert.assertEquals(invocations.size(), 1);
+    	
+    	// and the historyId stored in the updated primaryfile shall be the same as that in the invocation
+    	Primaryfile updatedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertEquals(invocations.get(0).getHistoryId(), updatedPrimaryfile.getHistoryId());
+    	Assert.assertNotNull(invocations.get(0).getId());    	
+    	Assert.assertNotNull(invocations.get(0).getUpdateTime());    	
+//    	Assert.assertNotNull(invocations.get(0).getState()); // this assertion succeeds when running this test along but fails when running the whole test class   
+    }
+    
+    @Test(expected = StorageException.class)
+    public void shouldThrowExceptionListJobsOnInvalidPrimaryfile() {
+//    	// prepare the workflow for testing
+//    	Workflow workflow = testHelper.ensureTestWorkflow();    	
+
+    	// then list AMP jobs on a non-existing primaryfile
+    	jobService.listJobs(workflow.getId(), 0L);
+    }
+    
+    @Test(expected = GalaxyWorkflowException.class)
+    public void shouldThrowExceptionListJobsOnInvalidWorkflow() {
+//    	// prepare the primaryfile for testing
+//    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+  	
+    	// then list AMP jobs on a non-existing workflow
+    	jobService.listJobs("foobar", primaryfile.getId());
+    }
+           
+    @Test
+    public void shouldShowDataset() {
+//    	// prepare the primaryfile and workflow for testing
+//    	Primaryfile primaryfile = testHelper.ensureTestAudio();
+//    	Workflow workflow = testHelper.ensureTestWorkflow();    
     	
     	// before running any AMP job on the workflow-primaryfile, there shall be no invocation for this combo	
     	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
@@ -179,22 +235,5 @@ public class JobServiceTests {
     	Assert.assertNotNull(invocations.get(0).getState());    	
     }
     
-    @Test(expected = StorageException.class)
-    public void shouldThrowExceptionListJobsOnInvalidPrimaryfile() {
-    	// prepare the workflow for testing
-    	Workflow workflow = testHelper.ensureTestWorkflow();    	
-
-    	// then list AMP jobs on a non-existing primaryfile
-    	jobService.listJobs(workflow.getId(), 0L);
-    }
     
-    @Test(expected = GalaxyWorkflowException.class)
-    public void shouldThrowExceptionListJobsOnInvalidWorkflow() {
-    	// prepare the primaryfile for testing
-    	Primaryfile primaryfile = testHelper.ensureTestAudio();
-  	
-    	// then list AMP jobs on a non-existing workflow
-    	jobService.listJobs("foobar", primaryfile.getId());
-    }
-           
 }

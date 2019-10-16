@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -24,7 +25,9 @@ import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
 import lombok.extern.java.Log;
 
 /**
@@ -59,6 +62,10 @@ public class TestHelper {
 
 	@Autowired
 	private WorkflowService workflowService;
+	
+	@Autowired
+	private JobService jobService;
+	
 	
 	/**
 	 * Check whether the primaryfile named TestAudio exists in Amppd; if not, upload it from its resource file.
@@ -171,7 +178,7 @@ public class TestHelper {
 	}	
 	
 	/**
-	 * Returns the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.
+	 * Return the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.
 	 * @param extention
 	 * @return
 	 */
@@ -184,5 +191,18 @@ public class TestHelper {
 		return contentType == null ? null : contentType + "/" + extension;	
 	}
 	
-
+	/**
+	 * Delete all histories except the AMPPD shared history, so that temporary histories used for running workflows won't keep building up. 
+	 */
+	public void cleanupHistories() {
+		List<History> histories = jobService.getHistoriesClient().getHistories();
+		
+		for (History history : histories) {
+			if (!history.getName().equals(GalaxyDataServiceImpl.SHARED_HISTORY_NAME)) {
+				jobService.getHistoriesClient().deleteHistory(history.getId());
+				log.info("History is deleted: ID: " + history.getId() + ", Name: " + history.getName());
+			}
+		}
+	}
+	
 }

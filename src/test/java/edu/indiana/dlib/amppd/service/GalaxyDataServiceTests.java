@@ -19,6 +19,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -31,6 +32,9 @@ public class GalaxyDataServiceTests {
 	@Autowired
     private FileStorageService fileStorageService;
 
+	@Autowired
+	private TestHelper testHelper;   
+	
 	@Autowired
 	private GalaxyDataService galaxyDataService;   
 	
@@ -48,6 +52,7 @@ public class GalaxyDataServiceTests {
         fileStorageService.delete(TEST_DIRECTORY_NAME);
         
         // TODO delete test library and all its contents
+        testHelper.cleanupHistories();	
     }
 
     @Test
