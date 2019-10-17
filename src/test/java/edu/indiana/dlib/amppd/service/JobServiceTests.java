@@ -204,29 +204,29 @@ public class JobServiceTests {
     @Test
     public void shouldShowJobStepOutput() {
     	String stepId = null;
-    	String outputId = null;
+    	String datasetId = null;
     	
     	if (invocation instanceof WorkflowOutputs) {
         	// retrieve the stepId/outputId using the IDs contained in the workflow outputs after running the AMP job
     		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
     		stepId = woutputs.getSteps().get(2).getId();
-    		outputId = woutputs.getOutputIds().get(1);
+    		datasetId = woutputs.getOutputIds().get(1);
 //    		dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), woutputs.getSteps().get(2).getId(), woutputs.getOutputIds().get(1));
     	}
     	else {
         	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
     		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
     		stepId = idetails.getSteps().get(2).getId();
-    		outputId = idetails.getSteps().get(2).getOutputs().get(1).getId();
+    		datasetId = idetails.getSteps().get(2).getOutputs().get(TestHelper.TEST_OUTPUT).getId();
 //        	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), idetails.getSteps().get(2).getId(), idetails.getSteps().get(2).getOutputs().get(1).getId());
     	}
-    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), stepId, outputId);
+    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), stepId, datasetId);
     	
 //    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 //    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), outputs.getId(), outputs.getSteps().get(2).getId(), outputs.getOutputIds().get(1));
     	
     	// verify the fields
-    	Assert.assertEquals(dataset.getId(), outputId);
+    	Assert.assertEquals(dataset.getId(), datasetId);
     	Assert.assertEquals(dataset.getHistoryId(), invocation.getHistoryId());
        	Assert.assertNotNull(dataset.getFileName());
        	Assert.assertNotNull(dataset.getCreatingJob());

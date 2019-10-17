@@ -47,6 +47,7 @@ public class TestHelper {
 	public static final String TEST_AUDIO = "TestAudio";
 	public static final String TEST_VIDEO = "TestVideo";	// TODO put a small sample TestVideo.mp4 into repository test resources
 	public static final String TEST_WORKFLOW = "TestWorkflow";
+	public static final String TEST_OUTPUT = "out_file1";
 	
 	@Autowired
     private UnitRepository unitRepository;
@@ -80,6 +81,8 @@ public class TestHelper {
 		List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
 		if (invocations.size() > 0) {
 			// some job has been run on the workflow-primaryfile, just return the first invocation
+			log.info("There are already " + invocations.size() + " AMP test jobs existing for Primaryfile " + primaryfile.getId() + " and Workflow " + workflow.getId()
+				+ ", will use job " + invocations.get(0).getId() + " in history " + invocations.get(0).getHistoryId() + " for testing.");
 			return invocations.get(0);
 		}
 		else {
@@ -225,5 +228,20 @@ public class TestHelper {
 			}
 		}
 	}
+
+	/**
+	 * Delete all test workflows.  
+	 */
+	public void cleanupWorkflows() {
+		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();
+		
+		for (Workflow workflow : workflows) {
+			if (workflow.getName().equals(TEST_WORKFLOW)) {
+				workflowService.getWorkflowsClient().deleteWorkflowRequest(workflow.getId());
+				log.info("Workflow is deleted: ID: " + workflow.getId() + ", Name: " + workflow.getName());
+			}
+		}
+	}
+	
 	
 }

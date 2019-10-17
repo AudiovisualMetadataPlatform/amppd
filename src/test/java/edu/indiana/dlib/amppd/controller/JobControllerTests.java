@@ -50,9 +50,6 @@ public class JobControllerTests {
 	
 	@MockBean
     private BundleRepository bundleRepository;
-
-	@Autowired
-    private PrimaryfileRepository primaryfileRepository;
 		
 	@Autowired
 	private JobService jobService;   
@@ -129,8 +126,7 @@ public class JobControllerTests {
     	mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$[0].historyId").value(primaryfile.getHistoryId())).andExpect(
-    							jsonPath("$[0].id").isNotEmpty()).andExpect(
-    	    							jsonPath("$[1]").doesNotExist());    			
+    							jsonPath("$[0].id").isNotEmpty());    			
     }
     
     @Test
@@ -186,27 +182,27 @@ public class JobControllerTests {
 //    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
 
     	String stepId = null;
-    	String outputId = null;
+    	String datasetId = null;
     	
     	if (invocation instanceof WorkflowOutputs) {
         	// retrieve the stepId/outputId using the IDs contained in the workflow outputs after running the AMP job
     		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
     		stepId = woutputs.getSteps().get(2).getId();
-    		outputId = woutputs.getOutputIds().get(1);
+    		datasetId = woutputs.getOutputIds().get(1);
 //    		dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), woutputs.getSteps().get(2).getId(), woutputs.getOutputIds().get(1));
     	}
     	else {
         	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
     		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
     		stepId = idetails.getSteps().get(2).getId();
-    		outputId = idetails.getSteps().get(2).getOutputs().get(1).getId();
+    		datasetId = idetails.getSteps().get(2).getOutputs().get(TestHelper.TEST_OUTPUT).getId();
 //        	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), idetails.getSteps().get(2).getId(), idetails.getSteps().get(2).getOutputs().get(1).getId());
     	}
 
     	// request to show the step output with the returned invocationId, stepId, and datasetId
-    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}", workflow.getId(), invocation.getId(), stepId, outputId))
+    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}/outputs/{datasetId}", invocation.getId(), stepId, datasetId).param("workflowId", workflow.getId()))
     		.andExpect(status().isOk()).andExpect(
-    			jsonPath("$.id").value(outputId)).andExpect(
+    			jsonPath("$.id").value(datasetId)).andExpect(
     	    			jsonPath("$.historyId").value(invocation.getHistoryId())).andExpect(
     	    	    			jsonPath("$.fileName").isNotEmpty());
     }

@@ -61,6 +61,9 @@ public class GalaxyDataServiceTests {
         
         // delete test histories for AMP jobs
         testHelper.cleanupHistories();	
+        
+        // delete test workflows
+        testHelper.cleanupWorkflows();
     }
 
     @Test
