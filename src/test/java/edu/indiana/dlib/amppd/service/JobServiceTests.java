@@ -176,7 +176,6 @@ public class JobServiceTests {
     	// before running any AMP job on the workflow-primaryfile, record the current number of invocations
     	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
     	int size = invocations.size();
-//    	Assert.assertEquals(invocations.size(), 0);
     	    	
     	// after running the AMP job once on the workflow-primaryfile, there shall be one more invocation listed for this combo
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
@@ -211,19 +210,14 @@ public class JobServiceTests {
     		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
     		stepId = woutputs.getSteps().get(2).getId();
     		datasetId = woutputs.getOutputIds().get(1);
-//    		dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), woutputs.getSteps().get(2).getId(), woutputs.getOutputIds().get(1));
     	}
     	else {
         	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
     		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
     		stepId = idetails.getSteps().get(2).getId();
     		datasetId = idetails.getSteps().get(2).getOutputs().get(TestHelper.TEST_OUTPUT).getId();
-//        	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), idetails.getSteps().get(2).getId(), idetails.getSteps().get(2).getOutputs().get(1).getId());
     	}
     	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), stepId, datasetId);
-    	
-//    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
-//    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), outputs.getId(), outputs.getSteps().get(2).getId(), outputs.getOutputIds().get(1));
     	
     	// verify the fields
     	Assert.assertEquals(dataset.getId(), datasetId);
@@ -239,5 +233,4 @@ public class JobServiceTests {
     	jobService.showJobStepOutput(workflow.getId(), "foo", "bar", "foobar");
     }
            
-
 }

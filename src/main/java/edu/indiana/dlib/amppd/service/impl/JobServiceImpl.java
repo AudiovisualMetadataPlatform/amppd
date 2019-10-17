@@ -9,9 +9,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import com.github.jmchilton.blend4j.galaxy.GalaxyResponseException;
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
@@ -86,7 +84,6 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
 		WorkflowInputs winputs = new WorkflowInputs();
-//		winputs.setDestination(new ExistingHistory(galaxyDataService.getSharedHistory().getId()));
 		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
 		winputs.setWorkflowId(workflowId);

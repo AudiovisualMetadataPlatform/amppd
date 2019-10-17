@@ -5,9 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,19 +23,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import com.jayway.jsonpath.JsonPath;
 
-import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
@@ -120,9 +115,6 @@ public class JobControllerTests {
     
     @Test
     public void shouldListJobs() throws Exception {    	               	
-//    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
-//    	Primaryfile savedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
-
     	mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$[0].historyId").value(primaryfile.getHistoryId())).andExpect(
@@ -131,8 +123,6 @@ public class JobControllerTests {
     
     @Test
     public void shouldShowJob() throws Exception {    	              	
-//    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
-
     	// request to list the jobs and retrieve invocationId from the response
     	MvcResult result = mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andReturn();    	
@@ -153,8 +143,6 @@ public class JobControllerTests {
     
     @Test
     public void shouldShowJobStep() throws Exception {    	               	
-//    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
-
     	// request to list the jobs and retrieve the invocationId from the response
     	MvcResult result1 = mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andReturn();    	
@@ -179,8 +167,6 @@ public class JobControllerTests {
        
     @Test
     public void shouldShowJobStepOutput() throws Exception {    	               	
-//    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());    	
-
     	String stepId = null;
     	String datasetId = null;
     	
@@ -189,14 +175,12 @@ public class JobControllerTests {
     		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
     		stepId = woutputs.getSteps().get(2).getId();
     		datasetId = woutputs.getOutputIds().get(1);
-//    		dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), woutputs.getSteps().get(2).getId(), woutputs.getOutputIds().get(1));
     	}
     	else {
         	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
     		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
     		stepId = idetails.getSteps().get(2).getId();
     		datasetId = idetails.getSteps().get(2).getOutputs().get(TestHelper.TEST_OUTPUT).getId();
-//        	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), idetails.getSteps().get(2).getId(), idetails.getSteps().get(2).getOutputs().get(1).getId());
     	}
 
     	// request to show the step output with the returned invocationId, stepId, and datasetId
@@ -207,5 +191,4 @@ public class JobControllerTests {
     	    	    			jsonPath("$.fileName").isNotEmpty());
     }
        
-
 }
