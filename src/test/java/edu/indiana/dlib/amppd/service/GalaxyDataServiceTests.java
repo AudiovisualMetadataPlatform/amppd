@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -28,17 +28,24 @@ public class GalaxyDataServiceTests {
 	public static final String TEST_DIRECTORY_NAME = "test";
 	public static final String TEST_FILE_NAME = "test.txt";
 	public static final String TEST_LIBRARY_NAME = "ammpd-test";
-	public static final String TEST_HISTORY_NAME = "ammpd-test";
 	
 	@Autowired
     private FileStorageService fileStorageService;
 
 	@Autowired
+	private TestHelper testHelper;   
+	
+	@Autowired
 	private GalaxyDataService galaxyDataService;   
 	
 	private String testFile;
-	private Library testLibrary;	
 
+	/* Notes:
+	 * The below setup and cleanup methods shall really be at class level instead of method level; however, JUnit requires class level methods to be static, 
+	 * which won't work here, since these methods access Spring beans and member fields. As a result, cleanupHistories is only done by in this class.
+	 * Alternatively, we can create a separate test class as a workaround, which just contains one dummy test, and does the cleanup for all test classes. 
+	 */
+		
 	@Before
 	public void setup() {
 		createTestFile();
@@ -51,6 +58,12 @@ public class GalaxyDataServiceTests {
         fileStorageService.delete(TEST_DIRECTORY_NAME);
         
         // TODO delete test library and all its contents
+        
+        // delete test histories for AMP jobs
+        testHelper.cleanupHistories();	
+        
+        // delete test workflows
+        testHelper.cleanupWorkflows();
     }
 
     @Test
@@ -81,8 +94,6 @@ public class GalaxyDataServiceTests {
     	Assert.assertNull(history);
     }
 
-    // TODO remove ignore once sample media file is added to repository
-    @Ignore
     @Test
     public void shouldUploadFileToExistingLibrary() {
     	GalaxyObject dataset = galaxyDataService.uploadFileToGalaxy(testFile, TEST_LIBRARY_NAME);
@@ -97,7 +108,7 @@ public class GalaxyDataServiceTests {
     }
     
     /**
-     * Create a temporary file under amppd file system root for unit tests and return the absolute pathname.
+     * Create a temporary empty file under amppd file system root for unit tests and return the absolute pathname.
      */
     private void createTestFile() {
     	Path unitPath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
@@ -121,17 +132,16 @@ public class GalaxyDataServiceTests {
     /**
      * Create a temporary Galaxy data library for testing.
      */
-    private void createTestLibrary() {
+    private Library createTestLibrary() {
 		Library library = galaxyDataService.getLibrary(TEST_LIBRARY_NAME);
 		if (library != null) {
-			testLibrary = library;
-			return;
+			return library;
 		}
 
 		library = new Library(TEST_LIBRARY_NAME);
 		library.setDescription("AMPPD Test Library");
 		try {
-			testLibrary = galaxyDataService.getLibrariesClient().createLibrary(library);
+			return galaxyDataService.getLibrariesClient().createLibrary(library);
 		}
 		catch (Exception e) {
 			String msg = "Cannot create test Galaxy data library for GalaxyDataServiceTests.";

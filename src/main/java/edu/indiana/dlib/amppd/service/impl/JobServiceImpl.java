@@ -10,8 +10,12 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
+import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
+import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
@@ -42,6 +46,8 @@ import lombok.extern.java.Log;
 @Log
 public class JobServiceImpl implements JobService {
 	
+	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
+	
 	@Autowired
     private BundleRepository bundleRepository;
 
@@ -60,21 +66,25 @@ public class JobServiceImpl implements JobService {
 	@Getter
 	private WorkflowsClient workflowsClient;
 		
+	@Getter
+	private HistoriesClient historiesClient;
+		
 	/**
 	 * Initialize the JobServiceImpl bean.
 	 */
 	@PostConstruct
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
+		historiesClient = galaxyApiService.getGalaxyInstance().getHistoriesClient();
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(String,String,Map<String, Map<String, String>>)
+	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(String,String,String,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, Map<String, Map<String, String>> parameters) {
+	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
 		WorkflowInputs winputs = new WorkflowInputs();
-		winputs.setDestination(new ExistingHistory(galaxyDataService.getSharedHistory().getId()));
+		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
 		winputs.setWorkflowId(workflowId);
 		
@@ -107,7 +117,7 @@ public class JobServiceImpl implements JobService {
 			});
 		});
 		
-		log.info("Successfully built job inputs, workflow ID: " + workflowId + ", datasetId: " + datasetId + " parameters: " + parameters);
+		log.info("Successfully built job inputs, workflowId: " + workflowId + ", datasetId: " + datasetId + " parameters: " + parameters);
 		return winputs;
 	}
 	
@@ -117,11 +127,12 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
 		WorkflowOutputs woutputs = null;
-		String msg = "Amppd job for: workflow ID: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters;
+		String msg = "Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters;
 		log.info("Creating " + msg);
 		
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+		boolean save = false;
 
 		/* Note: 
     	 * We do a lazy upload from Amppd to Galaxy, i.e. we only upload the primaryfile to Galaxy when a workflow is invoked in Galaxy against the primaryfile, 
@@ -141,14 +152,38 @@ public class JobServiceImpl implements JobService {
 	    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
 	    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);	
 	    	
-	    	// save the dataset ID in primaryfile for future reuse
+	    	// set flag to save the dataset ID in primaryfile for future reuse
 	    	primaryfile.setDatasetId(go.getId());
-	    	primaryfileRepository.save(primaryfile);
+	    	save = true;
 		}
 		
-    	// invoke the workflow 
+		// if the output history hasn't been created for this primaryfile, i.e. it's the first time any workflow is run against it, create a new history for it
+		if (primaryfile.getHistoryId() == null) {   
+			// since we use primaryfile ID in the output history name, we can assume that the name is unique, 
+			// thus, if the historyId is null, it means the output history for this primaryfile doesn't exist in Galaxy yet, and vice versa
+			History history = new History(PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX + primaryfile.getId());
+			try {
+				history = galaxyDataService.getHistoriesClient().create(history);
+		    	primaryfile.setHistoryId(history.getId());		
+		    	save = true;
+				log.info("Initialized the Galaxy output history " + history.getId() + " for primaryfile " + primaryfile.getId());
+			}
+			catch (Exception e) {
+				throw new RuntimeException("Cannot create Galaxy output history for primaryfile " + primaryfile.getId(), e);
+			}		
+		}			
+		else {
+			log.info("The Galaxy output history " + primaryfile.getHistoryId() + " for Primaryfile " + primaryfile.getId() + " already exists.");			
+		}
+
+		// if dataset or history IDs have been changed in primaryfile, persist it in DB 
+		if (save) {
+			primaryfileRepository.save(primaryfile);
+		}
+
+		// invoke the workflow 
     	try {
-    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), parameters);
+    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	
@@ -167,7 +202,7 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public List<WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
 		List<WorkflowOutputs> woutputsList = new ArrayList<WorkflowOutputs>();
-		String msg = "a bundle of Amppd jobs for: workflow ID: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
+		String msg = "a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
 		log.info("Creating " + msg);
 		
 		int nSuccess = 0;
@@ -201,4 +236,54 @@ public class JobServiceImpl implements JobService {
 		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
     	return woutputsList;
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.listJobs(String,Long)
+	 */	
+	@Override	
+	public List<Invocation> listJobs(String workflowId, Long primaryfileId) {
+		List<Invocation> invocations =  new ArrayList<Invocation>();
+		// retrieve primaryfile via ID
+		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+
+		// return an empty list if no AMP job has been run on the workflow-primaryfile
+		if (primaryfile.getHistoryId() == null) {
+			log.warning("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
+			return invocations;
+		}
+
+		try {
+			invocations = workflowsClient.indexInvocations(workflowId, primaryfile.getHistoryId());
+		} 
+		catch(Exception e) {
+			String msg = "Unable to index invocations for: workflowId: " + workflowId + ", priamryfileId: " + primaryfileId;
+			log.severe(msg);
+			throw new GalaxyWorkflowException(msg, e);
+		}
+		
+		log.info("Found " + invocations.size() + " invocations for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId);
+		return invocations;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.showJobStepOutput(String, String, String, String)
+	 */	
+	@Override	
+	public Dataset showJobStepOutput(String workflowId, String invocationId, String stepId, String datasetId) {
+		Dataset dataset  = null;
+		
+		try {
+			Invocation invocation = workflowsClient.showInvocation(workflowId, invocationId, false);
+			dataset = historiesClient.showDataset(invocation.getHistoryId(), datasetId);
+		}
+		catch (Exception e) {
+			String msg = "Could not find valid invocation for: workflowId: " + workflowId + ", invocationId: " + invocationId;
+			log.severe(msg);
+			throw new GalaxyWorkflowException(msg, e);
+		}
+
+		log.info("Found dataset for: workflowId: " + workflowId + ", invocationId: " + invocationId + ", invocationId: " + datasetId);
+		return dataset;
+	}
+	
 }

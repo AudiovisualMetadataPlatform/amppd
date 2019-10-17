@@ -1,8 +1,5 @@
 package edu.indiana.dlib.amppd.service;
 
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,9 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -20,10 +17,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
+import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
@@ -35,107 +38,59 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class JobServiceTests {
 
-	public static final String TEST_DIRECTORY_NAME = "test";
-	public static final String PRIMARYFILE_NAME = "primaryfile.mp4";
-	public static final Long PRIMARYFILE_ID = 1l;
 	public static final Long BUNDLE_ID = 2l;
-	
+
 	@MockBean
     private BundleRepository bundleRepository;
 
-	@MockBean
+	@Autowired
     private PrimaryfileRepository primaryfileRepository;
-	
-	@Autowired
-    private FileStorageService fileStorageService;
-	
-	@Autowired
-	private GalaxyDataService galaxyDataService;   
 		
 	@Autowired
 	private JobService jobService;   
 		
-    private Primaryfile primaryfile;
-    private Bundle bundle;
+	@Autowired
+	private TestHelper testHelper;   
 	
-    /**
-     * Set up a dummy primaryfile in Amppd for testing Amppd job creation.
-     */
-    private void setUpPrimaryFile() {
-    	primaryfile = new Primaryfile();
-    	primaryfile.setId(PRIMARYFILE_ID);
-    	primaryfile.setPathname(TEST_DIRECTORY_NAME + "/" + PRIMARYFILE_NAME);
-    	
-    	Path unitpath = fileStorageService.resolve(TEST_DIRECTORY_NAME);
-    	Path path = fileStorageService.resolve(primaryfile.getPathname());
-    	
-    	try {
-    		Files.createDirectories(unitpath);
-    		Files.createFile(path);
-    	}        
-    	catch (FileAlreadyExistsException e) {
-        	// if the file already exists do nothing
-    	}
-    	catch (Exception e) {
-    		throw new RuntimeException("Can't create test file for GalaxyDataServiceTests.", e);
-    	} 	
-    	
-    	Mockito.when(primaryfileRepository.findById(PRIMARYFILE_ID)).thenReturn(Optional.of(primaryfile));     	    	
-    	Mockito.when(primaryfileRepository.save(primaryfile)).thenReturn(primaryfile);     	    	
-    }
-
-    /**
-     * Set up a dummy bundle in Amppd for testing Amppd job bundle creation.
-     */
-    private void setUpBundle() {    	
-    	Item item = new Item();
-    	Set<Primaryfile> primaryfiles = new HashSet<Primaryfile>();
-    	primaryfiles.add(primaryfile);
-    	item.setPrimaryfiles(primaryfiles);
-
-    	// add some invalid primaryfile to the item
-    	Primaryfile pf = new Primaryfile();
-    	pf.setId(0l);;
-    	primaryfiles.add(pf);
-    	
-    	bundle = new Bundle();
-    	Set<Item> items = new HashSet<Item>();
-    	items.add(item);
-    	bundle.setItems(items); 	
-
-    	// add some invalid item to the bundle
-    	items.add(new Item());
-
-    	bundle.setId(BUNDLE_ID);
-    	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	    	
-    }
-    
+	private Primaryfile primaryfile;
+	private Workflow workflow;
+	private Invocation invocation;
+	
+	/* Notes:
+	 * The below setup and cleanup methods shall really be at class level instead of method level; however, JUnit requires class level methods to be static, 
+	 * which won't work here, since these methods access Spring beans and member fields. As a result, cleanupHistories will not be done for tests in this class,
+	 * which is OK as it will be done by the GalaxyDataServiceTests. Another reason we don't want to clean up histories after each test is that we want to reuse 
+	 * the AMP job created in setup across job related tests; this makes Galaxy behave more efficiently. Otherwise, some fields in the outputs may not be
+	 * populated in time, causing assertions to fail randomly.
+	 */
+	
 	@Before
 	public void setup() {
-		setUpPrimaryFile();
-		setUpBundle();
+    	// prepare the primaryfile, workflow, and the AMP job for testing
+    	primaryfile = testHelper.ensureTestAudio();
+    	workflow = testHelper.ensureTestWorkflow();    
+    	invocation = testHelper.ensureTestJob(true);
+	}
+	
 		
-		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
-		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
-		
-		// TODO We need to make sure there're some existing dataset in Galaxy for testing
-		
-		// TODO alternatively we could use mock workflowsClient, in which case we won't require any existing data in Galaxy
- 	}
-		
+	@After
+	public void cleanup() {
+//		testHelper.cleanupHistories();
+	}
+		    	
     @Test
-    public void shouldBuildWorkflowInputsOnValidInputs() {
-    	
-    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
-    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0); 
-
-    	// we assume there is at least one dataset existing in Galaxy, and we can use one of these
-    	LibraryContent dataset = galaxyDataService.getLibrariesClient().getLibraryContents(galaxyDataService.getSharedLibrary().getId()).get(0);
+    public void shouldBuildWorkflowInputsOnValidInputs() {    	
+    	// set up some dummy history and dataset
+    	History history = new History();
+    	history.setId("1");
+    	LibraryContent dataset = new LibraryContent();
+    	dataset.setId("1");
 
     	// set up some dummy parameters
     	HashMap<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
@@ -143,9 +98,10 @@ public class JobServiceTests {
     	param1.put("name1", "value1");
     	parameters.put("step1", param1);
     	
-    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), dataset.getId(), parameters);
+    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), dataset.getId(), history.getId(), parameters);
     	
     	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
+    	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
     	Assert.assertEquals(winputs.getInputs().size(), 1);
     	WorkflowInput winput = (WorkflowInput)winputs.getInputs().values().toArray()[0];
     	Assert.assertEquals(winput.getId(), dataset.getId());
@@ -156,21 +112,14 @@ public class JobServiceTests {
 
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
-    	jobService.buildWorkflowInputs("foobar", "", new HashMap<String, Map<String, String>>());
+    	jobService.buildWorkflowInputs("foobar", "", "", new HashMap<String, Map<String, String>>());
     }
 
-    // TODO remove ignore once sample media file is added to repository
-    @Ignore
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
-    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
-    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
-
-    	// before creating the job for the firs time on the primaryfile, the dataset ID is not set yet
-    	Assert.assertNull(primaryfile.getDatasetId());
-
-    	// use the dummy primaryfile we set up for this test
-    	WorkflowOutputs woutputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
+    			(WorkflowOutputs)invocation  :
+    			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
     	// now the dataset ID shall be set
     	Assert.assertNotNull(primaryfile.getDatasetId());
@@ -188,25 +137,30 @@ public class JobServiceTests {
     
     @Test(expected = StorageException.class)
     public void shouldThrowStorageExceptionCreateJobForNonExistingPrimaryfile() {
-    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
-    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
-
     	jobService.createJob(workflow.getId(), 0l, new HashMap<String, Map<String, String>>());
     }
     
-    // TODO remove ignore once sample media file is added to repository
-    @Ignore
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowGalaxyWorkflowExceptionExceptionCreateJobForNonExistingWorkflow() { 	
     	jobService.createJob("0", primaryfile.getId(), new HashMap<String, Map<String, String>>());
     }
     
-    // TODO remove ignore once sample media file is added to repository
-    @Ignore
     @Test
+    @Transactional
     public void shouldCreateJobBundle() {    	              
-    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these for this test
-    	Workflow workflow = jobService.getWorkflowsClient().getWorkflows().get(0);     	
+    	// add some invalid primaryfile to the valid primaryfile's item
+    	Primaryfile pf = new Primaryfile();
+    	pf.setId(0l);;
+    	primaryfile.getItem().getPrimaryfiles().add(pf); // this requires the method to be transactional otherwise Hibernate will throw LazyInitializationException
+    	
+    	// create a dummy bundle containing both the above item and some invalid item
+    	Bundle bundle = new Bundle();
+    	bundle.setId(BUNDLE_ID);
+    	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	     	
+    	Set<Item> items = new HashSet<Item>();
+    	items.add(primaryfile.getItem());
+    	items.add(new Item());
+    	bundle.setItems(items); 	
 
     	// use the dummy bundle we set up for this test
     	List<WorkflowOutputs> woutputsList = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
@@ -216,5 +170,67 @@ public class JobServiceTests {
     	Assert.assertEquals(woutputsList.size(), 1);
     	Assert.assertNotNull(woutputsList.get(0));
     }
-
+    
+    @Test
+    public void shouldListJobs() {
+    	// before running any AMP job on the workflow-primaryfile, record the current number of invocations
+    	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+    	int size = invocations.size();
+    	    	
+    	// after running the AMP job once on the workflow-primaryfile, there shall be one more invocation listed for this combo
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+    	Assert.assertEquals(invocations.size(), size + 1);
+    	
+    	// and the historyId stored in the updated primaryfile shall be the same as that in the invocation
+    	Primaryfile updatedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertEquals(invocations.get(0).getHistoryId(), updatedPrimaryfile.getHistoryId());
+    	Assert.assertNotNull(invocations.get(0).getId());    	
+    	Assert.assertNotNull(invocations.get(0).getUpdateTime());    	
+    	Assert.assertNotNull(invocations.get(0).getState()); // this assertion succeeds when running this test alone but fails when running the whole test class   
+    }
+    
+    @Test(expected = StorageException.class)
+    public void shouldThrowExceptionListJobsOnNonExistingPrimaryfile() {
+    	jobService.listJobs(workflow.getId(), 0L);
+    }
+    
+    @Test(expected = GalaxyWorkflowException.class)
+    public void shouldThrowExceptionListJobsOnNonExistingWorkflow() {
+    	jobService.listJobs("foobar", primaryfile.getId());
+    }
+           
+    @Test
+    public void shouldShowJobStepOutput() {
+    	String stepId = null;
+    	String datasetId = null;
+    	
+    	if (invocation instanceof WorkflowOutputs) {
+        	// retrieve the stepId/outputId using the IDs contained in the workflow outputs after running the AMP job
+    		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
+    		stepId = woutputs.getSteps().get(2).getId();
+    		datasetId = woutputs.getOutputIds().get(1);
+    	}
+    	else {
+        	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
+    		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
+    		stepId = idetails.getSteps().get(2).getId();
+    		datasetId = idetails.getSteps().get(2).getOutputs().get(TestHelper.TEST_OUTPUT).getId();
+    	}
+    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), stepId, datasetId);
+    	
+    	// verify the fields
+    	Assert.assertEquals(dataset.getId(), datasetId);
+    	Assert.assertEquals(dataset.getHistoryId(), invocation.getHistoryId());
+       	Assert.assertNotNull(dataset.getFileName());
+       	Assert.assertNotNull(dataset.getCreatingJob());
+       	Assert.assertNotNull(dataset.getCreateTime());
+       	Assert.assertNotNull(dataset.getUpdateTime());
+    }
+    
+    @Test(expected = GalaxyWorkflowException.class)
+    public void shouldThrowExceptionShowNonExistingDataset() {
+    	jobService.showJobStepOutput(workflow.getId(), "foo", "bar", "foobar");
+    }
+           
 }

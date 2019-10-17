@@ -1,27 +1,48 @@
 package edu.indiana.dlib.amppd.service;
 
-import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-// TODO remove ignore once tests are added
-@Ignore
+import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+
+import edu.indiana.dlib.amppd.util.TestHelper;
+
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class WorkflowServiceTests {
 		
 	@Autowired
 	private WorkflowService workflowService;   
-		
-	@Before
-	public void setup() {
-		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
-		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
-				
-		// TODO alternatively we could use mock workflowsClient, in which case we won't require any existing data in Galaxy
- 	}
+	
+	@Autowired
+	private TestHelper testHelper;   
+
+    @Test
+    public void shouldGetExistingWorkflow() {
+    	// prepare an uploaded workflow for testing
+    	Workflow workflowUploaded = testHelper.ensureTestWorkflow();    
+
+    	// retrieve the workflow by name
+    	Workflow workflowRetrieved = workflowService.getWorkflow(workflowUploaded.getName());
+    	
+    	// verify the retrieved workflow
+    	Assert.assertNotNull(workflowRetrieved.getId());
+    	Assert.assertEquals(workflowUploaded.getName(), workflowRetrieved.getName());
+    }
+
+    @Test
+    public void shouldReturnNullOnNonExistingWorkflow() {  
+    	// retrieve the workflow by name
+    	Workflow workflowRetrieved = workflowService.getWorkflow("foo");
+    	
+    	// verify the retrieved workflow
+    	Assert.assertNull(workflowRetrieved);
+    }
+
 
 }
