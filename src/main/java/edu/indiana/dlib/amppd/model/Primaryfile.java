@@ -25,6 +25,16 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Primaryfile extends Asset {
 
+	/* Note:
+	 * - The below history is not necessarily the same as where the primaryfile itself is uploaded in Galaxy
+	 *   (for ex, currently, all assets including primaryfiles are loaded into the shared AMPPD history).
+	 * - Each primaryfile has its own output history for all its associated AMP jobs. 
+	 * 	 Supplements, on the other hand, don't associate with any output history on its own, as they only participate in a job run along with 
+	 *   their associated primaryfile. So the historyId is only needed for primaryfile, not for supplements.
+	 */	
+	// ID of the history where all output datasets of all AMP jobs running against this primaryfile is stored in Galaxy.
+    private String historyId;			
+
 	@OneToMany(mappedBy="primaryfile")
     private Set<PrimaryfileSupplement> supplements;
 

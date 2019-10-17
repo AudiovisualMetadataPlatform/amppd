@@ -54,24 +54,24 @@ public class FileStorageServiceTests {
     }
 
     @Test
-    public void saveAndLoad() {
+    public void shouldSaveAndLoad() {
         fileStorageService.store(new MockMultipartFile("foo", "foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test.txt");
         assertTrue(Files.exists(fileStorageService.resolve(TEST_DIR_NAME + "/test.txt")));
     }
 
     @Test(expected = StorageException.class)
-    public void saveNotPermitted() {
+    public void shouldNotSaveUnpermitted() {
         fileStorageService.store(new MockMultipartFile("foo", "../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test0.txt");
     }
 
     @Test
-    public void savePermitted() {
+    public void shouldSavePermitted() {
         fileStorageService.store(new MockMultipartFile("foo", "bar/../foo.txt", MediaType.TEXT_PLAIN_VALUE, "Test File Upload".getBytes()), TEST_DIR_NAME + "/test1.txt");
         assertTrue(Files.exists(fileStorageService.resolve(TEST_DIR_NAME + "/test1.txt")));
     }
     
     @Test
-    public void getPrimaryfilePathname() {
+    public void shouldGetPrimaryfilePathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -93,7 +93,7 @@ public class FileStorageServiceTests {
     }
 
     @Test
-    public void getCollectionSupplementPathname() {
+    public void shouldGetCollectionSupplementPathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -111,7 +111,7 @@ public class FileStorageServiceTests {
     }
     
     @Test
-    public void getItemSupplementPathname() {
+    public void shouldGetItemSupplementPathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	
@@ -133,7 +133,7 @@ public class FileStorageServiceTests {
     }
     
     @Test
-    public void getPrimaryfileSupplementPathname() {
+    public void shouldGetPrimaryfileSupplementPathname() {
     	Unit unit = new Unit();
     	unit.setId(1l);
     	

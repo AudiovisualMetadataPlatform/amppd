@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
+import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -34,5 +35,18 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflow(String)
+	 */	
+	@Override
+	public Workflow getWorkflow(String workflowName) {
+		for (Workflow workflow : workflowsClient.getWorkflows()) {
+			if (workflow.getName().equalsIgnoreCase(workflowName)) {
+				return workflow;			
+			}
+		}
+		return null;
+	}
 	
 }

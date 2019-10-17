@@ -6,8 +6,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
 
@@ -17,6 +20,70 @@ import edu.indiana.dlib.amppd.model.Unit;
  *
  */
 public interface FileStorageService {
+	
+	/**
+	 * Upload the given file for the given primaryfile.
+	 * @param id ID of the given primaryfile
+	 * @param file the media file to be uploaded
+	 * @return the primaryfile with media file uploaded
+	 */
+	public Primaryfile uploadPrimaryfile(Long id, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @param file the media file to be uploaded
+	 * @return the primaryfile with media file uploaded
+	 */
+	public Primaryfile uploadPrimaryfile(Primaryfile primaryfile, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given collectionSupplement.
+	 * @param id ID of the given collectionSupplement
+	 * @param file the media file to be uploaded
+	 * @return the collectionSupplement with media file uploaded
+	 */
+	public CollectionSupplement uploadCollectionSupplement(Long id, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given collectionSupplement.
+	 * @param collectionSupplement the given collectionSupplement
+	 * @param file the media file to be uploaded
+	 * @return the collectionSupplement with media file uploaded
+	 */
+	public CollectionSupplement uploadCollectionSupplement(CollectionSupplement collectionSupplement, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given itemSupplement.
+	 * @param id ID of the given itemSupplement
+	 * @param file the media file to be uploaded
+	 * @return the itemSupplement with media file uploaded
+	 */
+	public ItemSupplement uploadItemSupplement(Long id, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given itemSupplement.
+	 * @param itemSupplement the given itemSupplement
+	 * @param file the media file to be uploaded
+	 * @return the itemSupplement with media file uploaded
+	 */
+	public ItemSupplement uploadItemSupplement(ItemSupplement itemSupplement, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given primaryfileSupplement.
+	 * @param id ID of the given primaryfileSupplement
+	 * @param file the media file to be uploaded
+	 * @return the primaryfileSupplement with media file uploaded
+	 */
+	public PrimaryfileSupplement uploadPrimaryfileSupplement(Long id, MultipartFile file);
+
+	/**
+	 * Upload the given file for the given primaryfileSupplement.
+	 * @param primaryfileSupplement the given primaryfileSupplement
+	 * @param file the media file to be uploaded
+	 * @return the primaryfileSupplement with media file uploaded
+	 */
+	public PrimaryfileSupplement uploadPrimaryfileSupplement(PrimaryfileSupplement primaryfileSupplement, MultipartFile file);
 
 	/**
 	 * Stores the specified sourceFile to the specified targetPathname on the file system.

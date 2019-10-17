@@ -45,6 +45,13 @@ public interface GalaxyDataService {
 	 */
 	public History getHistory(String name);
 
+//	/**
+//	 * Create output history for the given primaryfile, if not existing yet.
+//	 * @param ID of the the given primaryfile.
+//	 * @return the new history created, or existing history if found
+//	 */
+//	public History createHistory(Long primaryfileId);
+
 	/**
 	 * Upload a file/folder from AMP file system to a Galaxy data library without copying the physical file, which results in a dataset being created for the file in the library. 
 	 * @param filePath the path of the source file/folder to be uploaded

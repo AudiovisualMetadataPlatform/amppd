@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -28,6 +29,10 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.java.Log;
 
@@ -44,6 +49,18 @@ import lombok.extern.java.Log;
 @Log
 public class FileStorageServiceImpl implements FileStorageService {	
 
+	@Autowired
+    private PrimaryfileRepository primaryfileRepository;
+		
+	@Autowired
+    private CollectionSupplementRepository collectionSupplementRepository;
+
+	@Autowired
+    private ItemSupplementRepository itemSupplementRepository;
+
+	@Autowired
+    private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	
 	private AmppdPropertyConfig config; 	
 	private Path root;
 
@@ -62,8 +79,125 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfile(Long, MultipartFile)
+	 */
+	@Override
+	public Primaryfile uploadPrimaryfile(Long id, MultipartFile file) {		
+    	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
+    	return uploadPrimaryfile(primaryfile, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfile(Primaryfile, MultipartFile)
+	 */
+	@Override
+	public Primaryfile uploadPrimaryfile(Primaryfile primaryfile, MultipartFile file) {		
+    	if (primaryfile == null) {
+    		throw new RuntimeException("The given primaryfile for uploading media file is null.");
+    	}
+    	
+    	primaryfile.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(primaryfile);    	    	
+    	primaryfile.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	primaryfile = primaryfileRepository.save(primaryfile);  
+    	
+    	String msg = "Primaryfile " + primaryfile.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return primaryfile;
+	}	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadCollectionSupplement(Long, MultipartFile)
+	 */
+	@Override
+	public CollectionSupplement uploadCollectionSupplement(Long id, MultipartFile file) {		
+    	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));        	
+    	return uploadCollectionSupplement(collectionSupplement, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadCollectionSupplement(CollectionSupplement, MultipartFile)
+	 */
+	@Override
+	public CollectionSupplement uploadCollectionSupplement(CollectionSupplement collectionSupplement, MultipartFile file) {		
+    	if (collectionSupplement == null) {
+    		throw new RuntimeException("The given collectionSupplement for uploading media file is null.");
+    	}
+    	
+    	collectionSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(collectionSupplement);    	    	
+    	collectionSupplement.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);  
+    	
+    	String msg = "CollectionSupplement " + collectionSupplement.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return collectionSupplement;
+	}	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadItemSupplement(Long, MultipartFile)
+	 */
+	@Override
+	public ItemSupplement uploadItemSupplement(Long id, MultipartFile file) {		
+    	ItemSupplement itemSupplement = itemSupplementRepository.findById(id).orElseThrow(() -> new StorageException("ItemSupplement <" + id + "> does not exist!"));        	
+    	return uploadItemSupplement(itemSupplement, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadItemSupplement(ItemSupplement, MultipartFile)
+	 */
+	@Override
+	public ItemSupplement uploadItemSupplement(ItemSupplement itemSupplement, MultipartFile file) {		
+    	if (itemSupplement == null) {
+    		throw new RuntimeException("The given itemSupplement for uploading media file is null.");
+    	}
+    	
+    	itemSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(itemSupplement);    	    	
+    	itemSupplement.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	itemSupplement = itemSupplementRepository.save(itemSupplement);  
+    	
+    	String msg = "ItemSupplement " + itemSupplement.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return itemSupplement;
+	}	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfileSupplement(Long, MultipartFile)
+	 */
+	@Override
+	public PrimaryfileSupplement uploadPrimaryfileSupplement(Long id, MultipartFile file) {		
+    	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(id).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + id + "> does not exist!"));        	
+    	return uploadPrimaryfileSupplement(primaryfileSupplement, file);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfileSupplement(PrimaryfileSupplement, MultipartFile)
+	 */
+	@Override
+	public PrimaryfileSupplement uploadPrimaryfileSupplement(PrimaryfileSupplement primaryfileSupplement, MultipartFile file) {		
+    	if (primaryfileSupplement == null) {
+    		throw new RuntimeException("The given primaryfileSupplement for uploading media file is null.");
+    	}
+    	
+    	primaryfileSupplement.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
+    	String targetPathname = getFilePathname(primaryfileSupplement);    	    	
+    	primaryfileSupplement.setPathname(targetPathname);
+    	store(file, targetPathname);    	
+    	primaryfileSupplement = primaryfileSupplementRepository.save(primaryfileSupplement);  
+    	
+    	String msg = "PrimaryfileSupplement " + primaryfileSupplement.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
+    	log.info(msg);
+    	return primaryfileSupplement;
+	}	
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)
 	 */
+	@Override
 	public void store(MultipartFile file, String targetPathname) {
 		String originalFilename = file.getOriginalFilename();
 		try {
@@ -93,6 +227,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.resolve(String)
 	 */
+	@Override
     public Path resolve(String pathname) {
         return root.resolve(pathname);
     }
@@ -100,6 +235,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.resolve(String)
 	 */
+	@Override
     public String absolutePathName(String pathname) {
         return resolve(pathname).toAbsolutePath().toString();
     }
@@ -107,7 +243,8 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.loadAsResource(String)
 	 */
-    public Resource loadAsResource(String pathname) {
+	@Override
+	public Resource loadAsResource(String pathname) {
         try {
             Path file = resolve(pathname);
             Resource resource = new UrlResource(file.toUri());
@@ -126,6 +263,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.delete(String)
 	 */    
+	@Override
     public void delete(String pathname) {
     	try {
     		Path path = resolve(pathname);
@@ -140,6 +278,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.deleteAll()
 	 */
+	@Override
     public void deleteAll() {
     	try {
     		FileSystemUtils.deleteRecursively(root);
@@ -153,6 +292,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Unit)
 	 */
+	@Override
 	public String getDirPathname(Unit unit) {
 		// directory path for unit: U-<unitID>
 		return "U-" + unit.getId();		
@@ -161,6 +301,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Collection)
 	 */
+	@Override
 	public String getDirPathname(Collection collection) {
 		// directory path for collection: U-<unitID/C-<collectionId>
 		return getDirPathname(collection.getUnit()) + File.separator + "C-" + collection.getId();
@@ -169,6 +310,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Item)
 	 */
+	@Override
 	public String getDirPathname(Item item) {
 		// directory path for item: U-<unitID/C-<collectionId>/I-<itemId>
 		return getDirPathname(item.getCollection()) + File.separator + "I-" + item.getId();
@@ -177,6 +319,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getDirPathname(Primaryfile)
 	 */
+	@Override
 	public String getDirPathname(Primaryfile primaryfile) {
 		// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>
 		return getDirPathname(primaryfile.getItem()) + File.separator + "P-" + primaryfile.getId();
@@ -185,6 +328,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathname(Primaryfile)
 	 */
+	@Override
 	public String getFilePathname(Primaryfile primaryfile) {
 		// file path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>.<primaryExtension>
 		return getDirPathname(primaryfile) + "." + FilenameUtils.getExtension(primaryfile.getOriginalFilename());
@@ -193,6 +337,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.getFilePathname(Supplement)
 	 */
+	@Override
 	public String getFilePathname(Supplement supplement) {
 		// file name for supplement: S-<supplementId>
 		String filename = "S-" + supplement.getId() + "." + FilenameUtils.getExtension(supplement.getOriginalFilename());
