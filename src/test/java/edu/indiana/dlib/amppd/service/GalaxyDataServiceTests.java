@@ -40,6 +40,12 @@ public class GalaxyDataServiceTests {
 	
 	private String testFile;
 
+	/* Notes:
+	 * The below setup and cleanup methods shall really be at class level instead of method level; however, JUnit requires class level methods to be static, 
+	 * which won't work here, since these methods access Spring beans and member fields. As a result, cleanupHistories is only done by in this class.
+	 * Alternatively, we can create a separate test class as a workaround, which just contains one dummy test, and does the cleanup for all test classes. 
+	 */
+		
 	@Before
 	public void setup() {
 		createTestFile();
@@ -52,6 +58,8 @@ public class GalaxyDataServiceTests {
         fileStorageService.delete(TEST_DIRECTORY_NAME);
         
         // TODO delete test library and all its contents
+        
+        // delete test histories for AMP jobs
         testHelper.cleanupHistories();	
     }
 

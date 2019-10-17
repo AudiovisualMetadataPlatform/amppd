@@ -2,7 +2,9 @@ package edu.indiana.dlib.amppd.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -12,6 +14,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -66,6 +69,24 @@ public class TestHelper {
 	@Autowired
 	private JobService jobService;
 	
+	/**
+	 * Check whether any AMP job has been run on TestWorkflow against TestAudio/TestVideo; if not, prepare the workflow and primaryfile and run the job once.
+	 * @param useAudio if true use TestAudio, otherwise use TestVideo as the primaryfile
+	 * @return the prepared invocation 
+	 */
+	public Invocation ensureTestJob(boolean useAudio) {				
+		Primaryfile primaryfile = useAudio ? ensureTestAudio() : ensureTestVideo();
+		Workflow workflow = ensureTestWorkflow();
+		List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+		if (invocations.size() > 0) {
+			// some job has been run on the workflow-primaryfile, just return the first invocation
+			return invocations.get(0);
+		}
+		else {
+			// otherwise run the job once and return the WorkflowOutputs
+			return jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+		}
+	}	
 	
 	/**
 	 * Check whether the primaryfile named TestAudio exists in Amppd; if not, upload it from its resource file.

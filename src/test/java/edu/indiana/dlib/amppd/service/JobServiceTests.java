@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
@@ -59,17 +60,28 @@ public class JobServiceTests {
 	
 	private Primaryfile primaryfile;
 	private Workflow workflow;
+	private Invocation invocation;
+	
+	/* Notes:
+	 * The below setup and cleanup methods shall really be at class level instead of method level; however, JUnit requires class level methods to be static, 
+	 * which won't work here, since these methods access Spring beans and member fields. As a result, cleanupHistories will not be done for tests in this class,
+	 * which is OK as it will be done by the GalaxyDataServiceTests. Another reason we don't want to clean up histories after each test is that we want to reuse 
+	 * the AMP job created in setup across job related tests; this makes Galaxy behave more efficiently. Otherwise, some fields in the outputs may not be
+	 * populated in time, causing assertions to fail randomly.
+	 */
 	
 	@Before
 	public void setup() {
-    	// prepare the primaryfile and workflow for testing
+    	// prepare the primaryfile, workflow, and the AMP job for testing
     	primaryfile = testHelper.ensureTestAudio();
     	workflow = testHelper.ensureTestWorkflow();    
+    	invocation = testHelper.ensureTestJob(true);
 	}
+	
 		
 	@After
-	public void cleanupHistories() {
-		testHelper.cleanupHistories();
+	public void cleanup() {
+//		testHelper.cleanupHistories();
 	}
 		    	
     @Test
@@ -105,7 +117,9 @@ public class JobServiceTests {
 
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
-    	WorkflowOutputs woutputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
+    			(WorkflowOutputs)invocation  :
+    			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
     	// now the dataset ID shall be set
     	Assert.assertNotNull(primaryfile.getDatasetId());
@@ -159,44 +173,61 @@ public class JobServiceTests {
     
     @Test
     public void shouldListJobs() {
-    	// before running any AMP job on the workflow-primaryfile, there shall be no invocation for this combo	
+    	// before running any AMP job on the workflow-primaryfile, record the current number of invocations
     	List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
-    	Assert.assertEquals(invocations.size(), 0);
+    	int size = invocations.size();
+//    	Assert.assertEquals(invocations.size(), 0);
     	    	
-    	// after running the AMP job once on the workflow-primaryfile, there shall be one invocation listed for this combo
+    	// after running the AMP job once on the workflow-primaryfile, there shall be one more invocation listed for this combo
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
     	invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
-    	Assert.assertEquals(invocations.size(), 1);
+    	Assert.assertEquals(invocations.size(), size + 1);
     	
     	// and the historyId stored in the updated primaryfile shall be the same as that in the invocation
     	Primaryfile updatedPrimaryfile = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertEquals(invocations.get(0).getHistoryId(), updatedPrimaryfile.getHistoryId());
     	Assert.assertNotNull(invocations.get(0).getId());    	
     	Assert.assertNotNull(invocations.get(0).getUpdateTime());    	
-//    	Assert.assertNotNull(invocations.get(0).getState()); // this assertion succeeds when running this test along but fails when running the whole test class   
+    	Assert.assertNotNull(invocations.get(0).getState()); // this assertion succeeds when running this test alone but fails when running the whole test class   
     }
     
     @Test(expected = StorageException.class)
-    public void shouldThrowExceptionListJobsOnInvalidPrimaryfile() {
-    	// then list AMP jobs on a non-existing primaryfile
+    public void shouldThrowExceptionListJobsOnNonExistingPrimaryfile() {
     	jobService.listJobs(workflow.getId(), 0L);
     }
     
     @Test(expected = GalaxyWorkflowException.class)
-    public void shouldThrowExceptionListJobsOnInvalidWorkflow() {
-    	// then list AMP jobs on a non-existing workflow
+    public void shouldThrowExceptionListJobsOnNonExistingWorkflow() {
     	jobService.listJobs("foobar", primaryfile.getId());
     }
            
     @Test
     public void shouldShowJobStepOutput() {
-    	// retrieve the output data set using the IDs contained in the workflow outputs after running the AMP job 
-    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
-    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), outputs.getId(), outputs.getSteps().get(2).getId(), outputs.getOutputIds().get(1));
+    	String stepId = null;
+    	String outputId = null;
+    	
+    	if (invocation instanceof WorkflowOutputs) {
+        	// retrieve the stepId/outputId using the IDs contained in the workflow outputs after running the AMP job
+    		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
+    		stepId = woutputs.getSteps().get(2).getId();
+    		outputId = woutputs.getOutputIds().get(1);
+//    		dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), woutputs.getSteps().get(2).getId(), woutputs.getOutputIds().get(1));
+    	}
+    	else {
+        	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
+    		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
+    		stepId = idetails.getSteps().get(2).getId();
+    		outputId = idetails.getSteps().get(2).getOutputs().get(1).getId();
+//        	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), idetails.getSteps().get(2).getId(), idetails.getSteps().get(2).getOutputs().get(1).getId());
+    	}
+    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), invocation.getId(), stepId, outputId);
+    	
+//    	WorkflowOutputs outputs = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+//    	Dataset dataset = jobService.showJobStepOutput(workflow.getId(), outputs.getId(), outputs.getSteps().get(2).getId(), outputs.getOutputIds().get(1));
     	
     	// verify the fields
-    	Assert.assertEquals(dataset.getId(), outputs.getOutputIds().get(1));
-    	Assert.assertEquals(dataset.getHistoryId(), outputs.getHistoryId());
+    	Assert.assertEquals(dataset.getId(), outputId);
+    	Assert.assertEquals(dataset.getHistoryId(), invocation.getHistoryId());
        	Assert.assertNotNull(dataset.getFileName());
        	Assert.assertNotNull(dataset.getCreatingJob());
        	Assert.assertNotNull(dataset.getCreateTime());
@@ -205,7 +236,6 @@ public class JobServiceTests {
     
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowExceptionShowNonExistingDataset() {
-    	// then list AMP jobs on a non-existing workflow
     	jobService.showJobStepOutput(workflow.getId(), "foo", "bar", "foobar");
     }
            
