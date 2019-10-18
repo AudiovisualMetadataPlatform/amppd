@@ -39,8 +39,8 @@ button:hover {
 
 /* Center the avatar image inside this container */
 .imgcontainer {
-  width: 100%;
-
+ height:auto;
+  max-width:100%;
 }
 
 
@@ -53,9 +53,29 @@ button:hover {
   display: inline-block
 }
 
+.error {
+  padding: 20px 100px;
+  color: red;
+}
+
+ul{
+list-style: none;
+} 
+
+li span {
+  width : 70%;
+  padding-left: 100px;
+  padding-right: 100px;
+}
+
+p {
+  width:70%;
+  text-align: center;
+  margin:auto;
+}
+
 .form {
   text-align: center;
-
 }
 
 .row {

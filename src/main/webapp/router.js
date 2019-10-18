@@ -1,27 +1,32 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import LoginComponent from "./views/login.vue"
-import SecureComponent from "./views/secure.vue"
+//import Vue from ''
+//import Router from 'vue-router'
+//import LoginComponent from "App"
 
-Vue.use(Router)
+/* Vue.use(Router) */
 
-export default new Router({
-    routes: [
-        {
-            path: '/',
-            redirect: {
-                name: "login"
-            }
-        },
-        {
-            path: "/login",
-            name: "login",
-            component: LoginComponent
-        },
-        {
-            path: "/secure",
-            name: "secure",
-            component: SecureComponent
-        }
-    ]
+
+const routes = [
+  
+  {
+        path: '/',
+        component: loginForm,
+        name: 'LOGIN'
+      },
+
+     {
+        path: '/register', 
+        component: registerForm,
+        name: 'REGISTER'
+      }
+]
+
+const router = new VueRouter({
+  routes // short for `routes: routes`
 })
+
+var vue_app = new Vue(
+  {
+    router: router,
+  }).$mount('#accountContainer');
+
+//export default router;

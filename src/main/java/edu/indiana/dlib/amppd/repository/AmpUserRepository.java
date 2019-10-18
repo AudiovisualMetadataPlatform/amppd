@@ -7,6 +7,6 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 public class AmpUserRepository {
 	
 	public interface UserRepository extends JpaRepository<AmpUser, Long> {
-	    AmpUser findByUsername(String username);
+	    AmpUser findByUsername(String username) ;
 	}
 }
