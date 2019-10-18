@@ -38,9 +38,9 @@ button:hover {
 }
 
 /* Center the avatar image inside this container */
-.imgcontainer {
- height:auto;
-  max-width:100%;
+.imgcontainer, img {
+ height: 100%;
+ width: 100%;
 }
 
 
