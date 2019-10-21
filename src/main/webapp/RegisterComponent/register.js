@@ -32,6 +32,7 @@ var registerForm = Vue.component('register-form',
       {
         
       }
+      this.$router.push("/welcome");
       console.log("checkform WORKS");
       e.preventDefault();
     }

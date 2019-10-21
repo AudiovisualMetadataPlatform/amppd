@@ -12,11 +12,15 @@ const routes = [
         component: loginForm,
         name: 'LOGIN'
       },
-
      {
         path: '/register', 
         component: registerForm,
         name: 'REGISTER'
+      },
+      {
+        path: '/welcome', 
+        component: welcomeForm,
+        name: 'WELCOME'
       }
 ]
 
@@ -27,6 +31,6 @@ const router = new VueRouter({
 var vue_app = new Vue(
   {
     router: router,
-  }).$mount('#accountContainer');
+  }).$mount('#amp_app');
 
 //export default router;

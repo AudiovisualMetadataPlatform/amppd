@@ -31,6 +31,7 @@ var loginForm = Vue.component('login-form',
       }
       console.log("checkform WORKS");
       e.preventDefault();
+      this.$router.push("/welcome");
     }
   },
   mounted() {
