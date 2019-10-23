@@ -15,8 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
-import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -25,16 +25,19 @@ public class WorkflowControllerTests {
 		
 	@Autowired
 	private WorkflowService workflowService;   
+
+	@Autowired
+	private TestHelper testHelper;   
 	
     @Autowired
     private MockMvc mvc;
 
+	private Workflow workflow;	
+	
 	@Before
 	public void setup() {
-		// TODO We need to make sure there're some existing workflows in Galaxy for testing;
-		// this can be done via factory to import workflow json files, or populate workflows with Galaxy bootstrap.
-		
-		// TODO alternatively we could use mock workflowsClient, in which case we won't require any existing data in Galaxy
+    	// prepare the workflow for testing
+    	workflow = testHelper.ensureTestWorkflow();  
  	}
 	
     @Test
@@ -46,7 +49,7 @@ public class WorkflowControllerTests {
 
     @Test
     public void shouldShowWorkflowDetails() throws Exception {    	
-    	// we assume there is at least one workflow existing in Galaxy, and we can use one of these
+    	// there should be at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = workflowService.getWorkflowsClient().getWorkflows().get(0); 
 
     	mvc.perform(get("/workflows/{workflowId}", workflow.getId())).andExpect(status().isOk()).andExpect(

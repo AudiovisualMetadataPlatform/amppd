@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +23,22 @@ public class WorkflowServiceTests {
 	@Autowired
 	private TestHelper testHelper;   
 
+	private Workflow workflow;	
+	
+	@Before
+	public void setup() {
+    	// prepare the workflow for testing
+    	workflow = testHelper.ensureTestWorkflow();  
+ 	}
+		
     @Test
     public void shouldGetExistingWorkflow() {
-    	// prepare an uploaded workflow for testing
-    	Workflow workflowUploaded = testHelper.ensureTestWorkflow();    
-
     	// retrieve the workflow by name
-    	Workflow workflowRetrieved = workflowService.getWorkflow(workflowUploaded.getName());
+    	Workflow workflowRetrieved = workflowService.getWorkflow(workflow.getName());
     	
     	// verify the retrieved workflow
     	Assert.assertNotNull(workflowRetrieved.getId());
-    	Assert.assertEquals(workflowUploaded.getName(), workflowRetrieved.getName());
+    	Assert.assertEquals(workflow.getName(), workflowRetrieved.getName());
     }
 
     @Test
