@@ -28,12 +28,13 @@ var registerForm = Vue.component('register-form',
 	  if (this.pswd && this.confirm_pswd && this.confirm_pswd != this.pswd) {
         this.errors.push('Passwords do not match.');
       }
-      if (this.errors == [])
+      
+      if (this.errors.length == 0)
       {
-        
+       this.$router.push("/welcome");
       }
-      this.$router.push("/welcome");
-      console.log("checkform WORKS");
+    
+      console.log("checkform WORKS"+this.errors.length);
       e.preventDefault();
     }
   },

@@ -24,14 +24,16 @@ var loginForm = Vue.component('login-form',
       if (!this.pswd) {
         this.errors.push('Password required.');
       }
-
-      if (this.errors == [])
+      else{
+          this.$router.push("/welcome");
+      }
+      if (this.errors.length == 0)
       {
-        
+       this.$router.push("/welcome"); 
       }
       console.log("checkform WORKS");
       e.preventDefault();
-      this.$router.push("/welcome");
+      
     }
   },
   mounted() {
