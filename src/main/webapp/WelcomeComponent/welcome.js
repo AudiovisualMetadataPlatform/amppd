@@ -3,21 +3,21 @@ var welcomeForm = Vue.component('welcome-form',
   {
     template: '#welcome', // should match the ID of template tag
     name: 'WelcomeComponent',
-  	data: function() {
+    data: function() 
+    {
       return {
-		errors: [],
-		name: null,
-    pswd: null
+        errors: [],
+        name: null,
+        pswd: null
     }
   },
   methods:{
-    signout: function(e) {
-      
+    signout: function(e) {  
       this.$router.push("/");
     }
   },
   mounted() {
-            console.log("IT WORKS");
+            //console.log("IT WORKS");
         }
   });
 
