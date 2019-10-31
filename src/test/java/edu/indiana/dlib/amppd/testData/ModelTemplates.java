@@ -9,7 +9,6 @@ import br.com.six2six.fixturefactory.loader.TemplateLoader;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Job;
@@ -28,12 +27,12 @@ public class ModelTemplates implements TemplateLoader {
 		    Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
 	    	add("externalIds", new HashMap<String, String>());
 		    add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+	    	add("name", "Collection ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 	    	add("items", new HashSet<Item>());
 	    	add("supplements",new HashSet<CollectionSupplement>()); 
 	    	}}); 
@@ -41,12 +40,12 @@ public class ModelTemplates implements TemplateLoader {
 		
 		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
 			add("id", random(Long.class, range(1L, 200L)));
-			add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+			add("name", "CollectionSupplement ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 			//add("collection", new Collection());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
@@ -57,12 +56,12 @@ public class ModelTemplates implements TemplateLoader {
 		 
 	    Fixture.of(Item.class).addTemplate("valid", new Rule() {{			
 	    	add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+	    	add("name", "Item ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 	    	//add("collection", one(Collection.class, "valid"));
 			add("primaryfiles", new HashSet<Primaryfile>()); 
 			add("supplements", new HashSet<ItemSupplement>()); 
@@ -71,12 +70,12 @@ public class ModelTemplates implements TemplateLoader {
 			
 	    Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
 	    	add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+	    	add("name", "Primaryfile ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 	    	add("supplements", new HashSet<PrimaryfileSupplement>());
 			add("jobs", new HashSet<Job>());
 			add("originalFilename", firstName());
@@ -89,12 +88,12 @@ public class ModelTemplates implements TemplateLoader {
 		  Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
 			//add("item", has(1).of(Item.class, "valid")); 
 			add("id", random(Long.class, range(1L, 200L)));
-			add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+			add("name", "ItemSupplement ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("metainfo", regex("[A-Z]{1}[A-Z a-z]{9,29}"));
@@ -105,24 +104,24 @@ public class ModelTemplates implements TemplateLoader {
 	    Fixture.of(Bundle.class).addTemplate("valid", new Rule() {{
 	    	//add("items", has(2).of(Item.class, "valid"));	
 	    	add("id", random(Long.class, range(1L, 200L)));
-			add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+			add("name", "Bundle ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 	    	}});
 	    
 		
 		  Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
 			  //add("primaryfile", new Primaryfile());
 			add("id", random(Long.class, range(1L, 200L)));
-			add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+			add("name", "PrimaryfileSupplement ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 			//add("collection", new Collection());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
@@ -135,12 +134,12 @@ public class ModelTemplates implements TemplateLoader {
 	    	//add("collections", has(3).of(Collection.class, "valid")); 
 	    	add("externalIds", new HashMap<String, String>());
 	    	add("id", random(Long.class, range(1L, 200L)));
-			add("name", firstName());
-	    	add("description", "Description for ${name}'s test case");	
+			add("name", "Unit ${id}");
+	    	add("description", "Description for ${name}");	
 			add("createdDate", 20170101L); 
 			add("modifiedDate", 20170201L); 
-			add("createdBy", "${name}");
-			add("modifiedBy", "${name}");
+			add("createdBy", firstName());
+			add("modifiedBy", firstName());
 	    	}});
 	
 	    	}
