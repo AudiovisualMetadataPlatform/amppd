@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,10 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
-import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.repository.ItemRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -38,28 +36,16 @@ import edu.indiana.dlib.amppd.repository.ItemRepository;
 public class ItemRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private ItemRepository itemRepository;
 	
 	@Autowired 
 	private ObjectMapper mapper = new ObjectMapper();
-	private Item obj ;
-	//private ObjectFactory objFactory = new ObjectFactory();
+	private Item item ;
 	
 	@BeforeClass
 	public static void setupTest() 
 	{
 	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
 	}
-	
-	/*
-	 * @Before public void initiateBeforeTests() { HashMap params = new
-	 * HashMap<String, String>(); objItem=
-	 * (Item)objFactory.createDataentityObject(params, "Item");
-	 * 
-	 * }
-	 */
 	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
@@ -99,58 +85,77 @@ public class ItemRepositoryTests {
 	@Test
 	public void shouldQueryItemDescription() throws Exception {
 		
-		obj = Fixture.from(Item.class).gimme("valid");
+		item = Fixture.from(Item.class).gimme("valid");
 		
-		//Example implementation of Item->Collection->Unit hierarchy using Fixtures
-		//obj.setCollection(Fixture.from(Collection.class).gimme("valid"));
-		//obj.getCollection().setUnit(Fixture.from(Unit.class).gimme("valid"));
-		
-		
-		String json = mapper.writeValueAsString(obj);
+		String json = mapper.writeValueAsString(item);
 		mockMvc.perform(post("/items")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByDescription?description={description}", obj.getDescription())).andDo(
+				get("/items/search/findByDescription?description={description}", item.getDescription())).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].description").value(
-										obj.getDescription()));
+										item.getDescription()));
 	}
-
 	
 	@Test
 	public void shouldQueryItemCreatedBy() throws Exception {
 		
-		obj = Fixture.from(Item.class).gimme("valid");
+		item = Fixture.from(Item.class).gimme("valid");
 		
-		String json = mapper.writeValueAsString(obj);
+		String json = mapper.writeValueAsString(item);
 		mockMvc.perform(post("/items")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByCreatedBy?createdBy={createdBy}", obj.getCreatedBy())).andDo(
+				get("/items/search/findByCreatedBy?createdBy={createdBy}", item.getCreatedBy())).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].createdBy").value(
-										obj.getCreatedBy()));
+										item.getCreatedBy()));
+	}
+	
+	@Test
+	public void shouldQueryItemNameKeyword() throws Exception {
+		
+		item = Fixture.from(Item.class).gimme("valid");
+		String[] words = StringUtils.split(item.getName());
+		
+		String json = mapper.writeValueAsString(item);
+		mockMvc.perform(post("/items")
+				  .content(json)).andExpect(
+						  status().isCreated());
+		
+		mockMvc.perform(
+				get("/items/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.items[0].name").value(
+										item.getName()));
 	}
 		
-	/*
-	 * @Test public void shouldQueryItemCreatedDate() throws Exception {
-	 * 
-	 * obj = Fixture.from(Item.class).gimme("valid");
-	 * 
-	 * String json = mapper.writeValueAsString(obj); mockMvc.perform(post("/items")
-	 * .content(json)).andExpect( status().isCreated()); mockMvc.perform(
-	 * get("/items/search/findByCreatedDate?createdDate={createdDate}",
-	 * obj.getCreatedDate())).andDo( MockMvcResultHandlers.print()).andExpect(
-	 * status().isOk()).andExpect(
-	 * jsonPath("$._embedded.items[0].createdDate").value( obj.getCreatedDate())); }
-	 */
-	
+	@Test
+	public void shouldQueryItemDescriptionKeyword() throws Exception {
+		
+		item = Fixture.from(Item.class).gimme("valid");
+		String[] words = StringUtils.split(item.getDescription());
+		
+		String json = mapper.writeValueAsString(item);
+		mockMvc.perform(post("/items")
+				  .content(json)).andExpect(
+						  status().isCreated());
+		
+		mockMvc.perform(
+				get("/items/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.items[0].description").value(
+										item.getDescription()));
+	}	
+
 	@Test
 	public void shouldUpdateItem() throws Exception {
 

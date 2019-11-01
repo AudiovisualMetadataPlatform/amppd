@@ -23,5 +23,4 @@ public interface DataentityRepository<S extends Dataentity> extends PagingAndSor
 
 	List<S> findByModifiedBy(@Param("modifiedBy") String modifiedBy);
 
-	
 }
