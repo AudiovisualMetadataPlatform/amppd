@@ -165,12 +165,13 @@ public class JobServiceTests {
     	bundle.setItems(items); 	
 
     	// use the dummy bundle we set up for this test
-    	List<WorkflowOutputs> woutputsList = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
+    	Map<Long, WorkflowOutputs> woutputsMap = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
 
     	// only one primaryfile is valid, so only one workflow outputs shall exist in the list returned
-    	Assert.assertNotNull(woutputsList);
-    	Assert.assertEquals(woutputsList.size(), 1);
-    	Assert.assertNotNull(woutputsList.get(0));
+    	Assert.assertNotNull(woutputsMap);
+    	Assert.assertEquals(woutputsMap.size(), 1);
+    	Assert.assertTrue(woutputsMap.containsKey(primaryfile.getId()));
+    	Assert.assertNotNull(woutputsMap.get(primaryfile.getId()));
     }
     
     @Test

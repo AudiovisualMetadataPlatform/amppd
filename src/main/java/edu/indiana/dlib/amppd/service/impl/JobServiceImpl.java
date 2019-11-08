@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -200,8 +201,8 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String,Long,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public List<WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
-		List<WorkflowOutputs> woutputsList = new ArrayList<WorkflowOutputs>();
+	public Map<Long, WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
+		HashMap<Long, WorkflowOutputs> woutputsMap = new HashMap<Long, WorkflowOutputs>();
 		String msg = "a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
 		log.info("Creating " + msg);
 		
@@ -219,7 +220,7 @@ public class JobServiceImpl implements JobService {
 	        	else {
 		        	for (Primaryfile primaryfile : item.getPrimaryfiles() ) {
 		        		try {
-		        			woutputsList.add(createJob(workflowId, primaryfile.getId(), parameters));
+		        			woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));
 		        			nSuccess++;
 		        		}
 		        		catch (Exception e) {
@@ -234,7 +235,7 @@ public class JobServiceImpl implements JobService {
 
 		log.info("Number of Amppd jobs successfully created for the bundle: " + nSuccess);    	
 		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
-    	return woutputsList;
+    	return woutputsMap;
 	}	
 	
 	/**

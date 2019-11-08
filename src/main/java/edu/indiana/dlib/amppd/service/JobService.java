@@ -56,9 +56,9 @@ public interface JobService {
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return list outputs of the invocation returned by Galaxy
+	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
 	 */
-	public List<WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
+	public Map<Long, WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
 	
 	/**
 	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
