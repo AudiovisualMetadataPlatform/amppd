@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +25,7 @@ import lombok.extern.java.Log;
  * @author yingfeng
  *
  */
+@CrossOrigin(origins = "*")
 @RestController
 @Log
 public class JobController {	
@@ -55,7 +57,7 @@ public class JobController {
 	 * @return list outputs of the invocation returned by Galaxy
 	 */
 	@PostMapping("/jobs/bundle")
-	public List<WorkflowOutputs> createJobBundle(
+	public Map<Long, WorkflowOutputs> createJobBundle(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("bundleId") Long bundleId, 
 			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
