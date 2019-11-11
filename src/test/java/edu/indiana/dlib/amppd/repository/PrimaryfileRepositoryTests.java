@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class PrimaryfileRepositoryTests {
 	
 	@Autowired 
 	private ObjectMapper mapper;
-	private Primaryfile obj ;
+	private Primaryfile primaryfile ;
 	/*
 	 * private ObjectFactory objFactory = new ObjectFactory();
 	 * 
@@ -93,25 +94,25 @@ public class PrimaryfileRepositoryTests {
 	
 	
 	@Test
-	public void shouldQueryItemDescription() throws Exception {
+	public void shouldQueryPrimaryfileDescription() throws Exception {
 		
-		obj = Fixture.from(Primaryfile.class).gimme("valid");
+		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		
-		String json = mapper.writeValueAsString(obj);
+		String json = mapper.writeValueAsString(primaryfile);
 		mockMvc.perform(post("/primaryfiles")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		mockMvc.perform(
-				get("/primaryfiles/search/findByDescription?description={description}", obj.getDescription())).andDo(
+				get("/primaryfiles/search/findByDescription?description={description}", primaryfile.getDescription())).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].description").value(
-										obj.getDescription()));
+										primaryfile.getDescription()));
 	}
 
 	
 	/*
-	 * @Test public void shouldQueryItemCreatedDate() throws Exception {
+	 * @Test public void shouldQueryPrimaryfileCreatedDate() throws Exception {
 	 * 
 	 * objPrimaryFile.setName("Primary File 200"); objPrimaryFile.
 	 * setDescription("For testing Primary File Respository using Factories");
@@ -127,20 +128,20 @@ public class PrimaryfileRepositoryTests {
 
 	
 	@Test
-	public void shouldQueryItemCreatedBy() throws Exception {
+	public void shouldQueryPrimaryfileCreatedBy() throws Exception {
 		
-		obj = Fixture.from(Primaryfile.class).gimme("valid");
+		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		
-		String json = mapper.writeValueAsString(obj);
+		String json = mapper.writeValueAsString(primaryfile);
 		mockMvc.perform(post("/primaryfiles")
 				  .content(json)).andExpect(
 						  status().isCreated());
 		mockMvc.perform(
-				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", obj.getCreatedBy())).andDo(
+				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", primaryfile.getCreatedBy())).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].createdBy").value(
-										obj.getCreatedBy()));
+										primaryfile.getCreatedBy()));
 	}
 	
 
@@ -158,6 +159,44 @@ public class PrimaryfileRepositoryTests {
 										"Primaryfile 1"));
 	}
 
+	@Test
+	public void shouldQueryPrimaryfileNameKeyword() throws Exception {
+		
+		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
+		String[] words = StringUtils.split(primaryfile.getName());
+		
+		String json = mapper.writeValueAsString(primaryfile);
+		mockMvc.perform(post("/primaryfiles")
+				  .content(json)).andExpect(
+						  status().isCreated());
+		
+		mockMvc.perform(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.primaryfiles[0].name").value(
+										primaryfile.getName()));
+	}
+		
+	@Test
+	public void shouldQueryPrimaryfileDescriptionKeyword() throws Exception {
+		
+		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
+		String[] words = StringUtils.split(primaryfile.getDescription());
+		
+		String json = mapper.writeValueAsString(primaryfile);
+		mockMvc.perform(post("/primaryfiles")
+				  .content(json)).andExpect(
+						  status().isCreated());
+		
+		mockMvc.perform(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.primaryfiles[0].description").value(
+										primaryfile.getDescription()));
+	}	
+	
 	@Test
 	public void shouldUpdatePrimaryfile() throws Exception {
 

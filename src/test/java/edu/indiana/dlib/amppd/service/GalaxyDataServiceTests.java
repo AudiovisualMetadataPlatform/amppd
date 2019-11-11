@@ -95,7 +95,7 @@ public class GalaxyDataServiceTests {
     	Assert.assertNull(history);
     }
 
-//    @Ignore
+    @Ignore
     @Test
     public void shouldUploadFileToExistingLibrary() {
     	GalaxyObject dataset = galaxyDataService.uploadFileToGalaxy(testFile, TEST_LIBRARY_NAME);
