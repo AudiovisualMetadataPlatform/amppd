@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -31,7 +30,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import com.jayway.jsonpath.JsonPath;
 
 import edu.indiana.dlib.amppd.model.Bundle;
-import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.service.JobService;
@@ -93,20 +91,20 @@ public class JobControllerTests {
     @Test
     @Transactional
     public void shouldCreateJobBundle() throws Exception {    	              
-    	// add some invalid primaryfile to the valid primaryfile's item
-    	Primaryfile pf = new Primaryfile();
-    	pf.setId(0l);;
-    	primaryfile.getItem().getPrimaryfiles().add(pf); // this requires the method to be transactional otherwise Hibernate will throw LazyInitializationException
-    	
-    	// create a dummy bundle containing both the above item and some invalid item
+    	// create a dummy bundle 
     	Bundle bundle = new Bundle();
     	bundle.setId(BUNDLE_ID);
+    	bundle.setPrimaryfiles(new HashSet<Primaryfile>());
     	Mockito.when(bundleRepository.findById(BUNDLE_ID)).thenReturn(Optional.of(bundle));     	     	
-    	Set<Item> items = new HashSet<Item>();
-    	items.add(primaryfile.getItem());
-    	items.add(new Item());
-    	bundle.setItems(items); 	
 
+    	// add the valid primaryfile to the bundle
+    	bundle.getPrimaryfiles().add(primaryfile);
+    	
+    	// add some invalid primaryfile to the bundle
+    	Primaryfile pf = new Primaryfile();
+    	pf.setId(0l);;
+    	bundle.getPrimaryfiles().add(pf);
+    	
     	// use the dummy bundle we set up for this test
     	mvc.perform(post("/jobs/bundle").param("workflowId", workflow.getId()).param("bundleId", bundle.getId().toString()).param("parameters", "{}"))
     			.andExpect(status().isOk()).andExpect(

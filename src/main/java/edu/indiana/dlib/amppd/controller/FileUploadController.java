@@ -28,24 +28,48 @@ public class FileUploadController {
 	@Autowired
     private FileStorageService fileStorageService;
 
+	/**
+	 * Upload the given media file to Amppd file system for the given primaryfile.
+	 * @param id ID of the given primaryfile
+	 * @param file the media file content to be uploaded
+	 * @return the primaryfile with media uploaded
+	 */
 	@PostMapping("/primaryfiles/{id}/file")
 	public Primaryfile uploadPrimaryfile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for primaryfile ID " + id);
     	return fileStorageService.uploadPrimaryfile(id, file);
     }
 
+	/**
+	 * Upload the given media file to Amppd file system for the given collectionSupplement.
+	 * @param id ID of the given collectionSupplement
+	 * @param file the media file content to be uploaded
+	 * @return the collectionSupplement with media uploaded
+	 */
     @PostMapping("/collections/supplements/{id}/file")
     public CollectionSupplement uploadCollectionSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for collectionSupplement ID " + id);
     	return fileStorageService.uploadCollectionSupplement(id, file);
     }
     
+	/**
+	 * Upload the given media file to Amppd file system for the given itemSupplement.
+	 * @param id ID of the given itemSupplement
+	 * @param file the media file content to be uploaded
+	 * @return the itemSupplement with media uploaded
+	 */
     @PostMapping("/items/supplements/{id}/file")
     public ItemSupplement uploadItemSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for itemSupplement ID " + id);
     	return fileStorageService.uploadItemSupplement(id, file);
     }
     
+	/**
+	 * Upload the given media file to Amppd file system for the given primaryfileSupplement.
+	 * @param id ID of the given primaryfileSupplement
+	 * @param file the media file content to be uploaded
+	 * @return the primaryfileSupplement with media uploaded
+	 */
     @PostMapping("/primaryfiles/supplements/{id}/file")
     public PrimaryfileSupplement uploadPrimaryfileSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for primaryfileSupplement ID " + id);

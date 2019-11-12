@@ -209,29 +209,22 @@ public class JobServiceImpl implements JobService {
 		int nSuccess = 0;
 		int nFailed = 0;
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("Bundle <" + bundleId + "> does not exist!"));        	
-    	if (bundle.getItems() == null || bundle.getItems().isEmpty()) {
-    		log.warning("Bundle <\" + bundleId + \"> does not contain any item.");
+    	if (bundle.getPrimaryfiles() == null || bundle.getPrimaryfiles().isEmpty()) {
+    		log.warning("Bundle <\" + bundleId + \"> does not contain any primaryfile.");
     	}
     	else { 
-	    	for (Item item : bundle.getItems()) {
-	        	if (item.getPrimaryfiles() == null || item.getPrimaryfiles().isEmpty()) {
-	        		log.warning("Item <\" + itemId + \"> does not contain any primaryfile.");
-	        	}        	
-	        	else {
-		        	for (Primaryfile primaryfile : item.getPrimaryfiles() ) {
-		        		try {
-		        			woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));
-		        			nSuccess++;
-		        		}
-		        		catch (Exception e) {
-		        			// if error occurs with this primaryfile we still want to continue with other primaryfiles
-		        			log.severe(e.getStackTrace().toString());	
-		        			nFailed++;
-		        		}
-		        	}
-	        	}
-	    	}    		
-    	}
+    		for (Primaryfile primaryfile : bundle.getPrimaryfiles() ) {
+    			try {
+    				woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));
+    				nSuccess++;
+    			}
+    			catch (Exception e) {
+    				// if error occurs with this primaryfile we still want to continue with other primaryfiles
+    				log.severe(e.getStackTrace().toString());	
+    				nFailed++;
+    			}
+    		}
+    	}	  	
 
 		log.info("Number of Amppd jobs successfully created for the bundle: " + nSuccess);    	
 		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	

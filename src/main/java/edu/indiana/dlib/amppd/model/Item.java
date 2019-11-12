@@ -27,7 +27,6 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
-// Avoid using @Data here as Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Item extends Content {
     
 	@OneToMany(mappedBy="item")
@@ -39,8 +38,8 @@ public class Item extends Content {
 	@ManyToOne
 	private Collection collection;	
 		
-    @ManyToMany
-    @JsonBackReference
-    private Set<Bundle> bundles;      
+//    @ManyToMany
+//    @JsonBackReference
+//    private Set<Bundle> bundles;      
     	
 }
