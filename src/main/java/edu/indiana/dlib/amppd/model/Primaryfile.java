@@ -4,10 +4,13 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,6 +26,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
+// Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Primaryfile extends Asset {
 
 	/* Note:
@@ -41,9 +45,13 @@ public class Primaryfile extends Asset {
 	@ManyToOne
 	private Item item;
 		
+    @ManyToMany
+    @JsonBackReference
+    private Set<Bundle> bundles;      
+	
     @OneToMany(mappedBy="primaryfile")
     private Set<Job> jobs;        
-    	
+    	    
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<Bag> bags;        
 

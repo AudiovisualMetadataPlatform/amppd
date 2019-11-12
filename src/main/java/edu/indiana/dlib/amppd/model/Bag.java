@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 // TODO this class can be removed at some point
-// Currently we assume that bundle is associated with item (and thus all the primaryfiles belonging to that item) directly. 
+// Currently we assume that bundle is associated with primaryfiles directly. 
 // We will not use the concept of Bag for now. If a workflow needs to have supplements to go with the primaryfile, 
 // we assume supplements associated with it at all levels will apply to the workflow. 
 
