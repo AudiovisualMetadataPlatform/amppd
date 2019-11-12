@@ -1,15 +1,15 @@
 
   package edu.indiana.dlib.amppd.controller;
   
-  import org.springframework.beans.factory.annotation.Autowired; 
-  import org.springframework.ui.Model; 
-  import org.springframework.web.bind.annotation.GetMapping;
-  import org.springframework.web.bind.annotation.PostMapping;
-  import org.springframework.web.bind.annotation.RequestParam;
-  import org.springframework.web.bind.annotation.RestController;
+  import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-  import edu.indiana.dlib.amppd.repository.AmpUserRepository;
-  import lombok.extern.java.Log;
+import edu.indiana.dlib.amppd.repository.AmpUserRepository;
+import lombok.extern.java.Log;
   
  /**
 	 * Controller for REST operations on Login.
@@ -17,8 +17,8 @@
 	 * @author vinitab
 	 *
 	 */
+  @CrossOrigin(origins = "*")
   @RestController
-  
   @Log 
   public class AmpUserController{
   
