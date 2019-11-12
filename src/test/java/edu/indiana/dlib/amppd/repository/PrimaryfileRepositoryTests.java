@@ -43,15 +43,6 @@ public class PrimaryfileRepositoryTests {
 	@Autowired 
 	private ObjectMapper mapper;
 	private Primaryfile primaryfile ;
-	/*
-	 * private ObjectFactory objFactory = new ObjectFactory();
-	 * 
-	 * @Before public void initiateBeforeTests() throws ClassNotFoundException {
-	 * HashMap params = new HashMap<String, String>(); objPrimaryFile=
-	 * (Primaryfile)objFactory.createDataentityObject(params, "Primaryfile");
-	 * 
-	 * }
-	 */
 	
 	@BeforeClass
 	public static void setupTest() 
