@@ -201,7 +201,7 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String,Long,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public Map<Long, WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
+	public Map<Long, WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {		
 		HashMap<Long, WorkflowOutputs> woutputsMap = new HashMap<Long, WorkflowOutputs>();
 		String msg = "a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
 		log.info("Creating " + msg);

@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import lombok.extern.java.Log;
  * @author yingfeng
  *
  */
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @Log
 public class JobController {	
@@ -45,6 +46,9 @@ public class JobController {
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId, 
 			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+		if (parameters == null ) {
+			parameters = new HashMap<String, Map<String, String>>();
+		}
 		log.info("Creating Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters);
 		return jobService.createJob(workflowId, primaryfileId, parameters);
 	}
@@ -56,11 +60,16 @@ public class JobController {
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return list outputs of the invocation returned by Galaxy
 	 */
+	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/bundle")
 	public Map<Long, WorkflowOutputs> createJobBundle(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("bundleId") Long bundleId, 
-			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+		// if parameters is not specified in the request, use an empty map for it
+		if (parameters == null ) {
+			parameters = new HashMap<String, Map<String, String>>();
+		}
 		log.info("Creating a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + " parameters: " + parameters);		
 		return jobService.createJobBundle(workflowId, bundleId, parameters);
 	}
