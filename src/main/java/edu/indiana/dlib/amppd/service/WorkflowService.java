@@ -29,17 +29,23 @@ public interface WorkflowService {
 	
 	/**
 	 * Validate the specified workflow and return errors if any.
-	 * @param workflow the ID of the specified workflow 
+	 * @param workflowId the ID of the specified workflow 
 	 * @return a list of validation errors for invalid workflow, otherwise empty list 
 	 */
 	public List<String> validateWorkflow(String workflowId);
 
 	/**
-	 * List all workflows currently existing in Galaxy, including/excluding invalid ones based on the specification.
-	 * @param excludeInvalid whether to exclude the invalid workflows
-	 * @return a list of inquired workflows with name, ID, and URL.
+	 * Returns true if the specified workflow is valid; false otherwise
+	 * @param workflowId the ID of the specified workflow 
+	 * @return true if the specified workflow is valid; false otherwise
 	 */
-	@GetMapping("/workflows")
+	public Boolean isValidWorkflow(String workflowId);
+
+	/**
+	 * List workflows currently existing in Galaxy, including/excluding invalid ones based on the specification.
+	 * @param excludeInvalid whether to exclude the invalid workflows
+	 * @return a list of inquired workflows.
+	 */
 	public List<Workflow> listWorkflows(Boolean excludeInvalid);
 	
 	/**
