@@ -23,6 +23,7 @@ public class AmpUser {
     private Long id;
 	
 	private String username;
+	
 	@JsonIgnore
 	private String password;
 }
