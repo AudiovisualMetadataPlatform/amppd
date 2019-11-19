@@ -33,23 +33,21 @@ import lombok.extern.java.Log;
 			@RequestParam("pswd") String pswd){ 
 		boolean res = false;
 		log.info("Login Authenticaton for User=> Name:"+ name);	
-		/*
-		 * user = new AmpUser(); user.setUsername(name); user.setPassword(pswd);
-		 */
 		res = ampService.validate(name, pswd);
 		log.info(" Authenticaton result:"+res);
 		return res;
 	  }
 	  
 	  @GetMapping("/amp/register") 
-	  public @ResponseBody int register(
+	  public @ResponseBody boolean register(
 			@RequestParam("name") String name,
 			@RequestParam("pswd") String pswd){ 
-		int res = 0;
+		boolean res = false;
 		log.info("Registeration for User=> Name:"+ name);	
 		user = new AmpUser();
 		user.setUsername(name); 
 		user.setPassword(pswd);
+		//user.setApproved(false);
 		res = ampService.registerAmpUser(user);
 		log.info(" Registeration result:"+res);
 		return res;

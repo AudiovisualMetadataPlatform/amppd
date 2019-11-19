@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import lombok.ToString;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -21,9 +23,10 @@ public class AmpUser {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-	
 	private String username;
 	
 	@JsonIgnore
 	private String password;
+	@Value("${amp.user.approved: #{false}}")
+	private boolean approved;
 }
