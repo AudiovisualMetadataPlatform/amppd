@@ -15,8 +15,9 @@ import org.springframework.mail.SimpleMailMessage;
 @Service
 public class AmpUserServiceImpl implements AmpUserService{
 
-	  @Autowired
-	  private AmpUserRepository ampUserRepository;
+	/*
+	 * @Autowired private AmpUserRepository ampUserRepository;
+	 */
 	  
 	  @Autowired
 	  private JavaMailSender javaMailSender;
