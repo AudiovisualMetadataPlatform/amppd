@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.service.impl.AmpUserService;
+import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import lombok.extern.java.Log;
   
  /**
@@ -23,7 +23,7 @@ import lombok.extern.java.Log;
   @Log 
   public class AmpUserController{
 	  @Autowired
-	  private AmpUserService ampService;
+	  private AmpUserServiceImpl ampService;
 	  private static AmpUser user;
 	  
 	  @GetMapping("/amp/auth") 
