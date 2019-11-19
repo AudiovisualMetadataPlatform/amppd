@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import lombok.ToString;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,6 +26,5 @@ public class AmpUser {
 	
 	@JsonIgnore
 	private String password;
-	@Value("${amp.user.approved: #{false}}")
-	private boolean approved;
+	private boolean approved = false;
 }
