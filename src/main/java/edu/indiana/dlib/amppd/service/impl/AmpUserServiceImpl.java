@@ -18,8 +18,9 @@ public class AmpUserServiceImpl implements AmpUserService{
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
 	  
-	  @Autowired
-	  private JavaMailSender javaMailSender;
+	/*
+	 * @Autowired private JavaMailSender javaMailSender;
+	 */
 	  
 	  public boolean validate(String username, String pswd) { 
 		  String userFound = ampUserRepository.findByUsername(username, pswd);  
