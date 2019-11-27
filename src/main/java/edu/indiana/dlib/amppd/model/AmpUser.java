@@ -26,5 +26,7 @@ public class AmpUser {
 	private String email;
 	
 	private String password;
-	private boolean approved = false;
+	
+	// TODO change to Enum state (RQUESTED, APPROVED, ACTIVATED,  REJECTED) 
+	private Boolean approved = false;	
 }
