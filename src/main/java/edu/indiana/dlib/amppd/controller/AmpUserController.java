@@ -26,7 +26,7 @@ import lombok.extern.java.Log;
 	  private AmpUserServiceImpl ampService;
 	  private static AmpUser user;
 	  
-	  @GetMapping("/amp/auth") 
+	  @GetMapping("/login") 
 	  public @ResponseBody boolean loginAuth(
 			@RequestParam("name") String name,
 			@RequestParam("pswd") String pswd){ 
@@ -37,7 +37,7 @@ import lombok.extern.java.Log;
 		return res;
 	  }
 	  
-	  @GetMapping("/amp/register") 
+	  @GetMapping("/register") 
 	  public @ResponseBody boolean register(
 			@RequestParam("name") String name,
 			@RequestParam("pswd") String pswd){ 
