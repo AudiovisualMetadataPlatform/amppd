@@ -23,7 +23,7 @@ public interface AmpUserService {
 	 * @param user contains new user data
 	 * @return the result of registration
 	 */
-	public boolean registerAmpUser(AmpUser user);
+	public boolean registerAmpUser(String name, String pswd);
 	
 	/**
 	 * Sends an email.

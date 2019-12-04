@@ -43,11 +43,11 @@ import lombok.extern.java.Log;
 			@RequestParam("pswd") String pswd){ 
 		boolean res = false;
 		log.info("Registeration for User=> Name:"+ name);	
-		user = new AmpUser();
-		user.setUsername(name); 
-		user.setPassword(pswd);
+		
+		//user.setUsername(name); 
+		//user.setPassword(pswd);
 		//user.setApproved(false);
-		res = ampService.registerAmpUser(user);
+		res = ampService.registerAmpUser(name, pswd);
 		log.info(" Registeration result:"+res);
 		return res;
 	  }

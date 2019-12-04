@@ -12,6 +12,6 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
 public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
 	
-	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd")
-	String findByUsername(@Param("username") String username, @Param("pswd") String pswd);
+	@Query(value = "select i.password from AmpUser i where i.username = :username ")
+	String findByUsername(@Param("username") String username);
 }
