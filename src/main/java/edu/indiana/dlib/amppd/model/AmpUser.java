@@ -23,8 +23,8 @@ public class AmpUser {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 	private String username;
+	private String email;
 	
-	@JsonIgnore
 	private String password;
 	private boolean approved = false;
 }
