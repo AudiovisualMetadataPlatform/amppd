@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.web.AuthResponse;
 
 /**
  * Service for AmpUser related functions.
@@ -16,14 +17,14 @@ public interface AmpUserService {
 	 * @param pswd is the entered password
 	 * @return the result of validation
 	 */
-	public boolean validate(String username, String pswd);
+	public AuthResponse validate(String username, String pswd);
 	
 	/**
 	 * Register the new user and make entry to database.
 	 * @param user contains new user data
 	 * @return the result of registration
 	 */
-	public boolean registerAmpUser(AmpUser user);
+	public AuthResponse registerAmpUser(AmpUser user);
 	
 	/**
 	 * Sends an email.
@@ -31,4 +32,11 @@ public interface AmpUserService {
 	 * @return the result of email sending as success/failure
 	 */
 	void sendEmail(AmpUser u);
+
+	/**
+	 * Sets amp user as approved to login to the application
+	 * @param user name
+	 * @return the result of setting the user to approved as success/failure
+	 */
+	boolean approveUser(String userName);
 }
