@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.repository;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -17,10 +17,10 @@ public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
 	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.approved=true")
 	String findByApprovedUsername(@Param("username") String username, @Param("pswd") String pswd);
 	
-	@Query(value = "select i from AmpUser i where i.username = :username")
-	List<AmpUser> findByUsername(@Param("username") String username);
-	
 	@Query(value = "select case when COUNT(*)>0 then true else false end from AmpUser i where i.username = :username")
 	boolean usernameExists(@Param("username") String username);
+
+	Optional<AmpUser> findByUsername(String username);
+	Optional<AmpUser> findByEmail(String email);	
 	
 }
