@@ -17,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import edu.indiana.dlib.amppd.web.CustomAccessDeniedHandler;
 import edu.indiana.dlib.amppd.web.CustomAuthenticationEntryPoint;
 
+//TODO make this work
+
 //@Configuration
 //@EnableWebSecurity
 //@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
