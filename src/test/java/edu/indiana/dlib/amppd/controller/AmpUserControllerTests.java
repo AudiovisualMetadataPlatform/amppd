@@ -88,7 +88,7 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser();
     	postRegister(user, true);
         
-    	String url = String.format("/amp/auth");
+    	String url = String.format("/login");
     	AuthRequest request = new AuthRequest();
     	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
@@ -121,7 +121,7 @@ public class AmpUserControllerTests {
     private void postRegister(AmpUser user, boolean expectSuccess) throws Exception{
     	String json = mapper.writeValueAsString(user);
     	
-    	mvc.perform(post("/amp/register")
+    	mvc.perform(post("/register")
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(expectSuccess));
