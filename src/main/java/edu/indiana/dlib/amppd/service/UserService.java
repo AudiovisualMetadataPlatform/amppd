@@ -38,5 +38,5 @@ public interface UserService {
 	 * @param user name
 	 * @return the result of setting the user to approved as success/failure
 	 */
-	boolean approveUser(String userName);
+	boolean approveUser(String username);
 }
