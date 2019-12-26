@@ -26,7 +26,7 @@ import lombok.extern.java.Log;
 	  @Autowired
 	  private AmpUserServiceImpl ampService;
 	  
-	  @PostMapping(path = "/amp/auth", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/login", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse loginAuth(@RequestBody AuthRequest request){ 
 		AuthResponse res = new AuthResponse();
 		log.info("Login Authenticaton for User=> Name:"+ request.getUsername());	
@@ -35,7 +35,7 @@ import lombok.extern.java.Log;
 		return res;
 	  }
 
-	  @PostMapping(path = "/amp/register", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/register", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse register(
 			@RequestBody AmpUser user){ 
 		log.info("Registeration for User=> Name:"+ user.getUsername());	

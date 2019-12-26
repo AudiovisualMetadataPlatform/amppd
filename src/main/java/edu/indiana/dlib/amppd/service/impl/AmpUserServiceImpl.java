@@ -1,12 +1,15 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
@@ -14,11 +17,9 @@ import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 
-import org.springframework.mail.SimpleMailMessage;
-
 
 @Service
-public class AmpUserServiceImpl implements AmpUserService{
+public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
@@ -48,12 +49,12 @@ public class AmpUserServiceImpl implements AmpUserService{
 		  return response;
 	  }
 	  
-	  public boolean approveUser(String userName) {
+	  public boolean approveUser(String username) {
 		  try {
-			  List<AmpUser> users = ampUserRepository.findByUsername(userName);
-			  
-			  if(users.size()==0) return false;
-			  AmpUser user = users.get(0);
+			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
+//			  AmpUser user = ampUserRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found: " + username));
+//			  if(users.size()==0) return false;
+//			  AmpUser user = users.get(0);
 			  user.setApproved(true);
 			  ampUserRepository.save(user);
 		  }
@@ -131,5 +132,12 @@ public class AmpUserServiceImpl implements AmpUserService{
 		 * }
 		 */
 	}
+	
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
+		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
+		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Arrays.asList(authority));
+	}		
 
 }
