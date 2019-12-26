@@ -19,13 +19,15 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class AmpUser {
 	
+    public enum Role {USER, ADMIN, USER_MANAGER}
+	
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 	private String username;
-	private String email;
-	
+	private String email;	
 	private String password;
+	private Role role;
 	
 	// TODO change to Enum state (RQUESTED, APPROVED, ACTIVATED,  REJECTED) 
 	private Boolean approved = false;	

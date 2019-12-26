@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import net.reliqs.gleeometer.errors.CustomAccessDeniedHandler;
-import net.reliqs.gleeometer.errors.CustomAuthenticationEntryPoint;
+import edu.indiana.dlib.amppd.web.CustomAccessDeniedHandler;
+import edu.indiana.dlib.amppd.web.CustomAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -57,8 +57,8 @@ public class ServerSecurityConfig extends WebSecurityConfigurerAdapter {
                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                .and()
                .authorizeRequests()
-               .antMatchers("/api/signin/**").permitAll()
-               .antMatchers("/api/glee/**").hasAnyAuthority("ADMIN", "USER")
+               .antMatchers("/login/**").permitAll()
+               .antMatchers("/api/**").hasAnyAuthority("ADMIN", "USER")
                .antMatchers("/api/users/**").hasAuthority("ADMIN")
                .antMatchers("/api/**").authenticated()
                .anyRequest().authenticated()
