@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Entity
 @EqualsAndHashCode
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
-public class AmpUser {
+public class User {
 	
     public enum Role {USER, ADMIN, USER_MANAGER}
 	

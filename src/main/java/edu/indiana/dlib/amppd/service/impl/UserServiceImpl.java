@@ -12,17 +12,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.repository.AmpUserRepository;
-import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.model.User;
+import edu.indiana.dlib.amppd.repository.UserRepository;
+import edu.indiana.dlib.amppd.service.UserService;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 
 
 @Service
-public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
 	  @Autowired
-	  private AmpUserRepository ampUserRepository;
+	  private UserRepository userRepository;
 	  
 	  private int MIN_PASSWORD_LENGTH = 8;
 	  private int MIN_USERNAME_LENGTH = 3;
@@ -39,7 +39,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  response.addError("Username and password do not match");
 		  }
 		  
-		  String userFound = ampUserRepository.findByApprovedUsername(username, pswd);  
+		  String userFound = userRepository.findByApprovedUsername(username, pswd);  
 		  if(userFound != null)
 		  {
 			  if(userFound.equals("1")) {
@@ -51,12 +51,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  public boolean approveUser(String username) {
 		  try {
-			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
-//			  AmpUser user = ampUserRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found: " + username));
+			User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
+//			  User user = userRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found: " + username));
 //			  if(users.size()==0) return false;
-//			  AmpUser user = users.get(0);
+//			  User user = users.get(0);
 			  user.setApproved(true);
-			  ampUserRepository.save(user);
+			  userRepository.save(user);
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
@@ -64,7 +64,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  return false;		  
 	  }
 	  
-	  public AuthResponse registerAmpUser(AmpUser user) { 
+	  public AuthResponse registerUser(User user) { 
 		  
 		  AuthResponse response = new AuthResponse();
 		  		  
@@ -84,7 +84,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  }
 		  
 		  if(!response.hasErrors()) {
-			  user = ampUserRepository.save(user);
+			  user = userRepository.save(user);
 			  if(user!=null && user.getId() > 0) {
 				  response.setSuccess(true);
 			  }
@@ -97,7 +97,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  }
 	  
 	  private boolean usernameUnique(String username) {
-		  return !ampUserRepository.usernameExists(username);  
+		  return !userRepository.usernameExists(username);  
 	  }
 
 	  private boolean usernameAcceptableLength(String username) {
@@ -119,7 +119,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
 	  
 	@Override
-	public void sendEmail(AmpUser u) {
+	public void sendEmail(User u) {
 		// TODO Auto-generated method stub
 	  
 		/*
@@ -135,7 +135,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
+		User user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
 		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
 		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Arrays.asList(authority));
 	}		

@@ -17,26 +17,26 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.model.User;
+import edu.indiana.dlib.amppd.service.UserService;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-public class AmpUserControllerTests {
+public class UserControllerTests {
 
     @Autowired
     private MockMvc mvc;
 	
 	@Autowired
-    private AmpUserService ampUserService;
+    private UserService userService;
 	
 	@Autowired private ObjectMapper mapper;
 	
     @Test
     public void shouldRejectInvalidEmail() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
 
     	postRegister(user, true);
     	
@@ -52,43 +52,43 @@ public class AmpUserControllerTests {
     
     @Test
     public void shouldRejectShortPassword() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
     	user.setPassword("123456");
     	postRegister(user, false);
    
     }
     @Test
     public void shouldRejectShortUsername() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
     	user.setUsername(user.getUsername().substring(0,2));
     	postRegister(user, false);
     }
     @Test
     public void shouldRejectEmptyPassword() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
     	user.setPassword("");
     	postRegister(user, false);
    }
 
     @Test
     public void shouldRejectEmptyUsername() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
     	user.setUsername("");
     	postRegister(user, false);
     }
 
     @Test
     public void shouldAcceptValidUsernamePasswordEmail() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
     	postRegister(user, true);
     	
     }
     @Test
     public void shouldValidateApprovedUser() throws Exception {
-    	AmpUser user = getAmpUser();
+    	User user = getUser();
     	postRegister(user, true);
         
-    	String url = String.format("/amp/auth");
+    	String url = String.format("/login");
     	AuthRequest request = new AuthRequest();
     	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
@@ -99,7 +99,7 @@ public class AmpUserControllerTests {
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(false));
     	
     	
-    	ampUserService.approveUser(user.getUsername());
+    	userService.approveUser(user.getUsername());
 
     	mvc.perform(post(url)
     		       .contentType(MediaType.APPLICATION_JSON)
@@ -108,20 +108,20 @@ public class AmpUserControllerTests {
     	
     }
 
-    private AmpUser getAmpUser() {
+    private User getUser() {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 
-    	AmpUser ampUser = new AmpUser();
-    	ampUser.setEmail("test@iu.edu");
-    	ampUser.setPassword("password1234");
-    	ampUser.setUsername("testUser_" + rand_int1);
-    	return ampUser;
+    	User user = new User();
+    	user.setEmail("test@iu.edu");
+    	user.setPassword("password1234");
+    	user.setUsername("testUser_" + rand_int1);
+    	return user;
     }
     
-    private void postRegister(AmpUser user, boolean expectSuccess) throws Exception{
+    private void postRegister(User user, boolean expectSuccess) throws Exception{
     	String json = mapper.writeValueAsString(user);
     	
-    	mvc.perform(post("/amp/register")
+    	mvc.perform(post("/register")
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(expectSuccess));

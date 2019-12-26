@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
+import edu.indiana.dlib.amppd.model.User;
+import edu.indiana.dlib.amppd.service.impl.UserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 import lombok.extern.java.Log;
@@ -22,9 +22,9 @@ import lombok.extern.java.Log;
   @CrossOrigin(origins = "*")
   @RestController
   @Log 
-  public class AmpUserController{
+  public class UserController{
 	  @Autowired
-	  private AmpUserServiceImpl ampService;
+	  private UserServiceImpl ampService;
 	  
 	  @PostMapping(path = "/login", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse loginAuth(@RequestBody AuthRequest request){ 
@@ -37,9 +37,9 @@ import lombok.extern.java.Log;
 
 	  @PostMapping(path = "/register", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse register(
-			@RequestBody AmpUser user){ 
+			@RequestBody User user){ 
 		log.info("Registeration for User=> Name:"+ user.getUsername());	
-		AuthResponse res = ampService.registerAmpUser(user);
+		AuthResponse res = ampService.registerUser(user);
 		log.info(" Registeration result: " + res);
 		return res;
 	  }

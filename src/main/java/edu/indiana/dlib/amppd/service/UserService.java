@@ -1,15 +1,15 @@
 package edu.indiana.dlib.amppd.service;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.User;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 
 /**
- * Service for AmpUser related functions.
+ * Service for User related functions.
  * @author vinitab
  *
  */
 
-public interface AmpUserService {
+public interface UserService {
 
 	/**
 	 * Validate the login credentials against database.
@@ -24,14 +24,14 @@ public interface AmpUserService {
 	 * @param user contains new user data
 	 * @return the result of registration
 	 */
-	public AuthResponse registerAmpUser(AmpUser user);
+	public AuthResponse registerUser(User user);
 	
 	/**
 	 * Sends an email.
 	 * @param user contains new user info to be sent in the email
 	 * @return the result of email sending as success/failure
 	 */
-	void sendEmail(AmpUser u);
+	void sendEmail(User u);
 
 	/**
 	 * Sets amp user as approved to login to the application

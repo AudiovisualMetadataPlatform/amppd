@@ -8,19 +8,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.User;
 
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
-public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
+public interface UserRepository extends CrudRepository<User, Long>{
 	
-	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.approved=true")
+	@Query(value = "select 1 from User i where i.username = :username and i.password = :pswd and i.approved=true")
 	String findByApprovedUsername(@Param("username") String username, @Param("pswd") String pswd);
 	
-	@Query(value = "select case when COUNT(*)>0 then true else false end from AmpUser i where i.username = :username")
+	@Query(value = "select case when COUNT(*)>0 then true else false end from User i where i.username = :username")
 	boolean usernameExists(@Param("username") String username);
 
-	Optional<AmpUser> findByUsername(String username);
-	Optional<AmpUser> findByEmail(String email);	
+	Optional<User> findByUsername(String username);
+	Optional<User> findByEmail(String email);	
 	
 }
