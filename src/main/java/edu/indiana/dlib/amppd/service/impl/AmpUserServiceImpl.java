@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 
 
@@ -38,8 +39,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  else if(!passwordAcceptableLength(pswd)) {
 			  response.addError("Username and password do not match");
 		  }
-		  
-		  String userFound = ampUserRepository.findByApprovedUsername(username, pswd);  
+		  String encryptedPswd = MD5Encryption.getMd5(pswd);
+		  String userFound = ampUserRepository.findByApprovedUsername(username, encryptedPswd);  
 		  if(userFound != null)
 		  {
 			  if(userFound.equals("1")) {
@@ -84,6 +85,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  }
 		  
 		  if(!response.hasErrors()) {
+			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
 			  user = ampUserRepository.save(user);
 			  if(user!=null && user.getId() > 0) {
 				  response.setSuccess(true);

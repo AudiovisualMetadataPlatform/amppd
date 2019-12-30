@@ -21,5 +21,6 @@ import lombok.Setter;
 public class AmppdPropertyConfig {
 
     @NotNull private String fileStorageRoot;
+    @NotNull private String encryptionCookie;
 
 }
