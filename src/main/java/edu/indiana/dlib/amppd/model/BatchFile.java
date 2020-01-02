@@ -1,8 +1,11 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -17,17 +20,21 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 public class BatchFile {	
-	public enum FileType { PRIMARYFILE, COLLECTION_SUPPLEMENT, ITEM_SUPPLEMENT, PRIMARYFILE_SUPPLEMENT };
+	// in batch manifest the types are indicated as "C", "I", "P"
+	public enum SupplementType { COLLECTION, ITEM, PRIMARYFILE };
 
+	Collection collection;
 	String sourceIdType;
 	String sourceId;
 	String itemName;
 	String itemDescription;
-	FileType fileType; 
 	String primaryfileFilename;
 	String primaryfileName;
 	String primaryfileDescription;
-	String supplementFilename;	
+	SupplementType supplementType; 
+	
+	@OneToMany(mappedBy="batchFiles")
+	List<BatchSupplementFile> batchSupplementFiles;	
 	
 	@ManyToOne
 	Batch batch;
