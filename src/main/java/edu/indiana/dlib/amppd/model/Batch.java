@@ -21,11 +21,13 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 public class Batch {
+	// the following fields come from batch upload UI
 	AmpUser submitUser;
 	Date submitTime;
 	String manifestFilename;
-	Collection collection;
+	Unit unit;
 	
+	// the following info come from batch manifest
 	@OneToMany(mappedBy="batch")
 	List<BatchFile> batchFiles;
 	
