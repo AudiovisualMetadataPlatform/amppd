@@ -12,8 +12,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import lombok.Data;
 
 /**
- * Class containing information of a batch manifest. Fields that apply to the whole spreadsheet such as collection name are entered via UI; 
- * while fields of each batch file comes from each row in the manifest spreadsheet.
+ * Class containing information of a batch manifest. 
+ * Fields that apply to the whole spreadsheet such as unit name are entered via UI; while fields related to batch files comes from each row in the manifest.
+ * It's assumed that unit/collections referred in the manifest preexist, and the media files also exist in their corresponding unit/collection subfolders in the dropbox. 
  * @author yingfeng
  *
  */
