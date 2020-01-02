@@ -74,10 +74,7 @@ public class AmpUserControllerTests {
     @Test
     public void shouldEncryptPassword() throws Exception {
     	AmpUser user = getAmpUser();
-    	//AmpUser user2 = getAmpUser();
-    	//String curr_pswd = user.getPassword();
-    	//user.setPassword(MD5Encryption.getMd5(curr_pswd));
-    	postRegister(user, false);
+    	postRegister(user, true);   //saves the password in database after encryption
     	
     	ampUserService.approveUser(user.getUsername());
     	
