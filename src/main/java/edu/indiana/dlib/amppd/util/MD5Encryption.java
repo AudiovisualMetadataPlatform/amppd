@@ -35,7 +35,7 @@ public class MD5Encryption {
     
     /**
      * Get the Md5 encryption for input string.
-     * @return
+     * @return 
      */
     public static String getMd5(String input) 
     { 
