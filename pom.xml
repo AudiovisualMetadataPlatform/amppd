@@ -188,6 +188,12 @@
 			<artifactId>galaxy-bootstrap</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>3.8</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

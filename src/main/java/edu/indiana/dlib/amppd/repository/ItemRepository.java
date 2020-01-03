@@ -20,7 +20,4 @@ public interface ItemRepository extends ContentRepository<Item> {
 //	@Query(value = "select i from Item i where lower(i.name) like %:keyword.toLowerCase()% or lower(i.description) like %:keyword.toLowerCase()%")
 //	@Query(value = "select i from Item i where lower(i.name) like %:#{keyword.toLowerCase()}% or lower(i.description) like %:#{keyword.toLowerCase()}%")
 	
-	@Query(value = "select i from Item i where i.name like %:keyword% or i.description like %:keyword%")
-	List<Item> findByKeyword(@Param("keyword") String keyword); 
-
 }
