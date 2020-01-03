@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -23,6 +26,11 @@ public class BatchFile {
 	// in batch manifest the types are indicated as "C", "I", "P"
 	public enum SupplementType { COLLECTION, ITEM, PRIMARYFILE };
 
+	@Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+	int id;
+	
+	@ManyToOne
 	Collection collection;
 	String sourceIdType;
 	String sourceId;
@@ -33,7 +41,7 @@ public class BatchFile {
 	String primaryfileDescription;
 	SupplementType supplementType; 
 	
-	@OneToMany(mappedBy="batchFiles")
+	@OneToMany(mappedBy="batchFile")
 	List<BatchSupplementFile> batchSupplementFiles;	
 	
 	@ManyToOne
