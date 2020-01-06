@@ -23,4 +23,6 @@ public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
 	Optional<AmpUser> findByUsername(String username);
 	Optional<AmpUser> findByEmail(String email);	
 	
+	@Query(value = "update AmpUser set password = :pswd where username = :username")
+	String updatePassword(@Param("username") String username, @Param("pswd") String pswd);
 }

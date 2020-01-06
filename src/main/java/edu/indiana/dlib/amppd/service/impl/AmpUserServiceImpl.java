@@ -117,9 +117,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  
 		  return matcher.matches();
 	  }
-	  
-
-	  
+	  	  
 	@Override
 	public void sendEmail(AmpUser u) {
 		// TODO Auto-generated method stub
@@ -140,6 +138,18 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
 		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
 		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Arrays.asList(authority));
-	}		
+	}
 
+	@Override
+	public AuthResponse resetPassword(AmpUser user) {
+		// TODO Auto-generated method stub
+		AuthResponse response = new AuthResponse();
+		if(!passwordAcceptableLength(user.getPassword())) {
+			  response.addError("Password must be " + MIN_PASSWORD_LENGTH + " characters");
+		  }
+		String update_res = ampUserRepository.updatePassword(user.getUsername(), MD5Encryption.getMd5(user.getPassword()));
+		return response;
+	}	
+	
+	
 }

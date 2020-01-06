@@ -39,4 +39,11 @@ public interface AmpUserService {
 	 * @return the result of setting the user to approved as success/failure
 	 */
 	boolean approveUser(String userName);
+	
+	/**
+	 * Resets the existing password in the database for the given username
+	 * @param username
+	 * @return the boolean result for update in the databse
+	 */
+	AuthResponse resetPassword(AmpUser user);
 }

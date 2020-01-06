@@ -44,6 +44,13 @@ import lombok.extern.java.Log;
 		return res;
 	  }
 
-	 
+	  @PostMapping(path = "/reset", consumes = "application/json", produces = "application/json")
+	  public @ResponseBody AuthResponse resetPassword(
+			@RequestBody AmpUser user){ 
+		log.info("Reset Password for User=> Name:"+ user.getUsername());	
+		AuthResponse res = ampService.resetPassword(user);
+		log.info(" Reset Password result: " + res);
+		return res;
+	  }
   }
 		 
