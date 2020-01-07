@@ -1,22 +1,26 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.exception.MediaConversionException;
-import edu.indiana.dlib.amppd.exception.PreprocessException;
+import lombok.extern.java.Log;
 
 /**
  * Implmentation of PreprocessService.
  * @author yingfeng
  *
  */
+@Service
+@Log
 public class PreprocessServiceImpl {
 
 	public String convertFlacToWav(String sourceFilepath) throws MediaConversionException {
 		String extension = FilenameUtils.getExtension(sourceFilepath);
 		
-		if (extension != null && extension.equalsIgnoreCase("flac")) {
-			throw new PreprocessException("The given source file is not in FLAC format: " + sourceFilepath);
+		if (extension == null || !extension.equalsIgnoreCase("flac")) {
+			log.info("No conversion as the given source file is not in FLAC format: " + sourceFilepath);
+			return null;
 		}
 		
 		String targetFilePath = FilenameUtils.getFullPath(sourceFilepath) + FilenameUtils.getBaseName(sourceFilepath) + ".wav";
@@ -29,7 +33,9 @@ public class PreprocessServiceImpl {
 			throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath, e);
 		}
 		
+		log.info("Converted source flac file to target wav file: " + sourceFilepath + "->" + targetFilePath);
 		return targetFilePath;		
 	}
+	
 	
 }
