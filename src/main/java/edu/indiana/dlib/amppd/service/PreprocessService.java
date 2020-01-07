@@ -8,9 +8,9 @@ package edu.indiana.dlib.amppd.service;
 public interface PreprocessService {
 
 	/**
-	 * Converts the given file from flac format to wav format
-	 * @param sourceFilepath of the given source flac file
-	 * @return tfilepath of the generated target wav file
+	 * If the given file is of flac format then convert it to wav format.
+	 * @param sourceFilepath filepath of the given source  file
+	 * @return filepath of the generated target wav file if conversion happened; otherwise null
 	 */
 	public String convertFlacToWav(String sourceFilepath);
 	
