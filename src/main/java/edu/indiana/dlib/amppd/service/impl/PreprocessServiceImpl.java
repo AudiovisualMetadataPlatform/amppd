@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.exception.MediaConversionException;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import lombok.extern.java.Log;
 
 /**
@@ -37,5 +38,14 @@ public class PreprocessServiceImpl {
 		return targetFilePath;		
 	}
 	
+	public boolean convertFlac(Primaryfile primaryfile) throws MediaConversionException {
+		String targetFilePath = convertFlacToWav(primaryfile.getPathname());
+		if (targetFilePath != null) {
+			primaryfile.setPathname(targetFilePath);
+			log.info("Updated media file path after flac->wav conversion for primaryfile: " + primaryfile.getId());
+			return true;
+		}
+		return false;
+	}
 	
 }
