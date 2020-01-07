@@ -31,6 +31,21 @@ public class ManifestValidationServiceTests {
 
 	@Autowired
     private ManifestValidationService manifestService;
+
+	@Test
+	public void shouldBeValid() throws Exception {
+		String fileName = "batch_manifest_for_testing.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+        
+        System.out.println(content);
+                
+        ValidationResponse response = manifestService.validate("Test Unit", content);
+        
+        Assert.assertFalse(response.hasErrors());
+	}
 	
 	@Test
 	public void shouldBeInvalidUnitName() throws Exception {
@@ -63,8 +78,32 @@ public class ManifestValidationServiceTests {
 	}
 
 	@Test
-	public void shouldBeInvalidUnitName() throws Exception {
-		String fileName = "batch_manifest_for_testing.csv";
+	public void shouldBeInvalidPrimaryFile() throws Exception {
+		String fileName = "batch_manifest_invalid_primary_file.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+                        
+        ValidationResponse response = manifestService.validate("Test Unit", content);
+        
+        Assert.assertTrue(response.hasErrors());
+	}
+	@Test
+	public void shouldBeInvalidPrimaryFileWithPrimarySupplement() throws Exception {
+		String fileName = "batch_manifest_invalid_primary_file_2.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+                        
+        ValidationResponse response = manifestService.validate("Test Unit", content);
+        
+        Assert.assertTrue(response.hasErrors());
+	}
+	@Test
+	public void shouldBeInvalidSuppFile() throws Exception {
+		String fileName = "batch_manifest_invalid_supp_file.csv";
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
  
         File file = new File(classLoader.getResource(fileName).getFile());
