@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.opencsv.CSVReader;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
 import edu.indiana.dlib.amppd.service.ManifestValidationService;
 import edu.indiana.dlib.amppd.web.ValidationResponse;
@@ -31,9 +32,10 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
 
 @Service
 public class ManifestValidationServiceImpl implements ManifestValidationService {
-	String dropBoxBase = "/srv/amp/dropbox";
 	
-
+	@Autowired
+	private AmppdPropertyConfig propertyConfig;
+	
 	@Autowired
     private UnitRepository unitRepository;
 	
@@ -85,22 +87,23 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
     		if(collectionNameErrors.size()>0) {
     			return response;
     		}
+
+        	String sourceIdLabel = line[1];
+        	String sourceId = line[2];
+        	String itemTitle = line[3];
+        	String itemDescription = line[4];
         	
-        	String sourceId = line[1];
-        	String itemTitle = line[2];
-        	String itemDescription = line[3];
-        	
-        	List<String> itemErrors = validateItemColumns(sourceId, itemTitle, itemDescription, lineNum);
+        	List<String> itemErrors = validateItemColumns(sourceId, itemTitle, lineNum);
         	
         	response.addErrors(itemErrors);
         	
         	System.out.println(String.format("Collection: %s Source: %s Item Title: %s Item Desc: %s", collectionName, sourceId, itemTitle, itemDescription));
         	
-        	String primaryFile = line[4];
-        	String primaryFileLabel = line[5];
-        	String primaryFileDescr = line[6];
+        	String primaryFile = line[5];
+        	String primaryFileLabel = line[6];
+        	String primaryFileDescr = line[7];
         	
-        	SupplementType supplementType = getSupplementalFileType(line[7]);
+        	SupplementType supplementType = getSupplementalFileType(line[8]);
         	
         	List<String> primaryFileErrors = validatePrimaryFile(unitName, collectionName, primaryFile, primaryFileLabel, supplementType, lineNum);
         	
@@ -108,8 +111,8 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
         	
         	System.out.println(String.format("PF Name: %s PF Label: %s PF Descr: %s", primaryFile, primaryFileLabel, primaryFileDescr));
         	
-        	if(line.length>8) {
-        		for(int c = 8; c < line.length; c++) {
+        	if(line.length>9) {
+        		for(int c = 9; c < line.length; c++) {
         			String supplementalFile = line[c];
         			String supplementalFileLabel = "";
         			String supplementalFileDescr = "";
@@ -151,7 +154,7 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 	}
 	
 	// Validation methods
-	private List<String> validateItemColumns(String sourceId, String itemTitle, String itemDescription, int lineNum) {
+	private List<String> validateItemColumns(String sourceId, String itemTitle, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 		
     	if(sourceId.isBlank()) {
@@ -160,21 +163,39 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
     	if(itemTitle.isBlank()) {
     		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
     	}
-    	if(itemDescription.isBlank()) {
-    		errors.add(String.format("Row: %s: Item Description is missing", lineNum));
-    	}
     	return errors;
 	}
 	private List<String> validatePrimaryFile(String unitName, String collectionName, String primaryFile, String primaryFileLabel, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
 		
-		if(supplementType == SupplementType.PRIMARYFILE) {
+		// If the supplement type is for a primary file, or no supplement is supplied, we need make sure primary file values are supplied
+		if(supplementType == SupplementType.PRIMARYFILE || supplementType == null) {
 	    	if(primaryFile.isBlank()) {
-	    		errors.add(String.format("Row: %s: Primary file name is missing for supplement type Primary", lineNum));
+	    		if(supplementType == SupplementType.PRIMARYFILE) {
+		    		errors.add(String.format("Row: %s: Primary file name is missing for supplement type Primary", lineNum));
+	    		}
+	    		else {
+		    		errors.add(String.format("Row: %s: Primary file name is missing", lineNum));
+	    		}
 	    	}
 	    	if(primaryFileLabel.isBlank()) {
-	    		errors.add(String.format("Row: %s: Primary file label is missing for supplement type Primary", lineNum));
+	    		if(supplementType == SupplementType.PRIMARYFILE) {
+		    		errors.add(String.format("Row: %s: Primary file label is missing for supplement type Primary", lineNum));
+	    		}
+	    		else {
+		    		errors.add(String.format("Row: %s: Primary file label is missing", lineNum));
+	    		}
 	    	}
+
+			// Check to see if file exists in database
+			List<Primaryfile> files = primaryFileRepository.findByLabel(primaryFileLabel);
+
+			// If not - new file - Make sure it exists on file system
+			if(files.size()==0) {
+				if(!primaryFile.isBlank() && !fileExists(unitName, collectionName, primaryFile)) {
+		    		errors.add(String.format("Row: %s: Primary file %s does not exist in the dropbox", lineNum, primaryFile));
+				}
+			}
 		}
 		else if(supplementType == SupplementType.ITEM || supplementType == SupplementType.COLLECTION) {
 			if(!primaryFile.isBlank()) {
@@ -183,18 +204,6 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 			if(!primaryFile.isBlank()) {
 	    		errors.add(String.format("Row: %s: Primary file label should be blank for supplement type Item", lineNum));
 			}
-		}
-		else {
-			// Check to see if file exists in database
-			List<Primaryfile> files = primaryFileRepository.findByLabel(primaryFileLabel);
-
-			// If not - new file - Make sure it exists on file system
-			if(files.size()==0) {
-				if(!fileExists(unitName, collectionName, primaryFile)) {
-		    		errors.add(String.format("Row: %s: Primary file %s does not exist in the dropbox", lineNum, primaryFile));
-				}
-			}
-			
 		}
     	return errors;
 	}
@@ -287,11 +296,11 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 	}
 	private boolean fileExists(String unit, String collection, String filename) {
 
-		Path path = Paths.get(dropBoxBase, unit, collection, filename);	
+		Path path = Paths.get(propertyConfig.getDropboxRoot(), unit, collection, filename);	
 		return Files.exists(path);
 	}
 	private Path getCollectionPath(String unit, String collection) {
-		Path path = Paths.get(dropBoxBase, unit, collection);	
+		Path path = Paths.get(propertyConfig.getDropboxRoot(), unit, collection);	
 		return path;
 	}
 	private boolean unitExists(String unitName) {
