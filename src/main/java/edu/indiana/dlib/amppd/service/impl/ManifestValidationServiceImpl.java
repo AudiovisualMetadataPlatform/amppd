@@ -16,6 +16,9 @@ import com.opencsv.CSVReader;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
 import edu.indiana.dlib.amppd.service.ManifestValidationService;
+import edu.indiana.dlib.amppd.service.model.Manifest;
+import edu.indiana.dlib.amppd.service.model.ManifestRow;
+import edu.indiana.dlib.amppd.service.model.ManifestSupplement;
 import edu.indiana.dlib.amppd.web.ValidationResponse;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -54,12 +57,81 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 	@Autowired
     private ItemSupplementRepository itemSupplementRepository;
 	
+	
+	private Manifest createManifest(String unitName, List<String[]> lines) {
+		Manifest manifest = new Manifest();
+		
+		manifest.setUnitName(unitName);
+				
+        for(int rowNum = 1; rowNum < lines.size(); rowNum++) {
+        	
+        	ManifestRow manifestRow = new ManifestRow();	
+        	manifestRow.setRowNum(rowNum);
+        	manifest.addRow(manifestRow);
+        	
+        	String[] line = lines.get(rowNum);
+        	
+        	if(line.length < 7) continue;
+        	
+        	manifestRow.setCollectionName(line[0]);
+        	
+    		manifestRow.setSourceIdType(line[1]);
+    		manifestRow.setSourceId(line[2]);
+    		manifestRow.setItemName(line[3]);
+    		manifestRow.setItemDescription(line[4]);
+        	        	
+        	manifestRow.setPrimaryfileFilename(line[5]);
+        	manifestRow.setPrimaryfileName(line[6]);
+        	
+        	// Description is optional.  Verify the array is long enough before continuing
+        	if(line.length>=8) {
+            	manifestRow.setPrimaryfileDescription(line[7]);
+        	}
+        	else {
+        		continue;
+        	}
+        	
+        	SupplementType supplementType = null;
+        	
+        	// If a supplement type is supplied, get the enum value for the textual value
+        	if(line.length>8) {
+        		supplementType = getSupplementalFileType(line[8]);
+        	}
+        	
+        	manifestRow.setSupplementType(supplementType);
+        	
+        	if(line.length>9) {
+        		int supplementNum = 1;
+        		for(int c = 9; c < line.length; c++) {
+        			ManifestSupplement supplement = new ManifestSupplement();
+        			supplement.setSupplementNum(supplementNum);
+        			supplement.setFilename(line[c]);
+        			c++;
+        			if(c < line.length) {
+        				supplement.setName(line[c]);
+        			}
+        			c++;
+        			if(c < line.length) {
+        				supplement.setDescription(line[c]);
+        			}
+        			               	
+                	manifestRow.addSupplement(supplement);
+                	supplementNum++;
+        		}
+        	}
+        }
+        
+        return manifest;
+	}
+	
 	public ValidationResponse validate(String unitName, String fileContent) {
 
 		ValidationResponse response = new ValidationResponse();
 		
+		// Turn the string into a list of string arrays representing rows
 		List<String[]> lines = parse(fileContent);
 		
+		// If we have no rows, quit now
 		if(lines.size()<=1) {
 			response.addError("Invalid file. No rows supplied.");
 			return response;
@@ -73,74 +145,44 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 		if(unitErrors.size()>0) {
 			return response;
 		}
-		
-        for(int lineNum = 1; lineNum < lines.size(); lineNum++) {
-        	String[] line = lines.get(lineNum);
-        	System.out.println("Line has " + line.length + " variables ");
-        	String collectionName = line[0];
 
+		Manifest manifest = createManifest(unitName, lines);
+				
+        for(ManifestRow manifestRow : manifest.getRows()) {
+        	
     		// Validate supplied collection name
-    		List<String> collectionNameErrors = validateCollection(unitName, collectionName, lineNum);
+    		List<String> collectionNameErrors = validateCollection(manifest.getUnitName(), manifestRow.getCollectionName(), manifestRow.getRowNum());
         	response.addErrors(collectionNameErrors);
 
         	// If we have an invalid collection, no point on continuing with validation
     		if(collectionNameErrors.size()>0) {
     			return response;
     		}
-
-        	String sourceIdLabel = line[1];
-        	String sourceId = line[2];
-        	String itemTitle = line[3];
-        	String itemDescription = line[4];
-        	
-        	List<String> itemErrors = validateItemColumns(sourceId, itemTitle, lineNum);
-        	
+    		
+        	List<String> itemErrors = validateItemColumns(manifestRow.getSourceId(), manifestRow.getItemName(), manifestRow.getRowNum());
         	response.addErrors(itemErrors);
         	
-        	System.out.println(String.format("Collection: %s Source: %s Item Title: %s Item Desc: %s", collectionName, sourceId, itemTitle, itemDescription));
-        	
-        	String primaryFile = line[5];
-        	String primaryFileLabel = line[6];
-        	String primaryFileDescr = line[7];
-        	
-        	SupplementType supplementType = getSupplementalFileType(line[8]);
-        	
-        	List<String> primaryFileErrors = validatePrimaryFile(unitName, collectionName, primaryFile, primaryFileLabel, supplementType, lineNum);
-        	
+        	List<String> primaryFileErrors = validatePrimaryFile(manifest.getUnitName(), manifestRow.getCollectionName(), manifestRow.getPrimaryfileFilename(), manifestRow.getPrimaryfileName(), manifestRow.getSupplementType(), manifestRow.getRowNum());
         	response.addErrors(primaryFileErrors);
         	
-        	System.out.println(String.format("PF Name: %s PF Label: %s PF Descr: %s", primaryFile, primaryFileLabel, primaryFileDescr));
-        	
-        	if(line.length>9) {
-        		for(int c = 9; c < line.length; c++) {
-        			String supplementalFile = line[c];
-        			String supplementalFileLabel = "";
-        			String supplementalFileDescr = "";
-        			c++;
-        			if(c < line.length) {
-        				supplementalFileLabel = line[c];
-        			}
-        			c++;
-        			if(c < line.length) {
-        				supplementalFileDescr = line[c];
-        			}
-        			
-        			List<String> supplementErrors = validateSupplement(unitName, collectionName,  supplementalFile, supplementalFileLabel, supplementType, lineNum);
 
-                	response.addErrors(supplementErrors);
-                	
-                	System.out.println(
-                			String.format("supplementalFile: %s supplementalFileLabel: %s supplementalFileDescr: %s", supplementalFile, supplementalFileLabel, supplementalFileDescr));
-                	
-        		}
-        	}
+        	List<String> duplicatePrimaryFileErrors = validateUniquePrimaryfile(manifest, manifestRow);
+        	response.addErrors(duplicatePrimaryFileErrors);
+        	
+        	
+    		for(ManifestSupplement supplement : manifestRow.getSupplements()) {
+    			List<String> supplementErrors = validateSupplement(manifest.getUnitName(), manifestRow.getCollectionName(),  supplement.getFilename(), supplement.getName(), manifestRow.getSupplementType(), manifestRow.getRowNum());
+    			response.addErrors(supplementErrors);
+    			
+    			List<String> duplicateSupplementErrors = validateUniqueSupplement(manifest, manifestRow, supplement);
+    			response.addErrors(duplicateSupplementErrors);
+    		}
         }
         
         return response;
 	}
 	
 	private List<String[]> parse(String csvString) {
-
 		List<String[]> lines = new ArrayList<String[]>();
         CSVReader reader = null;
         try {
@@ -163,6 +205,35 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
     	if(itemTitle.isBlank()) {
     		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
     	}
+    	return errors;
+	}
+	
+	private List<String> validateUniquePrimaryfile(Manifest manifest, ManifestRow manifestRow) {
+		List<String> errors = new ArrayList<String>();
+		
+		if(manifest.isDuplicatePrimaryfileFilename(manifestRow.getPrimaryfileFilename(), manifestRow.getRowNum())) {
+    		errors.add(String.format("Row: %s: Duplicate primary file %s", manifestRow.getRowNum(), manifestRow.getPrimaryfileFilename()));
+		}
+		
+		if(manifest.isDuplicatePrimaryfileName(manifestRow.getPrimaryfileName(), manifestRow.getRowNum())) {
+    		errors.add(String.format("Row: %s: Duplicate primary file name %s", manifestRow.getRowNum(), manifestRow.getPrimaryfileName()));
+		}
+    	return errors;
+	}
+
+	private List<String> validateUniqueSupplement(Manifest manifest, ManifestRow manifestRow, ManifestSupplement manifestSupplement) {
+		List<String> errors = new ArrayList<String>();
+		for(ManifestRow testRow : manifest.getRows()) {
+			if(testRow.getSupplementType() == null) continue;
+			if(testRow.containsSupplementFilename(manifestSupplement.getFilename(), manifestRow.getRowNum(), manifestSupplement.getSupplementNum())){
+	    		errors.add(String.format("Row: %s: Duplicate supplement file %s", manifestRow.getRowNum(), manifestSupplement.getFilename()));
+			}
+			if(testRow.containsSupplementName(manifestSupplement.getName(), manifestRow.getRowNum(), manifestSupplement.getSupplementNum())){
+	    		errors.add(String.format("Row: %s: Duplicate supplement name %s", manifestRow.getRowNum(), manifestSupplement.getName()));
+			}
+			if(errors.size()>0) break;
+		}
+		
     	return errors;
 	}
 	private List<String> validatePrimaryFile(String unitName, String collectionName, String primaryFile, String primaryFileLabel, SupplementType supplementType, int lineNum){

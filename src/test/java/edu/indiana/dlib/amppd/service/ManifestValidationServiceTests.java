@@ -90,6 +90,30 @@ public class ManifestValidationServiceTests {
         Assert.assertTrue(response.hasErrors());
 	}
 	@Test
+	public void shouldBeInvalidPrimaryFileDuplicate() throws Exception {
+		String fileName = "batch_manifest_duplicate_primary.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+                        
+        ValidationResponse response = manifestService.validate("Test Unit", content);
+        
+        Assert.assertTrue(response.hasErrors());
+	}
+	@Test
+	public void shouldBeInvalidSupplementFileDuplicate() throws Exception {
+		String fileName = "batch_manifest_duplicate_supplement.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+                        
+        ValidationResponse response = manifestService.validate("Test Unit", content);
+        
+        Assert.assertTrue(response.hasErrors());
+	}
+	@Test
 	public void shouldBeInvalidPrimaryFileWithPrimarySupplement() throws Exception {
 		String fileName = "batch_manifest_invalid_primary_file_2.csv";
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
