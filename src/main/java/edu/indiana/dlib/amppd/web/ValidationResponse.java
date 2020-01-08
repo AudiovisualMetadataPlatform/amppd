@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.indiana.dlib.amppd.service.model.Manifest;
 import lombok.Data;
 
 @Data
@@ -11,7 +12,11 @@ public class ValidationResponse {
 	public ValidationResponse() {
 		errors = new ArrayList<String>();
 	}
-	private boolean success;
+	
+	boolean success;
+	Manifest manifest;
+	
+	
 	private ArrayList<String> errors;
 	
 	public void addError(String error) {
