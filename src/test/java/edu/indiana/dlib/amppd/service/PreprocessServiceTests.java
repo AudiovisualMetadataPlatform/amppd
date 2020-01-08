@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
+import org.apache.commons.io.FilenameUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,16 +28,29 @@ public class PreprocessServiceTests {
 	private TestHelper testHelper;   
 	
     @After
-    public void cleanAll() {
-    	// clean up unit test directory after unit tests done
-        fileStorageService.delete(TEST_DIR_NAME);
-    }
+//    public void cleanAll() {
+//    	// clean up unit test directory after unit tests done
+//        fileStorageService.delete(TEST_DIR_NAME);
+//    }
 
 	@Test
-    public void shouldConverFlacToWav() {
+    public void shouldConver() {
 		Primaryfile primaryfile = testHelper.ensurePrimaryfile(testHelper.TEST_VIDEO, "flac");
-		boolean converted = preprocessService.convertFlac(primaryfile);
-		Assert.assertTrue(converted);
+
+		// the media file should have been converted and the extension should be "wav"
+		Assert.assertTrue(preprocessService.convertFlac(primaryfile));		
+		Assert.assertEquals("wav", FilenameUtils.getExtension(primaryfile.getPathname()).toLowerCase());
 	}
 	
+	@Test
+    public void shouldNotConverNonFlacToWav() {
+		Primaryfile primaryfile = testHelper.ensurePrimaryfile(testHelper.TEST_VIDEO, "mp3");
+		String pathname = primaryfile.getPathname();
+		
+		// the media file should not have been converted and the pathname should be the same as before
+		Assert.assertFalse(preprocessService.convertFlac(primaryfile));		
+		Assert.assertEquals(pathname, primaryfile.getPathname());
+	}
+	
+
 }
