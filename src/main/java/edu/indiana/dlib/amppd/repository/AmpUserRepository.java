@@ -21,8 +21,8 @@ public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
 	boolean usernameExists(@Param("username") String username);
 
 	Optional<AmpUser> findByUsername(String username);
-	Optional<AmpUser> findByEmail(String email);	
+	Optional<AmpUser> findByEmail(String email);			
 	
-	@Query(value = "update AmpUser set password = :pswd where username = :username")
-	String updatePassword(@Param("username") String username, @Param("pswd") String pswd);
+	@Query(value = "update AmpUser set password = :pswd where username = :username and id = :id")
+	String updatePassword(@Param("username") String username, @Param("pswd") String pswd, @Param("id") Long id);
 }

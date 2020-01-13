@@ -42,8 +42,15 @@ public interface AmpUserService {
 	
 	/**
 	 * Resets the existing password in the database for the given username
-	 * @param username
+	 * @param username, new password to be updated in the DB, secure token
 	 * @return the boolean result for update in the databse
 	 */
-	AuthResponse resetPassword(AmpUser user);
+	public AuthResponse resetPassword(String userName, String new_password, String token);
+	
+	/**
+	 * Generates a token and sends it in an email to the provided email id
+	 * @param email id
+	 * @return the boolean result for sending the email
+	 */
+	public AuthResponse emailToken(String emailid);
 }

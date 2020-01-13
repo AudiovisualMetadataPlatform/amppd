@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.controller;
   
   import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -44,11 +45,20 @@ import lombok.extern.java.Log;
 		return res;
 	  }
 
-	  @PostMapping(path = "/reset", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/forgot-password", consumes = "application/json", produces = "application/json")
+	  public @ResponseBody AuthResponse forgotPassword(
+			  @RequestBody AuthRequest request){ 
+		log.info("Reset Password for User=> Email:"+ request.getEmailid());	
+		AuthResponse res = ampService.emailToken(request.getEmailid());
+		log.info(" Reset Password result: " + res);
+		return res;
+	  }
+	  
+	  @PostMapping(path = "/reset-password", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse resetPassword(
-			@RequestBody AmpUser user){ 
-		log.info("Reset Password for User=> Name:"+ user.getUsername());	
-		AuthResponse res = ampService.resetPassword(user);
+			  @RequestBody AuthRequest request){ 
+		log.info("Reset Password for User=> Email:"+ request.getEmailid());	
+		AuthResponse res = ampService.resetPassword(request.getEmailid(), request.getPassword(), request.getToken());
 		log.info(" Reset Password result: " + res);
 		return res;
 	  }

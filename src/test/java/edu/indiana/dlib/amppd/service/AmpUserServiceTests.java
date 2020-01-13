@@ -43,4 +43,25 @@ public class AmpUserServiceTests {
 		  }
 	 	
     }
+	
+	@Test
+	public void shouldSendEmail() throws Exception{
+    	
+	 	AmpUser user = new AmpUser();
+	 	user.setUsername("ampPasswordResetTest1");
+	 	user.setPassword("amp@123");
+	 	user.setEmail("vinitaboolchandani@gmail.com");
+	 	
+	 	ampUserService.registerAmpUser(user);
+	 	AmpUser retrievedUser = new AmpUser();
+	 	try {
+				retrievedUser = ampUserRepository.findByEmail(user.getEmail()).orElseThrow(() -> new RuntimeException("User not found: " + user.getEmail()));
+				//Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
+				ampUserService.resetPassword(retrievedUser.getEmail());
+		  }
+		  catch(Exception ex) {
+			  System.out.println(ex.toString());
+		  }
+	 	
+    }
 }

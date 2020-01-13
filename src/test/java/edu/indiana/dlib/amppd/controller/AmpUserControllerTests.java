@@ -126,6 +126,24 @@ public class AmpUserControllerTests {
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
     	
     }
+    
+    @Test
+	public void shouldSendEmail() throws Exception {
+    	AmpUser user = getAmpUser();
+    	String url = String.format("/reset-password");
+    	user.setEmail("winni8489@gmail.com");
+    	postRegister(user, true);
+    	
+    	ampUserService.approveUser(user.getUsername());
+    	AuthRequest request = new AuthRequest();
+    	request.setEmailid(user.getEmail());
+    	
+    	String json = mapper.writeValueAsString(request);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
+    }
 
     private AmpUser getAmpUser() {
         Random rand = new Random(); 
