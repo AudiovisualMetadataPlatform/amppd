@@ -3,7 +3,7 @@ package edu.indiana.dlib.amppd.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.indiana.dlib.amppd.service.model.Manifest;
+import edu.indiana.dlib.amppd.model.Batch;
 import lombok.Data;
 
 @Data
@@ -14,7 +14,7 @@ public class ValidationResponse {
 	}
 	
 	boolean success;
-	Manifest manifest;
+	Batch batch;
 	
 	
 	private ArrayList<String> errors;
