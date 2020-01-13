@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.model.Batch;
 import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -73,7 +71,6 @@ public class BatchServiceImpl implements BatchService {
 	
 	private void createItem(ManifestRow row, String username) {
 		
-
 		List<Collection> collections =  collectionRepository.findByName(row.getCollectionName());
 		
 		Collection collection = collections.get(0);
