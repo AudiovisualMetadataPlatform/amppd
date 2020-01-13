@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 import com.opencsv.CSVReader;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.model.Batch;
+import edu.indiana.dlib.amppd.model.BatchFile;
 import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
-import edu.indiana.dlib.amppd.service.ManifestValidationService;
-import edu.indiana.dlib.amppd.service.model.Manifest;
-import edu.indiana.dlib.amppd.service.model.ManifestRow;
-import edu.indiana.dlib.amppd.service.model.ManifestSupplement;
+import edu.indiana.dlib.amppd.model.BatchSupplementFile;
+import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.web.ValidationResponse;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -34,7 +34,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 
 @Service
-public class ManifestValidationServiceImpl implements ManifestValidationService {
+public class BatchValidationServiceImpl implements BatchValidationService {
 	
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
@@ -58,34 +58,41 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
     private ItemSupplementRepository itemSupplementRepository;
 	
 	
-	private Manifest createManifest(String unitName, List<String[]> lines) {
-		Manifest manifest = new Manifest();
+	private Batch createBatch(String unitName, List<String[]> lines) {
+		Batch batch = new Batch();
 		
-		manifest.setUnitName(unitName);
+		List<Unit> units = unitRepository.findByName(unitName);
+		
+		if(units!=null && units.size()>0) {
+			batch.setUnit(units.get(0));
+		}
 				
         for(int rowNum = 1; rowNum < lines.size(); rowNum++) {
         	
-        	ManifestRow manifestRow = new ManifestRow();	
-        	manifestRow.setRowNum(rowNum);
-        	manifest.addRow(manifestRow);
+        	BatchFile batchFile = new BatchFile();	
+        	batchFile.setRowNum(rowNum);
+        	batch.addBatchFile(batchFile);
         	
         	String[] line = lines.get(rowNum);
         	
         	if(line.length < 7) continue;
+        	List<Collection> collections = collectionRepository.findByName(line[0]);
         	
-        	manifestRow.setCollectionName(line[0]);
-        	
-    		manifestRow.setSourceIdType(line[1]);
-    		manifestRow.setSourceId(line[2]);
-    		manifestRow.setItemName(line[3]);
-    		manifestRow.setItemDescription(line[4]);
+        	if(collections!=null && collections.size()>0) {
+        		batchFile.setCollection(collections.get(0));
+        	}
         	        	
-        	manifestRow.setPrimaryfileFilename(line[5]);
-        	manifestRow.setPrimaryfileName(line[6]);
+        	batchFile.setSourceIdType(line[1]);
+        	batchFile.setSourceId(line[2]);
+        	batchFile.setItemName(line[3]);
+        	batchFile.setItemDescription(line[4]);
+        	        	
+        	batchFile.setPrimaryfileFilename(line[5]);
+        	batchFile.setPrimaryfileName(line[6]);
         	
         	// Description is optional.  Verify the array is long enough before continuing
         	if(line.length>=8) {
-            	manifestRow.setPrimaryfileDescription(line[7]);
+        		batchFile.setPrimaryfileDescription(line[7]);
         	}
         	else {
         		continue;
@@ -98,30 +105,30 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
         		supplementType = getSupplementalFileType(line[8]);
         	}
         	
-        	manifestRow.setSupplementType(supplementType);
+        	batchFile.setSupplementType(supplementType);
         	
         	if(line.length>9) {
         		int supplementNum = 1;
         		for(int c = 9; c < line.length; c++) {
-        			ManifestSupplement supplement = new ManifestSupplement();
+        			BatchSupplementFile supplement = new BatchSupplementFile();
         			supplement.setSupplementNum(supplementNum);
-        			supplement.setFilename(line[c]);
+        			supplement.setSupplementFilename(line[c]);
         			c++;
         			if(c < line.length) {
-        				supplement.setName(line[c]);
+        				supplement.setSupplementName(line[c]);
         			}
         			c++;
         			if(c < line.length) {
-        				supplement.setDescription(line[c]);
+        				supplement.setSupplementDescription(line[c]);
         			}
         			               	
-                	manifestRow.addSupplement(supplement);
+        			batchFile.addSupplement(supplement);
                 	supplementNum++;
         		}
         	}
         }
         
-        return manifest;
+        return batch;
 	}
 	
 	public ValidationResponse validate(String unitName, String fileContent) {
@@ -136,9 +143,11 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 			response.addError("Invalid file. No rows supplied.");
 			return response;
 		}
+
+		Batch batch = createBatch(unitName, lines);
 		
 		// Validate supplied unit name
-		List<String> unitErrors = validateUnit(unitName);
+		List<String> unitErrors = validateUnit(batch.getUnit());
     	response.addErrors(unitErrors);
 		
     	// If we have an invalid unit, no point on continuing with validation
@@ -146,12 +155,11 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 			return response;
 		}
 
-		Manifest manifest = createManifest(unitName, lines);
 				
-        for(ManifestRow manifestRow : manifest.getRows()) {
+        for(BatchFile batchFile : batch.getBatchFiles()) {
         	
     		// Validate supplied collection name
-    		List<String> collectionNameErrors = validateCollection(manifest.getUnitName(), manifestRow.getCollectionName(), manifestRow.getRowNum());
+    		List<String> collectionNameErrors = validateCollection(batch.getUnit(), batchFile.getCollection(), batchFile.getRowNum());
         	response.addErrors(collectionNameErrors);
 
         	// If we have an invalid collection, no point on continuing with validation
@@ -159,22 +167,22 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
     			return response;
     		}
     		
-        	List<String> itemErrors = validateItemColumns(manifestRow.getSourceId(), manifestRow.getItemName(), manifestRow.getRowNum());
+        	List<String> itemErrors = validateItemColumns(batchFile.getSourceId(), batchFile.getItemName(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
-        	List<String> primaryFileErrors = validatePrimaryFile(manifest.getUnitName(), manifestRow.getCollectionName(), manifestRow.getPrimaryfileFilename(), manifestRow.getPrimaryfileName(), manifestRow.getSupplementType(), manifestRow.getRowNum());
+        	List<String> primaryFileErrors = validatePrimaryFile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(primaryFileErrors);
         	
 
-        	List<String> duplicatePrimaryFileErrors = validateUniquePrimaryfile(manifest, manifestRow);
+        	List<String> duplicatePrimaryFileErrors = validateUniquePrimaryfile(batch, batchFile);
         	response.addErrors(duplicatePrimaryFileErrors);
         	
         	
-    		for(ManifestSupplement supplement : manifestRow.getSupplements()) {
-    			List<String> supplementErrors = validateSupplement(manifest.getUnitName(), manifestRow.getCollectionName(),  supplement.getFilename(), supplement.getName(), manifestRow.getSupplementType(), manifestRow.getRowNum());
+    		for(BatchSupplementFile supplement : batchFile.getBatchSupplementFiles()) {
+    			List<String> supplementErrors = validateSupplement(batch.getUnit(), batchFile.getCollection(),  supplement.getSupplementFilename(), supplement.getSupplementName(), batchFile.getSupplementType(), batchFile.getRowNum());
     			response.addErrors(supplementErrors);
     			
-    			List<String> duplicateSupplementErrors = validateUniqueSupplement(manifest, manifestRow, supplement);
+    			List<String> duplicateSupplementErrors = validateUniqueSupplement(batch, batchFile, supplement);
     			response.addErrors(duplicateSupplementErrors);
     		}
         }
@@ -208,35 +216,35 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
     	return errors;
 	}
 	
-	private List<String> validateUniquePrimaryfile(Manifest manifest, ManifestRow manifestRow) {
+	private List<String> validateUniquePrimaryfile(Batch batch, BatchFile batchFile) {
 		List<String> errors = new ArrayList<String>();
 		
-		if(manifest.isDuplicatePrimaryfileFilename(manifestRow.getPrimaryfileFilename(), manifestRow.getRowNum())) {
-    		errors.add(String.format("Row: %s: Duplicate primary file %s", manifestRow.getRowNum(), manifestRow.getPrimaryfileFilename()));
+		if(batch.isDuplicatePrimaryfileFilename(batchFile.getPrimaryfileFilename(), batchFile.getRowNum())) {
+    		errors.add(String.format("Row: %s: Duplicate primary file %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
 		}
 		
-		if(manifest.isDuplicatePrimaryfileName(manifestRow.getPrimaryfileName(), manifestRow.getRowNum())) {
-    		errors.add(String.format("Row: %s: Duplicate primary file name %s", manifestRow.getRowNum(), manifestRow.getPrimaryfileName()));
+		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getRowNum())) {
+    		errors.add(String.format("Row: %s: Duplicate primary file name %s", batchFile.getRowNum(), batchFile.getPrimaryfileName()));
 		}
     	return errors;
 	}
 
-	private List<String> validateUniqueSupplement(Manifest manifest, ManifestRow manifestRow, ManifestSupplement manifestSupplement) {
+	private List<String> validateUniqueSupplement(Batch batch, BatchFile batchFile, BatchSupplementFile batchSupplementFile) {
 		List<String> errors = new ArrayList<String>();
-		for(ManifestRow testRow : manifest.getRows()) {
+		for(BatchFile testRow : batch.getBatchFiles()) {
 			if(testRow.getSupplementType() == null) continue;
-			if(testRow.containsSupplementFilename(manifestSupplement.getFilename(), manifestRow.getRowNum(), manifestSupplement.getSupplementNum())){
-	    		errors.add(String.format("Row: %s: Duplicate supplement file %s", manifestRow.getRowNum(), manifestSupplement.getFilename()));
+			if(testRow.containsSupplementFilename(batchSupplementFile.getSupplementFilename(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
+	    		errors.add(String.format("Row: %s: Duplicate supplement file %s", batchFile.getRowNum(), batchSupplementFile.getSupplementFilename()));
 			}
-			if(testRow.containsSupplementName(manifestSupplement.getName(), manifestRow.getRowNum(), manifestSupplement.getSupplementNum())){
-	    		errors.add(String.format("Row: %s: Duplicate supplement name %s", manifestRow.getRowNum(), manifestSupplement.getName()));
+			if(testRow.containsSupplementName(batchSupplementFile.getSupplementName(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
+	    		errors.add(String.format("Row: %s: Duplicate supplement name %s", batchFile.getRowNum(), batchSupplementFile.getSupplementName()));
 			}
 			if(errors.size()>0) break;
 		}
 		
     	return errors;
 	}
-	private List<String> validatePrimaryFile(String unitName, String collectionName, String primaryFile, String primaryFileLabel, SupplementType supplementType, int lineNum){
+	private List<String> validatePrimaryFile(Unit unit, Collection collection, String primaryFile, String primaryFileLabel, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
 		
 		// If the supplement type is for a primary file, or no supplement is supplied, we need make sure primary file values are supplied
@@ -263,7 +271,7 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 
 			// If not - new file - Make sure it exists on file system
 			if(files.size()==0) {
-				if(!primaryFile.isBlank() && !fileExists(unitName, collectionName, primaryFile)) {
+				if(!primaryFile.isBlank() && !fileExists(unit.getName(), collection.getName(), primaryFile)) {
 		    		errors.add(String.format("Row: %s: Primary file %s does not exist in the dropbox", lineNum, primaryFile));
 				}
 			}
@@ -278,7 +286,7 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 		}
     	return errors;
 	}
-	private List<String> validateSupplement(String unitName, String collectionName, String supplementalFile, String supplementalFileLabel, SupplementType supplementType, int lineNum){
+	private List<String> validateSupplement(Unit unit, Collection collection, String supplementalFile, String supplementalFileLabel, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
 		if(supplementalFile.isBlank() && supplementalFileLabel.isBlank()) {
 			return errors;
@@ -304,7 +312,7 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 
 				// If not - new file - Make sure it exists on file system
 				if(files.size()==0) {
-					if(!fileExists(unitName, collectionName, supplementalFile)) {
+					if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
 			    		errors.add(String.format("Row: %s: Primary supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 					}
 				}
@@ -315,7 +323,7 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 
 				// If not - new file - Make sure it exists on file system
 				if(files.size()==0) {
-					if(!fileExists(unitName, collectionName, supplementalFile)) {
+					if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
 			    		errors.add(String.format("Row: %s: Item supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 					}
 				}
@@ -326,7 +334,7 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 
 				// If not - new file - Make sure it exists on file system
 				if(files.size()==0) {
-					if(!fileExists(unitName, collectionName, supplementalFile)) {
+					if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
 			    		errors.add(String.format("Row: %s: Collection supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 					}
 				}
@@ -336,7 +344,8 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 		
 		return errors;
 	}
-	private List<String> validateUnit(String unitName){
+	private List<String> validateUnit(Unit unit){
+		String unitName = unit!=null ? unit.getName() : "";
 		List<String> errors = new ArrayList<String>();
 		if(unitName==null || unitName.isBlank()) {
     		errors.add("Missing unit name");
@@ -346,16 +355,17 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 		}
 		return errors;
 	}
-	private List<String> validateCollection(String unitName, String collectionName, int lineNum){
+	private List<String> validateCollection(Unit unit, Collection collection, int lineNum){
 		List<String> errors = new ArrayList<String>();
+		String collectionName = collection!=null ? collection.getName() : "";
 		if(collectionName==null || collectionName.isBlank()) {
     		errors.add(String.format("Row %s: Missing collection name", lineNum));
 		}
 		else if(!collectionExists(collectionName)) {
-			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collectionName));
+			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collection.getName()));
 		}
-		else if(!dropBoxExists(unitName, collectionName)) {
-			errors.add(String.format("Row %s: Invalid drop box %s", lineNum, collectionName));
+		else if(!dropBoxExists(unit.getName(), collectionName)) {
+			errors.add(String.format("Row %s: Invalid drop box %s", lineNum, collection.getName()));
 		}
 		return errors;
 	}
@@ -366,7 +376,6 @@ public class ManifestValidationServiceImpl implements ManifestValidationService 
 		return Files.exists(path);
 	}
 	private boolean fileExists(String unit, String collection, String filename) {
-
 		Path path = Paths.get(propertyConfig.getDropboxRoot(), unit, collection, filename);	
 		return Files.exists(path);
 	}
