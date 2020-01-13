@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.List;
-
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -26,6 +24,7 @@ public class BatchSupplementFile {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	int id;
+	int supplementNum;
 	String supplementFilename;	
 	String supplementName;
 	String supplementDescription;

@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -40,5 +41,37 @@ public class Batch {
 	// the following info come from batch manifest
 	@OneToMany(mappedBy="batch")
 	List<BatchFile> batchFiles;
+
+	public void addBatchFile(BatchFile batchFile) {
+		if(batchFiles==null) batchFiles = new ArrayList<BatchFile>();
+		batchFiles.add(batchFile);
+	}
+
+	public boolean isDuplicatePrimaryfileFilename(String fileName, int rowNum) {
+		int c = 0;
+		for(BatchFile row : batchFiles) {
+			if(row.getRowNum()==rowNum) continue;
+			if(row.getPrimaryfileFilename().equals(fileName)) {
+				c++;
+				if(c>1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	
+	public boolean isDuplicatePrimaryfileName(String name, int rowNum) {
+		int c = 0;
+		for(BatchFile row : batchFiles) {
+			if(row.getRowNum()==rowNum) continue;
+			if(row.getPrimaryfileName().equals(name)) {
+				c++;
+				if(c>1) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }
