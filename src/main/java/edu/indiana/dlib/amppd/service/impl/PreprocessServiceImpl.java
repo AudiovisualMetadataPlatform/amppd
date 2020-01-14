@@ -1,10 +1,13 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.exception.MediaConversionException;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.java.Log;
 
 /**
@@ -14,7 +17,10 @@ import lombok.extern.java.Log;
  */
 @Service
 @Log
-public class PreprocessServiceImpl {
+public class PreprocessServiceImpl implements PreprocessService {
+	
+	@Autowired
+    private FileStorageService fileStorageService;
 
 	public String convertFlacToWav(String sourceFilepath) throws MediaConversionException {
 		String extension = FilenameUtils.getExtension(sourceFilepath);
@@ -25,7 +31,8 @@ public class PreprocessServiceImpl {
 		}
 		
 		String targetFilePath = FilenameUtils.getFullPath(sourceFilepath) + FilenameUtils.getBaseName(sourceFilepath) + ".wav";
-		String command = "ffmpeg -i " + sourceFilepath + " " + targetFilePath;
+		String command = "ffmpeg -i " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
+//		String command = "cp " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
 		
 		try {
 			Process process = Runtime.getRuntime().exec(command);

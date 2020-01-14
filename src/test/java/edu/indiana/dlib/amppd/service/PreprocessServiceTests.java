@@ -35,7 +35,7 @@ public class PreprocessServiceTests {
 
 	@Test
     public void shouldConver() {
-		Primaryfile primaryfile = testHelper.ensurePrimaryfile(testHelper.TEST_VIDEO, "flac");
+		Primaryfile primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_AUDIO, "flac");
 
 		// the media file should have been converted and the extension should be "wav"
 		Assert.assertTrue(preprocessService.convertFlac(primaryfile));		
@@ -44,7 +44,7 @@ public class PreprocessServiceTests {
 	
 	@Test
     public void shouldNotConverNonFlacToWav() {
-		Primaryfile primaryfile = testHelper.ensurePrimaryfile(testHelper.TEST_VIDEO, "mp3");
+		Primaryfile primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_AUDIO, "mp3");
 		String pathname = primaryfile.getPathname();
 		
 		// the media file should not have been converted and the pathname should be the same as before
