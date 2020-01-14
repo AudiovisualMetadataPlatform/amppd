@@ -5,13 +5,11 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.ManyToMany;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,10 +27,10 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Item extends Content {
     
-	@OneToMany(mappedBy="item")
+	@OneToMany(mappedBy="item", fetch = FetchType.EAGER)
     private Set<Primaryfile> primaryfiles;
 
-	@OneToMany(mappedBy="item")
+	@OneToMany(mappedBy="item", fetch = FetchType.EAGER)
     private Set<ItemSupplement> supplements;
 
 	@ManyToOne
