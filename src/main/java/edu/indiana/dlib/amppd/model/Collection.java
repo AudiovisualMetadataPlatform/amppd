@@ -1,9 +1,11 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -25,7 +27,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
 
-	@OneToMany(mappedBy="collection")
+	@OneToMany(mappedBy="collection", fetch = FetchType.EAGER)
     private Set<Item> items; 
 	
 	@OneToMany(mappedBy="collection")
@@ -33,5 +35,10 @@ public class Collection extends Content {
 	
 	@ManyToOne
 	private Unit unit;
+	
+	public void addItem(Item item) {
+		if(items==null) items = new HashSet<Item>();
+		items.add(item);
+	}
 	
 }

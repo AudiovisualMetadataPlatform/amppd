@@ -23,6 +23,9 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 public class BatchFile {	
+	public BatchFile() {
+		batchSupplementFiles = new ArrayList<BatchSupplementFile>();
+	}
 	// in batch manifest the types are indicated as "C", "I", "P"
 	public enum SupplementType { COLLECTION, ITEM, PRIMARYFILE };
 
