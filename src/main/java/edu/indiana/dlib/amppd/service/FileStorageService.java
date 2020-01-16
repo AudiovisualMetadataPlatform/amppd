@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 import org.springframework.core.io.Resource;
@@ -166,6 +167,13 @@ public interface FileStorageService {
 	 */
 	public String getFilePathname(Supplement supplement);
 
+	/**
+	 * Moves a file from the source to the destination by creating a hard link and then deleting the original file.  
+	 * @param sourcePath Source file path
+	 * @param destinationPath Destination file path
+	 * @throws IOException 
+	 */
+	public void moveFile(Path sourcePath, Path destinationPath) throws IOException;
 //	/**
 //	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
 //	 * 

@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,14 +65,8 @@ public class BatchServiceImpl implements BatchService {
 			return true;
 		}
 		catch(Exception ex) {
-			cleanup();
 			return false;
 		}
-	}
-	
-	// TODO:  What should we do when we fail for a given file?  Clean up that file?  Put it back?
-	private void cleanup() {
-		
 	}
 	
 	private String getSourceDir(Unit unit, Collection collection) {
@@ -87,7 +80,7 @@ public class BatchServiceImpl implements BatchService {
 	private void createItem(Unit unit, BatchFile batchFile, String username) throws IOException {
 
 		// Get the collection
-		Collection collection = batchFile.getCollection();
+		Collection collection = getUpdatedCollection(batchFile.getCollection().getId());
 		collection.setUnit(unit);
 		
 		// Set the source directory based on dropbox, unit name and collection name
@@ -97,8 +90,6 @@ public class BatchServiceImpl implements BatchService {
 		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username);
 		
 		collection.addItem(item);
-		
-		collectionRepository.save(collection);
 		
 		// Process the files based on the supplement type
 		if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE || batchFile.getSupplementType()==null) {
@@ -146,6 +137,9 @@ public class BatchServiceImpl implements BatchService {
 			}
 		}
 				
+	}
+	private Collection getUpdatedCollection(Long collectionId) {
+		return collectionRepository.findById(collectionId).get();
 	}
 	/*
 	 * Create an item supplememt
@@ -239,10 +233,12 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy) {
 		Item item = null;
+		/*List<Collection> collections = collectionRepository.findByName(collection.getName());
+		collection = collections.get(0); */
 		Set<Item> items = collection.getItems();
 		if(items!=null) {
 			for(Item i : items) {
-				if(i.getName()==itemName) {
+				if(i.getName().contentEquals(itemName)) {
 					item = i;
 					break;
 				}
@@ -280,16 +276,8 @@ public class BatchServiceImpl implements BatchService {
 		Path existingFile = Paths.get(propertyConfig.getDropboxRoot(), sourceDir, sourceFilename);	
 		Path newLink = Paths.get(propertyConfig.getFileStorageRoot(), targetFilename);	
 		
-		// Create a hard link
-		Files.createLink(newLink, existingFile);
-		
-		// If the new file doesn't exists for some reason, throw an exception
-		if(!Files.exists(newLink)) {
-			throw new FileNotFoundException(String.format("File %s failed to create.", newLink.getFileName()));
-		}
-		
-		// Delete original
-		Files.delete(existingFile);
+		// Move the file
+		fileStorageService.moveFile(existingFile, newLink);
 	}
 	
 	
