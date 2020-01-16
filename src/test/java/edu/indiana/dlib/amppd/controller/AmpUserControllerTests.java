@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 
 @RunWith(SpringRunner.class)
@@ -68,6 +69,24 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser();
     	user.setPassword("");
     	postRegister(user, false);
+   }
+    
+    @Test
+    public void shouldEncryptPassword() throws Exception {
+    	AmpUser user = getAmpUser();
+    	postRegister(user, true);   //saves the password in database after encryption
+    	
+    	ampUserService.approveUser(user.getUsername());
+    	
+    	String url = String.format("/login");
+    	AuthRequest request = new AuthRequest();
+    	request.setUsername(user.getUsername());
+    	request.setPassword(user.getPassword());
+    	String json = mapper.writeValueAsString(request);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
    }
 
     @Test
