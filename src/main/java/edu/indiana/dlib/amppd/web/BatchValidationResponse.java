@@ -7,9 +7,9 @@ import edu.indiana.dlib.amppd.model.Batch;
 import lombok.Data;
 
 @Data
-public class ValidationResponse {
+public class BatchValidationResponse {
 
-	public ValidationResponse() {
+	public BatchValidationResponse() {
 		errors = new ArrayList<String>();
 	}
 	

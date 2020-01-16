@@ -30,7 +30,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.web.ValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @Service
 public class BatchServiceImpl implements BatchService {
@@ -53,7 +53,7 @@ public class BatchServiceImpl implements BatchService {
 	private FileStorageService fileStorageService;
 	
 	
-	public boolean processBatch(ValidationResponse batchValidation, String username) {
+	public boolean processBatch(BatchValidationResponse batchValidation, String username) {
 		try {
 			
 			Batch batch = batchValidation.getBatch();

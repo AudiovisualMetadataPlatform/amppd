@@ -1,7 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.web.ValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 /**
  * Validates a batch manifest CSV returning any and all errors as strings 
@@ -16,5 +16,5 @@ public interface BatchValidationService {
 	 * @param fileContent
 	 * @return
 	 */
-	ValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent);
+	BatchValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent);
 }

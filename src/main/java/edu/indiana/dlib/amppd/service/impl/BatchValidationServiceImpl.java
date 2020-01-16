@@ -21,7 +21,7 @@ import edu.indiana.dlib.amppd.model.BatchFile;
 import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
 import edu.indiana.dlib.amppd.model.BatchSupplementFile;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
-import edu.indiana.dlib.amppd.web.ValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -161,9 +161,9 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the CSV
 	 */
-	public ValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent) {
+	public BatchValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent) {
 
-		ValidationResponse response = new ValidationResponse();
+		BatchValidationResponse response = new BatchValidationResponse();
 		
 		// Turn the string into a list of string arrays representing rows
 		List<String[]> lines = parse(fileContent);
