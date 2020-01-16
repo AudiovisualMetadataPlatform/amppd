@@ -114,7 +114,7 @@ public class BatchServiceTests {
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		 
 		// Copy zip file and extract the files
-        File srcFile = new File(classLoader.getResource("test_files.zip").getFile());	
+        File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	
         Path destPath = Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library", "test_files.zip");	
 
 		Files.copy(srcFile.toPath(), destPath);
