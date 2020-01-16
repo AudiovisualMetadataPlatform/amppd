@@ -233,8 +233,7 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy) {
 		Item item = null;
-		/*List<Collection> collections = collectionRepository.findByName(collection.getName());
-		collection = collections.get(0); */
+		
 		Set<Item> items = collection.getItems();
 		if(items!=null) {
 			for(Item i : items) {
@@ -278,6 +277,7 @@ public class BatchServiceImpl implements BatchService {
 		
 		// Move the file
 		fileStorageService.moveFile(existingFile, newLink);
+		
 	}
 	
 	
