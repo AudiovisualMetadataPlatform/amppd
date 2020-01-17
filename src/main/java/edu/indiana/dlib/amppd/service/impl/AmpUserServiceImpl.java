@@ -211,7 +211,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	private SimpleMailMessage constructResetTokenEmail(
 			  String contextPath, String token, AmpUser user) {
-			    String url = contextPath + "/reset-password/token=" + token;
+			    String url = contextPath + "/reset-password/" + token;
 			    String message = "Please click the link to reset the password. The link  will be valid only for a limited time.";//messages.getMessage("message.resetPassword", null, locale);
 			    return constructEmail("Reset Password", message + " \r\n" + url, user);
 			}
@@ -232,13 +232,13 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		PasswordResetToken passToken = (passwordTokenRepository.findByToken(token)).get();
 		if ((passToken == null) || (passToken.getUser().getId() != user.getId())) {
-			response.addError("Incorrect token");
+			response.addError("Incorrect Link");
 			response.setSuccess(false);
 		    //return response;
 		    }
 		Calendar cal = Calendar.getInstance();
 	    if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-	    	response.addError("Expired token");
+	    	response.addError("Link Expired");
 			response.setSuccess(false);
 	    }
 		
@@ -247,7 +247,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
 			  if(rows > 0)
 			  {
-				  response.setToken(token);
 				  response.setSuccess(true);
 			  }
 		  }
