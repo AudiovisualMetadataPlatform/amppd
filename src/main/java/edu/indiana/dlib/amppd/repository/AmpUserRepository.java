@@ -2,10 +2,12 @@ package edu.indiana.dlib.amppd.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
@@ -23,6 +25,8 @@ public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
 	Optional<AmpUser> findByUsername(String username);
 	Optional<AmpUser> findByEmail(String email);			
 	
+	@Transactional
+	@Modifying
 	@Query(value = "update AmpUser set password = :pswd where username = :username and id = :id")
-	String updatePassword(@Param("username") String username, @Param("pswd") String pswd, @Param("id") Long id);
+	int updatePassword(@Param("username") String username, @Param("pswd") String pswd, @Param("id") Long id);
 }

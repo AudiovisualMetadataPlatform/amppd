@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import edu.indiana.dlib.amppd.config.MailConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 
@@ -10,6 +13,7 @@ import edu.indiana.dlib.amppd.web.AuthResponse;
  */
 
 public interface AmpUserService {
+	
 
 	/**
 	 * Validate the login credentials against database.

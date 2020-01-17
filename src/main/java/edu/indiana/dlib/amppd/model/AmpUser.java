@@ -2,6 +2,8 @@ package edu.indiana.dlib.amppd.model;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -24,7 +26,9 @@ public class AmpUser {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
+	@Column(unique=true)
 	private String username;
+	@Column(unique=true)
 	private String email;	
 	private String password;
 	private Role role;

@@ -10,6 +10,7 @@ public class AuthResponse {
 	}
 	private boolean success;
 	private ArrayList<String> errors;
+	private String token;
 	
 	public void addError(String error) {
 		errors.add(error);

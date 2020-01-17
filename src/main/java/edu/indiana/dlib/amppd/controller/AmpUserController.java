@@ -20,7 +20,7 @@ import lombok.extern.java.Log;
 	 * @author vinitab
 	 *
 	 */
-  @CrossOrigin(origins = "*")
+  @CrossOrigin(origins = "*", allowedHeaders = "*")
   @RestController
   @Log 
   public class AmpUserController{
@@ -48,9 +48,9 @@ import lombok.extern.java.Log;
 	  @PostMapping(path = "/forgot-password", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse forgotPassword(
 			  @RequestBody AuthRequest request){ 
-		log.info("Reset Password for User=> Email:"+ request.getEmailid());	
+		log.info("Forgot Password for User=> Email:"+ request.getEmailid());	
 		AuthResponse res = ampService.emailToken(request.getEmailid());
-		log.info(" Reset Password result: " + res);
+		log.info(" Forgot Password result: " + res);
 		return res;
 	  }
 	  

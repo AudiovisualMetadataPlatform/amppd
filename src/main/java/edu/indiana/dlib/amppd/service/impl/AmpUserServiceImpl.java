@@ -37,10 +37,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
 	  
-	  private MailConfig mailconfig;
-	  
-	  @Autowired
 	  private MessageSource messages;
+	  private String ampEmailId = new String("winni8489@gmail.com");
 	  
 	  @Autowired
 	  private JavaMailSender mailSender;
@@ -50,8 +48,14 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  private int MIN_PASSWORD_LENGTH = 8;
 	  private int MIN_USERNAME_LENGTH = 3;
+	  
 	/*
 	 * @Autowired private JavaMailSender javaMailSender;
+	 */
+	  
+	/*
+	 * @Autowired public AmpUserServiceImpl(MailConfig mailconfig) { ampEmailId =
+	 * mailconfig.getUsername(); }
 	 */
 	  
 	  public AuthResponse validate(String username, String pswd) { 
@@ -174,7 +178,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			String token = UUID.randomUUID().toString();
 			createPasswordResetTokenForUser(user, token);
 		    try {
-				mailSender.send(constructResetTokenEmail("http://localhost:8080", token, user));
+				mailSender.send(constructResetTokenEmail("http://localhost:8080/#", token, user));
 			} catch (MailException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -185,15 +189,29 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	public void createPasswordResetTokenForUser(AmpUser user, String token) {
-	    PasswordResetToken myToken = new PasswordResetToken();
-	    myToken.setToken(token);
-	    myToken.setUser(user);
-		passwordTokenRepository.save(myToken);
+		
+		PasswordResetToken myToken=new PasswordResetToken();
+		Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
+		System.out.println("======>> CALENDAR:"+calendar.getTime());
+		calendar.add(Calendar.SECOND,PasswordResetToken.EXPIRATION);
+		System.out.println("======>> CALENDAR + 60*5:"+calendar.getTime());
+		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
+		if(userTokenExists == 1)
+		{
+			passwordTokenRepository.updateToken(token, user.getId(), calendar.getTime());
+		}
+		else
+		{
+			myToken.setUser(user);
+			myToken.setToken(token);
+			myToken.setExpiryDate(calendar.getTime());
+			passwordTokenRepository.save(myToken);
+		}
 	}
 	
 	private SimpleMailMessage constructResetTokenEmail(
 			  String contextPath, String token, AmpUser user) {
-			    String url = contextPath + "/reset-password?id=" + user.getId() + "&token=" + token;
+			    String url = contextPath + "/reset-password/token=" + token;
 			    String message = "Please click the link to reset the password. The link  will be valid only for a limited time.";//messages.getMessage("message.resetPassword", null, locale);
 			    return constructEmail("Reset Password", message + " \r\n" + url, user);
 			}
@@ -203,7 +221,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	    email.setSubject(subject);
 	    email.setText(body);
 	    email.setTo(user.getEmail());
-	    email.setFrom(mailconfig.getUsername());
+	    email.setFrom(ampEmailId);
 	    return email;
 	}
 
@@ -226,12 +244,14 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		
 	    if(!response.hasErrors()) {
 			  String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
-			  String res = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
+			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
+			  if(rows > 0)
+			  {
+				  response.setToken(token);
+				  response.setSuccess(true);
+			  }
 		  }
 	    
 		  return response;
 	}
-
-
-	
 }
