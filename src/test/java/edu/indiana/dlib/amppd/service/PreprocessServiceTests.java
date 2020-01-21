@@ -22,9 +22,6 @@ public class PreprocessServiceTests {
     private PreprocessService preprocessService;
 
 	@Autowired
-    private FileStorageService fileStorageService;
-
-	@Autowired
 	private TestHelper testHelper;   
 	
     @After
