@@ -1,8 +1,5 @@
 package edu.indiana.dlib.amppd.model;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -10,13 +7,13 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import lombok.ToString;
-
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @EntityListeners(AuditingEntityListener.class)
