@@ -5,11 +5,11 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,12 +25,13 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@Transactional(readOnly=true, noRollbackFor=Exception.class)
 public class Item extends Content {
     
-	@OneToMany(mappedBy="item", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy="item")
     private Set<Primaryfile> primaryfiles;
 
-	@OneToMany(mappedBy="item", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy="item")
     private Set<ItemSupplement> supplements;
 
 	@ManyToOne

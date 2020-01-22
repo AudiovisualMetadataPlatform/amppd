@@ -5,7 +5,6 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
@@ -27,7 +26,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
 
-	@OneToMany(mappedBy="collection", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy="collection")
     private Set<Item> items; 
 	
 	@OneToMany(mappedBy="collection")

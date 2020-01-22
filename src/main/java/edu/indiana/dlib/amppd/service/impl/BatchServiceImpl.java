@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.Batch;
@@ -33,6 +34,7 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @Service
+@Transactional
 public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;

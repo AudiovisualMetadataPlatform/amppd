@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.opencsv.CSVReader;
 
@@ -33,6 +34,7 @@ import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @Service
+@Transactional
 public class BatchValidationServiceImpl implements BatchValidationService {
 	
 	@Autowired
