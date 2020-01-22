@@ -30,8 +30,8 @@ import lombok.extern.java.Log;
 	  @PostMapping(path = "/login", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse loginAuth(@RequestBody AuthRequest request){ 
 		AuthResponse res = new AuthResponse();
-		log.info("Login Authenticaton for User=> Name:"+ request.getUsername());	
-		res = ampService.validate(request.getUsername(), request.getPassword());
+		log.info("Login Authenticaton for User=> Email:"+ request.getEmailid());	
+		res = ampService.validate(request.getEmailid(), request.getPassword());
 		log.info(" Authenticaton result:"+res);
 		return res;
 	  }
@@ -40,6 +40,7 @@ import lombok.extern.java.Log;
 	  public @ResponseBody AuthResponse register(
 			@RequestBody AmpUser user){ 
 		log.info("Registeration for User=> Name:"+ user.getUsername());	
+		log.info("Registeration for User=> Email:"+ user.getEmail());	
 		AuthResponse res = ampService.registerAmpUser(user);
 		log.info(" Registeration result: " + res);
 		return res;

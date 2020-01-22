@@ -35,7 +35,7 @@ public interface AmpUserService {
 	 * @param user contains new user info to be sent in the email
 	 * @return the result of email sending as success/failure
 	 */
-	void sendEmail(AmpUser u);
+	//void sendEmail(AmpUser u);
 
 	/**
 	 * Sets amp user as approved to login to the application

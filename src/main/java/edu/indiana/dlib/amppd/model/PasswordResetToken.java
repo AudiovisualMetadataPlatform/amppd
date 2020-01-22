@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -31,7 +32,7 @@ public class PasswordResetToken {
   
     private String token;
   
-    @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
+    @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
     @JoinColumn(nullable = false, name = "user_id")
     private AmpUser user;
   
