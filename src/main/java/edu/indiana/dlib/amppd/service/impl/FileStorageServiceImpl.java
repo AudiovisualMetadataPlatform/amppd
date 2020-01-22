@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -356,6 +357,19 @@ public class FileStorageServiceImpl implements FileStorageService {
 		}
 		
 		return dirname + File.separator  + filename;
+	}
+	
+	public void moveFile(Path sourcePath, Path destinationPath) throws IOException {
+		// Create a hard link
+		Files.createLink(destinationPath, sourcePath);
+		
+		// If the new file doesn't exists for some reason, throw an exception
+		if(!Files.exists(destinationPath)) {
+			throw new FileNotFoundException(String.format("File %s failed to create.", destinationPath.getFileName()));
+		}
+		
+		// Delete original
+		Files.delete(sourcePath);
 	}
 
 }

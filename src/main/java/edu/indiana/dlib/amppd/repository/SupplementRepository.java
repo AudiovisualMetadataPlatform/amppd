@@ -6,5 +6,4 @@ import edu.indiana.dlib.amppd.model.Supplement;
 
 @NoRepositoryBean
 public interface SupplementRepository<S extends Supplement> extends AssetRepository<S> {
-	
 }

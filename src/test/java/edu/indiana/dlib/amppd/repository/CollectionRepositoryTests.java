@@ -58,7 +58,7 @@ public class CollectionRepositoryTests {
 
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
-		collectionRepository.deleteAll();
+		collectionRepository.deleteAll(); 
 	}
 
 	@Test
