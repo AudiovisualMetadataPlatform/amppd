@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +14,7 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
-public interface AmpUserRepository extends CrudRepository<AmpUser, Long>{
+public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 	
 	@Query(value = "select 1 from AmpUser i where i.email = :email and i.password = :pswd and i.approved=true")
 	String findByApprovedUser(@Param("email") String email, @Param("pswd") String pswd);
