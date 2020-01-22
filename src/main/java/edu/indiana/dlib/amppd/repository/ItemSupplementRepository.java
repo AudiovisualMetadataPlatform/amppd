@@ -8,5 +8,4 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "itemSupplements", path = "itemSupplements")
 public interface ItemSupplementRepository extends SupplementRepository<ItemSupplement> {
-	
 }

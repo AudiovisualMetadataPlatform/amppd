@@ -15,5 +15,4 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	@Query(value = "select i from Primaryfile i where i.name like %:keyword% or i.description like %:keyword%")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 
-	
 }

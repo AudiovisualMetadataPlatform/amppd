@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Entity;
@@ -33,5 +34,10 @@ public class Collection extends Content {
 	
 	@ManyToOne
 	private Unit unit;
+	
+	public void addItem(Item item) {
+		if(items==null) items = new HashSet<Item>();
+		items.add(item);
+	}
 	
 }

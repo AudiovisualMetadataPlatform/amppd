@@ -21,6 +21,7 @@ import lombok.Setter;
 public class AmppdPropertyConfig {
 
     @NotNull private String fileStorageRoot;
+    @NotNull private String dropboxRoot;
     @NotNull private String encryptionSecret;  
     @NotNull private String username; 
     @NotNull private String password; 
