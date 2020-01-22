@@ -10,8 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.HashMap;
-
 //import org.apache.catalina.mapper.Mapper;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,11 +26,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.six2six.fixturefactory.Fixture;
-import br.com.six2six.fixturefactory.Rule;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
-import edu.indiana.dlib.amppd.model.factory.ObjectFactory;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.Dataentity;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -43,18 +38,16 @@ public class CollectionRepositoryTests {
 
 	@Autowired
 	private CollectionRepository collectionRepository;
-	
+
 	private ObjectMapper mapper = new ObjectMapper();
 	private Collection obj;
-	//private ObjectFactory objFactory = new ObjectFactory();
-	
-	
+	// private ObjectFactory objFactory = new ObjectFactory();
+
 	@BeforeClass
-	public static void setupTest() 
-	{
-	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
+	public static void setupTest() {
+		FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
 	}
-	
+
 	/*
 	 * @Before public void initiateBeforeTests() throws Exception { HashMap params =
 	 * new HashMap<String, String>(); objCollection=
@@ -63,91 +56,97 @@ public class CollectionRepositoryTests {
 	 * }
 	 */
 
-	@Before 
+	@Before
 	public void deleteAllBeforeTests() throws Exception {
 		collectionRepository.deleteAll(); 
 	}
 
+	@Test
+	public void shouldReturnRepositoryIndex() throws Exception {
+		mockMvc.perform(get("/")).andExpect(status().isOk()).andExpect(jsonPath("$._links.collections").exists());
+	}
 
-	@Test public void shouldReturnRepositoryIndex() throws Exception {
-		mockMvc.perform(get("/")).andExpect(status().isOk()).
-		andExpect( jsonPath("$._links.collections").exists()); }
+	@Test
+	public void shouldCreateCollection() throws Exception {
+		mockMvc.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+				.andExpect(status().isCreated()).andDo(MockMvcResultHandlers.print())
+				.andExpect(header().string("Location", containsString("collections/")));
+	}
 
+	@Test
+	public void shouldCreateCollectionWithLongDescription() throws Exception {
+		StringBuffer description = new StringBuffer();
+		for (int i=0; i<256; i++) {
+			description.append("Long description ");
+		}
+		String content = "{\"name\": \"Collection 1\", \"description\":\"" + description.toString() + "\"}";
+		mockMvc.perform(post("/collections").content(content))
+				.andExpect(status().isCreated()).andDo(MockMvcResultHandlers.print())
+				.andExpect(header().string("Location", containsString("collections/")));
+	}
 
-	@Test public void shouldCreateCollection() throws Exception {
-		mockMvc.perform(post("/collections").content(
-				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andDo(MockMvcResultHandlers.print()).andExpect(
-								header().string("Location", containsString("collections/"))); }
-	
+	@Test
+	public void shouldRetrieveCollection() throws Exception {
 
-	@Test public void shouldRetrieveCollection() throws Exception {
-		
-		
-		mockMvc.perform(post("/collections").
-				content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
-		.andExpect(status().isCreated()).andReturn(); }
-	
+		mockMvc.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+				.andExpect(status().isCreated()).andReturn();
+	}
 
-	@Test public void shouldQueryCollection() throws Exception {
+	@Test
+	public void shouldQueryCollection() throws Exception {
 		obj = Fixture.from(Collection.class).gimme("valid");
-		
+
 		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/collections")
-				  .content(json)).andExpect(
-						  status().isCreated());
-		
-		mockMvc.perform(
-				get("/collections/search/findByName?name={name}", obj.getName())).andDo(MockMvcResultHandlers.
-						print()).andExpect( status().isOk()).andExpect(
-								jsonPath("$._embedded.collections[0].name").value( obj.getName())) ; }
-	
+		mockMvc.perform(post("/collections").content(json)).andExpect(status().isCreated());
 
-	@Test public void shouldUpdateCollection() throws Exception { 
-	
-		  MvcResult mvcResult = mockMvc.perform(post("/collections").content(
-		  "{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-		  status().isCreated()).andReturn();
-		 
-		String location = mvcResult.getResponse().getHeader("Location");
-		
-		mockMvc.perform(put(location).content(
-				"{\"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
-						status().isNoContent());
-		 
-		 mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-			jsonPath("$.name").value("Collection 1.1")).andExpect(
-					jsonPath("$.description").value("For test")); }
+		mockMvc.perform(get("/collections/search/findByName?name={name}", obj.getName()))
+				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.collections[0].name").value(obj.getName()));
+	}
 
+	@Test
+	public void shouldUpdateCollection() throws Exception {
 
-
-	@Test public void shouldPartiallyUpdateCollection() throws Exception {
-
-		MvcResult mvcResult = mockMvc.perform(post("/collections").content(
-				"{\"name\": \"Collection 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
+		MvcResult mvcResult = mockMvc
+				.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+				.andExpect(status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(
-				patch(location).content("{\"name\": \"Collection 1.1.1\"}")).andExpect(
-						status().isNoContent());
+		mockMvc.perform(put(location).content("{\"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
+				.andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("Collection 1.1.1")).andExpect(
-						jsonPath("$.description").value("For test")); }
+		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Collection 1.1"))
+				.andExpect(jsonPath("$.description").value("For test"));
+	}
 
-	
-	@Test public void shouldDeleteCollection() throws Exception {
+	@Test
+	public void shouldPartiallyUpdateCollection() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/collections").content(
-				"{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
+		MvcResult mvcResult = mockMvc
+				.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+				.andExpect(status().isCreated()).andReturn();
+
+		String location = mvcResult.getResponse().getHeader("Location");
+
+		mockMvc.perform(patch(location).content("{\"name\": \"Collection 1.1.1\"}")).andExpect(status().isNoContent());
+
+		mockMvc.perform(get(location)).andExpect(status().isOk())
+				.andExpect(jsonPath("$.name").value("Collection 1.1.1"))
+				.andExpect(jsonPath("$.description").value("For test"));
+	}
+
+	@Test
+	public void shouldDeleteCollection() throws Exception {
+
+		MvcResult mvcResult = mockMvc
+				.perform(post("/collections").content("{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
+				.andExpect(status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isNotFound()); }
-
+		mockMvc.perform(get(location)).andExpect(status().isNotFound());
+	}
 
 }
