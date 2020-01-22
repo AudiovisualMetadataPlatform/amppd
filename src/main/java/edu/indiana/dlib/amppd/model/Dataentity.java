@@ -34,8 +34,6 @@ public abstract class Dataentity {
     
     @NonNull
     @Type(type="text")
-//    @Column(columnDefinition="text")
-//    @Column(length=2048)
     private String description;
 
     @CreatedDate
