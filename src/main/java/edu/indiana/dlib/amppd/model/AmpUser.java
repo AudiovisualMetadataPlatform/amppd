@@ -15,9 +15,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-@Data
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Data
 @EqualsAndHashCode
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class AmpUser {
