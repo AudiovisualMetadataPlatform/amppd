@@ -45,5 +45,6 @@ public class AmpUser {
 	private Boolean approved = false;	
 	
 	@OneToMany(mappedBy="assignedTo")
-    private Set<Hmgmtask> hmgmtasks;
+    private Set<HmgmTask> hmgmTasks;
+	
 }

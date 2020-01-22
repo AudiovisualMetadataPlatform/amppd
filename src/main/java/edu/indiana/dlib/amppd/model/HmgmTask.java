@@ -1,8 +1,11 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.Set;
+
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -23,7 +26,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class Hmgmtask extends Dataentity {
+public class HmgmTask extends Dataentity {
 	
 	public enum Type {TRANSCRIPT, NER, STRUCTURE};
 	public enum Status {OPEN, READY, ASSIGNED, PROGRESS, REVIEW, COMPLETED};
@@ -44,11 +47,13 @@ public class Hmgmtask extends Dataentity {
 	// current status, could be: Open, Ready (level of detail has been provided by supervisor), Assigned, In progress, Under review, Completed
 	private Status status;
 
-	// the path (relative to amppd root) for the temporary file saved while work is in progress
-	private String tmpFilepath;
+	// the path (relative to amppd root) for the output file saved while work is in progress
+	// note that each time assignee saves the file it will overwrites the previous version
+	// and when the task is submitted, this file becomes the final version sent to Galaxy HMGM tool
+	private String outputFilepath;
 	
-//	// ID of the user currently assigned to the task
-//	private Long assignedUserId;
+	@OneToMany(mappedBy="hmgmTask")
+	private Set<HmgmNote> hmgmNotes;
 	
 	@ManyToOne 
 	private AmpUser assignedTo;
