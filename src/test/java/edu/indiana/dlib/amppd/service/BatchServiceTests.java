@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -100,14 +101,17 @@ public class BatchServiceTests {
 		
 		unitRepository.deleteAll();
 		
+		String collectionName = "Music Library";
+		String unitName = "Test Unit";
+		
 		// Make sure a test unit and collection are created
 		mockMvc.perform(post("/units").content(
-				"{\"name\": \"Test Unit\", \"description\":\"For test\"}")).andExpect(
+				"{\"name\": \"" + unitName + "\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("units/")));
 
 		mockMvc.perform(post("/collections").content(
-				"{ \"name\": \"Music Library\", \"description\":\"For test\"}")).andExpect(
+				"{ \"name\": \"" + collectionName + "\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 		
 		
@@ -115,11 +119,20 @@ public class BatchServiceTests {
 		 
 		// Copy zip file and extract the files
         File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	
-        Path destPath = Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library", "test_files.zip");	
+        
+        Assert.assertTrue(srcFile.exists());
+        
+        // Create necessary directories
+
+        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
+        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot(), unitName));
+        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName));
+        
+        Path destPath = Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName, "test_files.zip");	
 
 		Files.copy(srcFile.toPath(), destPath);
 		
-        unzip(destPath.toString(), Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library").toString());
+        unzip(destPath.toString(), Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName).toString());
         
         Files.delete(destPath);
 

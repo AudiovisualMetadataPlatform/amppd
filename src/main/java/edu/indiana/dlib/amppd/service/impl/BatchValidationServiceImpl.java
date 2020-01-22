@@ -20,23 +20,17 @@ import edu.indiana.dlib.amppd.model.Batch;
 import edu.indiana.dlib.amppd.model.BatchFile;
 import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
 import edu.indiana.dlib.amppd.model.BatchSupplementFile;
-import edu.indiana.dlib.amppd.service.BatchValidationService;
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.ItemSupplement;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.BatchFileRepository;
 import edu.indiana.dlib.amppd.repository.BatchRepository;
 import edu.indiana.dlib.amppd.repository.BatchSupplementFileRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.service.BatchValidationService;
+import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @Service
 public class BatchValidationServiceImpl implements BatchValidationService {
@@ -49,19 +43,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	
 	@Autowired
     private CollectionRepository collectionRepository;
-	
-	@Autowired
-    private PrimaryfileRepository primaryFileRepository;
-
-	@Autowired
-    private PrimaryfileSupplementRepository primaryFileSupplementRepository;
-	
-	@Autowired
-    private CollectionSupplementRepository collectionSupplementRepository;
-
-	@Autowired
-    private ItemSupplementRepository itemSupplementRepository;
-	
+		
 	@Autowired
     private BatchRepository batchRepository;
 	@Autowired
@@ -324,10 +306,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	    	}
 
 			// Check to see if file exists in database
-			List<Primaryfile> files = primaryFileRepository.findByLabel(primaryFileLabel);
+			boolean primaryFileExists = primaryFileExistsInCollection(collection, primaryFileLabel);
 
 			// If not - new file - Make sure it exists on file system
-			if(files.size()==0) {
+			if(primaryFileExists) {
 				if(!primaryFile.isBlank() && !fileExists(unit.getName(), collection.getName(), primaryFile)) {
 		    		errors.add(String.format("Row: %s: Primary file %s does not exist in the dropbox", lineNum, primaryFile));
 				}
@@ -342,6 +324,27 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			}
 		}
     	return errors;
+	}
+	
+	/*
+	 * Check to see if this primary file exists in a collection already
+	 */
+	private boolean primaryFileExistsInCollection(Collection collection, String name) {
+		if(collection.getItems() == null) {
+			return false;
+		}
+		
+		for(Item item : collection.getItems()) {
+			if(item.getPrimaryfiles()==null) {
+				continue;
+			}
+			for(Primaryfile primaryFile : item.getPrimaryfiles()) {
+				if(primaryFile.getName()==name) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	/*
@@ -368,36 +371,19 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		}
 		else {
 			if(supplementType==SupplementType.PRIMARYFILE) {
-				// Check to see if file exists in database
-				List<PrimaryfileSupplement> files = primaryFileSupplementRepository.findByLabel(supplementalFileLabel);
-
-				// If not - new file - Make sure it exists on file system
-				if(files.size()==0) {
-					if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
-			    		errors.add(String.format("Row: %s: Primary supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
-					}
+				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
+		    		errors.add(String.format("Row: %s: Primary supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
+				}
+				
+			}
+			else if(supplementType==SupplementType.ITEM){
+				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
+		    		errors.add(String.format("Row: %s: Item supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 				}
 			}
 			else if(supplementType==SupplementType.ITEM){
-				// Check to see if file exists in database
-				List<ItemSupplement> files = itemSupplementRepository.findByLabel(supplementalFileLabel);
-
-				// If not - new file - Make sure it exists on file system
-				if(files.size()==0) {
-					if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
-			    		errors.add(String.format("Row: %s: Item supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
-					}
-				}
-			}
-			else if(supplementType==SupplementType.ITEM){
-				// Check to see if file exists in database
-				List<CollectionSupplement> files = collectionSupplementRepository.findByLabel(supplementalFileLabel);
-
-				// If not - new file - Make sure it exists on file system
-				if(files.size()==0) {
-					if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
-			    		errors.add(String.format("Row: %s: Collection supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
-					}
+				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
+			    	errors.add(String.format("Row: %s: Collection supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 				}
 			}
 
