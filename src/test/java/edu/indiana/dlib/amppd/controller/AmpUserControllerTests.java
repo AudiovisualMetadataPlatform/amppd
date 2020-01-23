@@ -18,10 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Passwordresettoken;
-import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 
 @RunWith(SpringRunner.class)
@@ -82,7 +79,7 @@ public class AmpUserControllerTests {
     	
     	String url = String.format("/login");
     	AuthRequest request = new AuthRequest();
-    	request.setUsername(user.getUsername());
+    	request.setEmailid(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url)
@@ -111,7 +108,7 @@ public class AmpUserControllerTests {
         
     	String url = String.format("/login");
     	AuthRequest request = new AuthRequest();
-    	request.setUsername(user.getUsername());
+    	request.setEmailid(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url)
