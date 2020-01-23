@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.AmpUser;  
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 
@@ -178,9 +178,11 @@ public class AmpUserControllerTests {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 
     	AmpUser ampUser = new AmpUser();
-    	ampUser.setEmail("test@iu.edu");
+    	
     	ampUser.setPassword("password1234");
     	ampUser.setUsername("testUser_" + rand_int1);
+    	ampUser.setEmail(ampUser.getUsername()+"@iu.edu");
+    	
     	return ampUser;
     }
     

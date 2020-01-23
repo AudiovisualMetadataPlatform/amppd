@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.service;
 
 
 import java.util.Calendar;
+import java.util.Random;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -14,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.AmpUser;  
 import edu.indiana.dlib.amppd.model.Passwordresettoken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
@@ -61,10 +62,8 @@ public class AmpUserServiceTests {
 	@Test
 	public void shouldResetPassword() throws Exception{
     	
-	 	AmpUser user = new AmpUser();  
-	 	user.setUsername("ampPasswordResetTest1");
+	 	AmpUser user = getAmpUser();  
 	 	user.setPassword(md5.getMd5("amptest@123"));
-	 	user.setEmail("test123@gmail.com");
 	 	ampUserService.registerAmpUser(user);
 	 	
 	 	String token = UUID.randomUUID().toString();
@@ -78,12 +77,24 @@ public class AmpUserServiceTests {
 	 	
 	 	try {
 				ampUserService.resetPassword(user.getEmail(), md5.getMd5("amp_new@123"), token);
-				AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).orElseThrow(() -> new RuntimeException("User not found: " + user.getEmail()));
+				AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).get();
 				Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
 		  }
 	 	
+    }
+	
+	private AmpUser getAmpUser() {
+        Random rand = new Random(); 
+        int rand_int1 = rand.nextInt(1000); 
+    	AmpUser ampUser = new AmpUser();
+    	
+    	ampUser.setPassword("password1234");
+    	ampUser.setUsername("testUser_" + rand_int1);
+    	ampUser.setEmail(ampUser.getUsername()+"@iu.edu");
+    	
+    	return ampUser;
     }
 }

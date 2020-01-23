@@ -32,7 +32,7 @@ public class Passwordresettoken {
   
     private String token;
   
-    @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
+    @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private AmpUser user;
   
