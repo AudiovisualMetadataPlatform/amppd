@@ -27,7 +27,7 @@ import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.MailConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.PasswordResetToken;
+import edu.indiana.dlib.amppd.model.Passwordresettoken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
@@ -187,9 +187,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	public void createPasswordResetTokenForUser(AmpUser user, String token) {
 		
-		PasswordResetToken myToken=new PasswordResetToken();
+		Passwordresettoken myToken=new Passwordresettoken();
 		Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
-		calendar.add(Calendar.SECOND,PasswordResetToken.EXPIRATION);
+		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
 		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
 		if(userTokenExists == 1)
 		{
@@ -225,7 +225,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		// TODO Auto-generated method stub
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
-		PasswordResetToken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
+		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
 		if ((passToken == null) || (user == null) || (passToken.getUser().getId() != user.getId())) {
 			response.addError("Incorrect Link");
 			response.setSuccess(false);

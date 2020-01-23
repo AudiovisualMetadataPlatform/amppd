@@ -22,7 +22,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class PasswordResetToken {
+public class Passwordresettoken {
   
     public static final int EXPIRATION = 60 * 5;
   

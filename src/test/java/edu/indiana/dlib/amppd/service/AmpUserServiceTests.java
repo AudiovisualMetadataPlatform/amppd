@@ -68,11 +68,11 @@ public class AmpUserServiceTests {
 	 	ampUserService.registerAmpUser(user);
 	 	
 	 	String token = UUID.randomUUID().toString();
-	 	PasswordResetToken myToken = new PasswordResetToken();
+	 	Passwordresettoken myToken = new Passwordresettoken();
 	 	myToken.setUser(user);
 		myToken.setToken(token);
 		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.SECOND,PasswordResetToken.EXPIRATION);
+		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
 		myToken.setExpiryDate(calendar.getTime());
 		passwordTokenRepository.save(myToken);
 	 	
