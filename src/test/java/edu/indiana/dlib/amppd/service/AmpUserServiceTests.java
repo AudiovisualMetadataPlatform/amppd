@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.PasswordResetToken;
+import edu.indiana.dlib.amppd.model.Passwordresettoken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
@@ -68,11 +68,11 @@ public class AmpUserServiceTests {
 	 	ampUserService.registerAmpUser(user);
 	 	
 	 	String token = UUID.randomUUID().toString();
-	 	PasswordResetToken myToken = new PasswordResetToken();
+	 	Passwordresettoken myToken = new Passwordresettoken();
 	 	myToken.setUser(user);
 		myToken.setToken(token);
 		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.SECOND,PasswordResetToken.EXPIRATION);
+		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
 		myToken.setExpiryDate(calendar.getTime());
 		passwordTokenRepository.save(myToken);
 	 	
