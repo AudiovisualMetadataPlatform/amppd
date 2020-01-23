@@ -15,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.PasswordResetToken;
+import edu.indiana.dlib.amppd.model.Passwordresettoken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
