@@ -83,7 +83,12 @@ public class BatchServiceTests {
     private AmpUserRepository ampUserRepository;
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
+	@Autowired
+    private AmpUserService ampUserService;
 
+	
+	private String ampUsername = "ampTestUser";
+	
 	@Before
 	public void createTestData() throws Exception {
 		isupplementRepository.deleteAll();
@@ -115,6 +120,17 @@ public class BatchServiceTests {
 		
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		 
+		
+		// If we don't have a test user, create one
+	 	Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
+	 	if(users==null || users.isEmpty()) {
+	 		AmpUser user = new AmpUser();
+		 	user.setUsername(ampUsername);
+		 	user.setPassword("testAmpPassword");
+		 	user.setEmail("ampTestUser@iu.edu");
+		 	ampUserService.registerAmpUser(user);
+	 	}
+	 	
 		// Copy zip file and extract the files
         File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	
         
@@ -149,7 +165,7 @@ public class BatchServiceTests {
         
         System.out.println(content);
         
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -171,7 +187,7 @@ public class BatchServiceTests {
         
         System.out.println(content);
         
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -191,7 +207,7 @@ public class BatchServiceTests {
         
         System.out.println(content);
                 
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Invalid Unit", "Test File", users.get(), content);
         
@@ -211,7 +227,7 @@ public class BatchServiceTests {
         
         System.out.println(content);
                 
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -229,7 +245,7 @@ public class BatchServiceTests {
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
                         
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -247,7 +263,7 @@ public class BatchServiceTests {
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
                         
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -265,7 +281,7 @@ public class BatchServiceTests {
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
 
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -283,7 +299,7 @@ public class BatchServiceTests {
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
 
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
@@ -301,7 +317,7 @@ public class BatchServiceTests {
         File file = new File(classLoader.getResource(fileName).getFile());
         String content = new String(Files.readAllBytes(file.toPath()));
 
-        Optional<AmpUser> users = ampUserRepository.findByUsername("dan");
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
