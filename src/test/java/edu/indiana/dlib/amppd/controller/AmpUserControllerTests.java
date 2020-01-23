@@ -128,7 +128,7 @@ public class AmpUserControllerTests {
     
     @Test
 	public void testForgotPasswordEmail() throws Exception {
-    	AmpUser user = getAmpUser();
+    	AmpUser user = getAmpUser(); 
     	String url = String.format("/forgot-password");
     	user.setEmail("winni8489@gmail.com");
     	postRegister(user, true);

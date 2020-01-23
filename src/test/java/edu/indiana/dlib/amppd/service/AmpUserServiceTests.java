@@ -75,7 +75,7 @@ public class AmpUserServiceTests {
 		myToken.setExpiryDate(calendar.getTime());
 		passwordTokenRepository.save(myToken);
 	 	
-	 	try {
+	 	try { 
 				ampUserService.resetPassword(user.getEmail(), md5.getMd5("amp_new@123"), token);
 				AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).get();
 				Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
