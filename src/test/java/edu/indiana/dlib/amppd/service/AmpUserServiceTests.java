@@ -61,7 +61,7 @@ public class AmpUserServiceTests {
 	@Test
 	public void shouldResetPassword() throws Exception{
     	
-	 	AmpUser user = new AmpUser();
+	 	AmpUser user = new AmpUser();  
 	 	user.setUsername("ampPasswordResetTest1");
 	 	user.setPassword(md5.getMd5("amptest@123"));
 	 	user.setEmail("test123@gmail.com");

@@ -93,7 +93,7 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser();
     	user.setUsername("");
     	postRegister(user, false);
-    }
+    }  
 
     @Test
     public void shouldAcceptValidUsernamePasswordEmail() throws Exception {
