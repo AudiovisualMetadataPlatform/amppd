@@ -168,10 +168,17 @@ public class BatchServiceTests {
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+
+        if(response.getErrors()!=null) {
+            for(String s : response.getErrors()) {
+                System.out.println("Should be valid fails validation: " + s);
+            }
+        }
         
         Assert.assertFalse(response.hasErrors());
         
-        boolean success = batchService.processBatch(response, "Test User");
+        boolean success = batchService.processBatch(response, ampUsername);
+        
         
         Assert.assertTrue(success);
         
