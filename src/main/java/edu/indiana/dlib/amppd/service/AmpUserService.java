@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import edu.indiana.dlib.amppd.config.MailConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 
@@ -10,6 +13,7 @@ import edu.indiana.dlib.amppd.web.AuthResponse;
  */
 
 public interface AmpUserService {
+	
 
 	/**
 	 * Validate the login credentials against database.
@@ -31,7 +35,7 @@ public interface AmpUserService {
 	 * @param user contains new user info to be sent in the email
 	 * @return the result of email sending as success/failure
 	 */
-	void sendEmail(AmpUser u);
+	//void sendEmail(AmpUser u);
 
 	/**
 	 * Sets amp user as approved to login to the application
@@ -39,4 +43,18 @@ public interface AmpUserService {
 	 * @return the result of setting the user to approved as success/failure
 	 */
 	boolean approveUser(String userName);
+	
+	/**
+	 * Resets the existing password in the database for the given username
+	 * @param username, new password to be updated in the DB, secure token
+	 * @return the boolean result for update in the databse
+	 */
+	public AuthResponse resetPassword(String userName, String new_password, String token);
+	
+	/**
+	 * Generates a token and sends it in an email to the provided email id
+	 * @param email id
+	 * @return the boolean result for sending the email
+	 */
+	public AuthResponse emailToken(String emailid);
 }

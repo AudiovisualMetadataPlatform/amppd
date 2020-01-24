@@ -17,9 +17,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.AmpUser;  
 import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 
 @RunWith(SpringRunner.class)
@@ -80,7 +79,7 @@ public class AmpUserControllerTests {
     	
     	String url = String.format("/login");
     	AuthRequest request = new AuthRequest();
-    	request.setUsername(user.getUsername());
+    	request.setEmailid(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url)
@@ -94,7 +93,7 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser();
     	user.setUsername("");
     	postRegister(user, false);
-    }
+    }  
 
     @Test
     public void shouldAcceptValidUsernamePasswordEmail() throws Exception {
@@ -109,7 +108,7 @@ public class AmpUserControllerTests {
         
     	String url = String.format("/login");
     	AuthRequest request = new AuthRequest();
-    	request.setUsername(user.getUsername());
+    	request.setEmailid(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url)
@@ -126,14 +125,64 @@ public class AmpUserControllerTests {
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
     	
     }
+    
+    @Test
+	public void testForgotPasswordEmail() throws Exception {
+    	AmpUser user = getAmpUser(); 
+    	String url = String.format("/forgot-password");
+    	user.setEmail("winni8489@gmail.com");
+    	postRegister(user, true);
+    	
+    	ampUserService.approveUser(user.getUsername());
+    	AuthRequest request = new AuthRequest();
+    	request.setEmailid(user.getEmail());
+    	
+    	String json = mapper.writeValueAsString(request);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
+    }
+    
+	/*
+	 * @Test public void testResetPassword() throws Exception {
+	 * 
+	 * String newPassword = "amptestresetpassword"; AmpUser user = getAmpUser();
+	 * String url = String.format("/reset-password");
+	 * user.setEmail("winni8489@gmail.com"); postRegister(user, true);
+	 * 
+	 * ampUserService.approveUser(user.getUsername()); AuthRequest request = new
+	 * AuthRequest(); request.setEmailid(user.getEmail());
+	 * request.setPassword(newPassword); request.setToken("randomTokenCheck");
+	 * 
+	 * String json = mapper.writeValueAsString(request); mvc.perform(post(url)
+	 * .contentType(MediaType.APPLICATION_JSON) .content(json)
+	 * .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(
+	 * jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(
+	 * false));
+	 * 
+	 * 
+	 * PasswordTokenRepository passTokenRepo = null; PasswordResetToken passToken =
+	 * passTokenRepo.findByUser(user).get(); if(passToken!=null) {
+	 * request.setToken(passToken.getToken()); json =
+	 * mapper.writeValueAsString(request); mvc.perform(post(url)
+	 * .contentType(MediaType.APPLICATION_JSON) .content(json)
+	 * .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(
+	 * jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true
+	 * )); }
+	 * 
+	 * }
+	 */
 
     private AmpUser getAmpUser() {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 
     	AmpUser ampUser = new AmpUser();
-    	ampUser.setEmail("test@iu.edu");
+    	
     	ampUser.setPassword("password1234");
     	ampUser.setUsername("testUser_" + rand_int1);
+    	ampUser.setEmail(ampUser.getUsername()+"@iu.edu");
+    	
     	return ampUser;
     }
     
