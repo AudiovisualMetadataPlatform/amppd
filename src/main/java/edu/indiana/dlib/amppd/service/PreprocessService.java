@@ -19,9 +19,9 @@ public interface PreprocessService {
 	/**
 	 * Converts flac file to wav file and update the pathname if the given asset points to a flac file.
 	 * @param asset the given asset
-	 * @return true if conversion happened; false otherwise
+	 * @return the updated asset if conversion happened; otherwise the original asset
 	 */
-	public boolean convertFlac(Asset asset);
+	public Asset convertFlac(Asset asset);
 	
 	/**
 	 * Retrieves media info of the given media file.
@@ -33,9 +33,16 @@ public interface PreprocessService {
 	/**
 	 * Retrieves media info for the given asset.
 	 * @@asset the given asset
-	 * @return content of the json output file containing the retrieved media info
+	 * @return the updated asset containing the retrieved media info
 	 */
-	public String retrieveMediaInfo(Asset asset);
+	public Asset retrieveMediaInfo(Asset asset);
+	
+	/**
+	 * Preprocesses the given asset by converting flac to wav and retrieving media info; this should be done any time an asset is ingested.
+	 * @@asset the given asset
+	 * @return the preprocessed asset
+	 */
+	public Asset preprocess(Asset asset);
 	
 
 }

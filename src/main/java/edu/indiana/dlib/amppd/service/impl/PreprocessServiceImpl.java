@@ -82,19 +82,19 @@ public class PreprocessServiceImpl implements PreprocessService {
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.convertFlac(Asset)
 	 */
 	@Override
-	public boolean convertFlac(Asset asset) {
+	public Asset convertFlac(Asset asset) {
 		String targetFilePath = convertFlacToWav(asset.getPathname());
 				
 		// note that we do not remove the original flac file just in case of future use
 		if (targetFilePath != null) {
 			asset.setPathname(targetFilePath);
-			saveAsset(asset); 
+			Asset updatedAsset = saveAsset(asset); 
 			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
-			return true;		
+			return updatedAsset;		
 		}
 
 		log.info("No conversion is needed for asset: " + asset.getId());
-		return false;
+		return asset;
 	}
 	
 	/**
@@ -138,35 +138,45 @@ public class PreprocessServiceImpl implements PreprocessService {
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.retrieveMediaInfo(Asset)
 	 */
 	@Override	
-	public String retrieveMediaInfo(Asset asset) {
+	public Asset retrieveMediaInfo(Asset asset) {
 		String mediainfo = retrieveMediaInfo(asset.getPathname());
 		if (StringUtils.isEmpty(mediainfo)) {
 			throw new PreprocessException("Error retrieving media info for Asset " + asset.getId() + ": the result is empty");
 		}
 
 		asset.setMediainfo(mediainfo);
-		saveAsset(asset);
-		log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
-		return mediainfo;
+		Asset updatedAsset = saveAsset(asset);
+		log.info("Retrieved media info for asset: " + asset.getId());
+		return updatedAsset;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.preprocess(Asset)
+	 */
+	@Override	
+	public Asset preprocess(Asset asset) {
+		log.info("Preprocessing asset: " + asset.getId());
+		return retrieveMediaInfo(convertFlac(asset));
 	}
 	
 	/**
 	 * Saves the given asset to DB.
 	 * @param asset the given asset
 	 */
-	private void saveAsset(Asset asset) {
+	private Asset saveAsset(Asset asset) {
 		if (asset instanceof Primaryfile) {
-			primaryfileRepository.save((Primaryfile)asset);
+			return primaryfileRepository.save((Primaryfile)asset);
 		}
 		else if (asset instanceof PrimaryfileSupplement) {
-			primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
+			return primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
 		}
 		else if (asset instanceof ItemSupplement) {
-			itemSupplementRepository.save((ItemSupplement)asset);
+			return itemSupplementRepository.save((ItemSupplement)asset);
 		}
 		else if (asset instanceof CollectionSupplement) {
-			collectionSupplementRepository.save((CollectionSupplement)asset);
+			return collectionSupplementRepository.save((CollectionSupplement)asset);
 		}
+		return asset;
 	}
 	
 }
