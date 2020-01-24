@@ -72,6 +72,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 		try {
 				root = Paths.get(config.getFileStorageRoot());
 				Files.createDirectories(root);	// creates root directory if not already exists
+				Files.createDirectories(Paths.get(config.getDropboxRoot()));	// creates batch root directory if not already exists
 				log.info("File storage root directory " + config.getFileStorageRoot() + " has been created." );
 			}
 		catch (IOException e) {
