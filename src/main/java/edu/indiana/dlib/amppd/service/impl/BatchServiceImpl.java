@@ -67,6 +67,7 @@ public class BatchServiceImpl implements BatchService {
 			return true;
 		}
 		catch(Exception ex) {
+			System.out.println(ex.toString());
 			return false;
 		}
 	}
