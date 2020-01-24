@@ -1,11 +1,25 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.IOException;
+
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.MediaConversionException;
+import edu.indiana.dlib.amppd.exception.PreprocessException;
+import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.java.Log;
@@ -20,8 +34,22 @@ import lombok.extern.java.Log;
 public class PreprocessServiceImpl implements PreprocessService {
 	
 	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+	
+	@Autowired
     private FileStorageService fileStorageService;
 
+	@Autowired
+	PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
+	PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	
+	@Autowired
+	ItemSupplementRepository itemSupplementRepository;
+	
+	@Autowired
+	CollectionSupplementRepository collectionSupplementRepository;
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.convertFlacToWav(String)
@@ -56,12 +84,16 @@ public class PreprocessServiceImpl implements PreprocessService {
 	@Override
 	public boolean convertFlac(Asset asset) {
 		String targetFilePath = convertFlacToWav(asset.getPathname());
+				
+		// note that we do not remove the original flac file just in case of future use
 		if (targetFilePath != null) {
 			asset.setPathname(targetFilePath);
-			log.info("Updated media file path after flac->wav conversion for primaryfile: " + asset.getId());
-			// note that we do not remove the original flac file just in case of future use
-			return true;
+			saveAsset(asset); 
+			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
+			return true;		
 		}
+
+		log.info("No conversion is needed for asset: " + asset.getId());
 		return false;
 	}
 	
@@ -70,26 +102,71 @@ public class PreprocessServiceImpl implements PreprocessService {
 	 */
 	@Override
 	public String retrieveMediaInfo(String filepath) {
-		String command = "python3 media_probe.py --json " + fileStorageService.absolutePathName(filepath);
+		String jsonpath = FilenameUtils.getFullPath(filepath) + FilenameUtils.getBaseName(filepath) + ".json";
+		String command = amppdPropertyConfig.getPythonPath() + " media_probe.py --json " + fileStorageService.absolutePathName(filepath) + " > " + jsonpath;
 		
+		// call media_probe to generate metadata into json file
+		// note that it's optional to keep the json file; for now let's keep it
 		try {
 			Process process = Runtime.getRuntime().exec(command);
+		    final int status = process.waitFor();
+		    if (status != 0) {
+		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
+		    }
 		}
-		catch (Exception e) {
-			throw new MediaConversionException("Exception while retrieving media info for " + filepath, e);
+		catch (IOException e) {
+			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
+		}
+		catch (InterruptedException e) {
+			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
 		}
 		
-		log.info("Retrieved media info for " + filepath);
-		return filepath;		
+		// read the json file content into a string
+		String nediainfo = null;
+		try {
+			nediainfo = fileStorageService.readTextFile(jsonpath);
+		}
+		catch(StorageFileNotFoundException e) {
+			throw new PreprocessException("Error while reading media info from " + jsonpath + ": the json file does not exist");
+		}
+		
+		log.info("Retrieved media info for " + filepath + " into json file " + jsonpath);
+		return nediainfo;		
 	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.retrieveMediaInfo(Asset)
 	 */
 	@Override	
-	public boolean retrieveMediaInfo(Asset asset) {
-		return true;
-	}
+	public String retrieveMediaInfo(Asset asset) {
+		String mediainfo = retrieveMediaInfo(asset.getPathname());
+		if (StringUtils.isEmpty(mediainfo)) {
+			throw new PreprocessException("Error retrieving media info for Asset " + asset.getId() + ": the result is empty");
+		}
 
+		asset.setMediainfo(mediainfo);
+		saveAsset(asset);
+		log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
+		return mediainfo;
+	}
+	
+	/**
+	 * Saves the given asset to DB.
+	 * @param asset the given asset
+	 */
+	private void saveAsset(Asset asset) {
+		if (asset instanceof Primaryfile) {
+			primaryfileRepository.save((Primaryfile)asset);
+		}
+		else if (asset instanceof PrimaryfileSupplement) {
+			primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
+		}
+		else if (asset instanceof ItemSupplement) {
+			itemSupplementRepository.save((ItemSupplement)asset);
+		}
+		else if (asset instanceof CollectionSupplement) {
+			collectionSupplementRepository.save((CollectionSupplement)asset);
+		}
+	}
 	
 }

@@ -26,4 +26,5 @@ public class AmppdPropertyConfig {
     @NotNull private String username; 
     @NotNull private String password; 
     @NotNull private String ampurl;
+    @NotNull private String pythonPath;
 }

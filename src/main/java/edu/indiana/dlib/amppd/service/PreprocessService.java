@@ -26,16 +26,16 @@ public interface PreprocessService {
 	/**
 	 * Retrieves media info of the given media file.
 	 * @@param filepath path relative to the root of the given media file
-	 * @return relative path of the json output file containing the retrieved media info
+	 * @return content of the json output file containing the retrieved media info
 	 */
 	public String retrieveMediaInfo(String filepath);
 
 	/**
 	 * Retrieves media info for the given asset.
-	 * @@param filepath path relative to the root of the given media file
-	 * @return relative path of the json output file containing the retrieved media info
+	 * @@asset the given asset
+	 * @return content of the json output file containing the retrieved media info
 	 */
-	public boolean retrieveMediaInfo(Asset asset);
+	public String retrieveMediaInfo(Asset asset);
 	
 
 }

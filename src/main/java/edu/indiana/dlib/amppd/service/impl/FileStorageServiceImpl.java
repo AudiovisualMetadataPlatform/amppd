@@ -372,4 +372,17 @@ public class FileStorageServiceImpl implements FileStorageService {
 		Files.delete(sourcePath);
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.readTextFile(String)
+	 */
+	@Override
+	public String readTextFile(String absolutePathame) {
+		try {
+			return Files.readString(Paths.get(absolutePathame));
+		}
+		catch(IOException e) {
+			throw new StorageFileNotFoundException("Error reading file " + absolutePathame, e);
+		}
+	}
+	
 }
