@@ -91,6 +91,9 @@ public class BatchServiceTests {
 	
 	@Before
 	public void createTestData() throws Exception {
+        // Cleanup drop box root for testing
+        deleteDirectory(new File(propertyConfig.getFileStorageRoot()), false);
+        
 		isupplementRepository.deleteAll();
 		csupplementRepository.deleteAll();
 		pfsupplementRepository.deleteAll();
@@ -149,8 +152,23 @@ public class BatchServiceTests {
         unzip(destPath.toString(), Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName).toString());
         
         Files.delete(destPath);
-
+        
 	}
+	boolean deleteDirectory(File directoryToBeDeleted, boolean deleteOriginal) {
+	    File[] allContents = directoryToBeDeleted.listFiles();
+	    if (allContents != null) {
+	        for (File file : allContents) {
+	            deleteDirectory(file, true);
+	        }
+	    }
+	    if(deleteOriginal) {
+		    if(!new File(propertyConfig.getDropboxRoot()).equals(directoryToBeDeleted)) {
+		    	directoryToBeDeleted.delete();
+		    }
+	    }
+	    return true;
+	}
+	
 	@After
 	public void cleanup() throws IOException {
 		FileUtils.cleanDirectory(new File(Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library").toString())); 
