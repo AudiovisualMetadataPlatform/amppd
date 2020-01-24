@@ -32,9 +32,11 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import lombok.extern.java.Log;
 
 @Service
 @Transactional
+@Log
 public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
@@ -67,7 +69,7 @@ public class BatchServiceImpl implements BatchService {
 			return true;
 		}
 		catch(Exception ex) {
-			System.out.println(ex.toString());
+			log.info("processBatch exception: " + ex.toString());
 			return false;
 		}
 	}
