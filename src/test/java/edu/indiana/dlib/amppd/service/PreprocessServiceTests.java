@@ -35,22 +35,23 @@ public class PreprocessServiceTests {
 	@Test
     public void shouldConvertFlacToWav() {
 		Asset primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_AUDIO, "flac");
+		Assert.assertEquals("flac", FilenameUtils.getExtension(primaryfile.getPathname()).toLowerCase());
 
 		// the media file should have been converted and the extension should be "wav"
 		Asset updatedPrimaryfile = preprocessService.convertFlac(primaryfile);		
 		Assert.assertEquals(primaryfile.getId(), updatedPrimaryfile.getId());
-		Assert.assertEquals("flac", FilenameUtils.getExtension(primaryfile.getPathname()).toLowerCase());
 		Assert.assertEquals("wav", FilenameUtils.getExtension(updatedPrimaryfile.getPathname()).toLowerCase());
 	}
 	
 	@Test
     public void shouldNotConvertNonFlacToWav() {
 		Asset primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_AUDIO, "mp3");
+		String pathname = primaryfile.getPathname();
 		
 		// the media file should not have been converted and the pathname should be the same as before
 		Asset updatedPrimaryfile = preprocessService.convertFlac(primaryfile);		
 		Assert.assertEquals(primaryfile.getId(), updatedPrimaryfile.getId());
-		Assert.assertEquals(primaryfile.getPathname(), updatedPrimaryfile.getPathname());
+		Assert.assertEquals(pathname, updatedPrimaryfile.getPathname());
 	}
 	
 	@Test

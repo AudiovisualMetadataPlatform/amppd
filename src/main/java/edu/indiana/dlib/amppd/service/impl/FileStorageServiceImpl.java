@@ -382,12 +382,12 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.readTextFile(String)
 	 */
 	@Override
-	public String readTextFile(String absolutePathame) {
+	public String readTextFile(String pathame) {
 		try {
-			return Files.readString(Paths.get(absolutePathame));
+			return Files.readString(resolve(pathame));
 		}
 		catch(IOException e) {
-			throw new StorageFileNotFoundException("Error reading file " + absolutePathame, e);
+			throw new StorageFileNotFoundException("Error reading file " + pathame, e);
 		}
 	}
 	

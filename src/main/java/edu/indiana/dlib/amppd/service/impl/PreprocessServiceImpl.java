@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FilenameUtils;
@@ -65,7 +66,6 @@ public class PreprocessServiceImpl implements PreprocessService {
 		
 		String targetFilePath = FilenameUtils.getFullPath(sourceFilepath) + FilenameUtils.getBaseName(sourceFilepath) + ".wav";
 		String command = "ffmpeg -i " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
-//		String command = "copy " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
 		
 		try {
 			Process process = Runtime.getRuntime().exec(command);
@@ -103,23 +103,71 @@ public class PreprocessServiceImpl implements PreprocessService {
 	@Override
 	public String retrieveMediaInfo(String filepath) {
 		String jsonpath = FilenameUtils.getFullPath(filepath) + FilenameUtils.getBaseName(filepath) + ".json";
-		String command = amppdPropertyConfig.getPythonPath() + " media_probe.py --json " + fileStorageService.absolutePathName(filepath) + " > " + jsonpath;
+		String command = amppdPropertyConfig.getPythonPath() + " " + 
+				amppdPropertyConfig.getMediaprobeDir() + 
+				"media_probe.py --json " + fileStorageService.absolutePathName(filepath);
+
+		ProcessBuilder pb = new ProcessBuilder(
+				amppdPropertyConfig.getPythonPath(), 
+				amppdPropertyConfig.getMediaprobeDir() + "media_probe.py", 
+				"--json", 
+				fileStorageService.absolutePathName(filepath));
+
+		// merges the standard error to standard output
+		pb.redirectErrorStream();
 		
-		// call media_probe to generate metadata into json file
-		// note that it's optional to keep the json file; for now let's keep it
+		// redirect media_probe output into json file
+		// alternatively we can write the json output directly into asset, but creating the json file could be useful for other purpose
+		pb.redirectOutput(new File(fileStorageService.absolutePathName(jsonpath)));				
+		
 		try {
-			Process process = Runtime.getRuntime().exec(command);
+			Process process = pb.start();
 		    final int status = process.waitFor();
-		    if (status != 0) {
+		    if (status != 0) {		    	
 		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
 		    }
 		}
 		catch (IOException e) {
+			// capture the error outputs info log
+			log.severe(fileStorageService.readTextFile(jsonpath));
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
 		}
 		catch (InterruptedException e) {
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
-		}
+		}	
+		
+//		String command = amppdPropertyConfig.getPythonPath() + " " + amppdPropertyConfig.getMediaprobeDir() + 
+//				"media_probe.py --json " + fileStorageService.absolutePathName(filepath) + " > " + fileStorageService.absolutePathName(jsonpath);
+//		String currentDir = System.getProperty("user.dir");
+		
+//		ProcessBuilder builder = new ProcessBuilder();
+//		if (isWindows) {
+//		    builder.command("cmd.exe", "/c", "dir");
+//		} else {
+//		    builder.command("sh", "-c", "ls");
+//		}
+//		builder.directory(new File(System.getProperty("user.home")));
+//		Process process = builder.start();
+//		StreamGobbler streamGobbler = 
+//		  new StreamGobbler(process.getInputStream(), System.out::println);
+//		Executors.newSingleThreadExecutor().submit(streamGobbler);
+//		int exitCode = process.waitFor();
+		
+//		// call media_probe to generate metadata into json file
+//		// note that it's optional to keep the json file; for now let's keep it
+//		try {
+//			Process process = Runtime.getRuntime().exec(command);
+//		    final int status = process.waitFor();
+//		    if (status != 0) {
+//		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
+//		    }
+//		}
+//		catch (IOException e) {
+//			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
+//		}
+//		catch (InterruptedException e) {
+//			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
+//		}		
 		
 		// read the json file content into a string
 		String nediainfo = null;

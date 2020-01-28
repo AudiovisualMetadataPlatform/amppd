@@ -177,10 +177,10 @@ public interface FileStorageService {
 	
 	/**
 	 * Reads all content from the given text file to a string using UTF-8 encoding.
-	 * @param absolutePathame absolute pathname of the given file
+	 * @param pathame pathname of the given file relative to amppd root
 	 * @return the string with all file content
 	 */
-	public String readTextFile(String absolutePathame);
+	public String readTextFile(String pathame);
 	
 //	/**
 //	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
