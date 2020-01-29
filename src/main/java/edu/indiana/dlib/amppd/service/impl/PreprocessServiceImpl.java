@@ -187,12 +187,12 @@ public class PreprocessServiceImpl implements PreprocessService {
 	 */
 	@Override	
 	public Asset retrieveMediaInfo(Asset asset) {
-		String mediainfo = retrieveMediaInfo(asset.getPathname());
-		if (StringUtils.isEmpty(mediainfo)) {
+		String mediaInfo = retrieveMediaInfo(asset.getPathname());
+		if (StringUtils.isEmpty(mediaInfo)) {
 			throw new PreprocessException("Error retrieving media info for Asset " + asset.getId() + ": the result is empty");
 		}
 
-		asset.setMediainfo(mediainfo);
+		asset.setMediaInfo(mediaInfo);
 		Asset updatedAsset = saveAsset(asset);
 		log.info("Retrieved media info for asset: " + asset.getId());
 		return updatedAsset;

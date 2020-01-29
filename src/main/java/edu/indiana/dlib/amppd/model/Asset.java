@@ -32,8 +32,9 @@ public abstract class Asset extends Content {
     private String pathname;			// path name relative to storage root for the file associated with the asset
     private String datasetId;			// ID of the dataset as a result of upload to Galaxy
     
+    // Note: mediaInfo must be a valid json string
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
-    private String mediainfo;			// technical media information extracted from the asset file, to be stored as a JSON blob 
+    private String mediaInfo;			// technical media information extracted from the asset file, to be stored as a JSON blob 
     
 }

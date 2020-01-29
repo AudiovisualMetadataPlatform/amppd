@@ -2,8 +2,8 @@ package edu.indiana.dlib.amppd.service;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -26,11 +25,11 @@ public class PreprocessServiceTests {
 	@Autowired
 	private TestHelper testHelper;   
 	
-    @After
-//    public void cleanAll() {
-//    	// clean up unit test directory after unit tests done
-//        fileStorageService.delete(TEST_DIR_NAME);
-//    }
+    @Before
+    public void cleanAll() {
+    	// clean up primaryfiles in DB to avoid reusing the same one among different tests
+    	testHelper.cleanupPrimaryfiles();
+    }
 
 	@Test
     public void shouldConvertFlacToWav() {
@@ -61,7 +60,16 @@ public class PreprocessServiceTests {
 		// the media info should have been retrieved
 		Asset updatedPrimaryfile = preprocessService.preprocess(primaryfile);
 		Assert.assertEquals(primaryfile.getId(), updatedPrimaryfile.getId());
-		Assert.assertTrue(StringUtils.isNotEmpty(updatedPrimaryfile.getMediainfo()));
+		String mediaInfo = updatedPrimaryfile.getMediaInfo();
+		Assert.assertTrue(StringUtils.isNotEmpty(mediaInfo));
+		Assert.assertTrue(mediaInfo.contains("container"));
+		Assert.assertTrue(mediaInfo.contains("duration"));
+		Assert.assertTrue(mediaInfo.contains("format"));
+		Assert.assertTrue(mediaInfo.contains("mime_type"));
+		Assert.assertTrue(mediaInfo.contains("size"));		
+		Assert.assertTrue(mediaInfo.contains("streams"));		
+		Assert.assertTrue(mediaInfo.contains("audio"));		
+		Assert.assertTrue(mediaInfo.contains("video"));		
 	}
 	
 }
