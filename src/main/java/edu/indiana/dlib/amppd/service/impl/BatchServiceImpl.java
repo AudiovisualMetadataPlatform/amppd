@@ -72,7 +72,7 @@ public class BatchServiceImpl implements BatchService {
 			return true;
 		}
 		catch(Exception ex) {
-			log.info("processBatch exception: " + ex.toString());
+			log.severe("processBatch exception: " + ex.toString());
 			return false;
 		}
 	}
