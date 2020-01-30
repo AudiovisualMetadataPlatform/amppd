@@ -4,6 +4,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class PreprocessServiceTests {
