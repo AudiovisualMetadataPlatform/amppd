@@ -12,7 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import lombok.Data;
 
 /**
- * Class containing information of a batch supplement file. This corresponds to a 3-column tuple specifying info for a unit/collection/primaryfile supplement.
+ * Class containing information of a batch supplement file. 
+ * This corresponds to a 3-column tuple specifying info for a unit/collection/primaryfile supplement.
  * @author yingfeng
  *
  */
@@ -23,14 +24,15 @@ public class BatchSupplementFile {
 
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-	int id;
-	int supplementNum;
-	String supplementFilename;	
-	String supplementName;
-	String supplementDescription;
+	private Long  id;
+	private int supplementNum;
+	
+	private String supplementFilename;	
+	private String supplementName;
+	private String supplementDescription;
 	
 	@ManyToOne
-	BatchFile batchFile;
+	private BatchFile batchFile;
 	
 }
 
