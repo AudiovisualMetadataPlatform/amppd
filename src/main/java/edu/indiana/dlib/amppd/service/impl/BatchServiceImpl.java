@@ -32,6 +32,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.java.Log;
 
@@ -56,23 +57,23 @@ public class BatchServiceImpl implements BatchService {
 	private ItemSupplementRepository itemSupplementRepository;
 	@Autowired
 	private FileStorageService fileStorageService;
+	@Autowired
+	private PreprocessService preprocessService;
 	
 	
 	public boolean processBatch(BatchValidationResponse batchValidation, String username) {
-		try {
-			
-			Batch batch = batchValidation.getBatch();
-			
-			for(BatchFile batchFile : batch.getBatchFiles()) {
+		Batch batch = batchValidation.getBatch();
+		boolean success = false;
+		for(BatchFile batchFile : batch.getBatchFiles()) {
+			try {
 				createItem(batch.getUnit(), batchFile, username);
-			}	
-			
-			return true;
-		}
-		catch(Exception ex) {
-			log.info("Batch processing exception: " + ex.toString());
-			return false;
-		}
+			}
+			catch(Exception ex) {
+				log.severe("Batch processing exception: " + ex.toString());
+				success = false;
+			}
+		}	
+		return success;
 	}
 			
 	/*
@@ -108,7 +109,6 @@ public class BatchServiceImpl implements BatchService {
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				createCollectionSupplement(collection, batchSupplementFile, username, sourceDir);
 			}
-			
 		}
 		else if(batchFile.getSupplementType()==SupplementType.ITEM) {
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
@@ -134,6 +134,11 @@ public class BatchServiceImpl implements BatchService {
 			Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
 	
 	    	logFileCreated(primaryFile, targetPath);
+	    	
+	    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
+			
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(primaryFile);
 	    	return primaryFile;
 		}
 		catch(IOException ex) {
@@ -153,8 +158,12 @@ public class BatchServiceImpl implements BatchService {
 			
 			// Move the file from the dropbox to amppd file storage
 			Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+			supplement.setPathname(fileStorageService.getFilePathname(supplement));
+			
 			// Log that the file was created
 	    	logFileCreated(supplement, targetSuppPath);
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating primary file supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -174,8 +183,11 @@ public class BatchServiceImpl implements BatchService {
 			
 			// Move the file from the dropbox to amppd file storage
 			Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+			supplement.setPathname(fileStorageService.getFilePathname(supplement));
 			// Log that the file was created
 			logFileCreated(supplement, targetSuppPath);
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating collection supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -195,8 +207,11 @@ public class BatchServiceImpl implements BatchService {
 			
 			// Move the file from the dropbox to amppd file storage
 			Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+			supplement.setPathname(fileStorageService.getFilePathname(supplement));
 			// Log that the file was created
 			logFileCreated(supplement, targetSuppPath);
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating item supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));

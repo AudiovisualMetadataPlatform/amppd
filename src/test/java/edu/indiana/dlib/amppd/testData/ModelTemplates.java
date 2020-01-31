@@ -49,7 +49,7 @@ public class ModelTemplates implements TemplateLoader {
 			//add("collection", new Collection());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
-		  	add("metainfo", regex("[A-Z]{1}[A-Z a-z]{9,29}"));
+		  	add("mediaInfo", "{}");
 		  	add("externalIds", new HashMap<String, String>());
 		  	}});
 		 
@@ -80,7 +80,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("jobs", new HashSet<Job>());
 			add("originalFilename", firstName());
 			add("pathname", "C:/New Folder/${name}");
-			add("metainfo", regex("[A-Z]{1}[A-Z a-z]{9,29}"));
+		  	add("mediaInfo", "{}");
 			add("externalIds", new HashMap<String, String>());
 			}});
 	    
@@ -96,7 +96,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("modifiedBy", firstName());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
-		  	add("metainfo", regex("[A-Z]{1}[A-Z a-z]{9,29}"));
+		  	add("mediaInfo", "{}");
 		  	add("externalIds", new HashMap<String, String>());
 			}});
 		 
@@ -125,7 +125,7 @@ public class ModelTemplates implements TemplateLoader {
 			//add("collection", new Collection());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
-		  	add("metainfo", regex("[A-Z]{1}[A-Z a-z]{9,29}"));
+		  	add("mediaInfo", "{}");
 		  	add("externalIds", new HashMap<String, String>());
 		  }});
 		 

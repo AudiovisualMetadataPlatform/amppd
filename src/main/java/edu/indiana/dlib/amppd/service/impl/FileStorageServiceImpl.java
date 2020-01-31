@@ -35,6 +35,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.java.Log;
 
 /**
@@ -62,6 +63,10 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Autowired
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 	
+	
+	@Autowired
+    private PreprocessService preprocessService;
+	
 	private AmppdPropertyConfig config; 	
 	private Path root;
 
@@ -72,6 +77,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 		try {
 				root = Paths.get(config.getFileStorageRoot());
 				Files.createDirectories(root);	// creates root directory if not already exists
+				Files.createDirectories(Paths.get(config.getDropboxRoot()));	// creates batch root directory if not already exists
 				log.info("File storage root directory " + config.getFileStorageRoot() + " has been created." );
 			}
 		catch (IOException e) {
@@ -85,7 +91,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Override
 	public Primaryfile uploadPrimaryfile(Long id, MultipartFile file) {		
     	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
-    	return uploadPrimaryfile(primaryfile, file);
+    	return (Primaryfile)preprocessService.preprocess(uploadPrimaryfile(primaryfile, file));
 	}
 	
 	/**
@@ -114,7 +120,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Override
 	public CollectionSupplement uploadCollectionSupplement(Long id, MultipartFile file) {		
     	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));        	
-    	return uploadCollectionSupplement(collectionSupplement, file);
+    	return (CollectionSupplement)preprocessService.preprocess(uploadCollectionSupplement(collectionSupplement, file));
 	}
 	
 	/**
@@ -143,7 +149,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Override
 	public ItemSupplement uploadItemSupplement(Long id, MultipartFile file) {		
     	ItemSupplement itemSupplement = itemSupplementRepository.findById(id).orElseThrow(() -> new StorageException("ItemSupplement <" + id + "> does not exist!"));        	
-    	return uploadItemSupplement(itemSupplement, file);
+    	return (ItemSupplement)preprocessService.preprocess(uploadItemSupplement(itemSupplement, file));
 	}
 	
 	/**
@@ -172,7 +178,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Override
 	public PrimaryfileSupplement uploadPrimaryfileSupplement(Long id, MultipartFile file) {		
     	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(id).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + id + "> does not exist!"));        	
-    	return uploadPrimaryfileSupplement(primaryfileSupplement, file);
+    	return (PrimaryfileSupplement)preprocessService.preprocess(uploadPrimaryfileSupplement(primaryfileSupplement, file));
 	}
 	
 	/**
@@ -372,4 +378,17 @@ public class FileStorageServiceImpl implements FileStorageService {
 		Files.delete(sourcePath);
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.readTextFile(String)
+	 */
+	@Override
+	public String readTextFile(String pathame) {
+		try {
+			return Files.readString(resolve(pathame));
+		}
+		catch(IOException e) {
+			throw new StorageFileNotFoundException("Error reading file " + pathame, e);
+		}
+	}
+	
 }

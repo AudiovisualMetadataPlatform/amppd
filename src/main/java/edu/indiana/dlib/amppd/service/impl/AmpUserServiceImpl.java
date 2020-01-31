@@ -1,9 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +10,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,8 +21,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.MailConfig;
-import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Passwordresettoken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
@@ -48,7 +43,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  static String ampEmailId ;
 	  
 	  @NotNull
-	  static String ampUrl ;
+	  static String uiUrl ;
 	  
 	  @Autowired
 	  private JavaMailSender mailSender;
@@ -62,7 +57,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  @Autowired 
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig) { 
 		  ampEmailId = amppdconfig.getUsername();
-		  ampUrl = amppdconfig.getAmpurl();
+		  uiUrl = amppdconfig.getUiUrl();
 	  }
 	 
 	  
@@ -175,7 +170,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			String token = UUID.randomUUID().toString();
 			createPasswordResetTokenForUser(user, token);
 		    try {
-				mailSender.send(constructResetTokenEmail(ampUrl, token, user));
+				mailSender.send(constructResetTokenEmail(uiUrl, token, user));
 			} catch (MailException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
