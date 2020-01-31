@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +93,7 @@ public class BatchServiceImpl implements BatchService {
 		String sourceDir = getSourceDir(unit, collection);
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username);
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getSourceId(), batchFile.getSourceIdType());
 		
 		collection.addItem(item);
 		
@@ -220,6 +221,7 @@ public class BatchServiceImpl implements BatchService {
 			// Create Primary files		
 			primaryFile = new Primaryfile();
 			primaryFile.setName(batchFile.getPrimaryfileName());
+			primaryFile.setDescription(batchFile.getPrimaryfileDescription());
 			primaryFile.setOriginalFilename(batchFile.getPrimaryfileFilename());
 			primaryFile.setCreatedBy(username);
 			primaryFile.setCreatedDate(new Date().getTime());
@@ -236,7 +238,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Gets an Item object.  If one already exists, 
 	 */
-	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy) {
+	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String sourceId, String sourceLabel) {
 		Item item = null;
 		
 		Set<Item> items = collection.getItems();
@@ -244,6 +246,10 @@ public class BatchServiceImpl implements BatchService {
 			for(Item i : items) {
 				if(i.getName().contentEquals(itemName)) {
 					item = i;
+					if(!sourceLabel.isBlank() && !sourceId.isBlank()) {
+						HashMap<String, String> externalIds = i.getExternalIds();
+						externalIds.put(sourceId, sourceLabel);
+					}
 					break;
 				}
 			}
@@ -253,6 +259,11 @@ public class BatchServiceImpl implements BatchService {
 			// if not, create it
 			item = new Item();
 			item.setName(itemName);
+			if(!sourceLabel.isBlank() && !sourceId.isBlank()) {
+				HashMap<String, String> externalIds = new HashMap<String, String>();
+				externalIds.put(sourceId, sourceLabel);
+				item.setExternalIds(externalIds);
+			}
 			item.setDescription(itemDescription);
 			item.setCreatedBy(createdBy);
 			item.setModifiedBy(createdBy);

@@ -1,7 +1,13 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,6 +18,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.opencsv.CSVReader;
 
@@ -52,6 +59,27 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     private BatchFileRepository batchFileRepository;
 	@Autowired
     private BatchSupplementFileRepository batchSupplementFileRepository;
+	
+	
+	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
+		BatchValidationResponse response;
+		StringBuilder textBuilder = new StringBuilder();
+		try (InputStream inputStream = file.getInputStream()) {
+		    try (Reader reader = new BufferedReader(new InputStreamReader
+		      (inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+		        int c = 0;
+		        while ((c = reader.read()) != -1) {
+		            textBuilder.append((char) c);
+		        }
+		    }
+		   
+		} catch (IOException e) {
+			response = new BatchValidationResponse();
+			response.addError("Unable to parse CSV file");
+			return response;
+		}
+		return validate(unitName, file.getName(), user, textBuilder.toString());
+	}
 	
 	/*
 	 * Create a batch object based on the parsed lines of the CSV
@@ -133,7 +161,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         				supplement.setSupplementDescription(line[c]);
         			}
         			// If the values are blank, don't add them
-        			if(supplement.getSupplementName().isBlank() && supplement.getSupplementFilename().isBlank()) continue;        	
+        			if(supplement.getSupplementName()!=null && supplement.getSupplementName().isBlank() && supplement.getSupplementFilename().isBlank()) continue;        	
         			batchFile.addSupplement(supplement);
                 	supplementNum++;
         		}
@@ -212,6 +240,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	}
         	
         	response.setBatch(batch);
+        	
+        	response.setSuccess(true);
         }
         
         return response;

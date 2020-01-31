@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 
 /**
@@ -28,7 +30,8 @@ public class BatchSupplementFile {
 	String supplementFilename;	
 	String supplementName;
 	String supplementDescription;
-	
+
+	@JsonIgnore
 	@ManyToOne
 	BatchFile batchFile;
 	

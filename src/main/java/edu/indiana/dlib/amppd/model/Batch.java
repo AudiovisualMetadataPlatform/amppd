@@ -14,6 +14,8 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 
 /**
@@ -35,6 +37,8 @@ public class Batch {
 	AmpUser submitUser;
 	Date submitTime;
 	String manifestFilename;
+	
+	@JsonIgnore
 	@ManyToOne
 	Unit unit;
 	

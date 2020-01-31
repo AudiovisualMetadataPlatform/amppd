@@ -14,6 +14,7 @@ public class BatchValidationResponse {
 	}
 	
 	boolean success;
+	
 	Batch batch;
 	
 	

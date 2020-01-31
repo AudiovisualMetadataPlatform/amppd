@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
@@ -17,4 +19,5 @@ public interface BatchValidationService {
 	 * @return
 	 */
 	BatchValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent);
+	BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file);
 }
