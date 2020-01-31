@@ -136,39 +136,6 @@ public class PreprocessServiceImpl implements PreprocessService {
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
 		}	
 		
-//		String command = amppdPropertyConfig.getPythonPath() + " " + amppdPropertyConfig.getMediaprobeDir() + 
-//				"media_probe.py --json " + fileStorageService.absolutePathName(filepath) + " > " + fileStorageService.absolutePathName(jsonpath);
-//		String currentDir = System.getProperty("user.dir");
-		
-//		ProcessBuilder builder = new ProcessBuilder();
-//		if (isWindows) {
-//		    builder.command("cmd.exe", "/c", "dir");
-//		} else {
-//		    builder.command("sh", "-c", "ls");
-//		}
-//		builder.directory(new File(System.getProperty("user.home")));
-//		Process process = builder.start();
-//		StreamGobbler streamGobbler = 
-//		  new StreamGobbler(process.getInputStream(), System.out::println);
-//		Executors.newSingleThreadExecutor().submit(streamGobbler);
-//		int exitCode = process.waitFor();
-		
-//		// call media_probe to generate metadata into json file
-//		// note that it's optional to keep the json file; for now let's keep it
-//		try {
-//			Process process = Runtime.getRuntime().exec(command);
-//		    final int status = process.waitFor();
-//		    if (status != 0) {
-//		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
-//		    }
-//		}
-//		catch (IOException e) {
-//			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
-//		}
-//		catch (InterruptedException e) {
-//			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
-//		}		
-		
 		// read the json file content into a string
 		String nediainfo = null;
 		try {

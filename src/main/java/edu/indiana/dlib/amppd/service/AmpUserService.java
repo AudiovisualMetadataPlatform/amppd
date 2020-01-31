@@ -1,8 +1,5 @@
 package edu.indiana.dlib.amppd.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import edu.indiana.dlib.amppd.config.MailConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 

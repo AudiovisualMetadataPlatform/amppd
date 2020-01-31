@@ -113,6 +113,7 @@ public class BatchServiceImpl implements BatchService {
 			moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), primaryFile.getPathname());
 			// preprocess the primaryFile after ingest
 			preprocessService.preprocess(primaryFile);
+//			log.info("Successfully ingested primaryFile <" + primaryFile.getId() + "> from " );
 			
 			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
 				targetDir = fileStorageService.getDirPathname(primaryFile);
