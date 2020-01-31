@@ -35,6 +35,7 @@ import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
+// TODO remove ignore once we have Galaxy Bootstrap working on Bamboo
 @Ignore
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
