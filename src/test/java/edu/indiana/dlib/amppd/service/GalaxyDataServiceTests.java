@@ -95,6 +95,7 @@ public class GalaxyDataServiceTests {
     	Assert.assertNull(history);
     }
 
+    // TODO remove ignore once we have Galaxy Bootstrap working on Bamboo
     @Ignore
     @Test
     public void shouldUploadFileToExistingLibrary() {

@@ -175,6 +175,7 @@ public class BatchServiceTests {
 		FileUtils.cleanDirectory(new File(Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library").toString())); 
 	}
 	
+	// TODO remove ignore once we have ffmpeg and MediaProbe installed on Bamboo
 	@Ignore
 	@Test
 	public void shouldBeValid() throws Exception {
