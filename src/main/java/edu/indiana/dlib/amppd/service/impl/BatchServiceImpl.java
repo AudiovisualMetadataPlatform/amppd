@@ -31,6 +31,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.java.Log;
 
@@ -55,6 +56,8 @@ public class BatchServiceImpl implements BatchService {
 	private ItemSupplementRepository itemSupplementRepository;
 	@Autowired
 	private FileStorageService fileStorageService;
+	@Autowired
+	private PreprocessService preprocessService;
 	
 	
 	public boolean processBatch(BatchValidationResponse batchValidation, String username) {
@@ -69,7 +72,7 @@ public class BatchServiceImpl implements BatchService {
 			return true;
 		}
 		catch(Exception ex) {
-			log.info("processBatch exception: " + ex.toString());
+			log.severe("processBatch exception: " + ex.toString());
 			return false;
 		}
 	}
@@ -106,7 +109,11 @@ public class BatchServiceImpl implements BatchService {
 			
 			// Move the file from the dropbox to amppd file storage
 			String targetDir = fileStorageService.getDirPathname(item);
-			moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
+			primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
+			moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), primaryFile.getPathname());
+			// preprocess the primaryFile after ingest
+			preprocessService.preprocess(primaryFile);
+//			log.info("Successfully ingested primaryFile <" + primaryFile.getId() + "> from " );
 			
 			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
 				targetDir = fileStorageService.getDirPathname(primaryFile);
@@ -114,8 +121,11 @@ public class BatchServiceImpl implements BatchService {
 				for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 					PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryFile, batchSupplementFile, username);
 					primaryfileSupplementRepository.save(supplement);
+					supplement.setPathname(fileStorageService.getFilePathname(supplement));
 					// Move the file from the dropbox to amppd file storage
-					moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+					moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), supplement.getPathname());
+					// preprocess the supplement after ingest
+					preprocessService.preprocess(supplement);
 				}
 			}
 
@@ -126,8 +136,11 @@ public class BatchServiceImpl implements BatchService {
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				CollectionSupplement supplement = createCollectionSupplement(collection, batchSupplementFile, username);
 				collectionSupplementRepository.save(supplement);
+				supplement.setPathname(fileStorageService.getFilePathname(supplement));
 				// Move the file from the dropbox to amppd file storage
-				moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+				moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), supplement.getPathname());
+				// preprocess the supplement after ingest
+				preprocessService.preprocess(supplement);
 			}
 			
 		}
@@ -137,8 +150,11 @@ public class BatchServiceImpl implements BatchService {
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				ItemSupplement supplement = createItemSupplement(item, batchSupplementFile, username);
 				itemSupplementRepository.save(supplement);
+				supplement.setPathname(fileStorageService.getFilePathname(supplement));
 				// Move the file from the dropbox to amppd file storage
-				moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+				moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), supplement.getPathname());
+				// preprocess the supplement after ingest
+				preprocessService.preprocess(supplement);
 			}
 		}
 				

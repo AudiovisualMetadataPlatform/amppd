@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.apache.commons.lang.StringUtils;
+import org.hamcrest.core.StringContains;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -133,8 +134,8 @@ public class ItemRepositoryTests {
 				get("/items/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.items[0].name").value(
-										item.getName()));
+								jsonPath("$._embedded.items[0].name").value(new StringContains(
+										item.getName())));
 	}
 		
 	@Test
@@ -152,8 +153,8 @@ public class ItemRepositoryTests {
 				get("/items/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.items[0].description").value(
-										item.getDescription()));
+								jsonPath("$._embedded.items[0].description").value(new StringContains(
+										item.getDescription())));
 	}	
 
 	@Test

@@ -18,7 +18,7 @@ import lombok.Data;
 
 /**
  * Class containing information of a batch manifest. Fields that apply to the whole spreadsheet such as collection name are entered via UI; 
- * while fields of each batch file comes from each row in the manifest spreadsheet.
+ * while fields of each batch file comes from each row in the manifest spreadsheet. A Batch could contain files from multiple collections.
  * @author yingfeng
  *
  */
@@ -28,19 +28,19 @@ import lombok.Data;
 public class Batch {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-	int id;
+	private Long id;
 	
 	// the following fields come from batch upload UI
 	@ManyToOne
-	AmpUser submitUser;
-	Date submitTime;
-	String manifestFilename;
+	private AmpUser submitUser;
+	private Date submitTime;
+	private String manifestFilename;
 	@ManyToOne
-	Unit unit;
+	private Unit unit;
 	
 	// the following info come from batch manifest
 	@OneToMany(mappedBy="batch")
-	List<BatchFile> batchFiles;
+	private List<BatchFile> batchFiles;
 
 	public void addBatchFile(BatchFile batchFile) {
 		if(batchFiles==null) batchFiles = new ArrayList<BatchFile>();

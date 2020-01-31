@@ -216,6 +216,14 @@ public class TestHelper {
 	}
 	
 	/**
+	 * Delete all primaryfiles. 
+	 * Call this method to make sure that the test will use a freshly created primaryfile instead of reusing those created in previous tests. 
+	 */
+	public void cleanupPrimaryfiles() {
+		primaryfileRepository.deleteAll();
+	}
+
+	/**
 	 * Delete all histories except the AMPPD shared history, so that temporary histories used for running workflows won't keep building up. 
 	 */
 	public void cleanupHistories() {

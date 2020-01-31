@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
 import java.io.IOException;
-
 import java.nio.file.Path;
 
 import org.springframework.core.io.Resource;
@@ -175,6 +174,14 @@ public interface FileStorageService {
 	 * @throws IOException 
 	 */
 	public void moveFile(Path sourcePath, Path destinationPath) throws IOException;
+	
+	/**
+	 * Reads all content from the given text file to a string using UTF-8 encoding.
+	 * @param pathame pathname of the given file relative to amppd root
+	 * @return the string with all file content
+	 */
+	public String readTextFile(String pathame);
+	
 //	/**
 //	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
 //	 * 
