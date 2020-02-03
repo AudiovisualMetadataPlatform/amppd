@@ -120,7 +120,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  user = ampUserRepository.save(user);
 			  if(user!=null && user.getId() > 0) 
 			  {
-				  
+				   
 				  //Send approval email to admin once the user is successfully entered in the database
 				  String token = UUID.randomUUID().toString();
 				  createPasswordResetTokenForUser(user, token);
