@@ -132,10 +132,9 @@ public class BatchServiceImpl implements BatchService {
 			// Move the file from the dropbox to amppd file storage
 			String targetDir = fileStorageService.getDirPathname(item);
 			Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
-	
-	    	logFileCreated(primaryFile, targetPath);
-	    	
 	    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
+	
+	    	logFileCreated(primaryFile, targetPath);	    	
 			
 			// preprocess the supplement after ingest
 			preprocessService.preprocess(primaryFile);
