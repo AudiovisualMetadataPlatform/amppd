@@ -118,8 +118,19 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!response.hasErrors()) {
 			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
 			  user = ampUserRepository.save(user);
-			  if(user!=null && user.getId() > 0) {
-				  response.setSuccess(true);
+			  if(user!=null && user.getId() > 0) 
+			  {
+				  
+				  //Send approval email to admin once the user is successfully entered in the database
+				  String token = UUID.randomUUID().toString();
+				  createPasswordResetTokenForUser(user, token);
+				  try {
+					  mailSender.send(constructResetTokenEmail(uiUrl, token, user));
+					} 
+				  catch (MailException e) {
+					  e.printStackTrace();
+				  	}
+					response.setSuccess(true);//new GenericResponse(messages.getMessage("message.resetPasswordEmail", null, request.getLocale()));
 			  }
 			  else {
 				  response.addError("Error creating user account");
