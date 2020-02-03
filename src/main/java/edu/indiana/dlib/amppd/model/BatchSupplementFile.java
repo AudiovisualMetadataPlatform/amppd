@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
- * Class containing information of a batch supplement file. This corresponds to a 3-column tuple specifying info for a unit/collection/primaryfile supplement.
+ * Class containing information of a batch supplement file. 
+ * This corresponds to a 3-column tuple specifying info for a unit/collection/primaryfile supplement.
  * @author yingfeng
  *
  */
@@ -33,7 +34,7 @@ public class BatchSupplementFile {
 
 	@JsonIgnore
 	@ManyToOne
-	BatchFile batchFile;
+	private BatchFile batchFile;
 	
 }
 

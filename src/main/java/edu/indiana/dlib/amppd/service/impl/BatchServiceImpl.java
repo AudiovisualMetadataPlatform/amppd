@@ -34,6 +34,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.java.Log;
 
@@ -58,6 +59,8 @@ public class BatchServiceImpl implements BatchService {
 	private ItemSupplementRepository itemSupplementRepository;
 	@Autowired
 	private FileStorageService fileStorageService;
+	@Autowired
+	private PreprocessService preprocessService;
 	
 	
 	public List<String> processBatch(BatchValidationResponse batchValidation, String username) {
@@ -75,15 +78,10 @@ public class BatchServiceImpl implements BatchService {
 		return errors;
 	}
 	
-	private String getSourceDir(Unit unit, Collection collection) {
-		
-		return String.format("/%s/%s", unit.getName(), collection.getName());
-	}
-	
 	/*
 	 * Create an item with the appropriate primary files, supplemental files, etc.
 	 */
-	private void createItem(Unit unit, BatchFile batchFile, String username) throws IOException {
+	private void createItem(Unit unit, BatchFile batchFile, String username) throws Exception {
 
 		// Get the collection
 		Collection collection = getUpdatedCollection(batchFile.getCollection().getId());
@@ -99,7 +97,35 @@ public class BatchServiceImpl implements BatchService {
 		
 		// Process the files based on the supplement type
 		if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE || batchFile.getSupplementType()==null) {
-			
+			// Either get an existing or create a primary file
+			Primaryfile primaryFile = createPrimaryfile(item, batchFile, username, sourceDir);
+	    	
+			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
+				// For each primary file supplememnt, create the object and then move the file to it's destination
+				for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
+					createPrimaryfileSupplement(primaryFile, batchSupplementFile, username, sourceDir);
+				}
+			}
+		}
+		else if(batchFile.getSupplementType()==SupplementType.COLLECTION) {
+			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
+				createCollectionSupplement(collection, batchSupplementFile, username, sourceDir);
+			}
+		}
+		else if(batchFile.getSupplementType()==SupplementType.ITEM) {
+			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
+				createItemSupplement(item, batchSupplementFile, username, sourceDir);
+			}
+		}
+				
+	}
+	
+	/*
+	 * Create a primary file, store it in the database, move it to it's destination in amppd storage, log that the file was created
+	 */
+	private Primaryfile createPrimaryfile(Item item, BatchFile batchFile, String username, String sourceDir) throws Exception {
+		
+		try {
 			// Either get an existing or create a primary file
 			Primaryfile primaryFile = getPrimaryfile(item, batchFile, username);
 			primaryFile.setItem(item);
@@ -107,50 +133,96 @@ public class BatchServiceImpl implements BatchService {
 			
 			// Move the file from the dropbox to amppd file storage
 			String targetDir = fileStorageService.getDirPathname(item);
-			moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
+			Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
+	    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
+	
+	    	logFileCreated(primaryFile, targetPath);	    	
 			
-			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
-				targetDir = fileStorageService.getDirPathname(primaryFile);
-				// For each primary file supplememnt, create the object and then move the file to it's destination
-				for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
-					PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryFile, batchSupplementFile, username);
-					primaryfileSupplementRepository.save(supplement);
-					// Move the file from the dropbox to amppd file storage
-					moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
-				}
-			}
-
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(primaryFile);
+	    	return primaryFile;
 		}
-		else if(batchFile.getSupplementType()==SupplementType.COLLECTION) {
+		catch(IOException ex) {
+			
+			throw new Exception(String.format("Error creating primary file %s.  Error is: %s", batchFile.getPrimaryfileFilename(), ex.toString()));
+		}
+	}
+	
+	/*
+	 * Create a primary file supplement, store it in the database, move it to it's destination in amppd storage, log that the file was created
+	 */
+	private void createPrimaryfileSupplement(Primaryfile primaryFile, BatchSupplementFile batchSupplementFile, String username, String sourceDir) throws Exception {
+		try {
+			String targetDir = fileStorageService.getDirPathname(primaryFile);
+			PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryFile, batchSupplementFile, username);
+			primaryfileSupplementRepository.save(supplement);
+			
+			// Move the file from the dropbox to amppd file storage
+			Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+			supplement.setPathname(fileStorageService.getFilePathname(supplement));
+			
+			// Log that the file was created
+	    	logFileCreated(supplement, targetSuppPath);
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(supplement);
+		}
+		catch(IOException ex) {
+			throw new Exception(String.format("Error creating primary file supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
+		}
+	}
+
+	/*
+	 * Create a collection file supplement, store it in the database, move it to it's destination in amppd storage, log that the file was created
+	 */
+	private void createCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username, String sourceDir) throws Exception {
+		try {
 			// For collection supplements, create supplements and then move the files to their destination
 			String targetDir = fileStorageService.getDirPathname(collection);
-			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
-				CollectionSupplement supplement = createCollectionSupplement(collection, batchSupplementFile, username);
-				collectionSupplementRepository.save(supplement);
-				// Move the file from the dropbox to amppd file storage
-				moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
-			}
 			
+			CollectionSupplement supplement = getCollectionSupplement(collection, batchSupplementFile, username);
+			collectionSupplementRepository.save(supplement);
+			
+			// Move the file from the dropbox to amppd file storage
+			Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+			supplement.setPathname(fileStorageService.getFilePathname(supplement));
+			// Log that the file was created
+			logFileCreated(supplement, targetSuppPath);
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(supplement);
 		}
-		else if(batchFile.getSupplementType()==SupplementType.ITEM) {
+		catch(IOException ex) {
+			throw new Exception(String.format("Error creating collection supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
+		}
+	}
+	
+	/*
+	 * Create a item file supplement, store it in the database, move it to it's destination in amppd storage, log that the file was created
+	 */
+	private void createItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username, String sourceDir) throws Exception {
+		try {
 			// For item supplements, create supplements and then move the files to their destination
 			String targetDir = fileStorageService.getDirPathname(item);
-			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
-				ItemSupplement supplement = createItemSupplement(item, batchSupplementFile, username);
-				itemSupplementRepository.save(supplement);
-				// Move the file from the dropbox to amppd file storage
-				moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
-			}
+			
+			ItemSupplement supplement = getItemSupplement(item, batchSupplementFile, username);
+			itemSupplementRepository.save(supplement);
+			
+			// Move the file from the dropbox to amppd file storage
+			Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
+			supplement.setPathname(fileStorageService.getFilePathname(supplement));
+			// Log that the file was created
+			logFileCreated(supplement, targetSuppPath);
+			// preprocess the supplement after ingest
+			preprocessService.preprocess(supplement);
 		}
-				
+		catch(IOException ex) {
+			throw new Exception(String.format("Error creating item supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
+		}
 	}
-	private Collection getUpdatedCollection(Long collectionId) {
-		return collectionRepository.findById(collectionId).get();
-	}
+	
 	/*
 	 * Create an item supplememt
 	 */
-	private ItemSupplement createItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username){
+	private ItemSupplement getItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username){
 		// Create Supplement
 		ItemSupplement itemSupplement = new ItemSupplement();
 		itemSupplement.setItem(item);
@@ -167,7 +239,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Create a collection supplement
 	 */
-	private CollectionSupplement createCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username){
+	private CollectionSupplement getCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username){
 		
 		CollectionSupplement collectionSupplement = new CollectionSupplement();
 		collectionSupplement.setCollection(collection);
@@ -279,7 +351,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Move the file using hard links
 	 */
-	private void moveFile(String sourceDir, String targetDir, String sourceFilename, String targetFilename) throws IOException {
+	private Path moveFile(String sourceDir, String targetDir, String sourceFilename, String targetFilename) throws IOException {
 		
 		// Check to see if the folder exists on the file system.  If not, create it.
 		if(!Files.exists(Paths.get(propertyConfig.getFileStorageRoot(), targetDir)))
@@ -294,7 +366,35 @@ public class BatchServiceImpl implements BatchService {
 		// Move the file
 		fileStorageService.moveFile(existingFile, newLink);
 		
+		return newLink;
 	}
 	
+	/*
+	 * Methods for logging when a file was created
+	 */
+	private void logFileCreated(Primaryfile primaryFile, Path targetPath) {
+    	log.info(String.format("Primaryfile %s has media file %s successfully uploaded to %s.", primaryFile.getId(), primaryFile.getOriginalFilename(), targetPath));
+	}
+	
+	private void logFileCreated(PrimaryfileSupplement supplement, Path targetPath) {
+    	log.info(String.format("Primary file supplement %s has media file %s successfully uploaded to %s.", supplement.getId(), supplement.getOriginalFilename(), targetPath));
+	}
+	
+	private void logFileCreated(ItemSupplement supplement, Path targetPath) {
+    	log.info(String.format("Item supplement %s has media file %s successfully uploaded to %s.", supplement.getId(), supplement.getOriginalFilename(), targetPath));
+	}
+	
+	private void logFileCreated(CollectionSupplement supplement, Path targetPath) {
+    	log.info(String.format("Collection supplement %s has media file %s successfully uploaded to %s.", supplement.getId(), supplement.getOriginalFilename(), targetPath));
+	}
+	
+	private Collection getUpdatedCollection(Long collectionId) {
+		return collectionRepository.findById(collectionId).get();
+	}
+
+	private String getSourceDir(Unit unit, Collection collection) {
+		
+		return String.format("/%s/%s", unit.getName(), collection.getName());
+	}
 	
 }

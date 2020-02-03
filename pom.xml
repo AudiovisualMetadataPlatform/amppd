@@ -178,6 +178,16 @@
   			<version>3.1.0</version>
   			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>3.8</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>2.9.2</version>
+		</dependency>
  		<dependency>
 			<groupId>com.github.AudiovisualMetadataPlatform</groupId>
 			<artifactId>blend4j</artifactId>
@@ -187,11 +197,6 @@
 			<groupId>com.github.AudiovisualMetadataPlatform</groupId>
 			<artifactId>galaxy-bootstrap</artifactId>
 			<version>master-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>3.8</version>
 		</dependency>
 		
 	</dependencies>

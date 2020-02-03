@@ -18,7 +18,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
- * Class containing information of a batch file. This corresponds to a row in a batch manifest spreadsheet.
+ * Class containing information of a batch file, which corresponds to a row in a batch manifest spreadsheet. 
+ * It could be one of the following:
+ * - a primaryfile plus its associated supplements if exists;
+ * - an item Supplement or a collection supplement.   
  * @author yingfeng
  *
  */
@@ -26,37 +29,37 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 public class BatchFile {	
-	public BatchFile() {
-		batchSupplementFiles = new ArrayList<BatchSupplementFile>();
-	}
 	// in batch manifest the types are indicated as "C", "I", "P"
 	public enum SupplementType { COLLECTION, ITEM, PRIMARYFILE };
 
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-	int id;
-	
-	int rowNum;
+	private Long id;	
+	private int rowNum;	
 	
 	@JsonIgnore
 	@ManyToOne
-	Collection collection;
-	String sourceIdType;
-	String sourceId;
-	String itemName;
-	String itemDescription;
-	String primaryfileFilename;
-	String primaryfileName;
-	String primaryfileDescription;
-	SupplementType supplementType; 
+	private Collection collection;
+	private String sourceIdType;
+	private String sourceId;
+	private String itemName;
+	private String itemDescription;
+	private String primaryfileFilename;
+	private String primaryfileName;
+	private String primaryfileDescription;
+	private SupplementType supplementType; 
 	
 	@OneToMany(mappedBy="batchFile")
-	List<BatchSupplementFile> batchSupplementFiles;	
+	private List<BatchSupplementFile> batchSupplementFiles;	
 	
 	@JsonIgnore
 	@ManyToOne
-	Batch batch;
+	private Batch batch;
 	
+	public BatchFile() {
+		batchSupplementFiles = new ArrayList<BatchSupplementFile>();
+	}
+
 	public void addSupplement(BatchSupplementFile batchSupplement) {
 		if(batchSupplementFiles==null) batchSupplementFiles = new ArrayList<BatchSupplementFile>();
 		

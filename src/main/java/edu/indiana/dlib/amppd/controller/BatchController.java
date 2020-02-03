@@ -38,6 +38,9 @@ public class BatchController {
 	@PostMapping(path = "/batch/ingest", consumes = "multipart/form-data", produces = "application/json")
 	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {	
 		
+		/*
+		 * THIS IS TEMPORARY UNTIL AUTHENTICATION WORKS
+		 */
 		AmpUser ampUser = new AmpUser();
 		// create instance of Random class 
         Random rand = new Random(); 
@@ -65,8 +68,9 @@ public class BatchController {
 			unit.setCreatedDate(new Date().getTime());
 			unitRepository.save(unit);
 		}
-		
-		
+		/*
+		 * END TEMPORARY SECTION
+		 */
 		BatchValidationResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
 		
 		if(response.isSuccess()) {
