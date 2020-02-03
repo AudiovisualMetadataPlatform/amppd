@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -187,18 +188,18 @@ public class BatchServiceTests {
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
 
-        if(response.getErrors()!=null) {
-            for(String s : response.getErrors()) {
+        if(response.getValidationErrors()!=null) {
+            for(String s : response.getValidationErrors()) {
                 System.out.println("Should be valid fails validation: " + s);
             }
         }
         
         Assert.assertFalse(response.hasErrors());
         
-        boolean success = batchService.processBatch(response, ampUsername);
+        List<String> errors = batchService.processBatch(response, ampUsername);
         
         
-        Assert.assertTrue(success);
+        Assert.assertTrue(errors.size()==0);
         
 	}
 	

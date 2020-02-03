@@ -1,12 +1,5 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -14,7 +7,6 @@ import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +18,6 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
-import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.java.Log;
 
@@ -79,7 +70,9 @@ public class BatchController {
 		BatchValidationResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
 		
 		if(response.isSuccess()) {
-			boolean batchSuccess = batchService.processBatch(response, ampUser.getUsername());
+			List<String> errors = batchService.processBatch(response, ampUser.getUsername());
+			boolean batchSuccess = errors.size()==0;
+			response.setProcessingErrors(errors);
 			response.setSuccess(batchSuccess);
 		}
 		

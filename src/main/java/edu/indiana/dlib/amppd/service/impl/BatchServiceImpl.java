@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,21 +60,19 @@ public class BatchServiceImpl implements BatchService {
 	private FileStorageService fileStorageService;
 	
 	
-	public boolean processBatch(BatchValidationResponse batchValidation, String username) {
-		try {
-			
-			Batch batch = batchValidation.getBatch();
-			
-			for(BatchFile batchFile : batch.getBatchFiles()) {
+	public List<String> processBatch(BatchValidationResponse batchValidation, String username) {
+		List<String> errors = new ArrayList<String>();
+		Batch batch = batchValidation.getBatch();
+		for(BatchFile batchFile : batch.getBatchFiles()) {
+			try {
 				createItem(batch.getUnit(), batchFile, username);
-			}	
-			
-			return true;
-		}
-		catch(Exception ex) {
-			log.info("processBatch exception: " + ex.toString());
-			return false;
-		}
+			}
+			catch(Exception ex) {
+				log.info("processBatch exception: " + ex.toString());
+				errors.add("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
+			}
+		}	
+		return errors;
 	}
 	
 	private String getSourceDir(Unit unit, Collection collection) {
