@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -113,6 +114,14 @@ public class PreprocessServiceImpl implements PreprocessService {
 				"--json", 
 				fileStorageService.absolutePathName(filepath));
 
+		// This is a hack to allow ProcessBuilder running on operating systems using /usr/local/bin to find ffprobe and pdfinfo for MediaProbe
+		Map<String, String> env = pb.environment();
+		String path = env.get("PATH");
+		if(path!=null && !path.contains("/usr/local/bin")) {
+			path = path.concat(":/usr/local/bin");
+			env.put("PATH", path);
+		}
+		
 		// merges the standard error to standard output
 		pb.redirectErrorStream();
 		
