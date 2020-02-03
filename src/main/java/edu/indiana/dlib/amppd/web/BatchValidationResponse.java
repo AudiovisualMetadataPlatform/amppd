@@ -26,8 +26,8 @@ public class BatchValidationResponse {
 		validationErrors.add(error);
 	}
 	public void addErrors(List<String> errors) {
-		if(validationErrors!=null && !validationErrors.isEmpty()) {
-			this.validationErrors.addAll(validationErrors);
+		if(validationErrors!=null && !errors.isEmpty()) {
+			this.validationErrors.addAll(errors);
 		}
 	}
 	

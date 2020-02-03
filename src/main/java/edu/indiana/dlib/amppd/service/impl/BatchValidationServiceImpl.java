@@ -78,7 +78,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			response.addError("Unable to parse CSV file");
 			return response;
 		}
-		return validate(unitName, file.getName(), user, textBuilder.toString());
+		return validate(unitName, file.getOriginalFilename(), user, textBuilder.toString());
 	}
 	
 	/*
