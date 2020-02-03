@@ -63,7 +63,7 @@ public class BatchServiceImpl implements BatchService {
 	
 	public boolean processBatch(BatchValidationResponse batchValidation, String username) {
 		Batch batch = batchValidation.getBatch();
-		boolean success = false;
+		boolean success = true;
 		for(BatchFile batchFile : batch.getBatchFiles()) {
 			try {
 				createItem(batch.getUnit(), batchFile, username);
