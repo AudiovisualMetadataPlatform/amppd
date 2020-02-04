@@ -34,9 +34,9 @@ public class Batch {
 	
 	// the following fields come from batch upload UI
 	@ManyToOne
-	AmpUser submitUser;
-	Date submitTime;
-	String manifestFilename;
+	private AmpUser submitUser;
+	private Date submitTime;
+	private String manifestFilename;
 	
 	@JsonIgnore
 	@ManyToOne

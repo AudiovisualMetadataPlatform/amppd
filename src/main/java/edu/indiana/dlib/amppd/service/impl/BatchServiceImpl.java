@@ -71,7 +71,7 @@ public class BatchServiceImpl implements BatchService {
 				createItem(batch.getUnit(), batchFile, username);
 			}
 			catch(Exception ex) {
-				log.info("processBatch exception: " + ex.toString());
+				log.severe("Batch processing exception: " + ex.toString());
 				errors.add("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
 			}
 		}	
