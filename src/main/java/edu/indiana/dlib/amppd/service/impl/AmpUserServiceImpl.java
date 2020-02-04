@@ -122,10 +122,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  {
 				   
 				  //Send approval email to admin once the user is successfully entered in the database
-				  String token = UUID.randomUUID().toString();
-				  createPasswordResetTokenForUser(user, token);
+				  //String token = UUID.randomUUID().toString();
+				  //createPasswordResetTokenForUser(user, token);
 				  try {
-					  mailSender.send(constructResetTokenEmail(uiUrl, token, user));
+					  
+					  mailSender.send(constructRegisterEmail(uiUrl, user));
 					} 
 				  catch (MailException e) {
 					  e.printStackTrace();
@@ -181,7 +182,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			String token = UUID.randomUUID().toString();
 			createPasswordResetTokenForUser(user, token);
 		    try {
-				mailSender.send(constructResetTokenEmail(uiUrl, token, user));
+		    	mailSender.send(constructResetTokenEmail(uiUrl, token, user));
 			} catch (MailException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -189,6 +190,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		    response.setSuccess(true);//new GenericResponse(messages.getMessage("message.resetPasswordEmail", null, request.getLocale()));
 		}
 		return response;
+	}
+	
+	private SimpleMailMessage constructRegisterEmail(String contextPath, AmpUser user) {
+	    String url = contextPath + "/approve-user/" + user.getId();
+	    String message = "A new user has registered and waiting approval. Click the link below to view and approve the  new user";
+	    return constructEmail("New User Approval", message + " \r\n" + url, ampEmailId);
 	}
 	
 	public void createPasswordResetTokenForUser(AmpUser user, String token) {
@@ -210,18 +217,17 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 	}
 	
-	private SimpleMailMessage constructResetTokenEmail(
-			  String contextPath, String token, AmpUser user) {
+	private SimpleMailMessage constructResetTokenEmail(String contextPath, String token, AmpUser user) {
 			    String url = contextPath + "/reset-password/" + token;
 			    String message = "Please click the link to reset the password. The link  will be valid only for a limited time.";//messages.getMessage("message.resetPassword", null, locale);
-			    return constructEmail("Reset Password", message + " \r\n" + url, user);
+			    return constructEmail("Reset Password", message + " \r\n" + url, user.getEmail());
 			}
 			 
-	private SimpleMailMessage constructEmail(String subject, String body, AmpUser user) {
+	private SimpleMailMessage constructEmail(String subject, String body, String toEmailID) {
 	    SimpleMailMessage email = new SimpleMailMessage();
 	    email.setSubject(subject);
 	    email.setText(body);
-	    email.setTo(user.getEmail());
+	    email.setTo(toEmailID);
 	    email.setFrom(ampEmailId);
 	    return email;
 	}  
