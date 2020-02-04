@@ -26,11 +26,11 @@ public class BatchSupplementFile {
 
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-	int id;
-	int supplementNum;
-	String supplementFilename;	
-	String supplementName;
-	String supplementDescription;
+	private Long id;
+	private int supplementNum;
+	private String supplementFilename;	
+	private String supplementName;
+	private String supplementDescription;
 
 	@JsonIgnore
 	@ManyToOne
