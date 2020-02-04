@@ -126,7 +126,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 				  //createPasswordResetTokenForUser(user, token);
 				  try {
 					  
-					  mailSender.send(constructRegisterEmail(uiUrl, user));
+					  mailSender.send(constructRegisterEmail(uiUrl, user, "approve"));
 					} 
 				  catch (MailException e) {
 					  e.printStackTrace();
@@ -192,10 +192,27 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return response;
 	}
 	
-	private SimpleMailMessage constructRegisterEmail(String contextPath, AmpUser user) {
-	    String url = contextPath + "/approve-user/" + user.getId();
-	    String message = "A new user has registered and waiting approval. Click the link below to view and approve the  new user";
-	    return constructEmail("New User Approval", message + " \r\n" + url, ampEmailId);
+	private SimpleMailMessage constructRegisterEmail(String contextPath, AmpUser user, String type) {
+		String subject = null;
+		String emailTo = null;
+		String message = null;
+		String url = null;
+		if (type.equalsIgnoreCase("approve"))
+		{
+			url = contextPath + "/approve-user/" + user.getId();
+			message = "A new user has registered and waiting approval. Click the link below to view and approve the  new user";
+			subject = "New User Approval";
+			emailTo = ampEmailId;
+		    
+		}
+		else if (type.equalsIgnoreCase("activate"))
+		{
+			url = contextPath + "/activate-account/" + user.getId();
+			message = "Click the link below to activate your AMP account";
+			subject = "Activate Account";
+			emailTo = user.getEmail();
+		}
+		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
 	public void createPasswordResetTokenForUser(AmpUser user, String token) {
@@ -259,5 +276,32 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  }
 	    
 		  return response;
+	}
+	
+	@Override 
+	public AuthResponse approveUser(Long userId)
+	{
+		AuthResponse response = new AuthResponse();
+		AmpUser user = ampUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+		if(user == null)
+		{
+			response.addError("Incorrect Link");
+			response.setSuccess(false);
+		}
+		if(!response.hasErrors()) {
+			try {
+				  mailSender.send(constructRegisterEmail(uiUrl, user, "activate"));
+				}
+			catch (MailException e) 
+			{
+				e.printStackTrace();
+			}
+			int rows = ampUserRepository.updateApproved(userId);
+			if(rows > 0)
+			{
+				response.setSuccess(true);
+			}
+		}
+		return response;
 	}
 }

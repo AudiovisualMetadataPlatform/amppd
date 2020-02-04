@@ -54,4 +54,6 @@ public interface AmpUserService {
 	 * @return the boolean result for sending the email
 	 */
 	public AuthResponse emailToken(String emailid);
+	
+	public AuthResponse approveUser(Long userID);
 }
