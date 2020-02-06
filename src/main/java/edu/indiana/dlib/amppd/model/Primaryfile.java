@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,13 +43,15 @@ public class Primaryfile extends Asset {
 	@OneToMany(mappedBy="primaryfile")
     private Set<PrimaryfileSupplement> supplements;
 
+    @JsonManagedReference
 	@ManyToOne
 	private Item item;
 		
     @ManyToMany
     @JsonBackReference
-    private Set<Bundle> bundles;      
-	
+    private Set<Bundle> bundles;  
+    
+    @JsonManagedReference
     @OneToMany(mappedBy="primaryfile")
     private Set<Job> jobs;        
     	    
