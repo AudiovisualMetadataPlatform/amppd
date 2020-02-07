@@ -54,4 +54,12 @@ public interface AmpUserService {
 	 * @return the boolean result for sending the email
 	 */
 	public AuthResponse emailToken(String emailid);
+	
+	/**
+	 * Gets an amp user by username.  Will return null if the amp user is not found.  This does not take into account 
+	 * whether or not user is approved.
+	 * @param username
+	 * @return AmpUser or null, depending on whether the user was found or not
+	 */
+	AmpUser getUser(String username);
 }

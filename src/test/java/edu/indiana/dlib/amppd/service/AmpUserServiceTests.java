@@ -5,7 +5,9 @@ import java.util.Calendar;
 import java.util.Random;
 import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.util.MD5Encryption;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 
 @RunWith(SpringRunner.class)
@@ -37,6 +40,9 @@ public class AmpUserServiceTests {
 	
 	@Autowired
 	private PasswordTokenRepository passwordTokenRepository;
+	
+	@Autowired
+	private TestHelper unitTestHelper;
 	
 	@Test
     public void shouldEncryptPassword() throws Exception{
@@ -96,4 +102,12 @@ public class AmpUserServiceTests {
     	
     	return ampUser;
     }
+	@Before
+	public void before() {
+		unitTestHelper.deleteAllUsers();
+	}
+	@After
+	public void after() {
+		unitTestHelper.deleteAllUsers();
+	}
 }
