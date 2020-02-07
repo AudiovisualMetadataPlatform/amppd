@@ -85,6 +85,21 @@ public class AmpUserServiceTests {
 	 	
     }
 	
+	@Test
+	public void shouldApproveUser() throws Exception{
+    	
+	 	AmpUser user = getAmpUser();  
+	 	//user.setPassword(md5.getMd5("amptest@123"));
+	 	ampUserService.registerAmpUser(user);
+	 	AmpUser user2 = ampUserRepository.findByEmail(user.getEmail()).get();
+	 	if(user2 != null) {
+	 		Long id = user2.getId();
+	 		Assert.assertFalse(user.getApproved().equals(true));
+	 		ampUserService.approveUser(id);
+	 		Assert.assertTrue(user2.getApproved().equals(true));
+	 	}
+    }
+	
 	private AmpUser getAmpUser() {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 

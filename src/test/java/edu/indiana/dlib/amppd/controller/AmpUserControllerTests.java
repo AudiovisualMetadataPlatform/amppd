@@ -125,6 +125,39 @@ public class AmpUserControllerTests {
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
     	
     }
+    //Test if register sends an email for approval
+    @Test
+	public void shouldTestApproveUser() throws Exception {
+    	AmpUser user = getAmpUser(); 
+    	user.setEmail("amppdiu@gmail.com"); 
+    	postRegister(user, true);
+    	String url = String.format("/login");
+    	AuthRequest request_login = new AuthRequest();
+    	request_login.setEmailid(user.getEmail());
+    	request_login.setPassword(user.getPassword());
+    	String json1 = mapper.writeValueAsString(request_login);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json1)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(false));
+    	/*
+    	url = String.format("/approve-user");
+    	//ampUserService.approveUser(user.getUsername());
+    	AuthRequest request_approve = new AuthRequest();
+    	request_approve.setId(user.getId());
+    	String json2 = mapper.writeValueAsString(request_approve);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json2)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
+    	
+    	url = String.format("/login");
+    	//json = mapper.writeValueAsString(request_login);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json1)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));*/
+    }
     
     @Test
 	public void testForgotPasswordEmail() throws Exception {
@@ -143,42 +176,11 @@ public class AmpUserControllerTests {
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
     }
-    
-	/*
-	 * @Test public void testResetPassword() throws Exception {
-	 * 
-	 * String newPassword = "amptestresetpassword"; AmpUser user = getAmpUser();
-	 * String url = String.format("/reset-password");
-	 * user.setEmail("winni8489@gmail.com"); postRegister(user, true);
-	 * 
-	 * ampUserService.approveUser(user.getUsername()); AuthRequest request = new
-	 * AuthRequest(); request.setEmailid(user.getEmail());
-	 * request.setPassword(newPassword); request.setToken("randomTokenCheck");
-	 * 
-	 * String json = mapper.writeValueAsString(request); mvc.perform(post(url)
-	 * .contentType(MediaType.APPLICATION_JSON) .content(json)
-	 * .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(
-	 * jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(
-	 * false));
-	 * 
-	 * 
-	 * PasswordTokenRepository passTokenRepo = null; PasswordResetToken passToken =
-	 * passTokenRepo.findByUser(user).get(); if(passToken!=null) {
-	 * request.setToken(passToken.getToken()); json =
-	 * mapper.writeValueAsString(request); mvc.perform(post(url)
-	 * .contentType(MediaType.APPLICATION_JSON) .content(json)
-	 * .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(
-	 * jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true
-	 * )); }
-	 * 
-	 * }
-	 */
 
     private AmpUser getAmpUser() {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 
     	AmpUser ampUser = new AmpUser();
-    	
     	ampUser.setPassword("password1234");
     	ampUser.setUsername("testUser_" + rand_int1);
     	ampUser.setEmail(ampUser.getUsername()+"@iu.edu");
