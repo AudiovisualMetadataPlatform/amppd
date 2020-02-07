@@ -20,8 +20,10 @@ import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
 import com.github.jmchilton.blend4j.galaxy.SearchClient.SearchResponse;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.HistoryContents;
+import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
+import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.Getter;
@@ -51,6 +53,8 @@ public class HumanMgmController {
 
 		galaxyInstance = galaxyApiService.getGalaxyInstance();
 		librariesClient = galaxyInstance.getLibrariesClient();
+		Job t = galaxyInstance.getJobsClient().showJob(id);
+		t.
 		HistoriesClient historiesClient = galaxyInstance.getHistoriesClient();
 		try {
 
@@ -71,6 +75,7 @@ public class HumanMgmController {
 				List<HistoryContents> libraryContentsList = historiesClient.showHistoryContents(matchingHistory.getId());
 				for(HistoryContents content : libraryContentsList) {
 					System.out.println(content.getName() + ":" + content.getUrl());
+					
 				}
 			}
 			
@@ -96,3 +101,4 @@ public class HumanMgmController {
 	public void getStepOutput(String workflowId, Long primaryfileId, String stepId) {
 	}
 }
+
