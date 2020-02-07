@@ -63,9 +63,8 @@ public class AmpUserServiceTests {
 	public void shouldResetPassword() throws Exception{
     	
 	 	AmpUser user = getAmpUser();  
-	 	user.setPassword(md5.getMd5("amptest@123"));
 	 	ampUserService.registerAmpUser(user);
-	 	
+	 	String old_pswd = MD5Encryption.getMd5(user.getPassword());
 	 	String token = UUID.randomUUID().toString();
 	 	Passwordresettoken myToken = new Passwordresettoken();
 	 	myToken.setUser(user);
@@ -76,9 +75,9 @@ public class AmpUserServiceTests {
 		passwordTokenRepository.save(myToken);
 	 	
 	 	try { 
-				ampUserService.resetPassword(user.getEmail(), md5.getMd5("amp_new@123"), token);
+				ampUserService.resetPassword(user.getEmail(),"amp_new@123", token);
 				AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).get();
-				Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
+				Assert.assertFalse(retrievedUser.getPassword().equals(old_pswd));
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
