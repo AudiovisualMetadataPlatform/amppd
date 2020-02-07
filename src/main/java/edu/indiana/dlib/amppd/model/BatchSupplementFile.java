@@ -9,7 +9,7 @@ import javax.persistence.ManyToOne;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Data;
 
@@ -32,7 +32,7 @@ public class BatchSupplementFile {
 	private String supplementName;
 	private String supplementDescription;
 
-	@JsonIgnore
+	@JsonBackReference
 	@ManyToOne
 	private BatchFile batchFile;
 	
