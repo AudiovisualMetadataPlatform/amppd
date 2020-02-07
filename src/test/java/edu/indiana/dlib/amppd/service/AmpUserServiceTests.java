@@ -32,6 +32,7 @@ public class AmpUserServiceTests {
 	@Autowired
     private AmpUserServiceImpl ampUserService = new AmpUserServiceImpl(amppdconfig);
 	
+	@Autowired
 	AmpUserRepository ampUserRepository;
 	MD5Encryption md5;
 	
@@ -96,6 +97,7 @@ public class AmpUserServiceTests {
 	 		Long id = user2.getId();
 	 		Assert.assertFalse(user.getApproved().equals(true));
 	 		ampUserService.approveUser(id);
+	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
 	 		Assert.assertTrue(user2.getApproved().equals(true));
 	 	}
     }
