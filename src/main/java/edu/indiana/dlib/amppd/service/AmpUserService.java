@@ -51,9 +51,14 @@ public interface AmpUserService {
 	/**
 	 * Generates a token and sends it in an email to the provided email id
 	 * @param email id
-	 * @return the boolean result for sending the email
+	 * @return the result for sending the email
 	 */
 	public AuthResponse emailToken(String emailid);
 	
+	/**
+	 * Generates an account verification email for the new and sets the approved flag to true in the database. 
+	 * @param user id
+	 * @return the result for approving the user in database
+	 */
 	public AuthResponse approveUser(Long userID);
 }
