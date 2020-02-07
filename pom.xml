@@ -184,6 +184,11 @@
 			<version>3.8</version>
 		</dependency>
 		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+    		<artifactId>json-simple</artifactId>
+    		<version>1.1</version>
+		</dependency>
+		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
 			<version>2.9.2</version>
@@ -198,7 +203,6 @@
 			<artifactId>galaxy-bootstrap</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
-		
 	</dependencies>
 
 	<build>
