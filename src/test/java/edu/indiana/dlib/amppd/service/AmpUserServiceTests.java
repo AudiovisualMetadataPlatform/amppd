@@ -59,7 +59,7 @@ public class AmpUserServiceTests {
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
 		  }
-	 	
+	 	  
     }
 	
 	@Test
