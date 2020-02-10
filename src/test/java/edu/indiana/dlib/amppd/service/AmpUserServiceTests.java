@@ -42,16 +42,13 @@ public class AmpUserServiceTests {
 	@Test
     public void shouldEncryptPassword() throws Exception{
     	
-	 	AmpUser user = new AmpUser();
-	 	user.setUsername("ampEncryptionTestID1");
-	 	user.setPassword("ampEncryptionPswd@123");
-	 	user.setEmail("ampEncryptionId1@iu.edu");
-	 	
-	 	ampUserService.registerAmpUser(user);
+	 	AmpUser user = getAmpUser(); 
+	 	String raw_pswd = user.getPassword();
+		ampUserService.registerAmpUser(user);
 	 	AmpUser retrievedUser = new AmpUser();
 	 	try {
-			retrievedUser = ampUserRepository.findByUsername(user.getUsername()).orElseThrow(() -> new RuntimeException("User not found: " + user.getUsername()));
-			Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
+			retrievedUser = ampUserRepository.findByUsername(user.getUsername()).get();
+			Assert.assertFalse(retrievedUser.getPassword().equals(raw_pswd));
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());

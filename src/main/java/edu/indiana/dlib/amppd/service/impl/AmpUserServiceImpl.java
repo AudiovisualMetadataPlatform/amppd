@@ -130,7 +130,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 				  catch (MailException e) {
 					  e.printStackTrace();
 				  	}
-					response.setSuccess(true);//new GenericResponse(messages.getMessage("message.resetPasswordEmail", null, request.getLocale()));
+					response.setSuccess(true);
 			  }
 			  else {
 				  response.addError("Error creating user account");
