@@ -61,7 +61,7 @@ public class PreprocessServiceTests {
 		Asset primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_VIDEO, "mp4");
 
 		// the media info should have been retrieved
-		Asset updatedPrimaryfile = preprocessService.preprocess(primaryfile);
+		Asset updatedPrimaryfile = preprocessService.retrieveMediaInfo(primaryfile);
 		Assert.assertEquals(primaryfile.getId(), updatedPrimaryfile.getId());
 		String mediaInfo = updatedPrimaryfile.getMediaInfo();
 		Assert.assertTrue(StringUtils.isNotEmpty(mediaInfo));
@@ -75,4 +75,23 @@ public class PreprocessServiceTests {
 		Assert.assertTrue(mediaInfo.contains("video"));		
 	}
 	
+	
+	@Test
+    public void shouldPreprocessPrimaryfile() {
+		Asset primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_AUDIO, "flac");
+
+		// the media info should have been retrieved
+		Asset updatedPrimaryfile = preprocessService.preprocess(primaryfile);
+		Assert.assertEquals(primaryfile.getId(), updatedPrimaryfile.getId());
+		String mediaInfo = updatedPrimaryfile.getMediaInfo();
+		Assert.assertTrue(StringUtils.isNotEmpty(mediaInfo));
+		Assert.assertTrue(mediaInfo.contains("container"));
+		Assert.assertTrue(mediaInfo.contains("duration"));
+		Assert.assertTrue(mediaInfo.contains("format"));
+		Assert.assertTrue(mediaInfo.contains("mime_type"));
+		Assert.assertTrue(mediaInfo.contains("size"));		
+		Assert.assertTrue(mediaInfo.contains("streams"));		
+		Assert.assertTrue(mediaInfo.contains("audio"));		
+		Assert.assertFalse(mediaInfo.contains("video"));		
+	}	
 }

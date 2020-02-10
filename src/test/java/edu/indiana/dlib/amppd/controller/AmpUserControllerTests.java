@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 
 @RunWith(SpringRunner.class)
@@ -33,6 +36,17 @@ public class AmpUserControllerTests {
     private AmpUserService ampUserService;
 	
 	@Autowired private ObjectMapper mapper;
+	@Autowired private TestHelper testHelper;
+	
+	@Before
+	public void init() {
+		testHelper.deleteAllUsers();
+	}
+
+	@After
+	public void cleanup() {
+		testHelper.deleteAllUsers();
+	}
 	
     @Test
     public void shouldRejectInvalidEmail() throws Exception {
