@@ -9,6 +9,8 @@ import javax.persistence.ManyToOne;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Data;
 
 /**
@@ -24,13 +26,13 @@ public class BatchSupplementFile {
 
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-	private Long  id;
+	private Long id;
 	private int supplementNum;
-	
 	private String supplementFilename;	
 	private String supplementName;
 	private String supplementDescription;
-	
+
+	@JsonBackReference
 	@ManyToOne
 	private BatchFile batchFile;
 	

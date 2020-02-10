@@ -10,25 +10,28 @@ import lombok.Data;
 public class BatchValidationResponse {
 
 	public BatchValidationResponse() {
-		errors = new ArrayList<String>();
+		validationErrors = new ArrayList<String>();
+		processingErrors = new ArrayList<String>();
 	}
 	
 	boolean success;
+	
 	Batch batch;
 	
+	private List<String> validationErrors;
 	
-	private ArrayList<String> errors;
+	private List<String> processingErrors;
 	
 	public void addError(String error) {
-		errors.add(error);
+		validationErrors.add(error);
 	}
 	public void addErrors(List<String> errors) {
-		if(errors!=null && !errors.isEmpty()) {
-			this.errors.addAll(errors);
+		if(validationErrors!=null && !errors.isEmpty()) {
+			this.validationErrors.addAll(errors);
 		}
 	}
 	
 	public boolean hasErrors() {
-		return !errors.isEmpty();
+		return !validationErrors.isEmpty();
 	}
 }

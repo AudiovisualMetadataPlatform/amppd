@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -45,6 +46,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @RunWith(SpringRunner.class)
@@ -85,13 +87,13 @@ public class BatchServiceTests {
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
 	@Autowired
-    private AmpUserService ampUserService;
+    private TestHelper testHelper;
 
 	
-	private String ampUsername = "ampTestUser";
+	private String ampUsername = "";
 	
-	@Before
-	public void createTestData() throws Exception {
+	private void deleteAllData() {
+
         // Cleanup drop box root for testing
         deleteDirectory(new File(propertyConfig.getFileStorageRoot()), false);
         
@@ -107,6 +109,14 @@ public class BatchServiceTests {
 		collectionRepository.deleteAll();
 		
 		unitRepository.deleteAll();
+		
+		testHelper.deleteAllUsers();
+	}
+	
+	@Before
+	public void createTestData() throws Exception {
+		
+		deleteAllData();
 		
 		String collectionName = "Music Library";
 		String unitName = "Test Unit";
@@ -125,15 +135,10 @@ public class BatchServiceTests {
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		 
 		
-		// If we don't have a test user, create one
-	 	Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
-	 	if(users==null || users.isEmpty()) {
-	 		AmpUser user = new AmpUser();
-		 	user.setUsername(ampUsername);
-		 	user.setPassword("testAmpPassword");
-		 	user.setEmail("ampTestUser@iu.edu");
-		 	ampUserService.registerAmpUser(user);
-	 	}
+		
+	 	AmpUser user = testHelper.createTestUser();
+	 	
+	 	ampUsername = user.getUsername();
 	 	
 		// Copy zip file and extract the files
         File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	
@@ -173,6 +178,7 @@ public class BatchServiceTests {
 	@After
 	public void cleanup() throws IOException {
 		FileUtils.cleanDirectory(new File(Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library").toString())); 
+		deleteAllData();
 	}
 	
 	// TODO remove ignore once we have ffmpeg and MediaProbe installed on Bamboo
@@ -190,18 +196,18 @@ public class BatchServiceTests {
         
         BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
 
-        if(response.getErrors()!=null) {
-            for(String s : response.getErrors()) {
+        if(response.getValidationErrors()!=null) {
+            for(String s : response.getValidationErrors()) {
                 System.out.println("Should be valid fails validation: " + s);
             }
         }
         
         Assert.assertFalse(response.hasErrors());
         
-        boolean success = batchService.processBatch(response, ampUsername);
+        List<String> errors = batchService.processBatch(response, ampUsername);
         
         
-        Assert.assertTrue(success);
+        Assert.assertTrue(errors.size()==0);
         
 	}
 	
@@ -390,7 +396,10 @@ public class BatchServiceTests {
         }
         bos.close();
     }
-	
+	@Test
+	public void createTestUnit() {
+		testHelper.createTestUnit();
+	}
 }
 
 

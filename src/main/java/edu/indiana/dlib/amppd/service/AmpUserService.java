@@ -61,4 +61,12 @@ public interface AmpUserService {
 	 * @return the result for approving the user in database
 	 */
 	public AuthResponse approveUser(Long userID);
+
+  /**
+	 * Gets an amp user by username.  Will return null if the amp user is not found.  This does not take into account 
+	 * whether or not user is approved.
+	 * @param username
+	 * @return AmpUser or null, depending on whether the user was found or not
+	 */
+	AmpUser getUser(String username);
 }

@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,7 +82,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  }
 		  return response;
 	  }
-	  
+	  public AmpUser getUser(String username) {
+		Optional<AmpUser> userOpt = ampUserRepository.findByUsername(username);
+		if(userOpt.isPresent()) return userOpt.get();
+		
+		return null;
+	  }
 	  public boolean approveUser(String username) {
 		  try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));

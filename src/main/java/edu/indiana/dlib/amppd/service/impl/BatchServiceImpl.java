@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,21 +63,21 @@ public class BatchServiceImpl implements BatchService {
 	private PreprocessService preprocessService;
 	
 	
-	public boolean processBatch(BatchValidationResponse batchValidation, String username) {
+	public List<String> processBatch(BatchValidationResponse batchValidation, String username) {
+		List<String> errors = new ArrayList<String>();
 		Batch batch = batchValidation.getBatch();
-		boolean success = false;
 		for(BatchFile batchFile : batch.getBatchFiles()) {
 			try {
 				createItem(batch.getUnit(), batchFile, username);
 			}
 			catch(Exception ex) {
 				log.severe("Batch processing exception: " + ex.toString());
-				success = false;
+				errors.add("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
 			}
 		}	
-		return success;
+		return errors;
 	}
-			
+	
 	/*
 	 * Create an item with the appropriate primary files, supplemental files, etc.
 	 */
@@ -316,6 +318,10 @@ public class BatchServiceImpl implements BatchService {
 			for(Item i : items) {
 				if(i.getName().contentEquals(itemName)) {
 					item = i;
+					if(!sourceLabel.isBlank() && !sourceId.isBlank()) {
+						HashMap<String, String> externalIds = i.getExternalIds();
+						externalIds.put(sourceId, sourceLabel);
+					}
 					break;
 				}
 			}
