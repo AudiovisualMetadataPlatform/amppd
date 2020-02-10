@@ -32,4 +32,9 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	@Modifying
 	@Query(value = "update AmpUser set password = :pswd where username = :username and id = :id")
 	int updatePassword(@Param("username") String username, @Param("pswd") String pswd, @Param("id") Long id);
+	
+	@Transactional
+	@Modifying
+	@Query(value = "update AmpUser set approved = 't' where id = :id")
+	int updateApproved(@Param("id") Long id);
 }

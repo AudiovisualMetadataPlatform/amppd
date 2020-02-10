@@ -62,5 +62,14 @@ import lombok.extern.java.Log;
 		log.info(" Reset Password result: " + res);
 		return res;
 	  }
+	  
+	  @PostMapping(path = "/approve-user", consumes = "application/json", produces = "application/json")
+	  public @ResponseBody AuthResponse approveUser(
+			  @RequestBody AuthRequest request){ 
+		log.info("Approve User=> id:"+ request.getUserId());	
+		AuthResponse res = ampService.approveUser(request.getUserId());
+		log.info(" Reset Password result: " + res);
+		return res;
+	  }
   }
 		 
