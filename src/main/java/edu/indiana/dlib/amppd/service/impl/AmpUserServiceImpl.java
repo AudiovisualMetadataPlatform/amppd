@@ -205,7 +205,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		if (type.equalsIgnoreCase("approve"))
 		{
 			url = contextPath + "/approve-user/" + user.getId();
-			message = "A new user has registered and waiting approval. Click the link below to view and approve the  new user";
+			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
+					"\n\n Click the link below to view and approve the new user. \n";
 			subject = "New User Approval";
 			emailTo = ampAdmin;
 		    
