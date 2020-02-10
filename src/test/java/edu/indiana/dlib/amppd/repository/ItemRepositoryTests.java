@@ -124,6 +124,7 @@ public class ItemRepositoryTests {
 		
 		item = Fixture.from(Item.class).gimme("valid");
 		String[] words = StringUtils.split(item.getName());
+		String keyword = words[words.length-1];
 		
 		String json = mapper.writeValueAsString(item);
 		mockMvc.perform(post("/items")
@@ -131,11 +132,10 @@ public class ItemRepositoryTests {
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.items[0].name").value(new StringContains(
-										item.getName())));
+								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
 	}
 		
 	@Test
@@ -143,6 +143,7 @@ public class ItemRepositoryTests {
 		
 		item = Fixture.from(Item.class).gimme("valid");
 		String[] words = StringUtils.split(item.getDescription());
+		String keyword = words[words.length-1];
 		
 		String json = mapper.writeValueAsString(item);
 		mockMvc.perform(post("/items")
@@ -150,11 +151,10 @@ public class ItemRepositoryTests {
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByKeyword?keyword={keyword}", words[words.length-1])).andDo(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
-								jsonPath("$._embedded.items[0].description").value(new StringContains(
-										item.getDescription())));
+								jsonPath("$._embedded.items[0].description").value(new StringContains(keyword)));
 	}	
 
 	@Test

@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -52,7 +53,7 @@ public class BatchFile {
 	@OneToMany(mappedBy="batchFile")
 	private List<BatchSupplementFile> batchSupplementFiles;	
 	
-	@JsonIgnore
+	@JsonBackReference
 	@ManyToOne
 	private Batch batch;
 	

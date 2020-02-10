@@ -2,9 +2,11 @@ package edu.indiana.dlib.amppd.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -19,14 +21,18 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
+import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
+import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -69,6 +75,15 @@ public class TestHelper {
 	
 	@Autowired
 	private JobService jobService;
+	
+	@Autowired
+	private AmpUserService ampUserService;
+	
+	@Autowired
+	private AmpUserRepository ampUserRepository;
+	
+	@Autowired
+	private PasswordTokenRepository passwordTokenRepository;
 	
 	/**
 	 * Check whether any AMP job has been run on TestWorkflow against TestAudio/TestVideo; if not, prepare the workflow and primaryfile and run the job once.
@@ -251,5 +266,51 @@ public class TestHelper {
 		}
 	}
 	
+	/*
+	 * Create a test user
+	 */
+	public AmpUser createTestUser() {
+		
+		String username = "pilotuser@iu.edu";
+		AmpUser ampUser = ampUserService.getUser(username);
+		if(ampUser==null) {
+			ampUser = new AmpUser();
+			ampUser.setEmail(username);
+			ampUser.setUsername(username);
+			ampUser.setPassword(username);
+			ampUser.setApproved(true);
+			ampUserService.registerAmpUser(ampUser);
+		}
+		
+    	return ampUser;
+	}
+	
+	/*
+	 * Delete all users
+	 */
+	public void deleteAllUsers() {
+		passwordTokenRepository.deleteAll();
+		ampUserRepository.deleteAll();
+	}
+	
+	public Unit createTestUnit() {
+		Unit unit = null;
+		String unitName = "AMP Pilot Unit";
+		List<Unit> units = unitRepository.findByName(unitName);
+		
+		if(units.size()>0) {
+			unit = units.get(0);
+		}
+		else {
+			unit = new Unit();
+			unit.setName(unitName);
+			unit.setModifiedBy("testuser");
+			unit.setCreatedBy("testuser");
+			unit.setModifiedDate(new Date().getTime());
+			unit.setCreatedDate(new Date().getTime());
+			unitRepository.save(unit);
+		}
+		return unit;
+	}
 	
 }
