@@ -15,8 +15,10 @@ import edu.indiana.dlib.amppd.service.HmgmService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
+import lombok.extern.java.Log;
 
 @Service
+@Log
 public class HmgmServiceImpl implements HmgmService {
 	private String TEMP_EXTENSION=".tmp";
 	private String COMPLETE_EXTENSION=".complete";
@@ -52,8 +54,9 @@ public class HmgmServiceImpl implements HmgmService {
 			
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.severe("Error getting transcript: " + e.getMessage());
 		} catch (ParseException e) {
-			e.printStackTrace();
+			log.severe("Error parsing transcript: " + e.getMessage());
 		}
 		return response;
 	}
@@ -69,7 +72,7 @@ public class HmgmServiceImpl implements HmgmService {
 			try (FileWriter file = new FileWriter(request.getFilePath())) {
 				file.write(jsonTmp.toJSONString());
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.severe("Error converting transcript to json: " + e.getMessage());
 				return false;
 			}
 			
@@ -110,7 +113,7 @@ public class HmgmServiceImpl implements HmgmService {
 			
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.severe("Error completing transcript: " + e.getMessage());
 			return false;
 		}
 		return true;

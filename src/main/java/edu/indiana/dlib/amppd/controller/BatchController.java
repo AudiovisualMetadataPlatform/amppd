@@ -23,7 +23,6 @@ import lombok.extern.java.Log;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@Log 
 public class BatchController {
 	@Autowired
 	private BatchValidationService batchValidationService;
