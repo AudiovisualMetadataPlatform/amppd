@@ -28,5 +28,6 @@ public class AmppdPropertyConfig {
     @NotNull private String username; 
     @NotNull private String password; 
     @NotNull private String uiUrl;
+    @NotNull private String admin;
 
 }

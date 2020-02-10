@@ -21,5 +21,6 @@ public class MailConfig {
 	    @NotNull private String host;
 	    @NotNull private String port;  
 	    @NotNull private String username;
-	    @NotNull private String password;  
+	    @NotNull private String password; 
+	    @NotNull private String uiUrl;
 }

@@ -43,6 +43,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  static String ampEmailId ;
 	  
 	  @NotNull
+	  static String ampAdmin ;
+	  
+	  @NotNull
 	  static String uiUrl ;
 	  
 	  @Autowired
@@ -58,6 +61,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig) { 
 		  ampEmailId = amppdconfig.getUsername();
 		  uiUrl = amppdconfig.getUiUrl();
+		  ampAdmin = amppdconfig.getAdmin();
 	  }
 	 
 	  
@@ -197,7 +201,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			url = contextPath + "/approve-user/" + user.getId();
 			message = "A new user has registered and waiting approval. Click the link below to view and approve the  new user";
 			subject = "New User Approval";
-			emailTo = ampEmailId;
+			emailTo = ampAdmin;
 		    
 		}
 		else if (type.equalsIgnoreCase("activate"))
