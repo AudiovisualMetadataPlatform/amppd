@@ -33,7 +33,7 @@ public class AmpUserServiceTests {
 	AmppdPropertyConfig amppdconfig = new AmppdPropertyConfig();
 	
 	@Autowired
-    private AmpUserServiceImpl ampUserService = new AmpUserServiceImpl(amppdconfig);
+    private AmpUserService ampUserService; // = new AmpUserServiceImpl(amppdconfig);
 	
 	@Autowired
 	AmpUserRepository ampUserRepository;
