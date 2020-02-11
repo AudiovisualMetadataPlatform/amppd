@@ -16,7 +16,6 @@ import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
-import lombok.extern.java.Log;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -36,6 +35,7 @@ public class BatchController {
 		/*
 		 * THIS IS TEMPORARY UNTIL AUTHENTICATION WORKS
 		 */
+
 		String pilotUsername = ampPropertyConfig.getUsername();
 		AmpUser ampUser = ampUserService.getUser(pilotUsername);
 		if(ampUser==null) {
