@@ -53,7 +53,7 @@ public class BatchFile {
 	@OneToMany(mappedBy="batchFile")
 	private List<BatchSupplementFile> batchSupplementFiles;	
 	
-	@JsonBackReference
+	@JsonBackReference(value="batch")
 	@ManyToOne
 	private Batch batch;
 	

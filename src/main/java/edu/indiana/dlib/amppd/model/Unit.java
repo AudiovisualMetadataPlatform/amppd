@@ -26,7 +26,6 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Unit extends Content {
 
-	@JsonManagedReference
 	@OneToMany(mappedBy="unit")
     private Set<Collection> collections;
 

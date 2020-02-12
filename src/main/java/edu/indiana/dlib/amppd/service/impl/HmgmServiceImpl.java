@@ -56,7 +56,7 @@ public class HmgmServiceImpl implements HmgmService {
 			e.printStackTrace();
 			log.severe("Error getting transcript: " + e.getMessage());
 		} catch (ParseException e) {
-			log.severe("Error parsing transcript: " + e.getMessage());
+			log.severe("Error parsing transcript: " + e.toString());
 		}
 		return response;
 	}

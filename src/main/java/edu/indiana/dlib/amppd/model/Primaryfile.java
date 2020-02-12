@@ -43,15 +43,13 @@ public class Primaryfile extends Asset {
 	@OneToMany(mappedBy="primaryfile")
     private Set<PrimaryfileSupplement> supplements;
 
-    @JsonManagedReference
 	@ManyToOne
 	private Item item;
 		
     @ManyToMany
-    @JsonBackReference
+	@JsonBackReference(value="bundles")
     private Set<Bundle> bundles;  
     
-    @JsonManagedReference
     @OneToMany(mappedBy="primaryfile")
     private Set<Job> jobs;        
     	    

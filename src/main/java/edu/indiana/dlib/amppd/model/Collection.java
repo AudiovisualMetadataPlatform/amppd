@@ -29,15 +29,14 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
 
-	@JsonBackReference
+	@JsonBackReference(value="item")
 	@OneToMany(mappedBy="collection")
     private Set<Item> items; 
 	
-	@JsonManagedReference
 	@OneToMany(mappedBy="collection")
     private Set<CollectionSupplement> supplements;
 
-	@JsonBackReference
+	@JsonBackReference(value="unit")
 	@ManyToOne
 	private Unit unit;
 	

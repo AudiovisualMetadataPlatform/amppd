@@ -24,7 +24,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class PrimaryfileSupplement extends Supplement {
 
-	@JsonBackReference
+	@JsonBackReference(value="primaryfile")
 	@ManyToOne
     private Primaryfile primaryfile;
     
