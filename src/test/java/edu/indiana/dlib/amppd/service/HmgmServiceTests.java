@@ -36,7 +36,7 @@ public class HmgmServiceTests {
     
 	@Before
 	public void createTestData() throws Exception {
-		String fileName = "batch_manifest_for_testing.csv";
+		String fileName = "transcribe.json";
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		testFile = new File(classLoader.getResource(fileName).getFile());
 	    Assert.assertTrue(testFile.exists());
@@ -112,7 +112,7 @@ public class HmgmServiceTests {
 	    Assert.assertTrue(tempFile.exists());
 	    
 	    TranscriptEditorRequest completeRequest = new TranscriptEditorRequest();
-	    completeRequest.setFilePath(testFile.getAbsolutePath());
+	    completeRequest.setFilePath(tempFile.getAbsolutePath());
 	    
 	    boolean completeSuccess = hmgmService.completeTranscript(completeRequest);
 	    

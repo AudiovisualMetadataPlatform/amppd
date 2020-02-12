@@ -32,7 +32,7 @@ public class BatchSupplementFile {
 	private String supplementName;
 	private String supplementDescription;
 
-	@JsonBackReference
+	@JsonBackReference(value="batch-file")
 	@ManyToOne
 	private BatchFile batchFile;
 	

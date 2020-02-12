@@ -24,7 +24,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class ItemSupplement extends Supplement {
 
-	@JsonBackReference
+	@JsonBackReference(value="item")
 	@ManyToOne
     private Item item;
     

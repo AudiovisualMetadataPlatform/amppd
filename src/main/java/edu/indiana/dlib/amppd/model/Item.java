@@ -12,7 +12,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,11 +30,10 @@ import lombok.ToString;
 @Transactional(readOnly=true, noRollbackFor=Exception.class)
 public class Item extends Content {
 
-	@JsonBackReference
+	@JsonBackReference(value="item")
 	@OneToMany(mappedBy="item")
     private Set<Primaryfile> primaryfiles;
 
-	@JsonManagedReference
 	@OneToMany(mappedBy="item")
     private Set<ItemSupplement> supplements;
 

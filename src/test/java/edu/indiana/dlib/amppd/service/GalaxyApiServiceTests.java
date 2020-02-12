@@ -1,12 +1,8 @@
 package edu.indiana.dlib.amppd.service;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -14,7 +10,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import edu.indiana.dlib.amppd.model.galaxy.GalaxyUser;
 import edu.indiana.dlib.amppd.service.impl.GalaxyApiServiceImpl;
 
 @RunWith(SpringRunner.class)
