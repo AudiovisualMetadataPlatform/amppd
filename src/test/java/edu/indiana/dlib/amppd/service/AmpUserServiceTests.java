@@ -33,8 +33,9 @@ public class AmpUserServiceTests {
 	AmppdPropertyConfig amppdconfig = new AmppdPropertyConfig();
 	
 	@Autowired
-    private AmpUserServiceImpl ampUserService = new AmpUserServiceImpl(amppdconfig);
+    private AmpUserService ampUserService; // = new AmpUserServiceImpl(amppdconfig);
 	
+	@Autowired
 	AmpUserRepository ampUserRepository;
 	MD5Encryption md5;
 	
@@ -47,16 +48,14 @@ public class AmpUserServiceTests {
 	@Test
     public void shouldEncryptPassword() throws Exception{
     	
-	 	AmpUser user = new AmpUser();
-	 	user.setUsername("ampEncryptionTestID1");
-	 	user.setPassword("ampEncryptionPswd@123");
-	 	user.setEmail("ampEncryptionId1@iu.edu");
+	 	AmpUser user = getAmpUser();
+	 	String raw_pswd = user.getPassword();
 	 	
 	 	ampUserService.registerAmpUser(user);
 	 	AmpUser retrievedUser = new AmpUser();
 	 	try {
-			retrievedUser = ampUserRepository.findByUsername(user.getUsername()).orElseThrow(() -> new RuntimeException("User not found: " + user.getUsername()));
-			Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
+			retrievedUser = ampUserRepository.findByUsername(user.getUsername()).get();
+			Assert.assertFalse(retrievedUser.getPassword().equals(raw_pswd));
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
@@ -68,9 +67,8 @@ public class AmpUserServiceTests {
 	public void shouldResetPassword() throws Exception{
     	
 	 	AmpUser user = getAmpUser();  
-	 	user.setPassword(md5.getMd5("amptest@123"));
 	 	ampUserService.registerAmpUser(user);
-	 	
+	 	String old_pswd = MD5Encryption.getMd5(user.getPassword());
 	 	String token = UUID.randomUUID().toString();
 	 	Passwordresettoken myToken = new Passwordresettoken();
 	 	myToken.setUser(user);
@@ -81,14 +79,30 @@ public class AmpUserServiceTests {
 		passwordTokenRepository.save(myToken);
 	 	
 	 	try { 
-				ampUserService.resetPassword(user.getEmail(), md5.getMd5("amp_new@123"), token);
+				ampUserService.resetPassword(user.getEmail(),"amp_new@123", token);
 				AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).get();
-				Assert.assertFalse(retrievedUser.getPassword().equals(user.getPassword()));
+				Assert.assertFalse(retrievedUser.getPassword().equals(old_pswd));
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
 		  }
 	 	
+    }
+	
+	@Test
+	public void shouldApproveUser() throws Exception{
+    	
+	 	AmpUser user = getAmpUser();  
+	 	//user.setPassword(md5.getMd5("amptest@123"));
+	 	ampUserService.registerAmpUser(user);
+	 	AmpUser user2 = ampUserRepository.findByEmail(user.getEmail()).get();
+	 	if(user2 != null) {
+	 		Long id = user2.getId();
+	 		Assert.assertFalse(user.getApproved().equals(true));
+	 		ampUserService.approveUser(id);
+	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
+	 		Assert.assertTrue(user2.getApproved().equals(true));
+	 	}
     }
 	
 	private AmpUser getAmpUser() {
