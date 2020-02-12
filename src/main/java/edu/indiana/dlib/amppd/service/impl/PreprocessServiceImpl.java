@@ -1,7 +1,9 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -65,11 +67,26 @@ public class PreprocessServiceImpl implements PreprocessService {
 			return null;
 		}
 		
+		// ffmpeg with -y so that it forces overwrite if target file already exists; 
+		// otherwise the process will be blocked waiting for user to confirm overwriting
 		String targetFilePath = FilenameUtils.getFullPath(sourceFilepath) + FilenameUtils.getBaseName(sourceFilepath) + ".wav";
-		String command = "ffmpeg -i " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
+		String command = "ffmpeg -y -i " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
 		
 		try {
 			Process process = Runtime.getRuntime().exec(command);
+		    final int status = process.waitFor();
+		    if (status != 0) {		    	
+				// capture the error outputs into log
+		    	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+		    	StringBuilder builder = new StringBuilder();
+		    	String line = null;
+		    	while ( (line = reader.readLine()) != null) {
+		    		builder.append(line);
+		    		builder.append(System.getProperty("line.separator"));
+		    	}
+				log.severe(builder.toString());
+		    	throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath + ": ffmpeg exited with status " + status);
+		    }
 		}
 		catch (Exception e) {
 			throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath, e);
@@ -104,10 +121,6 @@ public class PreprocessServiceImpl implements PreprocessService {
 	@Override
 	public String retrieveMediaInfo(String filepath) {
 		String jsonpath = FilenameUtils.getFullPath(filepath) + FilenameUtils.getBaseName(filepath) + ".json";
-		String command = amppdPropertyConfig.getPythonPath() + " " + 
-				amppdPropertyConfig.getMediaprobeDir() + 
-				"media_probe.py --json " + fileStorageService.absolutePathName(filepath);
-
 		ProcessBuilder pb = new ProcessBuilder(
 				amppdPropertyConfig.getPythonPath(), 
 				amppdPropertyConfig.getMediaprobeDir() + "media_probe.py", 
@@ -123,7 +136,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		}
 		
 		// merges the standard error to standard output
-		pb.redirectErrorStream();
+		pb.redirectErrorStream(true);
 		
 		// redirect media_probe output into json file
 		// alternatively we can write the json output directly into asset, but creating the json file could be useful for other purpose
@@ -133,12 +146,12 @@ public class PreprocessServiceImpl implements PreprocessService {
 			Process process = pb.start();
 		    final int status = process.waitFor();
 		    if (status != 0) {		    	
+				// capture the error outputs into log
+				log.severe(fileStorageService.readTextFile(jsonpath));
 		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
 		    }
 		}
 		catch (IOException e) {
-			// capture the error outputs info log
-			log.severe(fileStorageService.readTextFile(jsonpath));
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
 		}
 		catch (InterruptedException e) {
