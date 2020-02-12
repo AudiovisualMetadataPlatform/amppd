@@ -26,9 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
-import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
-import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
