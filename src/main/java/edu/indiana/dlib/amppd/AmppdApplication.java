@@ -22,11 +22,6 @@ public class AmppdApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AmppdApplication.class, args);
 		log.info("AMPPD has started successfully.");
-		
-//        log.debug("Hello, I'm DEBUG message.");
-//        log.info("Hello, I'm INFO message.");
-//        log.warn("Hello, I'm WARN message.");
-//        log.error("Hello, I'm ERROR message.");
 	}
 	
     public static void displayAllBeans() {
