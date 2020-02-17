@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -37,7 +36,7 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Class for helper methods facilitating various tests in Amppd.
@@ -45,7 +44,7 @@ import lombok.extern.java.Log;
  *
  */
 @Service
-@Log
+@Slf4j
 public class TestHelper {
 	
 	public static final List<String> AUDIO_TYPES = new ArrayList<>(List.of("mp3", "wav", "m4a", "ogg"));

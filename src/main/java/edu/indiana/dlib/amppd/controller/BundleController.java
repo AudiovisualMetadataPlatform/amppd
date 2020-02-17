@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.service.BundleService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller for REST operations on Bundle.
@@ -18,7 +18,7 @@ import lombok.extern.java.Log;
  */
 @CrossOrigin(origins = "*")
 @RestController
-@Log
+@Slf4j
 public class BundleController {
 
 	@Autowired

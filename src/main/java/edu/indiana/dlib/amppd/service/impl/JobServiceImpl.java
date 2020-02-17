@@ -27,7 +27,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
-import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -36,7 +35,7 @@ import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import lombok.Getter;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of JobService.
@@ -44,7 +43,7 @@ import lombok.extern.java.Log;
  *
  */
 @Service
-@Log
+@Slf4j
 public class JobServiceImpl implements JobService {
 	
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
@@ -188,7 +187,7 @@ public class JobServiceImpl implements JobService {
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	
-    		log.severe("Error creating " + msg);
+    		log.error("Error creating " + msg);
     		throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
@@ -210,7 +209,7 @@ public class JobServiceImpl implements JobService {
 		int nFailed = 0;
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("Bundle <" + bundleId + "> does not exist!"));        	
     	if (bundle.getPrimaryfiles() == null || bundle.getPrimaryfiles().isEmpty()) {
-    		log.warning("Bundle <\" + bundleId + \"> does not contain any primaryfile.");
+    		log.warn("Bundle <\" + bundleId + \"> does not contain any primaryfile.");
     	}
     	else { 
     		for (Primaryfile primaryfile : bundle.getPrimaryfiles() ) {
@@ -220,7 +219,7 @@ public class JobServiceImpl implements JobService {
     			}
     			catch (Exception e) {
     				// if error occurs with this primaryfile we still want to continue with other primaryfiles
-    				log.severe(e.getStackTrace().toString());	
+    				log.error(e.getStackTrace().toString());	
     				nFailed++;
     			}
     		}
@@ -242,7 +241,7 @@ public class JobServiceImpl implements JobService {
 
 		// return an empty list if no AMP job has been run on the workflow-primaryfile
 		if (primaryfile.getHistoryId() == null) {
-			log.warning("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
+			log.warn("No AMP job has been run on workflow " + workflowId + " against primaryfile " + primaryfileId);
 			return invocations;
 		}
 
@@ -251,7 +250,7 @@ public class JobServiceImpl implements JobService {
 		} 
 		catch(Exception e) {
 			String msg = "Unable to index invocations for: workflowId: " + workflowId + ", priamryfileId: " + primaryfileId;
-			log.severe(msg);
+			log.error(msg);
 			throw new GalaxyWorkflowException(msg, e);
 		}
 		
@@ -272,7 +271,7 @@ public class JobServiceImpl implements JobService {
 		}
 		catch (Exception e) {
 			String msg = "Could not find valid invocation for: workflowId: " + workflowId + ", invocationId: " + invocationId;
-			log.severe(msg);
+			log.error(msg);
 			throw new GalaxyWorkflowException(msg, e);
 		}
 

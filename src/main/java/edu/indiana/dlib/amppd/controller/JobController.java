@@ -19,7 +19,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.service.JobService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller for REST operations on Amppd jobs.
@@ -28,7 +28,7 @@ import lombok.extern.java.Log;
  */
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@Log
+@Slf4j
 public class JobController {	
 
 	@Autowired

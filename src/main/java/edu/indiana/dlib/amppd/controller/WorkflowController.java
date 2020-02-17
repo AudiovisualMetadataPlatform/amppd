@@ -13,7 +13,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.service.WorkflowService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller for REST operations on Workflow.
@@ -22,7 +22,7 @@ import lombok.extern.java.Log;
  */
 @CrossOrigin(origins = "*")
 @RestController
-@Log
+@Slf4j
 public class WorkflowController {
 
 	@Autowired
@@ -42,7 +42,7 @@ public class WorkflowController {
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflows from Galaxy.";
-			log.severe(msg);
+			log.error(msg);
 			throw new GalaxyWorkflowException(msg, e);
 		}
 		
@@ -64,7 +64,7 @@ public class WorkflowController {
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflow detail for ID " + workflowId + " from Galaxy.";
-			log.severe(msg);
+			log.error(msg);
 			throw new GalaxyWorkflowException(msg, e);
 		}
 
