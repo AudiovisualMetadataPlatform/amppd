@@ -36,11 +36,11 @@ import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Transactional
-@Log
+@Slf4j
 public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
@@ -71,7 +71,7 @@ public class BatchServiceImpl implements BatchService {
 				createItem(batch.getUnit(), batchFile, username);
 			}
 			catch(Exception ex) {
-				log.severe("Batch processing exception: " + ex.toString());
+				log.error("Batch processing exception: " + ex.toString());
 				errors.add("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
 			}
 		}	

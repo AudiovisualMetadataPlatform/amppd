@@ -5,21 +5,23 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.session.jdbc.config.annotation.web.http.EnableJdbcHttpSession;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 //@EnableJdbcHttpSession
 @EnableJpaRepositories("edu.indiana.dlib.amppd.repository")
 @EnableConfigurationProperties({GalaxyPropertyConfig.class, AmppdPropertyConfig.class})
+@Slf4j
 public class AmppdApplication {
 	
     private static ApplicationContext applicationContext;
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(AmppdApplication.class, args);
+		log.info("AMPPD has started successfully.");
 	}
 	
     public static void displayAllBeans() {

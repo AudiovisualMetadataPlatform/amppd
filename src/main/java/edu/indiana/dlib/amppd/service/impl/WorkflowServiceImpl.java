@@ -11,7 +11,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import lombok.Getter;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of WorkflowService.
@@ -19,7 +19,7 @@ import lombok.extern.java.Log;
  *
  */
 @Service
-@Log
+@Slf4j
 public class WorkflowServiceImpl implements WorkflowService {
 	
 	@Autowired

@@ -9,7 +9,7 @@ import com.github.jmchilton.blend4j.galaxy.GalaxyInstanceFactory;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.model.galaxy.GalaxyUser;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of Galaxy service.
@@ -19,7 +19,7 @@ import lombok.extern.java.Log;
 // TODO change commented code to use galaxyRestTemplate as autowired
 //@ContextConfiguration(classes = GalaxyRestTemplateFactoryConfig.class)
 @Service
-@Log
+@Slf4j
 public class GalaxyApiServiceImpl implements GalaxyApiService {
 
 	@Autowired
@@ -58,7 +58,7 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		}
 		catch (Exception e) {
 			String msg = "Unable to acquire Galaxy instance for user " + user.getUsername() + " at " + config.getBaseUrl();
-			log.severe(msg);
+			log.error(msg);
 			throw new RuntimeException(msg, e);
 		}
 		

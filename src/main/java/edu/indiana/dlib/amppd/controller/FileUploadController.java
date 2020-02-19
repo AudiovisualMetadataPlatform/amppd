@@ -13,7 +13,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 // TODO: when we add controllers for data entities, we might want to move the actions into controllers for the associated entities.
 
@@ -24,7 +24,7 @@ import lombok.extern.java.Log;
  */
 @CrossOrigin(origins = "*")
 @RestController
-@Log
+@Slf4j
 public class FileUploadController {
 	
 	@Autowired

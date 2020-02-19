@@ -17,12 +17,10 @@ import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
 import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
-import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import lombok.Getter;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of GalaxyDataService. 
@@ -32,7 +30,7 @@ import lombok.extern.java.Log;
  *
  */
 @Service
-@Log
+@Slf4j
 public class GalaxyDataServiceImpl implements GalaxyDataService {
 	
 	public static final String SHARED_LIBARY_NAME = "Amppd Library";
@@ -80,7 +78,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			}
 			catch (Exception e) {
 				String msg = "Cannot create shared Galaxy data library for AMPPD users.";
-				log.severe(msg);
+				log.error(msg);
 				throw new RuntimeException(msg, e);
 			}	
 		}
@@ -101,7 +99,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			}
 			catch (Exception e) {
 				String msg = "Cannot create shared Galaxy data history for AMPPD users.";
-				log.severe(msg);
+				log.error(msg);
 				throw new RuntimeException(msg, e);
 			}		
 		}
@@ -173,12 +171,12 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			}
 			catch (Exception e) {
 				msg = "Upload failed. " + e.getMessage();
-				log.severe(msg);
+				log.error(msg);
 				throw new GalaxyFileUploadException(msg, e);
 			}
 		} else {
 			msg = "Upload failed, unable to find the data library " + libraryName;
-			log.severe(msg);
+			log.error(msg);
 			throw new GalaxyFileUploadException(msg);
 		}
 
