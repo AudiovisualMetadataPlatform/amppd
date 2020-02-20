@@ -23,6 +23,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -47,6 +48,8 @@ import lombok.extern.slf4j.Slf4j;
 public class JobServiceImpl implements JobService {
 	
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
+	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
+	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context";
 	
 	@Autowired
     private BundleRepository bundleRepository;
@@ -79,33 +82,38 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(String,String,String,Map<String, Map<String, String>>)
-	 */	
-	@Override
-	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
+	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
+	 * Note that if the workflow includes Human MGM tools then context info will 
+	 * @param workflowId ID of the given workflow
+	 * @param datasetId ID of the given dataset
+	 * @param historyId ID of the given history
+	 * @param parameters step parameters for running the workflow
+	 * @return the built WorkflowInputs instance
+	 */
+	protected WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
 		WorkflowInputs winputs = new WorkflowInputs();
 		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
-		winputs.setWorkflowId(workflowId);
+		winputs.setWorkflowId(workflowDetails.getId());
 		
 		String inputId;
 		try {
-			WorkflowDetails wdetails = workflowsClient.showWorkflow(workflowId);
-			if (wdetails == null) {
-				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			}
-			
+//			WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
+//			if (workflowDetails == null) {
+//				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
+//			}
+//			
 			// each input in the workflow corresponds to an input step with a unique ID, the inputs of workflow detail is a map of {stepId: {label: value}}
-			Set<String> inputIds = wdetails.getInputs().keySet();
+			Set<String> inputIds = workflowDetails.getInputs().keySet();
 			if (inputIds.size() != 1) {
-				throw new GalaxyWorkflowException("Workflow " + workflowId + " has " + inputIds.size() + " inputs, while it should have exactly one input.");
+				throw new GalaxyWorkflowException("Workflow " + workflowDetails.getId() + " has " + inputIds.size() + " inputs, while it should have exactly one input.");
 			}
 			
 			// forAmppd, we can assume all workflows only take one primaryfile as input
 			inputId = (String)inputIds.toArray()[0];
 		}
 		catch (Exception e) {
-			throw new GalaxyWorkflowException("Exception when retrieving details for workflow " + workflowId);
+			throw new GalaxyWorkflowException("Exception when retrieving details for workflow " + workflowDetails.getId());
 		}
 		
 		WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
@@ -117,8 +125,41 @@ public class JobServiceImpl implements JobService {
 			});
 		});
 		
-		log.info("Successfully built job inputs, workflowId: " + workflowId + ", datasetId: " + datasetId + " parameters: " + parameters);
+		log.info("Successfully built job inputs, workflowId: " + workflowDetails.getId() + ", datasetId: " + datasetId + " parameters: " + parameters);
 		return winputs;
+	}
+	
+	/**
+	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
+	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
+	 * Note that the context parameters are purely system generated and shall be transparent to users.
+	 */
+	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile,  Map<String, Map<String, String>> parameters) {
+		boolean populated = false;
+		
+		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
+			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
+				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
+				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, generateContext(primaryfile));
+				populated = true;
+			}			
+		});
+		
+		return populated;
+	}
+	
+	protected String generateContext(Primaryfile primaryfile) {
+		boolean populated = false;
+		
+		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
+			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
+				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
+				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, generateContext(primaryfile));
+				populated = true;
+			}			
+		});
+		
+		return populated;
 	}
 	
 	/**
@@ -183,7 +224,13 @@ public class JobServiceImpl implements JobService {
 
 		// invoke the workflow 
     	try {
-    		WorkflowInputs winputs = buildWorkflowInputs(workflowId, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
+			WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
+			if (workflowDetails == null) {
+				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
+			}
+			
+    		WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
+    		populateHmgmContextParameters(workflowDetails, primaryfile, parameters);
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	

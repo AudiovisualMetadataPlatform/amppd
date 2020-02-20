@@ -30,16 +30,6 @@ public interface JobService {
 	public HistoriesClient getHistoriesClient();
 	
 	/**
-	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
-	 * @param workflowId ID of the given workflow
-	 * @param datasetId ID of the given dataset
-	 * @param historyId ID of the given history
-	 * @param parameters step parameters for running the workflow
-	 * @return the built WorkflowInputs instance
-	 */
-	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters);
-	
-	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileId ID of the given primaryfile

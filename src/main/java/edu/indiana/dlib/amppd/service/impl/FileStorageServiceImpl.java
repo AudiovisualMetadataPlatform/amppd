@@ -104,7 +104,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     	}
     	
     	// if primaryfile has been run against a workflow then do not allow uploading to replace existing media, 
-    	// as this will cause discrepancy with existing workflow outputs, which are linked to existing media {    	
+    	// as this will cause discrepancy with existing workflow outputs, which are linked to existing media 	
     	if (primaryfile.getDatasetId() != null || primaryfile.getHistoryId() != null) {
     		throw new StorageException("Uploading new media file to primaryfile " + primaryfile.getId() + " is not allowed as it has been run against a workflow." );
     	}
