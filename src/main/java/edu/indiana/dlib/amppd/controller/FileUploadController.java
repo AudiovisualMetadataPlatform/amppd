@@ -36,7 +36,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the primaryfile with media uploaded
 	 */
-	@PostMapping("/primaryfiles/{id}/file")
+	@PostMapping("/primaryfiles/{id}/upload")
 	public Primaryfile uploadPrimaryfile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for primaryfile ID " + id);
     	return fileStorageService.uploadPrimaryfile(id, file);
@@ -48,7 +48,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the collectionSupplement with media uploaded
 	 */
-    @PostMapping("/collections/supplements/{id}/file")
+    @PostMapping("/collections/supplements/{id}/upload")
     public CollectionSupplement uploadCollectionSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for collectionSupplement ID " + id);
     	return fileStorageService.uploadCollectionSupplement(id, file);
@@ -60,7 +60,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the itemSupplement with media uploaded
 	 */
-    @PostMapping("/items/supplements/{id}/file")
+    @PostMapping("/items/supplements/{id}/upload")
     public ItemSupplement uploadItemSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for itemSupplement ID " + id);
     	return fileStorageService.uploadItemSupplement(id, file);
@@ -72,7 +72,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the primaryfileSupplement with media uploaded
 	 */
-    @PostMapping("/primaryfiles/supplements/{id}/file")
+    @PostMapping("/primaryfiles/supplements/{id}/upload")
     public PrimaryfileSupplement uploadPrimaryfileSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for primaryfileSupplement ID " + id);
     	return fileStorageService.uploadPrimaryfileSupplement(id, file);

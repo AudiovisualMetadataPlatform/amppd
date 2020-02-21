@@ -25,9 +25,10 @@ public class AmppdPropertyConfig {
     @NotNull private String pythonPath;
     @NotNull private String mediaprobeDir;
     @NotNull private String encryptionSecret;  
+    @NotNull private String admin;
     @NotNull private String username; 
     @NotNull private String password; 
     @NotNull private String uiUrl;
-    @NotNull private String admin;
+    @NotNull private String url;
 
 }

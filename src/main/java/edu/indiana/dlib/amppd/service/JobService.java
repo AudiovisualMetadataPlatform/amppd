@@ -7,8 +7,11 @@ import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
+
+import edu.indiana.dlib.amppd.model.Primaryfile;
 
 
 /**
@@ -28,6 +31,43 @@ public interface JobService {
 	 * Return the HistoriesClient instance.
 	 */
 	public HistoriesClient getHistoriesClient();
+	
+	/**
+	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
+	 * Note that if the workflow includes Human MGM tools then context info will 
+	 * @param workflowId ID of the given workflow
+	 * @param datasetId ID of the given dataset
+	 * @param historyId ID of the given history
+	 * @param parameters step parameters for running the workflow
+	 * @return the built WorkflowInputs instance
+	 */
+	public WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String historyId, Map<String, Map<String, String>> parameters);
+	
+	/**
+	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
+	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
+	 * Note that the context parameters are purely system generated and shall be transparent to users.
+	 * @param workflowDetails the given workflow
+	 * @param primaryfile the given primaryfile
+	 * @param parameters the parameters for the workflow
+	 * @return true if the given parameters are updated with HMGM context
+	 */
+	public boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile,  Map<String, Map<String, String>> parameters);
+
+	/**
+	 * Get needed job context for HMGMs when running the given workflow against the given primaryfile.
+	 * @param workflowDetails the given workflow \
+	 * @param primaryfile the given primaryfile
+	 * @return the generated JSON string for HMGM context
+	 */
+	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile); 
+	
+	/**
+	 * Get the media file download URL for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @return the generated media URL
+	 */
+	public String getPrimaryfileMediaUrl(Primaryfile primaryfile);
 	
 	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.

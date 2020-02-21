@@ -25,8 +25,10 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
@@ -70,6 +72,9 @@ public class JobServiceImpl implements JobService {
 	@Autowired
 	private AmpUserService ampUserService;
 	
+	@Autowired
+	private AmppdPropertyConfig ampPropertyConfig;
+	
 	@Getter
 	private WorkflowsClient workflowsClient;
 		
@@ -86,15 +91,10 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
-	 * Note that if the workflow includes Human MGM tools then context info will 
-	 * @param workflowId ID of the given workflow
-	 * @param datasetId ID of the given dataset
-	 * @param historyId ID of the given history
-	 * @param parameters step parameters for running the workflow
-	 * @return the built WorkflowInputs instance
+	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(WorkflowDetails, String, String, Map<String, Map<String, String>>)
 	 */
-	protected WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
+	@Override
+	public WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
 		WorkflowInputs winputs = new WorkflowInputs();
 		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
@@ -134,17 +134,16 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
-	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
-	 * Note that the context parameters are purely system generated and shall be transparent to users.
+	 * @see edu.indiana.dlib.amppd.service.JobService.populateHmgmContextParameters(WorkflowDetails, Primaryfile, Map<String, Map<String, String>>)
 	 */
-	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile,  Map<String, Map<String, String>> parameters) {
+	@Override
+	public boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile,  Map<String, Map<String, String>> parameters) {
 		boolean populated = false;
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
 			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
 				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
-				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, getJobContext(workflowDetails, primaryfile));
+				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, getHmgmContext(workflowDetails, primaryfile));
 				boolean flag = true;
 			}			
 		});
@@ -153,12 +152,10 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * Get needed job context for HMGMs when running the given workflow against the given primaryfile.
-	 * @param workflowDetails the given workflow \
-	 * @param primaryfile the given primaryfile
-	 * @return the generated JSON string for HMGM context
+	 *@see edu.indiana.dlib.amppd.service.JobService.getHmgmContext(WorkflowDetails, Primaryfile)
 	 */
-	protected String getJobContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
+	@Override
+	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
 		Map<String, String> context = new HashMap<String, String>();
 		context.put("submittedBy", ampUserService.getCurrentUser().getUsername());
 		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
@@ -168,6 +165,7 @@ public class JobServiceImpl implements JobService {
 		context.put("primaryfileUrl", primaryfile.getName());
 		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("workflowId", workflowDetails.getId());		
+		context.put("workflowName", workflowDetails.getName());	
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		String contextJson = null;
@@ -182,12 +180,11 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * Get the media file download URL for the given primaryfile.
-	 * @param primaryfile the given primaryfile
-	 * @return the generated media URL
+	 * @see edu.indiana.dlib.amppd.service.JobService.getAssetMediaUrl(Asset)
 	 */
-	public String getPrimaryfileUrl(Primaryfile primaryfile) {
-		String url = null;
+	@Override
+	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
+		String url = ampPropertyConfig.getUrl() + "/primaryfile/" + primaryfile.getId() + "/media";
 		return url;
 	}
 	

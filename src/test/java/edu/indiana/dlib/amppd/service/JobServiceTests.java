@@ -99,7 +99,7 @@ public class JobServiceTests {
     	param1.put("name1", "value1");
     	parameters.put("step1", param1);
     	
-    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), dataset.getId(), history.getId(), parameters);
+    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow, dataset.getId(), history.getId(), parameters);
     	
     	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
     	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
@@ -113,7 +113,7 @@ public class JobServiceTests {
 
     @Test(expected = GalaxyWorkflowException.class)
     public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
-    	jobService.buildWorkflowInputs("foobar", "", "", new HashMap<String, Map<String, String>>());
+    	jobService.buildWorkflowInputs(null, "", "", new HashMap<String, Map<String, String>>());
     }
 
     @Test
