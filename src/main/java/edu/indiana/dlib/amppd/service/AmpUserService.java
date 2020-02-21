@@ -39,7 +39,7 @@ public interface AmpUserService {
 	 * @param user name
 	 * @return the result of setting the user to approved as success/failure
 	 */
-	boolean approveUser(String userName);
+	public boolean approveUser(String userName);
 	
 	/**
 	 * Resets the existing password in the database for the given username
@@ -68,5 +68,12 @@ public interface AmpUserService {
 	 * @param username
 	 * @return AmpUser or null, depending on whether the user was found or not
 	 */
-	AmpUser getUser(String username);
+	public AmpUser getUser(String username);
+	
+	/**
+	 * Gets the current user from User Session.
+	 * @return the current user
+	 */
+	public AmpUser getCurrentUser();
+	
 }

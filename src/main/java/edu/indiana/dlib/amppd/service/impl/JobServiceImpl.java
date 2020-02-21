@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -31,6 +31,7 @@ import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
@@ -65,6 +66,9 @@ public class JobServiceImpl implements JobService {
 	
 	@Autowired
 	private GalaxyDataService galaxyDataService;
+	
+	@Autowired
+	private AmpUserService ampUserService;
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -140,26 +144,51 @@ public class JobServiceImpl implements JobService {
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
 			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
 				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
-				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, generateContext(primaryfile));
-				populated = true;
+				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, getJobContext(workflowDetails, primaryfile));
+				boolean flag = true;
 			}			
 		});
 		
 		return populated;
 	}
 	
-	protected String generateContext(Primaryfile primaryfile) {
-		boolean populated = false;
+	/**
+	 * Get needed job context for HMGMs when running the given workflow against the given primaryfile.
+	 * @param workflowDetails the given workflow \
+	 * @param primaryfile the given primaryfile
+	 * @return the generated JSON string for HMGM context
+	 */
+	protected String getJobContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
+		Map<String, String> context = new HashMap<String, String>();
+		context.put("submittedBy", ampUserService.getCurrentUser().getUsername());
+		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
+		context.put("collectionName", primaryfile.getItem().getCollection().getName());
+		context.put("itemName", primaryfile.getItem().getName());
+		context.put("primaryfileName", primaryfile.getName());
+		context.put("primaryfileUrl", primaryfile.getName());
+		context.put("primaryfileId", primaryfile.getId().toString());
+		context.put("workflowId", workflowDetails.getId());		
 		
-		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
-			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
-				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
-				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, generateContext(primaryfile));
-				populated = true;
-			}			
-		});
+		ObjectMapper objectMapper = new ObjectMapper();
+		String contextJson = null;
+		try {
+			contextJson = objectMapper.writeValueAsString(context);
+		}
+		catch (Exception e) {			
+            throw new RuntimeException("Error while converting context map to json string for primaryfile " + primaryfile.getId() + " and workflow " + workflowDetails.getId(), e);
+        }
 		
-		return populated;
+		return contextJson;
+	}
+	
+	/**
+	 * Get the media file download URL for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @return the generated media URL
+	 */
+	public String getPrimaryfileUrl(Primaryfile primaryfile) {
+		String url = null;
+		return url;
 	}
 	
 	/**
