@@ -28,7 +28,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
@@ -157,7 +156,7 @@ public class JobServiceImpl implements JobService {
 //	@Override
 	/**
 	 * Build the workflow inputs to feed the given dataset and history along with the given user-defined parameters into the given Galaxy workflow.
-	 * Note that the parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
+	 * Note that the passed-in parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
 	 * @param workflowId ID of the given workflow
 	 * @param datasetId ID of the given dataset
 	 * @param historyId ID of the given history
@@ -209,13 +208,14 @@ public class JobServiceImpl implements JobService {
 	/**
 	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
 	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
-	 * Note that the context parameters are purely system generated and shall be transparent to users.
+	 * Note that the passed-in parameters here are part of the workflow inputs already populated with user-defined ones;
+	 * and the context parameters are purely system generated and shall be transparent to users.
 	 * @param workflowDetails the given workflow
 	 * @param primaryfile the given primaryfile
 	 * @param parameters the parameters for the workflow
 	 * @return true if the given parameters are updated with HMGM context
 	 */
-	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<String, Map<String, String>> parameters) {
+	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
 		boolean populated = false;
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
@@ -335,7 +335,7 @@ public class JobServiceImpl implements JobService {
 			}
 			
     		WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
-    		populateHmgmContextParameters(workflowDetails, primaryfile, parameters);
+    		populateHmgmContextParameters(workflowDetails, primaryfile, winputs.getParameters());
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	
