@@ -33,8 +33,9 @@ public interface JobService {
 	public HistoriesClient getHistoriesClient();
 	
 	/**
-	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
-	 * Note that if the workflow includes Human MGM tools then context info will 
+	 * Build the workflow inputs to feed the given dataset and history along with the given user-defined parameters into the given Galaxy workflow.
+	 * Note that the parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
+	 * Note that this method is meant to be used internally (protected), but made public so that it can be unit-tested without much hassle in JUnit.
 	 * @param workflowId ID of the given workflow
 	 * @param datasetId ID of the given dataset
 	 * @param historyId ID of the given history
@@ -47,6 +48,7 @@ public interface JobService {
 	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
 	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
 	 * Note that the context parameters are purely system generated and shall be transparent to users.
+	 * Also note that this method is meant to be used internally (protected), but made public so that it can be unit-tested without much hassle in JUnit.
 	 * @param workflowDetails the given workflow
 	 * @param primaryfile the given primaryfile
 	 * @param parameters the parameters for the workflow
