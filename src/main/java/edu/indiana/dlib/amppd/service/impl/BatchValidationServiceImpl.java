@@ -341,7 +341,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			boolean primaryFileExists = primaryFileExistsInCollection(collection, primaryFileLabel);
 
 			// If not - new file - Make sure it exists on file system
-			if(primaryFileExists) {
+			if(!primaryFileExists) {
 				if(!primaryFile.isBlank() && !fileExists(unit.getName(), collection.getName(), primaryFile)) {
 		    		errors.add(String.format("Row: %s: Primary file %s does not exist in the dropbox", lineNum, primaryFile));
 				}
