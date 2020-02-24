@@ -95,7 +95,8 @@ public class JobServiceImpl implements JobService {
 	 * if this is the first time it's ever run on any workflow, 
 	 * - upload its media file to Galaxy using the symbolic link option and save the dataset ID into the primaryfile;
 	 * - create a history for all workflow outputs associated with it and save the history ID into the primaryfile; 
-	 * return true if the primaryfile has been updated; false otherwise.
+	 * @param primaryfile the given primaryfile
+	 * @return true if the primaryfile has been updated; false otherwise.
 	 */
 	protected boolean preparePrimaryfileForJobs(Primaryfile primaryfile) {
 		boolean save = false;
@@ -111,7 +112,7 @@ public class JobServiceImpl implements JobService {
 		if (primaryfile.getDatasetId() == null) {    	
 	    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
 	    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
-	    		throw new StorageException("Primaryfile " + primaryfileId + " hasn't been uploaded to AMPPD file system");
+	    		throw new StorageException("Primaryfile " + primaryfile.getId() + " hasn't been uploaded to AMPPD file system");
 	    	}
 	    	
 	    	// upload the primaryfile into Galaxy data library, the returned result is a GalaxyObject containing the ID and URL of the dataset uploaded
@@ -150,11 +151,20 @@ public class JobServiceImpl implements JobService {
 		return false;
 	}
 	
+//	/**
+//	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(WorkflowDetails, String, String, Map<String, Map<String, String>>)
+//	 */
+//	@Override
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(WorkflowDetails, String, String, Map<String, Map<String, String>>)
+	 * Build the workflow inputs to feed the given dataset and history along with the given user-defined parameters into the given Galaxy workflow.
+	 * Note that the parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
+	 * @param workflowId ID of the given workflow
+	 * @param datasetId ID of the given dataset
+	 * @param historyId ID of the given history
+	 * @param parameters step parameters for running the workflow
+	 * @return the built WorkflowInputs instance
 	 */
-	@Override
-	public WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
+	protected WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String historyId, Map<String, Map<String, String>> parameters) {
 		WorkflowInputs winputs = new WorkflowInputs();
 		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
@@ -193,11 +203,19 @@ public class JobServiceImpl implements JobService {
 		return winputs;
 	}
 	
+//	/**
+//	 * @see edu.indiana.dlib.amppd.service.JobService.populateHmgmContextParameters(WorkflowDetails, Primaryfile, Map<String, Map<String, String>>)
+//	 */
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.populateHmgmContextParameters(WorkflowDetails, Primaryfile, Map<String, Map<String, String>>)
+	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
+	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
+	 * Note that the context parameters are purely system generated and shall be transparent to users.
+	 * @param workflowDetails the given workflow
+	 * @param primaryfile the given primaryfile
+	 * @param parameters the parameters for the workflow
+	 * @return true if the given parameters are updated with HMGM context
 	 */
-	@Override
-	public boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile,  Map<String, Map<String, String>> parameters) {
+	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<String, Map<String, String>> parameters) {
 		boolean populated = false;
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
@@ -259,7 +277,7 @@ public class JobServiceImpl implements JobService {
 		
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-		preparePrimaryfileForJob(primaryfile);
+		preparePrimaryfileForJobs(primaryfile);
 //		boolean save = false;
 //
 //		/* Note: 

@@ -85,36 +85,36 @@ public class JobServiceTests {
 //		testHelper.cleanupHistories();
 	}
 		    	
-    @Test
-    public void shouldBuildWorkflowInputsOnValidInputs() {    	
-    	// set up some dummy history and dataset
-    	History history = new History();
-    	history.setId("1");
-    	LibraryContent dataset = new LibraryContent();
-    	dataset.setId("1");
-
-    	// set up some dummy parameters
-    	HashMap<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
-    	HashMap<String, String> param1 = new  HashMap<String, String>();
-    	param1.put("name1", "value1");
-    	parameters.put("step1", param1);
-    	
-    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow, dataset.getId(), history.getId(), parameters);
-    	
-    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
-    	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
-    	Assert.assertEquals(winputs.getInputs().size(), 1);
-    	WorkflowInput winput = (WorkflowInput)winputs.getInputs().values().toArray()[0];
-    	Assert.assertEquals(winput.getId(), dataset.getId());
-    	Assert.assertEquals(winput.getSourceType(), InputSourceType.LDDA);
-    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
-    	Assert.assertEquals(winputs.getParameters().size(), 1);    	
-    }
-
-    @Test(expected = GalaxyWorkflowException.class)
-    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
-    	jobService.buildWorkflowInputs(null, "", "", new HashMap<String, Map<String, String>>());
-    }
+//    @Test
+//    public void shouldBuildWorkflowInputsOnValidInputs() {    	
+//    	// set up some dummy history and dataset
+//    	History history = new History();
+//    	history.setId("1");
+//    	LibraryContent dataset = new LibraryContent();
+//    	dataset.setId("1");
+//
+//    	// set up some dummy parameters
+//    	HashMap<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
+//    	HashMap<String, String> param1 = new  HashMap<String, String>();
+//    	param1.put("name1", "value1");
+//    	parameters.put("step1", param1);
+//    	
+//    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow, dataset.getId(), history.getId(), parameters);
+//    	
+//    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
+//    	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
+//    	Assert.assertEquals(winputs.getInputs().size(), 1);
+//    	WorkflowInput winput = (WorkflowInput)winputs.getInputs().values().toArray()[0];
+//    	Assert.assertEquals(winput.getId(), dataset.getId());
+//    	Assert.assertEquals(winput.getSourceType(), InputSourceType.LDDA);
+//    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
+//    	Assert.assertEquals(winputs.getParameters().size(), 1);    	
+//    }
+//
+//    @Test(expected = GalaxyWorkflowException.class)
+//    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
+//    	jobService.buildWorkflowInputs(null, "", "", new HashMap<String, Map<String, String>>());
+//    }
 
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
