@@ -216,17 +216,20 @@ public class JobServiceImpl implements JobService {
 	 * @return true if the given parameters are updated with HMGM context
 	 */
 	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
-		boolean populated = false;
+//		boolean populated = false;
+		int previousSize = parameters.size();
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
 			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
 				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
 				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, getHmgmContext(workflowDetails, primaryfile));
-				boolean flag = true;
+//				populated = true;
+				log.info("Adding HMGM context for primaryfile: + " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}			
 		});
 		
-		return populated;
+		return parameters.size() > previousSize;
+//		return populated;
 	}
 	
 	/**

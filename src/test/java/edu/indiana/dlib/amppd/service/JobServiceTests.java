@@ -85,6 +85,8 @@ public class JobServiceTests {
 //		testHelper.cleanupHistories();
 	}
 		    	
+	// TODO The below 2 tests are for protected methods, so need some workaround in JUnit 
+	
 //    @Test
 //    public void shouldBuildWorkflowInputsOnValidInputs() {    	
 //    	// set up some dummy history and dataset
