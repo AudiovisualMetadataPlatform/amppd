@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.controller;
   
   import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -11,7 +12,7 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.java.Log;
   
  /**
 	 * Controller for REST operations on Login.
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 	 */
   @CrossOrigin(origins = "*", allowedHeaders = "*")
   @RestController
-  @Slf4j 
+  @Log 
   public class AmpUserController{
 	  @Autowired
 	  private AmpUserServiceImpl ampService;
@@ -69,6 +70,15 @@ import lombok.extern.slf4j.Slf4j;
 		log.info("Approve User=> id:"+ request.getUserId());	
 		AuthResponse res = ampService.approveUser(request.getUserId());
 		log.info(" Reset Password result: " + res);
+		return res;
+	  }
+	  
+	  @PostMapping(path = "/reset-password-getEmail", consumes = "application/json", produces = "application/json")
+	  public @ResponseBody AuthResponse resetPasswordGetEmail(
+			  @RequestBody AuthRequest request){ 
+		log.info("Calling get email for a token using resetPasswordGetEmail()");	
+		AuthResponse res = ampService.resetPasswordGetEmail(request.getToken());
+		log.info(" Fetched Email id for a token using resetPasswordGetEmail():"+res.getEmailid());
 		return res;
 	  }
   }
