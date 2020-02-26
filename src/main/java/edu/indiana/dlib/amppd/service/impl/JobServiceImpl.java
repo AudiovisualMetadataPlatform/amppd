@@ -207,7 +207,7 @@ public class JobServiceImpl implements JobService {
 //	 */
 	/**
 	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
-	 * into the context parameter of each HMGM step in the workflow, and return true; otherwise return false. 
+	 * into the context parameter of each HMGM step in the workflow, and return the context; otherwise return empty string. 
 	 * Note that the passed-in parameters here are part of the workflow inputs already populated with user-defined ones;
 	 * and the context parameters are purely system generated and shall be transparent to users.
 	 * @param workflowDetails the given workflow
@@ -215,20 +215,35 @@ public class JobServiceImpl implements JobService {
 	 * @param parameters the parameters for the workflow
 	 * @return true if the given parameters are updated with HMGM context
 	 */
-	protected boolean populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
+	protected String populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
 //		boolean populated = false;
+		// we store context in StringBuffer instead of String because foreach doesn't allow updating local variable defined outside its scope
+		StringBuffer context = new StringBuffer(); 
 		int previousSize = parameters.size();
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
 			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
+				// since all HMGMs in the workflow share the same context, we only need to compute it once when first needed, then reuse it
+				if (context.length() == 0) {
+					context.append(getHmgmContext(workflowDetails, primaryfile));
+					log.info("Generated HMGM context for primaryfile + " + primaryfile.getId() + " and workflow " + workflowDetails.getId() + " is: " + context.toString());
+				}
 				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
-				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, getHmgmContext(workflowDetails, primaryfile));
+				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
 //				populated = true;
 				log.info("Adding HMGM context for primaryfile: + " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}			
 		});
 		
-		return parameters.size() > previousSize;
+		int nstep = parameters.size() - previousSize;
+		if (nstep > 0 ) {
+			log.info("Successfully populated job context for " + nstep + " HMGM steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());
+		}
+		else {
+			log.info("No HMGM steps found in workflow " + workflowDetails.getId());
+		}
+		return context.toString();		
+//		return parameters.size() > previousSize;
 //		return populated;
 	}
 	
@@ -241,6 +256,7 @@ public class JobServiceImpl implements JobService {
 		context.put("submittedBy", ampUserService.getCurrentUser().getUsername());
 		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
 		context.put("collectionName", primaryfile.getItem().getCollection().getName());
+		context.put("taskPlatform", primaryfile.getItem().getCollection().getName());
 		context.put("itemName", primaryfile.getItem().getName());
 		context.put("primaryfileName", primaryfile.getName());
 		context.put("primaryfileUrl", primaryfile.getName());

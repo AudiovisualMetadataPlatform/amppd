@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
@@ -52,6 +53,7 @@ public class TestHelper {
 	public static final String TEST_AUDIO = "TestAudio";
 	public static final String TEST_VIDEO = "TestVideo";	// TODO put a small sample TestVideo.mp4 into repository test resources
 	public static final String TEST_WORKFLOW = "TestWorkflow";
+	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_OUTPUT = "out_file1";
 	
 	@Autowired
@@ -127,6 +129,15 @@ public class TestHelper {
 	 */
 	public Workflow ensureTestWorkflow() {
 		return ensureWorkflow(TEST_WORKFLOW);
+	}
+	
+	/**
+	 * Check whether the workflow named TestWorkflow exists in Galaxy; if not, upload it from its resource file.
+	 * @return the prepared workflow as existing in Galaxy 
+	 */
+	public WorkflowDetails ensureTestWorkflowDetails() {
+		Workflow workflow = ensureWorkflow(TEST_WORKFLOW);
+		return workflowService.getWorkflowsClient().showWorkflow(workflow.getId());
 	}
 	
 	/**

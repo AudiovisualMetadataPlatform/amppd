@@ -27,7 +27,13 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
-
+    
+	// the set of task management platforms AMPPD currently supports
+	public enum TaskPlatform {JIRA, OPENPROJECT, REDMINE}
+	
+	// task platform can be chosen upon collection creation (or edit) by collection managers
+    private TaskPlatform taskPlatform;
+    
 	@JsonBackReference(value="item")
 	@OneToMany(mappedBy="collection")
     private Set<Item> items; 

@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -20,15 +21,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
-import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
-import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
@@ -61,6 +57,7 @@ public class JobServiceTests {
 	
 	private Primaryfile primaryfile;
 	private Workflow workflow;
+	private WorkflowDetails workflowDetails;
 	private Invocation invocation;
 	
 	/* Notes:
@@ -75,7 +72,8 @@ public class JobServiceTests {
 	public void setup() {
     	// prepare the primaryfile, workflow, and the AMP job for testing
     	primaryfile = testHelper.ensureTestAudio();
-    	workflow = testHelper.ensureTestWorkflow();    
+    	workflow = testHelper.ensureTestWorkflow();
+    	workflowDetails = testHelper.ensureTestWorkflowDetails();
     	invocation = testHelper.ensureTestJob(true);
 	}
 	
@@ -85,8 +83,7 @@ public class JobServiceTests {
 //		testHelper.cleanupHistories();
 	}
 		    	
-	// TODO The below 2 tests are for protected methods, so need some workaround in JUnit 
-	
+	// TODO Rewrite the below 2 tests with some workaround as they are protected methods, and JUnit doesn't allow tests on such by default 	
 //    @Test
 //    public void shouldBuildWorkflowInputsOnValidInputs() {    	
 //    	// set up some dummy history and dataset
@@ -117,7 +114,37 @@ public class JobServiceTests {
 //    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
 //    	jobService.buildWorkflowInputs(null, "", "", new HashMap<String, Map<String, String>>());
 //    }
-
+	
+	@Test
+    public void shouldReturnPrimaryfileUrl() {    	      
+		String url = jobService.getPrimaryfileMediaUrl(primaryfile);
+		Assert.assertTrue(url.startsWith("http://"));
+		Assert.assertTrue(url.contains("/primaryfile/" + primaryfile.getId()));
+		Assert.assertTrue(url.endsWith("/media"));
+	}
+    
+	@Test
+    public void shouldReturnHmgmContext() {    	      
+		String contextJson = jobService.getHmgmContext(workflowDetails, primaryfile);
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject context = (JSONObject)parser.parse(contextJson);
+			Assert.assertNotNull(context.get("submittedBy"));
+			Assert.assertNotNull(context.get("unitName"));
+			Assert.assertNotNull(context.get("collectionName"));
+			Assert.assertNotNull(context.get("taskPlatform"));
+			Assert.assertNotNull(context.get("itemName"));
+			Assert.assertNotNull(context.get("primaryfileName"));
+			Assert.assertNotNull(context.get("primaryfileUrl"));
+			Assert.assertNotNull(context.get("primaryfileId"));
+			Assert.assertNotNull(context.get("workflowId"));
+			Assert.assertNotNull(context.get("workflowName"));
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Error parsing contextJson: " + contextJson);
+		}
+	}
+    
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
     	WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
