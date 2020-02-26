@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -222,7 +223,7 @@ public class JobServiceImpl implements JobService {
 		int previousSize = parameters.size();
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
-			if (stepDef.getToolId().startsWith(HMGM_TOOL_ID_PREFIX)) {
+			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX)) {
 				// since all HMGMs in the workflow share the same context, we only need to compute it once when first needed, then reuse it
 				if (context.length() == 0) {
 					context.append(getHmgmContext(workflowDetails, primaryfile));

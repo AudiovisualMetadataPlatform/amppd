@@ -286,7 +286,7 @@ public class TestHelper {
 		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();
 		
 		for (Workflow workflow : workflows) {
-			if (workflow.getName().equals(TEST_WORKFLOW)) {
+			if (workflow.getName().equals(TEST_WORKFLOW) || workflow.getName().equals(TEST_HMGM_WORKFLOW) || workflow.getName().equals("Test HMGM Workflow")) {
 				workflowService.getWorkflowsClient().deleteWorkflowRequest(workflow.getId());
 				log.info("Workflow is deleted: ID: " + workflow.getId() + ", Name: " + workflow.getName());
 			}
