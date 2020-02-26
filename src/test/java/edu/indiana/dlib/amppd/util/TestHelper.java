@@ -132,11 +132,28 @@ public class TestHelper {
 	}
 	
 	/**
-	 * Check whether the workflow named TestWorkflow exists in Galaxy; if not, upload it from its resource file.
-	 * @return the prepared workflow as existing in Galaxy 
+	 * Ensure that the workflow named TestWorkflow exists in Galaxy and returns the details of it.
+	 * @return the prepared workflow details as existing in Galaxy 
 	 */
 	public WorkflowDetails ensureTestWorkflowDetails() {
 		Workflow workflow = ensureWorkflow(TEST_WORKFLOW);
+		return workflowService.getWorkflowsClient().showWorkflow(workflow.getId());
+	}
+	
+	/**
+	 * Check whether the workflow named TestHmgmWorkflow exists in Galaxy; if not, upload it from its resource file.
+	 * @return the prepared workflow as existing in Galaxy 
+	 */
+	public Workflow ensureTestHmgmWorkflow() {
+		return ensureWorkflow(TEST_HMGM_WORKFLOW);
+	}
+	
+	/**
+	 * Ensure that the workflow named TestHmgmWorkflow exists in Galaxy and returns the details of it.
+	 * @return the prepared workflow details as existing in Galaxy 
+	 */
+	public WorkflowDetails ensureTestHmgmWorkflowDetails() {
+		Workflow workflow = ensureWorkflow(TEST_HMGM_WORKFLOW);
 		return workflowService.getWorkflowsClient().showWorkflow(workflow.getId());
 	}
 	

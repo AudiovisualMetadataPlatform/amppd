@@ -56,8 +56,8 @@ public class JobServiceTests {
 	private TestHelper testHelper;   
 	
 	private Primaryfile primaryfile;
-	private Workflow workflow;
-	private WorkflowDetails workflowDetails;
+	private Workflow workflow, hmgmWorkflow;
+	private WorkflowDetails workflowDetails, hmgmWorkflowDetails;
 	private Invocation invocation;
 	
 	/* Notes:
@@ -74,6 +74,8 @@ public class JobServiceTests {
     	primaryfile = testHelper.ensureTestAudio();
     	workflow = testHelper.ensureTestWorkflow();
     	workflowDetails = testHelper.ensureTestWorkflowDetails();
+    	hmgmWorkflow = testHelper.ensureTestHmgmWorkflow();
+    	hmgmWorkflowDetails = testHelper.ensureTestHmgmWorkflowDetails();
     	invocation = testHelper.ensureTestJob(true);
 	}
 	
@@ -163,6 +165,19 @@ public class JobServiceTests {
     	String datasetId = primaryfile.getDatasetId();
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
     	Assert.assertEquals(primaryfile.getDatasetId(), datasetId);
+    }
+    
+    @Test
+    public void shouldCreateJobOnValidHmgmInputs() {    	              
+    	WorkflowOutputs woutputs = jobService.createJob(hmgmWorkflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+
+    	// now the dataset ID shall be set
+    	Assert.assertNotNull(primaryfile.getDatasetId());
+    	
+    	// returned workflow outputs shall have contents
+    	Assert.assertNotNull(woutputs);
+    	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertNotNull(woutputs.getOutputIds());    
     }
     
     @Test(expected = StorageException.class)
