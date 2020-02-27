@@ -230,9 +230,14 @@ public class JobServiceImpl implements JobService {
 					log.info("Generated HMGM context for primaryfile + " + primaryfile.getId() + " and workflow " + workflowDetails.getId() + " is: " + context.toString());
 				}
 				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
-				parameters.get(stepId).put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
+				Map<String, Object> stepParams = parameters.get(stepId);
+				if (stepParams == null) {
+					stepParams = new HashMap<String, Object>();
+					parameters.put(stepId, stepParams);
+				}
+				stepParams.put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
 //				populated = true;
-				log.info("Adding HMGM context for primaryfile: + " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
+				log.info("Adding HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}			
 		});
 		
@@ -254,13 +259,13 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
 		Map<String, String> context = new HashMap<String, String>();
-		context.put("submittedBy", ampUserService.getCurrentUser().getUsername());
+		context.put("submittedBy", ampUserService.getCurrentUsername());
 		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
 		context.put("collectionName", primaryfile.getItem().getCollection().getName());
-		context.put("taskPlatform", primaryfile.getItem().getCollection().getName());
+		context.put("taskPlatform", primaryfile.getItem().getCollection().getTaskPlatform());
 		context.put("itemName", primaryfile.getItem().getName());
 		context.put("primaryfileName", primaryfile.getName());
-		context.put("primaryfileUrl", primaryfile.getName());
+		context.put("primaryfileUrl", getPrimaryfileMediaUrl(primaryfile));
 		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("workflowId", workflowDetails.getId());		
 		context.put("workflowName", workflowDetails.getName());	

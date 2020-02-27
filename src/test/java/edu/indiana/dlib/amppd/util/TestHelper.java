@@ -87,27 +87,6 @@ public class TestHelper {
 	private PasswordTokenRepository passwordTokenRepository;
 	
 	/**
-	 * Check whether any AMP job has been run on TestWorkflow against TestAudio/TestVideo; if not, prepare the workflow and primaryfile and run the job once.
-	 * @param useAudio if true use TestAudio, otherwise use TestVideo as the primaryfile
-	 * @return the prepared invocation 
-	 */
-	public Invocation ensureTestJob(boolean useAudio) {				
-		Primaryfile primaryfile = useAudio ? ensureTestAudio() : ensureTestVideo();
-		Workflow workflow = ensureTestWorkflow();
-		List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
-		if (invocations.size() > 0) {
-			// some job has been run on the workflow-primaryfile, just return the first invocation
-			log.info("There are already " + invocations.size() + " AMP test jobs existing for Primaryfile " + primaryfile.getId() + " and Workflow " + workflow.getId()
-				+ ", will use job " + invocations.get(0).getId() + " in history " + invocations.get(0).getHistoryId() + " for testing.");
-			return invocations.get(0);
-		}
-		else {
-			// otherwise run the job once and return the WorkflowOutputs
-			return jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
-		}
-	}	
-	
-	/**
 	 * Check whether the primaryfile named TestAudio exists in Amppd; if not, upload it from its resource file.
 	 * @return the prepared primaryfile as existing in Amppd 
 	 */
@@ -186,6 +165,7 @@ public class TestHelper {
 		Collection collection = new Collection();
 		collection.setName("Collection for " + primaryfileName);
 		collection.setDescription("collection for tests");  	
+		collection.setTaskPlatform("Jira");  	
     	collection.setUnit(unit);
     	collection = collectionRepository.save(collection);
     	
@@ -244,6 +224,28 @@ public class TestHelper {
 	}	
 	
 	/**
+	 * Check whether any AMP job has been run on TestWorkflow against TestAudio/TestVideo; if not, prepare the workflow and primaryfile and run the job once.
+	 * @param useAudio if true use TestAudio, otherwise use TestVideo as the primaryfile
+	 * @return the prepared invocation 
+	 */
+	public Invocation ensureTestJob(boolean useAudio) {				
+		Primaryfile primaryfile = useAudio ? ensureTestAudio() : ensureTestVideo();
+		Workflow workflow = ensureTestWorkflow();
+		List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+		if (invocations.size() > 0) {
+			// some job has been run on the workflow-primaryfile, just return the first invocation
+			log.info("There are already " + invocations.size() + " AMP test jobs existing for Primaryfile " + primaryfile.getId() + " and Workflow " + workflow.getId()
+				+ ", will use job " + invocations.get(0).getId() + " in history " + invocations.get(0).getHistoryId() + " for testing.");
+			return invocations.get(0);
+		}
+		else {
+			// otherwise run the job once and return the WorkflowOutputs
+			return jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+		}
+	}	
+	
+
+	/**
 	 * Return the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.
 	 * @param extention
 	 * @return
@@ -286,7 +288,7 @@ public class TestHelper {
 		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();
 		
 		for (Workflow workflow : workflows) {
-			if (workflow.getName().equals(TEST_WORKFLOW) || workflow.getName().equals(TEST_HMGM_WORKFLOW) || workflow.getName().equals("Test HMGM Workflow")) {
+			if (workflow.getName().equals(TEST_WORKFLOW) || workflow.getName().equals(TEST_HMGM_WORKFLOW)) {
 				workflowService.getWorkflowsClient().deleteWorkflowRequest(workflow.getId());
 				log.info("Workflow is deleted: ID: " + workflow.getId() + ", Name: " + workflow.getName());
 			}

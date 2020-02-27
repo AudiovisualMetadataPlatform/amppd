@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -316,6 +317,16 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.AmpUserService.getCurrentUsername()
+	 */
+	@Override
+	public String getCurrentUsername() {
+		// TODO replace below tmp code with logic to get the current username from User Session		
+		// tmp code: return the default master AMP user for now
+		return ampPropertyConfig.getUsername();
+	}
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.AmpUserService.getCurrentUser()
 	 */
 	@Override
@@ -328,5 +339,16 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			throw new RuntimeException("Current user with username " + username + " doesn't exist!");
 		}
 		return currentUser;
+
+//		List<AmpUser> users = ampUserRepository.findAllByUsername(username);
+//		if (users.size() == 0) {
+//			throw new RuntimeException("Current user with username " + username + " doesn't exist!");
+//		}
+//		else if (users.size() > 1) {
+//			throw new RuntimeException("Current user with username " + username + " is not unique!");
+//		}
+//		else {
+//			return users.get(0);
+//		}
 	}
 }

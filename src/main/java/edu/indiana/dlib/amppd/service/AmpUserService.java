@@ -75,5 +75,10 @@ public interface AmpUserService {
 	 * @return the current user
 	 */
 	public AmpUser getCurrentUser();
-	
+		
+	/**
+	 * Gets the current username from User Session.
+	 * @return the current username
+	 */
+	public String getCurrentUsername();
 }

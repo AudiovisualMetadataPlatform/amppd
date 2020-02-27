@@ -56,8 +56,8 @@ public class JobServiceTests {
 	private TestHelper testHelper;   
 	
 	private Primaryfile primaryfile;
-	private Workflow workflow, hmgmWorkflow;
-	private WorkflowDetails workflowDetails, hmgmWorkflowDetails;
+	private Workflow workflow;
+	private WorkflowDetails hmgmWorkflowDetails;
 	private Invocation invocation;
 	
 	/* Notes:
@@ -73,8 +73,8 @@ public class JobServiceTests {
     	// prepare the primaryfile, workflow, and the AMP job for testing
     	primaryfile = testHelper.ensureTestAudio();
     	workflow = testHelper.ensureTestWorkflow();
-    	workflowDetails = testHelper.ensureTestWorkflowDetails();
-    	hmgmWorkflow = testHelper.ensureTestHmgmWorkflow();
+//    	workflowDetails = testHelper.ensureTestWorkflowDetails();
+//    	hmgmWorkflow = testHelper.ensureTestHmgmWorkflow();
     	hmgmWorkflowDetails = testHelper.ensureTestHmgmWorkflowDetails();
     	invocation = testHelper.ensureTestJob(true);
 	}
@@ -127,7 +127,7 @@ public class JobServiceTests {
     
 	@Test
     public void shouldReturnHmgmContext() {    	      
-		String contextJson = jobService.getHmgmContext(workflowDetails, primaryfile);
+		String contextJson = jobService.getHmgmContext(hmgmWorkflowDetails, primaryfile);
 		JSONParser parser = new JSONParser();
 		try {
 			JSONObject context = (JSONObject)parser.parse(contextJson);
@@ -153,30 +153,37 @@ public class JobServiceTests {
     			(WorkflowOutputs)invocation  :
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
-    	// now the dataset ID shall be set
-    	Assert.assertNotNull(primaryfile.getDatasetId());
+    	// now the dataset ID and history ID shall be set
+		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertNotNull(pf.getDatasetId());
+    	Assert.assertNotNull(pf.getHistoryId());
     	
     	// returned workflow outputs shall have contents
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
     	Assert.assertNotNull(woutputs.getOutputIds());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
-    	String datasetId = primaryfile.getDatasetId();
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
-    	Assert.assertEquals(primaryfile.getDatasetId(), datasetId);
+		Primaryfile pf1 = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertEquals(pf1.getDatasetId(), pf.getDatasetId());
+    	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
     }
     
     @Test
     public void shouldCreateJobOnValidHmgmInputs() {    	              
-    	WorkflowOutputs woutputs = jobService.createJob(hmgmWorkflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	WorkflowOutputs woutputs = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
-    	// now the dataset ID shall be set
-    	Assert.assertNotNull(primaryfile.getDatasetId());
+    	// now the dataset ID and history ID shall be set
+		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertNotNull(pf.getDatasetId());
+    	Assert.assertNotNull(pf.getHistoryId());
     	
     	// returned workflow outputs shall have contents
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
     	Assert.assertNotNull(woutputs.getOutputIds());    
     }
     
