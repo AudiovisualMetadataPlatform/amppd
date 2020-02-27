@@ -11,6 +11,7 @@ import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -73,8 +74,6 @@ public class JobServiceTests {
     	// prepare the primaryfile, workflow, and the AMP job for testing
     	primaryfile = testHelper.ensureTestAudio();
     	workflow = testHelper.ensureTestWorkflow();
-//    	workflowDetails = testHelper.ensureTestWorkflowDetails();
-//    	hmgmWorkflow = testHelper.ensureTestHmgmWorkflow();
     	hmgmWorkflowDetails = testHelper.ensureTestHmgmWorkflowDetails();
     	invocation = testHelper.ensureTestJob(true);
 	}

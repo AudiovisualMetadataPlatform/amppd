@@ -151,10 +151,6 @@ public class JobServiceImpl implements JobService {
 		return false;
 	}
 	
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.JobService.buildWorkflowInputs(WorkflowDetails, String, String, Map<String, Map<String, String>>)
-//	 */
-//	@Override
 	/**
 	 * Build the workflow inputs to feed the given dataset and history along with the given user-defined parameters into the given Galaxy workflow.
 	 * Note that the passed-in parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
@@ -172,11 +168,6 @@ public class JobServiceImpl implements JobService {
 		
 		String inputId;
 		try {
-//			WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-//			if (workflowDetails == null) {
-//				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-//			}
-//			
 			// each input in the workflow corresponds to an input step with a unique ID, the inputs of workflow detail is a map of {stepId: {label: value}}
 			Set<String> inputIds = workflowDetails.getInputs().keySet();
 			if (inputIds.size() != 1) {
@@ -203,9 +194,6 @@ public class JobServiceImpl implements JobService {
 		return winputs;
 	}
 	
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.JobService.populateHmgmContextParameters(WorkflowDetails, Primaryfile, Map<String, Map<String, String>>)
-//	 */
 	/**
 	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
 	 * into the context parameter of each HMGM step in the workflow, and return the context; otherwise return empty string. 
@@ -217,7 +205,6 @@ public class JobServiceImpl implements JobService {
 	 * @return true if the given parameters are updated with HMGM context
 	 */
 	protected String populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
-//		boolean populated = false;
 		// we store context in StringBuffer instead of String because foreach doesn't allow updating local variable defined outside its scope
 		StringBuffer context = new StringBuffer(); 
 		int previousSize = parameters.size();
@@ -236,7 +223,6 @@ public class JobServiceImpl implements JobService {
 					parameters.put(stepId, stepParams);
 				}
 				stepParams.put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
-//				populated = true;
 				log.info("Adding HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}			
 		});
@@ -249,8 +235,6 @@ public class JobServiceImpl implements JobService {
 			log.info("No HMGM steps found in workflow " + workflowDetails.getId());
 		}
 		return context.toString();		
-//		return parameters.size() > previousSize;
-//		return populated;
 	}
 	
 	/**
@@ -303,54 +287,6 @@ public class JobServiceImpl implements JobService {
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
 		preparePrimaryfileForJobs(primaryfile);
-//		boolean save = false;
-//
-//		/* Note: 
-//    	 * We do a lazy upload from Amppd to Galaxy, i.e. we only upload the primaryfile to Galaxy when a workflow is invoked in Galaxy against the primaryfile, 
-//    	 * rather than when the primaryfile is uploaded to Amppd.
-//    	 * The pros is that we won't upload to Galaxy unnecessarily if the primaryfile is never going to be processed through workflow;
-//    	 * the cons is that it might slow down workflow execution when running in batch.
-//		 * Furthermore, we only do this upload once, i.e. if the primaryfile has never been uploaded to Galaxy. 
-//		 * Later invocation of workflows on this primaryfile will just reuse the result from the first upload in Galaxy.
-//		 */
-//		if (primaryfile.getDatasetId() == null) {    	
-//	    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
-//	    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
-//	    		throw new StorageException("Primaryfile " + primaryfileId + " hasn't been uploaded to AMPPD file system");
-//	    	}
-//	    	
-//	    	// upload the primaryfile into Galaxy data library, the returned result is a GalaxyObject containing the ID and URL of the dataset uploaded
-//	    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
-//	    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);	
-//	    	
-//	    	// set flag to save the dataset ID in primaryfile for future reuse
-//	    	primaryfile.setDatasetId(go.getId());
-//	    	save = true;
-//		}
-//		
-//		// if the output history hasn't been created for this primaryfile, i.e. it's the first time any workflow is run against it, create a new history for it
-//		if (primaryfile.getHistoryId() == null) {   
-//			// since we use primaryfile ID in the output history name, we can assume that the name is unique, 
-//			// thus, if the historyId is null, it means the output history for this primaryfile doesn't exist in Galaxy yet, and vice versa
-//			History history = new History(PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX + primaryfile.getId());
-//			try {
-//				history = galaxyDataService.getHistoriesClient().create(history);
-//		    	primaryfile.setHistoryId(history.getId());		
-//		    	save = true;
-//				log.info("Initialized the Galaxy output history " + history.getId() + " for primaryfile " + primaryfile.getId());
-//			}
-//			catch (Exception e) {
-//				throw new RuntimeException("Cannot create Galaxy output history for primaryfile " + primaryfile.getId(), e);
-//			}		
-//		}			
-//		else {
-//			log.info("The Galaxy output history " + primaryfile.getHistoryId() + " for Primaryfile " + primaryfile.getId() + " already exists.");			
-//		}
-//
-//		// if dataset or history IDs have been changed in primaryfile, persist it in DB 
-//		if (save) {
-//			primaryfileRepository.save(primaryfile);
-//		}
 
 		// invoke the workflow 
     	try {

@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -26,7 +25,6 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	@Query(value = "select case when COUNT(*)>0 then true else false end from AmpUser i where i.email = :email")
 	boolean emailExists(@Param("email") String email);
 
-//	List<AmpUser> findAllByUsername(@Param("username") String username);
 	Optional<AmpUser> findByUsername(String username);
 	Optional<AmpUser> findByEmail(String email);			
 	
