@@ -244,13 +244,16 @@ public class JobServiceImpl implements JobService {
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
 		Map<String, String> context = new HashMap<String, String>();
 		context.put("submittedBy", ampUserService.getCurrentUsername());
+		context.put("unitId", primaryfile.getItem().getCollection().getUnit().getId().toString());		
 		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
+		context.put("collectionId", primaryfile.getItem().getCollection().getId().toString());		
 		context.put("collectionName", primaryfile.getItem().getCollection().getName());
 		context.put("taskPlatform", primaryfile.getItem().getCollection().getTaskPlatform());
+		context.put("itemId", primaryfile.getItem().getId().toString());		
 		context.put("itemName", primaryfile.getItem().getName());
+		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("primaryfileName", primaryfile.getName());
 		context.put("primaryfileUrl", getPrimaryfileMediaUrl(primaryfile));
-		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("workflowId", workflowDetails.getId());		
 		context.put("workflowName", workflowDetails.getName());	
 		
