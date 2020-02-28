@@ -39,6 +39,8 @@ public class Item extends Content {
 
 	@ManyToOne
 	private Collection collection;	
+	
+//	private long external_ID;
 		
 //    @ManyToMany
 //    @JsonBackReference

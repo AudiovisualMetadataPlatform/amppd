@@ -36,6 +36,7 @@ import edu.indiana.dlib.amppd.repository.BatchFileRepository;
 import edu.indiana.dlib.amppd.repository.BatchRepository;
 import edu.indiana.dlib.amppd.repository.BatchSupplementFileRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
@@ -59,6 +60,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     private BatchFileRepository batchFileRepository;
 	@Autowired
     private BatchSupplementFileRepository batchSupplementFileRepository;
+	@Autowired
+    private ItemRepository itemRepository;
 	
 	
 	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
@@ -117,8 +120,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	}
         	
         	// Get the source and item        	
-        	batchFile.setSourceIdType(line[1]);
-        	batchFile.setSourceId(line[2]);
+        	batchFile.setExternalSource(line[1]);
+        	batchFile.setExternalItemId(line[2]);
         	batchFile.setItemName(line[3]);
         	batchFile.setItemDescription(line[4]);
         	        	
@@ -209,7 +212,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     			return response;
     		}
     		
-        	List<String> itemErrors = validateItemColumns(batchFile.getSourceId(), batchFile.getItemName(), batchFile.getRowNum());
+        	List<String> itemErrors = validateItemColumns(batchFile.getExternalItemId(), batchFile.getItemName(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
         	// Validate the primary file
@@ -275,8 +278,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     	if(itemTitle.isBlank()) {
     		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
     	}
+    	
     	return errors;
 	}
+	
 	/*
 	 * Make sure primary files are unique to this file
 	 */

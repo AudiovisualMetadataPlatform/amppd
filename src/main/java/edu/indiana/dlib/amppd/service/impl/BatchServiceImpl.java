@@ -91,7 +91,7 @@ public class BatchServiceImpl implements BatchService {
 		String sourceDir = getSourceDir(unit, collection);
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getSourceId(), batchFile.getSourceIdType());
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource());
 		
 		collection.addItem(item);
 		
@@ -312,7 +312,7 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String sourceId, String sourceLabel) {
 		Item item = null;
-		
+		boolean found = false;
 		Set<Item> items = collection.getItems();
 		if(items!=null) {
 			for(Item i : items) {
