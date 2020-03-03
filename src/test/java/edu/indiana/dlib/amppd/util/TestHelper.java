@@ -55,6 +55,7 @@ public class TestHelper {
 	public static final String TEST_WORKFLOW = "TestWorkflow";
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_OUTPUT = "out_file1";
+	public static final String TASK_MANAGER = "JIRA";	
 	
 	@Autowired
     private UnitRepository unitRepository;
@@ -165,7 +166,7 @@ public class TestHelper {
 		Collection collection = new Collection();
 		collection.setName("Collection for " + primaryfileName);
 		collection.setDescription("collection for tests");  	
-		collection.setTaskPlatform("Jira");  	
+		collection.setTaskManager(TASK_MANAGER);  	
     	collection.setUnit(unit);
     	collection = collectionRepository.save(collection);
     	

@@ -248,7 +248,7 @@ public class JobServiceImpl implements JobService {
 		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
 		context.put("collectionId", primaryfile.getItem().getCollection().getId().toString());		
 		context.put("collectionName", primaryfile.getItem().getCollection().getName());
-		context.put("taskPlatform", primaryfile.getItem().getCollection().getTaskPlatform());
+		context.put("taskManager", primaryfile.getItem().getCollection().getTaskManager());
 		context.put("itemId", primaryfile.getItem().getId().toString());		
 		context.put("itemName", primaryfile.getItem().getName());
 		context.put("primaryfileId", primaryfile.getId().toString());

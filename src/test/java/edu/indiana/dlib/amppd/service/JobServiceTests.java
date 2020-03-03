@@ -133,7 +133,7 @@ public class JobServiceTests {
 			Assert.assertNotNull(context.get("submittedBy"));
 			Assert.assertNotNull(context.get("unitName"));
 			Assert.assertNotNull(context.get("collectionName"));
-			Assert.assertNotNull(context.get("taskPlatform"));
+			Assert.assertNotNull(context.get("taskManager"));
 			Assert.assertNotNull(context.get("itemName"));
 			Assert.assertNotNull(context.get("primaryfileName"));
 			Assert.assertNotNull(context.get("primaryfileUrl"));

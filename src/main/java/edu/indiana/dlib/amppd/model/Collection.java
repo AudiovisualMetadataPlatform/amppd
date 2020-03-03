@@ -29,17 +29,17 @@ import lombok.ToString;
 public class Collection extends Content {
     
 //	// the set of task management platforms AMPPD currently supports
-//	public enum TaskPlatform {JIRA, OPENPROJECT, REDMINE}
+//	public enum TaskManager {JIRA, OPENPROJECT, REDMINE}
 //	
 //	// task platform can be chosen upon collection creation (or edit) by collection managers
-//    private TaskPlatform taskPlatform;
+//    private TaskManager taskManager;
     
 	/* Note:
-	 * Originally taskPlatform was defined as enum type, for the sake of ensuring only a predefined set of options are allowed.
+	 * Originally TaskManager was defined as enum type, for the sake of ensuring only a predefined set of options are allowed.
 	 * However, enum might be serialized into integer values which need to be interpretated by external apps such as amppd-ui and HMGM tools, which would cause extra dependency. 
 	 * It would be better to use a string representation and give the referring code flexibility on how to process (and validate) the values.
 	 */
-	private String taskPlatform;
+	private String taskManager;
 	
 	@JsonBackReference(value="item")
 	@OneToMany(mappedBy="collection")
