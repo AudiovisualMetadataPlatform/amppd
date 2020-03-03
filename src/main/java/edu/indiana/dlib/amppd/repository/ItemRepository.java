@@ -17,16 +17,17 @@ import edu.indiana.dlib.amppd.model.Item;
 public interface ItemRepository extends ContentRepository<Item> {
 	
 	// TODO tried various ways below to achieve case-insensitive keyword match, but none worked
-//	// Note: ilike is a PostgreSQL extension, not part of standard SQL, so need to use nativeQuery. However, the query still fails with exception.
-//	@Query(value = "select i from Item i where i.name ilike %:keyword% or i.description ilike %:keyword%", nativeQuery = true)
-//	@Query(value = "select i from Item i where lower(i.name) like %:keyword.toLowerCase()% or lower(i.description) like %:keyword.toLowerCase()%")
-//	@Query(value = "select i from Item i where lower(i.name) like %:#{keyword.toLowerCase()}% or lower(i.description) like %:#{keyword.toLowerCase()}%")
+	//	// Note: ilike is a PostgreSQL extension, not part of standard SQL, so need to use nativeQuery. However, the query still fails with exception.
+	//	@Query(value = "select i from Item i where i.name ilike %:keyword% or i.description ilike %:keyword%", nativeQuery = true)
+	//	@Query(value = "select i from Item i where lower(i.name) like %:keyword.toLowerCase()% or lower(i.description) like %:keyword.toLowerCase()%")
+	//	@Query(value = "select i from Item i where lower(i.name) like %:#{keyword.toLowerCase()}% or lower(i.description) like %:#{keyword.toLowerCase()}%")
 	
 	@Query(value = "select i from Item i where i.name like %:keyword% or i.description like %:keyword%")
 	List<Item> findByKeyword(@Param("keyword") String keyword);
-	
-	/*@Transactional
+		
+	@Transactional
 	@Modifying
-	@Query(value = "update Item set name = :name where id = :id")
-	int updateTitle(@Param("name") String name, @Param("id") Long id);*/
+	@Query(value = "update Item set name = :name where id = :id") int
+	updateTitle(@Param("name") String name, @Param("id") Long id);
+	 
 }

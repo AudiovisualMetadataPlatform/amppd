@@ -34,4 +34,8 @@ public class BatchValidationResponse {
 	public boolean hasErrors() {
 		return !validationErrors.isEmpty();
 	}
+	
+	public boolean hasProcessingErrors() {
+		return !processingErrors.isEmpty();
+	}
 }
