@@ -31,7 +31,20 @@ public class BatchValidationResponse {
 		}
 	}
 	
+	public void addProcessingError(String error) {
+		processingErrors.add(error);
+	}
+	public void addProcessingErrors(List<String> errors) {
+		if(processingErrors!=null && !errors.isEmpty()) {
+			this.processingErrors.addAll(errors);
+		}
+	}
+	
 	public boolean hasErrors() {
 		return !validationErrors.isEmpty();
+	}
+	
+	public boolean hasProcessingErrors() {
+		return !processingErrors.isEmpty();
 	}
 }

@@ -62,6 +62,8 @@ public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private PreprocessService preprocessService;
 	
+	BatchValidationResponse batchValidationResponse = new BatchValidationResponse();
+	
 	
 	public List<String> processBatch(BatchValidationResponse batchValidation, String username) {
 		List<String> errors = new ArrayList<String>();
@@ -69,9 +71,15 @@ public class BatchServiceImpl implements BatchService {
 		for(BatchFile batchFile : batch.getBatchFiles()) {
 			try {
 				createItem(batch.getUnit(), batchFile, username);
+				log.info("BATCH PROCESSING : Check if there were processing errors");
+				if(batchValidationResponse.hasProcessingErrors())  
+				{
+					errors.addAll(batchValidationResponse.getProcessingErrors());
+					break;
+				}
 			}
 			catch(Exception ex) {
-				log.error("Batch processing exception: " + ex.toString());
+				log.error("BATCH PROCESSING : Batch processing exception: " + ex.toString());
 				errors.add("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
 			}
 		}	
@@ -84,35 +92,49 @@ public class BatchServiceImpl implements BatchService {
 	private void createItem(Unit unit, BatchFile batchFile, String username) throws Exception {
 
 		// Get the collection
+		log.info("BATCH PROCESSING : getting the updated collection");
 		Collection collection = getUpdatedCollection(batchFile.getCollection().getId());
 		collection.setUnit(unit);
 		
 		// Set the source directory based on dropbox, unit name and collection name
+		log.info("BATCH PROCESSING : Set the source directory based on dropbox, unit name and collection name");
 		String sourceDir = getSourceDir(unit, collection);
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getSourceId(), batchFile.getSourceIdType());
+		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource());
+		if(batchValidationResponse.hasProcessingErrors())
+			return;
 		
+		log.info("BATCH PROCESSING : The item found was added to the collection");
 		collection.addItem(item);
 		
 		// Process the files based on the supplement type
 		if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE || batchFile.getSupplementType()==null) {
 			// Either get an existing or create a primary file
-			Primaryfile primaryFile = createPrimaryfile(item, batchFile, username, sourceDir);
+			log.info("BATCH PROCESSING : Get an existing primaryFile otherwise create a new one");
+			Primaryfile primaryFile = createPrimaryfile(collection, item, batchFile, username, sourceDir);
+			if(batchValidationResponse.hasProcessingErrors() )
+				return;
 	    	
 			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
 				// For each primary file supplememnt, create the object and then move the file to it's destination
+				log.info("BATCH PROCESSING : For each primary file supplememnt, create the object and then move the file to it's destination");
 				for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 					createPrimaryfileSupplement(primaryFile, batchSupplementFile, username, sourceDir);
+					if(batchValidationResponse.hasProcessingErrors() )
+						break;
 				}
 			}
 		}
-		else if(batchFile.getSupplementType()==SupplementType.COLLECTION) {
+		else if(batchFile.getSupplementType()==SupplementType.COLLECTION && !batchValidationResponse.hasProcessingErrors() ) {
+			log.info("BATCH PROCESSING : For each collection supplememnt, create the object and then move the file to it's destination");
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				createCollectionSupplement(collection, batchSupplementFile, username, sourceDir);
 			}
 		}
-		else if(batchFile.getSupplementType()==SupplementType.ITEM) {
+		else if(batchFile.getSupplementType()==SupplementType.ITEM && !batchValidationResponse.hasProcessingErrors() ) {
+			log.info("BATCH PROCESSING : For each item supplememnt, create the object and then move the file to it's destination");
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				createItemSupplement(item, batchSupplementFile, username, sourceDir);
 			}
@@ -123,23 +145,26 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Create a primary file, store it in the database, move it to it's destination in amppd storage, log that the file was created
 	 */
-	private Primaryfile createPrimaryfile(Item item, BatchFile batchFile, String username, String sourceDir) throws Exception {
+	private Primaryfile createPrimaryfile(Collection batchfileCollection, Item item, BatchFile batchFile, String username, String sourceDir) throws Exception {
 		
 		try {
-			// Either get an existing or create a primary file
-			Primaryfile primaryFile = getPrimaryfile(item, batchFile, username);
-			primaryFile.setItem(item);
-			primaryfileRepository.save(primaryFile);
 			
-			// Move the file from the dropbox to amppd file storage
-			String targetDir = fileStorageService.getDirPathname(item);
-			Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
-	    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
-	
-	    	logFileCreated(primaryFile, targetPath);	    	
-			
-			// preprocess the supplement after ingest
-			preprocessService.preprocess(primaryFile);
+			Primaryfile primaryFile = getPrimaryfile(batchfileCollection, item, batchFile, username);
+			if(!batchValidationResponse.hasProcessingErrors() && primaryFile!=null)
+			{
+				primaryFile.setItem(item);
+				primaryfileRepository.save(primaryFile);
+				
+				log.info("BATCH PROCESSING : Move the primary file from the dropbox to amppd file storage");
+				String targetDir = fileStorageService.getDirPathname(item);
+				Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
+		    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
+		
+		    	logFileCreated(primaryFile, targetPath);	    	
+				
+				// preprocess the supplement after ingest
+				//preprocessService.preprocess(primaryFile);
+			}
 	    	return primaryFile;
 		}
 		catch(IOException ex) {
@@ -164,7 +189,7 @@ public class BatchServiceImpl implements BatchService {
 			// Log that the file was created
 	    	logFileCreated(supplement, targetSuppPath);
 			// preprocess the supplement after ingest
-			preprocessService.preprocess(supplement);
+			//preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating primary file supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -188,7 +213,7 @@ public class BatchServiceImpl implements BatchService {
 			// Log that the file was created
 			logFileCreated(supplement, targetSuppPath);
 			// preprocess the supplement after ingest
-			preprocessService.preprocess(supplement);
+			//preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating collection supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -202,7 +227,6 @@ public class BatchServiceImpl implements BatchService {
 		try {
 			// For item supplements, create supplements and then move the files to their destination
 			String targetDir = fileStorageService.getDirPathname(item);
-			
 			ItemSupplement supplement = getItemSupplement(item, batchSupplementFile, username);
 			itemSupplementRepository.save(supplement);
 			
@@ -212,7 +236,7 @@ public class BatchServiceImpl implements BatchService {
 			// Log that the file was created
 			logFileCreated(supplement, targetSuppPath);
 			// preprocess the supplement after ingest
-			preprocessService.preprocess(supplement);
+			//preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating item supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -220,36 +244,77 @@ public class BatchServiceImpl implements BatchService {
 	}
 	
 	/*
-	 * Create an item supplememt
+	 * Create an item supplememt if it does not already exists
 	 */
 	private ItemSupplement getItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username){
-		// Create Supplement
-		ItemSupplement itemSupplement = new ItemSupplement();
-		itemSupplement.setItem(item);
-		itemSupplement.setName(batchSupplementFile.getSupplementName());
-		itemSupplement.setOriginalFilename(batchSupplementFile.getSupplementFilename());
-		itemSupplement.setDescription(batchSupplementFile.getSupplementDescription());
-		itemSupplement.setCreatedBy(username);
-		itemSupplement.setModifiedBy(username);
-		itemSupplement.setCreatedDate(new Date().getTime());
-		itemSupplement.setModifiedDate(new Date().getTime());
+		//check if the supplement exists
+		ItemSupplement itemSupplement = null;
+		
+		if(item.getSupplements() != null)
+		{
+			log.info("BATCH PROCESSING : looping through the existing item supplement");
+			for(ItemSupplement is : item.getSupplements()) 
+			{
+				if(is.getName()==batchSupplementFile.getSupplementName())
+				{
+					log.error("BATCH PROCESSING : item supplement name already exists");
+					batchValidationResponse.addProcessingError("ERROR: item supplement name already exists");
+					itemSupplement = is;
+				}
+			}
+		}
+				
+		// Create Supplement if doesn't already exists
+		if(itemSupplement == null) 
+		{
+			itemSupplement = new ItemSupplement();
+			itemSupplement.setItem(item);
+			itemSupplement.setName(batchSupplementFile.getSupplementName());
+			itemSupplement.setOriginalFilename(batchSupplementFile.getSupplementFilename());
+			itemSupplement.setDescription(batchSupplementFile.getSupplementDescription());
+			itemSupplement.setCreatedBy(username);
+			itemSupplement.setModifiedBy(username);
+			itemSupplement.setCreatedDate(new Date().getTime());
+			itemSupplement.setModifiedDate(new Date().getTime());
+			log.info("BATCH PROCESSING : new item supplement created");
+		}
 		return itemSupplement;
 	}
 	
 	/*
-	 * Create a collection supplement
+	 * Create a collection supplement if it does not already exists
 	 */
 	private CollectionSupplement getCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username){
-		
-		CollectionSupplement collectionSupplement = new CollectionSupplement();
-		collectionSupplement.setCollection(collection);
-		collectionSupplement.setName(batchSupplementFile.getSupplementName());
-		collectionSupplement.setOriginalFilename(batchSupplementFile.getSupplementFilename());
-		collectionSupplement.setDescription(batchSupplementFile.getSupplementDescription());
-		collectionSupplement.setCreatedBy(username);
-		collectionSupplement.setModifiedBy(username);
-		collectionSupplement.setCreatedDate(new Date().getTime());
-		collectionSupplement.setModifiedDate(new Date().getTime());
+		//check if the supplement exists
+		CollectionSupplement collectionSupplement = null;
+		if(collection.getSupplements() != null)
+		{
+			log.info("BATCH PROCESSING : looping through the existing collection supplements");
+			for(CollectionSupplement cs : collection.getSupplements()) 
+			{
+				if(cs.getName()==batchSupplementFile.getSupplementName())
+				{
+					log.error("BATCH PROCESSING : collection supplement name already exists");
+					batchValidationResponse.addProcessingError("ERROR: collection supplement name already exists"); 
+					collectionSupplement = cs;
+				}
+			}
+		}
+				
+		// Create Supplement if doesn't already exists
+		if(collectionSupplement == null) 
+		{
+			collectionSupplement = new CollectionSupplement();
+			collectionSupplement.setCollection(collection);
+			collectionSupplement.setName(batchSupplementFile.getSupplementName());
+			collectionSupplement.setOriginalFilename(batchSupplementFile.getSupplementFilename());
+			collectionSupplement.setDescription(batchSupplementFile.getSupplementDescription());
+			collectionSupplement.setCreatedBy(username);
+			collectionSupplement.setModifiedBy(username);
+			collectionSupplement.setCreatedDate(new Date().getTime());
+			collectionSupplement.setModifiedDate(new Date().getTime());
+			log.info("BATCH PROCESSING : new collection supplement created");
+		}
 		
 		return collectionSupplement;
 	}
@@ -258,38 +323,63 @@ public class BatchServiceImpl implements BatchService {
 	 * Create a primary file supplement
 	 */
 	private PrimaryfileSupplement createPrimaryfileSupplement(Primaryfile primaryFile, BatchSupplementFile batchSupplementFile, String username){
+		//check if the supplement exists
+		PrimaryfileSupplement primaryfileSupplement = null;
+		if(primaryFile.getSupplements() != null)
+		{
+			log.info("BATCH PROCESSING : looping through the existing primary file supplements");
+			for(PrimaryfileSupplement ps : primaryFile.getSupplements()) 
+			{
+				if(ps.getName()==batchSupplementFile.getSupplementFilename())
+				{
+					log.error("BATCH PROCESSING : primary file supplement name already exists");
+					batchValidationResponse.addProcessingError("ERROR: primary file supplement name already exists");
+					primaryfileSupplement = ps;
+				}
+			}
+		}
 		
 		// Create Supplements
-		PrimaryfileSupplement primaryfileSupplement = new PrimaryfileSupplement();
-		primaryfileSupplement.setPrimaryfile(primaryFile);
-		primaryfileSupplement.setName(batchSupplementFile.getSupplementName());
-		primaryfileSupplement.setOriginalFilename(batchSupplementFile.getSupplementFilename());
-		primaryfileSupplement.setDescription(batchSupplementFile.getSupplementDescription());
-		primaryfileSupplement.setCreatedBy(username);
-		primaryfileSupplement.setModifiedBy(username);
-		primaryfileSupplement.setCreatedDate(new Date().getTime());
-		primaryfileSupplement.setModifiedDate(new Date().getTime());
+		if(primaryfileSupplement == null) 
+		{
+			primaryfileSupplement = new PrimaryfileSupplement();
+			primaryfileSupplement.setPrimaryfile(primaryFile);
+			primaryfileSupplement.setName(batchSupplementFile.getSupplementName());
+			primaryfileSupplement.setOriginalFilename(batchSupplementFile.getSupplementFilename());
+			primaryfileSupplement.setDescription(batchSupplementFile.getSupplementDescription());
+			primaryfileSupplement.setCreatedBy(username);
+			primaryfileSupplement.setModifiedBy(username);
+			primaryfileSupplement.setCreatedDate(new Date().getTime());
+			primaryfileSupplement.setModifiedDate(new Date().getTime());
+			log.info("BATCH PROCESSING : new primary file supplement created");
+		}
 		return primaryfileSupplement;
 	}
 	
 	/*
 	 * Either create a primary file or get an existing one 
 	 */
-	private Primaryfile getPrimaryfile(Item item, BatchFile batchFile, String username) {
+	private Primaryfile getPrimaryfile(Collection batchfileCollection, Item item, BatchFile batchFile, String username) {
 		Primaryfile primaryFile =null;
-		
+		boolean found = false;
 		// Check to see if the primary file exists
 		if(item.getPrimaryfiles()!=null) {
+			log.info("BATCH PROCESSING : loop to see if primary file name already exists for this item");
 			for(Primaryfile p : item.getPrimaryfiles()) {
-				if(p.getName()==batchFile.getPrimaryfileName()) {
-					primaryFile = p;
+				//Collection primaryFileCollection = item.getCollection();
+				//if(batchfileCollection.getName()==primaryFileCollection.getName() && item.getExternalIds().equals(batchFile.getExternalItemId()) && p.getName()==batchFile.getPrimaryfileName()) {
+				if(p.getName().contentEquals(batchFile.getPrimaryfileName()))
+				{
+					found = true;
+					log.error("BATCH PROCESSING : primary file name already exists");
+					batchValidationResponse.addProcessingError("ERROR: primary file name already exists");
 					break;
 				}
 			}
 		}
 		
 		// If it doesn't exist, create a new one
-		if(primaryFile==null) {
+		if(!found) {
 			// Create Primary files		
 			primaryFile = new Primaryfile();
 			primaryFile.setName(batchFile.getPrimaryfileName());
@@ -297,12 +387,11 @@ public class BatchServiceImpl implements BatchService {
 			primaryFile.setOriginalFilename(batchFile.getPrimaryfileFilename());
 			primaryFile.setCreatedBy(username);
 			primaryFile.setCreatedDate(new Date().getTime());
+			primaryFile.setModifiedBy(username);
+			primaryFile.setModifiedDate(new Date().getTime());
+			primaryFile.setItem(item);
+			log.info("BATCH PROCESSING : created new primary file object");
 		}
-		
-		primaryFile.setModifiedBy(username);
-		primaryFile.setModifiedDate(new Date().getTime());
-		primaryFile.setItem(item);
-		
 		return primaryFile;
 					
 	}
@@ -310,30 +399,50 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Gets an Item object.  If one already exists, 
 	 */
-	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String sourceId, String sourceLabel) {
+	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId, String externalSource) {
 		Item item = null;
-		
 		Set<Item> items = collection.getItems();
+		boolean found = false;
 		if(items!=null) {
+			log.info("BATCH PROCESSING : check for matching item in this collection"); 
 			for(Item i : items) {
-				if(i.getName().contentEquals(itemName)) {
-					item = i;
-					if(!sourceLabel.isBlank() && !sourceId.isBlank()) {
-						HashMap<String, String> externalIds = i.getExternalIds();
-						externalIds.put(sourceId, sourceLabel);
+				if(!externalSource.isBlank() && !externalItemId.isBlank()) 
+				{
+					if(i.getExternalIds().containsKey(externalItemId))
+					{
+						if(i.getName().contentEquals(itemName))
+						{
+							//throw an error for duplication
+							log.info("BATCH PROCESSING : Item external ID and Item name combination already exists"); 
+							//batchValidationResponse.addProcessingError("ERROR: Item external ID and Item name combination already exists");
+							found = true;
+							item = i;
+						}
+						else {
+							found = true;
+							item = i;
+							itemRepository.updateTitle(itemName, i.getId());
+						}
 					}
-					break;
 				}
+				else if(i.getName().contentEquals(itemName)) {
+					//throw an error for duplication
+					log.info("BATCH PROCESSING : Item name already exists"); 
+					//batchValidationResponse.addProcessingError("ERROR: Item name already exists");
+					found = true;
+					item = i;
+				}
+				if(found)
+					break;
 			}
 		}
-		// Check if it already exists
-		if(item==null) {
-			// if not, create it
+		// If item doesn't already exists
+		if(item==null && !found) {
 			item = new Item();
 			item.setName(itemName);
-			if(!sourceLabel.isBlank() && !sourceId.isBlank()) {
+			if(!externalSource.isBlank() && !externalItemId.isBlank()) {
 				HashMap<String, String> externalIds = new HashMap<String, String>();
-				externalIds.put(sourceId, sourceLabel);
+				externalIds.put(externalItemId, externalSource);
 				item.setExternalIds(externalIds);
 			}
 			item.setDescription(itemDescription);
@@ -342,7 +451,9 @@ public class BatchServiceImpl implements BatchService {
 			item.setCreatedDate(new Date().getTime());
 			item.setModifiedDate(new Date().getTime());
 			item.setCollection(collection);
+			log.info("BATCH PROCESSING : New item created"); 
 			itemRepository.save(item);
+			log.info("BATCH PROCESSING : New item saved to the database");
 		}
 		
 		return item;
@@ -389,6 +500,7 @@ public class BatchServiceImpl implements BatchService {
 	}
 	
 	private Collection getUpdatedCollection(Long collectionId) {
+		
 		return collectionRepository.findById(collectionId).get();
 	}
 
