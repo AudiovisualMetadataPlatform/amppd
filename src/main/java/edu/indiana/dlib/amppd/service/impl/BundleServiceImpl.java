@@ -9,10 +9,10 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.BundleService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
-@Log
+@Slf4j
 public class BundleServiceImpl implements BundleService {
 	
 	@Autowired
@@ -27,7 +27,7 @@ public class BundleServiceImpl implements BundleService {
 	@Override
 	public Bundle addPrimaryfile(Bundle bundle, Long primaryfileId) {
 		if (bundle == null) {
-			log.severe("The given bundle is null!");
+			log.error("The given bundle is null!");
 			return null;
 		}		
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
@@ -36,7 +36,7 @@ public class BundleServiceImpl implements BundleService {
 		if (bundle.getPrimaryfiles().contains(primaryfile)) {
 			// TODO the warning message shall be displayed back to the screen
 			String msg = "Primaryfile <" + primaryfileId + "> has already been added to bundle<" + bundle.getId() + ">!";
-			log.warning(msg);	
+			log.warn(msg);	
 			return bundle;
 		}
 
@@ -56,7 +56,7 @@ public class BundleServiceImpl implements BundleService {
 	@Override
     public Bundle deletePrimaryfile(Bundle bundle, Long primaryfileId) {		
 		if (bundle == null) {
-			log.severe("The given bundle is null!");
+			log.error("The given bundle is null!");
 			return null;
 		}		
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
@@ -65,7 +65,7 @@ public class BundleServiceImpl implements BundleService {
 		if (!bundle.getPrimaryfiles().contains(primaryfile)) {
 			// TODO the warning message shall be displayed back to the screen
 			String msg = "Primaryfile <" + primaryfileId + "> doesn't exist in bundle<" + bundle.getId() + ">!";
-			log.warning(msg);	
+			log.warn(msg);	
 			return bundle;
 		}
 
@@ -104,7 +104,7 @@ public class BundleServiceImpl implements BundleService {
 	public Bundle addPrimaryfiles(Long bundleId, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		if (primaryfileIds == null) {
-			log.warning("The given primaryfileIds is empty." );
+			log.warn("The given primaryfileIds is empty." );
 		}
 		for (Long primaryfileId : primaryfileIds) {
 			addPrimaryfile(bundleId, primaryfileId);			
@@ -119,7 +119,7 @@ public class BundleServiceImpl implements BundleService {
 	public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		if (primaryfileIds == null) {
-			log.warning("The given primaryfileIds is empty." );
+			log.warn("The given primaryfileIds is empty." );
 		}
 		for (Long primaryfileId : primaryfileIds) {
 			deletePrimaryfile(bundleId, primaryfileId);			

@@ -26,7 +26,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implmentation of PreprocessService.
@@ -34,7 +34,7 @@ import lombok.extern.java.Log;
  *
  */
 @Service
-@Log
+@Slf4j
 public class PreprocessServiceImpl implements PreprocessService {
 	
 	@Autowired
@@ -84,7 +84,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		    		builder.append(line);
 		    		builder.append(System.getProperty("line.separator"));
 		    	}
-				log.severe(builder.toString());
+				log.error(builder.toString());
 		    	throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath + ": ffmpeg exited with status " + status);
 		    }
 		}
@@ -147,7 +147,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		    final int status = process.waitFor();
 		    if (status != 0) {		    	
 				// capture the error outputs into log
-				log.severe(fileStorageService.readTextFile(jsonpath));
+				log.error(fileStorageService.readTextFile(jsonpath));
 		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
 		    }
 		}

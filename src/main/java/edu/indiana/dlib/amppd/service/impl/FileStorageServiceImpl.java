@@ -42,7 +42,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of FileStorageService.
@@ -54,7 +54,7 @@ import lombok.extern.java.Log;
  *
  */
 @Service
-@Log
+@Slf4j
 public class FileStorageServiceImpl implements FileStorageService {	
 
 	@Autowired
