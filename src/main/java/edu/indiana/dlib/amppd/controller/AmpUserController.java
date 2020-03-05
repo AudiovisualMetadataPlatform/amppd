@@ -12,7 +12,7 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j
   
  /**
 	 * Controller for REST operations on Login.
@@ -22,7 +22,7 @@ import lombok.extern.java.Log;
 	 */
   @CrossOrigin(origins = "*", allowedHeaders = "*")
   @RestController
-  @Log 
+  @Slf4j
   public class AmpUserController{
 	  @Autowired
 	  private AmpUserServiceImpl ampService;
