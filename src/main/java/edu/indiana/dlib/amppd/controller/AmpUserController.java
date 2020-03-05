@@ -12,7 +12,7 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
-import lombok.extern.slf4j.Slf4j
+import lombok.extern.slf4j.Slf4j;
   
  /**
 	 * Controller for REST operations on Login.
