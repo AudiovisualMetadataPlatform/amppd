@@ -16,7 +16,9 @@
 package edu.indiana.dlib.amppd.service;
 
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 
 import java.nio.file.Files;
 
@@ -37,6 +39,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import junit.framework.Assert;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -157,6 +160,41 @@ public class FileStorageServiceTests {
     	String pathname = fileStorageService.getFilePathname(supplement);
         assertTrue(pathname.equals("U-1/C-2/I-3/P-4/S-5.pdf"));
     }
+    
+    @Test
+    public void TestInvalidCharacters() {
+    	String path = "";
+    	String originalPath = "TEST";
+    	String lastChar = " ";
+    	for(String character : invalidChars) {
+    		path = originalPath + character;
+    		assertFalse(validPath(path));
+        	String encodedValue = fileStorageService.encodeUri(path);
+        	System.out.println(encodedValue);
+    		assertTrue(validPath(encodedValue));
 
+    		path = character + originalPath + character;
+    		encodedValue = fileStorageService.encodeUri(path);
+        	System.out.println(encodedValue);
+    		assertTrue(validPath(encodedValue));    	
+    		
+
+    		path = character + originalPath + lastChar + originalPath + character;
+    		encodedValue = fileStorageService.encodeUri(path);
+        	System.out.println(encodedValue);
+    		assertTrue(validPath(encodedValue));    
+    		lastChar = character;
+    	}
+    	
+    }
+    //":", "/", "?",  "#", "=", "@", "!",  "$", "&", "'", "(", ")", "*","+",
+    String[] invalidChars = new String[] { "[", "]",   ",", ";", " ", ":", "/", "?",  "#", "=", "@", "!",  "$", "&", "'", "(", ")", "*","+"};
+    
+    private boolean validPath(String path) {
+    	for(String character : invalidChars) {
+    		if(path.contains(character)) return false;
+    	}
+    	return true;
+    }
 
 }

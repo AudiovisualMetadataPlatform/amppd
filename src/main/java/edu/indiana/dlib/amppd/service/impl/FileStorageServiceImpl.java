@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -391,4 +397,31 @@ public class FileStorageServiceImpl implements FileStorageService {
 		}
 	}
 	
+	public String encodeUri(String path) {
+		Pattern pattern = Pattern.compile("[^A-Za-d0-9._-]");
+        
+		char[] chars = path.toCharArray();
+
+		for (char ch : chars) {
+			String charString = Character.toString(ch);
+	        Matcher matcher = pattern.matcher(charString);
+	        while (matcher.find()) {
+	            String hexString = "%" + Integer.toHexString((int) ch);
+	            path = path.replace(charString, hexString);
+	        }
+		}		
+		
+	    return path;
+	}
+	
+	public Path getDropboxPath(String unitName, String collectionName) {
+		Path unitPath = getDropboxPath(unitName);
+		String encodedCollectionName = encodeUri(collectionName);
+		return Paths.get(unitPath.toString(), encodedCollectionName);
+	}
+	
+	public Path getDropboxPath(String unitName) {
+		String encodedUnitName = encodeUri(unitName);
+		return Paths.get(config.getDropboxRoot(), encodedUnitName);
+	}
 }

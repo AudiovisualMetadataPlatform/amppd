@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
@@ -181,6 +182,9 @@ public interface FileStorageService {
 	 * @return the string with all file content
 	 */
 	public String readTextFile(String pathame);
+	public String encodeUri(String path);
+	public Path getDropboxPath(String unitName, String collectionName);
+	public Path getDropboxPath(String unitName);
 	
 //	/**
 //	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
