@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
+
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,6 +29,7 @@ import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
+import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,8 +38,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
-	  
-	  private MessageSource messages;
 	  
 	  @NotNull
 	  static String ampEmailId ;
@@ -79,6 +78,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  if(userFound.equals("1")) {
 				  response.setSuccess(true);
 			  }
+			  log.info("User validated Successfully");
 		  }
 		  return response;
 	  }
@@ -91,10 +91,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public boolean approveUser(String username) {
 		  try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
-//			  AmpUser user = ampUserRepository.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found: " + username));
-//			  if(users.size()==0) return false;
-//			  AmpUser user = users.get(0);
-			  user.setApproved(true);
+			user.setApproved(true);
 			  ampUserRepository.save(user);
 		  }
 		  catch(Exception ex) {
@@ -128,8 +125,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!response.hasErrors()) {
 			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
 			  user = ampUserRepository.save(user);
-			  if(user!=null && user.getId() > 0) 
+			  if(user!=null && user.getUser_id() > 0) 
 			  {
+				  log.info("User validated successfully. Registration email being sent");
 				  try {
 					  mailSender.send(constructRegisterEmail(uiUrl, user, "approve"));
 					} 
@@ -140,6 +138,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  }
 			  else {
 				  response.addError("Error creating user account");
+				  log.error("User validation unsuccessful so not registering the user: "+user.getEmail());
 			  }
 		  }
 		  
@@ -181,18 +180,27 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public AuthResponse emailToken(String emailid) {
 		// TODO Auto-generated method stub
 		AuthResponse response = new AuthResponse();
+		log.info("Executing emailToken() for user:"+emailid);
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		if(user.getApproved())
 		{
 			String token = UUID.randomUUID().toString();
-			createPasswordResetTokenForUser(user, token);
-		    try {
-		    	mailSender.send(constructResetTokenEmail(uiUrl, token, user));
-			} catch (MailException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    response.setSuccess(true);//new GenericResponse(messages.getMessage("message.resetPasswordEmail", null, request.getLocale()));
+			boolean res = createPasswordResetTokenForUser(user, token);
+		    if(res)
+		    {
+				try {
+			    	mailSender.send(constructResetTokenEmail(uiUrl, token, user));
+				} catch (MailException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				response.setSuccess(true);
+				log.info("Token email sent successfully");
+		    }
+		    else
+		    {
+		    	response.setSuccess(false);
+		    }
 		}
 		return response;
 	}
@@ -204,8 +212,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String url = null;
 		if (type.equalsIgnoreCase("approve"))
 		{
-			url = contextPath + "/approve-user/" + user.getId();
-			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
+			log.info("constructing Email for User approval:"+user.getUsername());
+			url = contextPath + "/approve-user/" + user.getUser_id();
+			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getUser_id()+
 					"\n\n Click the link below to view and approve the new user. \n";
 			subject = "New User Approval";
 			emailTo = ampAdmin;
@@ -213,7 +222,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		else if (type.equalsIgnoreCase("activate"))
 		{
-			url = contextPath + "/activate-account/" + user.getId();
+			log.info("Constructing email for user account activation"+user.getUsername());
+			url = contextPath + "/activate-account/" + user.getUser_id();
 			message = "Click the link below to activate your AMP account";
 			subject = "Activate Account";
 			emailTo = user.getEmail();
@@ -221,23 +231,31 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
-	public void createPasswordResetTokenForUser(AmpUser user, String token) {
-		
+	public boolean createPasswordResetTokenForUser(AmpUser user, String token) {
+		int res = 0;
 		Passwordresettoken myToken=new Passwordresettoken();
 		Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
 		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
-		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
+		int userTokenExists = passwordTokenRepository.ifExists(user.getUser_id());
+		System.out.println("User token exists status is:"+userTokenExists+"for user id:"+user.getUser_id());
 		if(userTokenExists == 1)
 		{
-			passwordTokenRepository.updateToken(token, user.getId(), calendar.getTime());
+			res = passwordTokenRepository.updateToken(token, user.getUser_id(), calendar.getTime());
 		}
 		else
 		{
 			myToken.setUser(user);
 			myToken.setToken(token);
 			myToken.setExpiryDate(calendar.getTime());
-			passwordTokenRepository.save(myToken);
+			myToken = passwordTokenRepository.save(myToken);
+			if(myToken != null)
+				res = 1;
 		}
+		log.info("The result of creating a token is (1:true/0:false):"+res);
+		if(res == 1)
+			return true;
+		else
+			return false;
 	}
 	
 	private SimpleMailMessage constructResetTokenEmail(String contextPath, String token, AmpUser user) {
@@ -261,10 +279,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
-		if ((passToken == null) || (user == null) || (passToken.getUser().getId() != user.getId())) {
+		if ((passToken == null) || (user == null) || (passToken.getUser().getUser_id() != user.getUser_id())) {
 			response.addError("Incorrect Link");
 			response.setSuccess(false);
-		    //return response;
 		    }
 		Calendar cal = Calendar.getInstance();
 	    if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
@@ -274,7 +291,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		
 	    if(!response.hasErrors()) {
 			  String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
-			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
+			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getUser_id()); 
 			  if(rows > 0)
 			  {
 				  response.setSuccess(true);
@@ -306,6 +323,34 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			if(rows > 0)
 			{
 				response.setSuccess(true);
+			}
+		}
+		return response;
+	}
+	
+	@Override
+	public AuthResponse resetPasswordGetEmail(String token)
+	{
+		AuthResponse response = new AuthResponse();
+		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
+		if ((passToken == null)) {
+			log.error("incorrect Link in resetPasswordGetEmail");
+			response.addError("Incorrect Link");
+			response.setSuccess(false);
+		    }
+		else
+		{
+			AmpUser user = ampUserRepository.findById(passToken.getUser().getUser_id()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getToken_id()));
+			if(user!= null && user.getApproved())
+			{
+				response.setEmailid(user.getEmail());
+				response.setSuccess(true);
+				log.info("Email fetched successfully");
+			}
+			else
+			{
+				response.addError("User doesn't exist");
+				response.setSuccess(false);
 			}
 		}
 		return response;
