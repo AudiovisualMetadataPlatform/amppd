@@ -360,7 +360,7 @@ public class BatchServiceImpl implements BatchService {
 		}
 		
 		// Create paths from /{root}/{unit}/{collection}/{filename}
-		Path existingFile = Paths.get(propertyConfig.getDropboxRoot(), sourceDir, sourceFilename);	
+		Path existingFile = Paths.get(sourceDir, sourceFilename);	
 		Path newLink = Paths.get(propertyConfig.getFileStorageRoot(), targetFilename);	
 		
 		// Move the file
@@ -393,8 +393,7 @@ public class BatchServiceImpl implements BatchService {
 	}
 
 	private String getSourceDir(Unit unit, Collection collection) {
-		
-		return String.format("/%s/%s", unit.getName(), collection.getName());
+		return fileStorageService.getDropboxPath(unit.getName(), collection.getName()).toString();
 	}
 	
 }
