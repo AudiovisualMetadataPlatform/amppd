@@ -18,7 +18,6 @@ package edu.indiana.dlib.amppd.service;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
 
 import java.nio.file.Files;
 
@@ -39,7 +38,6 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
-import junit.framework.Assert;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -164,30 +162,33 @@ public class FileStorageServiceTests {
     @Test
     public void TestInvalidCharacters() {
     	String path = "";
-    	String originalPath = "TEST";
+    	String originalPath = "TEST1._-";
     	String lastChar = " ";
     	for(String character : invalidChars) {
     		path = originalPath + character;
     		assertFalse(validPath(path));
         	String encodedValue = fileStorageService.encodeUri(path);
-        	System.out.println(encodedValue);
+        	System.out.println("Original Value: " + path + " Encoded Value: " + encodedValue);
     		assertTrue(validPath(encodedValue));
+    		assertTrue(encodedValue.contains(originalPath));
 
     		path = character + originalPath + character;
     		encodedValue = fileStorageService.encodeUri(path);
-        	System.out.println(encodedValue);
-    		assertTrue(validPath(encodedValue));    	
+        	System.out.println("Original Value: " + path + " Encoded Value: " + encodedValue);
+    		assertTrue(validPath(encodedValue)); 
+    		assertTrue(encodedValue.contains(originalPath));   	
     		
 
     		path = character + originalPath + lastChar + originalPath + character;
     		encodedValue = fileStorageService.encodeUri(path);
-        	System.out.println(encodedValue);
+        	System.out.println("Original Value: " + path + " Encoded Value: " + encodedValue);
     		assertTrue(validPath(encodedValue));    
+    		assertTrue(encodedValue.contains(originalPath));  
     		lastChar = character;
     	}
     	
     }
-    //":", "/", "?",  "#", "=", "@", "!",  "$", "&", "'", "(", ")", "*","+",
+    
     String[] invalidChars = new String[] { "[", "]",   ",", ";", " ", ":", "/", "?",  "#", "=", "@", "!",  "$", "&", "'", "(", ")", "*","+"};
     
     private boolean validPath(String path) {
