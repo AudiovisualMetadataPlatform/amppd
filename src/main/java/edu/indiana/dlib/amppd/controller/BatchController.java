@@ -51,9 +51,10 @@ public class BatchController {
 		if(response.isSuccess()) {
 			List<String> errors = batchService.processBatch(response, ampUser.getUsername());
 			boolean batchSuccess = errors.size()==0;
-			log.info("Batch processing success : "+batchSuccess);
+			log.info("  errors:"+ errors.size());
 			response.setProcessingErrors(errors);
 			response.setSuccess(batchSuccess);
+			log.info("Batch processing success : "+batchSuccess+" processing errors:"+response.getProcessingErrors().size());
 		}
 		
 		return response;

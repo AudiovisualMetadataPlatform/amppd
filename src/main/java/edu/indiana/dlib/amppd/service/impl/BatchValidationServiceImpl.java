@@ -36,7 +36,6 @@ import edu.indiana.dlib.amppd.repository.BatchFileRepository;
 import edu.indiana.dlib.amppd.repository.BatchRepository;
 import edu.indiana.dlib.amppd.repository.BatchSupplementFileRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
@@ -60,10 +59,6 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     private BatchFileRepository batchFileRepository;
 	@Autowired
     private BatchSupplementFileRepository batchSupplementFileRepository;
-	@Autowired
-    private ItemRepository itemRepository;
-	
-	
 	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
 		BatchValidationResponse response;
 		StringBuilder textBuilder = new StringBuilder();

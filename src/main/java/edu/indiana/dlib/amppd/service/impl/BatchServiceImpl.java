@@ -62,27 +62,29 @@ public class BatchServiceImpl implements BatchService {
 	@Autowired
 	private PreprocessService preprocessService;
 	
-	BatchValidationResponse batchValidationResponse = new BatchValidationResponse();
+	BatchValidationResponse batchValidationResponse;
+	int currRow;
 	
 	
 	public List<String> processBatch(BatchValidationResponse batchValidation, String username) {
 		List<String> errors = new ArrayList<String>();
 		Batch batch = batchValidation.getBatch();
+		batchValidationResponse = new BatchValidationResponse();
 		for(BatchFile batchFile : batch.getBatchFiles()) {
+			currRow = batchFile.getRowNum();
 			try {
 				createItem(batch.getUnit(), batchFile, username);
-				log.info("BATCH PROCESSING : Check if there were processing errors");
-				if(batchValidationResponse.hasProcessingErrors())  
-				{
-					errors.addAll(batchValidationResponse.getProcessingErrors());
-					break;
-				}
 			}
 			catch(Exception ex) {
 				log.error("BATCH PROCESSING : Batch processing exception: " + ex.toString());
 				errors.add("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
 			}
 		}	
+		log.info("BATCH PROCESSING : Check if there were processing errors");
+		if(batchValidationResponse.hasProcessingErrors())  
+		{
+			errors.addAll(batchValidationResponse.getProcessingErrors());
+		}
 		return errors;
 	}
 	
@@ -102,12 +104,13 @@ public class BatchServiceImpl implements BatchService {
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
 		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource());
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource(), batchFile.getPrimaryfileFilename(),batchFile.getBatchSupplementFiles().size());
 		if(batchValidationResponse.hasProcessingErrors())
 			return;
-		
-		log.info("BATCH PROCESSING : The item found was added to the collection");
+		itemRepository.save(item);
+		log.info("BATCH PROCESSING : New item saved to the database");
 		collection.addItem(item);
+		log.info("BATCH PROCESSING : The item found was added to the collection");
 		
 		// Process the files based on the supplement type
 		if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE || batchFile.getSupplementType()==null) {
@@ -163,7 +166,7 @@ public class BatchServiceImpl implements BatchService {
 		    	logFileCreated(primaryFile, targetPath);	    	
 				
 				// preprocess the supplement after ingest
-				//preprocessService.preprocess(primaryFile);
+				preprocessService.preprocess(primaryFile);
 			}
 	    	return primaryFile;
 		}
@@ -189,7 +192,7 @@ public class BatchServiceImpl implements BatchService {
 			// Log that the file was created
 	    	logFileCreated(supplement, targetSuppPath);
 			// preprocess the supplement after ingest
-			//preprocessService.preprocess(supplement);
+			preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating primary file supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -213,7 +216,7 @@ public class BatchServiceImpl implements BatchService {
 			// Log that the file was created
 			logFileCreated(supplement, targetSuppPath);
 			// preprocess the supplement after ingest
-			//preprocessService.preprocess(supplement);
+			preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating collection supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -236,7 +239,7 @@ public class BatchServiceImpl implements BatchService {
 			// Log that the file was created
 			logFileCreated(supplement, targetSuppPath);
 			// preprocess the supplement after ingest
-			//preprocessService.preprocess(supplement);
+			preprocessService.preprocess(supplement);
 		}
 		catch(IOException ex) {
 			throw new Exception(String.format("Error creating item supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
@@ -258,7 +261,7 @@ public class BatchServiceImpl implements BatchService {
 				if(is.getName()==batchSupplementFile.getSupplementName())
 				{
 					log.error("BATCH PROCESSING : item supplement name already exists");
-					batchValidationResponse.addProcessingError("ERROR: item supplement name already exists");
+					batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" item supplement name already exists");
 					itemSupplement = is;
 				}
 			}
@@ -295,7 +298,7 @@ public class BatchServiceImpl implements BatchService {
 				if(cs.getName()==batchSupplementFile.getSupplementName())
 				{
 					log.error("BATCH PROCESSING : collection supplement name already exists");
-					batchValidationResponse.addProcessingError("ERROR: collection supplement name already exists"); 
+					batchValidationResponse.addProcessingError("ERROR: In row "+ currRow +" collection supplement name already exists"); 
 					collectionSupplement = cs;
 				}
 			}
@@ -333,7 +336,7 @@ public class BatchServiceImpl implements BatchService {
 				if(ps.getName()==batchSupplementFile.getSupplementFilename())
 				{
 					log.error("BATCH PROCESSING : primary file supplement name already exists");
-					batchValidationResponse.addProcessingError("ERROR: primary file supplement name already exists");
+					batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" primary file supplement name already exists");
 					primaryfileSupplement = ps;
 				}
 			}
@@ -372,7 +375,7 @@ public class BatchServiceImpl implements BatchService {
 				{
 					found = true;
 					log.error("BATCH PROCESSING : primary file name already exists");
-					batchValidationResponse.addProcessingError("ERROR: primary file name already exists");
+					batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" primary file name already exists");
 					break;
 				}
 			}
@@ -399,7 +402,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Gets an Item object.  If one already exists, 
 	 */
-	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId, String externalSource) {
+	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId, String externalSource, String primaryFileName, int supplementfiles) {
 		Item item = null;
 		Set<Item> items = collection.getItems();
 		boolean found = false;
@@ -412,23 +415,22 @@ public class BatchServiceImpl implements BatchService {
 					{
 						if(i.getName().contentEquals(itemName))
 						{
-							//throw an error for duplication
-							log.info("BATCH PROCESSING : Item external ID and Item name combination already exists"); 
-							//batchValidationResponse.addProcessingError("ERROR: Item external ID and Item name combination already exists");
-							found = true;
-							item = i;
+							if(primaryFileName == null && supplementfiles == 0)
+							{
+								log.info("BATCH PROCESSING : Item external id  and external source combination already exists"); 
+								batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
+							}
 						}
-						else {
-							found = true;
-							item = i;
-							itemRepository.updateTitle(itemName, i.getId());
-						}
+						else
+							itemRepository.updateTitle(itemName,i.getId());
+						found = true;
+						item = i;
 					}
 				}
 				else if(i.getName().contentEquals(itemName)) {
 					//throw an error for duplication
 					log.info("BATCH PROCESSING : Item name already exists"); 
-					//batchValidationResponse.addProcessingError("ERROR: Item name already exists");
+					batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
 					found = true;
 					item = i;
 				}
@@ -451,9 +453,7 @@ public class BatchServiceImpl implements BatchService {
 			item.setCreatedDate(new Date().getTime());
 			item.setModifiedDate(new Date().getTime());
 			item.setCollection(collection);
-			log.info("BATCH PROCESSING : New item created"); 
-			itemRepository.save(item);
-			log.info("BATCH PROCESSING : New item saved to the database");
+			
 		}
 		
 		return item;
