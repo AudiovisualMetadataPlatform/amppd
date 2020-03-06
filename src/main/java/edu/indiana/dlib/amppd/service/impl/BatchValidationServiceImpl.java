@@ -38,6 +38,7 @@ import edu.indiana.dlib.amppd.repository.BatchSupplementFileRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @Service
@@ -59,6 +60,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     private BatchFileRepository batchFileRepository;
 	@Autowired
     private BatchSupplementFileRepository batchSupplementFileRepository;
+
+	@Autowired
+    private FileStorageService fileStorageService;
+	
 	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
 		BatchValidationResponse response;
 		StringBuilder textBuilder = new StringBuilder();
@@ -466,15 +471,15 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	 * Verify the file exists in the drop box
 	 */
 	private boolean fileExists(String unit, String collection, String filename) {
-		Path path = Paths.get(propertyConfig.getDropboxRoot(), unit, collection, filename);	
+		Path collectionPath = getCollectionPath(unit, collection);
+		Path path = Paths.get(collectionPath.toString(), filename);
 		return Files.exists(path);
 	}
 	/*
 	 * Get the collection path in the drop box
 	 */
 	private Path getCollectionPath(String unit, String collection) {
-		Path path = Paths.get(propertyConfig.getDropboxRoot(), unit, collection);	
-		return path;
+		return fileStorageService.getDropboxPath(unit, collection);
 	}
 	/*
 	 * Verify the unit exists in the database 

@@ -182,6 +182,28 @@ public interface FileStorageService {
 	 */
 	public String readTextFile(String pathame);
 	
+	/**
+	 * Encodes characters not in [A-Z], [0-9], [.], [-], or [_] using a %[hex] format.  Note that passing in an entire path will result in a malformed path as '/' will be encoded
+	 * @param path to encode
+	 * @return URI encoded value
+	 */
+	public String encodeUri(String path);
+	
+	/**
+	 * Gets the URI encoded dropbox path for a given collection
+	 * @param unitName
+	 * @param collectionName
+	 * @return
+	 */
+	public Path getDropboxPath(String unitName, String collectionName);
+	
+	/**
+	 * Gets the URI encoded drop box path for a given unit
+	 * @param unitName
+	 * @return
+	 */
+	public Path getDropboxPath(String unitName);
+	
 //	/**
 //	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
 //	 * 

@@ -69,4 +69,13 @@ public interface AmpUserService {
 	 * @return AmpUser or null, depending on whether the user was found or not
 	 */
 	AmpUser getUser(String username);
+	
+	/**
+	 * Gets an amp emailid by token. It returns the emailid to the reset password page for prepopulation there. 
+	 * If the email id is not found it returns error
+	 * @param token
+	 * @return the emailid in AuthResponse instance
+	 */
+	public AuthResponse resetPasswordGetEmail(String token);
+	
 }

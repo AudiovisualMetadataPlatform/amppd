@@ -87,6 +87,8 @@ public class BatchServiceTests {
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
 	@Autowired
+	private FileStorageService fileStorageService;
+	@Autowired
     private TestHelper testHelper;
 
 	
@@ -146,16 +148,19 @@ public class BatchServiceTests {
         Assert.assertTrue(srcFile.exists());
         
         // Create necessary directories
-
-        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
-        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot(), unitName));
-        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName));
         
-        Path destPath = Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName, "test_files.zip");	
+        
+        Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
+        Path unitPath = fileStorageService.getDropboxPath(unitName);
+        Path collectionPath = fileStorageService.getDropboxPath(unitName, collectionName);
+        Files.createDirectories(unitPath);
+        Files.createDirectories(collectionPath);
+        
+        Path destPath = Paths.get(collectionPath.toString(), "test_files.zip");	
 
 		Files.copy(srcFile.toPath(), destPath);
 		
-        unzip(destPath.toString(), Paths.get(propertyConfig.getDropboxRoot(), unitName, collectionName).toString());
+        unzip(destPath.toString(), collectionPath.toString());
         
         Files.delete(destPath);
         
@@ -177,7 +182,9 @@ public class BatchServiceTests {
 	
 	@After
 	public void cleanup() throws IOException {
-		FileUtils.cleanDirectory(new File(Paths.get(propertyConfig.getDropboxRoot(), "Test Unit", "Music Library").toString())); 
+		String un = fileStorageService.encodeUri("Test Unit");
+		String cn = fileStorageService.encodeUri("Music Library");
+		FileUtils.cleanDirectory(new File(Paths.get(propertyConfig.getDropboxRoot(), un, cn).toString())); 
 		deleteAllData();
 	}
 	
