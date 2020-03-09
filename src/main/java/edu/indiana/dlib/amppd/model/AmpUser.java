@@ -34,7 +34,7 @@ public class AmpUser {
 	
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long user_id;
+    private Long id;
 	
 	@Column(unique=true)
 	private String username;

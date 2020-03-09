@@ -28,7 +28,7 @@ public class Passwordresettoken {
   
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long token_id;
+    private Long id;
   
     private String token;
   
