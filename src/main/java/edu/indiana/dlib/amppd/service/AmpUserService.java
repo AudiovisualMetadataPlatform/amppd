@@ -62,6 +62,15 @@ public interface AmpUserService {
 	 */
 	public AuthResponse approveUser(Long userID);
 
+	
+	/**
+	 * Gets an amp emailid by token. It returns the emailid to the reset password page for prepopulation there. 
+	 * If the email id is not found it returns error
+	 * @param token
+	 * @return the emailid in AuthResponse instance
+	 */
+	public AuthResponse resetPasswordGetEmail(String token);
+
   /**
 	 * Gets an amp user by username.  Will return null if the amp user is not found.  This does not take into account 
 	 * whether or not user is approved.
@@ -81,4 +90,5 @@ public interface AmpUserService {
 	 * @return the current username
 	 */
 	public String getCurrentUsername();
+	
 }
