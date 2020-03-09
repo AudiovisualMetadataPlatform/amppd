@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -29,33 +28,36 @@ import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
+	  private int MIN_PASSWORD_LENGTH = 8;
+	  private int MIN_USERNAME_LENGTH = 3;
+
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
-	  
-	  @NotNull
-	  static String ampEmailId ;
-	  
-	  @NotNull
-	  static String ampAdmin ;
-	  
-	  @NotNull
-	  static String uiUrl ;
-	  
-	  @Autowired
-	  private JavaMailSender mailSender;
 	  
 	  @Autowired
 	  private PasswordTokenRepository passwordTokenRepository;
 	  
-	  private int MIN_PASSWORD_LENGTH = 8;
-	  private int MIN_USERNAME_LENGTH = 3;
+	  @Autowired
+	  private AmppdPropertyConfig ampPropertyConfig;
+		
+	  @NotNull
+	  private static String ampEmailId ;
+	  
+	  @NotNull
+	  private static String ampAdmin ;
+	  
+	  @NotNull
+	  private static String uiUrl ;
+	  
+	  @Autowired
+	  private JavaMailSender mailSender;
+	  
 	  
 	  @Autowired 
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig) { 
@@ -82,12 +84,14 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  }
 		  return response;
 	  }
+	  
 	  public AmpUser getUser(String username) {
 		Optional<AmpUser> userOpt = ampUserRepository.findByUsername(username);
 		if(userOpt.isPresent()) return userOpt.get();
 		
 		return null;
 	  }
+	  
 	  public boolean approveUser(String username) {
 		  try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
@@ -355,4 +359,30 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		return response;
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.AmpUserService.getCurrentUsername()
+	 */
+	@Override
+	public String getCurrentUsername() {
+		// TODO replace below tmp code with logic to get the current username from User Session		
+		// tmp code: return the default master AMP user for now
+		return ampPropertyConfig.getUsername();
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.AmpUserService.getCurrentUser()
+	 */
+	@Override
+	public AmpUser getCurrentUser() {
+		// TODO replace below tmp code with logic to get the current user from User Session		
+		// tmp code: return the default master AMP user for now
+		String username = ampPropertyConfig.getUsername();
+		AmpUser currentUser = getUser(username);		
+		if (currentUser == null) {
+			throw new RuntimeException("Current user with username " + username + " doesn't exist!");
+		}
+		return currentUser;
+	}
+	
 }

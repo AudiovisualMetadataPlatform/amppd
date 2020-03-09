@@ -80,15 +80,15 @@ public interface AmpUserService {
 	public AmpUser getUser(String username);
 	
 	/**
-	 * Gets the current user from User Session.
-	 * @return the current user
-	 */
-	public AmpUser getCurrentUser();
-		
-	/**
 	 * Gets the current username from User Session.
 	 * @return the current username
 	 */
 	public String getCurrentUsername();
 	
+	/**
+	 * Gets the current user from User Session.
+	 * @return the current user
+	 */
+	public AmpUser getCurrentUser();
+		
 }
