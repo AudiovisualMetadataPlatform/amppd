@@ -7,8 +7,10 @@ import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
+
+import edu.indiana.dlib.amppd.model.Primaryfile;
 
 
 /**
@@ -30,14 +32,19 @@ public interface JobService {
 	public HistoriesClient getHistoriesClient();
 	
 	/**
-	 * Build the workflow inputs to feed the given dataset and history along with the given parameters into the given Galaxy workflow.
-	 * @param workflowId ID of the given workflow
-	 * @param datasetId ID of the given dataset
-	 * @param historyId ID of the given history
-	 * @param parameters step parameters for running the workflow
-	 * @return the built WorkflowInputs instance
+	 * Get needed job context for HMGMs when running the given workflow against the given primaryfile.
+	 * @param workflowDetails the given workflow
+	 * @param primaryfile the given primaryfile
+	 * @return the generated JSON string for HMGM context
 	 */
-	public WorkflowInputs buildWorkflowInputs(String workflowId, String datasetId, String historyId, Map<String, Map<String, String>> parameters);
+	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile); 
+	
+	/**
+	 * Get the media file download URL for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @return the generated media URL
+	 */
+	public String getPrimaryfileMediaUrl(Primaryfile primaryfile);
 	
 	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.

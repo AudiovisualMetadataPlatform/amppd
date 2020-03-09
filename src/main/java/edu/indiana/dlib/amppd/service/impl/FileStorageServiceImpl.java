@@ -105,12 +105,18 @@ public class FileStorageServiceImpl implements FileStorageService {
     		throw new RuntimeException("The given primaryfile for uploading media file is null.");
     	}
     	
+    	// if primaryfile has been run against a workflow then do not allow uploading to replace existing media, 
+    	// as this will cause discrepancy with existing workflow outputs, which are linked to existing media 	
+    	if (primaryfile.getDatasetId() != null || primaryfile.getHistoryId() != null) {
+    		throw new StorageException("Uploading new media file to primaryfile " + primaryfile.getId() + " is not allowed as it has been run against a workflow." );
+    	}
+    		
     	primaryfile.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
     	String targetPathname = getFilePathname(primaryfile);    	    	
     	primaryfile.setPathname(targetPathname);
     	store(file, targetPathname);    	
-    	primaryfile = primaryfileRepository.save(primaryfile);  
-    	
+    	    	
+    	primaryfile = primaryfileRepository.save(primaryfile);      	
     	String msg = "Primaryfile " + primaryfile.getId() + " has media file " + file.getOriginalFilename() + " successfully uploaded to " + targetPathname + ".";
     	log.info(msg);
     	return primaryfile;

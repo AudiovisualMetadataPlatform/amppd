@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,15 +22,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
-import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
-import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
@@ -61,6 +58,7 @@ public class JobServiceTests {
 	
 	private Primaryfile primaryfile;
 	private Workflow workflow;
+	private WorkflowDetails hmgmWorkflowDetails;
 	private Invocation invocation;
 	
 	/* Notes:
@@ -75,7 +73,8 @@ public class JobServiceTests {
 	public void setup() {
     	// prepare the primaryfile, workflow, and the AMP job for testing
     	primaryfile = testHelper.ensureTestAudio();
-    	workflow = testHelper.ensureTestWorkflow();    
+    	workflow = testHelper.ensureTestWorkflow();
+    	hmgmWorkflowDetails = testHelper.ensureTestHmgmWorkflowDetails();
     	invocation = testHelper.ensureTestJob(true);
 	}
 	
@@ -85,55 +84,106 @@ public class JobServiceTests {
 //		testHelper.cleanupHistories();
 	}
 		    	
-    @Test
-    public void shouldBuildWorkflowInputsOnValidInputs() {    	
-    	// set up some dummy history and dataset
-    	History history = new History();
-    	history.setId("1");
-    	LibraryContent dataset = new LibraryContent();
-    	dataset.setId("1");
-
-    	// set up some dummy parameters
-    	HashMap<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
-    	HashMap<String, String> param1 = new  HashMap<String, String>();
-    	param1.put("name1", "value1");
-    	parameters.put("step1", param1);
-    	
-    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow.getId(), dataset.getId(), history.getId(), parameters);
-    	
-    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
-    	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
-    	Assert.assertEquals(winputs.getInputs().size(), 1);
-    	WorkflowInput winput = (WorkflowInput)winputs.getInputs().values().toArray()[0];
-    	Assert.assertEquals(winput.getId(), dataset.getId());
-    	Assert.assertEquals(winput.getSourceType(), InputSourceType.LDDA);
-    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
-    	Assert.assertEquals(winputs.getParameters().size(), 1);    	
-    }
-
-    @Test(expected = GalaxyWorkflowException.class)
-    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
-    	jobService.buildWorkflowInputs("foobar", "", "", new HashMap<String, Map<String, String>>());
-    }
-
+	// TODO Rewrite the below 2 tests with some workaround as they are protected methods, and JUnit doesn't allow tests on such by default 	
+//    @Test
+//    public void shouldBuildWorkflowInputsOnValidInputs() {    	
+//    	// set up some dummy history and dataset
+//    	History history = new History();
+//    	history.setId("1");
+//    	LibraryContent dataset = new LibraryContent();
+//    	dataset.setId("1");
+//
+//    	// set up some dummy parameters
+//    	HashMap<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
+//    	HashMap<String, String> param1 = new  HashMap<String, String>();
+//    	param1.put("name1", "value1");
+//    	parameters.put("step1", param1);
+//    	
+//    	WorkflowInputs winputs = jobService.buildWorkflowInputs(workflow, dataset.getId(), history.getId(), parameters);
+//    	
+//    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
+//    	Assert.assertTrue(((ExistingHistory)winputs.getDestination()).value().contains(history.getId()));
+//    	Assert.assertEquals(winputs.getInputs().size(), 1);
+//    	WorkflowInput winput = (WorkflowInput)winputs.getInputs().values().toArray()[0];
+//    	Assert.assertEquals(winput.getId(), dataset.getId());
+//    	Assert.assertEquals(winput.getSourceType(), InputSourceType.LDDA);
+//    	Assert.assertEquals(winputs.getWorkflowId(), workflow.getId());
+//    	Assert.assertEquals(winputs.getParameters().size(), 1);    	
+//    }
+//
+//    @Test(expected = GalaxyWorkflowException.class)
+//    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
+//    	jobService.buildWorkflowInputs(null, "", "", new HashMap<String, Map<String, String>>());
+//    }
+	
+	@Test
+    public void shouldReturnPrimaryfileUrl() {    	      
+		String url = jobService.getPrimaryfileMediaUrl(primaryfile);
+		Assert.assertTrue(url.startsWith("http://"));
+		Assert.assertTrue(url.contains("/primaryfile/" + primaryfile.getId()));
+		Assert.assertTrue(url.endsWith("/media"));
+	}
+    
+	@Test
+    public void shouldReturnHmgmContext() {    	      
+		String contextJson = jobService.getHmgmContext(hmgmWorkflowDetails, primaryfile);
+		JSONParser parser = new JSONParser();
+		try {
+			JSONObject context = (JSONObject)parser.parse(contextJson);
+			Assert.assertNotNull(context.get("submittedBy"));
+			Assert.assertNotNull(context.get("unitName"));
+			Assert.assertNotNull(context.get("collectionName"));
+			Assert.assertNotNull(context.get("taskManager"));
+			Assert.assertNotNull(context.get("itemName"));
+			Assert.assertNotNull(context.get("primaryfileName"));
+			Assert.assertNotNull(context.get("primaryfileUrl"));
+			Assert.assertNotNull(context.get("primaryfileId"));
+			Assert.assertNotNull(context.get("workflowId"));
+			Assert.assertNotNull(context.get("workflowName"));
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Error parsing contextJson: " + contextJson);
+		}
+	}
+    
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
     	WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
     			(WorkflowOutputs)invocation  :
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
-    	// now the dataset ID shall be set
-    	Assert.assertNotNull(primaryfile.getDatasetId());
+    	// now the dataset ID and history ID shall be set
+		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertNotNull(pf.getDatasetId());
+    	Assert.assertNotNull(pf.getHistoryId());
     	
     	// returned workflow outputs shall have contents
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
     	Assert.assertNotNull(woutputs.getOutputIds());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
-    	String datasetId = primaryfile.getDatasetId();
     	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
-    	Assert.assertEquals(primaryfile.getDatasetId(), datasetId);
+		Primaryfile pf1 = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertEquals(pf1.getDatasetId(), pf.getDatasetId());
+    	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
+    }
+    
+    @Test
+    public void shouldCreateJobOnValidHmgmInputs() {    	              
+    	WorkflowOutputs woutputs = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+
+    	// now the dataset ID and history ID shall be set
+		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertNotNull(pf.getDatasetId());
+    	Assert.assertNotNull(pf.getHistoryId());
+    	
+    	// returned workflow outputs shall have contents
+    	Assert.assertNotNull(woutputs);
+    	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
+    	Assert.assertNotNull(woutputs.getOutputIds());    
     }
     
     @Test(expected = StorageException.class)

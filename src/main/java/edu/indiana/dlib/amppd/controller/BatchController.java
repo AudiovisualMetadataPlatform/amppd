@@ -32,16 +32,8 @@ public class BatchController {
 	@PostMapping(path = "/batch/ingest", consumes = "multipart/form-data", produces = "application/json")
 	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {	
 		
-		/*
-		 * THIS IS TEMPORARY UNTIL AUTHENTICATION WORKS
-		 */
-
-		String pilotUsername = ampPropertyConfig.getUsername();
-		AmpUser ampUser = ampUserService.getUser(pilotUsername);
-		if(ampUser==null) {
-			BatchValidationResponse response  = new BatchValidationResponse();
-			response.addError("Invalid user " + pilotUsername);
-		}
+		// the user submitting the batch shall be the current user logged in and should be recorded in the user session
+		AmpUser ampUser = ampUserService.getCurrentUser();
 		
 		BatchValidationResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
 		

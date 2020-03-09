@@ -39,7 +39,7 @@ public interface AmpUserService {
 	 * @param user name
 	 * @return the result of setting the user to approved as success/failure
 	 */
-	boolean approveUser(String userName);
+	public boolean approveUser(String userName);
 	
 	/**
 	 * Resets the existing password in the database for the given username
@@ -62,13 +62,6 @@ public interface AmpUserService {
 	 */
 	public AuthResponse approveUser(Long userID);
 
-  /**
-	 * Gets an amp user by username.  Will return null if the amp user is not found.  This does not take into account 
-	 * whether or not user is approved.
-	 * @param username
-	 * @return AmpUser or null, depending on whether the user was found or not
-	 */
-	AmpUser getUser(String username);
 	
 	/**
 	 * Gets an amp emailid by token. It returns the emailid to the reset password page for prepopulation there. 
@@ -77,5 +70,25 @@ public interface AmpUserService {
 	 * @return the emailid in AuthResponse instance
 	 */
 	public AuthResponse resetPasswordGetEmail(String token);
+
+  /**
+	 * Gets an amp user by username.  Will return null if the amp user is not found.  This does not take into account 
+	 * whether or not user is approved.
+	 * @param username
+	 * @return AmpUser or null, depending on whether the user was found or not
+	 */
+	public AmpUser getUser(String username);
 	
+	/**
+	 * Gets the current username from User Session.
+	 * @return the current username
+	 */
+	public String getCurrentUsername();
+	
+	/**
+	 * Gets the current user from User Session.
+	 * @return the current user
+	 */
+	public AmpUser getCurrentUser();
+		
 }

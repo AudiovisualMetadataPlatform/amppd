@@ -53,7 +53,10 @@ public class PrimaryfileRepositoryTests {
 	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
-		primaryfileRepository.deleteAll();
+		// TODO do a more refined delete to remove all data that might cause conflicts for tests in this class 
+		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
+		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
+//		primaryfileRepository.deleteAll();
 	}
 
 	@Test
