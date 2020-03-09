@@ -55,7 +55,7 @@ public class TestHelper {
 	public static final String TEST_WORKFLOW = "TestWorkflow";
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_OUTPUT = "out_file1";
-	public static final String TASK_MANAGER = "JIRA";	
+	public static final String TASK_MANAGER = "Jira";	
 	
 	@Autowired
     private UnitRepository unitRepository;
