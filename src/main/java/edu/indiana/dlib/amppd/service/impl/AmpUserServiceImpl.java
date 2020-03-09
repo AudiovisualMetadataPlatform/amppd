@@ -129,7 +129,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!response.hasErrors()) {
 			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
 			  user = ampUserRepository.save(user);
-			  if(user!=null && user.getUser_id() > 0) 
+			  if(user!=null && user.getId() > 0) 
 			  {
 				  log.info("User validated successfully. Registration email being sent");
 				  try {
@@ -217,8 +217,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		if (type.equalsIgnoreCase("approve"))
 		{
 			log.info("constructing Email for User approval:"+user.getUsername());
-			url = contextPath + "/approve-user/" + user.getUser_id();
-			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getUser_id()+
+			url = contextPath + "/approve-user/" + user.getId();
+			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
 			subject = "New User Approval";
 			emailTo = ampAdmin;
@@ -227,7 +227,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else if (type.equalsIgnoreCase("activate"))
 		{
 			log.info("Constructing email for user account activation"+user.getUsername());
-			url = contextPath + "/activate-account/" + user.getUser_id();
+			url = contextPath + "/activate-account/" + user.getId();
 			message = "Click the link below to activate your AMP account";
 			subject = "Activate Account";
 			emailTo = user.getEmail();
@@ -240,11 +240,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		Passwordresettoken myToken=new Passwordresettoken();
 		Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
 		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
-		int userTokenExists = passwordTokenRepository.ifExists(user.getUser_id());
-		System.out.println("User token exists status is:"+userTokenExists+"for user id:"+user.getUser_id());
+		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
+		System.out.println("User token exists status is:"+userTokenExists+"for user id:"+user.getId());
 		if(userTokenExists == 1)
 		{
-			res = passwordTokenRepository.updateToken(token, user.getUser_id(), calendar.getTime());
+			res = passwordTokenRepository.updateToken(token, user.getId(), calendar.getTime());
 		}
 		else
 		{
@@ -283,7 +283,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
-		if ((passToken == null) || (user == null) || (passToken.getUser().getUser_id() != user.getUser_id())) {
+		if ((passToken == null) || (user == null) || (passToken.getUser().getId() != user.getId())) {
 			response.addError("Incorrect Link");
 			response.setSuccess(false);
 		    }
@@ -295,7 +295,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		
 	    if(!response.hasErrors()) {
 			  String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
-			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getUser_id()); 
+			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
 			  if(rows > 0)
 			  {
 				  response.setSuccess(true);
@@ -344,7 +344,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		    }
 		else
 		{
-			AmpUser user = ampUserRepository.findById(passToken.getUser().getUser_id()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getToken_id()));
+			AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
 			if(user!= null && user.getApproved())
 			{
 				response.setEmailid(user.getEmail());
