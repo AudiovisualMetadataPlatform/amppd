@@ -15,10 +15,13 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
+import edu.indiana.dlib.amppd.service.impl.BatchServiceImpl;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
+@Slf4j
 public class BatchController {
 	@Autowired
 	private BatchValidationService batchValidationService;
@@ -36,12 +39,14 @@ public class BatchController {
 		AmpUser ampUser = ampUserService.getCurrentUser();
 		
 		BatchValidationResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
-		
+		log.info("Batch validation success : "+response.isSuccess());
 		if(response.isSuccess()) {
 			List<String> errors = batchService.processBatch(response, ampUser.getUsername());
 			boolean batchSuccess = errors.size()==0;
+			log.info("  errors:"+ errors.size());
 			response.setProcessingErrors(errors);
 			response.setSuccess(batchSuccess);
+			log.info("Batch processing success : "+batchSuccess+" processing errors:"+response.getProcessingErrors().size());
 		}
 		
 		return response;

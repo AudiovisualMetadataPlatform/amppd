@@ -41,8 +41,8 @@ public class BatchFile {
 	@JsonIgnore
 	@ManyToOne
 	private Collection collection;
-	private String sourceIdType;
-	private String sourceId;
+	private String externalSource;
+	private String externalItemId;
 	private String itemName;
 	private String itemDescription;
 	private String primaryfileFilename;
