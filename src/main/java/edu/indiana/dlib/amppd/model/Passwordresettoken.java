@@ -33,7 +33,7 @@ public class Passwordresettoken {
     private String token;
   
     @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "user_id")
+    @JoinColumn(nullable = false, name = "id")
     private AmpUser user;
   
     private Date expiryDate;
