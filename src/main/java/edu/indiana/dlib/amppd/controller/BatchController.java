@@ -41,12 +41,12 @@ public class BatchController {
 		BatchValidationResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
 		log.info("Batch validation success : "+response.isSuccess());
 		if(response.isSuccess()) {
-			List<String> errors = batchService.processBatch(response, ampUser.getUsername());
-			boolean batchSuccess = errors.size()==0;
-			log.info("  errors:"+ errors.size());
-			response.setProcessingErrors(errors);
+			response = batchService.processBatch(response, ampUser.getUsername());
+			boolean batchSuccess = (!response.hasProcessingErrors());
+			log.info("  errors:"+ response.getProcessingErrors().size());
+			//response.setProcessingErrors(errors);
 			response.setSuccess(batchSuccess);
-			log.info("Batch processing success : "+batchSuccess+" processing errors:"+response.getProcessingErrors().size());
+			log.info("Batch processing success : "+batchSuccess+" processing errors:"+response.getProcessingErrors());
 		}
 		
 		return response;

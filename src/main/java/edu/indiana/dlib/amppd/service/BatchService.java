@@ -18,5 +18,5 @@ public interface BatchService {
 	 * @param username
 	 * @return
 	 */
-	List<String> processBatch(BatchValidationResponse batchValidation, String username);
+	BatchValidationResponse processBatch(BatchValidationResponse batchValidation, String username);
 }

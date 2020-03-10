@@ -37,4 +37,4 @@ public class Passwordresettoken {
     private AmpUser user;
   
     private Date expiryDate;
-}
+}    

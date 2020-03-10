@@ -211,10 +211,10 @@ public class BatchServiceTests {
         
         Assert.assertFalse(response.hasErrors());
         
-        List<String> errors = batchService.processBatch(response, ampUsername);
+        response = batchService.processBatch(response, ampUsername);
         
         
-        Assert.assertTrue(errors.size()==0);
+        Assert.assertTrue(!response.hasProcessingErrors());
         
 	}
 	
