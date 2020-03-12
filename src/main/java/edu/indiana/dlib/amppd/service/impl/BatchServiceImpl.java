@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,6 +159,9 @@ public class BatchServiceImpl implements BatchService {
 			if(errors.size()==0 && primaryFile!=null)
 			{
 				primaryFile.setItem(item);
+				Set<Primaryfile> primaryfilesSet = item.getPrimaryfiles();
+				primaryfilesSet.add(primaryFile);
+				item.setPrimaryfiles(primaryfilesSet);
 				primaryfileRepository.save(primaryFile);
 				
 				log.info("BATCH PROCESSING : Move the primary file from the dropbox to amppd file storage");
@@ -384,21 +388,37 @@ public class BatchServiceImpl implements BatchService {
 		Primaryfile primaryFile =null;
 		boolean found = false;
 		// Check to see if the primary file exists
-		if(item.getPrimaryfiles()!=null) {
+		//Optional<List<Primaryfile>> primaryFiles1 = primaryfileRepository.findByItem(item);
+		//if(primaryFiles1.get() != null)
+		//{
+		Set <Primaryfile> primaryFiles = item.getPrimaryfiles();
+		log.info("The primary files fetched are:",primaryFiles);
+		if(primaryFiles.size() >= 0) 
+		{
 			log.info("BATCH PROCESSING : loop to see if primary file name already exists for this item");
-			for(Primaryfile p : item.getPrimaryfiles()) {
-				//Collection primaryFileCollection = item.getCollection();
-				//if(batchfileCollection.getName()==primaryFileCollection.getName() && item.getExternalIds().equals(batchFile.getExternalItemId()) && p.getName()==batchFile.getPrimaryfileName()) {
-				if(p.getName().contentEquals(batchFile.getPrimaryfileName()))
+			for(Primaryfile p : item.getPrimaryfiles()) 
+			{ 
+				log.info("entered for");
+				if((p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
 				{
-					found = true;
-					log.error("BATCH PROCESSING : primary file name already exists");
-					errors.add("ERROR: In row "+currRow+" primary file name already exists");
-					break;
+					log.info("entered first if");
+					if(item.getExternalIds().containsKey(batchFile.getExternalItemId())) 
+					{
+						log.info("entered second if"); 
+						if(item.getCollection().getId() == batchfileCollection.getId()) 
+						{ 
+							log.info("entered third if"); 
+							found = true;
+							log.error("BATCH PROCESSING : primary file name already exists");
+							errors.add("ERROR: In row "+currRow+" primary file name already exists");
+							break; 
+							} 
+						} 
+					} 
 				}
-			}
+			 
 		}
-		
+		//}
 		// If it doesn't exist, create a new one
 		if(!found) {
 			// Create Primary files		
