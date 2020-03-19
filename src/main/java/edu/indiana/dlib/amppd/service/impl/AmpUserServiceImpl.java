@@ -67,16 +67,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  uiUrl = amppduiConfig.getUrl();
 	  } 
 
-//	  /**
-//	   *  initialize GalaxyDataService bean.
-//	   */
-//	  @PostConstruct
-//	  public void init() {
-//		  ampEmailId = amppdConfig.getUsername();
-//		  ampAdmin = amppdConfig.getAdmin();
-//		  uiUrl = amppduiConfig.getUrl();
-//	  } 
-
 	  public AuthResponse validate(String email, String pswd) { 
 		  AuthResponse response = new AuthResponse();
 		  

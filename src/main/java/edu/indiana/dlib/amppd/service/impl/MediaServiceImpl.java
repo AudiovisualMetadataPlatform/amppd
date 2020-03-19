@@ -149,7 +149,7 @@ public class MediaServiceImpl implements MediaService {
 	 * @see edu.indiana.dlib.amppd.service.MediaService.cleanAll()
 	 */
 	@Override
-    public void cleanAll() {
+    public void cleanup() {
     	try {
     		FileUtils.cleanDirectory(new File(root.toString()));
     		log.info("Successfully deleted all directories/files under media symlink root.");

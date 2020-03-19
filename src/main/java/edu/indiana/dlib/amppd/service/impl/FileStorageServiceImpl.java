@@ -294,7 +294,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.cleanAll()
 	 */
 	@Override
-    public void cleanAll() {
+    public void cleanup() {
     	try {
     		FileUtils.cleanDirectory(new File(root.toString()));
     		log.info("Successfully deleted all directories/files under file storage root.");

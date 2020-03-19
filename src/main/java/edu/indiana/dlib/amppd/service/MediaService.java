@@ -43,6 +43,6 @@ public interface MediaService {
 	/**
 	 * Clean up all symlinks under the media symlink root.
 	 */
-	public void cleanAll();	
+	public void cleanup();	
 	
 }

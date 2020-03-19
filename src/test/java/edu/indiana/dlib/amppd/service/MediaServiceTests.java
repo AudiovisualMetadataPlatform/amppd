@@ -41,7 +41,7 @@ public class MediaServiceTests {
 	@After
 	public void cleanup() {
 		// remove all symlinks created
-		mediaService.cleanAll();
+		mediaService.cleanup();
 	}
 
 	@Test
