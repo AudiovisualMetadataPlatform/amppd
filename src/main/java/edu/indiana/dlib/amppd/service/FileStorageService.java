@@ -123,7 +123,7 @@ public interface FileStorageService {
 	/**
 	 * Clean up all files under the file storage root.
 	 */
-	public void cleanAll();
+	public void cleanup();
 		
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified unit.

@@ -146,7 +146,7 @@ public class MediaServiceImpl implements MediaService {
     }
     
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.cleanAll()
+	 * @see edu.indiana.dlib.amppd.service.MediaService.cleanup()
 	 */
 	@Override
     public void cleanup() {

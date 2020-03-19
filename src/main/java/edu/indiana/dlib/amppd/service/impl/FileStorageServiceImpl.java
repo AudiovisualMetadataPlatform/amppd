@@ -291,7 +291,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
     
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.cleanAll()
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.cleanup()
 	 */
 	@Override
     public void cleanup() {
