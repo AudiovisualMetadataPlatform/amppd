@@ -43,7 +43,7 @@ public class MediaControllerTests {
 
 	@After
 	public void cleanup() {
-		// remove all symlinks created
+		// clean up all symlinks created
 		mediaService.cleanup();
 	}
 	
