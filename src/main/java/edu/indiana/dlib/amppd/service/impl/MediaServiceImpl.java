@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -32,24 +33,24 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class MediaServiceImpl implements MediaService {
-	
-    public static int SYMLINK_LENGTH = 16;
-	
+
+	public static int SYMLINK_LENGTH = 16;
+
 	@Autowired
-    private PrimaryfileRepository primaryfileRepository;
-		
+	private PrimaryfileRepository primaryfileRepository;
+
 	@Autowired
 	PrimaryfileSupplementRepository primaryfileSupplementRepository;
-	
+
 	@Autowired
 	ItemSupplementRepository itemSupplementRepository;
-	
+
 	@Autowired
 	CollectionSupplementRepository collectionSupplementRepository;
-	
+
 	@Autowired
-    private FileStorageService fileStorageService;
-		
+	private FileStorageService fileStorageService;
+
 	private AmppdPropertyConfig config; 	
 	private Path root;
 
@@ -58,10 +59,10 @@ public class MediaServiceImpl implements MediaService {
 		// initialize Amppd Apache server media root folder 
 		config = amppdconfig;
 		try {
-				root = Paths.get(config.getSymlinkRoot());
-				Files.createDirectories(root);	// creates root directory if not already exists
-				log.info("Media symlink root directory " + config.getSymlinkRoot() + " has been created." );
-			}
+			root = Paths.get(config.getSymlinkRoot());
+			Files.createDirectories(root);	// creates root directory if not already exists
+			log.info("Media symlink root directory " + config.getSymlinkRoot() + " has been created." );
+		}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize media symlink root directory " + config.getSymlinkRoot(), e);
 		}		
@@ -71,23 +72,24 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getPrimaryfileSymlinkUrl(Long id) {
-    	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
-    	String url = config.getUiUrl() + "/" + config.getSymlinkRoot() + "/" + createSymlink(primaryfile);
-    	return url;
+		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
+		String url = config.getUiUrl() + "/" + config.getSymlinkRoot() + "/" + createSymlink(primaryfile);
+		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
+		return url;
 	}
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(Asset)
 	 */
 	@Override
 	public String createSymlink(Asset asset) {
-    	if (asset == null) {
-    		throw new RuntimeException("The given asset for creating symlink is null.");
-    	}
+		if (asset == null) {
+			throw new RuntimeException("The given asset for creating symlink is null.");
+		}
 		if (asset.getPathname() == null ) {
 			throw new StorageException("Can't create symlink for asset " + asset.getId() + ": its media file hasn't been uploaded.");
 		}
-		
+
 		// if symlink hasn't been created, create it
 		if (asset.getSymlink() != null ) {
 			log.info("Symlink for asset " + asset.getId() + " already exists, will reuse it");
@@ -99,7 +101,7 @@ public class MediaServiceImpl implements MediaService {
 		String symlink = asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
 		Path path = fileStorageService.resolve(asset.getPathname());
 		Path link = resolve(symlink);
-		
+
 		// create the symbolic link for the original media file using the random string
 		try {
 			Files.createSymbolicLink(path, link);
@@ -111,11 +113,11 @@ public class MediaServiceImpl implements MediaService {
 		// save the symlink into asset
 		asset.setSymlink(symlink);
 		saveAsset(asset);
-		
+
 		log.info("Successfully created symlink " + symlink + " for asset " + asset.getId());
 		return symlink;
 	}
-		
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.resolve(String)
 	 */
@@ -124,6 +126,35 @@ public class MediaServiceImpl implements MediaService {
 		return root.resolve(pathname);
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.delete(String)
+	 */    
+	@Override
+    public void delete(String symlink) {
+    	try {
+    		Path path = resolve(symlink);
+    		FileSystemUtils.deleteRecursively(path);
+    		log.info("Successfully deleted directory/file " + symlink);
+    	}
+    	catch (IOException e) {
+    		throw new StorageException("Could not delete file " + symlink, e);
+    	}
+    }
+    
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.deleteAll()
+	 */
+	@Override
+    public void deleteAll() {
+    	try {
+    		FileSystemUtils.deleteRecursively(root);
+    		log.info("Successfully deleted all directories/files under media symlink root.");
+    	}
+    	catch (IOException e) {
+    		throw new StorageException("Could not delete all directories/files under media symlink root.");
+    	}  	
+    }
+	
 	/**
 	 * Saves the given asset to DB.
 	 * @param asset the given asset
@@ -143,6 +174,6 @@ public class MediaServiceImpl implements MediaService {
 		}
 		return asset;
 	}
-			
-	
+
+
 }

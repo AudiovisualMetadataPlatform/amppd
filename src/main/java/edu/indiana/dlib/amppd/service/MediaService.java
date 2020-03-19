@@ -34,4 +34,15 @@ public interface MediaService {
 	 */
 	public Path resolve(String pathname);	
 	
+	/**
+	 * Deletes the specified symlink.
+	 * @param symlink the specified symlink
+	 */
+	public void delete(String symlink);
+	
+	/**
+	 * Deletes all symlinks under the media symlink root.
+	 */
+	public void deleteAll();	
+	
 }

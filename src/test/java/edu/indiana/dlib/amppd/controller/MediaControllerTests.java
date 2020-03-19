@@ -1,0 +1,57 @@
+package edu.indiana.dlib.amppd.controller;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.util.TestHelper;
+
+@RunWith(SpringRunner.class)
+@AutoConfigureMockMvc
+@SpringBootTest
+public class MediaControllerTests {
+
+	@Autowired
+	private MediaService mediaService;
+
+	@Autowired
+	private TestHelper testHelper;   
+	
+    @Autowired
+    private MockMvc mvc;
+
+	private Primaryfile primaryfile;
+
+	@Before
+	public void setup() {
+		// prepare the primaryfile with empty symlink for testing
+		primaryfile = testHelper.ensureTestAudio();
+		primaryfile.setSymlink(null);
+	}
+
+	@After
+	public void cleanup() {
+		// remove all symlinks created
+		mediaService.deleteAll();
+	}
+	
+    @Test
+    public void shouldServePrimaryfile() throws Exception {  	
+    	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId())).andExpect(
+    			status().is3xxRedirection()).andExpect(
+    					redirectedUrl("http://localhost:8500/media/" + primaryfile.getSymlink()));
+    }
+
+}
