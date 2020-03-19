@@ -41,8 +41,8 @@ public interface MediaService {
 	public void delete(String symlink);
 	
 	/**
-	 * Deletes all symlinks under the media symlink root.
+	 * Clean up all symlinks under the media symlink root.
 	 */
-	public void deleteAll();	
+	public void cleanAll();	
 	
 }

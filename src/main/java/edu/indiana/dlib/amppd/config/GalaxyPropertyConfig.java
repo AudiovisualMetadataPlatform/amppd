@@ -11,7 +11,7 @@ import lombok.Setter;
 
 
 /**
- * Configuration for persistence layer.
+ * Configuration for Galaxy related properties.
  * @author adeelahmad
  *
  */

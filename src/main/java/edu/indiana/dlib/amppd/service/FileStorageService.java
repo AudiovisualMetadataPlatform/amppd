@@ -121,9 +121,9 @@ public interface FileStorageService {
 	public void delete(String pathname);
 	
 	/**
-	 * Deletes all files under the file storage root.
+	 * Clean up all files under the file storage root.
 	 */
-	public void deleteAll();
+	public void cleanAll();
 		
 	/**
 	 * Returns the target storage directory path name relative to the storage root for the specified unit.
@@ -204,10 +204,5 @@ public interface FileStorageService {
 	 */
 	public Path getDropboxPath(String unitName);
 	
-//	/**
-//	 * Upload a file/folder from AMP file system to Galaxy data library without copying the physical file. 
-//	 * 
-//	 */
-//	public ClientResponse uploadFileToGalaxy(String filePath, String lib_name);
 	
 }

@@ -1,8 +1,8 @@
 package edu.indiana.dlib.amppd.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -44,14 +44,14 @@ public class MediaControllerTests {
 	@After
 	public void cleanup() {
 		// remove all symlinks created
-		mediaService.deleteAll();
+		mediaService.cleanAll();
 	}
 	
     @Test
     public void shouldServePrimaryfile() throws Exception {  	
     	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId())).andExpect(
     			status().is3xxRedirection()).andExpect(
-    					redirectedUrl("http://localhost:8500/media/" + primaryfile.getSymlink()));
+    					redirectedUrlPattern("http://*:8500/#/symlink/*"));
     }
 
 }

@@ -1,16 +1,18 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -51,29 +53,31 @@ public class MediaServiceImpl implements MediaService {
 	@Autowired
 	private FileStorageService fileStorageService;
 
-	private AmppdPropertyConfig config; 	
+	@Autowired
+	private AmppdUiPropertyConfig amppduiConfig; 	
+	
 	private Path root;
 
 	@Autowired
-	public MediaServiceImpl(AmppdPropertyConfig amppdconfig) {
-		// initialize Amppd Apache server media root folder 
-		config = amppdconfig;
+	public MediaServiceImpl(AmppdUiPropertyConfig amppduiConfig) {
+		// initialize Amppd UI Apache server media root folder 
 		try {
-			root = Paths.get(config.getSymlinkRoot());
+			root = Paths.get(amppduiConfig.getDocumentRoot(), amppduiConfig.getSymlinkDir());
 			Files.createDirectories(root);	// creates root directory if not already exists
-			log.info("Media symlink root directory " + config.getSymlinkRoot() + " has been created." );
+			log.info("Media symlink root directory " + root + " has been created." );
 		}
 		catch (IOException e) {
-			throw new StorageException("Could not initialize media symlink root directory " + config.getSymlinkRoot(), e);
+			throw new StorageException("Could not initialize media symlink root directory " + root, e);
 		}		
 	}	
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileSymlink(Long)
 	 */
 	@Override
 	public String getPrimaryfileSymlinkUrl(Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
-		String url = config.getUiUrl() + "/" + config.getSymlinkRoot() + "/" + createSymlink(primaryfile);
+		String url = amppduiConfig.getUrl() + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
 		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
 		return url;
 	}
@@ -104,10 +108,10 @@ public class MediaServiceImpl implements MediaService {
 
 		// create the symbolic link for the original media file using the random string
 		try {
-			Files.createSymbolicLink(path, link);
+			Files.createSymbolicLink(link, path);
 		}
 		catch (IOException e) {
-			throw new StorageException("Error creating symlink for asset " + asset.getId());		    	
+			throw new StorageException("Error creating symlink for asset " + asset.getId(), e);		    	
 		}
 
 		// save the symlink into asset
@@ -142,12 +146,12 @@ public class MediaServiceImpl implements MediaService {
     }
     
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.deleteAll()
+	 * @see edu.indiana.dlib.amppd.service.MediaService.cleanAll()
 	 */
 	@Override
-    public void deleteAll() {
+    public void cleanAll() {
     	try {
-    		FileSystemUtils.deleteRecursively(root);
+    		FileUtils.cleanDirectory(new File(root.toString()));
     		log.info("Successfully deleted all directories/files under media symlink root.");
     	}
     	catch (IOException e) {

@@ -11,13 +11,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MediaServiceTests {
 
+	@Autowired
+    private PrimaryfileRepository primaryfileRepository;
+	
 	@Autowired
 	private MediaService mediaService;
 
@@ -36,7 +41,7 @@ public class MediaServiceTests {
 	@After
 	public void cleanup() {
 		// remove all symlinks created
-		mediaService.deleteAll();
+		mediaService.cleanAll();
 	}
 
 	@Test
@@ -67,10 +72,11 @@ public class MediaServiceTests {
     
 	@Test
     public void shouldReturnPrimaryfileSymlinkUrl() {
-		String url = mediaService.getPrimaryfileSymlinkUrl(primaryfile.getId());			
+		String url = mediaService.getPrimaryfileSymlinkUrl(primaryfile.getId());	
+		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));  
 		Assert.assertTrue(url.startsWith("http://"));
 		Assert.assertTrue(url.contains("/symlink/"));
-		Assert.assertTrue(url.endsWith(primaryfile.getSymlink()));
+		Assert.assertTrue(url.endsWith(pf.getSymlink()));
 	}
     
 

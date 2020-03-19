@@ -11,8 +11,7 @@ import lombok.Setter;
 
 
 /**
- * Configuration for persistence layer.
- *
+ * Configuration for AMPPD related properties.
  */
 @ConfigurationProperties(prefix="amppd")
 @Validated
@@ -21,7 +20,6 @@ import lombok.Setter;
 public class AmppdPropertyConfig {
 
     @NotNull private String fileStorageRoot;
-    @NotNull private String symlinkRoot;
     @NotNull private String dropboxRoot;
     @NotNull private String pythonPath;
     @NotNull private String mediaprobeDir;
@@ -29,7 +27,6 @@ public class AmppdPropertyConfig {
     @NotNull private String admin;
     @NotNull private String username; 
     @NotNull private String password; 
-    @NotNull private String uiUrl;
     @NotNull private String url;
 
 }

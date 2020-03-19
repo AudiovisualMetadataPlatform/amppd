@@ -1,6 +1,12 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,10 +34,23 @@ public class MediaController {
 	 * @return the binary content of the media file
 	 */
 	@GetMapping("/primaryfiles/{id}/media")
-	public String servePrimaryfile(@PathVariable("id") Long id) {		
+	public ResponseEntity<Object> servePrimaryfile(@PathVariable("id") Long id) {		
     	log.info("Serving media file for primaryfile ID " + id);
     	String url = mediaService.getPrimaryfileSymlinkUrl(id);
-    	return "redirect: " + url;
+    	HttpHeaders httpHeaders = new HttpHeaders();
+    	try {
+    		httpHeaders.setLocation(new URI(url));
+    	}
+    	catch (URISyntaxException e) {
+    		new RuntimeException("Invalid media symlink URL: " + url, e);
+    	}
+        return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
     }
+	
+//	public String servePrimaryfile(@PathVariable("id") Long id) {		
+//    	log.info("Serving media file for primaryfile ID " + id);
+//    	String url = mediaService.getPrimaryfileSymlinkUrl(id);
+//    	return "redirect: " + url;
+//    }
 
 }
