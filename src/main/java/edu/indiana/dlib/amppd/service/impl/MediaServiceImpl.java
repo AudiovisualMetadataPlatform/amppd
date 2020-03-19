@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
@@ -76,8 +77,9 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getPrimaryfileSymlinkUrl(Long id) {
-		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
-		String url = amppduiConfig.getUrl() + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
+		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
+		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
+		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
 		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
 		return url;
 	}

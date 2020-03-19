@@ -73,7 +73,7 @@ public class JobServiceImpl implements JobService {
 	private AmpUserService ampUserService;
 	
 	@Autowired
-	private AmppdPropertyConfig ampPropertyConfig;
+	private AmppdPropertyConfig amppdPropertyConfig;
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -274,7 +274,7 @@ public class JobServiceImpl implements JobService {
 	 */
 	@Override
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
-		String url = ampPropertyConfig.getUrl() + "/primaryfile/" + primaryfile.getId() + "/media";
+		String url = amppdPropertyConfig.getUrl() + "/primaryfile/" + primaryfile.getId() + "/media";
 		return url;
 	}
 	

@@ -51,7 +51,7 @@ public class MediaControllerTests {
     public void shouldServePrimaryfile() throws Exception {  	
     	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId())).andExpect(
     			status().is3xxRedirection()).andExpect(
-    					redirectedUrlPattern("http://*:8500/#/symlink/*"));
+    					redirectedUrlPattern("http://*:8500/symlink/*"));
     }
 
 }
