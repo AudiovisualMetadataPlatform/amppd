@@ -21,6 +21,7 @@ import lombok.Setter;
 public class AmppdPropertyConfig {
 
     @NotNull private String fileStorageRoot;
+    @NotNull private String symlinkRoot;
     @NotNull private String dropboxRoot;
     @NotNull private String pythonPath;
     @NotNull private String mediaprobeDir;

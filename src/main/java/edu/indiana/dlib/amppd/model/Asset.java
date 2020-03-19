@@ -31,6 +31,7 @@ public abstract class Asset extends Content {
 	private String originalFilename;	// the file name of the original file uploaded by user or batch
     private String pathname;			// path name relative to storage root for the file associated with the asset
     private String datasetId;			// ID of the dataset as a result of upload to Galaxy
+    private String symlink;				// the symlink under the static content directory used for serving large media file
     
     // Note: mediaInfo must be a valid json string
     @Type(type = "jsonb")
