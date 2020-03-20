@@ -267,12 +267,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	private SimpleMailMessage constructResetTokenEmail(String contextPath, String token, AmpUser user) {
-		
 		String url = contextPath + "/reset-password/" + token;
 		String message = "Please click the link to reset the password. The link  will be valid only for a limited time.";//messages.getMessage("message.resetPassword", null, locale);
 		log.info("Constructed reset token email :"+ message);
 		return constructEmail("Reset Password", message + " \r\n" + url, user.getEmail());
-			}
+	}
 			 
 	private SimpleMailMessage constructEmail(String subject, String body, String toEmailID) {
 	    SimpleMailMessage email = new SimpleMailMessage();
