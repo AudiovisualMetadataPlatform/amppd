@@ -24,9 +24,9 @@ public interface PasswordTokenRepository extends CrudRepository<Passwordresettok
 		
 		@Transactional
 		@Modifying
-		@Query(value = "update Passwordresettoken set token = :token, expiry_date= :expiration_date  where id = :id")
+		@Query(value = "update Passwordresettoken set token = :token, expiry_date= :expiration_date  where user_id = :id")
 		int updateToken( @Param("token") String token, @Param("id") Long id, @Param("expiration_date") Date expiry_date);
 		
-		@Query(value = "select count(*) from Passwordresettoken where id = :id")
+		@Query(value = "select count(*) from Passwordresettoken where user_id = :id")
 		int ifExists(@Param("id") Long id);
 }
