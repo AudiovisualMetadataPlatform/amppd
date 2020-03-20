@@ -243,13 +243,15 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
 		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
 		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
-		log.info("User token exists status is:"+userTokenExists+"for user id:"+user.getId());
-		if(userTokenExists == 1)
+		log.info("User token exists status is:"+userTokenExists+" for user id:"+user.getId());
+		if(userTokenExists >= 1)
 		{
+			log.info("User token exists so updating token info");
 			res = passwordTokenRepository.updateToken(token, user.getId(), calendar.getTime());
 		}
 		else
 		{
+			log.info("User token does not exist so creating new token");
 			myToken.setUser(user);
 			myToken.setToken(token);
 			myToken.setExpiryDate(calendar.getTime());
@@ -258,7 +260,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 				res = 1;
 		}
 		log.info("The result of creating a token is (1:true/0:false):"+res);
-		if(res == 1)
+		if(res > 0)
 			return true;
 		else
 			return false;
