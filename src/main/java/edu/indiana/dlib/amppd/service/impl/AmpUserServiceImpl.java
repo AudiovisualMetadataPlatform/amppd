@@ -188,13 +188,15 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		if(user.getApproved())
 		{
+			log.info("Approved user found with entered email id");
 			String token = UUID.randomUUID().toString();
 			boolean res = createPasswordResetTokenForUser(user, token);
 		    if(res)
 		    {
+		    	log.info("Password reset token created successfully");
 				try {
 			    	mailSender.send(constructResetTokenEmail(uiUrl, token, user));
-				} catch (MailException e) {
+				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
@@ -241,7 +243,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		Calendar calendar = Calendar.getInstance(); // gets a calendar using the default time zone and locale.
 		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
 		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
-		System.out.println("User token exists status is:"+userTokenExists+"for user id:"+user.getId());
+		log.info("User token exists status is:"+userTokenExists+"for user id:"+user.getId());
 		if(userTokenExists == 1)
 		{
 			res = passwordTokenRepository.updateToken(token, user.getId(), calendar.getTime());
@@ -263,9 +265,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	private SimpleMailMessage constructResetTokenEmail(String contextPath, String token, AmpUser user) {
-			    String url = contextPath + "/reset-password/" + token;
-			    String message = "Please click the link to reset the password. The link  will be valid only for a limited time.";//messages.getMessage("message.resetPassword", null, locale);
-			    return constructEmail("Reset Password", message + " \r\n" + url, user.getEmail());
+		
+		String url = contextPath + "/reset-password/" + token;
+		String message = "Please click the link to reset the password. The link  will be valid only for a limited time.";//messages.getMessage("message.resetPassword", null, locale);
+		log.info("Constructed reset token email :"+ message);
+		return constructEmail("Reset Password", message + " \r\n" + url, user.getEmail());
 			}
 			 
 	private SimpleMailMessage constructEmail(String subject, String body, String toEmailID) {
@@ -274,6 +278,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	    email.setText(body);
 	    email.setTo(toEmailID);
 	    email.setFrom(ampAdmin);
+	    log.info("Constructed Email Object with all the information packed");
 	    return email;
 	}  
 
