@@ -11,8 +11,7 @@ import lombok.Setter;
 
 
 /**
- * Configuration for persistence layer.
- *
+ * Configuration for AMPPD related properties.
  */
 @ConfigurationProperties(prefix="amppd")
 @Validated
@@ -28,7 +27,6 @@ public class AmppdPropertyConfig {
     @NotNull private String admin;
     @NotNull private String username; 
     @NotNull private String password; 
-    @NotNull private String uiUrl;
     @NotNull private String url;
 
 }

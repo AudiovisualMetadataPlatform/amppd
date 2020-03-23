@@ -49,7 +49,7 @@ public class FileStorageServiceTests {
     private FileStorageService fileStorageService;
 
     @After
-    public void cleanAll() {
+    public void cleanup() {
     	// clean up unit test directory after unit tests done
         fileStorageService.delete(TEST_DIR_NAME);
     }

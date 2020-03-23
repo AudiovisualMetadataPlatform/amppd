@@ -12,6 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -65,7 +66,6 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Autowired
     private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 	
-	
 	@Autowired
     private PreprocessService preprocessService;
 	
@@ -77,11 +77,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 		// initialize Amppd file system 
 		config = amppdconfig;
 		try {
-				root = Paths.get(config.getFileStorageRoot());
-				Files.createDirectories(root);	// creates root directory if not already exists
-				Files.createDirectories(Paths.get(config.getDropboxRoot()));	// creates batch root directory if not already exists
-				log.info("File storage root directory " + config.getFileStorageRoot() + " has been created." );
-			}
+			root = Paths.get(config.getFileStorageRoot());
+			Files.createDirectories(root);	// creates root directory if not already exists
+			Files.createDirectories(Paths.get(config.getDropboxRoot()));	// creates batch root directory if not already exists
+			log.info("File storage root directory " + config.getFileStorageRoot() + " has been created." );
+		}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize file storage root directory " + config.getFileStorageRoot(), e);
 		}		
@@ -291,12 +291,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
     
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.deleteAll()
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.cleanup()
 	 */
 	@Override
-    public void deleteAll() {
+    public void cleanup() {
     	try {
-    		FileSystemUtils.deleteRecursively(root);
+    		FileUtils.cleanDirectory(new File(root.toString()));
     		log.info("Successfully deleted all directories/files under file storage root.");
     	}
     	catch (IOException e) {

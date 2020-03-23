@@ -7,13 +7,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
 //@EnableJdbcHttpSession
 @EnableJpaRepositories("edu.indiana.dlib.amppd.repository")
-@EnableConfigurationProperties({GalaxyPropertyConfig.class, AmppdPropertyConfig.class})
+@EnableConfigurationProperties({GalaxyPropertyConfig.class, AmppdPropertyConfig.class, AmppdUiPropertyConfig.class})
 @Slf4j
 public class AmppdApplication {
 	

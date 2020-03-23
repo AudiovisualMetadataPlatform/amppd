@@ -29,7 +29,7 @@ public class PreprocessServiceTests {
 	private TestHelper testHelper;   
 	
     @Before
-    public void cleanAll() {
+    public void cleanup() {
     	// clean up primaryfiles in DB to avoid reusing the same one among different tests
     	testHelper.cleanupPrimaryfiles();
     }

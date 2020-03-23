@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Passwordresettoken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
@@ -44,7 +45,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private PasswordTokenRepository passwordTokenRepository;
 	  
 	  @Autowired
-	  private AmppdPropertyConfig ampPropertyConfig;
+	  private AmppdPropertyConfig amppdConfig;		
 		
 	  @NotNull
 	  private static String ampEmailId ;
@@ -60,13 +61,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  
 	  @Autowired 
-	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig) { 
+	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
 		  ampEmailId = amppdconfig.getUsername();
-		  uiUrl = amppdconfig.getUiUrl();
 		  ampAdmin = amppdconfig.getAdmin();
-	  }
-	 
-	  
+		  uiUrl = amppduiConfig.getUrl();
+	  } 
+
 	  public AuthResponse validate(String email, String pswd) { 
 		  AuthResponse response = new AuthResponse();
 		  
@@ -373,7 +373,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public String getCurrentUsername() {
 		// TODO replace below tmp code with logic to get the current username from User Session		
 		// tmp code: return the default master AMP user for now
-		return ampPropertyConfig.getUsername();
+		return amppdConfig.getUsername();
 	}
 
 	/**
@@ -383,7 +383,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public AmpUser getCurrentUser() {
 		// TODO replace below tmp code with logic to get the current user from User Session		
 		// tmp code: return the default master AMP user for now
-		String username = ampPropertyConfig.getUsername();
+		String username = amppdConfig.getUsername();
 		AmpUser currentUser = getUser(username);		
 		if (currentUser == null) {
 			throw new RuntimeException("Current user with username " + username + " doesn't exist!");
