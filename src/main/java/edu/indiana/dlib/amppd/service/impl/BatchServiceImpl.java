@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -160,6 +161,10 @@ public class BatchServiceImpl implements BatchService {
 			{
 				primaryFile.setItem(item);
 				Set<Primaryfile> primaryfilesSet = item.getPrimaryfiles();
+				if(primaryfilesSet == null)
+				{
+					primaryfilesSet = new HashSet<Primaryfile>();
+				}
 				primaryfilesSet.add(primaryFile);
 				item.setPrimaryfiles(primaryfilesSet);
 				primaryfileRepository.save(primaryFile);
@@ -189,7 +194,7 @@ public class BatchServiceImpl implements BatchService {
 		try {
 			String targetDir = fileStorageService.getDirPathname(primaryFile);
 			PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryFile, batchSupplementFile, username, errors);
-			if(errors.size()==0)
+			if(errors.size()==0 && supplement != null)
 			{
 				primaryfileSupplementRepository.save(supplement);
 			
@@ -217,7 +222,7 @@ public class BatchServiceImpl implements BatchService {
 			String targetDir = fileStorageService.getDirPathname(collection);
 			
 			CollectionSupplement supplement = getCollectionSupplement(collection, batchSupplementFile, username, errors);
-			if(errors.size()==0)
+			if(supplement != null && errors.size()==0)
 			{
 				collectionSupplementRepository.save(supplement);
 				
@@ -243,7 +248,7 @@ public class BatchServiceImpl implements BatchService {
 			log.info("check if the supplement exists already or create a new one");
 			String targetDir = fileStorageService.getDirPathname(item);
 			ItemSupplement supplement = getItemSupplement(item, batchSupplementFile, username, errors);
-			if(errors.size()==0)
+			if(supplement != null && errors.size()==0)
 			{
 				itemSupplementRepository.save(supplement);
 				
@@ -272,7 +277,7 @@ public class BatchServiceImpl implements BatchService {
 			log.info("BATCH PROCESSING : looping through the existing item supplement");
 			for(ItemSupplement is : item.getSupplements()) 
 			{
-				if(is.getName().contentEquals(batchSupplementFile.getSupplementName()))
+				if(is.getName() != null && is.getName().contentEquals(batchSupplementFile.getSupplementName()))
 				{
 					log.error("BATCH PROCESSING : item supplement name already exists");
 					errors.add("ERROR: In row "+currRow+" item supplement name already exists");
@@ -312,7 +317,7 @@ public class BatchServiceImpl implements BatchService {
 			log.info("BATCH PROCESSING : looping through the existing collection supplements");
 			for(CollectionSupplement cs : collection.getSupplements()) 
 			{
-				if(cs.getName().contentEquals(batchSupplementFile.getSupplementName()))
+				if(cs.getName() != null && cs.getName().contentEquals(batchSupplementFile.getSupplementName()))
 				{
 					log.error("BATCH PROCESSING : collection supplement name already exists");
 					errors.add("ERROR: In row "+ currRow +" collection supplement name already exists"); 
@@ -353,7 +358,7 @@ public class BatchServiceImpl implements BatchService {
 			log.info("BATCH PROCESSING : looping through the existing primary file supplements");
 			for(PrimaryfileSupplement ps : primaryFile.getSupplements()) 
 			{
-				if(ps.getName().contentEquals(batchSupplementFile.getSupplementFilename()))
+				if(ps.getName() != null && ps.getName().contentEquals(batchSupplementFile.getSupplementFilename()))
 				{
 					log.error("BATCH PROCESSING : primary file supplement name already exists");
 					errors.add("ERROR: In row "+currRow+" primary file supplement name already exists");
@@ -388,16 +393,16 @@ public class BatchServiceImpl implements BatchService {
 		Primaryfile primaryFile =null;
 		boolean found = false;
 		Set <Primaryfile> primaryFiles = item.getPrimaryfiles();
-		if(primaryFiles.size() >= 0) 
+		if(primaryFiles != null && primaryFiles.size() >= 0) 
 		{
 			log.info("BATCH PROCESSING : loop to see if primary file name already exists for this item");
-			for(Primaryfile p : item.getPrimaryfiles()) 
+			for(Primaryfile p : primaryFiles) 
 			{ 
-				if((p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
+				if((p.getName() != null && p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
 				{
-					if(item.getExternalIds().containsKey(batchFile.getExternalItemId())) 
+					if(item.getExternalIds() != null && item.getExternalIds().containsKey(batchFile.getExternalItemId())) 
 					{
-						if(item.getCollection().getId() == batchfileCollection.getId()) 
+						if(item.getCollection() != null && item.getCollection().getId() == batchfileCollection.getId()) 
 						{ 
 							found = true;
 							log.error("BATCH PROCESSING : primary file name already exists");
@@ -438,7 +443,7 @@ public class BatchServiceImpl implements BatchService {
 			for(Item i : items) {
 				if(!externalSource.isBlank() && !externalItemId.isBlank()) 
 				{
-					if(i.getExternalIds().containsKey(externalItemId))
+					if(i.getExternalIds() != null && i.getExternalIds().containsKey(externalItemId))
 					{
 						found = true;
 						item = i;
