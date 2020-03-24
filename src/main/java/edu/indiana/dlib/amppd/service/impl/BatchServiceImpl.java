@@ -161,7 +161,6 @@ public class BatchServiceImpl implements BatchService {
 			{
 				primaryFile.setItem(item);
 				Set<Primaryfile> primaryfilesSet = item.getPrimaryfiles();
-				log.info("primaryfilesSet :::"+primaryfilesSet);
 				if(primaryfilesSet == null)
 				{
 					primaryfilesSet = new HashSet<Primaryfile>();
