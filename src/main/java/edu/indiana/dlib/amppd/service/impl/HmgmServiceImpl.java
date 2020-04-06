@@ -33,6 +33,10 @@ public class HmgmServiceImpl implements HmgmService {
 			String pathToFile = datasetPath;
 			if(new File(pathToFile + COMPLETE_EXTENSION).exists()) {
 				response.setComplete(true);
+				return response;
+			}
+			if(!new File(pathToFile).exists()) {
+				return response;
 			}
 			File tempFile = new File(datasetPath + TEMP_EXTENSION);
 			if(reset) {
