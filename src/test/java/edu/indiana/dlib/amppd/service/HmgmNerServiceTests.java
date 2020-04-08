@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,42 +11,39 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import edu.indiana.dlib.amppd.web.NerEditorRequest;
-import edu.indiana.dlib.amppd.web.NerEditorResponse;
-import edu.indiana.dlib.amppd.web.SaveNerRequest;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
 public class HmgmNerServiceTests {
 
 	@Autowired
     private HmgmNerService hmgmNerService;
 	
-	File testFile;
+	File inputFile;
 	File tmpFile;
 	File completeFile;
-	String testJson="{key: value}";
+	String testJson = "{key: value}";
     
 	@Before
 	public void setup() throws Exception {
-		String fileName = "ner.json";
+		String fileName = "hmgm_ner.json";
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		testFile = new File(classLoader.getResource(fileName).getFile());
-	    Assert.assertTrue(testFile.exists());
+		inputFile = new File(classLoader.getResource(fileName).getFile());
+	    Assert.assertTrue(inputFile.exists());
 
-	    completeFile = new File(testFile.getAbsoluteFile() + ".complete");
-	    tmpFile = new File(testFile.getAbsoluteFile() + ".tmp");
+	    completeFile = new File(inputFile.getAbsoluteFile() + ".complete");
+	    tmpFile = new File(inputFile.getAbsoluteFile() + ".tmp");
 	}
 	
 	@After
 	public void cleanup() throws IOException {
 		if(completeFile.exists()) completeFile.delete();
 		if(tmpFile.exists()) tmpFile.delete();
+	    Assert.assertFalse(completeFile.exists());
+	    Assert.assertFalse(tmpFile.exists());
 	}
 
 	@Test
@@ -55,21 +51,22 @@ public class HmgmNerServiceTests {
 		// no tmp file at this point
 	    Assert.assertFalse(tmpFile.exists());
 
-	    String content = hmgmNerService.getNer(testFile.getAbsolutePath());	   
+	    String content = hmgmNerService.getNer(inputFile.getAbsolutePath());	   
 	    
 	    // original file is used
 	    Assert.assertNotNull(content);
+	    Assert.assertTrue(content.contains("http://iiif.io/api/presentation/3/context.json"));
 	    // TODO add a string comparison with the original content
 	}
 	
 	@Test
 	public void shouldGetTmpNer() throws Exception {	
 		// save once to ensure tmp file exists
-	    boolean success = hmgmNerService.saveNer(testFile.getAbsolutePath(), testJson);
+	    boolean success = hmgmNerService.saveNer(inputFile.getAbsolutePath(), testJson);
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(tmpFile.exists());
 	    
-	    String content = hmgmNerService.getNer(testFile.getAbsolutePath());
+	    String content = hmgmNerService.getNer(inputFile.getAbsolutePath());
 	    
 	    // the tmp file content is returned
 	    Assert.assertEquals(content, testJson);		        
@@ -80,7 +77,7 @@ public class HmgmNerServiceTests {
 		// before save, no tmp file
 	    Assert.assertFalse(tmpFile.exists());
 	    
-	    boolean success = hmgmNerService.saveNer(testFile.getAbsolutePath(), testJson);
+	    boolean success = hmgmNerService.saveNer(inputFile.getAbsolutePath(), testJson);
 	    
 	    // after save, tmp file exists
 	    Assert.assertTrue(success);
@@ -96,11 +93,17 @@ public class HmgmNerServiceTests {
 		// before complete, no complete file
 	    Assert.assertFalse(completeFile.exists());
 	    
-	    boolean success = hmgmNerService.completeNer(testFile.getAbsolutePath());	
+		// save once to ensure tmp file exists
+	    boolean successSave = hmgmNerService.saveNer(inputFile.getAbsolutePath(), testJson);
+	    Assert.assertTrue(successSave);
+	    Assert.assertTrue(tmpFile.exists());
+
+	    boolean successComplete = hmgmNerService.completeNer(inputFile.getAbsolutePath());	
 	    
-	    // after complete, complete file exists
-	    Assert.assertTrue(success);
+	    // after complete, complete file exists, and tmp file doesn't exist
+	    Assert.assertTrue(successComplete);
 	    Assert.assertTrue(completeFile.exists());
+	    Assert.assertFalse(tmpFile.exists());
 	}
 
 }

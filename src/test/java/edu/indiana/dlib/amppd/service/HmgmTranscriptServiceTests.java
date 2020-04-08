@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -22,7 +21,6 @@ import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
 public class HmgmTranscriptServiceTests {
 
 	@Autowired
@@ -36,7 +34,7 @@ public class HmgmTranscriptServiceTests {
     
 	@Before
 	public void createTestData() throws Exception {
-		String fileName = "transcribe.json";
+		String fileName = "hmgm_transcribe.json";
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		testFile = new File(classLoader.getResource(fileName).getFile());
 	    Assert.assertTrue(testFile.exists());

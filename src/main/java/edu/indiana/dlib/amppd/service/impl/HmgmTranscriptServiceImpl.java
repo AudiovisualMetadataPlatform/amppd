@@ -113,7 +113,7 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 			
 			File dest = new File(destFilePath);
 			
-			Files.copy(source.toPath(), dest.toPath());
+			Files.move(source.toPath(), dest.toPath());
 			
 			
 		} catch (Exception e) {

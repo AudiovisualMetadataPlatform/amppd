@@ -38,11 +38,11 @@ public class HmgmController {
 	}
 	
 	@GetMapping(path = "/hmgm/ner-editor", produces = "application/json")
-	public @ResponseBody String getNer(String resourcePath) {			
+	public @ResponseBody String getNer(@RequestParam String resourcePath) {			
 		return hmgmNerService.getNer(resourcePath);
 	}
 	
-	@PostMapping(path = "/hmgm/ner-editor/save", consumes="application/json", produces = "application/json")
+	@PostMapping(path = "/hmgm/ner-editor", consumes="application/json", produces = "application/json")
 	public @ResponseBody boolean saveNer(@RequestParam String resourcePath, @RequestBody String content) {			
 		return hmgmNerService.saveNer(resourcePath, content);
 	}
