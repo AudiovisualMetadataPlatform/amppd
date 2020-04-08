@@ -23,10 +23,10 @@ import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class HmgmServiceTests {
+public class HmgmTranscriptServiceTests {
 
 	@Autowired
-    private HmgmService hmgmService;
+    private HmgmTranscriptService hmgmTranscriptService;
 
 	
 	File testFile;
@@ -55,7 +55,7 @@ public class HmgmServiceTests {
 	@Test
 	public void shouldGetFile() throws Exception {	    
 	    
-	    TranscriptEditorResponse response = hmgmService.getTranscript(testFile.getAbsolutePath(), false);
+	    TranscriptEditorResponse response = hmgmTranscriptService.getTranscript(testFile.getAbsolutePath(), false);
 	    
 	    Assert.assertTrue(response.isSuccess());
 	    Assert.assertFalse(response.isComplete());
@@ -68,12 +68,12 @@ public class HmgmServiceTests {
 	    TranscriptEditorRequest request = new TranscriptEditorRequest();
 	    request.setFilePath(testFile.getAbsolutePath());
 	    
-	    boolean success = hmgmService.completeTranscript(request);
+	    boolean success = hmgmTranscriptService.completeTranscript(request);
 	    
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(completeFile.exists());
 
-	    TranscriptEditorResponse response = hmgmService.getTranscript(testFile.getAbsolutePath(), false);
+	    TranscriptEditorResponse response = hmgmTranscriptService.getTranscript(testFile.getAbsolutePath(), false);
 	    
 	    Assert.assertTrue(response.isComplete());
 	}
@@ -85,7 +85,7 @@ public class HmgmServiceTests {
 	    request.setFilePath(testFile.getAbsolutePath() + ".tmp");
 	    request.setJson(testJson);
 	    
-	    boolean success = hmgmService.saveTranscript(request);
+	    boolean success = hmgmTranscriptService.saveTranscript(request);
 	    
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(tempFile.exists());
@@ -106,7 +106,7 @@ public class HmgmServiceTests {
 	    request.setFilePath(testFile.getAbsolutePath() + ".tmp");
 	    request.setJson(testJson);
 	    
-	    boolean success = hmgmService.saveTranscript(request);
+	    boolean success = hmgmTranscriptService.saveTranscript(request);
 	    
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(tempFile.exists());
@@ -114,7 +114,7 @@ public class HmgmServiceTests {
 	    TranscriptEditorRequest completeRequest = new TranscriptEditorRequest();
 	    completeRequest.setFilePath(tempFile.getAbsolutePath());
 	    
-	    boolean completeSuccess = hmgmService.completeTranscript(completeRequest);
+	    boolean completeSuccess = hmgmTranscriptService.completeTranscript(completeRequest);
 	    
 	    Assert.assertTrue(completeSuccess);
 

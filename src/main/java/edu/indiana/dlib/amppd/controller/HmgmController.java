@@ -5,13 +5,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.service.HmgmService;
-import edu.indiana.dlib.amppd.web.NerEditorRequest;
-import edu.indiana.dlib.amppd.web.NerEditorResponse;
-import edu.indiana.dlib.amppd.web.SaveNerRequest;
+import edu.indiana.dlib.amppd.service.HmgmNerService;
+import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
@@ -20,36 +19,42 @@ import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
 @RestController
 public class HmgmController {
 		
-	@Autowired HmgmService hmgmService;
+	@Autowired HmgmTranscriptService hmgmTranscriptService;
+	@Autowired HmgmNerService hmgmNerService;
 	
 	@GetMapping(path = "/hmgm/transcript-editor", produces = "application/json")
 	public @ResponseBody TranscriptEditorResponse transcriptEditor(String datasetPath, boolean reset) {			
-		return hmgmService.getTranscript(datasetPath, reset);
+		return hmgmTranscriptService.getTranscript(datasetPath, reset);
 	}
 	
 	@PostMapping(path = "/hmgm/transcript-editor/save", consumes="application/json", produces = "application/json")
 	public @ResponseBody boolean saveTranscript(@RequestBody SaveTranscriptRequest request) {			
-		return hmgmService.saveTranscript(request);
+		return hmgmTranscriptService.saveTranscript(request);
 	}
 	
 	@PostMapping(path = "/hmgm/transcript-editor/complete", consumes="application/json", produces = "application/json")
 	public @ResponseBody boolean completeTranscript(@RequestBody TranscriptEditorRequest request) {			
-		return hmgmService.completeTranscript(request);
+		return hmgmTranscriptService.completeTranscript(request);
 	}
 	
 	@GetMapping(path = "/hmgm/ner-editor", produces = "application/json")
-	public @ResponseBody NerEditorResponse nerEditor(String datasetPath, boolean reset) {			
-		return hmgmService.getNer(datasetPath, reset);
+	public @ResponseBody String getNer(String resourcePath) {			
+		return hmgmNerService.getNer(resourcePath);
 	}
 	
 	@PostMapping(path = "/hmgm/ner-editor/save", consumes="application/json", produces = "application/json")
-	public @ResponseBody boolean saveNer(@RequestBody SaveNerRequest request) {			
-		return hmgmService.saveNer(request);
+	public @ResponseBody boolean saveNer(@RequestParam String resourcePath, @RequestBody String content) {			
+		return hmgmNerService.saveNer(resourcePath, content);
 	}
 	
 	@PostMapping(path = "/hmgm/ner-editor/complete", consumes="application/json", produces = "application/json")
-	public @ResponseBody boolean completeNer(@RequestBody NerEditorRequest request) {			
-		return hmgmService.completeNer(request);
+	public @ResponseBody boolean completeNer(@RequestParam String resourcePath) {			
+		return hmgmNerService.completeNer(resourcePath);
+	}
+
+	@PostMapping(path = "/hmgm/ner-editor/reset", consumes="application/json", produces = "application/json")
+	public @ResponseBody boolean resetNer(@RequestParam String resourcePath) {			
+		return hmgmNerService.resetNer(resourcePath);
 	}
 	
 }
