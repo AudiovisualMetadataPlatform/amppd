@@ -55,6 +55,7 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 			
 	        FileReader fileReader = new FileReader(pathToFile);
 	        JSONObject json = (JSONObject) parser.parse(fileReader);
+	        fileReader.close();
 	        log.info("Successfully got NER input: " + pathToFile);
 	        
 	        return json.toJSONString();			
@@ -79,8 +80,9 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 	        JSONObject jsonTmp = (JSONObject) parser.parse(content);
 	        
 			try {
-				FileWriter file = new FileWriter(tmpPath);
-				file.write(jsonTmp.toJSONString());
+				FileWriter filewriter = new FileWriter(tmpPath);
+				filewriter.write(jsonTmp.toJSONString());
+				filewriter.close();
 				log.info("Successfully saved NER editor content to file: " + tmpPath);				
 				return true;
 			} catch (IOException e) {

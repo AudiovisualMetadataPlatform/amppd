@@ -4,6 +4,8 @@ package edu.indiana.dlib.amppd.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -13,37 +15,62 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.FileSystemUtils;
 
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class HmgmNerServiceTests {
 
+	public static final String TEST_DIR = "/tmp/test/";
+	public static final String TEST_FILE = "hmgm_ner.json";
+
 	@Autowired
     private HmgmNerService hmgmNerService;
 	
-	File inputFile;
-	File tmpFile;
-	File completeFile;
-	String testJson = "{key: value}";
-    
+	private File inputFile;
+	private File tmpFile;
+	private File completeFile;
+	private String testJson = "{\"key\":\"value\"}";
+	String fileName = "hmgm_ner.json";
+
+	/**
+	 * Create test directory and test files.
+	 * @throws Exception
+	 */
 	@Before
 	public void setup() throws Exception {
-		String fileName = "hmgm_ner.json";
-		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		inputFile = new File(classLoader.getResource(fileName).getFile());
-	    Assert.assertTrue(inputFile.exists());
-
-	    completeFile = new File(inputFile.getAbsoluteFile() + ".complete");
+		// use a temporary test directory to keep all test files instead of using the original data files in project target directory
+		// to avoid side effect on project files (ex, the original NER input file will be moved to the complete file)
+		Files.createDirectories(Paths.get(TEST_DIR));
+		
+		// copy original data file into the test directory
+		Path source = Paths.get(ClassLoader.getSystemClassLoader().getResource(fileName).toURI());
+		Path target = Paths.get(TEST_DIR, TEST_FILE);
+		if (!Files.exists(target) ) {
+			Files.copy(source, target);
+		}
+		
+		inputFile = new File(target.toString());
+	    completeFile = new File(inputFile.getAbsolutePath() + ".complete");
 	    tmpFile = new File(inputFile.getAbsoluteFile() + ".tmp");
 	}
 	
+	/**
+	 * Clean up test directory.
+	 * @throws IOException
+	 */
 	@After
 	public void cleanup() throws IOException {
-		if(completeFile.exists()) completeFile.delete();
-		if(tmpFile.exists()) tmpFile.delete();
-	    Assert.assertFalse(completeFile.exists());
-	    Assert.assertFalse(tmpFile.exists());
+		FileSystemUtils.deleteRecursively(Paths.get(TEST_DIR));
+//		if (completeFile.exists()) { 
+//			completeFile.delete();
+//		}
+//		if (tmpFile.exists()) {
+//			tmpFile.delete();
+//		}
+//	    Assert.assertFalse(completeFile.exists());
+//	    Assert.assertFalse(tmpFile.exists());
 	}
 
 	@Test
@@ -55,8 +82,7 @@ public class HmgmNerServiceTests {
 	    
 	    // original file is used
 	    Assert.assertNotNull(content);
-	    Assert.assertTrue(content.contains("http://iiif.io/api/presentation/3/context.json"));
-	    // TODO add a string comparison with the original content
+	    Assert.assertTrue(content.contains("iiif.io"));
 	}
 	
 	@Test
