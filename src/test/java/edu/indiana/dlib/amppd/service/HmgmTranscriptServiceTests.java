@@ -5,6 +5,8 @@ package edu.indiana.dlib.amppd.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -23,6 +25,9 @@ import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
 @SpringBootTest
 public class HmgmTranscriptServiceTests {
 
+	public static final String TEST_DIR = "/tmp/test/";
+	public static final String TEST_FILE = "hmgm_ner.json";
+
 	@Autowired
     private HmgmTranscriptService hmgmTranscriptService;
 
@@ -34,13 +39,24 @@ public class HmgmTranscriptServiceTests {
     
 	@Before
 	public void createTestData() throws Exception {
-		String fileName = "hmgm_transcribe.json";
-		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		testFile = new File(classLoader.getResource(fileName).getFile());
-	    Assert.assertTrue(testFile.exists());
+//		String fileName = "hmgm_transcribe.json";
+//		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+//		testFile = new File(classLoader.getResource(fileName).getFile());
+//	    Assert.assertTrue(testFile.exists());
 
+		// use a temporary test directory to keep all test files instead of using the original data files in project target directory
+		// to avoid side effect on project files (ex, the original NER input file will be moved to the complete file)
+		Files.createDirectories(Paths.get(TEST_DIR));
+		
+		// copy original data file into the test directory
+		Path source = Paths.get(ClassLoader.getSystemClassLoader().getResource(TEST_FILE).toURI());
+		Path target = Paths.get(TEST_DIR, TEST_FILE);
+		if (!Files.exists(target) ) {
+			Files.copy(source, target);
+		}
+		
+		testFile = new File(target.toString());	    
 	    completeFile = new File(testFile.getAbsoluteFile() + ".complete");
-
 	    tempFile = new File(testFile.getAbsoluteFile() + ".tmp");
 	}
 	

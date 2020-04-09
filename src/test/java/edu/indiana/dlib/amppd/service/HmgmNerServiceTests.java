@@ -32,7 +32,6 @@ public class HmgmNerServiceTests {
 	private File tmpFile;
 	private File completeFile;
 	private String testJson = "{\"key\":\"value\"}";
-	String fileName = "hmgm_ner.json";
 
 	/**
 	 * Create test directory and test files.
@@ -45,7 +44,7 @@ public class HmgmNerServiceTests {
 		Files.createDirectories(Paths.get(TEST_DIR));
 		
 		// copy original data file into the test directory
-		Path source = Paths.get(ClassLoader.getSystemClassLoader().getResource(fileName).toURI());
+		Path source = Paths.get(ClassLoader.getSystemClassLoader().getResource(TEST_FILE).toURI());
 		Path target = Paths.get(TEST_DIR, TEST_FILE);
 		if (!Files.exists(target) ) {
 			Files.copy(source, target);
