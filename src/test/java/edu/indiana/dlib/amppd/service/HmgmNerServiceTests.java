@@ -62,14 +62,6 @@ public class HmgmNerServiceTests {
 	@After
 	public void cleanup() throws IOException {
 		FileSystemUtils.deleteRecursively(Paths.get(TEST_DIR));
-//		if (completeFile.exists()) { 
-//			completeFile.delete();
-//		}
-//		if (tmpFile.exists()) {
-//			tmpFile.delete();
-//		}
-//	    Assert.assertFalse(completeFile.exists());
-//	    Assert.assertFalse(tmpFile.exists());
 	}
 
 	@Test
