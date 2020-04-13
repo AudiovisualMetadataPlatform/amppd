@@ -139,7 +139,34 @@ public class ItemRepositoryTests {
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
 	}
+
+	@Test
+	public void shouldQueryItemNameKeywordCaseInsensitive() throws Exception {
 		
+		item = Fixture.from(Item.class).gimme("valid");
+		String[] words = StringUtils.split(item.getName());
+		String keyword = words[words.length-1].toUpperCase();
+		
+		String json = mapper.writeValueAsString(item);
+		mockMvc.perform(post("/items")
+				  .content(json)).andExpect(
+						  status().isCreated());
+		
+		mockMvc.perform(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
+		
+		keyword = words[words.length-1].toLowerCase();
+		
+		mockMvc.perform(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
+	}
+	
 	@Test
 	public void shouldQueryItemDescriptionKeyword() throws Exception {
 		
