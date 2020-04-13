@@ -106,7 +106,24 @@ public class HmgmNerServiceTests {
 	}
 	
 	@Test
-	public void shouldComplete() throws Exception {	   
+	public void shouldCompleteWithOriginalNer() throws Exception {	   
+		// before complete, no complete file
+	    Assert.assertFalse(completeFile.exists());
+	    
+	    // without save, no tmp file either
+	    Assert.assertFalse(tmpFile.exists());
+	    
+	    boolean successComplete = hmgmNerService.completeNer(inputFile.getAbsolutePath());	
+	    
+	    // after complete, original and complete file exists, and tmp file doesn't exist
+	    Assert.assertTrue(successComplete);
+	    Assert.assertTrue(inputFile.exists());
+	    Assert.assertTrue(completeFile.exists());
+	    Assert.assertFalse(tmpFile.exists());
+	}
+	
+	@Test
+	public void shouldCompleteWithTmpNer() throws Exception {	   
 		// before complete, no complete file
 	    Assert.assertFalse(completeFile.exists());
 	    
@@ -117,12 +134,14 @@ public class HmgmNerServiceTests {
 
 	    boolean successComplete = hmgmNerService.completeNer(inputFile.getAbsolutePath());	
 	    
-	    // after complete, complete file exists, and tmp file doesn't exist
+	    // after complete, original and complete file exists, and tmp file doesn't exist
 	    Assert.assertTrue(successComplete);
+	    Assert.assertTrue(inputFile.exists());
 	    Assert.assertTrue(completeFile.exists());
 	    Assert.assertFalse(tmpFile.exists());
 	}
 
+	
 }
 
 

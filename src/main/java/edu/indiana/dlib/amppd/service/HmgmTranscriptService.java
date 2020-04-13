@@ -1,8 +1,5 @@
 package edu.indiana.dlib.amppd.service;
 
-import edu.indiana.dlib.amppd.web.NerEditorRequest;
-import edu.indiana.dlib.amppd.web.NerEditorResponse;
-import edu.indiana.dlib.amppd.web.SaveNerRequest;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;

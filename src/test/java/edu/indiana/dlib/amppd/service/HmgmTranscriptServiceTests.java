@@ -90,6 +90,11 @@ public class HmgmTranscriptServiceTests {
 	    TranscriptEditorResponse response = hmgmTranscriptService.getTranscript(testFile.getAbsolutePath(), false);
 	    
 	    Assert.assertTrue(response.isComplete());
+	    
+	    // after complete, original and complete file exists, and tmp file doesn't exist
+	    Assert.assertTrue(testFile.exists());
+	    Assert.assertTrue(completeFile.exists());
+	    Assert.assertFalse(tempFile.exists());	    
 	}
 
 	@Test
@@ -138,6 +143,11 @@ public class HmgmTranscriptServiceTests {
 	    
 	    Assert.assertEquals(text, testJson);
 		        
+	    // after complete, original and complete file exists, and tmp file doesn't exist
+	    Assert.assertTrue(testFile.exists());
+	    Assert.assertTrue(completeFile.exists());
+	    Assert.assertFalse(tempFile.exists());	    
+	    
 	}
 	
 }
