@@ -50,7 +50,7 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 			File tempFile = new File(resourcePath + TMP_EXTENSION);
 			if (tempFile.exists()) {
 				pathToFile = tempFile.getAbsolutePath();
-		        log.info("Temporary NER input file exists, using this version.");
+		        log.info("Temporary NER input file exists, using this version instead of the original input.");
 			}
 			
 	        FileReader fileReader = new FileReader(pathToFile);
@@ -104,19 +104,27 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 		Path destPath = Paths.get(resourcePath + COMPLETE_EXTENSION);
 		Path tmpPath = Paths.get(resourcePath + TMP_EXTENSION);
 		
+		// upon completion, HMGM tool expects the original file and .complete file exist as a result,
+		// then it will delete the original file, and move the complete file to Galaxy
+		if (!Files.exists(srcPath)) {
+			log.error("Error completing NER edits: original source file does not exist: " + srcPath);
+			return false;
+		}
+		
 		try {
+			// if tmp file has been saved, move it to .complete file instead of copying, since upon completion, 
+			// users are not allowed to edit the tmp file anymore, and HMGM tool doesn't expect it to exist 
 			if (Files.exists(tmpPath)) {
 				srcPath = tmpPath;
 		        log.info("Temporary NER editor file exists, using this version.");
+				Files.move(srcPath, destPath);
 			}
-			else if (!Files.exists(srcPath)) {
-				log.error("Error completing NER edits: source file does not exist: " + srcPath);
-				return false;
+			// otherwise, copy original file to .complete file instead of moving, as HMGM tool does expect it to exist 
+			else {
+		        log.info("Temporary NER editor file does not exist, using the original version.");
+				Files.copy(srcPath, destPath);
 			}
 			
-			// move .tmp file to .complete file since upon complete, things shall be finalized and not allowed to go back;
-			// so there is no need to keep the tmp file; upon complete, HMGM tool will delete/move the original/complete file
-			Files.move(srcPath, destPath);
 			log.info("Successfully completed NER edits into file: " + destPath);
 			return true;
 						

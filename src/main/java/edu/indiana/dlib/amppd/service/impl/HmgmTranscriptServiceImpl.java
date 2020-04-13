@@ -95,8 +95,7 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 			int lastIndex = request.getFilePath().lastIndexOf(TEMP_EXTENSION);
 			String destFilePath = "";
 			if(lastIndex > 0) {
-				destFilePath = request.getFilePath().substring(0, lastIndex) + COMPLETE_EXTENSION;
-				
+				destFilePath = request.getFilePath().substring(0, lastIndex) + COMPLETE_EXTENSION;				
 			}
 			else {
 				destFilePath = request.getFilePath() + COMPLETE_EXTENSION;
@@ -112,9 +111,16 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 			}
 			
 			File dest = new File(destFilePath);
-			
-			Files.move(source.toPath(), dest.toPath());
-			
+
+			// the result is that we have the original file and the complete file
+			if(lastIndex > 0) {
+				// move tmp file to complete file
+				Files.move(source.toPath(), dest.toPath());
+			}
+			else {
+				// copy original file to complete file
+				Files.copy(source.toPath(), dest.toPath());
+			}			
 			
 		} catch (Exception e) {
 			log.error("Error completing transcript: " + e.getMessage());
