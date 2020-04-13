@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.repository.NoRepositoryBean;
@@ -15,7 +16,7 @@ public interface DataentityRepository<S extends Dataentity> extends PagingAndSor
 
 	List<S> findByDescription(@Param("description") String description); // TODO: use customized impl to do match with SQL LIKE instead of =
 
-	List<S> findByCreatedDate(@Param("createdDate") String createdDate);
+	List<S> findByCreatedDate(@Param("createdDate") Date createdDate);
 
 	List<S> findByCreatedBy(@Param("createdBy") String createdBy);
 
