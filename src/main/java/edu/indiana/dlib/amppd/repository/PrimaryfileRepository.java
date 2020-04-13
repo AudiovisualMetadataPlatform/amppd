@@ -14,7 +14,6 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "primaryfiles", path = "primaryfiles")
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
-	
 	@Query(value = "select i from Primaryfile i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 
 	
