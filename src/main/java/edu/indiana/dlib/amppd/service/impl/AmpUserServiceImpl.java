@@ -185,28 +185,37 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		// TODO Auto-generated method stub
 		AuthResponse response = new AuthResponse();
 		log.info("Executing emailToken() for user:"+emailid);
-		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
-		if(user.getApproved())
+		try {
+			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
+			
+			
+			if(user.getApproved())
+			{
+				log.info("Approved user found with entered email id");
+				String token = UUID.randomUUID().toString();
+				boolean res = createPasswordResetTokenForUser(user, token);
+			    if(res)
+			    {
+			    	log.info("Password reset token created successfully");
+					try {
+				    	mailSender.send(constructResetTokenEmail(uiUrl, token, user));
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					response.setSuccess(true);
+					log.info("Token email sent successfully");
+			    }
+			    else
+			    {
+			    	response.setSuccess(false);
+			    }
+			}
+		}
+		catch(Exception e)
 		{
-			log.info("Approved user found with entered email id");
-			String token = UUID.randomUUID().toString();
-			boolean res = createPasswordResetTokenForUser(user, token);
-		    if(res)
-		    {
-		    	log.info("Password reset token created successfully");
-				try {
-			    	mailSender.send(constructResetTokenEmail(uiUrl, token, user));
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				response.setSuccess(true);
-				log.info("Token email sent successfully");
-		    }
-		    else
-		    {
-		    	response.setSuccess(false);
-		    }
+			response.addError(e.getMessage());
+			response.setSuccess(false);
 		}
 		return response;
 	}
