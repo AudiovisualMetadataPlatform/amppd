@@ -172,7 +172,33 @@ public class PrimaryfileRepositoryTests {
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].name").value(new StringContains(keyword)));
 	}
+
+	@Test
+	public void shouldQueryPrimaryfileNameKeywordCaseInsensitive() throws Exception {
 		
+		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
+		String[] words = StringUtils.split(primaryfile.getName());
+		String keyword = words[words.length-1].toUpperCase();
+		
+		String json = mapper.writeValueAsString(primaryfile);
+		mockMvc.perform(post("/primaryfiles")
+				  .content(json)).andExpect(
+						  status().isCreated());
+		
+		mockMvc.perform(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.primaryfiles[0].name").value(new StringContains(keyword)));
+		
+		keyword = words[words.length-1].toLowerCase();
+
+		mockMvc.perform(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+						MockMvcResultHandlers.print()).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.primaryfiles[0].name").value(new StringContains(keyword)));
+	}
 	@Test
 	public void shouldQueryPrimaryfileDescriptionKeyword() throws Exception {
 		
