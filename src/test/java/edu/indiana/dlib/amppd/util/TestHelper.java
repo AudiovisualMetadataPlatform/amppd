@@ -336,8 +336,8 @@ public class TestHelper {
 			unit.setName(unitName);
 			unit.setModifiedBy("testuser");
 			unit.setCreatedBy("testuser");
-			unit.setModifiedDate(new Date().getTime());
-			unit.setCreatedDate(new Date().getTime());
+			unit.setModifiedDate(new Date());
+			unit.setCreatedDate(new Date());
 			unitRepository.save(unit);
 		}
 		return unit;

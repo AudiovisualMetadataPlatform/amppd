@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -271,7 +270,6 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private ItemSupplement getItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username, List<String>errors){
 		ItemSupplement itemSupplement = null;
-		boolean found = false;
 		if(item.getSupplements() != null)
 		{
 			log.info("BATCH PROCESSING : looping through the existing item supplement");
@@ -282,7 +280,6 @@ public class BatchServiceImpl implements BatchService {
 					log.error("BATCH PROCESSING : item supplement name already exists");
 					errors.add("ERROR: In row "+currRow+" item supplement name already exists");
 					itemSupplement = is;
-					found=true;
 					break;
 				}
 			}
@@ -298,8 +295,8 @@ public class BatchServiceImpl implements BatchService {
 			itemSupplement.setDescription(batchSupplementFile.getSupplementDescription());
 			itemSupplement.setCreatedBy(username);
 			itemSupplement.setModifiedBy(username);
-			itemSupplement.setCreatedDate(new Date().getTime());
-			itemSupplement.setModifiedDate(new Date().getTime());
+			itemSupplement.setCreatedDate(new Date());
+			itemSupplement.setModifiedDate(new Date());
 			log.info("BATCH PROCESSING : new item supplement created");
 		}
 		return itemSupplement;
@@ -310,7 +307,6 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private CollectionSupplement getCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username, List<String>errors){
 		//check if the supplement exists
-		boolean found = false;
 		CollectionSupplement collectionSupplement = null;
 		if(collection.getSupplements() != null)
 		{
@@ -322,7 +318,6 @@ public class BatchServiceImpl implements BatchService {
 					log.error("BATCH PROCESSING : collection supplement name already exists");
 					errors.add("ERROR: In row "+ currRow +" collection supplement name already exists"); 
 					collectionSupplement = cs;
-					found=true;
 					break;
 				}
 			}
@@ -338,8 +333,8 @@ public class BatchServiceImpl implements BatchService {
 			collectionSupplement.setDescription(batchSupplementFile.getSupplementDescription());
 			collectionSupplement.setCreatedBy(username);
 			collectionSupplement.setModifiedBy(username);
-			collectionSupplement.setCreatedDate(new Date().getTime());
-			collectionSupplement.setModifiedDate(new Date().getTime());
+			collectionSupplement.setCreatedDate(new Date());
+			collectionSupplement.setModifiedDate(new Date());
 			log.info("BATCH PROCESSING : new collection supplement created");
 		}
 		
@@ -351,7 +346,6 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private PrimaryfileSupplement createPrimaryfileSupplement(Primaryfile primaryFile, BatchSupplementFile batchSupplementFile, String username, List<String> errors){
 		//check if the supplement exists
-		boolean found = false;
 		PrimaryfileSupplement primaryfileSupplement = null;
 		if(primaryFile.getSupplements() != null)
 		{
@@ -363,7 +357,6 @@ public class BatchServiceImpl implements BatchService {
 					log.error("BATCH PROCESSING : primary file supplement name already exists");
 					errors.add("ERROR: In row "+currRow+" primary file supplement name already exists");
 					primaryfileSupplement = ps;
-					found=true;
 					break;
 				}
 			}
@@ -379,8 +372,8 @@ public class BatchServiceImpl implements BatchService {
 			primaryfileSupplement.setDescription(batchSupplementFile.getSupplementDescription());
 			primaryfileSupplement.setCreatedBy(username);
 			primaryfileSupplement.setModifiedBy(username);
-			primaryfileSupplement.setCreatedDate(new Date().getTime());
-			primaryfileSupplement.setModifiedDate(new Date().getTime());
+			primaryfileSupplement.setCreatedDate(new Date());
+			primaryfileSupplement.setModifiedDate(new Date());
 			log.info("BATCH PROCESSING : new primary file supplement created");
 		}
 		return primaryfileSupplement;
@@ -421,9 +414,9 @@ public class BatchServiceImpl implements BatchService {
 			primaryFile.setDescription(batchFile.getPrimaryfileDescription());
 			primaryFile.setOriginalFilename(batchFile.getPrimaryfileFilename());
 			primaryFile.setCreatedBy(username);
-			primaryFile.setCreatedDate(new Date().getTime());
+			primaryFile.setCreatedDate(new Date());
 			primaryFile.setModifiedBy(username);
-			primaryFile.setModifiedDate(new Date().getTime());
+			primaryFile.setModifiedDate(new Date());
 			primaryFile.setItem(item);
 			log.info("BATCH PROCESSING : created new primary file object");
 		}
@@ -477,8 +470,8 @@ public class BatchServiceImpl implements BatchService {
 			item.setDescription(itemDescription);
 			item.setCreatedBy(createdBy);
 			item.setModifiedBy(createdBy);
-			item.setCreatedDate(new Date().getTime());
-			item.setModifiedDate(new Date().getTime());
+			item.setCreatedDate(new Date());
+			item.setModifiedDate(new Date());
 			item.setCollection(collection);
 			itemRepository.save(item);
 			log.info("BATCH PROCESSING : Item was not found and hence new item was created"); 

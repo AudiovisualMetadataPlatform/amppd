@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.Date;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,10 +39,10 @@ public abstract class Dataentity {
     private String description;
 
     @CreatedDate
-    private long createdDate;
+    private Date createdDate;
  
     @LastModifiedDate
-    private long modifiedDate;
+    private Date modifiedDate;
     
     @CreatedBy
     private String createdBy;
