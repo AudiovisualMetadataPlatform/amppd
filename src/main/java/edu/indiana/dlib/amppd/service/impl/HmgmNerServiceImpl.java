@@ -100,14 +100,21 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 	 */
 	@Override
 	public boolean completeNer(String resourcePath) {			
+		// upon completion, HMGM tool expects the original file and .complete file exist as a result,
+		// then it will delete the original file, and move the complete file to Galaxy
 		Path srcPath = Paths.get(resourcePath);
 		Path destPath = Paths.get(resourcePath + COMPLETE_EXTENSION);
 		Path tmpPath = Paths.get(resourcePath + TMP_EXTENSION);
 		
-		// upon completion, HMGM tool expects the original file and .complete file exist as a result,
-		// then it will delete the original file, and move the complete file to Galaxy
+		// the original input file shall exist at this point
 		if (!Files.exists(srcPath)) {
 			log.error("Error completing NER edits: original source file does not exist: " + srcPath);
+			return false;
+		}		
+		
+		// the complete version of the input file shouldn't exist yet, as users are not allowed to resubmit
+		if (Files.exists(destPath)) {
+			log.error("Error completing NER edits: the complete version of the input file already exists: " + destPath);
 			return false;
 		}
 		

@@ -42,17 +42,17 @@ public class HmgmController {
 		return hmgmNerService.getNer(resourcePath);
 	}
 	
-	@PostMapping(path = "/hmgm/ner-editor", consumes="application/json", produces = "application/json")
+	@PostMapping(path = "/hmgm/ner-editor")
 	public @ResponseBody boolean saveNer(@RequestParam String resourcePath, @RequestBody String content) {			
 		return hmgmNerService.saveNer(resourcePath, content);
 	}
 	
-	@PostMapping(path = "/hmgm/ner-editor/complete", consumes="application/json", produces = "application/json")
+	@PostMapping(path = "/hmgm/ner-editor/complete")
 	public @ResponseBody boolean completeNer(@RequestParam String resourcePath) {			
 		return hmgmNerService.completeNer(resourcePath);
 	}
 
-	@PostMapping(path = "/hmgm/ner-editor/reset", consumes="application/json", produces = "application/json")
+	@PostMapping(path = "/hmgm/ner-editor/reset")
 	public @ResponseBody boolean resetNer(@RequestParam String resourcePath) {			
 		return hmgmNerService.resetNer(resourcePath);
 	}
