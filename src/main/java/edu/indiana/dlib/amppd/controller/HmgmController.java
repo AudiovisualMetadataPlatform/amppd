@@ -14,9 +14,11 @@ import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
+@Slf4j
 public class HmgmController {
 		
 	@Autowired HmgmTranscriptService hmgmTranscriptService;
@@ -38,11 +40,11 @@ public class HmgmController {
 	}
 	
 	@GetMapping(path = "/hmgm/ner-editor", produces = "application/json")
-	public @ResponseBody String getNer(@RequestParam String resourcePath) {			
+	public @ResponseBody String getNer(@RequestParam String resourcePath) {		
 		return hmgmNerService.getNer(resourcePath);
 	}
 	
-	@PostMapping(path = "/hmgm/ner-editor")
+	@PostMapping(path = "/hmgm/ner-editor", consumes = "application/json")
 	public @ResponseBody boolean saveNer(@RequestParam String resourcePath, @RequestBody String content) {			
 		return hmgmNerService.saveNer(resourcePath, content);
 	}
@@ -51,11 +53,17 @@ public class HmgmController {
 	public @ResponseBody boolean completeNer(@RequestParam String resourcePath) {			
 		return hmgmNerService.completeNer(resourcePath);
 	}
-
+	
 	@PostMapping(path = "/hmgm/ner-editor/reset")
 	public @ResponseBody boolean resetNer(@RequestParam String resourcePath) {			
 		return hmgmNerService.resetNer(resourcePath);
-	}
-	
+	}	
+
+//	@PostMapping(path = "/hmgm/ner-editor/reset")
+//	public @ResponseBody boolean resetNer(HttpServletRequest request, @RequestParam String resourcePath) {			
+//		log.debug("Reset NER request URL: " + request.getRequestURI());
+//		return hmgmNerService.resetNer(resourcePath);
+//	}
+//	
 }
 
