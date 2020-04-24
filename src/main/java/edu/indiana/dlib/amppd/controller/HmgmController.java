@@ -59,11 +59,5 @@ public class HmgmController {
 		return hmgmNerService.resetNer(resourcePath);
 	}	
 
-//	@PostMapping(path = "/hmgm/ner-editor/reset")
-//	public @ResponseBody boolean resetNer(HttpServletRequest request, @RequestParam String resourcePath) {			
-//		log.debug("Reset NER request URL: " + request.getRequestURI());
-//		return hmgmNerService.resetNer(resourcePath);
-//	}
-//	
 }
 

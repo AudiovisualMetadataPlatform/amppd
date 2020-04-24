@@ -73,9 +73,16 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 	 */
 	@Override
 	public boolean saveNer(String resourcePath, String content) {			
+		// do not allow save if the input file has already been completed with editing
+		Path completePath = Paths.get(resourcePath + COMPLETE_EXTENSION);
+		if (Files.exists(completePath)) {
+			log.error("Error saving NER edits: the complete version of the input file already exists: " + completePath);
+			return false;
+		}
+
 		JSONParser parser = new JSONParser();
 		String tmpPath = resourcePath + TMP_EXTENSION;
-
+		
 		try {
 	        JSONObject jsonTmp = (JSONObject) parser.parse(content);
 	        
