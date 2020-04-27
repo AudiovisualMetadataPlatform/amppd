@@ -98,7 +98,7 @@ public class AmpUserServiceTests {
 	 	if(user2 != null) {
 	 		Long id = user2.getId();
 	 		Assert.assertFalse(user.getApproved().equals(true));
-	 		ampUserService.approveUser(id);
+	 		ampUserService.approveUser(id, "approve");
 	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
 	 		Assert.assertTrue(user2.getApproved().equals(true));
 	 	}

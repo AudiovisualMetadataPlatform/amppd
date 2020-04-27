@@ -35,6 +35,6 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	
 	@Transactional
 	@Modifying
-	@Query(value = "update AmpUser set approved = 't' where id = :id")
-	int updateApproved(@Param("id") Long id);
+	@Query(value = "update AmpUser set approved = :approved where id = :id")
+	int updateApproved(@Param("id") Long id, boolean approved);
 }
