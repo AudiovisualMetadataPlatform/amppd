@@ -111,9 +111,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!usernameAcceptableLength(user.getUsername())) {
 			  response.addError("Username must be " + MIN_USERNAME_LENGTH + " characters");
 		  }
-		  else if(!usernameUnique(user.getUsername())) {
-			  response.addError("Username already taken.");
-		  }
+		/*
+		 * else if(!usernameUnique(user.getUsername())) {
+		 * response.addError("Username already taken."); }
+		 */
 		  
 		  if(!emailUnique(user.getEmail())) {
 			  response.addError("Email already exists");
