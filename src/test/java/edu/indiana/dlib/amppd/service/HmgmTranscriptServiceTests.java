@@ -5,6 +5,8 @@ package edu.indiana.dlib.amppd.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -12,7 +14,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -22,11 +23,13 @@ import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@AutoConfigureMockMvc
-public class HmgmServiceTests {
+public class HmgmTranscriptServiceTests {
+
+	public static final String TEST_DIR = "/tmp/test/";
+	public static final String TEST_FILE = "hmgm_ner.json";
 
 	@Autowired
-    private HmgmService hmgmService;
+    private HmgmTranscriptService hmgmTranscriptService;
 
 	
 	File testFile;
@@ -36,13 +39,24 @@ public class HmgmServiceTests {
     
 	@Before
 	public void createTestData() throws Exception {
-		String fileName = "transcribe.json";
-		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		testFile = new File(classLoader.getResource(fileName).getFile());
-	    Assert.assertTrue(testFile.exists());
+//		String fileName = "hmgm_transcribe.json";
+//		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+//		testFile = new File(classLoader.getResource(fileName).getFile());
+//	    Assert.assertTrue(testFile.exists());
 
+		// use a temporary test directory to keep all test files instead of using the original data files in project target directory
+		// to avoid side effect on project files (ex, the original NER input file will be moved to the complete file)
+		Files.createDirectories(Paths.get(TEST_DIR));
+		
+		// copy original data file into the test directory
+		Path source = Paths.get(ClassLoader.getSystemClassLoader().getResource(TEST_FILE).toURI());
+		Path target = Paths.get(TEST_DIR, TEST_FILE);
+		if (!Files.exists(target) ) {
+			Files.copy(source, target);
+		}
+		
+		testFile = new File(target.toString());	    
 	    completeFile = new File(testFile.getAbsoluteFile() + ".complete");
-
 	    tempFile = new File(testFile.getAbsoluteFile() + ".tmp");
 	}
 	
@@ -55,7 +69,7 @@ public class HmgmServiceTests {
 	@Test
 	public void shouldGetFile() throws Exception {	    
 	    
-	    TranscriptEditorResponse response = hmgmService.getTranscript(testFile.getAbsolutePath(), false);
+	    TranscriptEditorResponse response = hmgmTranscriptService.getTranscript(testFile.getAbsolutePath(), false);
 	    
 	    Assert.assertTrue(response.isSuccess());
 	    Assert.assertFalse(response.isComplete());
@@ -68,14 +82,19 @@ public class HmgmServiceTests {
 	    TranscriptEditorRequest request = new TranscriptEditorRequest();
 	    request.setFilePath(testFile.getAbsolutePath());
 	    
-	    boolean success = hmgmService.completeTranscript(request);
+	    boolean success = hmgmTranscriptService.completeTranscript(request);
 	    
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(completeFile.exists());
 
-	    TranscriptEditorResponse response = hmgmService.getTranscript(testFile.getAbsolutePath(), false);
+	    TranscriptEditorResponse response = hmgmTranscriptService.getTranscript(testFile.getAbsolutePath(), false);
 	    
 	    Assert.assertTrue(response.isComplete());
+	    
+	    // after complete, original and complete file exists, and tmp file doesn't exist
+	    Assert.assertTrue(testFile.exists());
+	    Assert.assertTrue(completeFile.exists());
+	    Assert.assertFalse(tempFile.exists());	    
 	}
 
 	@Test
@@ -85,7 +104,7 @@ public class HmgmServiceTests {
 	    request.setFilePath(testFile.getAbsolutePath() + ".tmp");
 	    request.setJson(testJson);
 	    
-	    boolean success = hmgmService.saveTranscript(request);
+	    boolean success = hmgmTranscriptService.saveTranscript(request);
 	    
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(tempFile.exists());
@@ -106,7 +125,7 @@ public class HmgmServiceTests {
 	    request.setFilePath(testFile.getAbsolutePath() + ".tmp");
 	    request.setJson(testJson);
 	    
-	    boolean success = hmgmService.saveTranscript(request);
+	    boolean success = hmgmTranscriptService.saveTranscript(request);
 	    
 	    Assert.assertTrue(success);
 	    Assert.assertTrue(tempFile.exists());
@@ -114,7 +133,7 @@ public class HmgmServiceTests {
 	    TranscriptEditorRequest completeRequest = new TranscriptEditorRequest();
 	    completeRequest.setFilePath(tempFile.getAbsolutePath());
 	    
-	    boolean completeSuccess = hmgmService.completeTranscript(completeRequest);
+	    boolean completeSuccess = hmgmTranscriptService.completeTranscript(completeRequest);
 	    
 	    Assert.assertTrue(completeSuccess);
 
@@ -124,6 +143,11 @@ public class HmgmServiceTests {
 	    
 	    Assert.assertEquals(text, testJson);
 		        
+	    // after complete, original and complete file exists, and tmp file doesn't exist
+	    Assert.assertTrue(testFile.exists());
+	    Assert.assertTrue(completeFile.exists());
+	    Assert.assertFalse(tempFile.exists());	    
+	    
 	}
 	
 }
