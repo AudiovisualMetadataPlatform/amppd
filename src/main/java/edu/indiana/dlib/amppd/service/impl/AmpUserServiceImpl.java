@@ -74,7 +74,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  response.addError("Email and password do not match");
 		  }
 		  String encryptedPswd = MD5Encryption.getMd5(pswd);
-		  String userFound = ampUserRepository.findByApprovedUser(email, encryptedPswd);  
+		  String userFound = ampUserRepository.findByApprovedUser(email, encryptedPswd, AmpUser.State.ACCEPTED);  
 		  if(userFound != null)
 		  {
 			  if(userFound.equals("1")) {
@@ -95,13 +95,13 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public boolean approveUser(String username) {
 		  try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
-			user.setApproved(true);
+			user.setApprove_status(AmpUser.State.ACCEPTED);
 			  ampUserRepository.save(user);
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
 		  }
-		  return false;		  
+		  return false;		    
 	  }
 	  
 	  public AuthResponse registerAmpUser(AmpUser user) { 
@@ -190,7 +190,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
 			
 			
-			if(user.getApproved())
+			if(user.getApprove_status()==AmpUser.State.ACTIVATED)
 			{
 				log.info("Approved user found with entered email id");
 				String token = UUID.randomUUID().toString();
@@ -345,11 +345,15 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		if(!response.hasErrors()) {
 			try {
 				if(action.contentEquals("approve"))
+				{
+					user.setApprove_status(AmpUser.State.ACCEPTED);
 					mailSender.send(constructRegisterEmail(uiUrl, user, "activated"));
+					
+				}
 				else if(action.contentEquals("reject"))
 				{
 					mailSender.send(constructRegisterEmail(uiUrl, user, "rejected"));
-					approved = false;
+					user.setApprove_status(AmpUser.State.REJECTED);
 				}
 			}
 			catch (Exception e) 
@@ -360,7 +364,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 				//e.printStackTrace();
 				return response;
 			}
-			int rows = ampUserRepository.updateApproved(userId, approved);
+			int rows = ampUserRepository.updateApprove_status(userId, user.getApprove_status());
 			if(rows > 0)
 			{
 				response.setSuccess(true);
@@ -382,7 +386,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else
 		{
 			AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
-			if(user!= null && user.getApproved())
+			if(user!= null && user.getApprove_status() == AmpUser.State.ACTIVATED)
 			{
 				response.setEmailid(user.getEmail());
 				response.setSuccess(true);

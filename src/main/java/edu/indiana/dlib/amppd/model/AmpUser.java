@@ -6,6 +6,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -31,6 +33,7 @@ public class AmpUser {
 	 * Supervisor and Student are for Human MGM use only, and we assume they don't overlap with AMPPD Content User such as Collection Manager.
 	 */	
     public enum Role {ADMIN, MANAGER, SUPERVISOR, STUDENT}
+    public enum State {REQUESTED, ACCEPTED, ACTIVATED,  REJECTED}
 	
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -44,8 +47,8 @@ public class AmpUser {
 	private String password;
 	private Role role;
 	
-	// TODO change to Enum state (RQUESTED, APPROVED, ACTIVATED,  REJECTED) 
-	private Boolean approved = false;	
+	@Enumerated(EnumType.STRING)
+	private State approve_status = State.REQUESTED;
 	
 	@OneToMany(mappedBy="assignedTo")
     private Set<HmgmTask> hmgmTasks;
