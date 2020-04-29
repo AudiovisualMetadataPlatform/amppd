@@ -74,7 +74,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  response.addError("Email and password do not match");
 		  }
 		  String encryptedPswd = MD5Encryption.getMd5(pswd);
-		  String userFound = ampUserRepository.findByApprovedUser(email, encryptedPswd);  
+		  String userFound = ampUserRepository.findByApprovedUser(email, encryptedPswd, AmpUser.State.ACCEPTED);  
 		  if(userFound != null)
 		  {
 			  if(userFound.equals("1")) {
@@ -95,13 +95,13 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public boolean approveUser(String username) {
 		  try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
-			user.setApproved(true);
+			user.setApprove_status(AmpUser.State.ACCEPTED);
 			  ampUserRepository.save(user);
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
 		  }
-		  return false;		  
+		  return false;		    
 	  }
 	  
 	  public AuthResponse registerAmpUser(AmpUser user) { 
@@ -111,9 +111,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!usernameAcceptableLength(user.getUsername())) {
 			  response.addError("Username must be " + MIN_USERNAME_LENGTH + " characters");
 		  }
-		  else if(!usernameUnique(user.getUsername())) {
-			  response.addError("Username already taken.");
-		  }
+		/*
+		 * else if(!usernameUnique(user.getUsername())) {
+		 * response.addError("Username already taken."); }
+		 */
 		  
 		  if(!emailUnique(user.getEmail())) {
 			  response.addError("Email already exists");
@@ -189,7 +190,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
 			
 			
-			if(user.getApproved())
+			if(user.getApprove_status()==AmpUser.State.ACTIVATED)
 			{
 				log.info("Approved user found with entered email id");
 				String token = UUID.randomUUID().toString();
@@ -227,7 +228,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String url = null;
 		if (type.equalsIgnoreCase("approve"))
 		{
-			log.info("constructing Email for User approval:"+user.getUsername());
+			log.info("constructing Email for User account approval:"+user.getUsername());
 			url = contextPath + "/approve-user/" + user.getId();
 			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
@@ -235,11 +236,20 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			emailTo = ampAdmin;
 		    
 		}
-		else if (type.equalsIgnoreCase("activate"))
+		else if (type.equalsIgnoreCase("rejected"))
 		{
-			log.info("Constructing email for user account activation"+user.getUsername());
+			log.info("constructing Email for User account rejection notification:"+user.getUsername());
+			url = contextPath + "/" ;
+			message = "Your registeration request has been reviewed and unfortunately it was not accepted by the admin.\n Please contact the AMP's admin for further details.";
+			subject = "Registeration request rejected";
+			emailTo = user.getEmail();
+		    
+		}
+		else if (type.equalsIgnoreCase("activated"))
+		{
+			log.info("Constructing email for user account activation notification"+user.getUsername());
 			url = contextPath + "/activate-account/" + user.getId();
-			message = "Click the link below to activate your AMP account";
+			message = "Your registeration request has been reviewed and accepted. \n Click the link below to activate your AMP account";
 			subject = "Activate Account";
 			emailTo = user.getEmail();
 		}
@@ -321,10 +331,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	@Override 
-	public AuthResponse approveUser(Long userId)
+	public AuthResponse approveUser(Long userId, String action)
 	{
+		boolean approved = true;
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
+		
 		if(user == null)
 		{
 			response.addError("Incorrect Link");
@@ -332,13 +344,27 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		if(!response.hasErrors()) {
 			try {
-				  mailSender.send(constructRegisterEmail(uiUrl, user, "activate"));
+				if(action.contentEquals("approve"))
+				{
+					user.setApprove_status(AmpUser.State.ACCEPTED);
+					mailSender.send(constructRegisterEmail(uiUrl, user, "activated"));
+					
 				}
-			catch (MailException e) 
-			{
-				e.printStackTrace();
+				else if(action.contentEquals("reject"))
+				{
+					mailSender.send(constructRegisterEmail(uiUrl, user, "rejected"));
+					user.setApprove_status(AmpUser.State.REJECTED);
+				}
 			}
-			int rows = ampUserRepository.updateApproved(userId);
+			catch (Exception e) 
+			{
+				System.out.println("Entered exception handling for mailsender");
+				response.addError("Couldn't send email to:"+user.getEmail());
+				response.setSuccess(false);
+				//e.printStackTrace();
+				return response;
+			}
+			int rows = ampUserRepository.updateApprove_status(userId, user.getApprove_status());
 			if(rows > 0)
 			{
 				response.setSuccess(true);
@@ -360,7 +386,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else
 		{
 			AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
-			if(user!= null && user.getApproved())
+			if(user!= null && user.getApprove_status() == AmpUser.State.ACTIVATED)
 			{
 				response.setEmailid(user.getEmail());
 				response.setSuccess(true);

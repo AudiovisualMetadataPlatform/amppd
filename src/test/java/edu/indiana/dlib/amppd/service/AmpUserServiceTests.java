@@ -97,10 +97,10 @@ public class AmpUserServiceTests {
 	 	AmpUser user2 = ampUserRepository.findByEmail(user.getEmail()).get();
 	 	if(user2 != null) {
 	 		Long id = user2.getId();
-	 		Assert.assertFalse(user.getApproved().equals(true));
-	 		ampUserService.approveUser(id);
+	 		Assert.assertFalse(user.getApprove_status()==AmpUser.State.ACCEPTED);
+	 		ampUserService.approveUser(id, "approve");
 	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
-	 		Assert.assertTrue(user2.getApproved().equals(true));
+	 		Assert.assertTrue(user2.getApprove_status()==AmpUser.State.ACCEPTED);
 	 	}
     }
 	
