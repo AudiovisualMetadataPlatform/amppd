@@ -176,7 +176,7 @@ public class BatchServiceImpl implements BatchService {
 		    	logFileCreated(primaryFile, targetPath);	    	
 				
 				// preprocess the supplement after ingest
-				preprocessService.preprocess(primaryFile);
+				//preprocessService.preprocess(primaryFile);
 			}
 	    	return primaryFile;
 		}
@@ -204,7 +204,7 @@ public class BatchServiceImpl implements BatchService {
 				// Log that the file was created
 		    	logFileCreated(supplement, targetSuppPath);
 				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
+				//preprocessService.preprocess(supplement);
 			}
 		}
 		catch(IOException ex) {
@@ -231,7 +231,7 @@ public class BatchServiceImpl implements BatchService {
 				// Log that the file was created
 				logFileCreated(supplement, targetSuppPath);
 				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
+				//preprocessService.preprocess(supplement);
 			}
 		}
 		catch(IOException ex) {
@@ -257,7 +257,7 @@ public class BatchServiceImpl implements BatchService {
 				// Log that the file was created
 				logFileCreated(supplement, targetSuppPath);
 				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
+				//preprocessService.preprocess(supplement);
 			}
 		}
 		catch(IOException ex) {
@@ -442,7 +442,7 @@ public class BatchServiceImpl implements BatchService {
 						item = i;
 						if(!i.getName().contentEquals(itemName))
 						{
-							log.info("BATCH PROCESSING : Item external id  and external source combination already exists"); 
+							log.info("BATCH PROCESSING : External Item id  and external source combination already exists"); 
 							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
 							itemRepository.updateTitle(itemName,i.getId());
 						}
