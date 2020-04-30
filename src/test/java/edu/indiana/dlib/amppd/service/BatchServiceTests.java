@@ -329,6 +329,21 @@ public class BatchServiceTests {
         Assert.assertTrue(response.hasErrors());
 	}
 	
+	@Test
+	public void shouldBeValidWithBlankItemID() throws Exception {
+		String fileName = "batch_manifest_for_testing_blank_ItemID.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
+        
+        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        
+        Assert.assertFalse(response.hasErrors());
+	}
+	
 	/*
 	 * Invalid primary file with supplement file type = primary
 	 */
