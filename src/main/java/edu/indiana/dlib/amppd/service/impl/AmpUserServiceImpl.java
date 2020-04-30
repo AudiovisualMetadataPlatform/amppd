@@ -193,7 +193,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
 			
 			
-			if(user.getApprove_status()==AmpUser.State.ACTIVATED)
+			if(user.getApprove_status()==AmpUser.State.ACCEPTED)
 			{
 				log.info("Approved user found with entered email id");
 				String token = UUID.randomUUID().toString();
@@ -389,7 +389,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else
 		{
 			AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
-			if(user!= null && user.getApprove_status() == AmpUser.State.ACTIVATED)
+			if(user!= null && user.getApprove_status() == AmpUser.State.ACCEPTED)
 			{
 				response.setEmailid(user.getEmail());
 				response.setSuccess(true);
