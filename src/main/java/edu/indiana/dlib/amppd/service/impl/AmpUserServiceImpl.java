@@ -95,8 +95,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public boolean approveUser(String username) {
 		  try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
-			user.setApprove_status(AmpUser.State.ACCEPTED);
-			  ampUserRepository.save(user);
+			/*
+			 * user.setApprove_status(AmpUser.State.ACCEPTED); ampUserRepository.save(user);
+			 */
+			if(user!=null)
+				ampUserRepository.updateApprove_status(user.getId(), AmpUser.State.ACCEPTED);
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
