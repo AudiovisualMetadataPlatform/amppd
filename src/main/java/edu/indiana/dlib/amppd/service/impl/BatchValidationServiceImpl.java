@@ -212,7 +212,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     			return response;
     		}
     		
-        	List<String> itemErrors = validateItemColumns(batchFile.getExternalItemId(), batchFile.getItemName(), batchFile.getRowNum());
+        	List<String> itemErrors = validateItemColumns( batchFile.getItemName(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
         	// Validate the primary file
@@ -269,12 +269,9 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate item columns
 	 */
-	private List<String> validateItemColumns(String sourceId, String itemTitle, int lineNum) {
+	private List<String> validateItemColumns( String itemTitle, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 		
-    	if(sourceId.isBlank()) {
-    		errors.add(String.format("Row: %s: Source ID is missing", lineNum));
-    	}
     	if(itemTitle.isBlank()) {
     		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
     	}

@@ -442,7 +442,7 @@ public class BatchServiceImpl implements BatchService {
 						item = i;
 						if(!i.getName().contentEquals(itemName))
 						{
-							log.info("BATCH PROCESSING : Item external id  and external source combination already exists"); 
+							log.info("BATCH PROCESSING : External Item id  and external source combination already exists"); 
 							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
 							itemRepository.updateTitle(itemName,i.getId());
 						}
