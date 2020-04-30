@@ -173,7 +173,7 @@ public class AmpUserControllerTests {
     		       .content(json1)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));*/
     }
-    @Ignore
+    
     @Test
 	public void testForgotPasswordEmail() throws Exception {
     	AmpUser user = getAmpUser(); 
