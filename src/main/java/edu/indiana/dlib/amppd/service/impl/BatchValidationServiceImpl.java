@@ -272,10 +272,6 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	private List<String> validateItemColumns( String itemTitle, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 		
-		/*
-		 * if(sourceId.isBlank()) {
-		 * errors.add(String.format("Row: %s: Source ID is missing", lineNum)); }
-		 */
     	if(itemTitle.isBlank()) {
     		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
     	}
