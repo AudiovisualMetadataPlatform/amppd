@@ -52,7 +52,7 @@ public class JobServiceImpl implements JobService {
 	
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
-	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context";
+	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
 	
 	@Autowired
     private BundleRepository bundleRepository;
