@@ -47,6 +47,13 @@ public interface JobService {
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile);
 	
 	/**
+	 * Get the media information file path for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @return the absolute path of the media info JSON file
+	 */
+	public String getPrimaryfileMediaInfoFilepath(Primaryfile primaryfile);
+
+	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileId ID of the given primaryfile

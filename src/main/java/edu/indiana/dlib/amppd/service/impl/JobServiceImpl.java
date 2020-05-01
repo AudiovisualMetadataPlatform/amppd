@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,6 +255,7 @@ public class JobServiceImpl implements JobService {
 		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("primaryfileName", primaryfile.getName());
 		context.put("primaryfileUrl", getPrimaryfileMediaUrl(primaryfile));
+		context.put("primaryfileMediaInfo", getPrimaryfileMediaInfoFilepath(primaryfile));
 		context.put("workflowId", workflowDetails.getId());		
 		context.put("workflowName", workflowDetails.getName());	
 		
@@ -270,12 +272,21 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.getAssetMediaUrl(Asset)
+	 * @see edu.indiana.dlib.amppd.service.JobService.getPrimaryfileMediaUrl(Primaryfile)
 	 */
 	@Override
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
 		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfile.getId() + "/media";
 		return url;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.getAssetMediaUrl(Asset)
+	 */
+	@Override
+	public String getPrimaryfileMediaInfoFilepath(Primaryfile primaryfile) {
+		String jsonpath = FilenameUtils.getFullPath(primaryfile.getPathname()) + FilenameUtils.getBaseName(primaryfile.getPathname()) + ".json";
+		return jsonpath;
 	}
 	
 	/**

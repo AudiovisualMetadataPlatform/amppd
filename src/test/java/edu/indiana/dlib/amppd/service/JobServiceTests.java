@@ -49,7 +49,10 @@ public class JobServiceTests {
 
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
-		
+
+	@Autowired
+    private FileStorageService fileStorageService;
+
 	@Autowired
 	private JobService jobService;   
 		
@@ -121,6 +124,17 @@ public class JobServiceTests {
 		String url = jobService.getPrimaryfileMediaUrl(primaryfile);
 		Assert.assertTrue(url.startsWith("http://"));
 		Assert.assertTrue(url.contains("/primaryfiles/" + primaryfile.getId()));
+<<<<<<< Upstream, based on origin/master
+=======
+		Assert.assertTrue(url.endsWith("/media"));
+	}
+    
+	@Test
+    public void shouldReturnPrimaryfileMediaInfoFilepath() {    	      
+		String path = jobService.getPrimaryfileMediaInfoFilepath(primaryfile);
+		Assert.assertTrue(path.startsWith("http://"));
+
+>>>>>>> d002669 AMP-628: tmp commit
 		Assert.assertTrue(url.endsWith("/media"));
 	}
     
