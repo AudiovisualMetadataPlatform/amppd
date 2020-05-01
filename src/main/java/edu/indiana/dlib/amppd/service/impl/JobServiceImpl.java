@@ -274,7 +274,7 @@ public class JobServiceImpl implements JobService {
 	 */
 	@Override
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
-		String url = amppdPropertyConfig.getUrl() + "/primaryfile/" + primaryfile.getId() + "/media";
+		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfile.getId() + "/media";
 		return url;
 	}
 	
