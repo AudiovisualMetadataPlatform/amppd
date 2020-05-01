@@ -45,6 +45,21 @@ public class MediaServiceTests {
 	}
 
 	@Test
+    public void shouldReturnPrimaryfileUrl() {    	      
+		String url = mediaService.getPrimaryfileMediaUrl(primaryfile);
+		Assert.assertTrue(url.startsWith("http://"));
+		Assert.assertTrue(url.contains("/primaryfiles/" + primaryfile.getId()));
+		Assert.assertTrue(url.endsWith("/media"));
+	}
+    
+	@Test
+    public void shouldReturnPrimaryfileMediaInfoPath() {    	      
+		String path = mediaService.getAssetMediaInfoPath(primaryfile);
+		Assert.assertTrue(path.contains(primaryfile.getId().toString()));
+		Assert.assertTrue(path.endsWith(".json"));
+	}
+	
+	@Test
     public void shouldCreateNewPrimaryfileSymlink() {
 		// initially symlink in primaryfile is not populated
 		Assert.assertNull(primaryfile.getSymlink());

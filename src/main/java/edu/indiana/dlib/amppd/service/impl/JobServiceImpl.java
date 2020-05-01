@@ -8,7 +8,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
@@ -39,6 +37,7 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,7 +73,7 @@ public class JobServiceImpl implements JobService {
 	private AmpUserService ampUserService;
 	
 	@Autowired
-	private AmppdPropertyConfig amppdPropertyConfig;
+    private MediaService mediaService;	
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -254,8 +253,8 @@ public class JobServiceImpl implements JobService {
 		context.put("itemName", primaryfile.getItem().getName());
 		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("primaryfileName", primaryfile.getName());
-		context.put("primaryfileUrl", getPrimaryfileMediaUrl(primaryfile));
-		context.put("primaryfileMediaInfo", getPrimaryfileMediaInfoFilepath(primaryfile));
+		context.put("primaryfileUrl", mediaService.getPrimaryfileMediaUrl(primaryfile));
+		context.put("primaryfileMediaInfo", mediaService.getAssetMediaInfoPath(primaryfile));
 		context.put("workflowId", workflowDetails.getId());		
 		context.put("workflowName", workflowDetails.getName());	
 		
@@ -269,24 +268,6 @@ public class JobServiceImpl implements JobService {
         }
 		
 		return contextJson;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.getPrimaryfileMediaUrl(Primaryfile)
-	 */
-	@Override
-	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
-		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfile.getId() + "/media";
-		return url;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.getAssetMediaUrl(Asset)
-	 */
-	@Override
-	public String getPrimaryfileMediaInfoFilepath(Primaryfile primaryfile) {
-		String jsonpath = FilenameUtils.getFullPath(primaryfile.getPathname()) + FilenameUtils.getBaseName(primaryfile.getPathname()) + ".json";
-		return jsonpath;
 	}
 	
 	/**
