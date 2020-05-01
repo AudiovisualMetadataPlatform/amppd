@@ -45,7 +45,7 @@ public class MediaServiceTests {
 	}
 
 	@Test
-    public void shouldReturnPrimaryfileUrl() {    	      
+    public void shouldReturnPrimaryfileMediaUrl() {    	      
 		String url = mediaService.getPrimaryfileMediaUrl(primaryfile);
 		Assert.assertTrue(url.startsWith("http://"));
 		Assert.assertTrue(url.contains("/primaryfiles/" + primaryfile.getId()));
