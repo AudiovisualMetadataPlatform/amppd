@@ -21,6 +21,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
+import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
@@ -56,6 +57,9 @@ public class TestHelper {
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_OUTPUT = "out_file1";
 	public static final String TASK_MANAGER = "Jira";	
+
+	@Autowired
+    private JwtTokenUtil tokenUtil;
 	
 	@Autowired
     private UnitRepository unitRepository;
@@ -314,7 +318,10 @@ public class TestHelper {
 		
     	return ampUser;
 	}
-	
+	public String getToken() {
+		AmpUser user = createTestUser();
+		return tokenUtil.generateToken(user);
+	}
 	/*
 	 * Delete all users
 	 */

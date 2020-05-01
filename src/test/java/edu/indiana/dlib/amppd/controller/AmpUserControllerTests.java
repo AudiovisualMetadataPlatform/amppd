@@ -37,10 +37,12 @@ public class AmpUserControllerTests {
 	
 	@Autowired private ObjectMapper mapper;
 	@Autowired private TestHelper testHelper;
+	String token = "";
 	
 	@Before
 	public void init() {
 		testHelper.deleteAllUsers();
+		token = testHelper.getToken();
 	}
 
 	@After
@@ -96,7 +98,7 @@ public class AmpUserControllerTests {
     	request.setEmailid(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
-    	mvc.perform(post(url)
+    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
@@ -125,7 +127,7 @@ public class AmpUserControllerTests {
     	request.setEmailid(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
-    	mvc.perform(post(url)
+    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(false));
@@ -133,7 +135,7 @@ public class AmpUserControllerTests {
     	
     	ampUserService.approveUser(user.getUsername());
 
-    	mvc.perform(post(url)
+    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
@@ -150,7 +152,7 @@ public class AmpUserControllerTests {
     	request_login.setEmailid(user.getEmail());
     	request_login.setPassword(user.getPassword());
     	String json1 = mapper.writeValueAsString(request_login);
-    	mvc.perform(post(url)
+    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json1)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(false));
@@ -185,7 +187,7 @@ public class AmpUserControllerTests {
     	request.setEmailid(user.getEmail());
     	
     	String json = mapper.writeValueAsString(request);
-    	mvc.perform(post(url)
+    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
@@ -205,7 +207,7 @@ public class AmpUserControllerTests {
     private void postRegister(AmpUser user, boolean expectSuccess) throws Exception{
     	String json = mapper.writeValueAsString(user);
     	
-    	mvc.perform(post("/register")
+    	mvc.perform(post("/register").header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(expectSuccess));

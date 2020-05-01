@@ -47,7 +47,5 @@ public class AmpUser {
 	// TODO change to Enum state (RQUESTED, APPROVED, ACTIVATED,  REJECTED) 
 	private Boolean approved = false;	
 	
-	@OneToMany(mappedBy="assignedTo")
-    private Set<HmgmTask> hmgmTasks;
 	
 }

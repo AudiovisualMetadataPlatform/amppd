@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,6 +42,10 @@ public class ItemRepositoryTests {
 	@Autowired 
 	private ObjectMapper mapper = new ObjectMapper();
 	private Item item ;
+	
+	@Autowired
+    private TestHelper testHelper;
+	String token = "";
 	
 	@BeforeClass
 	public static void setupTest() 
@@ -54,19 +59,20 @@ public class ItemRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		itemRepository.deleteAll();
+	    token = testHelper.getToken();
 	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
 
-		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.items").exists());
 	}
 
 	@Test
 	public void shouldCreateItem() throws Exception {
 
-		mockMvc.perform(post("/items").content(
+		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("items/")));
@@ -75,12 +81,12 @@ public class ItemRepositoryTests {
 	@Test
 	public void shouldRetrieveItem() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/items").content(
+		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Item 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -91,12 +97,13 @@ public class ItemRepositoryTests {
 		item = Fixture.from(Item.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(item);
-		mockMvc.perform(post("/items")
+		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByDescription?description={description}", item.getDescription())).andDo(
+				get("/items/search/findByDescription?description={description}", item.getDescription()).header("Authorization", "Bearer " + token))
+					.andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].description").value(
@@ -109,12 +116,12 @@ public class ItemRepositoryTests {
 		item = Fixture.from(Item.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(item);
-		mockMvc.perform(post("/items")
+		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByCreatedBy?createdBy={createdBy}", item.getCreatedBy())).andDo(
+				get("/items/search/findByCreatedBy?createdBy={createdBy}", item.getCreatedBy()).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].createdBy").value(
@@ -129,12 +136,12 @@ public class ItemRepositoryTests {
 		String keyword = words[words.length-1];
 		
 		String json = mapper.writeValueAsString(item);
-		mockMvc.perform(post("/items")
+		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
@@ -148,12 +155,12 @@ public class ItemRepositoryTests {
 		String keyword = words[words.length-1].toUpperCase();
 		
 		String json = mapper.writeValueAsString(item);
-		mockMvc.perform(post("/items")
+		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
@@ -161,7 +168,7 @@ public class ItemRepositoryTests {
 		keyword = words[words.length-1].toLowerCase();
 		
 		mockMvc.perform(
-				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].name").value(new StringContains(keyword)));
@@ -175,12 +182,12 @@ public class ItemRepositoryTests {
 		String keyword = words[words.length-1];
 		
 		String json = mapper.writeValueAsString(item);
-		mockMvc.perform(post("/items")
+		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/items/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/items/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].description").value(new StringContains(keyword)));
@@ -189,17 +196,17 @@ public class ItemRepositoryTests {
 	@Test
 	public void shouldUpdateItem() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/items").content(
+		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(put(location).content(
-				"{\"name\": \"Item 1.1\", \"description\":\"For test\"}")).andExpect(
+				"{\"name\": \"Item 1.1\", \"description\":\"For test\"}").header("Authorization", "Bearer " + token)).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Item 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -207,17 +214,17 @@ public class ItemRepositoryTests {
 	@Test
 	public void shouldPartiallyUpdateItem() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/items").content(
+		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"Item 1.1.1\"}")).andExpect(
+				patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"Item 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Item 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -225,13 +232,13 @@ public class ItemRepositoryTests {
 	@Test
 	public void shouldDeleteItem() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/items").content(
+		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Item 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
 	}
 }

@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,6 +43,10 @@ public class ItemSupplementRepositoryTests {
 	private ObjectMapper mapper = new ObjectMapper();
 	private ItemSupplement obj ;
 	//private ObjectFactory objFactory = new ObjectFactory();
+
+	@Autowired
+    private TestHelper testHelper;
+	String token = "";
 	
 	@BeforeClass
 	public static void setupTest() 
@@ -55,12 +60,13 @@ public class ItemSupplementRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		itemSupplementRepository.deleteAll();
+	    token = testHelper.getToken();
 	}
 
 	@Test
 	public void shouldReturnItemSupplementRepositoryIndex() throws Exception {
 
-		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.itemSupplements").exists());
 
 	}
@@ -68,7 +74,7 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldCreateItemSupplement() throws Exception {
 
-		mockMvc.perform(post("/itemSupplements").content(
+		mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("itemSupplements/")));
@@ -77,12 +83,12 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldRetrieveItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("ItemSupplement 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -93,12 +99,12 @@ public class ItemSupplementRepositoryTests {
 		obj = Fixture.from(ItemSupplement.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/itemSupplements")
+		mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 
 		mockMvc.perform(
-				get("/itemSupplements/search/findByName?name={name}", obj.getName())).andExpect(
+				get("/itemSupplements/search/findByName?name={name}", obj.getName()).header("Authorization", "Bearer " + token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.itemSupplements[0].name").value(
 										obj.getName()));
@@ -107,17 +113,17 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldUpdateItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(put(location).content(
+		mockMvc.perform(put(location).header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("ItemSupplement 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -125,17 +131,17 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldPartiallyUpdateItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"ItemSupplement 1.1.1\"}")).andExpect(
+				patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"ItemSupplement 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("ItemSupplement 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -143,13 +149,13 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldDeleteItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
 	}
 }

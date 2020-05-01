@@ -34,6 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.BatchFileRepository;
@@ -122,26 +123,26 @@ public class BatchServiceTests {
 		
 		String collectionName = "Music Library";
 		String unitName = "Test Unit";
-		
+
+	 	AmpUser user = testHelper.createTestUser();
+	 	
+	 	ampUsername = user.getUsername();
+	 	
+	 	String token = testHelper.getToken();
+	 	
 		// Make sure a test unit and collection are created
-		mockMvc.perform(post("/units").content(
+		mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"" + unitName + "\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("units/")));
 
-		mockMvc.perform(post("/collections").content(
+		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"" + collectionName + "\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 		
 		
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-		 
 		
-		
-	 	AmpUser user = testHelper.createTestUser();
-	 	
-	 	ampUsername = user.getUsername();
-	 	
 		// Copy zip file and extract the files
         File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	
         

@@ -33,16 +33,19 @@ public class WorkflowControllerTests {
     private MockMvc mvc;
 
 	private Workflow workflow;	
+
+	String token = "";
 	
 	@Before
 	public void setup() {
     	// prepare the workflow for testing
     	workflow = testHelper.ensureTestWorkflow();  
+    	token = testHelper.getToken();
  	}
 	
     @Test
     public void shouldListWorkflows() throws Exception {    	
-    	mvc.perform(get("/workflows")).andExpect(status().isOk()).andExpect(
+    	mvc.perform(get("/workflows").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
     			jsonPath("$[0]").exists());
     }
 
@@ -52,7 +55,7 @@ public class WorkflowControllerTests {
     	// there should be at least one workflow existing in Galaxy, and we can use one of these
     	Workflow workflow = workflowService.getWorkflowsClient().getWorkflows().get(0); 
 
-    	mvc.perform(get("/workflows/{workflowId}", workflow.getId())).andExpect(status().isOk()).andExpect(
+    	mvc.perform(get("/workflows/{workflowId}", workflow.getId()).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
     			jsonPath("$.id").value(workflow.getId()));
     }
 
