@@ -311,10 +311,11 @@ public class TestHelper {
 			ampUser = new AmpUser();
 			ampUser.setEmail(username);
 			ampUser.setUsername(username);
-			ampUser.setPassword(username);
 			ampUser.setApproved(true);
+			ampUser.setPassword(username);
 			ampUserService.registerAmpUser(ampUser);
 		}
+		ampUser.setPassword(username);
 		
     	return ampUser;
 	}

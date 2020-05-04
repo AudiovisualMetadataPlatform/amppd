@@ -23,6 +23,7 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.AuthRequest;
+import edu.indiana.dlib.amppd.web.JwtRequest;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
@@ -50,6 +51,21 @@ public class AmpUserControllerTests {
 		testHelper.deleteAllUsers();
 	}
 	
+	@Test
+	public void shouldReturnToken() throws Exception {
+		AmpUser user = testHelper.createTestUser();
+    	    	
+    	String url = String.format("/authenticate");
+    	JwtRequest request = new JwtRequest();
+    	request.setUsername(user.getUsername());
+    	request.setPassword(user.getPassword());
+    	String json = mapper.writeValueAsString(request);
+    	mvc.perform(post(url)
+    		       .contentType(MediaType.APPLICATION_JSON)
+    		       .content(json)
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("token").isString());
+	}
+		
     @Test
     public void shouldRejectInvalidEmail() throws Exception {
     	AmpUser user = getAmpUser();
@@ -93,15 +109,15 @@ public class AmpUserControllerTests {
     	
     	ampUserService.approveUser(user.getUsername());
     	
-    	String url = String.format("/login");
-    	AuthRequest request = new AuthRequest();
-    	request.setEmailid(user.getEmail());
+    	String url = String.format("/authenticate");
+    	JwtRequest request = new JwtRequest();
+    	request.setUsername(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
-    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("token").isString());
    }
 
     @Test
@@ -122,15 +138,15 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser();
     	postRegister(user, true);
         
-    	String url = String.format("/login");
-    	AuthRequest request = new AuthRequest();
-    	request.setEmailid(user.getEmail());
+    	String url = String.format("/authenticate");
+    	JwtRequest request = new JwtRequest();
+    	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
-    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(false));
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(400));
     	
     	
     	ampUserService.approveUser(user.getUsername());
@@ -138,7 +154,7 @@ public class AmpUserControllerTests {
     	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
-    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("token").isString());
     	
     }
     //Test if register sends an email for approval
@@ -147,15 +163,15 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser(); 
     	user.setEmail("amppdiu@gmail.com"); 
     	postRegister(user, true);
-    	String url = String.format("/login");
-    	AuthRequest request_login = new AuthRequest();
-    	request_login.setEmailid(user.getEmail());
+    	String url = String.format("/authenticate");
+    	JwtRequest request_login = new JwtRequest();
+    	request_login.setUsername(user.getEmail());
     	request_login.setPassword(user.getPassword());
     	String json1 = mapper.writeValueAsString(request_login);
     	mvc.perform(post(url).header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json1)
-    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(false));
+    		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(400));
     	/*
     	url = String.format("/approve-user");
     	//ampUserService.approveUser(user.getUsername());
@@ -187,7 +203,7 @@ public class AmpUserControllerTests {
     	request.setEmailid(user.getEmail());
     	
     	String json = mapper.writeValueAsString(request);
-    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
+    	mvc.perform(post(url)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
@@ -198,8 +214,8 @@ public class AmpUserControllerTests {
         int rand_int1 = rand.nextInt(1000); 
     	AmpUser ampUser = new AmpUser();
     	ampUser.setPassword("password1234");
-    	ampUser.setUsername("testUser_" + rand_int1);
-    	ampUser.setEmail(ampUser.getUsername()+"@iu.edu");
+    	ampUser.setUsername("testUser_" + rand_int1+"@iu.edu");
+    	ampUser.setEmail(ampUser.getUsername());
     	
     	return ampUser;
     }
