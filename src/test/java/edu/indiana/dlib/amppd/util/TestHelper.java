@@ -311,8 +311,8 @@ public class TestHelper {
 			ampUser = new AmpUser();
 			ampUser.setEmail(username);
 			ampUser.setUsername(username);
-			ampUser.setApproved(true);
 			ampUser.setPassword(username);
+			ampUser.setApprove_status(AmpUser.State.ACCEPTED);
 			ampUserService.registerAmpUser(ampUser);
 		}
 		ampUser.setPassword(username);

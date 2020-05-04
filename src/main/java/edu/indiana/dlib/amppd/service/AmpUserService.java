@@ -60,7 +60,7 @@ public interface AmpUserService {
 	 * @param user id
 	 * @return the result for approving the user in database
 	 */
-	public AuthResponse approveUser(Long userID);
+	public AuthResponse approveUser(Long userID, String action);
 
 	
 	/**

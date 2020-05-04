@@ -120,7 +120,7 @@ public class JobServiceTests {
     public void shouldReturnPrimaryfileUrl() {    	      
 		String url = jobService.getPrimaryfileMediaUrl(primaryfile);
 		Assert.assertTrue(url.startsWith("http://"));
-		Assert.assertTrue(url.contains("/primaryfile/" + primaryfile.getId()));
+		Assert.assertTrue(url.contains("/primaryfiles/" + primaryfile.getId()));
 		Assert.assertTrue(url.endsWith("/media"));
 	}
     

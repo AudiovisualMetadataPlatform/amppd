@@ -81,12 +81,21 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/approve-user", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/user/account/approve", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse approveUser(
 			  @RequestBody AuthRequest request){ 
 		log.info("Approve User=> id:"+ request.getUserId());	
-		AuthResponse res = ampService.approveUser(request.getUserId());
-		log.info(" Reset Password result: " + res);
+		AuthResponse res = ampService.approveUser(request.getUserId(), "approve");
+		log.info(" approve user result: " + res);
+		return res;
+	  }
+	  
+	  @PostMapping(path = "/user/account/reject", consumes = "application/json", produces = "application/json")
+	  public @ResponseBody AuthResponse rejectUser(
+			  @RequestBody AuthRequest request){ 
+		log.info("Reject User=> id:"+ request.getUserId());	
+		AuthResponse res = ampService.approveUser(request.getUserId(), "reject");
+		log.info(" reject user result: " + res);
 		return res;
 	  }
 	  

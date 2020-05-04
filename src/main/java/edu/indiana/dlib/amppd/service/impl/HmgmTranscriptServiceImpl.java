@@ -11,7 +11,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
-import edu.indiana.dlib.amppd.service.HmgmService;
+import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class HmgmServiceImpl implements HmgmService {
+public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 	private String TEMP_EXTENSION=".tmp";
 	private String COMPLETE_EXTENSION=".complete";
 	
@@ -95,8 +95,7 @@ public class HmgmServiceImpl implements HmgmService {
 			int lastIndex = request.getFilePath().lastIndexOf(TEMP_EXTENSION);
 			String destFilePath = "";
 			if(lastIndex > 0) {
-				destFilePath = request.getFilePath().substring(0, lastIndex) + COMPLETE_EXTENSION;
-				
+				destFilePath = request.getFilePath().substring(0, lastIndex) + COMPLETE_EXTENSION;				
 			}
 			else {
 				destFilePath = request.getFilePath() + COMPLETE_EXTENSION;
@@ -112,9 +111,16 @@ public class HmgmServiceImpl implements HmgmService {
 			}
 			
 			File dest = new File(destFilePath);
-			
-			Files.copy(source.toPath(), dest.toPath());
-			
+
+			// the result is that we have the original file and the complete file
+			if(lastIndex > 0) {
+				// move tmp file to complete file
+				Files.move(source.toPath(), dest.toPath());
+			}
+			else {
+				// copy original file to complete file
+				Files.copy(source.toPath(), dest.toPath());
+			}			
 			
 		} catch (Exception e) {
 			log.error("Error completing transcript: " + e.getMessage());
@@ -122,4 +128,5 @@ public class HmgmServiceImpl implements HmgmService {
 		}
 		return true;
 	}
+	
 }

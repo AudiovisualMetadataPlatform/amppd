@@ -159,16 +159,16 @@ public class PreprocessServiceImpl implements PreprocessService {
 		}	
 		
 		// read the json file content into a string
-		String nediainfo = null;
+		String mediaInfo = null;
 		try {
-			nediainfo = fileStorageService.readTextFile(jsonpath);
+			mediaInfo = fileStorageService.readTextFile(jsonpath);
 		}
 		catch(StorageFileNotFoundException e) {
 			throw new PreprocessException("Error while reading media info from " + jsonpath + ": the json file does not exist");
 		}
 		
 		log.info("Retrieved media info for " + filepath + " into json file " + jsonpath);
-		return nediainfo;		
+		return mediaInfo;		
 	}
 	
 	/**

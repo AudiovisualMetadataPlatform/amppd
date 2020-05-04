@@ -52,7 +52,7 @@ public class JobServiceImpl implements JobService {
 	
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
-	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context";
+	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
 	
 	@Autowired
     private BundleRepository bundleRepository;
@@ -274,7 +274,7 @@ public class JobServiceImpl implements JobService {
 	 */
 	@Override
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
-		String url = amppdPropertyConfig.getUrl() + "/primaryfile/" + primaryfile.getId() + "/media";
+		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfile.getId() + "/media";
 		return url;
 	}
 	
@@ -284,8 +284,9 @@ public class JobServiceImpl implements JobService {
 	@Override
 	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
 		WorkflowOutputs woutputs = null;
-		String msg = "Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters;
-		log.info("Creating " + msg);
+		String msg = "Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId;
+		String msg_param = ", parameters (user defined): " + parameters;
+		log.info("Creating " + msg + msg_param);
 		
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
@@ -300,14 +301,15 @@ public class JobServiceImpl implements JobService {
 			
     		WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
     		populateHmgmContextParameters(workflowDetails, primaryfile, winputs.getParameters());
+    		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		woutputs = workflowsClient.runWorkflow(winputs);
     	}
     	catch (Exception e) {    	
-    		log.error("Error creating " + msg);
+    		log.error("Error creating " + msg + msg_param);
     		throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
-		log.info("Successfully created " + msg);
+		log.info("Successfully created " + msg + msg_param);
     	log.info("Galaxy workflow outputs: " + woutputs);
     	return woutputs;
 	}
