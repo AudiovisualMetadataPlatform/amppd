@@ -92,6 +92,13 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		
 		return null;
 	  }
+
+	  public AmpUser getUserByEmail(String email) {
+		Optional<AmpUser> userOpt = ampUserRepository.findByEmail(email);
+		if(userOpt.isPresent()) return userOpt.get();
+		
+		return null;
+	  }
 	  
 	  public boolean approveUser(String username) {
 		  try {

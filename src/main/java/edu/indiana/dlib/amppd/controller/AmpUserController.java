@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 			  return ResponseEntity.status(400).body(null);
 		  }
 			
-		  final AmpUser userDetails = ampService.getUser(authenticationRequest.getUsername());
+		  final AmpUser userDetails = ampService.getUserByEmail(authenticationRequest.getUsername());
 		  final String token = jwtTokenUtil.generateToken(userDetails);
 		  return ResponseEntity.ok(new JwtResponse(token));
 	  }
