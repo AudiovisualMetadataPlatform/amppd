@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -44,6 +45,10 @@ public class PrimaryfileRepositoryTests {
 	@Autowired 
 	private ObjectMapper mapper;
 	private Primaryfile primaryfile ;
+
+	@Autowired
+    private TestHelper testHelper;
+	String token = "";
 	
 	@BeforeClass
 	public static void setupTest() 
@@ -57,18 +62,19 @@ public class PrimaryfileRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		primaryfileRepository.deleteAll();
+		token = testHelper.getToken();
 	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
 
-		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.primaryfiles").exists());
 	}
 
 	@Test
 	public void shouldCreatePrimaryfile() throws Exception {
-		mockMvc.perform(post("/primaryfiles").content(
+		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("primaryfiles/")));
@@ -77,12 +83,12 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldRetrievePrimaryfile() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Primaryfile 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -94,11 +100,11 @@ public class PrimaryfileRepositoryTests {
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(primaryfile);
-		mockMvc.perform(post("/primaryfiles")
+		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		mockMvc.perform(
-				get("/primaryfiles/search/findByDescription?description={description}", primaryfile.getDescription())).andDo(
+				get("/primaryfiles/search/findByDescription?description={description}", primaryfile.getDescription()).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].description").value(
@@ -128,11 +134,11 @@ public class PrimaryfileRepositoryTests {
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(primaryfile);
-		mockMvc.perform(post("/primaryfiles")
+		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		mockMvc.perform(
-				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", primaryfile.getCreatedBy())).andDo(
+				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", primaryfile.getCreatedBy()).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].createdBy").value(
@@ -144,11 +150,11 @@ public class PrimaryfileRepositoryTests {
 	public void shouldQueryPrimaryfileName() throws Exception {
 
 		mockMvc.perform(post("/primaryfiles").content(
-				"{ \"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
+				"{ \"name\": \"Primaryfile 1\", \"description\":\"For test\"}").header("Authorization", "Bearer " + token)).andExpect(
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/primaryfiles/search/findByName?name={name}", "Primaryfile 1")).andExpect(
+				get("/primaryfiles/search/findByName?name={name}", "Primaryfile 1").header("Authorization", "Bearer " + token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].name").value(
 										"Primaryfile 1"));
@@ -162,12 +168,12 @@ public class PrimaryfileRepositoryTests {
 		String keyword = words[words.length-1];
 		
 		String json = mapper.writeValueAsString(primaryfile);
-		mockMvc.perform(post("/primaryfiles")
+		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].name").value(new StringContains(keyword)));
@@ -181,12 +187,12 @@ public class PrimaryfileRepositoryTests {
 		String keyword = words[words.length-1].toUpperCase();
 		
 		String json = mapper.writeValueAsString(primaryfile);
-		mockMvc.perform(post("/primaryfiles")
+		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].name").value(new StringContains(keyword)));
@@ -194,7 +200,7 @@ public class PrimaryfileRepositoryTests {
 		keyword = words[words.length-1].toLowerCase();
 
 		mockMvc.perform(
-				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].name").value(new StringContains(keyword)));
@@ -207,12 +213,12 @@ public class PrimaryfileRepositoryTests {
 		String keyword = words[words.length-1];
 
 		String json = mapper.writeValueAsString(primaryfile);
-		mockMvc.perform(post("/primaryfiles")
+		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
 		mockMvc.perform(
-				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword)).andDo(
+				get("/primaryfiles/search/findByKeyword?keyword={keyword}", keyword).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].description").value(new StringContains(keyword)));
@@ -221,17 +227,17 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldUpdatePrimaryfile() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(put(location).content(
+		mockMvc.perform(put(location).header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Primaryfile 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -239,17 +245,17 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldPartiallyUpdatePrimaryfile() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"Primaryfile 1.1.1\"}")).andExpect(
+				patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"Primaryfile 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Primaryfile 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -257,13 +263,13 @@ public class PrimaryfileRepositoryTests {
 	@Test
 	public void shouldDeletePrimaryfile() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Primaryfile 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
 	}
 }

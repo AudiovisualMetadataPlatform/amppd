@@ -60,6 +60,7 @@ public class JobControllerTests {
 	private Primaryfile primaryfile;
 	private Workflow workflow;	
 	private Invocation invocation;
+	String token = "";
 
 	/* Notes:
 	 * The below setup and cleanup methods shall really be at class level instead of method level; however, JUnit requires class level methods to be static, 
@@ -75,6 +76,7 @@ public class JobControllerTests {
     	primaryfile = testHelper.ensureTestAudio();
     	workflow = testHelper.ensureTestWorkflow();    
     	invocation = testHelper.ensureTestJob(true);  
+    	token = testHelper.getToken();
 	}
 		
 	@After
@@ -84,7 +86,7 @@ public class JobControllerTests {
 		    	    
     @Test
     public void shouldCreateJob() throws Exception {    	              
-    	mvc.perform(post("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
+    	mvc.perform(post("/jobs").header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()).param("parameters", "{}"))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$.historyId").isNotEmpty()).andExpect(
     							jsonPath("$.outputIds").isNotEmpty());    			
@@ -108,7 +110,7 @@ public class JobControllerTests {
     	bundle.getPrimaryfiles().add(pf);
     	
     	// use the dummy bundle we set up for this test
-    	mvc.perform(post("/jobs/bundle").param("workflowId", workflow.getId()).param("bundleId", bundle.getId().toString()).param("parameters", "{}"))
+    	mvc.perform(post("/jobs/bundle").header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()).param("bundleId", bundle.getId().toString()).param("parameters", "{}"))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$").isNotEmpty());
     	// TODO fix verification of primaryfile ID existence
@@ -120,7 +122,7 @@ public class JobControllerTests {
     
     @Test
     public void shouldListJobs() throws Exception {    	               	
-    	mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    	mvc.perform(get("/jobs").header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andExpect(
     					jsonPath("$[0].historyId").value(primaryfile.getHistoryId())).andExpect(
     							jsonPath("$[0].id").isNotEmpty());    			
@@ -129,12 +131,12 @@ public class JobControllerTests {
     @Test
     public void shouldShowJob() throws Exception {    	              	
     	// request to list the jobs and retrieve invocationId from the response
-    	MvcResult result = mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    	MvcResult result = mvc.perform(get("/jobs").header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andReturn();    	
     	String invocationId = JsonPath.read(result.getResponse().getContentAsString(), "$[0].id");
     	
     	// request to show the job with the retrieved invocationId
-    	mvc.perform(get("/jobs/{invocationId}", invocationId).param("workflowId", workflow.getId()))
+    	mvc.perform(get("/jobs/{invocationId}", invocationId).header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()))
     		.andExpect(status().isOk()).andExpect(
     			jsonPath("$.id").value(invocationId)).andExpect(
     				jsonPath("$.inputs").isNotEmpty()).andExpect(
@@ -149,17 +151,17 @@ public class JobControllerTests {
     @Test
     public void shouldShowJobStep() throws Exception {    	               	
     	// request to list the jobs and retrieve the invocationId from the response
-    	MvcResult result1 = mvc.perform(get("/jobs").param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    	MvcResult result1 = mvc.perform(get("/jobs").header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
     			.andExpect(status().isOk()).andReturn();    	
     	String invocationId = JsonPath.read(result1.getResponse().getContentAsString(), "$[0].id");
     	    	
     	// request to show the job with the retrieved invocationId
-    	MvcResult result2 = mvc.perform(get("/jobs/{invocationId}", invocationId).param("workflowId", workflow.getId()))
+    	MvcResult result2 = mvc.perform(get("/jobs/{invocationId}", invocationId).header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()))
     		.andExpect(status().isOk()).andReturn();   
     	String stepId = JsonPath.read(result2.getResponse().getContentAsString(), "$.steps[2].id");
 
     	// request to show the step with the retrieved invocationId and stepId
-    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}", invocationId, stepId).param("workflowId", workflow.getId()))
+    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}", invocationId, stepId).header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()))
     		.andExpect(status().isOk()).andExpect(
     			jsonPath("$.id").value(stepId)).andExpect(
     				jsonPath("$.jobs").isNotEmpty()).andExpect(
@@ -189,7 +191,7 @@ public class JobControllerTests {
     	}
 
     	// request to show the step output with the returned invocationId, stepId, and datasetId
-    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}/outputs/{datasetId}", invocation.getId(), stepId, datasetId).param("workflowId", workflow.getId()))
+    	mvc.perform(get("/jobs/{invocationId}/steps/{stepId}/outputs/{datasetId}", invocation.getId(), stepId, datasetId).header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()))
     		.andExpect(status().isOk()).andExpect(
     			jsonPath("$.id").value(datasetId)).andExpect(
     	    			jsonPath("$.historyId").value(invocation.getHistoryId())).andExpect(

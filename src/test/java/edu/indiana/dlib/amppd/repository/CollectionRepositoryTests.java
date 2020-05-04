@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -43,6 +44,9 @@ public class CollectionRepositoryTests {
 	private Collection obj;
 	// private ObjectFactory objFactory = new ObjectFactory();
 
+	@Autowired private TestHelper testHelper;
+	String token = "";
+	
 	@BeforeClass
 	public static void setupTest() {
 		FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
@@ -54,16 +58,17 @@ public class CollectionRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		collectionRepository.deleteAll(); 
+		token = testHelper.getToken();
 	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-		mockMvc.perform(get("/")).andExpect(status().isOk()).andExpect(jsonPath("$._links.collections").exists());
+		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(jsonPath("$._links.collections").exists());
 	}
 
 	@Test
 	public void shouldCreateCollection() throws Exception {
-		mockMvc.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andDo(MockMvcResultHandlers.print())
 				.andExpect(header().string("Location", containsString("collections/")));
 	}
@@ -75,7 +80,7 @@ public class CollectionRepositoryTests {
 			description.append("Long description ");
 		}
 		String content = "{\"name\": \"Collection 1\", \"description\":\"" + description.toString() + "\"}";
-		mockMvc.perform(post("/collections").content(content))
+		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(content))
 				.andExpect(status().isCreated()).andDo(MockMvcResultHandlers.print())
 				.andExpect(header().string("Location", containsString("collections/")));
 	}
@@ -83,7 +88,7 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldRetrieveCollection() throws Exception {
 
-		mockMvc.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
 	}
 
@@ -92,9 +97,9 @@ public class CollectionRepositoryTests {
 		obj = Fixture.from(Collection.class).gimme("valid");
 
 		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/collections").content(json)).andExpect(status().isCreated());
+		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(json)).andExpect(status().isCreated());
 
-		mockMvc.perform(get("/collections/search/findByName?name={name}", obj.getName()))
+		mockMvc.perform(get("/collections/search/findByName?name={name}", obj.getName()).header("Authorization", "Bearer " + token))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.collections[0].name").value(obj.getName()));
 	}
@@ -103,15 +108,15 @@ public class CollectionRepositoryTests {
 	public void shouldUpdateCollection() throws Exception {
 
 		MvcResult mvcResult = mockMvc
-				.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+				.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(put(location).content("{\"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
+		mockMvc.perform(put(location).header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
 				.andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Collection 1.1"))
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Collection 1.1"))
 				.andExpect(jsonPath("$.description").value("For test"));
 	}
 
@@ -119,14 +124,14 @@ public class CollectionRepositoryTests {
 	public void shouldPartiallyUpdateCollection() throws Exception {
 
 		MvcResult mvcResult = mockMvc
-				.perform(post("/collections").content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
+				.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(patch(location).content("{\"name\": \"Collection 1.1.1\"}")).andExpect(status().isNoContent());
+		mockMvc.perform(patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1.1.1\"}")).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk())
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.name").value("Collection 1.1.1"))
 				.andExpect(jsonPath("$.description").value("For test"));
 	}
@@ -135,13 +140,13 @@ public class CollectionRepositoryTests {
 	public void shouldDeleteCollection() throws Exception {
 
 		MvcResult mvcResult = mockMvc
-				.perform(post("/collections").content("{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
+				.perform(post("/collections").header("Authorization", "Bearer " + token).content("{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
 	}
 
 }

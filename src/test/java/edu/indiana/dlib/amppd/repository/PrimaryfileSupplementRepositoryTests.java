@@ -29,6 +29,7 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -43,6 +44,8 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Autowired 
 	private ObjectMapper mapper;
 	private PrimaryfileSupplement obj ;
+	@Autowired private TestHelper testHelper;
+	String token = "";
 	/*
 	 * private ObjectFactory objFactory = new ObjectFactory();
 	 * 
@@ -65,12 +68,13 @@ public class PrimaryfileSupplementRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		supplementRepository.deleteAll();
+		token = testHelper.getToken();
 	}
 
 	@Test
 	public void shouldReturnPrimaryfileSupplementRepositoryIndex() throws Exception {
 
-		mockMvc.perform(get("/")).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.primaryfileSupplements").exists());
 
 	}
@@ -78,7 +82,7 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Test
 	public void shouldCreatePrimaryfileSupplement() throws Exception {
 
-		mockMvc.perform(post("/primaryfileSupplements").content(
+		mockMvc.perform(post("/primaryfileSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"PrimaryfileSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("primaryfileSupplements/")));
@@ -87,12 +91,12 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Test
 	public void shouldRetrievePrimaryfileSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"PrimaryfileSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("PrimaryfileSupplement 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -103,12 +107,12 @@ public class PrimaryfileSupplementRepositoryTests {
 		obj = Fixture.from(PrimaryfileSupplement.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/primaryfileSupplements")
+		mockMvc.perform(post("/primaryfileSupplements").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 
 		mockMvc.perform(
-				get("/primaryfileSupplements/search/findByName?name={name}", obj.getName())).andExpect(
+				get("/primaryfileSupplements/search/findByName?name={name}", obj.getName()).header("Authorization", "Bearer " + token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfileSupplements[0].name").value(
 										obj.getName()));
@@ -117,17 +121,17 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Test
 	public void shouldUpdatePrimaryfileSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"PrimaryfileSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(put(location).content(
+		mockMvc.perform(put(location).header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"PrimaryfileSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("PrimaryfileSupplement 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -135,17 +139,17 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Test
 	public void shouldPartiallyUpdatePrimaryfileSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"PrimaryfileSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).content("{\"name\": \"PrimaryfileSupplement 1.1.1\"}")).andExpect(
+				patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"PrimaryfileSupplement 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("PrimaryfileSupplement 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -153,13 +157,13 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Test
 	public void shouldDeletePrimaryfileSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").content(
+		MvcResult mvcResult = mockMvc.perform(post("/primaryfileSupplements").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"PrimaryfileSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
 	}
 }

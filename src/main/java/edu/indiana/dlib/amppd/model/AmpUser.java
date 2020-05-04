@@ -50,7 +50,5 @@ public class AmpUser {
 	@Enumerated(EnumType.STRING)
 	private State approve_status = State.REQUESTED;
 	
-	@OneToMany(mappedBy="assignedTo")
-    private Set<HmgmTask> hmgmTasks;
 	
 }

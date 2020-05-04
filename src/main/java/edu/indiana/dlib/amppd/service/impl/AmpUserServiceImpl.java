@@ -15,6 +15,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -409,9 +410,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 */
 	@Override
 	public String getCurrentUsername() {
-		// TODO replace below tmp code with logic to get the current username from User Session		
-		// tmp code: return the default master AMP user for now
-		return amppdConfig.getUsername();
+		AmpUser userDetails = (AmpUser) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
+		String username = userDetails.getUsername();
+		return username;
 	}
 
 	/**
@@ -421,7 +423,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public AmpUser getCurrentUser() {
 		// TODO replace below tmp code with logic to get the current user from User Session		
 		// tmp code: return the default master AMP user for now
-		String username = amppdConfig.getUsername();
+		String username = getCurrentUsername();
 		AmpUser currentUser = getUser(username);		
 		if (currentUser == null) {
 			throw new RuntimeException("Current user with username " + username + " doesn't exist!");

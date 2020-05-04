@@ -34,11 +34,14 @@ public class MediaControllerTests {
 
 	private Primaryfile primaryfile;
 
+	String token = "";
+	
 	@Before
 	public void setup() {
 		// prepare the primaryfile with empty symlink for testing
 		primaryfile = testHelper.ensureTestAudio();
 		primaryfile.setSymlink(null);
+		token = testHelper.getToken();
 	}
 
 	@After
@@ -49,7 +52,7 @@ public class MediaControllerTests {
 	
     @Test
     public void shouldServePrimaryfile() throws Exception {  	
-    	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId())).andExpect(
+    	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId()).header("Authorization", "Bearer " + token)).andExpect(
     			status().is3xxRedirection()).andExpect(
     					redirectedUrlPattern("http://*:8500/symlink/*"));
     }
