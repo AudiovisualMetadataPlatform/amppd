@@ -1,17 +1,24 @@
 package edu.indiana.dlib.amppd.controller;
   
   import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
+import edu.indiana.dlib.amppd.web.JwtRequest;
+import edu.indiana.dlib.amppd.web.JwtResponse;
 import lombok.extern.slf4j.Slf4j;
   
  /**
@@ -26,14 +33,28 @@ import lombok.extern.slf4j.Slf4j;
   public class AmpUserController{
 	  @Autowired
 	  private AmpUserServiceImpl ampService;
+	  @Autowired
+	  private AuthenticationManager authenticationManager;
+
+	  @Autowired
+	  private JwtTokenUtil jwtTokenUtil;
 	  
-	  @PostMapping(path = "/login", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse loginAuth(@RequestBody AuthRequest request){ 
-		AuthResponse res = new AuthResponse();
-		log.info("Login Authenticaton for User=> Email:"+ request.getEmailid());	
-		res = ampService.validate(request.getEmailid(), request.getPassword());
-		log.info(" Authenticaton result:"+res);
-		return res;
+	  @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+		  AuthResponse response = ampService.validate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+			
+		  if(!response.isSuccess()) {
+			  return ResponseEntity.status(400).body(null);
+		  }
+			
+		  final AmpUser userDetails = ampService.getUser(authenticationRequest.getUsername());
+		  final String token = jwtTokenUtil.generateToken(userDetails);
+		  return ResponseEntity.ok(new JwtResponse(token));
+	  }
+		
+	  @RequestMapping(value = "/validate", method = RequestMethod.POST)
+	  public ResponseEntity<?> validateToken() throws Exception {
+		  return ResponseEntity.ok("Success");
 	  }
 
 	  @PostMapping(path = "/register", consumes = "application/json", produces = "application/json")

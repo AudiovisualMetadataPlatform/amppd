@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
 import org.springframework.context.annotation.Configuration;
-
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -97,9 +97,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.cors().and().csrf().disable()
-		.authorizeRequests().antMatchers("/authenticate", "/register").permitAll().
-		anyRequest().authenticated().and().
+		httpSecurity.cors().and().csrf().disable().authorizeRequests()
+		.antMatchers(HttpMethod.POST, "/register").permitAll()
+		.antMatchers(HttpMethod.POST, "/authenticate").permitAll()
+		.antMatchers(HttpMethod.POST, "/forgot-password").permitAll()
+		.antMatchers(HttpMethod.POST, "/reset-password").permitAll()
+		.anyRequest().authenticated().and().
 		exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
