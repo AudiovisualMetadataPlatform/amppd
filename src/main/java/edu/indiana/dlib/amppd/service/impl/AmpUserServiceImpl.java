@@ -232,7 +232,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		if (type.equalsIgnoreCase("approve"))
 		{
 			log.info("constructing Email for User account approval:"+user.getUsername());
-			url = contextPath + "/approve-user/" + user.getId();
+			url = contextPath + "/account/approve-user/" + user.getId();
 			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
 			subject = "New User Approval";
@@ -242,16 +242,16 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else if (type.equalsIgnoreCase("rejected"))
 		{
 			log.info("constructing Email for User account rejection notification:"+user.getUsername());
-			url = contextPath + "/" ;
-			message = "Your registeration request has been reviewed and unfortunately it was not accepted by the admin.\n Please contact the AMP's admin for further details.";
-			subject = "Registeration request rejected";
+			url = "" ;
+			message = "Sign up rejected. Please reply to this email if you think this was done in error.";
+			subject = "Sign up rejected";
 			emailTo = user.getEmail();
 		    
 		}
 		else if (type.equalsIgnoreCase("activated"))
 		{
 			log.info("Constructing email for user account activation notification"+user.getUsername());
-			url = contextPath + "/activate-account/" + user.getId();
+			url = contextPath + "/account/activate-account/" + user.getId();
 			message = "Your registeration request has been reviewed and accepted. \n Click the link below to activate your AMP account";
 			subject = "Activate Account";
 			emailTo = user.getEmail();
