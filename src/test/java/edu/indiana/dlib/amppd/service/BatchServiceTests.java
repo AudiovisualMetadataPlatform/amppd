@@ -257,6 +257,27 @@ public class BatchServiceTests {
 	}
 	
 	/*
+	 * Invalid collection name.  Should fail validation
+	 */
+	@Test
+	public void shouldBeInvalidCollectionName() throws Exception {
+		String fileName = "batch_manifest_for_testing.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+ 
+        File file = new File(classLoader.getResource(fileName).getFile());
+        String content = new String(Files.readAllBytes(file.toPath()));
+        
+        System.out.println(content);
+                
+        Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
+        
+        BatchValidationResponse response = manifestService.validate("Invalid Collection", "Test File", users.get(), content);
+        
+        Assert.assertTrue(response.hasErrors());
+	}
+
+	
+	/*
 	 * File name doesn't exist.  Should fail validation
 	 */
 	@Test

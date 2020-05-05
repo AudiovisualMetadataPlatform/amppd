@@ -118,7 +118,9 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	if(collections!=null && collections.size()>0) {
         		batchFile.setCollection(collections.get(0));
         	}
-        	
+        	//Get the collection name
+        	if(line[0] != null)
+        		batchFile.setCollectionName(line[0]);
         	// Get the source and item        	
         	batchFile.setExternalSource(line[1]);
         	batchFile.setExternalItemId(line[2]);
@@ -204,12 +206,13 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         for(BatchFile batchFile : batch.getBatchFiles()) {
         	
     		// Validate supplied collection name
-    		List<String> collectionNameErrors = validateCollection(batch.getUnit(), batchFile.getCollection(), batchFile.getRowNum());
+    		List<String> collectionNameErrors = validateCollection(batch.getUnit(), batchFile.getCollection(), batchFile.getRowNum(), batchFile.getCollectionName());
         	response.addErrors(collectionNameErrors);
 
         	// If we have an invalid collection, no point on continuing with validation
     		if(collectionNameErrors.size()>0) {
-    			return response;
+    			//return response;
+    			continue;
     		}
     		
         	List<String> itemErrors = validateItemColumns( batchFile.getItemName(), batchFile.getRowNum());
@@ -442,14 +445,17 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the collection
 	 */
-	private List<String> validateCollection(Unit unit, Collection collection, int lineNum){
+	private List<String> validateCollection(Unit unit, Collection collection, int lineNum, String collectionNameFromManifest){
 		List<String> errors = new ArrayList<String>();
 		String collectionName = collection!=null ? collection.getName() : "";
-		if(collectionName==null || collectionName.isBlank()) {
-    		errors.add(String.format("Row %s: Missing collection name", lineNum));
+		if(collectionNameFromManifest == null || collectionNameFromManifest.isBlank()) {
+			errors.add(String.format("Row %s: Missing collection name", lineNum));
+		}
+		else if((collectionName==null || collectionName.isBlank()) ) {
+			errors.add(String.format("Row %s: Collection does not exist %s", lineNum, collectionNameFromManifest));
 		}
 		else if(!collectionExists(collectionName)) {
-			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collection.getName()));
+			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collectionNameFromManifest));
 		}
 		else if(!dropBoxExists(unit.getName(), collectionName)) {
 			errors.add(String.format("Row %s: Invalid drop box %s", lineNum, collection.getName()));
