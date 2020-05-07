@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 	  
 	  @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-		  AuthResponse response = ampService.validate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+		  AuthResponse response = ampService.authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 			
 		  if(!response.isSuccess()) {
 			  return ResponseEntity.status(400).body(null);
@@ -85,7 +85,7 @@ import lombok.extern.slf4j.Slf4j;
 	  public @ResponseBody AuthResponse approveUser(
 			  @RequestBody AuthRequest request){ 
 		log.info("Approve User=> id:"+ request.getUserId());	
-		AuthResponse res = ampService.approveUser(request.getUserId(), "approve");
+		AuthResponse res = ampService.accountAction(request.getUserId(), "approve");
 		log.info(" approve user result: " + res);
 		return res;
 	  }
@@ -94,10 +94,20 @@ import lombok.extern.slf4j.Slf4j;
 	  public @ResponseBody AuthResponse rejectUser(
 			  @RequestBody AuthRequest request){ 
 		log.info("Reject User=> id:"+ request.getUserId());	
-		AuthResponse res = ampService.approveUser(request.getUserId(), "reject");
+		AuthResponse res = ampService.accountAction(request.getUserId(), "reject");
 		log.info(" reject user result: " + res);
 		return res;
 	  }
+	  
+	  @PostMapping(path = "/user/account/activate", consumes = "application/json", produces = "application/json")
+	  public @ResponseBody AuthResponse activateUser(
+			  @RequestBody AuthRequest request){ 
+		log.info("Activate User=> id:"+ request.getUserId());	
+		AuthResponse res = ampService.accountAction(request.getUserId(), "activate");
+		log.info(" reject user result: " + res);
+		return res;
+	  }
+
 	  
 	  @PostMapping(path = "/reset-password-getEmail", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse resetPasswordGetEmail(

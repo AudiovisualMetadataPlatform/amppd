@@ -18,7 +18,7 @@ public interface AmpUserService {
 	 * @param pswd is the entered password
 	 * @return the result of validation
 	 */
-	public AuthResponse validate(String username, String pswd);
+	public AuthResponse authenticate(String username, String pswd);
 	
 	/**
 	 * Register the new user and make entry to database.
@@ -56,11 +56,11 @@ public interface AmpUserService {
 	public AuthResponse emailToken(String emailid);
 	
 	/**
-	 * Generates an account verification email for the new and sets the approved flag to true in the database. 
+	 * Generates an account verification email for the new and sets the approve_status flag to the specified action in the database. 
 	 * @param user id
-	 * @return the result for approving the user in database
+	 * @return the response object consisting of the database update result and errors, if any.
 	 */
-	public AuthResponse approveUser(Long userID, String action);
+	public AuthResponse accountAction(Long userID, String action);
 
 	
 	/**
