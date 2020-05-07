@@ -53,7 +53,7 @@ public interface AmpUserService {
 	 * @param email id
 	 * @return the result for sending the email
 	 */
-	public AuthResponse emailToken(String emailid);
+	public AuthResponse emailResetPasswordToken(String emailid);
 	
 	/**
 	 * Generates an account verification email for the new and sets the approve_status flag to the specified action in the database. 

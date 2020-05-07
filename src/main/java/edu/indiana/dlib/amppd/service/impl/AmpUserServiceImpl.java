@@ -137,30 +137,27 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 
 	@Override
-	public AuthResponse emailToken(String emailid) {
+	public AuthResponse emailResetPasswordToken(String emailid) {
 		AuthResponse response = new AuthResponse();
 		log.info("Executing emailToken() for user:"+emailid);
 		try {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
 			if(user.getApprove_status() == AmpUser.State.ACTIVATED){
 				log.info("Activated user account found with entered email id");
-				String token = UUID.randomUUID().toString();
-				boolean res = createPasswordResetTokenForUser(user, token);
-			    if(res){
-			    	log.info("Password reset token created successfully");
-					try {
-						mailSender.send(constructResetTokenEmail(uiUrl, token, user));
-					} 
-					catch (Exception e) {
-						e.printStackTrace();
-					}
-					response.setSuccess(true);
-					log.info("Token email sent successfully");
-			    }
-			    else {
-			    	response.setSuccess(false);
-			    }
+				//String token = UUID.randomUUID().toString();
+				try {
+					mailSender.send(constructTokenEmail(uiUrl, user, "reset password"));
+				} 
+				catch (Exception e) {
+					log.error(e.getMessage());
+					response.addError("System error in sending email");
+					response.setSuccess(false);
+				}
+				log.info("Token email sent successfully");
 			}
+		    else {
+		    	response.setSuccess(false);
+		    }
 		}
 		catch(Exception e){
 			response.addError(e.getMessage());
@@ -205,7 +202,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			try {
 				if(action.contentEquals("approve")){
 					user.setApprove_status(AmpUser.State.ACCEPTED);
-					mailSender.send(constructEmailAttributes(uiUrl, user, "account approval"));
+					mailSender.send(constructTokenEmail(uiUrl, user, "account approval"));
 				}
 				else if(action.contentEquals("reject")){
 					mailSender.send(constructEmailAttributes(uiUrl, user, "account rejection"));
@@ -280,10 +277,21 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	//HELPER FUNCTIONS FOLLOW ---->
 	
-	private SimpleMailMessage constructResetTokenEmail(String contextPath, String token, AmpUser user) {
-		String url = contextPath + "/reset-password/" + token;
-		log.info("Constructed reset token url, constructing email attributes");
-		return constructEmailAttributes(url, user, "reset password");
+	private SimpleMailMessage constructTokenEmail(String contextPath, AmpUser user, String type) {
+		String token = createTimedToken(user);
+		String url = new String();
+	    if(token != null){
+	    	log.info("Password reset token created successfully");
+	    	if (type.equalsIgnoreCase("reset password")) {
+	    		url = contextPath + "/reset-password/" + token;
+	    		log.info("Constructed reset token url, constructing email attributes");
+	    	}
+	    	else if (type.equalsIgnoreCase("account approval")) {
+	    		url = contextPath + "/account/activate-account/" + token;
+	    		log.info("Constructed reset token url, constructing email attributes");
+	    	}
+	    }	
+	    return constructEmailAttributes(url, user, type);
 	}
 	
 	private SimpleMailMessage constructEmailAttributes(String contextPath, AmpUser user, String type) {
@@ -297,7 +305,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
 			subject = "New User account request";
-			emailTo = user.getEmail();
+			emailTo = ampAdmin;
 		}
 		else if(type.contentEquals("reset password"))
 		{
@@ -305,7 +313,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			url = contextPath;
 			message = "Please click the link to reset the password. The link  will be valid only for a limited time.";
 			subject = "Reset Account Password";
-			emailTo = ampAdmin;			
+			emailTo = user.getEmail();			
 		}
 		else if (type.equalsIgnoreCase("account rejection")){
 			log.info("constructing Email for User account rejection notification:"+user.getUsername());
@@ -315,8 +323,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			emailTo = user.getEmail();
 		}
 		else if (type.equalsIgnoreCase("account approval")){
-			log.info("Constructing email for User account activation notification"+user.getUsername());
-			url = contextPath + "/account/activate-account/" + user.getId();
+			log.info("Constructing email for User account activation"+user.getUsername());
+			url = contextPath;
 			message = "Your registeration request has been reviewed and accepted. \n Click the link below to activate your AMP account";
 			subject = "Activate your account";
 			emailTo = user.getEmail();
@@ -324,8 +332,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
-	public boolean createPasswordResetTokenForUser(AmpUser user, String token) {
+	public String createTimedToken(AmpUser user) {
 		int res = 0;
+		String token = UUID.randomUUID().toString();
 		Passwordresettoken myToken=new Passwordresettoken();
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
@@ -346,9 +355,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		log.info("The result of creating a token is (1:true/0:false):"+res);
 		if(res > 0)
-			return true;
+			return token;
 		else
-			return false;
+			return null;
 	}
 	
 	private SimpleMailMessage constructEmail(String subject, String body, String toEmailID) {

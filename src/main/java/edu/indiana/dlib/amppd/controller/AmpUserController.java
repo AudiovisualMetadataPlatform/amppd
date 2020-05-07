@@ -67,7 +67,7 @@ import lombok.extern.slf4j.Slf4j;
 	  public @ResponseBody AuthResponse forgotPassword(
 			  @RequestBody AuthRequest request){ 
 		log.info("Forgot Password for User=> Email:"+ request.getEmailid());	
-		AuthResponse res = ampService.emailToken(request.getEmailid());
+		AuthResponse res = ampService.emailResetPasswordToken(request.getEmailid());
 		log.info(" Forgot Password result: " + res);
 		return res;
 	  }
