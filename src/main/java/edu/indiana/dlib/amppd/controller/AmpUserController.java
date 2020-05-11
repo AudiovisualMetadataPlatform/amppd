@@ -101,10 +101,10 @@ import lombok.extern.slf4j.Slf4j;
 	  
 	  @PostMapping(path = "/user/account/activate", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse activateUser(
-			  @RequestBody AuthRequest request){ 
-		log.info("Activate User=> id:"+ request.getUserId());	
-		AuthResponse res = ampService.accountAction(request.getUserId(), "activate");
-		log.info(" reject user result: " + res);
+			  @RequestBody AuthRequest request){
+		log.info("Activate User");	
+		AuthResponse res = ampService.activateAccount(request.getToken());
+		log.info(" activate user result: " + res);
 		return res;
 	  }
 

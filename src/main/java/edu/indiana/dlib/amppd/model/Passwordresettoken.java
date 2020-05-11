@@ -22,10 +22,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Passwordresettoken {
-  
-    public static final int EXPIRATION = 60 * 5;
-  
+public class Passwordresettoken {  
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

@@ -73,7 +73,7 @@ public class AmpUserServiceTests {
 	 	myToken.setUser(user);
 		myToken.setToken(token);
 		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.SECOND,Passwordresettoken.EXPIRATION);
+		calendar.add(Calendar.SECOND,amppdconfig.getPasswordResetTokenExpiration());
 		myToken.setExpiryDate(calendar.getTime());
 		passwordTokenRepository.save(myToken);
 	 	
@@ -97,10 +97,10 @@ public class AmpUserServiceTests {
 	 	AmpUser user2 = ampUserRepository.findByEmail(user.getEmail()).get();
 	 	if(user2 != null) {
 	 		Long id = user2.getId();
-	 		Assert.assertFalse(user.getApprove_status()==AmpUser.State.ACCEPTED);
+	 		Assert.assertFalse(user.getStatus()==AmpUser.State.ACCEPTED);
 	 		ampUserService.accountAction(id, "approve");
 	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
-	 		Assert.assertTrue(user2.getApprove_status()==AmpUser.State.ACCEPTED);
+	 		Assert.assertTrue(user2.getStatus()==AmpUser.State.ACCEPTED);
 	 	}
     }
 	

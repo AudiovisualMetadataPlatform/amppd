@@ -62,6 +62,12 @@ public interface AmpUserService {
 	 */
 	public AuthResponse accountAction(Long userID, String action);
 
+	/**
+	 * Fetches the user id from the database for a given token if it is not expired. 
+	 * @param token
+	 * @return user id for an unexpired token.
+	 */
+	public AuthResponse activateAccount(String token);
 	
 	/**
 	 * Gets an amp emailid by token. It returns the emailid to the reset password page for prepopulation there. 
