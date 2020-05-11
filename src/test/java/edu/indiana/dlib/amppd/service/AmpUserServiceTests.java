@@ -85,12 +85,10 @@ public class AmpUserServiceTests {
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());
 		  }
-	 	
     }
 	
 	@Test
-	public void shouldApproveUser() throws Exception{
-    	
+	public void shouldApproveUser() throws Exception{	
 	 	AmpUser user = getAmpUser();  
 	 	//user.setPassword(md5.getMd5("amptest@123"));
 	 	ampUserService.registerAmpUser(user);
@@ -102,6 +100,31 @@ public class AmpUserServiceTests {
 	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
 	 		Assert.assertTrue(user2.getStatus()==AmpUser.State.ACCEPTED);
 	 	}
+    }
+	
+	@Test
+	public void shouldActivateUser() throws Exception{	
+	 	AmpUser user = getAmpUser();  
+	 	ampUserService.registerAmpUser(user);
+	 	//String old_pswd = MD5Encryption.getMd5(user.getPassword());
+	 	String token = UUID.randomUUID().toString();
+	 	Passwordresettoken myToken = new Passwordresettoken();
+	 	myToken.setUser(user);
+		myToken.setToken(token);
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.SECOND,amppdconfig.getAccountActivationTokenExpiration());
+		myToken.setExpiryDate(calendar.getTime());
+		passwordTokenRepository.save(myToken);
+		Assert.assertFalse(user.getStatus()==AmpUser.State.ACTIVATED);
+	 	try { 
+	 		ampUserRepository.updateStatus(user.getId(), AmpUser.State.ACCEPTED);
+			ampUserService.activateAccount(token);
+			AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).get();
+			Assert.assertTrue(retrievedUser.getStatus()==AmpUser.State.ACTIVATED);
+		  }
+		  catch(Exception ex) {
+			  System.out.println(ex.toString());
+		  }
     }
 	
 	private AmpUser getAmpUser() {

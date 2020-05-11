@@ -149,20 +149,14 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
 			if(user.getStatus() == AmpUser.State.ACTIVATED){
 				log.info("Activated user account found with entered email id");
-				//String token = UUID.randomUUID().toString();
-				try {
-					mailSender.send(constructTokenEmail(uiUrl, user, "reset password"));
-				} 
-				catch (Exception e) {
-					log.error(e.getMessage());
-					response.addError("System error in sending email");
-					response.setSuccess(false);
-				}
+				mailSender.send(constructTokenEmail(uiUrl, user, "reset password"));
 				log.info("Token email sent successfully");
 			}
 		    else {
+		    	response.addError("User account status is invalid");
 		    	response.setSuccess(false);
 		    }
+			response.setSuccess(true);
 		}
 		catch(Exception e){
 			response.addError(e.getMessage());
@@ -213,10 +207,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 					mailSender.send(constructEmailAttributes(uiUrl, user, "account rejection"));
 					user.setStatus(AmpUser.State.REJECTED);
 				}
-				else if(action.contentEquals("activate")){
-					
-					
-				}
+				
 			}
 			catch (Exception e) {
 				response.addError("Account action:"+action+" could not be completed");
@@ -439,7 +430,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return null;
 	}
 	  
-	public boolean approveUser(String username) {
+	public boolean activateUser(String username) {
 		try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
 			if(user!=null)
@@ -447,8 +438,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		catch(Exception ex) {
 			  System.out.println(ex.toString());
+			  return false;
 		}
-		return false;		    
+		return true;		    
 	}
 	
 	private boolean emailUnique(String username) {

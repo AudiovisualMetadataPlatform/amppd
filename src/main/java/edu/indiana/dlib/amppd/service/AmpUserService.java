@@ -28,18 +28,11 @@ public interface AmpUserService {
 	public AuthResponse registerAmpUser(AmpUser user);
 	
 	/**
-	 * Sends an email.
-	 * @param user contains new user info to be sent in the email
-	 * @return the result of email sending as success/failure
-	 */
-	//void sendEmail(AmpUser u);
-
-	/**
 	 * Sets amp user as approved to login to the application
 	 * @param user name
 	 * @return the result of setting the user to approved as success/failure
 	 */
-	public boolean approveUser(String userName);
+	public boolean activateUser(String userName);
 	
 	/**
 	 * Resets the existing password in the database for the given username
