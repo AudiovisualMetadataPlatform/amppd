@@ -86,19 +86,29 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	    return source;
 	}
+	
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.cors().and().csrf().disable().authorizeRequests()
-		.antMatchers(HttpMethod.POST, "/register").permitAll()
-		.antMatchers(HttpMethod.POST, "/authenticate").permitAll()
-		.antMatchers(HttpMethod.POST, "/forgot-password").permitAll()
-		.antMatchers(HttpMethod.POST, "/reset-password").permitAll()
-		// TODO remove below hmgm paths after we done development with HMGM
-		.antMatchers("/hmgm/**").permitAll()
-		.anyRequest().authenticated().and().
-		exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		// if authentication is turned on, add JWT token filter
+		if (this.amppdPropertyConfig.getAuth()) {
+			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			.antMatchers(HttpMethod.POST, "/register").permitAll()
+			.antMatchers(HttpMethod.POST, "/authenticate").permitAll()
+			.antMatchers(HttpMethod.POST, "/forgot-password").permitAll()
+			.antMatchers(HttpMethod.POST, "/reset-password").permitAll()
+			// TODO remove below hmgm paths after we done development with HMGM
+			.antMatchers("/hmgm/**").permitAll()
+			.anyRequest().authenticated().and().
+			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+			httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		}
+		// otherwise permit all requests
+		else {
+			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			.anyRequest()
+			.permitAll();
+		}
 	}
 
 }
