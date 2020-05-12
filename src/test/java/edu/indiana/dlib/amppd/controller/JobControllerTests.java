@@ -122,10 +122,11 @@ public class JobControllerTests {
     
     @Test
     public void shouldListJobsDetails() throws Exception {    	               	
-    	mvc.perform(get("/jobs").header("Authorization", "Bearer " + token).param("workflowId", workflow.getId()).param("primaryfileId", primaryfile.getId().toString()))
+    	mvc.perform(get("/jobs/details").header("Authorization", "Bearer " + token))
     			.andExpect(status().isOk()).andExpect(
-    					jsonPath("$[0].historyId").value(primaryfile.getHistoryId())).andExpect(
-    							jsonPath("$[0].id").isNotEmpty());    			
+    					jsonPath("$[0].inputs").isNotEmpty()).andExpect(
+    							jsonPath("$[0].steps").isNotEmpty()).andExpect(
+    									jsonPath("$[0].steps[0].outputs").isNotEmpty());    			
     }
     
     @Test

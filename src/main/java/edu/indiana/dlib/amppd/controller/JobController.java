@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -84,7 +83,7 @@ public class JobController {
 	 * List all AMP jobs with step details, i.e. all workflow invocations submitted via AMPPD UI to Galaxy.
 	 * @return a list of Invocations each containing basic information of an AMP job.
 	 */
-	@GetMapping("/jobs")
+	@GetMapping("/jobs/details")
 	public List<InvocationDetails> listJobsDetails() {
 		log.info("Listing all AMP jobs with step details: ");		
 		/* Note: 
@@ -96,22 +95,14 @@ public class JobController {
 	}
 	
 	/**
-	 * List AMP jobs, i.e. workflow invocations submitted via AMPPD UI to Galaxy:
-	 * if "all" is true, all invocations with step details will be returned, and the workflowId and primaryfileId will be ignored;
-	 * otherwise, invocations run on the specified workflow against the specified primaryfile will be returned, without step details.
-	 *  
+	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
 	 * @return a list of Invocations each containing basic information of an AMP job.
 	 */
 	@GetMapping("/jobs")
 	public List<Invocation> listJobs(
-			@RequestParam("all") Boolean all,
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId) {
-		log.info("Listing all AMP jobs for: all: " + all + ", workflowId: " + workflowId + ", primaryfileId: " + primaryfileId);
-		if (all) {
-			log.info("Listing all AMP jobs ...");
-			return jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername());
-		}
+		log.info("Listing all AMP jobs for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId);		
 		return jobService.listJobs(workflowId, primaryfileId);
 	}
 	
