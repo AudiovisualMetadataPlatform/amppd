@@ -7,12 +7,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
@@ -53,7 +55,10 @@ public class MediaServiceImpl implements MediaService {
 
 	@Autowired
 	private FileStorageService fileStorageService;
-
+	
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+	
 	@Autowired
 	private AmppdUiPropertyConfig amppduiConfig; 	
 	
@@ -72,6 +77,25 @@ public class MediaServiceImpl implements MediaService {
 		}		
 	}	
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Primaryfile)
+	 */
+	@Override
+	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
+		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfile.getId() + "/media";
+		return url;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getAssetMediaInfoPath(Asset)
+	 */
+	@Override
+	public String getAssetMediaInfoPath(Asset asset) {
+		String jsonpath = FilenameUtils.getFullPath(asset.getPathname()) + FilenameUtils.getBaseName(asset.getPathname()) + ".json";
+		jsonpath = fileStorageService.absolutePathName(jsonpath);
+		return jsonpath;
+	}
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileSymlink(Long)
 	 */
