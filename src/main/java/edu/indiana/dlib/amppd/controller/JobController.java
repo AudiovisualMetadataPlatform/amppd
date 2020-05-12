@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationBriefs;
+import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.service.JobService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +34,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JobController {	
 
+	@Autowired
+	private GalaxyPropertyConfig galaxyPropertyConfig;
+	
 	@Autowired
 	private JobService jobService;
 	
@@ -75,14 +81,37 @@ public class JobController {
 	}
 
 	/**
-	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
+	 * List all AMP jobs with step details, i.e. all workflow invocations submitted via AMPPD UI to Galaxy.
+	 * @return a list of Invocations each containing basic information of an AMP job.
+	 */
+	@GetMapping("/jobs")
+	public List<InvocationDetails> listJobsDetails() {
+		log.info("Listing all AMP jobs with step details: ");		
+		/* Note: 
+		 * Galaxy admin can list invocations owned by any user; while non-admin can only list self-owned ones.
+		 * Since all invocations are submitted as amppd master user, which is a Galaxy admin, its username
+		 * is passed as the query parameter, and the returned list will include all AMPPD jobs.
+		 */
+		return jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername());
+	}
+	
+	/**
+	 * List AMP jobs, i.e. workflow invocations submitted via AMPPD UI to Galaxy:
+	 * if "all" is true, all invocations with step details will be returned, and the workflowId and primaryfileId will be ignored;
+	 * otherwise, invocations run on the specified workflow against the specified primaryfile will be returned, without step details.
+	 *  
 	 * @return a list of Invocations each containing basic information of an AMP job.
 	 */
 	@GetMapping("/jobs")
 	public List<Invocation> listJobs(
+			@RequestParam("all") Boolean all,
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId) {
-		log.info("Listing all AMP jobs for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId);		
+		log.info("Listing all AMP jobs for: all: " + all + ", workflowId: " + workflowId + ", primaryfileId: " + primaryfileId);
+		if (all) {
+			log.info("Listing all AMP jobs ...");
+			return jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername());
+		}
 		return jobService.listJobs(workflowId, primaryfileId);
 	}
 	
