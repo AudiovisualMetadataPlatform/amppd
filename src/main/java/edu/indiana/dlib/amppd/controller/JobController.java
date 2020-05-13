@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationBriefs;
+import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.service.JobService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JobController {	
 
+	@Autowired
+	private GalaxyPropertyConfig galaxyPropertyConfig;
+	
 	@Autowired
 	private JobService jobService;
 	
@@ -74,6 +79,21 @@ public class JobController {
 		return jobService.createJobBundle(workflowId, bundleId, parameters);
 	}
 
+	/**
+	 * List all AMP jobs with step details, i.e. all workflow invocations submitted via AMPPD UI to Galaxy.
+	 * @return a list of Invocations each containing basic information of an AMP job.
+	 */
+	@GetMapping("/jobs/details")
+	public List<InvocationDetails> listJobsDetails() {
+		log.info("Listing all AMP jobs with step details: ");		
+		/* Note: 
+		 * Galaxy admin can list invocations owned by any user; while non-admin can only list self-owned ones.
+		 * Since all invocations are submitted as amppd master user, which is a Galaxy admin, its username
+		 * is passed as the query parameter, and the returned list will include all AMPPD jobs.
+		 */
+		return jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername());
+	}
+	
 	/**
 	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
 	 * @return a list of Invocations each containing basic information of an AMP job.

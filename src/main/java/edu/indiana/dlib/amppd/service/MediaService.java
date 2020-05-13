@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.service;
 import java.nio.file.Path;
 
 import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 
 /**
  * Service for serving media files for primaryfiles and supplements. 
@@ -11,6 +12,20 @@ import edu.indiana.dlib.amppd.model.Asset;
  */
 public interface MediaService {
 
+	/**
+	 * Get the media file download URL for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @return the generated media URL
+	 */
+	public String getPrimaryfileMediaUrl(Primaryfile primaryfile);
+
+	/**
+	 * Get the media information JSON file path for the given asset.
+	 * @param asset the given asset
+	 * @return the absolute path of the media info JSON file
+	 */
+	public String getAssetMediaInfoPath(Asset asset);	
+	
 	/**
 	 * Get the media symlink URL for the given primaryfile:
 	 * create a new one if not existing yet; or reuse the existing symlink if already created.
@@ -43,6 +58,6 @@ public interface MediaService {
 	/**
 	 * Clean up all symlinks under the media symlink root.
 	 */
-	public void cleanup();	
+	public void cleanup();
 	
 }

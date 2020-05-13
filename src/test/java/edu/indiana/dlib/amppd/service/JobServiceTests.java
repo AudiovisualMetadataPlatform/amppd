@@ -49,7 +49,7 @@ public class JobServiceTests {
 
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
-		
+
 	@Autowired
 	private JobService jobService;   
 		
@@ -115,15 +115,7 @@ public class JobServiceTests {
 //    public void shouldThrowExceptionBuildnputsForNonExistingWorkflow() {
 //    	jobService.buildWorkflowInputs(null, "", "", new HashMap<String, Map<String, String>>());
 //    }
-	
-	@Test
-    public void shouldReturnPrimaryfileUrl() {    	      
-		String url = jobService.getPrimaryfileMediaUrl(primaryfile);
-		Assert.assertTrue(url.startsWith("http://"));
-		Assert.assertTrue(url.contains("/primaryfiles/" + primaryfile.getId()));
-		Assert.assertTrue(url.endsWith("/media"));
-	}
-    
+	    
 	@Test
     public void shouldReturnHmgmContext() {    	      
 		String contextJson = jobService.getHmgmContext(hmgmWorkflowDetails, primaryfile);

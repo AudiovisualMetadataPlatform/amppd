@@ -40,13 +40,6 @@ public interface JobService {
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile); 
 	
 	/**
-	 * Get the media file download URL for the given primaryfile.
-	 * @param primaryfile the given primaryfile
-	 * @return the generated media URL
-	 */
-	public String getPrimaryfileMediaUrl(Primaryfile primaryfile);
-	
-	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileId ID of the given primaryfile

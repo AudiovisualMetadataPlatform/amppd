@@ -25,31 +25,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 }
 */
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.context.annotation.Bean;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -60,6 +48,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+	
 	@Autowired
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	
@@ -95,21 +86,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	    return source;
 	}
+	
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity.cors().and().csrf().disable().authorizeRequests()
-		.antMatchers(HttpMethod.POST, "/register").permitAll()
-		.antMatchers(HttpMethod.POST, "/authenticate").permitAll()
-		.antMatchers(HttpMethod.POST, "/forgot-password").permitAll()
-		.antMatchers(HttpMethod.POST, "/reset-password").permitAll()
-		.antMatchers(HttpMethod.POST, "/user/account/activate").permitAll()
-		.antMatchers(HttpMethod.POST, "/reset-password-getEmail").permitAll()
-		// TODO remove below hmgm paths after we done development with HMGM
-		.antMatchers("/hmgm/**").permitAll()
-		.anyRequest().authenticated().and().
-		exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		// if authentication is turned on, add JWT token filter
+		if (this.amppdPropertyConfig.getAuth()) {
+			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			.antMatchers(HttpMethod.POST, "/register").permitAll()
+			.antMatchers(HttpMethod.POST, "/authenticate").permitAll()
+			.antMatchers(HttpMethod.POST, "/forgot-password").permitAll()
+			.antMatchers(HttpMethod.POST, "/reset-password").permitAll()
+      .antMatchers(HttpMethod.POST, "/user/account/activate").permitAll()
+		  .antMatchers(HttpMethod.POST, "/reset-password-getEmail").permitAll()
+			// TODO remove below hmgm paths after we done development with HMGM
+			.antMatchers("/hmgm/**").permitAll()
+			.anyRequest().authenticated().and().
+			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+			httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		}
+		// otherwise permit all requests
+		else {
+			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			.anyRequest()
+			.permitAll();
+		}
 	}
 
 }
