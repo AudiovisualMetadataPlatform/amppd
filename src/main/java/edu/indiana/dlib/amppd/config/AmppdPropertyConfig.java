@@ -28,6 +28,7 @@ public class AmppdPropertyConfig {
     @NotNull private String username; 
     @NotNull private String password; 
     @NotNull private String url;
+    @NotNull private int passwordResetTokenExpiration;
+    @NotNull private int accountActivationTokenExpiration;
     @NotNull private Boolean auth;
-
 }

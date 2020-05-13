@@ -48,7 +48,7 @@ public class AmpUser {
 	private Role role;
 	
 	@Enumerated(EnumType.STRING)
-	private State approve_status = State.REQUESTED;
+	private State status = State.REQUESTED;
 	
 	
 }

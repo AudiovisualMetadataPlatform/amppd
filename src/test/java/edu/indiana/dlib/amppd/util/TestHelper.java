@@ -312,7 +312,7 @@ public class TestHelper {
 			ampUser.setEmail(username);
 			ampUser.setUsername(username);
 			ampUser.setPassword(username);
-			ampUser.setApprove_status(AmpUser.State.ACCEPTED);
+			ampUser.setStatus(AmpUser.State.ACCEPTED);
 			ampUserService.registerAmpUser(ampUser);
 		}
 		ampUser.setPassword(username);
