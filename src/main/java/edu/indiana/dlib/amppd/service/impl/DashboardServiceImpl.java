@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,12 +13,14 @@ import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.DashboardResult;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,8 @@ public class DashboardServiceImpl implements DashboardService{
 	private PrimaryfileRepository primaryfileRepository;
 	@Autowired
 	private JobService jobService;
+	@Autowired
+	private WorkflowService workflowService;
 
 	public List<DashboardResult> getDashboardResults(){
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
@@ -56,6 +61,25 @@ public class DashboardServiceImpl implements DashboardService{
 					List<Job> jobs = step.getJobs();
 					if(jobs.isEmpty()) continue;
 					
+					String workflowName = detail.getWorkflowId();
+					Map<String, String> workflowDetails = new HashMap<String, String>();
+					if(workflowDetails.containsKey(detail.getWorkflowId())) {
+						workflowName = workflowDetails.get(detail.getWorkflowId());
+					}
+					else {
+						try {
+							WorkflowDetails workflow = workflowService.getWorkflowsClient().showWorkflowInstance(detail.getWorkflowId());
+							if(workflow!=null) {
+								workflowName = workflow.getName();
+							}
+						}
+						catch(Exception ex) {
+							String msg = "Unable to retrieve workflows from Galaxy.";
+							log.error(msg);
+						}
+						workflowDetails.put(detail.getWorkflowId(), workflowName);
+					}
+					
 					Date date = step.getUpdateTime();
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
@@ -73,13 +97,15 @@ public class DashboardServiceImpl implements DashboardService{
 					for(String key : outputs.keySet()) {
 						DashboardResult result = new DashboardResult();
 						result.setWorkflowStep(jobName);
-						result.setSubmitter("amppd");
+						result.setSubmitter(galaxyPropertyConfig.getUsername());
 						result.setDate(date);
 						result.setStatus(status);
+						result.setWorkflowName(workflowName);
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 						
+						// TODO: Add workflow name
 						result.setWorkflowName(detail.getWorkflowId());
 						
 						result.setOutputFile(key);
