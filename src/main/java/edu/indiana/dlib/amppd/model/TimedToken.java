@@ -22,7 +22,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Passwordresettoken {  
+public class TimedToken {  
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
