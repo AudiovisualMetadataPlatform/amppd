@@ -24,9 +24,9 @@ import org.springframework.stereotype.Service;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Passwordresettoken;
+import edu.indiana.dlib.amppd.model.TimedToken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
-import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
+import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
@@ -43,7 +43,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private AmpUserRepository ampUserRepository;
 	  
 	  @Autowired
-	  private PasswordTokenRepository passwordTokenRepository;
+	  private TimedTokenRepository timedTokenRepository;
 	 		
 	  @NotNull
 	  private static String ampEmailId ;
@@ -169,7 +169,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public AuthResponse resetPassword(String emailid, String new_password, String token) {
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
-		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
+		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
 		if ((passToken == null) || (user == null) || (passToken.getUser().getId() != user.getId())) {
 			response.addError("Incorrect Link");
 			response.setSuccess(false);
@@ -225,7 +225,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	@Override
 	public AuthResponse resetPasswordGetEmail(String token){
 		AuthResponse response = new AuthResponse();
-		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
+		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
 		if ((passToken == null)) {
 			log.error("incorrect Link in resetPasswordGetEmail");
 			response.addError("Incorrect Link");
@@ -276,7 +276,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public AuthResponse activateAccount(String token)
 	{
 		AuthResponse response = new AuthResponse();
-		Passwordresettoken passToken = (passwordTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
+		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
 		if ((passToken == null)) {
 			log.error("incorrect token for account activation");
 			response.addError("Expired Url");
@@ -382,21 +382,21 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public String createTimedToken(AmpUser user, int expirationDuration) {
 		int res = 0;
 		String token = UUID.randomUUID().toString();
-		Passwordresettoken myToken=new Passwordresettoken();
+		TimedToken myToken=new TimedToken();
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.SECOND, expirationDuration);
-		int userTokenExists = passwordTokenRepository.ifExists(user.getId());
+		int userTokenExists = timedTokenRepository.ifExists(user.getId());
 		log.info("User token exists status is:"+userTokenExists+" for user id:"+user.getId());
 		if(userTokenExists >= 1){
 			log.info("User token exists so updating token info");
-			res = passwordTokenRepository.updateToken(token, user.getId(), calendar.getTime());
+			res = timedTokenRepository.updateToken(token, user.getId(), calendar.getTime());
 		}
 		else {
 			log.info("User token does not exist so creating new token");
 			myToken.setUser(user);
 			myToken.setToken(token);
 			myToken.setExpiryDate(calendar.getTime());
-			myToken = passwordTokenRepository.save(myToken);
+			myToken = timedTokenRepository.save(myToken);
 			if(myToken != null)
 				res = 1;
 		}

@@ -30,7 +30,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
-import edu.indiana.dlib.amppd.repository.PasswordTokenRepository;
+import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
@@ -89,7 +89,7 @@ public class TestHelper {
 	private AmpUserRepository ampUserRepository;
 	
 	@Autowired
-	private PasswordTokenRepository passwordTokenRepository;
+	private TimedTokenRepository timedTokenRepository;
 	
 	/**
 	 * Check whether the primaryfile named TestAudio exists in Amppd; if not, upload it from its resource file.
@@ -327,7 +327,7 @@ public class TestHelper {
 	 * Delete all users
 	 */
 	public void deleteAllUsers() {
-		passwordTokenRepository.deleteAll();
+		timedTokenRepository.deleteAll();
 		ampUserRepository.deleteAll();
 	}
 	
