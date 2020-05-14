@@ -60,6 +60,7 @@ public class AmpUserControllerTests {
     	JwtRequest request = new JwtRequest();
     	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
+    	ampUserService.activateUser(user.getUsername());
     	String json = mapper.writeValueAsString(request);
     	mvc.perform(post(url)
     		       .contentType(MediaType.APPLICATION_JSON)
