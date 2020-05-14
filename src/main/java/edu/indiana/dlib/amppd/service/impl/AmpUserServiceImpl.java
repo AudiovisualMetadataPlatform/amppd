@@ -68,6 +68,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
 		  ampEmailId = amppdconfig.getUsername();
 		  ampAdmin = amppdconfig.getAdmin();
+		  log.debug("Fetched email id from property file:"+ampAdmin);
 		  uiUrl = amppduiConfig.getUrl();
 		  passwordResetTokenExpiration = amppdconfig.getPasswordResetTokenExpiration();
 		  accountActivationTokenExpiration = amppdconfig.getAccountActivationTokenExpiration();
@@ -376,6 +377,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
+		log.debug("Sending email from email id:"+ampAdmin);
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
@@ -413,7 +415,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	    email.setText(body);
 	    email.setTo(toEmailID);
 	    email.setFrom(ampAdmin);
-	    log.info("Constructed Email Object with all the information packed");
+	    log.info("Constructed Email Object with all the information packed. Sending email from:"+ampAdmin);
 	    return email;
 	}  
 
