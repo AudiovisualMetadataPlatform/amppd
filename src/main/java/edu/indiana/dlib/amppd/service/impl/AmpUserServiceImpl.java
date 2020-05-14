@@ -415,7 +415,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	    email.setText(body);
 	    email.setTo(toEmailID);
 	    email.setFrom(ampAdmin);
-	    log.info("Constructed Email Object with all the information packed");
+	    log.info("Constructed Email Object with all the information packed. Sending email from:"+ampAdmin);
 	    return email;
 	}  
 
