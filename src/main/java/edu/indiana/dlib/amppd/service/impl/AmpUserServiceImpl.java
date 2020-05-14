@@ -330,7 +330,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
     	log.info("Password reset token created successfully");
     	if (type.equalsIgnoreCase("reset password")) {
     		String token = createTimedToken(user, passwordResetTokenExpiration);
-    		url = contextPath + "/reset-password/" + token;
+    		url = contextPath + "/account/reset-password/" + token;
     		log.info("Constructed reset token url, constructing email attributes");
     	}
     	else if (type.equalsIgnoreCase("account approval")) {
