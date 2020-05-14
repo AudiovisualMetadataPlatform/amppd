@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
@@ -51,16 +52,24 @@ public class WorkflowController {
 	
 	/**
 	 * Show details of a workflow based on information retrieved from Galaxy.
+	 * Note: Set instance to true if the workflow ID is returned from invocation listing, in which case it's likely not a StoredWorkflow ID.
 	 * @param workflowId ID of the queried workflow
+	 * @param instance true if fetch by Workflow ID instead of StoredWorkflow id, false by default
 	 * @return all the details information of the queried workflow
 	 */
 	@GetMapping("/workflows/{workflowId}")
-	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId) {	
+	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId, @RequestParam("instance") Boolean instance) {	
 		WorkflowDetails workflow = null;
 	
 		try {
-			workflow = workflowService.getWorkflowsClient().showWorkflow(workflowId);
-			log.info("Showing workflow detail for ID: " +  workflowId);
+			if (instance) {
+				workflow = workflowService.getWorkflowsClient().showWorkflow(workflowId);
+				log.info("Showing stored workflow detail for ID: " +  workflowId);
+			}
+			else {
+				workflow = workflowService.getWorkflowsClient().showWorkflowInstance(workflowId);
+				log.info("Showing possibly non-stored workflow instance detail for ID: " +  workflowId);				
+			}
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflow detail for ID " + workflowId + " from Galaxy.";
