@@ -18,7 +18,7 @@ public interface AmpUserService {
 	 * @param pswd is the entered password
 	 * @return the result of validation
 	 */
-	public AuthResponse validate(String username, String pswd);
+	public AuthResponse authenticate(String username, String pswd);
 	
 	/**
 	 * Register the new user and make entry to database.
@@ -28,18 +28,11 @@ public interface AmpUserService {
 	public AuthResponse registerAmpUser(AmpUser user);
 	
 	/**
-	 * Sends an email.
-	 * @param user contains new user info to be sent in the email
-	 * @return the result of email sending as success/failure
-	 */
-	//void sendEmail(AmpUser u);
-
-	/**
 	 * Sets amp user as approved to login to the application
 	 * @param user name
 	 * @return the result of setting the user to approved as success/failure
 	 */
-	public boolean approveUser(String userName);
+	public boolean activateUser(String userName);
 	
 	/**
 	 * Resets the existing password in the database for the given username
@@ -53,15 +46,21 @@ public interface AmpUserService {
 	 * @param email id
 	 * @return the result for sending the email
 	 */
-	public AuthResponse emailToken(String emailid);
+	public AuthResponse emailResetPasswordToken(String emailid);
 	
 	/**
-	 * Generates an account verification email for the new and sets the approved flag to true in the database. 
+	 * Generates an account verification email for the new and sets the approve_status flag to the specified action in the database. 
 	 * @param user id
-	 * @return the result for approving the user in database
+	 * @return the response object consisting of the database update result and errors, if any.
 	 */
-	public AuthResponse approveUser(Long userID, String action);
+	public AuthResponse accountAction(Long userID, String action);
 
+	/**
+	 * Fetches the user id from the database for a given token if it is not expired. 
+	 * @param token
+	 * @return user id for an unexpired token.
+	 */
+	public AuthResponse activateAccount(String token);
 	
 	/**
 	 * Gets an amp emailid by token. It returns the emailid to the reset password page for prepopulation there. 

@@ -12,21 +12,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Passwordresettoken;
+import edu.indiana.dlib.amppd.model.TimedToken;
 
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "token", path = "token")
-public interface PasswordTokenRepository extends CrudRepository<Passwordresettoken, Long>{
+public interface TimedTokenRepository extends CrudRepository<TimedToken, Long>{
 		
-		Optional<Passwordresettoken> findByToken(String token);
+		Optional<TimedToken> findByToken(String token);
 		
-		Optional<Passwordresettoken> findByUser(AmpUser user);
+		Optional<TimedToken> findByUser(AmpUser user);
 		
 		@Transactional
 		@Modifying
-		@Query(value = "update Passwordresettoken set token = :token, expiry_date= :expiration_date  where user_id = :id")
+		@Query(value = "update TimedToken set token = :token, expiry_date= :expiration_date  where user_id = :id")
 		int updateToken( @Param("token") String token, @Param("id") Long id, @Param("expiration_date") Date expiry_date);
 		
-		@Query(value = "select count(*) from Passwordresettoken where user_id = :id")
+		@Query(value = "select count(*) from TimedToken where user_id = :id")
 		int ifExists(@Param("id") Long id);
 }
