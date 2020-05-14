@@ -68,7 +68,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
 		  ampEmailId = amppdconfig.getUsername();
 		  ampAdmin = amppdconfig.getAdmin();
-		  log.debug("Fetched email id from property file:"+ampAdmin);
 		  uiUrl = amppduiConfig.getUrl();
 		  passwordResetTokenExpiration = amppdconfig.getPasswordResetTokenExpiration();
 		  accountActivationTokenExpiration = amppdconfig.getAccountActivationTokenExpiration();
@@ -172,17 +171,21 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
 		if ((passToken == null) || (user == null) || (passToken.getUser().getId() != user.getId())) {
+			log.error("Error occurred as token and email id do not match");
 			response.addError("Incorrect Link");
 			response.setSuccess(false);
 		    }
 		Calendar cal = Calendar.getInstance();
 	    if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+	    	log.error("Error occurred as link has expired");
+	    	log.debug("passToken.getExpiryDate().getTime():"+passToken.getExpiryDate().getTime()+","+cal.getTime().getTime());
 	    	response.addError("Link Expired");
 			response.setSuccess(false);
 	    }		
 	    if(!response.hasErrors()) {
 			  String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
 			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
+			  log.error("Errors occurred in the password reset process");
 			  if(rows > 0){
 				  response.setSuccess(true);
 			  }
@@ -377,7 +380,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
-		log.debug("Sending email from email id:"+ampAdmin);
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
