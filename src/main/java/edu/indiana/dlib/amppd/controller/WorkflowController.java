@@ -58,7 +58,7 @@ public class WorkflowController {
 	 * @return all the details information of the queried workflow
 	 */
 	@GetMapping("/workflows/{workflowId}")
-	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId, @RequestParam("instance") Boolean instance) {	
+	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId, @RequestParam(name = "instance", required = false) Boolean instance) {	
 		WorkflowDetails workflow = null;
 	
 		try {
