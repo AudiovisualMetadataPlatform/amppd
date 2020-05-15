@@ -39,6 +39,13 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private int MIN_PASSWORD_LENGTH = 8;
 	  private int MIN_USERNAME_LENGTH = 3;
 
+
+	  @Autowired
+	  private AmppdPropertyConfig amppdPropertyConfig;
+		
+	  @Autowired
+	  private AmppdUiPropertyConfig amppdUiPropertyConfig;
+		
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
 	  
@@ -65,14 +72,24 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  
 	  @Autowired 
-	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
-		  ampEmailId = amppdconfig.getUsername();
-		  ampAdmin = amppdconfig.getAdmin();
+	  public AmpUserServiceImpl() { 
+		  ampEmailId = amppdPropertyConfig.getUsername();
+		  ampAdmin = amppdPropertyConfig.getAdmin();
 		  log.debug("Fetched email id from property file:"+ampAdmin);
-		  uiUrl = amppduiConfig.getUrl();
-		  passwordResetTokenExpiration = amppdconfig.getPasswordResetTokenExpiration();
-		  accountActivationTokenExpiration = amppdconfig.getAccountActivationTokenExpiration();
+		  uiUrl = amppdUiPropertyConfig.getUrl();
+		  passwordResetTokenExpiration = amppdPropertyConfig.getPasswordResetTokenExpiration();
+		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
 	  } 
+
+//	  @Autowired 
+//	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
+//		  ampEmailId = amppdconfig.getUsername();
+//		  ampAdmin = amppdconfig.getAdmin();
+//		  log.debug("Fetched email id from property file:"+ampAdmin);
+//		  uiUrl = amppduiConfig.getUrl();
+//		  passwordResetTokenExpiration = amppdconfig.getPasswordResetTokenExpiration();
+//		  accountActivationTokenExpiration = amppdconfig.getAccountActivationTokenExpiration();
+//	  } 
 
 	  @Override
 	  public AuthResponse authenticate(String email, String pswd) { 
@@ -256,8 +273,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 */
 	@Override
 	public String getCurrentUsername() {
-		AmpUser userDetails = (AmpUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+		if (!amppdPropertyConfig.getAuth())
+			return amppdPropertyConfig.getUsername();
+		
+		AmpUser userDetails = (AmpUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = userDetails.getUsername();
 		return username;
 	}
