@@ -62,7 +62,7 @@ public class WorkflowController {
 		WorkflowDetails workflow = null;
 	
 		try {
-			if (instance) {
+			if (instance != null && instance) {
 				workflow = workflowService.getWorkflowsClient().showWorkflow(workflowId);
 				log.info("Showing stored workflow detail for ID: " +  workflowId);
 			}
