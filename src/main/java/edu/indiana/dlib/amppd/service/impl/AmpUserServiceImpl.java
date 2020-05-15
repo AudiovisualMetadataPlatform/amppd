@@ -79,16 +79,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
 	  } 
 
-//	  @Autowired 
-//	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
-//		  ampEmailId = amppdconfig.getUsername();
-//		  ampAdmin = amppdconfig.getAdmin();
-//		  log.debug("Fetched email id from property file:"+ampAdmin);
-//		  uiUrl = amppduiConfig.getUrl();
-//		  passwordResetTokenExpiration = amppdconfig.getPasswordResetTokenExpiration();
-//		  accountActivationTokenExpiration = amppdconfig.getAccountActivationTokenExpiration();
-//	  } 
-
 	  @Override
 	  public AuthResponse authenticate(String email, String pswd) { 
 		  AuthResponse response = new AuthResponse();
