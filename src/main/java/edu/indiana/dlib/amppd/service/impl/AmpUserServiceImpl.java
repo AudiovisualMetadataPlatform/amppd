@@ -39,11 +39,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private int MIN_PASSWORD_LENGTH = 8;
 	  private int MIN_USERNAME_LENGTH = 3;
 
-
-	  @Autowired
-	  private AmppdPropertyConfig amppdPropertyConfig;
-		
-	  @Autowired
+	  private AmppdPropertyConfig amppdPropertyConfig;		
 	  private AmppdUiPropertyConfig amppdUiPropertyConfig;
 		
 	  @Autowired
@@ -72,7 +68,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  
 	  @Autowired 
-	  public AmpUserServiceImpl() { 
+	  public AmpUserServiceImpl(AmppdPropertyConfig amppdPropertyConfig, AmppdUiPropertyConfig amppdUiPropertyConfig) { 
+		  this.amppdPropertyConfig = amppdPropertyConfig;
+		  this.amppdUiPropertyConfig = amppdUiPropertyConfig;
 		  ampEmailId = amppdPropertyConfig.getUsername();
 		  ampAdmin = amppdPropertyConfig.getAdmin();
 		  log.debug("Fetched email id from property file:"+ampAdmin);
@@ -286,8 +284,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 */
 	@Override
 	public AmpUser getCurrentUser() {
-		// TODO replace below tmp code with logic to get the current user from User Session		
-		// tmp code: return the default master AMP user for now
 		String username = getCurrentUsername();
 		AmpUser currentUser = getUser(username);		
 		if (currentUser == null) {
