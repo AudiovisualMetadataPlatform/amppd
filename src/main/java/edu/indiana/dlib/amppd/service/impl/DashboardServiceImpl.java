@@ -137,6 +137,9 @@ public class DashboardServiceImpl implements DashboardService{
 		else if(jobStatus.equals("error")) {
 			status = GalaxyJobState.ERROR;
 		}
+		else if(jobStatus.equals("paused")) {
+			status = GalaxyJobState.PAUSED;
+		}
 		return status;
 	}
 	
