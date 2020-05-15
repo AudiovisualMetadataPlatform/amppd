@@ -39,6 +39,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private int MIN_PASSWORD_LENGTH = 8;
 	  private int MIN_USERNAME_LENGTH = 3;
 
+	  private AmppdPropertyConfig amppdPropertyConfig;		
+	  private AmppdUiPropertyConfig amppdUiPropertyConfig;
+		
 	  @Autowired
 	  private AmpUserRepository ampUserRepository;
 	  
@@ -65,13 +68,15 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  
 	  @Autowired 
-	  public AmpUserServiceImpl(AmppdPropertyConfig amppdconfig, AmppdUiPropertyConfig amppduiConfig) { 
-		  ampEmailId = amppdconfig.getUsername();
-		  ampAdmin = amppdconfig.getAdmin();
+	  public AmpUserServiceImpl(AmppdPropertyConfig amppdPropertyConfig, AmppdUiPropertyConfig amppdUiPropertyConfig) { 
+		  this.amppdPropertyConfig = amppdPropertyConfig;
+		  this.amppdUiPropertyConfig = amppdUiPropertyConfig;
+		  ampEmailId = amppdPropertyConfig.getUsername();
+		  ampAdmin = amppdPropertyConfig.getAdmin();
 		  log.debug("Fetched email id from property file:"+ampAdmin);
-		  uiUrl = amppduiConfig.getUrl();
-		  passwordResetTokenExpiration = amppdconfig.getPasswordResetTokenExpiration();
-		  accountActivationTokenExpiration = amppdconfig.getAccountActivationTokenExpiration();
+		  uiUrl = amppdUiPropertyConfig.getUrl();
+		  passwordResetTokenExpiration = amppdPropertyConfig.getPasswordResetTokenExpiration();
+		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
 	  } 
 
 	  @Override
@@ -256,8 +261,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 */
 	@Override
 	public String getCurrentUsername() {
-		AmpUser userDetails = (AmpUser) SecurityContextHolder.getContext().getAuthentication()
-                .getPrincipal();
+		if (!amppdPropertyConfig.getAuth())
+			return amppdPropertyConfig.getUsername();
+		
+		AmpUser userDetails = (AmpUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		String username = userDetails.getUsername();
 		return username;
 	}
@@ -267,8 +274,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 */
 	@Override
 	public AmpUser getCurrentUser() {
-		// TODO replace below tmp code with logic to get the current user from User Session		
-		// tmp code: return the default master AMP user for now
 		String username = getCurrentUsername();
 		AmpUser currentUser = getUser(username);		
 		if (currentUser == null) {
