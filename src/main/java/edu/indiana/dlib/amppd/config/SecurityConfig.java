@@ -92,12 +92,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		// if authentication is turned on, add JWT token filter
 		if (this.amppdPropertyConfig.getAuth()) {
 			httpSecurity.cors().and().csrf().disable().authorizeRequests()
-			.antMatchers(HttpMethod.POST, "/register").permitAll()
-			.antMatchers(HttpMethod.POST, "/authenticate").permitAll()
-			.antMatchers(HttpMethod.POST, "/forgot-password").permitAll()
-			.antMatchers(HttpMethod.POST, "/reset-password").permitAll()
-			.antMatchers(HttpMethod.POST, "/user/account/activate").permitAll()
-			.antMatchers(HttpMethod.POST, "/reset-password-getEmail").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/forgot-password").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/reset-password").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
 			// TODO remove below hmgm paths after we done development with HMGM
 			.antMatchers("/hmgm/**").permitAll()
 			.anyRequest().authenticated().and().

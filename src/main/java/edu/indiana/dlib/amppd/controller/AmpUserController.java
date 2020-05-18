@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 	  @Autowired
 	  private JwtTokenUtil jwtTokenUtil;
 	  
-	  @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	  @RequestMapping(value = "/account/authenticate", method = RequestMethod.POST)
 	  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
 		  AuthResponse response = ampService.authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
 			
@@ -43,17 +43,17 @@ import lombok.extern.slf4j.Slf4j;
 			  return ResponseEntity.status(400).body(null);
 		  }
 			
-		  final AmpUser userDetails = ampService.getUserByEmail(authenticationRequest.getUsername());
+		  final AmpUser userDetails = ampService.getUser(authenticationRequest.getUsername());
 		  final String token = jwtTokenUtil.generateToken(userDetails);
 		  return ResponseEntity.ok(new JwtResponse(token));
 	  }
 		
-	  @RequestMapping(value = "/validate", method = RequestMethod.POST)
+	  @RequestMapping(value = "/account/validate", method = RequestMethod.POST)
 	  public ResponseEntity<?> validateToken() throws Exception {
 		  return ResponseEntity.ok("Success");
 	  }
 
-	  @PostMapping(path = "/register", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/register", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse register(
 			@RequestBody AmpUser user){ 
 		log.info("Registeration for User=> Name:"+ user.getUsername());	
@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 
-	  @PostMapping(path = "/forgot-password", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/forgot-password", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse forgotPassword(
 			  @RequestBody AuthRequest request){ 
 		log.info("Forgot Password for User=> Email:"+ request.getEmailid());	
@@ -72,7 +72,7 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/reset-password", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/reset-password", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse resetPassword(
 			  @RequestBody AuthRequest request){ 
 		log.info("Reset Password for User=> Email:"+ request.getEmailid());	
@@ -81,7 +81,7 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/user/account/approve", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/approve", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse approveUser(
 			  @RequestBody AuthRequest request){ 
 		log.info("Approve User=> id:"+ request.getUserId());	
@@ -90,7 +90,7 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/user/account/reject", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/reject", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse rejectUser(
 			  @RequestBody AuthRequest request){ 
 		log.info("Reject User=> id:"+ request.getUserId());	
@@ -99,7 +99,7 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/user/account/activate", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/activate", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse activateUser(
 			  @RequestBody AuthRequest request){
 		log.info("Activate User");	
@@ -109,7 +109,7 @@ import lombok.extern.slf4j.Slf4j;
 	  }
 
 	  
-	  @PostMapping(path = "/reset-password-getEmail", consumes = "application/json", produces = "application/json")
+	  @PostMapping(path = "/account/reset-password-getEmail", consumes = "application/json", produces = "application/json")
 	  public @ResponseBody AuthResponse resetPasswordGetEmail(
 			  @RequestBody AuthRequest request){ 
 		log.info("Calling get email for a token using resetPasswordGetEmail()");	
