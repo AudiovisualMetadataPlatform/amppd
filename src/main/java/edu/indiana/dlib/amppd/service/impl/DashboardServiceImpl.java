@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Job;
@@ -21,6 +22,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.util.CacheHelper;
 import edu.indiana.dlib.amppd.web.DashboardResult;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +39,17 @@ public class DashboardServiceImpl implements DashboardService{
 	private JobService jobService;
 	@Autowired
 	private WorkflowService workflowService;
-
+	@Autowired
+	private CacheHelper cache;
+		
 	public List<DashboardResult> getDashboardResults(){
-		List<DashboardResult> results = new ArrayList<DashboardResult>();
+
+		List<DashboardResult> results = (List<DashboardResult>) cache.get("WorkflowDashboard", false);
+		
+		if(results!=null) {
+			return results;
+		}
+		results = new ArrayList<DashboardResult>();
 		try {
 			// Get a list of invocation details from Galaxy
 			List<InvocationDetails> details = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername());
@@ -95,6 +105,12 @@ public class DashboardServiceImpl implements DashboardService{
 					// For each output, create a record.
 					Map<String, JobInputOutput> outputs = step.getOutputs();
 					for(String key : outputs.keySet()) {
+						JobInputOutput output = outputs.get(key);
+						Dataset dataset = jobService.showJobStepOutput(detail.getWorkflowId(), detail.getId(), step.getId(), output.getId());
+						
+						// Show only relevant output
+						if(dataset!=null && !dataset.getVisible()) continue;
+						
 						DashboardResult result = new DashboardResult();
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
@@ -118,7 +134,7 @@ public class DashboardServiceImpl implements DashboardService{
 		catch(Exception ex) {
 			log.error("Error getting dashboard results", ex);
 		}
-		
+		cache.put("WorkflowDashboard", results);
 		return results;
 	}
 	

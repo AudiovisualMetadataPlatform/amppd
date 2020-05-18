@@ -25,7 +25,6 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.DashboardResult;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DashboardServiceTests {
