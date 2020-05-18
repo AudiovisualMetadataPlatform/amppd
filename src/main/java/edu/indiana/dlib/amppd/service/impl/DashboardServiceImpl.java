@@ -95,6 +95,12 @@ public class DashboardServiceImpl implements DashboardService{
 					// For each output, create a record.
 					Map<String, JobInputOutput> outputs = step.getOutputs();
 					for(String key : outputs.keySet()) {
+						JobInputOutput output = outputs.get(key);
+						Dataset dataset = jobService.showJobStepOutput(detail.getWorkflowId(), detail.getId(), step.getId(), output.getId());
+						
+						// Show only relevant output
+						if(dataset!=null && !dataset.getVisible()) continue;
+						
 						DashboardResult result = new DashboardResult();
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
