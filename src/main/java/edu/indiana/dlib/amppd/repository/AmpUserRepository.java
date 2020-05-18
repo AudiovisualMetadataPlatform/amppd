@@ -16,8 +16,8 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 	
-	@Query(value = "select 1 from AmpUser i where i.email = :email and i.password = :pswd and i.status=:status")
-	String findByApprovedUser(@Param("email") String email, @Param("pswd") String pswd, @Param("status") AmpUser.State status);
+	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.status=:status")
+	String findByApprovedUser(@Param("username") String username, @Param("pswd") String pswd, @Param("status") AmpUser.State status);
 	
 	@Query(value = "select case when COUNT(*)>0 then true else false end from AmpUser i where i.username = :username")
 	boolean usernameExists(@Param("username") String username);

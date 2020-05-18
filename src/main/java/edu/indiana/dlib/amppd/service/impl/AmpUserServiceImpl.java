@@ -38,6 +38,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
 	  private int MIN_PASSWORD_LENGTH = 8;
 	  private int MIN_USERNAME_LENGTH = 3;
+	  private int MIN_NAME_LENGTH = 1;
 
 	  private AmppdPropertyConfig amppdPropertyConfig;		
 	  private AmppdUiPropertyConfig amppdUiPropertyConfig;
@@ -80,14 +81,14 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  } 
 
 	  @Override
-	  public AuthResponse authenticate(String email, String pswd) { 
+	  public AuthResponse authenticate(String username, String pswd) { 
 		  AuthResponse response = new AuthResponse();
 		  
 		  if(!passwordAcceptableLength(pswd)) {
-			  response.addError("Email and password do not match");
+			  response.addError("Username and password do not match");
 		  }
 		  String encryptedPswd = MD5Encryption.getMd5(pswd);
-		  String userFound = ampUserRepository.findByApprovedUser(email, encryptedPswd, AmpUser.State.ACTIVATED);  
+		  String userFound = ampUserRepository.findByApprovedUser(username, encryptedPswd, AmpUser.State.ACTIVATED);  
 		  if(userFound != null)
 		  {
 			  if(userFound.equals("1")) {
@@ -106,8 +107,17 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!usernameAcceptableLength(user.getUsername())) {
 			  response.addError("Username must be " + MIN_USERNAME_LENGTH + " characters");
 		  }		  
+		  if(!nameAcceptableLength(user.getLastName())) {
+			  response.addError("Last name must be " + MIN_USERNAME_LENGTH + " characters");
+		  }	  
+		  if(!nameAcceptableLength(user.getFirstName())) {
+			  response.addError("First name must be " + MIN_USERNAME_LENGTH + " characters");
+		  }	  
 		  if(!emailUnique(user.getEmail())) {
 			  response.addError("Email already exists");
+		  }
+		  if(!usernameUnique(user.getUsername())) {
+			  response.addError("Username already exists");
 		  }
 		  if(!passwordAcceptableLength(user.getPassword())) {
 			  response.addError("Password must be " + MIN_PASSWORD_LENGTH + " characters");
@@ -144,7 +154,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
 		GrantedAuthority authority = new SimpleGrantedAuthority(user.getRole().name());
-		return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Arrays.asList(authority));
+		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), Arrays.asList(authority));
 	}
 
 	@Override
@@ -454,12 +464,18 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return true;		    
 	}
 	
-	private boolean emailUnique(String username) {
-		return !ampUserRepository.emailExists(username);  
+	private boolean emailUnique(String email) {
+		return !ampUserRepository.emailExists(email);  
 	}
 
+	private boolean usernameUnique(String username) {
+		return !ampUserRepository.usernameExists(username);  
+	}
 	private boolean usernameAcceptableLength(String username) {
 		return username.length() >= MIN_USERNAME_LENGTH;
+	}
+	private boolean nameAcceptableLength(String name) {
+		return name.length() >= MIN_NAME_LENGTH;
 	}
 	  
 	private boolean passwordAcceptableLength(String password) {

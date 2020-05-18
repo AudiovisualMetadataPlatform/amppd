@@ -56,7 +56,7 @@ public class AmpUserControllerTests {
 	public void shouldReturnToken() throws Exception {
 		AmpUser user = testHelper.createTestUser();
     	    	
-    	String url = String.format("/authenticate");
+    	String url = String.format("/account/authenticate");
     	JwtRequest request = new JwtRequest();
     	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
@@ -82,6 +82,7 @@ public class AmpUserControllerTests {
     	
     	user.setEmail(".@yahoo");
     	postRegister(user, false);
+    	
     }
     
     @Test
@@ -111,7 +112,7 @@ public class AmpUserControllerTests {
     	
     	ampUserService.activateUser(user.getUsername());
     	
-    	String url = String.format("/authenticate");
+    	String url = String.format("/account/authenticate");
     	JwtRequest request = new JwtRequest();
     	request.setUsername(user.getEmail());
     	request.setPassword(user.getPassword());
@@ -140,7 +141,7 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser();
     	postRegister(user, true);
         
-    	String url = String.format("/authenticate");
+    	String url = String.format("/account/authenticate");
     	JwtRequest request = new JwtRequest();
     	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
@@ -165,7 +166,7 @@ public class AmpUserControllerTests {
     	AmpUser user = getAmpUser(); 
     	user.setEmail("amppdiu@gmail.com"); 
     	postRegister(user, true);
-    	String url = String.format("/authenticate");
+    	String url = String.format("/account/authenticate");
     	JwtRequest request_login = new JwtRequest();
     	request_login.setUsername(user.getEmail());
     	request_login.setPassword(user.getPassword());
@@ -179,7 +180,7 @@ public class AmpUserControllerTests {
     @Test
 	public void testForgotPasswordEmail() throws Exception {
     	AmpUser user = getAmpUser(); 
-    	String url = String.format("/forgot-password");
+    	String url = String.format("/account/forgot-password");
     	user.setEmail("amppdiu@gmail.com"); 
     	postRegister(user, true);
     	
@@ -201,14 +202,16 @@ public class AmpUserControllerTests {
     	ampUser.setPassword("password1234");
     	ampUser.setUsername("testUser_" + rand_int1+"@iu.edu");
     	ampUser.setEmail(ampUser.getUsername());
-    	
+
+    	ampUser.setFirstName("AMP");
+    	ampUser.setLastName("User");
     	return ampUser;
     }
     
     private void postRegister(AmpUser user, boolean expectSuccess) throws Exception{
     	String json = mapper.writeValueAsString(user);
     	
-    	mvc.perform(post("/register").header("Authorization", "Bearer " + token)
+    	mvc.perform(post("/account/register").header("Authorization", "Bearer " + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(expectSuccess));

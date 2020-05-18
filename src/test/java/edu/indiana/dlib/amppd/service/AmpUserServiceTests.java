@@ -135,6 +135,8 @@ public class AmpUserServiceTests {
     	ampUser.setPassword("password1234");
     	ampUser.setUsername("testUser_" + rand_int1);
     	ampUser.setEmail(ampUser.getUsername()+"@iu.edu");
+    	ampUser.setFirstName("AMP");
+    	ampUser.setLastName("USER");
     	
     	return ampUser;
     }
