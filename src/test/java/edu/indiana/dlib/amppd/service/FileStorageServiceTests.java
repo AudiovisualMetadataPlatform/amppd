@@ -159,43 +159,4 @@ public class FileStorageServiceTests {
         assertTrue(pathname.equals("U-1/C-2/I-3/P-4/S-5.pdf"));
     }
     
-    @Test
-    public void TestInvalidCharacters() {
-    	String path = "";
-    	String originalPath = "TEST1._-";
-    	String lastChar = " ";
-    	for(String character : invalidChars) {
-    		path = originalPath + character;
-    		assertFalse(validPath(path));
-        	String encodedValue = fileStorageService.encodeUri(path);
-        	System.out.println("Original Value: " + path + " Encoded Value: " + encodedValue);
-    		assertTrue(validPath(encodedValue));
-    		assertTrue(encodedValue.contains(originalPath));
-
-    		path = character + originalPath + character;
-    		encodedValue = fileStorageService.encodeUri(path);
-        	System.out.println("Original Value: " + path + " Encoded Value: " + encodedValue);
-    		assertTrue(validPath(encodedValue)); 
-    		assertTrue(encodedValue.contains(originalPath));   	
-    		
-
-    		path = character + originalPath + lastChar + originalPath + character;
-    		encodedValue = fileStorageService.encodeUri(path);
-        	System.out.println("Original Value: " + path + " Encoded Value: " + encodedValue);
-    		assertTrue(validPath(encodedValue));    
-    		assertTrue(encodedValue.contains(originalPath));  
-    		lastChar = character;
-    	}
-    	
-    }
-    
-    String[] invalidChars = new String[] { "[", "]",   ",", ";", " ", ":", "/", "?",  "#", "=", "@", "!",  "$", "&", "'", "(", ")", "*","+"};
-    
-    private boolean validPath(String path) {
-    	for(String character : invalidChars) {
-    		if(path.contains(character)) return false;
-    	}
-    	return true;
-    }
-
 }

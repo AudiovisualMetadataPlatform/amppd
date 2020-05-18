@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -34,7 +33,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.BatchFileRepository;
@@ -87,6 +85,8 @@ public class BatchServiceTests {
     private AmpUserRepository ampUserRepository;
 	@Autowired
 	private AmppdPropertyConfig propertyConfig;
+	@Autowired
+	private DropboxService dropboxService;
 	@Autowired
 	private FileStorageService fileStorageService;
 	@Autowired
@@ -152,8 +152,8 @@ public class BatchServiceTests {
         
         
         Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
-        Path unitPath = fileStorageService.getDropboxPath(unitName);
-        Path collectionPath = fileStorageService.getDropboxPath(unitName, collectionName);
+        Path unitPath = dropboxService.getDropboxPath(unitName);
+        Path collectionPath = dropboxService.getDropboxPath(unitName, collectionName);
         Files.createDirectories(unitPath);
         Files.createDirectories(collectionPath);
         
@@ -183,8 +183,8 @@ public class BatchServiceTests {
 	
 	@After
 	public void cleanup() throws IOException {
-		String un = fileStorageService.encodeUri("Test Unit");
-		String cn = fileStorageService.encodeUri("Music Library");
+		String un = dropboxService.encodeUri("Test Unit");
+		String cn = dropboxService.encodeUri("Music Library");
 		FileUtils.cleanDirectory(new File(Paths.get(propertyConfig.getDropboxRoot(), un, cn).toString())); 
 		deleteAllData();
 	}

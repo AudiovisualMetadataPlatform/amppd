@@ -34,6 +34,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.BatchService;
+import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
@@ -58,6 +59,8 @@ public class BatchServiceImpl implements BatchService {
 	private CollectionSupplementRepository collectionSupplementRepository;
 	@Autowired
 	private ItemSupplementRepository itemSupplementRepository;
+	@Autowired
+	private DropboxService dropboxService;
 	@Autowired
 	private FileStorageService fileStorageService;
 	@Autowired
@@ -526,7 +529,7 @@ public class BatchServiceImpl implements BatchService {
 	}
 
 	private String getSourceDir(Unit unit, Collection collection) {
-		return fileStorageService.getDropboxPath(unit.getName(), collection.getName()).toString();
+		return dropboxService.getDropboxPath(unit.getName(), collection.getName()).toString();
 	}
 	
 }
