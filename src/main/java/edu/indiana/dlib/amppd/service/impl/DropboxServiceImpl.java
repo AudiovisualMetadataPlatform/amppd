@@ -23,9 +23,7 @@ import lombok.extern.slf4j.Slf4j;
  * The sub-directories are organized in the same hierarchy as the asset contents, i.e. one directory per unit, 
  * under which one directory per collection. The names of the directories are encoded based on the unit/collection
  * name, respectively, with special characters replaced to avoid conflicts with OS directory naming rules.
- * 
  * @author yingfeng dfische3
- *
  */
 @Service
 @Slf4j
@@ -98,8 +96,15 @@ public class DropboxServiceImpl implements DropboxService {
 	@Override
 	public void createCollectionSubdirs() {
 		Iterable<Collection> collections = collectionRepository.findAll();
+
+		// if we encounter exception for some collection, skip it and contiue with the rest.
 		for (Collection collection : collections) {
-			createCollectionSubdir(collection);
+			try {
+				createCollectionSubdir(collection);
+			}
+			catch (StorageException e) {
+				continue;
+			}
 		}
 	}
 

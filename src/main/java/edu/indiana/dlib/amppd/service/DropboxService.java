@@ -7,7 +7,6 @@ import edu.indiana.dlib.amppd.model.Collection;
 /**
  * Service for operations related to dropbox, including creating, updating, deleting dropbox sub-directories.
  * @author yingfeng dfische3
- *
  */
 public interface DropboxService {
 

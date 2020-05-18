@@ -18,7 +18,6 @@ import edu.indiana.dlib.amppd.model.Unit;
 /**
  * Service for storing/retrieving files, including primaryfiles, supplements associated with collections/items/primaryfiles, as well as intermediate files.
  * @author yingfeng
- *
  */
 public interface FileStorageService {
 	
