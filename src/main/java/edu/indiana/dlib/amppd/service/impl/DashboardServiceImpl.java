@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Job;
