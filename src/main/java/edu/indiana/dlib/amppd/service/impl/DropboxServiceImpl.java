@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -29,8 +29,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DropboxServiceImpl implements DropboxService {
 	
+	@Autowired
 	private CollectionRepository collectionRepository;
 	
+	@Autowired
 	private AmppdPropertyConfig config; 	
 
 	/**
@@ -81,7 +83,8 @@ public class DropboxServiceImpl implements DropboxService {
 	public Path createCollectionSubdir(Collection collection) {
 		Path path = getDropboxPath(collection.getUnit().getName(), collection.getName());
 		try {
-			Files.createDirectories(path);
+			// directory is only created if not existin
+			Files.createDirectories(path); 
 			log.info("Dropbox sub-directory " + path + " has been created." );
 			return path;
 		}
@@ -96,15 +99,15 @@ public class DropboxServiceImpl implements DropboxService {
 	@Override
 	public void createCollectionSubdirs() {
 		Iterable<Collection> collections = collectionRepository.findAll();
-
-		// if we encounter exception for some collection, skip it and contiue with the rest.
+		
+		// we could choose to skip a collection and continue with the rest in case an exception occors;
+		// however, if such IO exception happens, it usually is caused by system-wide issue instead of per collection
+		// so likely there is no point to try other collections
+		// meanwhile, admin can fix whatever causing the exception and rerun this process, 
+		// in which case the creation will continue where it's stoppped before
+		
 		for (Collection collection : collections) {
-			try {
-				createCollectionSubdir(collection);
-			}
-			catch (StorageException e) {
-				continue;
-			}
+			createCollectionSubdir(collection);
 		}
 	}
 

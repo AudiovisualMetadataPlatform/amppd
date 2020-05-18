@@ -26,11 +26,12 @@ public class DropboxController {
 	private DropboxService dropboxService;
 
 	/**
-	 * Create sub-directories as needed for the all existing collections.
+	 * Create dropbbox sub-directories as needed for all existing collections.
 	 */
-	@PostMapping("/primaryfiles/{id}/upload")
-	public Primaryfile uploadPrimaryfile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
-    	log.info("Uploading media file " + file.getName() + " for primaryfile ID " + id);
-    	return fileStorageService.uploadPrimaryfile(id, file);
+	@PostMapping("/dropbox/create")
+	public void createCollectionSubdirs() {		
+    	log.info("Creating dropbox subdirectories for all existing collections ...");
+    	dropboxService.createCollectionSubdirs();
     }
+	
 }

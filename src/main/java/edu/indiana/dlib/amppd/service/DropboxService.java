@@ -40,8 +40,8 @@ public interface DropboxService {
 	public Path createCollectionSubdir(Collection collection);
 	
 	/**
-	 * Create sub-directories as needed for the all existing collections.
-	 * @return 
+	 * Create sub-directories as needed for all existing collections.
+	 * @return true if successful for all; false otherwise.
 	 */
 	public void createCollectionSubdirs();
 	
