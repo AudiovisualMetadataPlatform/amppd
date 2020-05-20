@@ -18,30 +18,36 @@ public interface DropboxService {
 	public String encodeUri(String path);
 
 	/**
-	 * Gets the URI encoded drop box path for a given unit
-	 * @param unitName
-	 * @return
+	 * Gets the URI encoded dropbox path given the unit name.
+	 * @param unitName name of the unit
+	 * @return the dropbox sub-directory path for the unit
 	 */
 	public Path getDropboxPath(String unitName);
 
 	/**
-	 * Gets the URI encoded dropbox path for a given collection
-	 * @param unitName
-	 * @param collectionName
-	 * @return
+	 * Gets the URI encoded dropbox path given the unit and collection names. 
+	 * @param unitName name of the unit
+	 * @param collectionName name of the collection
+	 * @return the dropbox sub-directory path for the collection
 	 */
 	public Path getDropboxPath(String unitName, String collectionName);
 
 	/**
+	 * Gets the URI encoded dropbox path for a given collection.
+	 * @param collection the given collection
+	 * @return the dropbox sub-directory path for the collection
+	 */
+	public Path getDropboxPath(Collection collection);
+
+	/**
 	 * Create sub-directory for the given collection; if the directory already exists, do nothing.
 	 * @param collection the given collection
-	 * @return 
+	 * @return the path of the dropbox sub-directory created
 	 */
 	public Path createCollectionSubdir(Collection collection);
 	
 	/**
 	 * Create sub-directories as needed for all existing collections.
-	 * @return true if successful for all; false otherwise.
 	 */
 	public void createCollectionSubdirs();
 	

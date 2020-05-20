@@ -1,8 +1,10 @@
 package edu.indiana.dlib.amppd.controller;
 
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.nio.file.Files;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +15,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -25,16 +29,25 @@ public class DropboxControllerTests {
 
 	@Autowired
     private TestHelper testHelper;
-	String token = "";
+	
+	@Autowired
+	private DropboxService dropboxService;
+
+	private String token = "";
+	private Collection collection = null;
 	
 	@Before
 	public void setup() {
 		token = testHelper.getToken();
+		
+		// ensure at least one collection exists for testing
+		Collection collection = testHelper.createTestCollection();		
 	}
 	
     @Test
     public void shouldCreateSubdirsForAllCollections() throws Exception {
     	mvc.perform(post("/dropbox/create").header("Authorization", "Bearer " + token)).andExpect(status().isOk());   
+    	assertTrue(Files.exists(dropboxService.getDropboxPath(collection)));
     }
     
 }

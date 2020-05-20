@@ -321,10 +321,12 @@ public class TestHelper {
 		
     	return ampUser;
 	}
+	
 	public String getToken() {
 		AmpUser user = createTestUser();
 		return tokenUtil.generateToken(user);
 	}
+	
 	/*
 	 * Delete all users
 	 */
@@ -353,4 +355,28 @@ public class TestHelper {
 		return unit;
 	}
 	
+	public Collection createTestCollection() {		
+		Unit unit = createTestUnit();
+		
+		Collection collection = null;
+		String collectionName = "AMP Pilot Collection";
+		List<Collection> collections = collectionRepository.findByName(collectionName);
+		
+		if(collections.size()>0) {
+			collection = collections.get(0);
+		}
+		else {
+			collection = new Collection();
+			collection.setName(collectionName);
+			collection.setModifiedBy("testuser");
+			collection.setCreatedBy("testuser");
+			collection.setModifiedDate(new Date());
+			collection.setCreatedDate(new Date());
+			collection.setUnit(unit);			
+			collectionRepository.save(collection);
+		}
+		return collection;
+	}
+	
+
 }

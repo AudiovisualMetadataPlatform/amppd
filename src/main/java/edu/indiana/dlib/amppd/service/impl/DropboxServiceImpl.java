@@ -77,11 +77,19 @@ public class DropboxServiceImpl implements DropboxService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DropboxService.getDropboxPath(Collection)
+	 */
+	@Override
+	public Path getDropboxPath(Collection collection) {
+		return getDropboxPath(collection.getUnit().getName(), collection.getName());
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DropboxService.createCollectionSubdir(Collection)
 	 */
 	@Override
 	public Path createCollectionSubdir(Collection collection) {
-		Path path = getDropboxPath(collection.getUnit().getName(), collection.getName());
+		Path path = getDropboxPath(collection);
 		try {
 			// directory is only created if not existin
 			Files.createDirectories(path); 

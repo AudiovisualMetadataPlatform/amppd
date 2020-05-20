@@ -25,7 +25,7 @@ public class DropboxServiceTests {
 	private DropboxService dropboxService;
 	
     @Test
-    public void shouldHangleInvalidCharacters() {
+    public void shouldHandleInvalidCharacters() {
     	String path = "";
     	String originalPath = "TEST1._-";
     	String lastChar = " ";
@@ -60,6 +60,7 @@ public class DropboxServiceTests {
     	return true;
     }
 
+    @Test
     public void shouldCreateSubdirForCollection() {
     	Unit unit = new Unit();
     	unit.setId(1l);
