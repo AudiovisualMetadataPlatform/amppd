@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -271,11 +272,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 */
 	@Override
 	public String getCurrentUsername() {
-		if (!amppdPropertyConfig.getAuth())
-			return amppdPropertyConfig.getUsername();
-		
-		AmpUser userDetails = (AmpUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		String username = userDetails.getUsername();
+		// if authentication is turned off and no login, then userDetails will be a String with value anonymousUser
+		// in this case, use the default AMPPD user as current user; otherwise even authentication property is set to false,
+		// user can still go through login, in which case userDetails will be the current AmpUser
+		Object userDetails = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		AmpUser user = userDetails != null && userDetails instanceof AmpUser ? (AmpUser) userDetails : null;
+		String username = user != null && StringUtils.isNotEmpty(user.getUsername()) ? user.getUsername() : amppdPropertyConfig.getUsername();
 		return username;
 	}
 
