@@ -245,18 +245,18 @@ public class JobServiceImpl implements JobService {
 		Map<String, String> context = new HashMap<String, String>();
 		context.put("submittedBy", ampUserService.getCurrentUsername());
 		context.put("unitId", primaryfile.getItem().getCollection().getUnit().getId().toString());		
-		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
+		context.put("unitName", sanitizeText(primaryfile.getItem().getCollection().getUnit().getName()));
 		context.put("collectionId", primaryfile.getItem().getCollection().getId().toString());		
-		context.put("collectionName", primaryfile.getItem().getCollection().getName());
+		context.put("collectionName", sanitizeText(primaryfile.getItem().getCollection().getName()));
 		context.put("taskManager", primaryfile.getItem().getCollection().getTaskManager());
 		context.put("itemId", primaryfile.getItem().getId().toString());		
-		context.put("itemName", primaryfile.getItem().getName());
+		context.put("itemName", sanitizeText(primaryfile.getItem().getName()));
 		context.put("primaryfileId", primaryfile.getId().toString());
-		context.put("primaryfileName", primaryfile.getName());
+		context.put("primaryfileName", sanitizeText(primaryfile.getName()));
 		context.put("primaryfileUrl", mediaService.getPrimaryfileMediaUrl(primaryfile));
 		context.put("primaryfileMediaInfo", mediaService.getAssetMediaInfoPath(primaryfile));
 		context.put("workflowId", workflowDetails.getId());		
-		context.put("workflowName", workflowDetails.getName());	
+		context.put("workflowName", sanitizeText(workflowDetails.getName()));	
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		String contextJson = null;
@@ -268,6 +268,20 @@ public class JobServiceImpl implements JobService {
         }
 		
 		return contextJson;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.sanitizeText(String)
+	 */
+	public String sanitizeText(String text) {
+		char[] invalids = new char[] {'\'', '"'};
+		
+		String str = text;
+		for (char invalid : invalids) {
+			str = StringUtils.replace(str, Character.toString(invalid), "%" + Integer.toHexString((int) invalid));
+		}
+		
+		return str;
 	}
 	
 	/**

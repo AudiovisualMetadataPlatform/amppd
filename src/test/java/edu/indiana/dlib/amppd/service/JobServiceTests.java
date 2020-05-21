@@ -72,10 +72,10 @@ public class JobServiceTests {
 	@Before
 	public void setup() {
     	// prepare the primaryfile, workflow, and the AMP job for testing
-    	primaryfile = testHelper.ensureTestAudio();
-    	workflow = testHelper.ensureTestWorkflow();
-    	hmgmWorkflowDetails = testHelper.ensureTestHmgmWorkflowDetails();
-    	invocation = testHelper.ensureTestJob(true);
+//    	primaryfile = testHelper.ensureTestAudio();
+//    	workflow = testHelper.ensureTestWorkflow();
+//    	hmgmWorkflowDetails = testHelper.ensureTestHmgmWorkflowDetails();
+//    	invocation = testHelper.ensureTestJob(true);
 	}
 	
 		
@@ -136,6 +136,25 @@ public class JobServiceTests {
 		catch (Exception e) {
 			throw new RuntimeException("Error parsing contextJson: " + contextJson);
 		}
+	}
+    
+	@Test
+    public void shouldSanitizeText() {    	      
+		String withoutQuote = "text";
+		String withoutQuoteS = jobService.sanitizeText(withoutQuote);
+		Assert.assertEquals(withoutQuoteS, withoutQuote);
+
+		String withSingleQuote = "text'";
+		String withSingleQuoteS = jobService.sanitizeText(withSingleQuote);
+		Assert.assertEquals(withSingleQuoteS, "text%27");
+
+		String withDoubleQuote = "text\"";
+		String withDoubleQuoteS = jobService.sanitizeText(withDoubleQuote);
+		Assert.assertEquals(withDoubleQuote, "text%22");
+
+		String withBothQuotes = "text'\"";
+		String withBothQuotesS = jobService.sanitizeText(withBothQuotes);
+		Assert.assertEquals(withBothQuotes, "text%27%22");
 	}
     
     @Test
