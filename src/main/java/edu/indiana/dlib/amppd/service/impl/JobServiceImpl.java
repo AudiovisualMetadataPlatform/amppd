@@ -276,6 +276,7 @@ public class JobServiceImpl implements JobService {
 	public String sanitizeText(String text) {
 		char[] invalids = new char[] {'\'', '"'};
 		
+		// replace invalid chars with their hex code
 		String str = text;
 		for (char invalid : invalids) {
 			str = StringUtils.replace(str, Character.toString(invalid), "%" + Integer.toHexString((int) invalid));
