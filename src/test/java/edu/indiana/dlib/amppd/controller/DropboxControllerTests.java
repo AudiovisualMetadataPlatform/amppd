@@ -41,7 +41,7 @@ public class DropboxControllerTests {
 		token = testHelper.getToken();
 		
 		// ensure at least one collection exists for testing
-		Collection collection = testHelper.createTestCollection();		
+		collection = testHelper.createTestCollection();		
 	}
 	
     @Test
