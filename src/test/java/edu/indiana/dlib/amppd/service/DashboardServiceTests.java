@@ -57,7 +57,11 @@ public class DashboardServiceTests {
     	workflow = testHelper.ensureTestWorkflow();
     	invocation = testHelper.ensureTestJob(true);
 	}
-	
+	@Test
+	public void shouldFillDashboardTable() {
+		List<DashboardResult> results = dashboardService.refreshAllDashboardResults();
+		Assert.assertFalse(results.isEmpty());
+	}
 	@Test
 	public void shouldReturnRows() {
 		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 

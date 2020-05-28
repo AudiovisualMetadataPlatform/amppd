@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.service.DashboardService;
@@ -19,7 +20,12 @@ public class DashboardController {
 	
 	@GetMapping("/workflow/dashboard")
 	public List<DashboardResult> getDashboardResults(){
-		return dashboardService.getDashboardResults();
+		return dashboardService.getAllDashboardResults();
+	}
+
+	@PostMapping("/workflow/dashboard/refresh")
+	public void refreshDashboardResults(){
+		dashboardService.refreshAllDashboardResults();
 	}
 
 }
