@@ -21,11 +21,11 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
+import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.DashboardResult;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DashboardServiceTests {
@@ -39,7 +39,9 @@ public class DashboardServiceTests {
     private DashboardService dashboardService;
 
 	@Autowired
-	private JobService jobService;   
+	private JobService jobService;  
+	@Autowired
+	private DashboardRepository dashboardRepository;    
 		
 	@Autowired
 	private TestHelper testHelper;   
@@ -47,6 +49,7 @@ public class DashboardServiceTests {
 	private Primaryfile primaryfile;
 	private Workflow workflow;
 	private Invocation invocation;
+	
 		
 	/**
 	 * Initialize the JobServiceImpl bean.
@@ -60,8 +63,39 @@ public class DashboardServiceTests {
 	}
 	@Test
 	public void shouldFillDashboardTable() {
-		List<DashboardResult> results = dashboardService.refreshAllDashboardResults();
-		Assert.assertFalse(results.isEmpty());
+		dashboardService.refreshAllDashboardResults();
+		
+		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
+    			(WorkflowOutputs)invocation  :
+    			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+
+    	// now the dataset ID and history ID shall be set
+		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertNotNull(pf.getDatasetId());
+    	Assert.assertNotNull(pf.getHistoryId());
+    	
+    	// returned workflow outputs shall have contents
+    	Assert.assertNotNull(woutputs);
+    	Assert.assertNotNull(woutputs.getHistoryId());
+    	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
+    	Assert.assertNotNull(woutputs.getOutputIds());
+    	
+    	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
+    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+		Primaryfile pf1 = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
+    	Assert.assertEquals(pf1.getDatasetId(), pf.getDatasetId());
+    	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
+    	
+    	
+		Iterable<DashboardResult> results = dashboardRepository.findAll();
+	
+		for(DashboardResult result : results) {
+    		validateResult(result);
+    	}
+		
+		boolean invocationFound = dashboardRepository.invocationExists(invocation.getId());
+		Assert.assertTrue(invocationFound);
+		
 	}
 	@Test
 	public void shouldReturnRows() {
@@ -91,14 +125,7 @@ public class DashboardServiceTests {
     	Assert.assertTrue(!records.isEmpty());
     	boolean returnedPrimaryFile = false;
     	for(DashboardResult result : records) {
-        	Assert.assertNotNull(result.getOutputFile());
-        	Assert.assertNotNull(result.getSourceItem());
-        	Assert.assertNotNull(result.getSourceFilename());
-        	Assert.assertNotNull(result.getSubmitter());
-        	Assert.assertNotNull(result.getWorkflowName());
-        	Assert.assertNotNull(result.getWorkflowStep());
-        	Assert.assertNotNull(result.getStatus());
-        	Assert.assertNotNull(result.getDate());
+    		validateResult(result);
     		if(result.getSourceFilename().equals(pf1.getOriginalFilename()) &&
     				result.getSourceItem().equals(pf1.getItem().getName())) {
     			returnedPrimaryFile = true;
@@ -107,4 +134,16 @@ public class DashboardServiceTests {
     	Assert.assertTrue(returnedPrimaryFile);
     	
 	}
+	private void validateResult(DashboardResult result) {
+		Assert.assertNotNull(result.getOutputFile());
+    	Assert.assertNotNull(result.getSourceItem());
+    	Assert.assertNotNull(result.getSourceFilename());
+    	Assert.assertNotNull(result.getSubmitter());
+    	Assert.assertNotNull(result.getWorkflowName());
+    	Assert.assertNotNull(result.getWorkflowStep());
+    	Assert.assertNotNull(result.getStatus());
+    	Assert.assertNotNull(result.getDate());
+	}
+	
+	
 }
