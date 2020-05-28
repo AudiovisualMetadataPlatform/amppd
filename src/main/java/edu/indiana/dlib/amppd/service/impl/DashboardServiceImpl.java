@@ -8,12 +8,12 @@ import java.util.Map;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
-import com.github.jmchilton.blend4j.galaxy.beans.InvocationStep;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
@@ -47,9 +47,12 @@ public class DashboardServiceImpl implements DashboardService{
 	private CacheHelper cache;
 	@Autowired
 	private DashboardRepository dashboardRepository;
+	@Value("${amppd.refreshDashboardMinutes}")
+	private int REFRESH_MINUTES;
+	private String CACHE_KEY ="DashboardResults";
 	
 	private boolean shouldRefreshJobState(GalaxyJobState jobState, Date lastUpdated) {
-		if(lastUpdated.compareTo(DateUtils.addMinutes(new Date(), -2))>0) {
+		if(lastUpdated.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES))>0) {
 			return false;
 		}
 		switch(jobState) {
@@ -57,7 +60,6 @@ public class DashboardServiceImpl implements DashboardService{
 			case ERROR:
 				return false;
 			default:
-				
 				return true;
 		}
 	}
@@ -77,15 +79,21 @@ public class DashboardServiceImpl implements DashboardService{
 		return result;		
 	}
 	
-	public List<DashboardResult> getAllDashboardResults(){
+	public List<DashboardResult> getDashboardResults(){
+		List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);
 		
-		List<DashboardResult> results = (List<DashboardResult>) dashboardRepository.findAll();
+		if(results!=null) {
+			return results;
+		}
+		results = (List<DashboardResult>) dashboardRepository.findAll();
 		
 		for(DashboardResult result : results) {
 			if(shouldRefreshJobState(result.getStatus(), result.getUpdateDate())) {
 				result = updateDashboardResult(result);
 			}
 		}
+
+		cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
 		
 		return results;
 	}
@@ -166,105 +174,18 @@ public class DashboardServiceImpl implements DashboardService{
 			}
 			
 			dashboardRepository.saveAll(results);
+			// Expunge the cache
+			cache.remove(CACHE_KEY);
 		}
 		catch(Exception ex) {
 			log.error("Error getting dashboard results", ex);
 		}
 	}
 	
-	public List<DashboardResult> getDashboardResults(){
-
-		List<DashboardResult> results = (List<DashboardResult>) cache.get("WorkflowDashboard", false);
-		
-		if(results!=null) {
-			return results;
-		}
-		results = new ArrayList<DashboardResult>();
-		try {
-			// Get a list of invocation details from Galaxy
-			List<InvocationDetails> details = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername());
-			
-			// For each detail
-			for(InvocationDetails detail : details) {
-				// Check to see if we have an associated primary file.
-				List<Primaryfile> files = primaryfileRepository.findByHistoryId(detail.getHistoryId());
-				
-				// If not, skip this invocation
-				if(files.isEmpty()) continue;
-				
-				// Grab the first primary file, although should only be one.
-				Primaryfile thisFile = files.get(0);
-				
-				// Iterate through each step.  Each of which has a list of jobs (unless it is the initial input)				
-				for(InvocationStepDetails step : detail.getSteps()) {
-					// If we have no jobs, don't add a result here
-					List<Job> jobs = step.getJobs();
-					if(jobs.isEmpty()) continue;
-					
-					String workflowName = detail.getWorkflowId();
-					Map<String, String> workflowDetails = new HashMap<String, String>();
-					if(workflowDetails.containsKey(detail.getWorkflowId())) {
-						workflowName = workflowDetails.get(detail.getWorkflowId());
-					}
-					else {
-						try {
-							WorkflowDetails workflow = workflowService.getWorkflowsClient().showWorkflowInstance(detail.getWorkflowId());
-							if(workflow!=null) {
-								workflowName = workflow.getName();
-							}
-						}
-						catch(Exception ex) {
-							String msg = "Unable to retrieve workflows from Galaxy.";
-							log.error(msg);
-						}
-						workflowDetails.put(detail.getWorkflowId(), workflowName);
-					}
-					
-					Date date = step.getUpdateTime();
-					
-					// It's possible to have more than one job per step, although we don't have any examples at the moment
-					GalaxyJobState status = GalaxyJobState.UNKNOWN;
-					String jobName = "";
-					for(Job job : jobs) {
-						// Concatenate the job names in case we have more than one. 
-						jobName = jobName + job.getToolId() + " ";
-						date = job.getCreated();
-						status = getJobStatus(job.getState());
-					}
-
-					// For each output, create a record.
-					Map<String, JobInputOutput> outputs = step.getOutputs();
-					for(String key : outputs.keySet()) {
-						JobInputOutput output = outputs.get(key);
-						Dataset dataset = jobService.showJobStepOutput(detail.getWorkflowId(), detail.getId(), step.getId(), output.getId());
-						
-						// Show only relevant output
-						if(dataset!=null && !dataset.getVisible()) continue;
-						
-						DashboardResult result = new DashboardResult();
-						result.setWorkflowStep(jobName);
-						result.setSubmitter(galaxyPropertyConfig.getUsername());
-						result.setDate(date);
-						result.setStatus(status);
-						result.setWorkflowName(workflowName);
-						
-						result.setSourceFilename(thisFile.getOriginalFilename());
-						result.setSourceItem(thisFile.getItem().getName());
-												
-						result.setOutputFile(key);
-						results.add(result);
-					}
-				}
-				
-			}
-		}
-		catch(Exception ex) {
-			log.error("Error getting dashboard results", ex);
-		}
-		cache.put("WorkflowDashboard", results);
-		return results;
-	}
-	
+	/**
+	 * This method is to refresh all galaxy jobs data in the dashbord table.  Only needed
+	 * to prevent a cold start
+	 */
 	public List<DashboardResult> refreshAllDashboardResults(){
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
 		try {
@@ -361,7 +282,7 @@ public class DashboardServiceImpl implements DashboardService{
 		catch(Exception ex) {
 			log.error("Error getting dashboard results", ex);
 		}
-		cache.put("WorkflowDashboard", results);
+		cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
 		return results;
 	}
 	

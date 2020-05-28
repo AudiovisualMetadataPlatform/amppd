@@ -8,50 +8,45 @@ import org.springframework.stereotype.Service;
 @Service
 public class CacheHelper {
  
-    private long timeToLive;
     private LRUMap cacheMap;
  
     protected class CacheObject<T> {
         public long lastAccessed = System.currentTimeMillis();
         public T value;
- 
-        protected CacheObject(T value) {
+        public long timeToLive;
+        protected CacheObject(T value, long timeToLive) {
             this.value = value;
+            this.timeToLive = timeToLive * 1000;
         }
     }
  
     public CacheHelper() {
-    	init((long)120, 120, 100);
+    	init(100);
     }
     public CacheHelper(long timeToLive, final long timerInterval, int maxItems) {
-        init(timeToLive, timerInterval, maxItems);
+        init(maxItems);
     }	
-    public void init(long timeToLive, final long timerInterval, int maxItems) {
-    	this.timeToLive = timeToLive * 1000;
-    	 
+    public void init(int maxItems) {
         cacheMap = new LRUMap(maxItems);
- 
-        if (timeToLive > 0 && timerInterval > 0) {
- 
-            Thread t = new Thread(new Runnable() {
-                public void run() {
-                    while (true) {
-                        try {
-                            Thread.sleep(timerInterval * 1000);
-                        } catch (InterruptedException ex) {
-                        }
-                        cleanup();
+
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(30 * 1000);
+                    } catch (InterruptedException ex) {
                     }
+                    cleanup();
                 }
-            });
- 
-            t.setDaemon(true);
-            t.start();
-        }
+            }
+        });
+
+        t.setDaemon(true);
+        t.start();
     }
-    public void put(String key, Object value) {
+    public void put(String key, Object value, long timeToLive) {
         synchronized (cacheMap) {
-        	cacheMap.put(key, new CacheObject(value));
+        	cacheMap.put(key, new CacheObject(value, timeToLive));
         }
     }
  
@@ -71,6 +66,7 @@ public class CacheHelper {
  
     public void remove(String key) {
         synchronized (cacheMap) {
+        	System.out.println("Removing " + key + " from cache");
         	cacheMap.remove(key);
         }
     }
@@ -97,8 +93,9 @@ public class CacheHelper {
             while (itr.hasNext()) {
                 key = (String) itr.next();
                 c = (CacheObject) itr.getValue();
-            	System.out.println("now: " + now + " last: " + (timeToLive + c.lastAccessed));
-                if (c != null && (now > (timeToLive + c.lastAccessed))) {
+            	System.out.println("now: " + now + " last: " + (c.timeToLive + c.lastAccessed));
+                if (c != null && (now > (c.timeToLive + c.lastAccessed))) {
+                	System.out.println("Expiring " + key + " from cache");
                     deleteKey.add(key);
                 }
             }

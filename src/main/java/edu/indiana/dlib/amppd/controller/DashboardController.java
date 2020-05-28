@@ -20,7 +20,7 @@ public class DashboardController {
 	
 	@GetMapping("/workflow/dashboard")
 	public List<DashboardResult> getDashboardResults(){
-		return dashboardService.getAllDashboardResults();
+		return dashboardService.getDashboardResults();
 	}
 
 	@PostMapping("/workflow/dashboard/refresh")

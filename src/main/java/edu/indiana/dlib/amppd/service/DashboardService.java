@@ -10,7 +10,6 @@ public interface DashboardService {
 	 * @return
 	 */
 	List<DashboardResult> getDashboardResults();
-	List<DashboardResult> getAllDashboardResults();
 	void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId);
 	List<DashboardResult> refreshAllDashboardResults();
 }
