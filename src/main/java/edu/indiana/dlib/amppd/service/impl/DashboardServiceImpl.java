@@ -51,6 +51,12 @@ public class DashboardServiceImpl implements DashboardService{
 	private int REFRESH_MINUTES;
 	private String CACHE_KEY ="DashboardResults";
 	
+	/**
+	 * Check to see whether or not we should get job status from galaxy
+	 * @param jobState Current job state
+	 * @param lastUpdated Date the database was last updated
+	 * @return
+	 */
 	private boolean shouldRefreshJobState(GalaxyJobState jobState, Date lastUpdated) {
 		if(lastUpdated.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES))>0) {
 			return false;
@@ -64,6 +70,11 @@ public class DashboardServiceImpl implements DashboardService{
 		}
 	}
 	
+	/**
+	 * Updates job status from galaxy
+	 * @param result
+	 * @return
+	 */
 	private DashboardResult updateDashboardResult(DashboardResult result) {
 		Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getDatasetId());
 		String state = ds.getState();
@@ -79,6 +90,9 @@ public class DashboardServiceImpl implements DashboardService{
 		return result;		
 	}
 	
+	/**
+	 * Gets all records from the database and updates where appropriate
+	 */
 	public List<DashboardResult> getDashboardResults(){
 		List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);
 		
@@ -97,7 +111,9 @@ public class DashboardServiceImpl implements DashboardService{
 		
 		return results;
 	}
-	
+	/**
+	 * Adds a record to galaxy
+	 */
 	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId) 
 	{
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
