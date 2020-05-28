@@ -40,7 +40,8 @@ public interface JobService {
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile); 
 	
 	/**
-	 * Sanitize the given text by replacing quotes (if any) with special encoding so the result can be used in a context JSON string.
+	 * Sanitize the given text by replacing single/double quotes (if any) with "%" followed by their hex code,
+	 * so the result can be used in a context JSON string, which can be parsed as a valid parameter on command line.
 	 * @param text text to be sanitized
 	 * @return
 	 */

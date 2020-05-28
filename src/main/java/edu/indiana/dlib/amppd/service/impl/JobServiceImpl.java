@@ -242,6 +242,11 @@ public class JobServiceImpl implements JobService {
 	 */
 	@Override
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
+		// we need to sanitize all the names before putting them into the context map, 
+		// as quotes in a name could interfere when context is passed as a paramter on command line   
+		// furthermore, we better do this before serialize the context into JSON string,
+		// as ObjectMapper might add escape char for double quotes
+		
 		Map<String, String> context = new HashMap<String, String>();
 		context.put("submittedBy", ampUserService.getCurrentUsername());
 		context.put("unitId", primaryfile.getItem().getCollection().getUnit().getId().toString());		
@@ -276,6 +281,7 @@ public class JobServiceImpl implements JobService {
 	public String sanitizeText(String text) {
 		char[] invalids = new char[] {'\'', '"'};
 		
+		// replace invalid chars with their hex code
 		String str = text;
 		for (char invalid : invalids) {
 			str = StringUtils.replace(str, Character.toString(invalid), "%" + Integer.toHexString((int) invalid));
