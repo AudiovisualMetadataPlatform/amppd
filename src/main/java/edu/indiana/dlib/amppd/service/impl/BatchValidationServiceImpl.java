@@ -38,6 +38,7 @@ import edu.indiana.dlib.amppd.repository.BatchSupplementFileRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
+import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
@@ -56,10 +57,15 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		
 	@Autowired
     private BatchRepository batchRepository;
+	
 	@Autowired
     private BatchFileRepository batchFileRepository;
+	
 	@Autowired
     private BatchSupplementFileRepository batchSupplementFileRepository;
+
+	@Autowired
+	private DropboxService dropboxService;
 
 	@Autowired
     private FileStorageService fileStorageService;
@@ -452,7 +458,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			errors.add(String.format("Row %s: Missing collection name", lineNum));
 		}
 		else if((collectionName==null || collectionName.isBlank()) ) {
-			errors.add(String.format("Row %s: Collection does not exist %s", lineNum, collectionNameFromManifest));
+			errors.add(String.format("Row %s: Collection does not exist", lineNum));
 		}
 		else if(!collectionExists(collectionName)) {
 			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collectionNameFromManifest));
@@ -482,7 +488,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	 * Get the collection path in the drop box
 	 */
 	private Path getCollectionPath(String unit, String collection) {
-		return fileStorageService.getDropboxPath(unit, collection);
+		return dropboxService.getDropboxPath(unit, collection);
 	}
 	/*
 	 * Verify the unit exists in the database 
