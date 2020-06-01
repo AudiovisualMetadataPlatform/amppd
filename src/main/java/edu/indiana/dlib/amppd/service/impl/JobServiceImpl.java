@@ -302,7 +302,7 @@ public class JobServiceImpl implements JobService {
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		woutputs = workflowsClient.runWorkflow(winputs);
     		
-    		dashboardService.addDashboardResult(workflowDetails.getId(), workflowDetails.getName(), primaryfile.getId(), woutputs.getHistoryId());
+    		dashboardService.addDashboardResult(workflowId, workflowDetails.getName(), primaryfileId, woutputs.getHistoryId());
     	}
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);
