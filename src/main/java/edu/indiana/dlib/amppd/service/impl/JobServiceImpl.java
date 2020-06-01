@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +34,13 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.DashboardResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,6 +77,9 @@ public class JobServiceImpl implements JobService {
 	
 	@Autowired
     private MediaService mediaService;	
+	
+	@Autowired
+    private DashboardService dashboardService;	
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -315,6 +321,8 @@ public class JobServiceImpl implements JobService {
     		populateHmgmContextParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		woutputs = workflowsClient.runWorkflow(winputs);
+    		
+    		dashboardService.addDashboardResult(workflowId, workflowDetails.getName(), primaryfileId, woutputs.getHistoryId());
     	}
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);
