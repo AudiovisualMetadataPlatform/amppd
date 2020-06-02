@@ -40,6 +40,14 @@ public interface JobService {
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile); 
 	
 	/**
+	 * Sanitize the given text by replacing single/double quotes (if any) with "%" followed by their hex code,
+	 * so the result can be used in a context JSON string, which can be parsed as a valid parameter on command line.
+	 * @param text text to be sanitized
+	 * @return
+	 */
+	public String sanitizeText(String text);
+	
+	/**
 	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileId ID of the given primaryfile

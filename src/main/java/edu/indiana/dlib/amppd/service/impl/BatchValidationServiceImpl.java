@@ -458,7 +458,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			errors.add(String.format("Row %s: Missing collection name", lineNum));
 		}
 		else if((collectionName==null || collectionName.isBlank()) ) {
-			errors.add(String.format("Row %s: Collection does not exist %s", lineNum, collectionNameFromManifest));
+			errors.add(String.format("Row %s: Collection does not exist", lineNum));
 		}
 		else if(!collectionExists(collectionName)) {
 			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collectionNameFromManifest));

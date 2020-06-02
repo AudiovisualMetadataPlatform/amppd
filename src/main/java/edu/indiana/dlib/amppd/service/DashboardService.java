@@ -10,4 +10,17 @@ public interface DashboardService {
 	 * @return
 	 */
 	List<DashboardResult> getDashboardResults();
+	/**
+	 * Adds initial record to the dashboard results in database
+	 * @param workflowId
+	 * @param workflowName
+	 * @param primaryfileId
+	 * @param historyId
+	 */
+	void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId);
+	/**
+	 * Refreshes the database.  Should be used for initial population of database only. 
+	 * @return
+	 */
+	List<DashboardResult> refreshAllDashboardResults();
 }

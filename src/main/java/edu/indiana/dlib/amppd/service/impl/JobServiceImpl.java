@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +34,13 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.DashboardResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -74,6 +77,9 @@ public class JobServiceImpl implements JobService {
 	
 	@Autowired
     private MediaService mediaService;	
+	
+	@Autowired
+    private DashboardService dashboardService;	
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -242,21 +248,26 @@ public class JobServiceImpl implements JobService {
 	 */
 	@Override
 	public String getHmgmContext(WorkflowDetails workflowDetails, Primaryfile primaryfile) {
+		// we need to sanitize all the names before putting them into the context map, 
+		// as quotes in a name could interfere when context is passed as a paramter on command line   
+		// furthermore, we better do this before serialize the context into JSON string,
+		// as ObjectMapper might add escape char for double quotes
+		
 		Map<String, String> context = new HashMap<String, String>();
 		context.put("submittedBy", ampUserService.getCurrentUsername());
 		context.put("unitId", primaryfile.getItem().getCollection().getUnit().getId().toString());		
-		context.put("unitName", primaryfile.getItem().getCollection().getUnit().getName());
+		context.put("unitName", sanitizeText(primaryfile.getItem().getCollection().getUnit().getName()));
 		context.put("collectionId", primaryfile.getItem().getCollection().getId().toString());		
-		context.put("collectionName", primaryfile.getItem().getCollection().getName());
+		context.put("collectionName", sanitizeText(primaryfile.getItem().getCollection().getName()));
 		context.put("taskManager", primaryfile.getItem().getCollection().getTaskManager());
 		context.put("itemId", primaryfile.getItem().getId().toString());		
-		context.put("itemName", primaryfile.getItem().getName());
+		context.put("itemName", sanitizeText(primaryfile.getItem().getName()));
 		context.put("primaryfileId", primaryfile.getId().toString());
-		context.put("primaryfileName", primaryfile.getName());
+		context.put("primaryfileName", sanitizeText(primaryfile.getName()));
 		context.put("primaryfileUrl", mediaService.getPrimaryfileMediaUrl(primaryfile));
 		context.put("primaryfileMediaInfo", mediaService.getAssetMediaInfoPath(primaryfile));
 		context.put("workflowId", workflowDetails.getId());		
-		context.put("workflowName", workflowDetails.getName());	
+		context.put("workflowName", sanitizeText(workflowDetails.getName()));	
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		String contextJson = null;
@@ -268,6 +279,21 @@ public class JobServiceImpl implements JobService {
         }
 		
 		return contextJson;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.sanitizeText(String)
+	 */
+	public String sanitizeText(String text) {
+		char[] invalids = new char[] {'\'', '"'};
+		
+		// replace invalid chars with their hex code
+		String str = text;
+		for (char invalid : invalids) {
+			str = StringUtils.replace(str, Character.toString(invalid), "%" + Integer.toHexString((int) invalid));
+		}
+		
+		return str;
 	}
 	
 	/**
@@ -295,6 +321,8 @@ public class JobServiceImpl implements JobService {
     		populateHmgmContextParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		woutputs = workflowsClient.runWorkflow(winputs);
+    		
+    		dashboardService.addDashboardResult(workflowId, workflowDetails.getName(), primaryfileId, woutputs.getHistoryId());
     	}
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);
