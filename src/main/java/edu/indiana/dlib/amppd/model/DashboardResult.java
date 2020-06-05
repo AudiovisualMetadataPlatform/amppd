@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.web;
+package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
@@ -10,6 +10,7 @@ import javax.persistence.Id;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Data;
 
 @EntityListeners(AuditingEntityListener.class)

@@ -4,7 +4,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import edu.indiana.dlib.amppd.web.DashboardResult;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 
 public interface DashboardRepository  extends PagingAndSortingRepository<DashboardResult, Long>{
 

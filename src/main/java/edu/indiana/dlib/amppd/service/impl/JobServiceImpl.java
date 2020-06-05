@@ -30,6 +30,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -40,7 +41,6 @@ import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.DashboardResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

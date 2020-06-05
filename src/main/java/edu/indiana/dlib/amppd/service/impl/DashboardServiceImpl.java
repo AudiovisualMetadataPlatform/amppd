@@ -27,7 +27,7 @@ import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.util.CacheHelper;
-import edu.indiana.dlib.amppd.web.DashboardResult;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
 
