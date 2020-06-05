@@ -33,6 +33,6 @@ public class DashboardResult {
 	private String outputId;
 	private String invocationId;
 	private Date updateDate;
-	private String datasetId;
+//	private String datasetId;	// we don't need datasetId as it is the same as outputId
 	private String stepId;
 }

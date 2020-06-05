@@ -76,7 +76,7 @@ public class DashboardServiceImpl implements DashboardService{
 	 * @return
 	 */
 	private DashboardResult updateDashboardResult(DashboardResult result) {
-		Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getDatasetId());
+		Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 		String state = ds.getState();
 		
 		GalaxyJobState status = getJobStatus(state);
@@ -176,7 +176,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
 						result.setStepId(step.getId());
-						result.setDatasetId(dataset.getId());
+//						result.setDatasetId(dataset.getId());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
@@ -280,7 +280,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
 						result.setStepId(step.getId());
-						result.setDatasetId(dataset.getId());
+//						result.setDatasetId(dataset.getId());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
