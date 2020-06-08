@@ -27,12 +27,12 @@ public class DashboardResult {
 	private String sourceFilename;
 	private String workflowStep;
 	private String outputFile;
+	private String outputUrl;
 	private GalaxyJobState status;
 	private String workflowId;
 	private String historyId;
-	private String outputId;
+	private String outputId;	// we don't need datasetId as it is the same as outputId
 	private String invocationId;
 	private Date updateDate;
-//	private String datasetId;	// we don't need datasetId as it is the same as outputId
 	private String stepId;
 }
