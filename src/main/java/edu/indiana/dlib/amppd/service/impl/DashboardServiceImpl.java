@@ -76,12 +76,18 @@ public class DashboardServiceImpl implements DashboardService{
 	 * @return
 	 */
 	private DashboardResult updateDashboardResult(DashboardResult result) {
-		Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
-		String state = ds.getState();
-		
-		GalaxyJobState status = getJobStatus(state);
-		
-		result.setStatus(status);
+		try {
+			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
+			String state = ds.getState();
+			
+			GalaxyJobState status = getJobStatus(state);
+			
+			result.setStatus(status);
+			
+		}
+		catch(Exception ex) {
+			log.info("Unable to update the status of invocation " + result.getInvocationId() + " from Galaxy");
+		}
 		
 		result.setUpdateDate(new Date());
 		
