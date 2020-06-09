@@ -176,12 +176,13 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
 						result.setStepId(step.getId());
-						result.setOutputUrl(dataset.getFullDownloadUrl());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputPath(dataset.getFileName());
+						result.setOutputUrl(dataset.getFullDownloadUrl());
 						result.setUpdateDate(new Date());
 						results.add(result);
 					}
@@ -280,12 +281,13 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
 						result.setStepId(step.getId());
-						result.setOutputUrl(dataset.getFullDownloadUrl());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputPath(dataset.getFileName());
+						result.setOutputUrl(dataset.getFullDownloadUrl());
 						result.setUpdateDate(new Date());
 						results.add(result);
 						

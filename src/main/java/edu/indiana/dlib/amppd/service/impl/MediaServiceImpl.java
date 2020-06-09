@@ -19,10 +19,12 @@ import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
@@ -52,6 +54,9 @@ public class MediaServiceImpl implements MediaService {
 
 	@Autowired
 	CollectionSupplementRepository collectionSupplementRepository;
+
+	@Autowired
+	private DashboardRepository dashboardRepository;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -128,7 +133,7 @@ public class MediaServiceImpl implements MediaService {
 
 		// use a random string to obscure the symlink for security
 		// TODO do we want to include asset ID to rule out any chance of name collision
-		String symlink = asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
+		String symlink = "A-" + asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
 		Path path = fileStorageService.resolve(asset.getPathname());
 		Path link = resolve(symlink);
 
@@ -145,6 +150,58 @@ public class MediaServiceImpl implements MediaService {
 		saveAsset(asset);
 
 		log.info("Successfully created symlink " + symlink + " for asset " + asset.getId());
+		return symlink;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputSymlinkUrl(Long)
+	 */
+	@Override
+	public String getDashboardOutputSymlinkUrl(Long id) {
+		DashboardResult dashboardResult = dashboardRepository.findById(id).orElseThrow(() -> new StorageException("dashboardResult <" + id + "> does not exist!"));   
+		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
+		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(dashboardResult);
+		log.info("Output symlink URL for dashboardResult <" + id + "> is: " + url);
+		return url;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(DashboardResult)
+	 */
+	@Override
+	public String createSymlink(DashboardResult dashboardResult) {
+		if (dashboardResult == null) {
+			throw new RuntimeException("The given dashboardResult for creating symlink is null.");
+		}
+		if (dashboardResult.getOutputPath() == null ) {
+			throw new StorageException("Can't create output symlink for dashboardResult " + dashboardResult.getId() + ": its media file hasn't been uploaded.");
+		}
+
+		// if symlink hasn't been created, create it
+		if (dashboardResult.getOutputLink() != null ) {
+			log.info("Output symlink for dashboardResult " + dashboardResult.getId() + " already exists, will reuse it");
+			return dashboardResult.getOutputLink();
+		}
+
+		// use a random string to obscure the symlink for security
+		// TODO do we want to include dashboardResult ID to rule out any chance of name collision
+		String symlink = "O-" + dashboardResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
+		Path path = Paths.get(dashboardResult.getOutputPath());
+		Path link = resolve(symlink);
+
+		// create the symbolic link for the output file using the random string
+		try {
+			Files.createSymbolicLink(link, path);
+		}
+		catch (IOException e) {
+			throw new StorageException("Error creating output symlink for dashboardResult " + dashboardResult.getId(), e);		    	
+		}
+
+		// save the symlink into dashboardResult
+		dashboardResult.setOutputLink(symlink);
+		dashboardRepository.save(dashboardResult);
+
+		log.info("Successfully created output symlink " + symlink + " for dashboardResult " + dashboardResult.getId());
 		return symlink;
 	}
 

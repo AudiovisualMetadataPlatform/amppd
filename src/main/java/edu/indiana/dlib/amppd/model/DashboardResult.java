@@ -27,7 +27,9 @@ public class DashboardResult {
 	private String sourceFilename;
 	private String workflowStep;
 	private String outputFile;
-	private String outputUrl;
+	private String outputPath;	// full absolute path of the output file
+	private String outputLink;	// obscure symlink generated for the output file
+	private String outputUrl;	// full download URL in Galaxy
 	private GalaxyJobState status;
 	private String workflowId;
 	private String historyId;

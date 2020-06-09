@@ -18,12 +18,12 @@ public class DashboardController {
 	@Autowired
 	private DashboardService dashboardService;
 	
-	@GetMapping("/workflow/dashboard")
+	@GetMapping("/dashboard")
 	public List<DashboardResult> getDashboardResults(){
 		return dashboardService.getDashboardResults();
 	}
 
-	@PostMapping("/workflow/dashboard/refresh")
+	@PostMapping("/dashboard/refresh")
 	public void refreshDashboardResults(){
 		dashboardService.refreshAllDashboardResults();
 	}
