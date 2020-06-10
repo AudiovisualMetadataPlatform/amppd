@@ -52,6 +52,13 @@ public interface MediaService {
 	public String getDashboardOutputSymlinkUrl(Long id);
 
 	/**
+	 * Get the output file extension for the given dashboardResult, based on its dataset type/extension.
+	 * @param the given dashboardResult
+	 * @return the file extension of the output file
+	 */
+	public String getDashboardOutputExtension(DashboardResult dashboardResult);
+	
+	/**
 	 * Create an obscure symlink for the output of the given dashboardResult, if it hasn't been created,
 	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
 	 * @param the given dashboardResult

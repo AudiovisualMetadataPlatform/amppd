@@ -187,8 +187,10 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
 						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 					}
@@ -292,8 +294,10 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
 						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 						

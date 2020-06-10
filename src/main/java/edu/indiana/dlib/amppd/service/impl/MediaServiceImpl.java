@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -42,6 +44,11 @@ import lombok.extern.slf4j.Slf4j;
 public class MediaServiceImpl implements MediaService {
 
 	public static int SYMLINK_LENGTH = 16;
+
+	// Galaxy tool data types and the associated output file extensions
+	public static List<String> EXTENSION_JSON = Arrays.asList(new String[] {"json", "segments"});
+	public static List<String> EXTENSION_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
+	public static List<String> EXTENSION_VIDEO = Arrays.asList(new String[] {"video"});
 
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
@@ -132,8 +139,11 @@ public class MediaServiceImpl implements MediaService {
 		}
 
 		// use a random string to obscure the symlink for security
-		// TODO do we want to include asset ID to rule out any chance of name collision
-		String symlink = "A-" + asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
+		// prefix A stands for Asset
+		// include asset ID to rule out any chance of name collision
+		// add file extension to help browser decide file type so to use proper display app
+		String fileExt = FilenameUtils.getExtension(asset.getPathname());
+		String symlink = "A-" + asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + fileExt;			    
 		Path path = fileStorageService.resolve(asset.getPathname());
 		Path link = resolve(symlink);
 
@@ -165,6 +175,29 @@ public class MediaServiceImpl implements MediaService {
 		return url;
 	}
 
+	/*
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputExtension(DashboardResult)
+	 */
+	public String getDashboardOutputExtension(DashboardResult dashboardResult) {
+		// We make the following assumptions based on current on Galaxy tool output data types and file types:
+		// all text outputs are of json format
+		// all audio outputs are of wav format
+		// all video outputs are of mp4 format
+		// We can refine the data types and the associated file extensions in the future as our use case grow
+		if (EXTENSION_JSON.contains(dashboardResult.getOutputType())) {
+			return "json";				
+		}
+		else if (EXTENSION_AUDIO.contains(dashboardResult.getOutputType())) {
+			return "wav";				
+		}
+		else if (EXTENSION_VIDEO.contains(dashboardResult.getOutputType())) {
+			return "mp4";				
+		}
+		// the default extension
+		return "dat";
+	}
+	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(DashboardResult)
 	 */
@@ -174,7 +207,7 @@ public class MediaServiceImpl implements MediaService {
 			throw new RuntimeException("The given dashboardResult for creating symlink is null.");
 		}
 		if (dashboardResult.getOutputPath() == null ) {
-			throw new StorageException("Can't create output symlink for dashboardResult " + dashboardResult.getId() + ": its media file hasn't been uploaded.");
+			throw new StorageException("Can't create output symlink for dashboardResult " + dashboardResult.getId() + ": its output file path is null.");
 		}
 
 		// if symlink hasn't been created, create it
@@ -184,8 +217,10 @@ public class MediaServiceImpl implements MediaService {
 		}
 
 		// use a random string to obscure the symlink for security
-		// TODO do we want to include dashboardResult ID to rule out any chance of name collision
-		String symlink = "O-" + dashboardResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
+		// prefix O stands for Output
+		// include dashboardResult ID to rule out any chance of name collision
+		// add file extension to help browser decide file type so to use proper display app 
+		String symlink = "O-" + dashboardResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + getDashboardOutputExtension(dashboardResult);
 		Path path = Paths.get(dashboardResult.getOutputPath());
 		Path link = resolve(symlink);
 

@@ -19,7 +19,7 @@ import lombok.Data;
 public class DashboardResult {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-	private int id;
+	private Long id;
 	private Date date;
 	private String submitter;
 	private String workflowName;
@@ -27,6 +27,7 @@ public class DashboardResult {
 	private String sourceFilename;
 	private String workflowStep;
 	private String outputFile;
+	private String outputType;	// type of output file, indicated by its file extension 
 	private String outputPath;	// full absolute path of the output file
 	private String outputLink;	// obscure symlink generated for the output file
 	private String outputUrl;	// full download URL in Galaxy
