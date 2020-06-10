@@ -24,14 +24,16 @@ import com.google.common.io.Resources;
 import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
-import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -72,6 +74,9 @@ public class TestHelper {
 	
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
+	
+//	@Autowired
+//	private DashboardRepository dashboardRepository;
 	
 	@Autowired
     private FileStorageService fileStorageService; 
@@ -249,6 +254,14 @@ public class TestHelper {
 		}
 	}	
 	
+//	/**
+//	 * Create dashboard results for various output types, one for each type; fields not related to output are not populated.
+//	 */
+//	public DashboardResult ensureDashboardResultOutputs() {
+//		DashboardResult dsJson = new DashboardResult();
+//		dsJson.setOutputFileType("json");
+//		dsJson.setOutputFilePath("");
+//	}
 
 	/**
 	 * Return the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.

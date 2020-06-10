@@ -12,13 +12,21 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.service.impl.MediaServiceImpl;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class MediaServiceTests {
+
+//	// tmp test directory for dashboard result output files
+//	public static final String TEST_DIR_NAME = "test";
+//	
+//	@Autowired
+//    private FileStorageService fileStorageService;
 
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
@@ -42,6 +50,9 @@ public class MediaServiceTests {
 	public void cleanup() {
 		// remove all symlinks created
 		mediaService.cleanup();
+//
+//		// clean up tmp test directory after unit tests done
+//        fileStorageService.delete(TEST_DIR_NAME);
 	}
 
 	@Test
@@ -94,5 +105,28 @@ public class MediaServiceTests {
 		Assert.assertTrue(url.endsWith(pf.getSymlink()));
 	}
     
-
+	@Test
+	public void shouldReturnJsonExtensionForJsonOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_JSON.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_JSON);
+	}
+	
+	@Test
+	public void shouldReturnAudioExtensionForAudioOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_AUDIO.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_AUDIO);
+	}
+	
+	@Test
+	public void shouldReturnVideoExtensionForVideoOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_VIDEO.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_VIDEO);
+	}
+	
 }

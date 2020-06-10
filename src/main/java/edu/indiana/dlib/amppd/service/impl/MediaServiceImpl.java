@@ -45,10 +45,16 @@ public class MediaServiceImpl implements MediaService {
 
 	public static int SYMLINK_LENGTH = 16;
 
-	// Galaxy tool data types and the associated output file extensions
-	public static List<String> EXTENSION_JSON = Arrays.asList(new String[] {"json", "segments"});
-	public static List<String> EXTENSION_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
-	public static List<String> EXTENSION_VIDEO = Arrays.asList(new String[] {"video"});
+	// Galaxy data types extended by AMPPD 
+	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments"});
+	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
+	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
+
+	// file extensions used by dashboard output symlinks, corresponding to Galaxy data types
+	public static String FILE_EXT_JSON = "json";
+	public static String FILE_EXT_AUDIO = "wav";
+	public static String FILE_EXT_VIDEO = "mp4";
+	public static String FILE_EXT_DEFAULT = "dat";
 
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
@@ -184,17 +190,17 @@ public class MediaServiceImpl implements MediaService {
 		// all audio outputs are of wav format
 		// all video outputs are of mp4 format
 		// We can refine the data types and the associated file extensions in the future as our use case grow
-		if (EXTENSION_JSON.contains(dashboardResult.getOutputType())) {
-			return "json";				
+		if (TYPE_JSON.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_JSON;				
 		}
-		else if (EXTENSION_AUDIO.contains(dashboardResult.getOutputType())) {
-			return "wav";				
+		else if (TYPE_AUDIO.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_AUDIO;				
 		}
-		else if (EXTENSION_VIDEO.contains(dashboardResult.getOutputType())) {
-			return "mp4";				
+		else if (TYPE_VIDEO.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_VIDEO;				
 		}
 		// the default extension
-		return "dat";
+		return FILE_EXT_DEFAULT;
 	}
 	
 
