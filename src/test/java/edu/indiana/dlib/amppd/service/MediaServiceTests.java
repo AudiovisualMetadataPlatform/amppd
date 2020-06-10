@@ -22,12 +22,6 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 @SpringBootTest
 public class MediaServiceTests {
 
-//	// tmp test directory for dashboard result output files
-//	public static final String TEST_DIR_NAME = "test";
-//	
-//	@Autowired
-//    private FileStorageService fileStorageService;
-
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 	
@@ -50,9 +44,6 @@ public class MediaServiceTests {
 	public void cleanup() {
 		// remove all symlinks created
 		mediaService.cleanup();
-//
-//		// clean up tmp test directory after unit tests done
-//        fileStorageService.delete(TEST_DIR_NAME);
 	}
 
 	@Test

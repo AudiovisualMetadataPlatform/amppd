@@ -34,7 +34,6 @@ public class MediaControllerTests {
 	private String token = "";
 
 	private Primaryfile primaryfile;
-//	private Primaryfile dashboardResult;
 	
 	@Before
 	public void setup() {
@@ -42,8 +41,6 @@ public class MediaControllerTests {
 		primaryfile = testHelper.ensureTestAudio();
 		primaryfile.setSymlink(null);
 		token = testHelper.getToken();
-		
-		// prepare a dashboardResult with empty symlink for testing
 	}
 
 	@After
@@ -58,13 +55,5 @@ public class MediaControllerTests {
     			status().is3xxRedirection()).andExpect(
     					redirectedUrlPattern("http://*:8500/symlink/*"));
     }
-
-//    @Test
-//    public void shouldServeDashboardOutput() throws Exception {  	
-//    	mvc.perform(get("/dashboard/{id}/output", dashboardResult.getId()).header("Authorization", "Bearer " + token)).andExpect(
-//    			status().is3xxRedirection()).andExpect(
-//    					redirectedUrlPattern("http://*:8500/symlink/*"));
-//    }
-
 
 }
