@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.service.DashboardService;
-import edu.indiana.dlib.amppd.web.DashboardResult;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -18,12 +18,12 @@ public class DashboardController {
 	@Autowired
 	private DashboardService dashboardService;
 	
-	@GetMapping("/workflow/dashboard")
+	@GetMapping("/dashboard")
 	public List<DashboardResult> getDashboardResults(){
 		return dashboardService.getDashboardResults();
 	}
 
-	@PostMapping("/workflow/dashboard/refresh")
+	@PostMapping("/dashboard/refresh")
 	public void refreshDashboardResults(){
 		dashboardService.refreshAllDashboardResults();
 	}

@@ -2,7 +2,7 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
-import edu.indiana.dlib.amppd.web.DashboardResult;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 
 public interface DashboardService {
 	/***

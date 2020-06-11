@@ -31,10 +31,9 @@ public class MediaControllerTests {
 	
     @Autowired
     private MockMvc mvc;
+	private String token = "";
 
 	private Primaryfile primaryfile;
-
-	String token = "";
 	
 	@Before
 	public void setup() {

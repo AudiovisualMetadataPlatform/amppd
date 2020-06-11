@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.service;
 import java.nio.file.Path;
 
 import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 
 /**
@@ -35,12 +36,35 @@ public interface MediaService {
 	public String getPrimaryfileSymlinkUrl(Long id);
 	
 	/**
-	 * Create an obscure symlink for the given asset, if it hasn't been created. 
-	 * in the media directory where static contents are served by AMPPD-UI Apache server.
+	 * Create an obscure symlink for the given asset, if it hasn't been created,
+	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
 	 * @param the given asset
 	 * @return the created symlink.
 	 */
 	public String createSymlink(Asset asset);
+	
+	/**
+	 * Get the output symlink URL for the given dashboardResult:
+	 * create a new one if not existing yet; or reuse the existing symlink if already created.
+	 * @param id ID of the given dashboardResult
+	 * @return the absolute path of the output symlink
+	 */
+	public String getDashboardOutputSymlinkUrl(Long id);
+
+	/**
+	 * Get the output file extension for the given dashboardResult, based on its dataset type/extension.
+	 * @param the given dashboardResult
+	 * @return the file extension of the output file
+	 */
+	public String getDashboardOutputExtension(DashboardResult dashboardResult);
+	
+	/**
+	 * Create an obscure symlink for the output of the given dashboardResult, if it hasn't been created,
+	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
+	 * @param the given dashboardResult
+	 * @return the created symlink.
+	 */
+	public String createSymlink(DashboardResult dashboardResult);
 	
 	/**
 	 * Resolve the path for the given pathname relative to the AMPPD media symlink root.

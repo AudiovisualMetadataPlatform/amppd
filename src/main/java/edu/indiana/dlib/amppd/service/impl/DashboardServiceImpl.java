@@ -27,7 +27,7 @@ import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.util.CacheHelper;
-import edu.indiana.dlib.amppd.web.DashboardResult;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,7 +77,7 @@ public class DashboardServiceImpl implements DashboardService{
 	 */
 	private DashboardResult updateDashboardResult(DashboardResult result) {
 		try {
-			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getDatasetId());
+			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 			String state = ds.getState();
 			
 			GalaxyJobState status = getJobStatus(state);
@@ -182,12 +182,15 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
 						result.setStepId(step.getId());
-						result.setDatasetId(dataset.getId());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputType(dataset.getFileExt());
+						result.setOutputPath(dataset.getFileName());
+						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 					}
@@ -286,12 +289,15 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
 						result.setStepId(step.getId());
-						result.setDatasetId(dataset.getId());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputType(dataset.getFileExt());
+						result.setOutputPath(dataset.getFileName());
+						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 						
