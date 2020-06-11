@@ -72,7 +72,7 @@ public class MediaServiceTests {
 		Assert.assertNotNull(primaryfile.getSymlink());
 		
 		// and the symlink starts with primaryfile ID
-		Assert.assertTrue(primaryfile.getSymlink().startsWith(primaryfile.getId().toString()));
+		Assert.assertTrue(primaryfile.getSymlink().contains(primaryfile.getId().toString()));
 		
 		// and the symlink file should exist
 		Assert.assertTrue(Files.exists(mediaService.resolve(primaryfile.getSymlink())));
