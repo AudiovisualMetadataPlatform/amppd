@@ -9,6 +9,10 @@ import java.util.Map;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
@@ -27,7 +31,9 @@ import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.util.CacheHelper;
+import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardResult;
+import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
 
@@ -99,23 +105,21 @@ public class DashboardServiceImpl implements DashboardService{
 	/**
 	 * Gets all records from the database and updates where appropriate
 	 */
-	public List<DashboardResult> getDashboardResults(){
-		List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);
+	public DashboardResponse getDashboardResults(DashboardSearchQuery query){
+		//List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);
 		
-		if(results!=null) {
-			return results;
-		}
-		results = (List<DashboardResult>) dashboardRepository.findAll();
+		//if(results!=null) {
+		//	return results;
+		//}
+		DashboardResponse response = dashboardRepository.searchResults(query);
 		
-		for(DashboardResult result : results) {
+		for(DashboardResult result : response.getRows()) {
 			if(shouldRefreshJobState(result.getStatus(), result.getUpdateDate())) {
 				result = updateDashboardResult(result);
 			}
 		}
 
-		cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
-		
-		return results;
+		return response;
 	}
 	/**
 	 * Adds a record to galaxy

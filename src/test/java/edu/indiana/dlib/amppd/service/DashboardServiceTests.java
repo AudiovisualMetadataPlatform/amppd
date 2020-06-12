@@ -24,8 +24,11 @@ import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardResult;
-@Ignore
+import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
+import edu.indiana.dlib.amppd.web.DashboardSortRule;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DashboardServiceTests {
@@ -120,7 +123,17 @@ public class DashboardServiceTests {
     	Assert.assertEquals(pf1.getDatasetId(), pf.getDatasetId());
     	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
     	
-    	List<DashboardResult> records = dashboardService.getDashboardResults();
+    	
+    	DashboardSearchQuery query = new DashboardSearchQuery();
+    	query.setPageNum(1);
+    	query.setResultsPerPage(5);
+    	DashboardSortRule sort = new DashboardSortRule();
+    	sort.setColumnName("Date");
+    	
+    	query.setSortRule(sort);
+    	
+    	DashboardResponse results = dashboardService.getDashboardResults(query);
+    	List<DashboardResult> records = results.getRows();
     	
     	Assert.assertTrue(!records.isEmpty());
     	boolean returnedPrimaryFile = false;
