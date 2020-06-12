@@ -19,18 +19,19 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
-import edu.indiana.dlib.amppd.web.DashboardResult;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.DashboardSortRule;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@Ignore
 public class DashboardServiceTests {
 
 	@MockBean

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -19,10 +21,12 @@ import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
@@ -41,6 +45,17 @@ public class MediaServiceImpl implements MediaService {
 
 	public static int SYMLINK_LENGTH = 16;
 
+	// Galaxy data types extended by AMPPD 
+	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments"});
+	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
+	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
+
+	// file extensions used by dashboard output symlinks, corresponding to Galaxy data types
+	public static String FILE_EXT_JSON = "json";
+	public static String FILE_EXT_AUDIO = "wav";
+	public static String FILE_EXT_VIDEO = "mp4";
+	public static String FILE_EXT_DEFAULT = "dat";
+
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
 
@@ -52,6 +67,9 @@ public class MediaServiceImpl implements MediaService {
 
 	@Autowired
 	CollectionSupplementRepository collectionSupplementRepository;
+
+	@Autowired
+	private DashboardRepository dashboardRepository;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -127,8 +145,11 @@ public class MediaServiceImpl implements MediaService {
 		}
 
 		// use a random string to obscure the symlink for security
-		// TODO do we want to include asset ID to rule out any chance of name collision
-		String symlink = asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true);			    
+		// prefix A stands for Asset
+		// include asset ID to rule out any chance of name collision
+		// add file extension to help browser decide file type so to use proper display app
+		String fileExt = FilenameUtils.getExtension(asset.getPathname());
+		String symlink = "A-" + asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + fileExt;			    
 		Path path = fileStorageService.resolve(asset.getPathname());
 		Path link = resolve(symlink);
 
@@ -145,6 +166,83 @@ public class MediaServiceImpl implements MediaService {
 		saveAsset(asset);
 
 		log.info("Successfully created symlink " + symlink + " for asset " + asset.getId());
+		return symlink;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputSymlinkUrl(Long)
+	 */
+	@Override
+	public String getDashboardOutputSymlinkUrl(Long id) {
+		DashboardResult dashboardResult = dashboardRepository.findById(id).orElseThrow(() -> new StorageException("dashboardResult <" + id + "> does not exist!"));   
+		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
+		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(dashboardResult);
+		log.info("Output symlink URL for dashboardResult <" + id + "> is: " + url);
+		return url;
+	}
+
+	/*
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputExtension(DashboardResult)
+	 */
+	public String getDashboardOutputExtension(DashboardResult dashboardResult) {
+		// We make the following assumptions based on current on Galaxy tool output data types and file types:
+		// all text outputs are of json format
+		// all audio outputs are of wav format
+		// all video outputs are of mp4 format
+		// We can refine the data types and the associated file extensions in the future as our use case grow
+		if (TYPE_JSON.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_JSON;				
+		}
+		else if (TYPE_AUDIO.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_AUDIO;				
+		}
+		else if (TYPE_VIDEO.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_VIDEO;				
+		}
+		// the default extension
+		return FILE_EXT_DEFAULT;
+	}
+	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(DashboardResult)
+	 */
+	@Override
+	public String createSymlink(DashboardResult dashboardResult) {
+		if (dashboardResult == null) {
+			throw new RuntimeException("The given dashboardResult for creating symlink is null.");
+		}
+		if (dashboardResult.getOutputPath() == null ) {
+			throw new StorageException("Can't create output symlink for dashboardResult " + dashboardResult.getId() + ": its output file path is null.");
+		}
+
+		// if symlink hasn't been created, create it
+		if (dashboardResult.getOutputLink() != null ) {
+			log.info("Output symlink for dashboardResult " + dashboardResult.getId() + " already exists, will reuse it");
+			return dashboardResult.getOutputLink();
+		}
+
+		// use a random string to obscure the symlink for security
+		// prefix O stands for Output
+		// include dashboardResult ID to rule out any chance of name collision
+		// add file extension to help browser decide file type so to use proper display app 
+		String symlink = "O-" + dashboardResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + getDashboardOutputExtension(dashboardResult);
+		Path path = Paths.get(dashboardResult.getOutputPath());
+		Path link = resolve(symlink);
+
+		// create the symbolic link for the output file using the random string
+		try {
+			Files.createSymbolicLink(link, path);
+		}
+		catch (IOException e) {
+			throw new StorageException("Error creating output symlink for dashboardResult " + dashboardResult.getId(), e);		    	
+		}
+
+		// save the symlink into dashboardResult
+		dashboardResult.setOutputLink(symlink);
+		dashboardRepository.save(dashboardResult);
+
+		log.info("Successfully created output symlink " + symlink + " for dashboardResult " + dashboardResult.getId());
 		return symlink;
 	}
 

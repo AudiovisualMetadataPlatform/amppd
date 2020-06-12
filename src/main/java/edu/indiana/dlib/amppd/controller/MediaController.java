@@ -46,6 +46,26 @@ public class MediaController {
     	}
         return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
     }
+
+	/**
+	 * Serve the output file of the given dashboardResult by redirecting the request to the AMPPD UI Apache server.
+	 * @param id ID of the given dashboardResult
+	 * @return the content of the output file
+	 */
+	@GetMapping("/dashboard/{id}/output")
+	public ResponseEntity<Object> serveDashboardOutput(@PathVariable("id") Long id) {		
+    	log.info("Serving output for dashboardResult ID " + id);
+    	String url = mediaService.getDashboardOutputSymlinkUrl(id);
+    	HttpHeaders httpHeaders = new HttpHeaders();
+    	try {
+    		httpHeaders.setLocation(new URI(url));
+    	}
+    	catch (URISyntaxException e) {
+    		new RuntimeException("Invalid output symlink URL: " + url, e);
+    	}
+        return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
+    }
+	
 	
 //	public String servePrimaryfile(@PathVariable("id") Long id) {		
 //    	log.info("Serving media file for primaryfile ID " + id);

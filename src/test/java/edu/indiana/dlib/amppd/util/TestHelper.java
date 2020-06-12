@@ -30,8 +30,8 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
-import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -249,7 +249,6 @@ public class TestHelper {
 		}
 	}	
 	
-
 	/**
 	 * Return the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.
 	 * @param extention

@@ -12,8 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.service.impl.MediaServiceImpl;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -70,7 +72,7 @@ public class MediaServiceTests {
 		Assert.assertNotNull(primaryfile.getSymlink());
 		
 		// and the symlink starts with primaryfile ID
-		Assert.assertTrue(primaryfile.getSymlink().startsWith(primaryfile.getId().toString()));
+		Assert.assertTrue(primaryfile.getSymlink().contains(primaryfile.getId().toString()));
 		
 		// and the symlink file should exist
 		Assert.assertTrue(Files.exists(mediaService.resolve(primaryfile.getSymlink())));
@@ -94,5 +96,28 @@ public class MediaServiceTests {
 		Assert.assertTrue(url.endsWith(pf.getSymlink()));
 	}
     
-
+	@Test
+	public void shouldReturnJsonExtensionForJsonOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_JSON.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_JSON);
+	}
+	
+	@Test
+	public void shouldReturnAudioExtensionForAudioOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_AUDIO.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_AUDIO);
+	}
+	
+	@Test
+	public void shouldReturnVideoExtensionForVideoOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_VIDEO.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_VIDEO);
+	}
+	
 }

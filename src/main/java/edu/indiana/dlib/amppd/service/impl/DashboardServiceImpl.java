@@ -9,10 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
@@ -24,15 +20,15 @@ import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.DashboardRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.util.CacheHelper;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
-import edu.indiana.dlib.amppd.web.DashboardResult;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +79,7 @@ public class DashboardServiceImpl implements DashboardService{
 	 */
 	private DashboardResult updateDashboardResult(DashboardResult result) {
 		try {
-			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getDatasetId());
+			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 			String state = ds.getState();
 			
 			GalaxyJobState status = getJobStatus(state);
@@ -186,12 +182,15 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
 						result.setStepId(step.getId());
-						result.setDatasetId(dataset.getId());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputType(dataset.getFileExt());
+						result.setOutputPath(dataset.getFileName());
+						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 					}
@@ -290,12 +289,15 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
 						result.setStepId(step.getId());
-						result.setDatasetId(dataset.getId());
 						
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
+						result.setOutputType(dataset.getFileExt());
+						result.setOutputPath(dataset.getFileName());
+						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 						

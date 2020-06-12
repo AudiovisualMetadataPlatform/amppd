@@ -15,9 +15,9 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.web.DashboardFilterValues;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
-import edu.indiana.dlib.amppd.web.DashboardResult;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.DashboardSortRule;
 
