@@ -3,13 +3,15 @@ package edu.indiana.dlib.amppd.service;
 import java.util.List;
 
 import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.web.DashboardResponse;
+import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 
 public interface DashboardService {
 	/***
 	 * Get a list of all results to display in the workflow dashboard
 	 * @return
 	 */
-	List<DashboardResult> getDashboardResults();
+	DashboardResponse getDashboardResults(DashboardSearchQuery query);
 	/**
 	 * Adds initial record to the dashboard results in database
 	 * @param workflowId
