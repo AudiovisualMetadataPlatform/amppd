@@ -26,9 +26,7 @@ public class DashboardResult {
 	private Date date;
 	private String submitter;
 	private String workflowName;
-	@Column(name="source_item")
 	private String sourceItem;
-	@Column(name="source_filename")
 	private String sourceFilename;
 	private String workflowStep;
 	private String outputFile;
