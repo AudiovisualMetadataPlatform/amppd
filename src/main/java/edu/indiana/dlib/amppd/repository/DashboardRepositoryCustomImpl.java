@@ -131,12 +131,12 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         // Setup predicates (where statements)
         List<Predicate> predicates = getPredicates(searchQuery, root, cb);
         
-
+        /*TODO:  I think this should be commented out.  Do not limit values.  Allow users to keep searching.
         if(!predicates.isEmpty()) {
-        	Predicate[] preds = predicates.toArray(new Predicate[0]);
-        	query.where(preds);
+        	//Predicate[] preds = predicates.toArray(new Predicate[0]);
+        	//query.where(preds);
         }
-        
+        */
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
