@@ -12,6 +12,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -96,8 +97,8 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 	
 	private List<Predicate> getPredicates(DashboardSearchQuery searchQuery, Root<DashboardResult> root, CriteriaBuilder cb) {
 		List<Predicate> predicates = new ArrayList<Predicate>();
-		if(searchQuery.getFilterBySearchTerm().length>0) {
-        	
+		
+		if(searchQuery.getFilterBySearchTerm().length>0) {        	
         	In<String> inClause = cb.in(root.get("sourceItem"));
         	In<String> inClause2 = cb.in(root.get("sourceFilename"));
         	
@@ -105,17 +106,49 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         	    inClause.value(term);
         		inClause2.value(term);
         	}            
-            
-            
+                        
             // Combine the two predicates to get an "OR"
             Predicate sourcePredicate = cb.or(inClause2, inClause);
             predicates.add(sourcePredicate);
         }
+		
         if(searchQuery.getFilterBySubmitters().length>0) {
-            Expression<String> sourceItem = root.get("submitter");
-            Predicate submitterPred = sourceItem.in(searchQuery.getFilterBySubmitters());
-            predicates.add(submitterPred);
+            Path<String> path = root.get("submitter");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterBySubmitters());
+            predicates.add(predicate);
         }
+        
+        if(searchQuery.getFilterByWorkflows().length>0) {
+        	Path<String> path = root.get("workflow");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByWorkflows());
+            predicates.add(predicate);
+        }
+        
+        if(searchQuery.getFilterByItems().length>0) {
+        	Path<String> path = root.get("item");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByItems());
+            predicates.add(predicate);
+        }
+        
+        if(searchQuery.getFilterByFiles().length>0) {
+        	Path<String> path = root.get("file");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByFiles());
+            predicates.add(predicate);
+        }
+        
+        if(searchQuery.getFilterBySteps().length>0) {
+        	Path<String> path = root.get("step");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterBySteps());
+            predicates.add(predicate);
+        }
+        
+        if(searchQuery.getFilterByStatuses().length>0) {
+        	Path<String> path = root.get("status");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByStatuses());
+            predicates.add(predicate);
+        }
+        
+        
         return predicates;
 	}
 	private DashboardFilterValues getFilterValues(DashboardSearchQuery searchQuery) {
