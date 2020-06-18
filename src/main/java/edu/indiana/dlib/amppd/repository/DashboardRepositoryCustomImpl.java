@@ -11,7 +11,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -21,6 +20,7 @@ import edu.indiana.dlib.amppd.web.DashboardFilterValues;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.DashboardSortRule;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
 public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom {
 	@PersistenceContext
@@ -31,7 +31,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         
         List<DashboardResult> rows = getDashboardRows(searchQuery);
         
-        DashboardFilterValues filters = getFilterValues(searchQuery);
+        DashboardFilterValues filters = getFilterValues();
         
         
         // Format the response
@@ -75,6 +75,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         
         return query.getResultList();
 	}
+	
 	private int getTotalCount(DashboardSearchQuery searchQuery) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -119,25 +120,25 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         }
         
         if(searchQuery.getFilterByWorkflows().length>0) {
-        	Path<String> path = root.get("workflow");
+        	Path<String> path = root.get("workflowName");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByWorkflows());
             predicates.add(predicate);
         }
         
         if(searchQuery.getFilterByItems().length>0) {
-        	Path<String> path = root.get("item");
+        	Path<String> path = root.get("sourceItem");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByItems());
             predicates.add(predicate);
         }
         
         if(searchQuery.getFilterByFiles().length>0) {
-        	Path<String> path = root.get("file");
+        	Path<String> path = root.get("sourceFilename");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByFiles());
             predicates.add(predicate);
         }
         
         if(searchQuery.getFilterBySteps().length>0) {
-        	Path<String> path = root.get("step");
+        	Path<String> path = root.get("workflowStep");
             Predicate predicate = path.in((Object[])searchQuery.getFilterBySteps());
             predicates.add(predicate);
         }
@@ -147,37 +148,38 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
             Predicate predicate = path.in((Object[])searchQuery.getFilterByStatuses());
             predicates.add(predicate);
         }
-        
-        
+                
         return predicates;
 	}
-	private DashboardFilterValues getFilterValues(DashboardSearchQuery searchQuery) {
+	
+	private DashboardFilterValues getFilterValues() {
 
-		DashboardFilterValues filters = new DashboardFilterValues();
-		
+		DashboardFilterValues filters = new DashboardFilterValues();		
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
         Root<DashboardResult> root = query.from(DashboardResult.class);
+        CriteriaQuery<GalaxyJobState> queryGjs = cb.createQuery(GalaxyJobState.class);
+        Root<DashboardResult> rootGjs = queryGjs.from(DashboardResult.class);
         
-
-        // Setup predicates (where statements)
-        List<Predicate> predicates = getPredicates(searchQuery, root, cb);
-        
-        /*TODO:  I think this should be commented out.  Do not limit values.  Allow users to keep searching.
-        if(!predicates.isEmpty()) {
-        	//Predicate[] preds = predicates.toArray(new Predicate[0]);
-        	//query.where(preds);
-        }
-        */
+        // We treat each filter independently, i.e. its possible value set is not dependent on current selected values in other filters;
+        // rather, we populate each filter with distinct values existing in the current dashboard table.
+        // Making filter value set context-dependent will result in deadlock queries. 
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
-
+        List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
+        List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
+        List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();
         List<String> searchTerms= union(filenames, items);
         
         filters.setSearchTerms(searchTerms);
         filters.setSubmitters(submitters);
+        filters.setWorkflows(workflows);
+        filters.setSteps(steps);
+        filters.setItems(items);
+        filters.setFiles(filenames);
+        filters.setStatuses(statuses);
         
         return filters;
         

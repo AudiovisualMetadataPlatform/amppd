@@ -11,6 +11,6 @@ public class DashboardFilterValues {
 	private List<String> items;
 	private List<String> files;
 	private List<String> steps;
-	private List<String> statuses;
+	private List<GalaxyJobState> statuses;
 	private List<String> searchTerms;
 }

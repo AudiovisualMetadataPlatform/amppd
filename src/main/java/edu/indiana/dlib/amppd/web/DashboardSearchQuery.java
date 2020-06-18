@@ -11,7 +11,7 @@ public class DashboardSearchQuery {
 	private String[] filterByItems;
 	private String[] filterByFiles;
 	private String[] filterBySteps;
-	private String[] filterByStatuses;
+	private GalaxyJobState[] filterByStatuses;
 	private String[] filterBySearchTerm;	
 	private DashboardSortRule sortRule;
 }
