@@ -38,6 +38,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         DashboardResponse response = new DashboardResponse();
         response.setRows(rows);
         response.setTotalResults(count);
+        // TODO we don't need to update filters with each query; we should update filters each time the DashboardResult table gets updated
         response.setFilters(filters);
         return response;
     }
