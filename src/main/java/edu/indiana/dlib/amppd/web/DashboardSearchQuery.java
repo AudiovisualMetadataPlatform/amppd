@@ -7,6 +7,11 @@ public class DashboardSearchQuery {
 	private int pageNum;
 	private int resultsPerPage;
 	private String[] filterBySubmitters;
+	private String[] filterByWorkflows;
+	private String[] filterByItems;
+	private String[] filterByFiles;
+	private String[] filterBySteps;
+	private GalaxyJobState[] filterByStatuses;
 	private String[] filterBySearchTerm;	
 	private DashboardSortRule sortRule;
 }
