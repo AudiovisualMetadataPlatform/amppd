@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -106,7 +107,6 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         		inClause2.value(term);
         	}            
             
-            
             // Combine the two predicates to get an "OR"
             Predicate sourcePredicate = cb.or(inClause2, inClause);
             predicates.add(sourcePredicate);
@@ -116,6 +116,15 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
             Predicate submitterPred = sourceItem.in(searchQuery.getFilterBySubmitters());
             predicates.add(submitterPred);
         }
+        
+        //Build the predicate for Date filter
+		if(searchQuery.getFilterByDates().size()>0) { 
+			Predicate datePred = cb.between(root.get("date"), searchQuery.getFilterByDates().get(0), searchQuery.getFilterByDates().get(1)); 
+			//Predicate fromDate = cb.greaterThanOrEqualTo(root.get("date"),searchQuery.getFilterByDates().get(0)); 
+			//Predicate toDate = cb.lessThanOrEqualTo(root.get("date"), searchQuery.getFilterByDates().get(1)); 
+			predicates.add(datePred); 
+		}
+        
         return predicates;
 	}
 	private DashboardFilterValues getFilterValues(DashboardSearchQuery searchQuery) {
@@ -125,8 +134,9 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
+        CriteriaQuery<Date> queryDate = cb.createQuery(Date.class);
         Root<DashboardResult> root = query.from(DashboardResult.class);
-        
+        Root<DashboardResult> rootDateCriteria = queryDate.from(DashboardResult.class);
 
         // Setup predicates (where statements)
         List<Predicate> predicates = getPredicates(searchQuery, root, cb);
@@ -137,14 +147,19 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         	//query.where(preds);
         }
         */
+        
+        
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
-
+        //add date filters here
+        List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get("date").as(java.sql.Date.class))).getResultList();
+        
         List<String> searchTerms= union(filenames, items);
         
         filters.setSearchTerms(searchTerms);
         filters.setSubmitters(submitters);
+        filters.setDateFilter(dateFilters);
         
         return filters;
         
