@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -17,10 +18,13 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.service.impl.DashboardServiceImpl;
 import edu.indiana.dlib.amppd.web.DashboardFilterValues;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.DashboardSortRule;
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 
 public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom {
 	@PersistenceContext
@@ -30,7 +34,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         int count = getTotalCount(searchQuery);
         
         List<DashboardResult> rows = getDashboardRows(searchQuery);
-        
+        //log.info("1st row with date:"+rows.get(0).getDate());
         DashboardFilterValues filters = getFilterValues(searchQuery);
         
         
@@ -70,6 +74,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 
         // Get the actual rows
         TypedQuery<DashboardResult> query = em.createQuery(cq);
+        log.info("=======>>>>QUERY IS:"+query.unwrap(org.hibernate.Query.class).getQueryString()  );
         query.setFirstResult(firstResult);
         query.setMaxResults(searchQuery.getResultsPerPage());
         
@@ -119,10 +124,13 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         
         //Build the predicate for Date filter
 		if(searchQuery.getFilterByDates().size()>0) { 
-			Predicate datePred = cb.between(root.get("date"), searchQuery.getFilterByDates().get(0), searchQuery.getFilterByDates().get(1)); 
-			//Predicate fromDate = cb.greaterThanOrEqualTo(root.get("date"),searchQuery.getFilterByDates().get(0)); 
-			//Predicate toDate = cb.lessThanOrEqualTo(root.get("date"), searchQuery.getFilterByDates().get(1)); 
-			predicates.add(datePred); 
+			//Predicate datePred = cb.between(root.get("date").as(java.sql.Date.class), searchQuery.getFilterByDates().get(0), searchQuery.getFilterByDates().get(1)); 
+			Predicate fromDate = cb.greaterThanOrEqualTo(root.get("date").as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
+			Predicate toDate = cb.lessThanOrEqualTo(root.get("date").as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
+			
+			Predicate datePredicate = cb.and(fromDate, toDate);
+            predicates.add(datePredicate);
+			
 		}
         
         return predicates;
