@@ -29,10 +29,6 @@ public class DashboardController {
 	
 	@PostMapping(path = "/dashboard", consumes = "application/json", produces = "application/json")
 	public DashboardResponse getDashboardResults(@RequestBody DashboardSearchQuery query){
-		if(query.getFilterByDates().size()>0)
-		{
-			log.info("the dates are:"+query.getFilterByDates().get(0)+"      "+query.getFilterByDates().get(1));
-		}
 		return dashboardService.getDashboardResults(query);
 	}
 

@@ -114,7 +114,6 @@ public class DashboardServiceImpl implements DashboardService{
 				result = updateDashboardResult(result);
 			}
 		}
-		//log.info("dashboard row 0 date is"+response.getRows().get(0).getDate());
 		return response;
 	}
 	/**

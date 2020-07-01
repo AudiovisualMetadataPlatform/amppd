@@ -18,7 +18,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import edu.indiana.dlib.amppd.model.DashboardResult;
-import edu.indiana.dlib.amppd.service.impl.DashboardServiceImpl;
 import edu.indiana.dlib.amppd.web.DashboardFilterValues;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
@@ -34,7 +33,6 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         int count = getTotalCount(searchQuery);
         
         List<DashboardResult> rows = getDashboardRows(searchQuery);
-        //log.info("1st row with date:"+rows.get(0).getDate());
         DashboardFilterValues filters = getFilterValues(searchQuery);
         
         
@@ -124,10 +122,8 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         
         //Build the predicate for Date filter
 		if(searchQuery.getFilterByDates().size()>0) { 
-			//Predicate datePred = cb.between(root.get("date").as(java.sql.Date.class), searchQuery.getFilterByDates().get(0), searchQuery.getFilterByDates().get(1)); 
 			Predicate fromDate = cb.greaterThanOrEqualTo(root.get("date").as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
 			Predicate toDate = cb.lessThanOrEqualTo(root.get("date").as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
-			
 			Predicate datePredicate = cb.and(fromDate, toDate);
             predicates.add(datePredicate);
 			
@@ -160,7 +156,6 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
-        //add date filters here
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get("date").as(java.sql.Date.class))).getResultList();
         
         List<String> searchTerms= union(filenames, items);
