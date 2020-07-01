@@ -29,6 +29,7 @@ public class DashboardController {
 	
 	@PostMapping(path = "/dashboard", consumes = "application/json", produces = "application/json")
 	public DashboardResponse getDashboardResults(@RequestBody DashboardSearchQuery query){
+		log.info("Received request inside getDashboardResults");
 		return dashboardService.getDashboardResults(query);
 	}
 
