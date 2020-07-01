@@ -1,6 +1,8 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
+
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,8 +22,13 @@ import edu.indiana.dlib.amppd.web.DashboardFilterValues;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.DashboardSortRule;
+
+import lombok.extern.slf4j.Slf4j;
+
+
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
+@Slf4j
 public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom {
 	@PersistenceContext
     EntityManager em;
@@ -30,8 +37,10 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         int count = getTotalCount(searchQuery);
         
         List<DashboardResult> rows = getDashboardRows(searchQuery);
+
         
         DashboardFilterValues filters = getFilterValues();
+
         
         
         // Format the response
@@ -71,6 +80,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 
         // Get the actual rows
         TypedQuery<DashboardResult> query = em.createQuery(cq);
+        log.info("=======>>>>QUERY IS:"+query.unwrap(org.hibernate.Query.class).getQueryString()  );
         query.setFirstResult(firstResult);
         query.setMaxResults(searchQuery.getResultsPerPage());
         
@@ -108,7 +118,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         	    inClause.value(term);
         		inClause2.value(term);
         	}            
-                        
+
             // Combine the two predicates to get an "OR"
             Predicate sourcePredicate = cb.or(inClause2, inClause);
             predicates.add(sourcePredicate);
@@ -119,6 +129,15 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
             Predicate predicate = path.in((Object[])searchQuery.getFilterBySubmitters());
             predicates.add(predicate);
         }
+        
+        //Build the predicate for Date filter
+		if(searchQuery.getFilterByDates().size()>0) { 
+			Predicate fromDate = cb.greaterThanOrEqualTo(root.get("date").as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
+			Predicate toDate = cb.lessThanOrEqualTo(root.get("date").as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
+			Predicate datePredicate = cb.and(fromDate, toDate);
+            predicates.add(datePredicate);
+			
+		}
         
         if(searchQuery.getFilterByWorkflows().length>0) {
         	Path<String> path = root.get("workflowName");
@@ -159,16 +178,20 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
+        CriteriaQuery<Date> queryDate = cb.createQuery(Date.class);
         Root<DashboardResult> root = query.from(DashboardResult.class);
+        Root<DashboardResult> rootDateCriteria = queryDate.from(DashboardResult.class);
         CriteriaQuery<GalaxyJobState> queryGjs = cb.createQuery(GalaxyJobState.class);
         Root<DashboardResult> rootGjs = queryGjs.from(DashboardResult.class);
         
         // We treat each filter independently, i.e. its possible value set is not dependent on current selected values in other filters;
         // rather, we populate each filter with distinct values existing in the current dashboard table.
         // Making filter value set context-dependent will result in deadlock queries. 
+
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
+        List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get("date").as(java.sql.Date.class))).getResultList();
         List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
         List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();
@@ -176,6 +199,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         
         filters.setSearchTerms(searchTerms);
         filters.setSubmitters(submitters);
+        filters.setDateFilter(dateFilters);
         filters.setWorkflows(workflows);
         filters.setSteps(steps);
         filters.setItems(items);
