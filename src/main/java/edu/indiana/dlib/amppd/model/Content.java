@@ -1,8 +1,8 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.HashMap;
-
 import javax.persistence.MappedSuperclass;
+
+import org.hibernate.annotations.Type;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +19,7 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public abstract class Content extends Dataentity {
 
+    @Type(type="text")
     private String externalId;
 
 }
