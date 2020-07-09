@@ -110,7 +110,7 @@ public class BatchServiceImpl implements BatchService {
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
 		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource());
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId());
 		/*
 		 * if(errors.size()>0) return;
 		 */
@@ -430,14 +430,14 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Gets an Item object.  If one already exists, 
 	 */
-	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId, String externalSource) {
+	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId) {
 		Item item = null;
 		Set<Item> items = collection.getItems();
 		boolean found = false;
 		if(items!=null) {
 			log.info("BATCH PROCESSING : check for matching item in this collection"); 
 			for(Item i : items) {
-				if(!externalSource.isBlank() && !externalItemId.isBlank()) 
+				if(!externalItemId.isBlank()) 
 				{
 					if(i.getExternalId() != null && i.getExternalId() == externalItemId)
 					{
@@ -445,7 +445,7 @@ public class BatchServiceImpl implements BatchService {
 						item = i;
 						if(!i.getName().contentEquals(itemName))
 						{
-							log.info("BATCH PROCESSING : External Item id  and external source combination already exists"); 
+							log.info("BATCH PROCESSING : External Item id already exists"); 
 							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
 							itemRepository.updateTitle(itemName,i.getId());
 						}
