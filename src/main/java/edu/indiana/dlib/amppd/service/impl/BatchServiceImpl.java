@@ -396,7 +396,7 @@ public class BatchServiceImpl implements BatchService {
 			{ 
 				if((p.getName() != null && p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
 				{
-					if(item.getExternalIds() != null && item.getExternalIds().containsKey(batchFile.getExternalItemId())) 
+					if(item.getExternalId() != null && item.getExternalId() == batchFile.getExternalItemId()) 
 					{
 						if(item.getCollection() != null && item.getCollection().getId() == batchfileCollection.getId()) 
 						{ 
@@ -439,7 +439,7 @@ public class BatchServiceImpl implements BatchService {
 			for(Item i : items) {
 				if(!externalSource.isBlank() && !externalItemId.isBlank()) 
 				{
-					if(i.getExternalIds() != null && i.getExternalIds().containsKey(externalItemId))
+					if(i.getExternalId() != null && i.getExternalId() == externalItemId)
 					{
 						found = true;
 						item = i;
@@ -465,10 +465,8 @@ public class BatchServiceImpl implements BatchService {
 		if(item==null && !found) {
 			item = new Item();
 			item.setName(itemName);
-			if(!externalSource.isBlank() && !externalItemId.isBlank()) {
-				HashMap<String, String> externalIds = new HashMap<String, String>();
-				externalIds.put(externalItemId, externalSource);
-				item.setExternalIds(externalIds);
+			if(!externalItemId.isBlank()) {
+				item.setExternalId(externalItemId);
 			}
 			item.setDescription(itemDescription);
 			item.setCreatedBy(createdBy);

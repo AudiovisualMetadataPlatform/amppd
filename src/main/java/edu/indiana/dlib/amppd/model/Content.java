@@ -19,6 +19,6 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public abstract class Content extends Dataentity {
 
-    private HashMap<String, String> externalIds;
+    private String externalId;
 
 }
