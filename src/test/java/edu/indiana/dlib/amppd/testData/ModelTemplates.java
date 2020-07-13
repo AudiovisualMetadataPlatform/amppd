@@ -26,7 +26,7 @@ public class ModelTemplates implements TemplateLoader {
 		// TODO Auto-generated method stub
 				
 		    Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
-	    	add("externalIds", new HashMap<String, String>());
+			add("externalId", new String());
 		    add("id", random(Long.class, range(1L, 200L)));
 	    	add("name", "Collection ${id}");
 	    	add("description", "Description for ${name}");	
@@ -51,7 +51,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalIds", new HashMap<String, String>());
+		  	add("externalId", new String());
 		  	}});
 		 
 		 
@@ -66,7 +66,7 @@ public class ModelTemplates implements TemplateLoader {
 	    	//add("collection", one(Collection.class, "valid"));
 			add("primaryfiles", new HashSet<Primaryfile>()); 
 			add("supplements", new HashSet<ItemSupplement>()); 
-			add("externalIds", new HashMap<String, String>());
+		  	add("externalId", new String());
 			}});
 			
 	    Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
@@ -82,7 +82,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 			add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-			add("externalIds", new HashMap<String, String>());
+		  	add("externalId", new String());
 			}});
 	    
 		
@@ -98,7 +98,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalIds", new HashMap<String, String>());
+		  	add("externalId", new String());
 			}});
 		 
 	    
@@ -127,13 +127,13 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalIds", new HashMap<String, String>());
+		  	add("externalId", new String());
 		  }});
 		 
 	  
 	    Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
-	    	//add("collections", has(3).of(Collection.class, "valid")); 
-	    	add("externalIds", new HashMap<String, String>());
+	    	//add("collections", has(3).of(Collection.class, "valid"));
+		  	add("externalId", new String());
 	    	add("id", random(Long.class, range(1L, 200L)));
 			add("name", "Unit ${id}");
 	    	add("description", "Description for ${name}");	
