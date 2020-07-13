@@ -10,9 +10,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.AuthResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -72,5 +77,15 @@ public class MediaController {
 //    	String url = mediaService.getPrimaryfileSymlinkUrl(id);
 //    	return "redirect: " + url;
 //    }
+	
+	/*
+	 * @PostMapping(path = "/primaryfiles/search/findByItemOrFileName", consumes =
+	 * "application/json", produces = "application/json") public @ResponseBody
+	 * AuthResponse searchPrimaryfile(
+	 * 
+	 * @RequestBody String keyword){ AuthResponse res =
+	 * mediaService.findByItemOrFileName(keyword); log.info(" search result: " +
+	 * res); return res; }
+	 */
 
 }

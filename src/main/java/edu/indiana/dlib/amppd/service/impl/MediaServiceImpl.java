@@ -32,6 +32,8 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.AuthResponse;
+import edu.indiana.dlib.amppd.web.FileSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -302,6 +304,12 @@ public class MediaServiceImpl implements MediaService {
 		}
 		return asset;
 	}
-
+	
+	/*
+	 * public AuthResponse findByItemOrFileName(String keyword) { FileSearchResponse
+	 * response;
+	 * 
+	 * return response; }
+	 */
 
 }

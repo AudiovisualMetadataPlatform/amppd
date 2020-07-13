@@ -19,4 +19,8 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	@Query(value = "select i from Primaryfile i where i.historyId = :historyId")
 	List<Primaryfile> findByHistoryId(@Param("historyId") String historyId); 
+	
+	@Query(value = "select i from Primaryfile p, item i where i.id = p.item_id and ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(i.name) like lower(concat('%', :keyword,'%')))")
+	List<Item> findByItemOrFileName(@Param("keyword") String keyword);
+	//TODO: this gives error so maybe a new controller and service are needed.
 }

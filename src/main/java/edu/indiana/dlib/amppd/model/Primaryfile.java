@@ -44,7 +44,8 @@ public class Primaryfile extends Asset {
 	@OneToMany(mappedBy="primaryfile")
     private Set<PrimaryfileSupplement> supplements;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ITEM_ID")
 	private Item item;
 		
     @ManyToMany
