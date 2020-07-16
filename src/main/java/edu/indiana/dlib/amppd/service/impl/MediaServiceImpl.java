@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.ItemSearchResult;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
@@ -32,6 +34,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -302,6 +305,32 @@ public class MediaServiceImpl implements MediaService {
 		}
 		return asset;
 	}
-
+	
+	public ItemSearchResponse findItemOrFile(String keyword) {
+		log.info("Executing file search in media service");
+		ItemSearchResponse response = new ItemSearchResponse();
+		ArrayList<ItemSearchResult> rows;
+		try {
+			List<Primaryfile> matchedFiles = primaryfileRepository.findByItemOrFileName(keyword);
+			ItemSearchResult result;
+			rows = new ArrayList<ItemSearchResult>();
+			log.debug("the first object is:"+matchedFiles.get(0).toString());
+			for(Primaryfile p : matchedFiles) {
+				result = new ItemSearchResult();
+				result.setItemName(p.getItem().getName());
+				result.setPrimaryFileName(p.getName());
+				rows.add(result);
+			}
+			response.setRows(rows);
+			response.setSuccess(true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			response.setError(e.getMessage());
+			response.setSuccess(false);
+		}
+		
+		return response;
+	}
 
 }

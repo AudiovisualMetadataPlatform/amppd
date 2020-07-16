@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.controller;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -10,9 +11,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -72,5 +82,14 @@ public class MediaController {
 //    	String url = mediaService.getPrimaryfileSymlinkUrl(id);
 //    	return "redirect: " + url;
 //    }
-
+	
+	@CrossOrigin(origins = "*")
+	@GetMapping(path = "/primaryfiles/search/findByItemOrFileName")
+	public @ResponseBody ItemSearchResponse searchFile(@RequestParam("keyword") String keyword) {	
+		ItemSearchResponse res = new ItemSearchResponse();
+		res = mediaService.findItemOrFile(keyword);
+		log.info("returning from findItemOrFile");
+		return res;
+	}
+	
 }

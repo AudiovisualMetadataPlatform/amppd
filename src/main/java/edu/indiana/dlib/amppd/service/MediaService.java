@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 
 /**
  * Service for serving media files for primaryfiles and supplements. 
@@ -83,5 +84,7 @@ public interface MediaService {
 	 * Clean up all symlinks under the media symlink root.
 	 */
 	public void cleanup();
+	
+	public ItemSearchResponse findItemOrFile(String keyword);
 	
 }
