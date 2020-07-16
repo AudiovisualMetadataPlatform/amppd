@@ -19,4 +19,5 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	@Query(value = "select i from Primaryfile i where i.historyId = :historyId")
 	List<Primaryfile> findByHistoryId(@Param("historyId") String historyId); 
+		
 }
