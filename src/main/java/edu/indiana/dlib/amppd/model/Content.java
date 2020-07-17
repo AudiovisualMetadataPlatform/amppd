@@ -21,5 +21,7 @@ public abstract class Content extends Dataentity {
 
     @Type(type="text")
     private String externalId;
+    @Type(type="text")
+    private String externalSource;
 
 }
