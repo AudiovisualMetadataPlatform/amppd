@@ -331,7 +331,7 @@ public class MediaServiceImpl implements MediaService {
 				}
 				curr_item_id = p.getItem().getId();
 				result.setItemName(p.getItem().getName());
-				primaryFilerows.putIfAbsent(p.getId().toString(), p.getName());
+				primaryFilerows.putIfAbsent(p.getId().toString(), p.getOriginalFilename());
 				/*
 				 * primaryFilerows.put("id",p.getId().toString()); primaryFilerows.put("name",
 				 * p.getName());
