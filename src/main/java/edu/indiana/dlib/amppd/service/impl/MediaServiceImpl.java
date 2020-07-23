@@ -7,7 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -309,18 +311,35 @@ public class MediaServiceImpl implements MediaService {
 	public ItemSearchResponse findItemOrFile(String keyword) {
 		log.info("Executing file search in media service");
 		ItemSearchResponse response = new ItemSearchResponse();
-		ArrayList<ItemSearchResult> rows;
+		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
 		try {
 			List<Primaryfile> matchedFiles = primaryfileRepository.findByItemOrFileName(keyword);
-			ItemSearchResult result;
-			rows = new ArrayList<ItemSearchResult>();
+			ItemSearchResult result = new ItemSearchResult();;
+			Map <String, String>primaryFilerows = new HashMap<String, String>();
 			log.debug("the first object is:"+matchedFiles.get(0).toString());
+			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
-				result = new ItemSearchResult();
+				log.debug("=====================************>>>>>>>>>>>the item is:"+p.getItem().getId());
+				//reset if the current item is a new entry
+				if(p.getItem().getId() != curr_item_id && primaryFilerows.size()>0) {
+					log.info("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
+					result.setPrimaryFiles(primaryFilerows);
+					rows.add(result);
+					result = new ItemSearchResult();
+					primaryFilerows = new HashMap<String, String>();
+					
+				}
+				curr_item_id = p.getItem().getId();
 				result.setItemName(p.getItem().getName());
-				result.setPrimaryFileName(p.getName());
-				rows.add(result);
+				primaryFilerows.putIfAbsent(p.getId().toString(), p.getName());
+				/*
+				 * primaryFilerows.put("id",p.getId().toString()); primaryFilerows.put("name",
+				 * p.getName());
+				 */
 			}
+			//add the last item to the rows
+			result.setPrimaryFiles(primaryFilerows);
+			rows.add(result);
 			response.setRows(rows);
 			response.setSuccess(true);
 		} catch (Exception e) {
