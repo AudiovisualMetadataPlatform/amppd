@@ -14,7 +14,6 @@ import edu.indiana.dlib.amppd.model.Item;
 @RepositoryRestResource(collectionResourceRel = "bundles", path = "bundles")
 public interface BundleRepository extends DataentityRepository<Bundle> {
 	
-	@Query(value = "select i from Item i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
 	List<Bundle> findByNameAndCreatedBy(String name, String createdBy);
 	
 }
