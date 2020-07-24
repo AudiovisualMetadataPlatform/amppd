@@ -85,6 +85,6 @@ public interface MediaService {
 	 */
 	public void cleanup();
 	
-	public ItemSearchResponse findItemOrFile(String keyword);
+	public ItemSearchResponse findItemOrFile(String keyword, String mediaType);
 	
 }

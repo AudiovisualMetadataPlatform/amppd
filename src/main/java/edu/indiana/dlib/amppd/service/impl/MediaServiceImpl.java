@@ -16,6 +16,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
@@ -308,7 +310,7 @@ public class MediaServiceImpl implements MediaService {
 		return asset;
 	}
 	
-	public ItemSearchResponse findItemOrFile(String keyword) {
+	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
 		log.info("Executing file search in media service");
 		ItemSearchResponse response = new ItemSearchResponse();
 		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
@@ -319,7 +321,6 @@ public class MediaServiceImpl implements MediaService {
 			log.debug("the first object is:"+matchedFiles.get(0).toString());
 			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
-				log.debug("=====================************>>>>>>>>>>>the item is:"+p.getItem().getId());
 				//reset if the current item is a new entry
 				if(p.getItem().getId() != curr_item_id && primaryFilerows.size()>0) {
 					log.info("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
@@ -329,27 +330,57 @@ public class MediaServiceImpl implements MediaService {
 					primaryFilerows = new HashMap<String, String>();
 					
 				}
-				curr_item_id = p.getItem().getId();
-				result.setItemName(p.getItem().getName());
-				primaryFilerows.putIfAbsent(p.getId().toString(), p.getOriginalFilename());
-				/*
-				 * primaryFilerows.put("id",p.getId().toString()); primaryFilerows.put("name",
-				 * p.getName());
-				 */
+				String mime_type = getMediaTypeFromJson(p);
+				if(mime_type!=null && !mediaType.contentEquals("000"))
+				{
+					if((mime_type.contains("audio") && mediaType.substring(0, 1).contentEquals("1")) 
+							|| (mime_type.contains("video") && mediaType.substring(1, 2).contentEquals("1")) 
+							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
+						curr_item_id = p.getItem().getId();
+						result.setItemName(p.getItem().getName());
+						primaryFilerows.putIfAbsent(p.getId().toString(), p.getOriginalFilename());
+					}
+				}
+				else {
+					curr_item_id = p.getItem().getId();
+					result.setItemName(p.getItem().getName());
+					primaryFilerows.putIfAbsent(p.getId().toString(), p.getOriginalFilename());
+
+				}
 			}
 			//add the last item to the rows
-			result.setPrimaryFiles(primaryFilerows);
-			rows.add(result);
-			response.setRows(rows);
-			response.setSuccess(true);
+			if(primaryFilerows.size()>0) {
+				result.setPrimaryFiles(primaryFilerows);
+				rows.add(result);
+				response.setRows(rows);
+				response.setSuccess(true);
+			}
+			response.setSuccess(false);
+			response.setError("No primary file found");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			response.setError(e.getMessage());
 			response.setSuccess(false);
 		}
-		
 		return response;
+	}
+	
+	public String getMediaTypeFromJson(Primaryfile p) {
+		String mime_type = new String();
+		String media_type = p.getMediaInfo();
+		try {
+			if(media_type!=null) {
+				JSONObject jsonObject = new JSONObject(media_type);
+				JSONObject jsonObject_container = new JSONObject(jsonObject.getString("container"));
+				mime_type = jsonObject_container.getString("mime_type");
+				log.info("====>>>>>MIME TYPE IS:"+jsonObject_container.getString("mime_type"));
+			}
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return mime_type;
 	}
 
 }
