@@ -27,6 +27,7 @@ public class DashboardResult {
 	private String submitter;
 	private String workflowName;
 	private String sourceItem;
+	private Long primaryfileId;
 	private String sourceFilename;
 	private String workflowStep;
 	private String outputFile;

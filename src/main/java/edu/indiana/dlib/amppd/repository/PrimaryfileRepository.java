@@ -20,6 +20,7 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	@Query(value = "select i from Primaryfile i where i.historyId = :historyId")
 	List<Primaryfile> findByHistoryId(@Param("historyId") String historyId); 
+
 	
 	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByItemOrFileName(@Param("keyword") String keyword);

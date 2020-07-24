@@ -182,6 +182,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setInvocationId(invocation.getId());
 						result.setStepId(step.getId());
 						
+						result.setPrimaryfileId(thisFile.getId());
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
@@ -289,6 +290,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setInvocationId(detail.getId());
 						result.setStepId(step.getId());
 						
+						result.setPrimaryfileId(thisFile.getId());
 						result.setSourceFilename(thisFile.getOriginalFilename());
 						result.setSourceItem(thisFile.getItem().getName());
 												
