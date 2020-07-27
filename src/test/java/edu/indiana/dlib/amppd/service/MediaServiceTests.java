@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import br.com.six2six.fixturefactory.Fixture;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.impl.MediaServiceImpl;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -119,5 +121,18 @@ public class MediaServiceTests {
 		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
 		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_VIDEO);
 	}
+	
+	@Test
+	public void shouldFindItemorFile() {
+		//primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
+		System.out.println("------------primaryfile name is:"+primaryfile.getName());
+		String keyword = new String(primaryfile.getName().substring(0,2));
+		String mediaType = new String("audio");
+		ItemSearchResponse response = mediaService.findItemOrFile(keyword, mediaType);
+		System.out.println("-------------------success is:"+response.isSuccess());
+		
+		Assert.assertTrue(response.isSuccess());
+	}
+
 	
 }
