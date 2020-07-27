@@ -475,6 +475,9 @@ public class BatchServiceImpl implements BatchService {
 			if(!externalItemId.isBlank()) {
 				item.setExternalId(externalItemId);
 			}
+			if(!externalSource.isBlank()) {
+				item.setExternalSource(externalSource);
+			}
 			item.setDescription(itemDescription);
 			item.setCreatedBy(createdBy);
 			item.setModifiedBy(createdBy);
