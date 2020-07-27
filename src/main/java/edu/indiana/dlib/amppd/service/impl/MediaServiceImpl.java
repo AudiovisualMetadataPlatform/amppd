@@ -353,9 +353,8 @@ public class MediaServiceImpl implements MediaService {
 				result.setPrimaryFiles(primaryFilerows);
 				rows.add(result);
 				response.setRows(rows);
-				response.setSuccess(true);
 			}
-			response.setSuccess(false);
+			response.setSuccess(true);
 			response.setError("No primary file found");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
