@@ -317,17 +317,19 @@ public class MediaServiceImpl implements MediaService {
 		try {
 			List<Primaryfile> matchedFiles = primaryfileRepository.findByItemOrFileName(keyword);
 			ItemSearchResult result = new ItemSearchResult();;
-			Map <String, String>primaryFilerows = new HashMap<String, String>();
-			log.debug("the first object is:"+matchedFiles.get(0).toString());
+			Map <String, String>primaryFileinfo;
+			ArrayList<Map> primaryFilerows = new ArrayList<Map>();
+			//log.debug("the first object is:"+matchedFiles.get(0).toString());
 			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
 				//reset if the current item is a new entry
+				primaryFileinfo = new HashMap<String, String>();
 				if(p.getItem().getId() != curr_item_id && primaryFilerows.size()>0) {
 					log.info("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
 					result.setPrimaryFiles(primaryFilerows);
 					rows.add(result);
 					result = new ItemSearchResult();
-					primaryFilerows = new HashMap<String, String>();
+					primaryFilerows = new ArrayList<Map>();
 					
 				}
 				String mime_type = getMediaTypeFromJson(p);
@@ -338,14 +340,19 @@ public class MediaServiceImpl implements MediaService {
 							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
 						curr_item_id = p.getItem().getId();
 						result.setItemName(p.getItem().getName());
-						primaryFilerows.putIfAbsent(p.getId().toString(), p.getOriginalFilename());
+						primaryFileinfo.put("id", p.getId().toString()); 
+						primaryFileinfo.put("name",p.getOriginalFilename());
+						primaryFileinfo.put("mediaType",mime_type);
+						primaryFilerows.add(primaryFileinfo);
 					}
 				}
 				else {
 					curr_item_id = p.getItem().getId();
 					result.setItemName(p.getItem().getName());
-					primaryFilerows.putIfAbsent(p.getId().toString(), p.getOriginalFilename());
-
+					primaryFileinfo.put("id", p.getId().toString()); 
+					primaryFileinfo.put("name",p.getOriginalFilename());
+					primaryFileinfo.put("mediaType",mime_type);
+					primaryFilerows.add(primaryFileinfo);
 				}
 			}
 			//add the last item to the rows
@@ -354,8 +361,12 @@ public class MediaServiceImpl implements MediaService {
 				rows.add(result);
 				response.setRows(rows);
 			}
+			else
+			{
+				response.setError("No primary file found");
+			}
 			response.setSuccess(true);
-			response.setError("No primary file found");
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
