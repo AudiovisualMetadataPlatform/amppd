@@ -396,8 +396,8 @@ public class BatchServiceImpl implements BatchService {
 			{ 
 				if((p.getName() != null && p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
 				{
-					boolean matchesExternalId = item.getExternalId() != null && item.getExternalId() == batchFile.getExternalItemId();
-					boolean matchesExternalSource = batchFile.getExternalSource().isBlank() || (item.getExternalSource() != null && item.getExternalSource() == batchFile.getExternalSource());
+					boolean matchesExternalId = item.getExternalId() != null && item.getExternalId().equals(batchFile.getExternalItemId());
+					boolean matchesExternalSource = batchFile.getExternalSource().isBlank() || (item.getExternalSource() != null && item.getExternalSource().equals(batchFile.getExternalSource()));
 
 					if((matchesExternalId && matchesExternalSource)) 
 					{
@@ -443,8 +443,8 @@ public class BatchServiceImpl implements BatchService {
 			for(Item i : items) {
 				if(!externalItemId.isBlank()) 
 				{
-					boolean matchesExternalId = i.getExternalId() != null && i.getExternalId() == externalItemId;
-					boolean matchesExternalSource = externalSource.isBlank() || (i.getExternalSource()!=null && externalSource == i.getExternalSource());
+					boolean matchesExternalId = i.getExternalId() != null && i.getExternalId().equals(externalItemId);
+					boolean matchesExternalSource = externalSource.isBlank() || (i.getExternalSource()!=null && externalSource.equals(i.getExternalSource()));
 							
 					if(matchesExternalId && matchesExternalSource)
 					{
