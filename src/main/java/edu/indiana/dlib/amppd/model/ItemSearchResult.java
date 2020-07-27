@@ -9,6 +9,6 @@ import lombok.Data;
 public class ItemSearchResult {
 	private String itemName;
 	//private ArrayList<String> primaryFileNames;
-	private Map<String, String> primaryFiles;
+	private ArrayList<Map> primaryFiles;
 
 }
