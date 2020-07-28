@@ -1,6 +1,9 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.util.Set;
+
 import edu.indiana.dlib.amppd.model.Bundle;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 
 /**
  * Service for bundle related functions.
@@ -57,5 +60,12 @@ public interface BundleService {
 	  */
 	 public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds);
 
+	 /**
+	  * Create a new bundle with the given name and prifmaryfiles.
+	  * @param name name of the new bundle
+	  * @param prifmaryfiles prifmaryfiles contained in the new bundle
+	  * @return the newly created bundle
+	  */
+	 public Bundle createBundle(String name, Set<Primaryfile> prifmaryfiles);
 	 
 }

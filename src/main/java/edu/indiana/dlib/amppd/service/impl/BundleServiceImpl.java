@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -127,4 +130,28 @@ public class BundleServiceImpl implements BundleService {
 		return bundle;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.BundleService.createBundle(String, Set<Primaryfile>)
+	 */	
+	@Override
+	public Bundle createBundle(String name, Set<Primaryfile> prifmaryfiles) {
+		if (StringUtils.isEmpty(name)) {
+			log.error("The given bundle name is empty!");
+			return null;
+		}		
+
+		if (prifmaryfiles == null) {
+			log.error("The given prifmaryfiles is null!");
+			return null;
+		}		
+
+		Bundle bundle = new Bundle();
+		bundle.setName(name);
+		bundle.setPrimaryfiles(prifmaryfiles);
+		bundle = bundleRepository.save(bundle);
+		
+		log.info("Successfully created new bundle " + bundle.getId() + " with name " + name + " and " + prifmaryfiles.size() + " prifmaryfiles.");			
+		return bundle;
+	}
+	 
 }
