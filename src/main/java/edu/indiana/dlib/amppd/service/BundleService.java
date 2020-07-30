@@ -13,11 +13,11 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 public interface BundleService {
 
 	/**
-	 * Find the unique bundle with the given name created by the current user.
+	 * Find the bundle with the given name created by the current user.
 	 * @param name name of the bundle
-	 * @return the searched bundle if found, or null otherwise
+	 * @return the matching bundle if found, or null otherwise
 	 */
-	public Bundle findBundleForCurrentUser(String name);	
+	public Bundle findByNameCreatedByCurrentUser(String name);	
 	
 	/**
 	 * Add the given primaryfile to the given bundle.

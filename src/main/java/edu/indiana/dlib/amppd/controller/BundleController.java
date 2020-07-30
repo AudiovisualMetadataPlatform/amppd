@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,17 @@ public class BundleController {
 
 	@Autowired
     private BundleService bundleService;
+	
+	/**
+	 * Find the bundle with the given name created by the current user.
+	 * @param name name of the bundle
+	 * @return the matching bundle if found, or null otherwise
+	 */
+	@GetMapping("/bundles/search/findByNameCreatedByCurrentUser")
+	public Bundle findByNameCreatedByCurrentUser(@RequestParam("name") String name) {
+		log.info("Finding bundle with name " + name + " for the current user ...");
+		return bundleService.findByNameCreatedByCurrentUser(name);
+	}
 	
 	/**
 	 * Add the given primaryfile to the given bundle.

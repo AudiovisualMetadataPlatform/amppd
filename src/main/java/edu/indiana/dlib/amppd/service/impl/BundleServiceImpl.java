@@ -30,9 +30,9 @@ public class BundleServiceImpl implements BundleService {
     private AmpUserService ampUserService;
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.BundleService.findBundleForCurrentUser(String)
+	 * @see edu.indiana.dlib.amppd.service.BundleService.findByNameCreatedByCurrentUser(String)
 	 */
-	public Bundle findBundleForCurrentUser(String name) {
+	public Bundle findByNameCreatedByCurrentUser(String name) {
 		String username = ampUserService.getCurrentUsername();
 		List<Bundle> bundles = bundleRepository.findByNameAndCreatedBy(name, ampUserService.getCurrentUsername());
 
