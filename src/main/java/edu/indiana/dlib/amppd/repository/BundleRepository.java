@@ -13,7 +13,10 @@ import edu.indiana.dlib.amppd.model.Item;
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "bundles", path = "bundles")
 public interface BundleRepository extends DataentityRepository<Bundle> {
-	
+		
 	List<Bundle> findByNameAndCreatedBy(String name, String createdBy);
+	
+	@Query(value = "select i from Bundle i where i.name is not null and i.name != ''")
+	List<Bundle> findAllWithNonEmptyName();
 	
 }

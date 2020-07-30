@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BundleService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +25,32 @@ public class BundleServiceImpl implements BundleService {
 	
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
+    private AmpUserService ampUserService;
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.BundleService.findBundleForCurrentUser(String)
+	 */
+	public Bundle findBundleForCurrentUser(String name) {
+		String username = ampUserService.getCurrentUsername();
+		List<Bundle> bundles = bundleRepository.findByNameAndCreatedBy(name, ampUserService.getCurrentUsername());
+
+		// bundle name shall be unique per user if all bundles are created via AMPPD UI;
+		// however just in case there're more than one found, we will return the first
+		if (bundles == null || bundles.isEmpty()) {
+			log.info("No bundle found with name " + name + " for the current user " + username);
+			return null;
+		}
+		
+		if (bundles.size() > 1) {
+			log.warn("There are " + bundles.size() + " bundles found with name " + name + " for the current user " + username);
+		}
+		
+		Bundle bundle = bundles.get(0);
+		log.info("Successfully found bundle " + bundle.getId() + " with name " + name + " for the current user " + username);
+		return bundle;
+	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.BundleService.addPrimaryfile(Bundle, Long)
