@@ -84,5 +84,16 @@ public class BundleController {
 		return bundleService.deletePrimaryfiles(bundleId, primaryfileIds);
     }
 
+	 /**
+	  * Update the set of primaryfiles with the given set of primaryfiles for the given bundle.
+	  * @param bundleId ID of the given bundle
+	  * @param primaryfileIds IDs of the given primaryfiles
+	  * @return the updated bundle
+	  */
+	@PostMapping("/bundles/{bundleId}/updatePrimaryfiles")
+	public Bundle updatePrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
+		log.info("Updating primaryfiles " + primaryfileIds + " for bundle " + bundleId);
+		return bundleService.updatePrimaryfiles(bundleId, primaryfileIds);
+    }
 
 }

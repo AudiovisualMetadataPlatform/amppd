@@ -38,8 +38,8 @@ public class Job {
     @OneToMany(mappedBy="job")
     private Set<JobMgmMode> jobMgmModes;
     
-    @ManyToOne
-    private Primaryfile primaryfile;
+//    @ManyToOne
+//    private Primaryfile primaryfile;
 
 //    @ManyToOne
 //    private Bag bag;

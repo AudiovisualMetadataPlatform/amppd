@@ -68,6 +68,15 @@ public interface BundleService {
 	 public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds);
 
 	 /**
+	  * Update the set of primaryfiles with the given set of primaryfiles for the given bundle.
+	  * @param bundleId ID of the given bundle
+	  * @param primaryfileIds IDs of the given primaryfiles
+	  * @return the updated bundle
+	  */
+	 public Bundle updatePrimaryfiles(Long bundleId, Long[] primaryfileIds);
+
+	 
+	 /**
 	  * Create a new bundle with the given name and prifmaryfiles.
 	  * @param name name of the new bundle
 	  * @param prifmaryfiles prifmaryfiles contained in the new bundle
