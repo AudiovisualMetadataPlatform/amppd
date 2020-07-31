@@ -15,7 +15,7 @@ public interface BundleService {
 	 * @return the matching bundle if found, or null otherwise
 	 */
 	public Bundle findByNameCreatedByCurrentUser(String name);	
-	
+
 	/**
 	 * Add the given primaryfile to the given bundle.
 	 * @param bundle the given bundle
@@ -30,8 +30,8 @@ public interface BundleService {
 	 * @param primaryfileId ID of the given primaryfile
 	 * @return the updated bundle
 	 */
-	 public Bundle deletePrimaryfile(Bundle bundle, Long primaryfileId);
-	 
+	public Bundle deletePrimaryfile(Bundle bundle, Long primaryfileId);
+
 	/**
 	 * Add the given primaryfile to the given bundle.
 	 * @param bundleId ID of the given bundle
@@ -46,39 +46,40 @@ public interface BundleService {
 	 * @param primaryfileId ID of the given primaryfile
 	 * @return the updated bundle
 	 */
-	 public Bundle deletePrimaryfile(Long bundleId, Long primaryfileId);
-	 
-	 /**
-	  * Add the given primaryfiles to the given bundle.
-	  * @param bundleId ID of the given bundle
-	  * @param primaryfileIds IDs of the given primaryfiles
-	  * @return the updated bundle
-	  */
-	 public Bundle addPrimaryfiles(Long bundleId, Long[] primaryfileIds);
+	public Bundle deletePrimaryfile(Long bundleId, Long primaryfileId);
 
-	 /**
-	  * Delete the given primaryfiles from the given bundle.
-	  * @param bundleId ID of the given bundle
-	  * @param primaryfileIds IDs of the given primaryfiles
-	  * @return the updated bundle
-	  */
-	 public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds);
+	/**
+	 * Add the given primaryfiles to the given bundle.
+	 * @param bundleId ID of the given bundle
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @return the updated bundle
+	 */
+	public Bundle addPrimaryfiles(Long bundleId, Long[] primaryfileIds);
 
-	 /**
-	  * Update the set of primaryfiles with the given set of primaryfiles for the given bundle.
-	  * @param bundleId ID of the given bundle
-	  * @param primaryfileIds IDs of the given primaryfiles
-	  * @return the updated bundle
-	  */
-	 public Bundle updatePrimaryfiles(Long bundleId, Long[] primaryfileIds);
+	/**
+	 * Delete the given primaryfiles from the given bundle.
+	 * @param bundleId ID of the given bundle
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @return the updated bundle
+	 */
+	public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds);
 
-	 
-	 /**
-	  * Create a new bundle with the given name and prifmaryfiles.
-	  * @param name name of the new bundle
-	  * @param primaryfileIds IDs of the given primaryfiles
-	  * @return the newly created bundle
-	  */
-	 public Bundle createBundle(String name, Long[] primaryfileIds);
-	 
+	/**
+	 * Update the given bundle with the given description and set of primaryfiles.
+	 * @param bundleId ID of the given bundle
+	 * @param description description of the given bundle
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @return the updated bundle
+	 */
+	public Bundle updateBundle(Long bundleId, String description, Long[] primaryfileIds);
+
+	/**
+	 * Create a new bundle with the given name, description, and prifmaryfiles.
+	 * @param name name of the new bundle
+	 * @param description description of the new bundle
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @return the newly created bundle
+	 */
+	public Bundle createBundle(String name, String description, Long[] primaryfileIds);
+
 }

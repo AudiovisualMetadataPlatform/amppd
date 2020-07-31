@@ -65,6 +65,7 @@ public class JobController {
 	 * @param parameters step parameters for running the workflow
 	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
 	 */
+	@PostMapping("/jobs/multi")
 	public Map<Long, WorkflowOutputs> createJobs(			
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileIds") Long[] primaryfileIds, 

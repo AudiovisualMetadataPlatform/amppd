@@ -85,27 +85,29 @@ public class BundleController {
 	}
 
 	/**
-	 * Update the set of primaryfiles with the given set of primaryfiles for the given bundle.
+	 * Update the given bundle with the given description and set of primaryfiles.
 	 * @param bundleId ID of the given bundle
+	 * @param description description of the given bundle
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the updated bundle
 	 */
-	@PostMapping("/bundles/{bundleId}/updatePrimaryfiles")
-	public Bundle updatePrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
-		log.info("Updating bundle " + bundleId + " with prifmaryfiles " + primaryfileIds);
-		return bundleService.updatePrimaryfiles(bundleId, primaryfileIds);
+	@PostMapping("/bundles/{bundleId}/update")
+	public Bundle updateBundle(@PathVariable Long bundleId, @RequestParam String description, @RequestParam Long[] primaryfileIds) {		
+		log.info("Updating bundle " + bundleId + " with description " + description + " and prifmaryfiles " + primaryfileIds);
+		return bundleService.updateBundle(bundleId, description, primaryfileIds);
 	}
 
 	/**
 	 * Create a new bundle with the given name and prifmaryfiles.
 	 * @param name name of the new bundle
+	 * @param description description of the new bundle
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the newly created bundle
 	 */
-	@PostMapping("/bundles")
-	public Bundle createBundle(@RequestParam("name") String name, @RequestParam("primaryfileIds") Long[] primaryfileIds) {
-		log.info("Creating a new bundle with name " + name + " and prifmaryfiles " + primaryfileIds);		
-		return bundleService.createBundle(name, primaryfileIds);
+	@PostMapping("/bundles/create")
+	public Bundle createBundle(@RequestParam String name, @RequestParam String description, @RequestParam Long[] primaryfileIds) {
+		log.info("Creating new bundle with name " + name + " and prifmaryfiles " + primaryfileIds);		
+		return bundleService.createBundle(name, description, primaryfileIds);
 	}
 
 
