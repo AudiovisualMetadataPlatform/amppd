@@ -23,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 public class BundleController {
 
 	@Autowired
-    private BundleService bundleService;
-	
+	private BundleService bundleService;
+
 	/**
 	 * Find the bundle with the given name created by the current user.
 	 * @param name name of the bundle
@@ -35,7 +35,7 @@ public class BundleController {
 		log.info("Finding bundle with name " + name + " for the current user ...");
 		return bundleService.findByNameCreatedByCurrentUser(name);
 	}
-	
+
 	/**
 	 * Add the given primaryfile to the given bundle.
 	 * @param bundleId ID of the given bundle
@@ -46,7 +46,7 @@ public class BundleController {
 	public Bundle addPrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
 		log.info("Adding primaryfile " + primaryfileId + " to bundle " + bundleId);
 		return bundleService.addPrimaryfile(bundleId, primaryfileId);
-    }
+	}
 
 	/**
 	 * Delete the given primaryfile from the given bundle.
@@ -55,11 +55,11 @@ public class BundleController {
 	 * @return the updated bundle
 	 */
 	@PostMapping("/bundles/{bundleId}/deletePrimaryfile")
-    public Bundle deletePrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
+	public Bundle deletePrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
 		log.info("Deleteing primaryfile " + primaryfileId + " from bundle " + bundleId);
 		return bundleService.deletePrimaryfile(bundleId, primaryfileId);
-    }
-	
+	}
+
 	/**
 	 * Add the given primaryfiles to the given bundle.
 	 * @param bundleId ID of the given bundle
@@ -70,7 +70,7 @@ public class BundleController {
 	public Bundle addPrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
 		log.info("Adding primaryfiles " + primaryfileIds + " to bundle " + bundleId);
 		return bundleService.addPrimaryfiles(bundleId, primaryfileIds);
-    }
+	}
 
 	/**
 	 * Delete the given primaryfiles from the given bundle.
@@ -82,18 +82,31 @@ public class BundleController {
 	public Bundle deletePrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
 		log.info("Deleteing primaryfiles " + primaryfileIds + " from bundle " + bundleId);
 		return bundleService.deletePrimaryfiles(bundleId, primaryfileIds);
-    }
+	}
 
-	 /**
-	  * Update the set of primaryfiles with the given set of primaryfiles for the given bundle.
-	  * @param bundleId ID of the given bundle
-	  * @param primaryfileIds IDs of the given primaryfiles
-	  * @return the updated bundle
-	  */
+	/**
+	 * Update the set of primaryfiles with the given set of primaryfiles for the given bundle.
+	 * @param bundleId ID of the given bundle
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @return the updated bundle
+	 */
 	@PostMapping("/bundles/{bundleId}/updatePrimaryfiles")
 	public Bundle updatePrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
-		log.info("Updating primaryfiles " + primaryfileIds + " for bundle " + bundleId);
+		log.info("Updating bundle " + bundleId + " with prifmaryfiles " + primaryfileIds);
 		return bundleService.updatePrimaryfiles(bundleId, primaryfileIds);
-    }
+	}
+
+	/**
+	 * Create a new bundle with the given name and prifmaryfiles.
+	 * @param name name of the new bundle
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @return the newly created bundle
+	 */
+	@PostMapping("/bundles")
+	public Bundle createBundle(@RequestParam("name") String name, @RequestParam("primaryfileIds") Long[] primaryfileIds) {
+		log.info("Creating a new bundle with name " + name + " and prifmaryfiles " + primaryfileIds);		
+		return bundleService.createBundle(name, primaryfileIds);
+	}
+
 
 }

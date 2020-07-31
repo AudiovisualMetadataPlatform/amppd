@@ -59,11 +59,29 @@ public class JobController {
 	}
 
 	/**
+	 * Create new Amppd jobs by submitting to Galaxy the given workflow on the given primaryfiles, along with the given parameters.
+	 * @param workflowId ID of the given workflow
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @param parameters step parameters for running the workflow
+	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 */
+	public Map<Long, WorkflowOutputs> createJobs(			
+			@RequestParam("workflowId") String workflowId, 
+			@RequestParam("primaryfileIds") Long[] primaryfileIds, 
+			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+		if (parameters == null ) {
+			parameters = new HashMap<String, Map<String, String>>();
+		}
+		log.info("Creating Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + " parameters: " + parameters);
+		return jobService.createJobs(workflowId, primaryfileIds, parameters);
+	}
+	
+	/**
 	 * Creating a bundle of multiple Amppd jobs, one for each primaryfile included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return list outputs of the invocation returned by Galaxy
+	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
 	 */
 	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/bundle")

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -73,10 +72,10 @@ public class BundleServiceImpl implements BundleService {
 			return bundle;
 		}
 
-		primaryfile.getBundles().add(bundle);	// need to add from primaryfile side since Primaryfile owns the M:M relationship
-		bundle.getPrimaryfiles().add(primaryfile);	// TODO do we need this?
-		primaryfileRepository.save(primaryfile);
-		bundle = bundleRepository.save(bundle);	// TODO do we need this?
+//		primaryfile.getBundles().add(bundle);	
+		bundle.getPrimaryfiles().add(primaryfile);	// need to add on bundle side since bundle owns the M:M relationship
+//		primaryfileRepository.save(primaryfile);
+		bundle = bundleRepository.save(bundle);	
 		
 		String msg = "Successfully added primaryfile <" + primaryfileId + "> to bundle<" + bundle.getId() + ">.";
 		log.info(msg);
@@ -102,10 +101,10 @@ public class BundleServiceImpl implements BundleService {
 			return bundle;
 		}
 
-		primaryfile.getBundles().remove(bundle);	// need to remove from primaryfile side since Primaryfile owns the M;M relationship
-		bundle.getPrimaryfiles().remove(primaryfile);		// TODO do we need this?
-		primaryfileRepository.save(primaryfile);
-		bundle = bundleRepository.save(bundle);		// TODO do we need this?
+//		primaryfile.getBundles().remove(bundle);	
+		bundle.getPrimaryfiles().remove(primaryfile); // need to remove from bundle side since bundle owns the M:M relationship
+//		primaryfileRepository.save(primaryfile);
+		bundle = bundleRepository.save(bundle);		
 
     	String msg = "Ssuccessfully deleted primaryfile <" + primaryfileId + "> from bundle<" + bundle.getId() + ">.";
     	log.info(msg);
@@ -141,7 +140,7 @@ public class BundleServiceImpl implements BundleService {
 			return bundle;
 		}
 		for (Long primaryfileId : primaryfileIds) {
-			bundle = addPrimaryfile(bundleId, primaryfileId);			
+			bundle = addPrimaryfile(bundle, primaryfileId);			
 		}		
 		return bundle;
 	}
@@ -157,7 +156,7 @@ public class BundleServiceImpl implements BundleService {
 			return bundle;
 		}
 		for (Long primaryfileId : primaryfileIds) {
-			bundle = deletePrimaryfile(bundleId, primaryfileId);			
+			bundle = deletePrimaryfile(bundle, primaryfileId);			
 		}		
 		return bundle;
 	}
@@ -169,8 +168,6 @@ public class BundleServiceImpl implements BundleService {
 	public Bundle updatePrimaryfiles(Long bundleId, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		if (primaryfileIds == null) {
-//			Long[] pids = ArrayUtils.nullToEmpty(primaryfileIds);
-			log.error("The given primaryfileIds is empty." );
 			throw new RuntimeException("The given primaryfileIds is empty.");
 		}
 		
@@ -186,32 +183,40 @@ public class BundleServiceImpl implements BundleService {
 		
 		bundle.setPrimaryfiles(primaryfiles);
 		bundle = bundleRepository.save(bundle);				
-		String msg = "Successfully updated primaryfiles " + primaryfileIds + " to bundle<" + bundle.getId() + ">.";
-		log.info(msg);
+		log.info("Successfully updated bundle " + bundle.getId() + " with " + primaryfiles.size() + " prifmaryfiles.");			
 		return bundle;		
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.BundleService.createBundle(String, Set<Primaryfile>)
+	 * @see edu.indiana.dlib.amppd.service.BundleService.createBundle(String, Long[])
 	 */	
 	@Override
-	public Bundle createBundle(String name, Set<Primaryfile> prifmaryfiles) {
-		if (StringUtils.isEmpty(name)) {
-			log.error("The given bundle name is empty!");
-			return null;
+	public Bundle createBundle(String name, Long[] primaryfileIds) {
+		if (name == null) {
+			throw new RuntimeException("The given bundle name is null.");
 		}		
 
-		if (prifmaryfiles == null) {
-			log.error("The given prifmaryfiles is null!");
-			return null;
+		if (primaryfileIds == null) {
+			throw new RuntimeException("The given prifmaryfileIds is null!");
 		}		
 
 		Bundle bundle = new Bundle();
 		bundle.setName(name);
-		bundle.setPrimaryfiles(prifmaryfiles);
+
+		// remove redundant primaryfile IDs
+		Set<Long> pidset = new HashSet<Long>(Arrays.asList(primaryfileIds));
+		Long[] pids = pidset.toArray(primaryfileIds);
+		Set<Primaryfile> primaryfiles = new HashSet<Primaryfile>();
+
+		for (Long primaryfileId : pids) {					
+			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
+			primaryfiles.add(primaryfile);	
+		}
+
+		bundle.setPrimaryfiles(primaryfiles);
 		bundle = bundleRepository.save(bundle);
-		
-		log.info("Successfully created new bundle " + bundle.getId() + " with name " + name + " and " + prifmaryfiles.size() + " prifmaryfiles.");			
+
+		log.info("Successfully created new bundle " + bundle.getId() + " with name " + name + " and " + primaryfiles.size() + " prifmaryfiles.");			
 		return bundle;
 	}
 	 
