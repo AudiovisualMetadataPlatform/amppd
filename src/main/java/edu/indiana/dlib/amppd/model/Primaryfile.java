@@ -10,6 +10,8 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -38,13 +40,14 @@ public class Primaryfile extends Asset {
     private String historyId;			
 
 	@OneToMany(mappedBy="primaryfile")
+	@JsonBackReference
     private Set<PrimaryfileSupplement> supplements;
 
 	@ManyToOne
 	private Item item;
 		
-//	@JsonBackReference(value="bundles")
     @ManyToMany(mappedBy = "primaryfiles")
+	@JsonBackReference
     private Set<Bundle> bundles;  
     
 //    @OneToMany(mappedBy="primaryfile")

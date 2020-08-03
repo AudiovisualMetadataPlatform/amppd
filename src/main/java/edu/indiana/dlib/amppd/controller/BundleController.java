@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,14 +28,24 @@ public class BundleController {
 	private BundleService bundleService;
 
 	/**
+	 * Find all named bundles, i.e. bundles with non-empty name.
+	 * @return all named bundles
+	 */
+	@GetMapping("/bundles/search/findAllNamed")
+	public List<Bundle> findAllNamed() {
+		log.info("Finding all named bundles ... " );
+		return bundleService.findAllNamed();		
+	}
+	
+	/**
 	 * Find the bundle with the given name created by the current user.
 	 * @param name name of the bundle
 	 * @return the matching bundle if found, or null otherwise
 	 */
-	@GetMapping("/bundles/search/findByNameCreatedByCurrentUser")
-	public Bundle findByNameCreatedByCurrentUser(@RequestParam("name") String name) {
+	@GetMapping("/bundles/search/findNamedByCurrentUser")
+	public Bundle findNamedByCurrentUser(@RequestParam("name") String name) {
 		log.info("Finding bundle with name " + name + " for the current user ...");
-		return bundleService.findByNameCreatedByCurrentUser(name);
+		return bundleService.findNamedByCurrentUser(name);
 	}
 
 	/**

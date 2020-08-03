@@ -31,9 +31,18 @@ public class BundleServiceImpl implements BundleService {
 	private AmpUserService ampUserService;
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.BundleService.findByNameCreatedByCurrentUser(String)
+	 * @see edu.indiana.dlib.amppd.service.BundleService.findAllNamed()
 	 */
-	public Bundle findByNameCreatedByCurrentUser(String name) {
+	public List<Bundle> findAllNamed() {
+		List<Bundle> bundles = bundleRepository.findAllWithNonEmptyName();
+		log.info("Successfully found " + bundles.size() + " named bundles.");
+		return bundles;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.BundleService.findNamedByCurrentUser(String)
+	 */
+	public Bundle findNamedByCurrentUser(String name) {
 		String username = ampUserService.getCurrentUsername();
 		List<Bundle> bundles = bundleRepository.findByNameAndCreatedBy(name, ampUserService.getCurrentUsername());
 

@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.util.List;
+
 import edu.indiana.dlib.amppd.model.Bundle;
 
 /**
@@ -10,11 +12,17 @@ import edu.indiana.dlib.amppd.model.Bundle;
 public interface BundleService {
 
 	/**
+	 * Find all named bundles, i.e. bundles with non-empty name.
+	 * @return all named bundles
+	 */
+	public List<Bundle> findAllNamed();	
+
+	/**
 	 * Find the bundle with the given name created by the current user.
 	 * @param name name of the bundle
 	 * @return the matching bundle if found, or null otherwise
 	 */
-	public Bundle findByNameCreatedByCurrentUser(String name);	
+	public Bundle findNamedByCurrentUser(String name);	
 
 	/**
 	 * Add the given primaryfile to the given bundle.
