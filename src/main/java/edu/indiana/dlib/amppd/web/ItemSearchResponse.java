@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.indiana.dlib.amppd.model.DashboardResult;
-import edu.indiana.dlib.amppd.model.ItemSearchResult;
 import lombok.Data;
 
 @Data
