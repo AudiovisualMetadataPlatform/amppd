@@ -14,7 +14,7 @@ public interface BundleRepository extends DataentityRepository<Bundle> {
 		
 	List<Bundle> findByNameAndCreatedBy(String name, String createdBy);
 	
-	@Query(value = "select i from Bundle i where i.name is not null and i.name != ''")
-	List<Bundle> findAllWithNonEmptyName();
+	@Query(value = "select b from Bundle b where b.name is not null and b.name != '' and b.primaryfiles.size > 0")
+	List<Bundle> findAllWithNonEmptyNameNonEmptyPrimaryfiles();
 	
 }

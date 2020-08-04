@@ -34,7 +34,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.findAllNamed()
 	 */
 	public List<Bundle> findAllNamed() {
-		List<Bundle> bundles = bundleRepository.findAllWithNonEmptyName();
+		List<Bundle> bundles = bundleRepository.findAllWithNonEmptyNameNonEmptyPrimaryfiles();
 		log.info("Successfully found " + bundles.size() + " named bundles.");
 		return bundles;
 	}

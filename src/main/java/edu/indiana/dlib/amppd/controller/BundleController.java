@@ -28,7 +28,7 @@ public class BundleController {
 	private BundleService bundleService;
 
 	/**
-	 * Find all named bundles, i.e. bundles with non-empty name.
+	 * Find all named bundles, i.e. bundles with non-empty name and non-empty primaryfiles.
 	 * @return all named bundles
 	 */
 	@GetMapping("/bundles/search/findAllNamed")

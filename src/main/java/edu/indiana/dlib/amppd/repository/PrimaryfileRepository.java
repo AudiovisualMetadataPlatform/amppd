@@ -13,10 +13,9 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 @RepositoryRestResource(collectionResourceRel = "primaryfiles", path = "primaryfiles")
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
-//	@Query(value = "select i from Primaryfile i where i.historyId = :historyId")
 	List<Primaryfile> findByHistoryId(String historyId); 
 
-	@Query(value = "select i from Primaryfile i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
+	@Query(value = "select p from Primaryfile p where lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.description) like lower(concat('%', :keyword,'%'))")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 
 		
 	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
