@@ -348,7 +348,10 @@ public class JobServiceImpl implements JobService {
 		int nSuccess = 0;
 		int nFailed = 0;
 
-		for (Long primaryfileId : pids) {					
+		for (Long primaryfileId : pids) {
+			// skip null primaryfileId, which could result from redundant IDs passed from request parameter being changed to null
+			if (primaryfileId == null) continue; 
+			
 			try {
 				Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
 				woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));

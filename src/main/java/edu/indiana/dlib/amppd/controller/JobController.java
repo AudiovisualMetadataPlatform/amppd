@@ -46,11 +46,11 @@ public class JobController {
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return outputs of the invocation returned by Galaxy
 	 */
-	@PostMapping("/jobs")
+	@PostMapping("/jobs/submitFile")
 	public WorkflowOutputs createJob(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId, 
-			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
@@ -65,11 +65,11 @@ public class JobController {
 	 * @param parameters step parameters for running the workflow
 	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
 	 */
-	@PostMapping("/jobs/multi")
+	@PostMapping("/jobs/submitFiles")
 	public Map<Long, WorkflowOutputs> createJobs(			
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileIds") Long[] primaryfileIds, 
-			@RequestParam("parameters") Map<String, Map<String, String>> parameters) {	
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
@@ -85,7 +85,7 @@ public class JobController {
 	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
 	 */
 	@CrossOrigin(origins = "*")
-	@PostMapping("/jobs/bundle")
+	@PostMapping("/jobs/submitBundle")
 	public Map<Long, WorkflowOutputs> createJobBundle(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("bundleId") Long bundleId, 

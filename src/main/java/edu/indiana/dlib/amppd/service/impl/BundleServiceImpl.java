@@ -222,7 +222,10 @@ public class BundleServiceImpl implements BundleService {
 		Long[] pids = pidset.toArray(primaryfileIds);
 		Set<Primaryfile> primaryfiles = new HashSet<Primaryfile>();
 
-		for (Long primaryfileId : pids) {					
+		for (Long primaryfileId : pids) {		
+			// skip null primaryfileId, which could result from redundant IDs passed from request parameter being changed to null
+			if (primaryfileId == null) continue; 
+			
 			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
 			primaryfiles.add(primaryfile);	
 		}
