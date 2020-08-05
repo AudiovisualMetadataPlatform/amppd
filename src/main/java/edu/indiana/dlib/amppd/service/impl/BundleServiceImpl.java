@@ -81,9 +81,7 @@ public class BundleServiceImpl implements BundleService {
 			return bundle;
 		}
 
-		//		primaryfile.getBundles().add(bundle);	
 		bundle.getPrimaryfiles().add(primaryfile);	// need to add on bundle side since bundle owns the M:M relationship
-		//		primaryfileRepository.save(primaryfile);
 		bundle = bundleRepository.save(bundle);	
 
 		String msg = "Successfully added primaryfile <" + primaryfileId + "> to bundle<" + bundle.getId() + ">.";
@@ -110,9 +108,7 @@ public class BundleServiceImpl implements BundleService {
 			return bundle;
 		}
 
-		//		primaryfile.getBundles().remove(bundle);	
 		bundle.getPrimaryfiles().remove(primaryfile); // need to remove from bundle side since bundle owns the M:M relationship
-		//		primaryfileRepository.save(primaryfile);
 		bundle = bundleRepository.save(bundle);		
 
 		String msg = "Ssuccessfully deleted primaryfile <" + primaryfileId + "> from bundle<" + bundle.getId() + ">.";
