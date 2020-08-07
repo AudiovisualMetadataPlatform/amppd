@@ -78,7 +78,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("createdBy", firstName());
 			add("modifiedBy", firstName());
 	    	add("supplements", new HashSet<PrimaryfileSupplement>());
-			add("jobs", new HashSet<Job>());
+//			add("jobs", new HashSet<Job>());
 			add("originalFilename", firstName());
 			add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");

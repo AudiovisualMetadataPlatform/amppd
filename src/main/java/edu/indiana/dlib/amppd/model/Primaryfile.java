@@ -40,14 +40,14 @@ public class Primaryfile extends Asset {
     private String historyId;			
 
 	@OneToMany(mappedBy="primaryfile")
-	@JsonBackReference
+	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
 	@ManyToOne
 	private Item item;
 		
     @ManyToMany(mappedBy = "primaryfiles")
-	@JsonBackReference
+	@JsonBackReference(value="bundles")
     private Set<Bundle> bundles;  
     
 //    @OneToMany(mappedBy="primaryfile")

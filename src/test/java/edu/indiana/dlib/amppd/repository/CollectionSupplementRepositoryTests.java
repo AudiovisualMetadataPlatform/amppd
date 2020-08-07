@@ -36,9 +36,6 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class CollectionSupplementRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private CollectionSupplementRepository supplementRepository;
 	
 	@Autowired 
 	private ObjectMapper mapper = new ObjectMapper();

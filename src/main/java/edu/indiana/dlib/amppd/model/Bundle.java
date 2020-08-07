@@ -33,7 +33,7 @@ public class Bundle extends Dataentity {
 	// and our use case is often updating bundle's primaryfiles instead of the other way around
 	@ManyToMany
     @JoinTable(name = "bundle_primaryfile", joinColumns = @JoinColumn(name = "bundle_id"), inverseJoinColumns = @JoinColumn(name = "primaryfile_id"))
-	@JsonManagedReference	
+//	@JsonManagedReference	
     private Set<Primaryfile> primaryfiles;
 
 //	@ManyToMany(mappedBy = "bundles")

@@ -34,12 +34,6 @@ public class BundleRepositoryTests {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private BundleRepository bundleRepository;
-
-	@Autowired
-	private AmpUserService userService;
-
-	@Autowired
     private TestHelper testHelper;
 	String token = "";
 	

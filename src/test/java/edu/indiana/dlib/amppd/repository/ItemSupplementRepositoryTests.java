@@ -36,9 +36,6 @@ public class ItemSupplementRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private ItemSupplementRepository itemSupplementRepository;
-
 	@Autowired 
 	private ObjectMapper mapper = new ObjectMapper();
 	private ItemSupplement obj ;
