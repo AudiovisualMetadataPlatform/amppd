@@ -38,6 +38,9 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class PrimaryfileRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
+
+//	@Autowired
+//	AmpUserService ampUserservice;
 	
 	@Autowired 
 	private ObjectMapper mapper;
@@ -134,12 +137,14 @@ public class PrimaryfileRepositoryTests {
 		mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token)
 				  .content(json)).andExpect(
 						  status().isCreated());
+		
+//		String username = ampUserservice.getCurrentUsername();
 		mockMvc.perform(
-				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", primaryfile.getCreatedBy()).header("Authorization", "Bearer " + token)).andDo(
+				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", TestHelper.TEST_USER).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.primaryfiles[0].createdBy").value(
-										primaryfile.getCreatedBy()));
+										TestHelper.TEST_USER));
 	}
 	
 
