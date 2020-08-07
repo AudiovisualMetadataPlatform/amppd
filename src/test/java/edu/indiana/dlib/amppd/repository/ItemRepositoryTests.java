@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -38,6 +39,9 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class ItemRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
+	
+//	@Autowired
+//	AmpUserService ampUserservice;
 	
 	@Autowired 
 	private ObjectMapper mapper = new ObjectMapper();
@@ -120,12 +124,13 @@ public class ItemRepositoryTests {
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
+//		String username = ampUserservice.getCurrentUsername();
 		mockMvc.perform(
-				get("/items/search/findByCreatedBy?createdBy={createdBy}", item.getCreatedBy()).header("Authorization", "Bearer " + token)).andDo(
+				get("/items/search/findByCreatedBy?createdBy={createdBy}", TestHelper.TEST_USER).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].createdBy").value(
-										item.getCreatedBy()));
+										TestHelper.TEST_USER));
 	}
 	
 	@Test
