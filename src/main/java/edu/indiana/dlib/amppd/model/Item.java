@@ -31,11 +31,11 @@ import lombok.ToString;
 public class Item extends Content {
 
 	@OneToMany(mappedBy="item")
-	@JsonBackReference
+	@JsonBackReference(value="primaryfiles")
     private Set<Primaryfile> primaryfiles;
 
 	@OneToMany(mappedBy="item")
-	@JsonBackReference
+	@JsonBackReference(value="supplements")
     private Set<ItemSupplement> supplements;
 
 	@ManyToOne

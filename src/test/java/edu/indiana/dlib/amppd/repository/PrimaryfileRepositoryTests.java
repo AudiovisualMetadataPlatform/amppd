@@ -38,9 +38,6 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class PrimaryfileRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired 
 	private ObjectMapper mapper;

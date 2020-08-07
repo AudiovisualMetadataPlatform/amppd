@@ -37,9 +37,6 @@ public class CollectionRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private CollectionRepository collectionRepository;
-
 	private ObjectMapper mapper = new ObjectMapper();
 	private Collection obj;
 	// private ObjectFactory objFactory = new ObjectFactory();

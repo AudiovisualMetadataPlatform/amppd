@@ -32,9 +32,6 @@ public class UnitRepositoryTests {
 	private MockMvc mockMvc;
 
 	@Autowired
-	private UnitRepository unitRepository;
-
-	@Autowired
     private TestHelper testHelper;
 	String token = "";
 	@Before

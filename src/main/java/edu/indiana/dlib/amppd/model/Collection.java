@@ -42,11 +42,11 @@ public class Collection extends Content {
 	private String taskManager;
 	
 	@OneToMany(mappedBy="collection")
-	@JsonBackReference
+	@JsonBackReference(value="items")
     private Set<Item> items; 
 	
 	@OneToMany(mappedBy="collection")
-	@JsonBackReference
+	@JsonBackReference(value="supplements")
     private Set<CollectionSupplement> supplements;
 
 	@ManyToOne

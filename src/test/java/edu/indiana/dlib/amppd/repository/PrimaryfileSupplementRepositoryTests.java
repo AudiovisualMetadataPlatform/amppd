@@ -38,9 +38,6 @@ public class PrimaryfileSupplementRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
-	@Autowired
-	private PrimaryfileSupplementRepository supplementRepository;
-
 	@Autowired 
 	private ObjectMapper mapper;
 	private PrimaryfileSupplement obj ;

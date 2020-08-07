@@ -21,7 +21,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
@@ -32,12 +31,6 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class BundleRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
-
-	@Autowired
-	private BundleRepository bundleRepository;
-
-	@Autowired
-	private AmpUserService userService;
 
 	@Autowired
     private TestHelper testHelper;

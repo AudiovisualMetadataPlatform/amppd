@@ -27,7 +27,7 @@ import lombok.ToString;
 public class Unit extends Content {
 
 	@OneToMany(mappedBy="unit")
-	@JsonBackReference
+	@JsonBackReference(value="collections")
     private Set<Collection> collections;
 
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 
