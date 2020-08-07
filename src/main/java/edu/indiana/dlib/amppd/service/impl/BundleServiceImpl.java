@@ -54,7 +54,7 @@ public class BundleServiceImpl implements BundleService {
 		}
 
 		if (bundles.size() > 1) {
-			log.warn("There are " + bundles.size() + " bundles found with name " + name + " for the current user " + username);
+			throw new RuntimeException("There are " + bundles.size() + " bundles found with name " + name + " for the current user " + username);
 		}
 
 		Bundle bundle = bundles.get(0);
