@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.web;
 
 import java.util.ArrayList;
 import java.util.Map;

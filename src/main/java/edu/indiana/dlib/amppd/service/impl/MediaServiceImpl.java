@@ -27,7 +27,6 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.DashboardResult;
-import edu.indiana.dlib.amppd.model.ItemSearchResult;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
@@ -39,6 +38,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
+import edu.indiana.dlib.amppd.web.ItemSearchResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -317,13 +317,13 @@ public class MediaServiceImpl implements MediaService {
 		try {
 			List<Primaryfile> matchedFiles = primaryfileRepository.findByItemOrFileName(keyword);
 			ItemSearchResult result = new ItemSearchResult();;
-			Map <String, String>primaryFileinfo;
+			Map <String, Object>primaryFileinfo;
 			ArrayList<Map> primaryFilerows = new ArrayList<Map>();
 			//log.debug("the first object is:"+matchedFiles.get(0).toString());
 			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
 				//reset if the current item is a new entry
-				primaryFileinfo = new HashMap<String, String>();
+				primaryFileinfo = new HashMap<String, Object>();
 				if(p.getItem().getId() != curr_item_id && primaryFilerows.size()>0) {
 					log.info("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
 					result.setPrimaryFiles(primaryFilerows);
@@ -340,8 +340,8 @@ public class MediaServiceImpl implements MediaService {
 							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
 						curr_item_id = p.getItem().getId();
 						result.setItemName(p.getItem().getName());
-						primaryFileinfo.put("id", p.getId().toString()); 
-						primaryFileinfo.put("name",p.getOriginalFilename());
+						primaryFileinfo.put("id", p.getId()); 
+						primaryFileinfo.put("name",p.getName());
 						primaryFileinfo.put("mediaType",mime_type);
 						primaryFilerows.add(primaryFileinfo);
 					}
@@ -349,8 +349,8 @@ public class MediaServiceImpl implements MediaService {
 				else {
 					curr_item_id = p.getItem().getId();
 					result.setItemName(p.getItem().getName());
-					primaryFileinfo.put("id", p.getId().toString()); 
-					primaryFileinfo.put("name",p.getOriginalFilename());
+					primaryFileinfo.put("id", p.getId()); 
+					primaryFileinfo.put("name",p.getName());
 					primaryFileinfo.put("mediaType",mime_type);
 					primaryFilerows.add(primaryFileinfo);
 				}

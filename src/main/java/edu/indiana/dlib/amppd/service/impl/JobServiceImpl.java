@@ -1,8 +1,9 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,7 +31,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
-import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -334,6 +334,41 @@ public class JobServiceImpl implements JobService {
     	return woutputs;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[], Map<String, Map<String, String>>)
+	 */
+	public Map<Long, WorkflowOutputs> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
+		HashMap<Long, WorkflowOutputs> woutputsMap = new HashMap<Long, WorkflowOutputs>();
+		String msg = "a list of Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameters: " + parameters;
+		log.info("Creating " + msg);		
+
+		// remove redundant primaryfile IDs
+		Set<Long> pidset = primaryfileIds == null ? new HashSet<Long>() : new HashSet<Long>(Arrays.asList(primaryfileIds));
+		Long[] pids = pidset.toArray(primaryfileIds);		
+		int nSuccess = 0;
+		int nFailed = 0;
+
+		for (Long primaryfileId : pids) {
+			// skip null primaryfileId, which could result from redundant IDs passed from request parameter being changed to null
+			if (primaryfileId == null) continue; 
+			
+			try {
+				Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
+				woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));
+				nSuccess++;
+			}
+			catch (Exception e) {
+				// if error occurs with this primaryfile we still want to continue with other primaryfiles
+				log.error(e.getStackTrace().toString());	
+				nFailed++;
+			}
+		}  	
+
+		log.info("Number of Amppd jobs successfully created for the primaryfiles: " + nSuccess);    	
+		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
+    	return woutputsMap;		
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String,Long,Map<String, Map<String, String>>)
 	 */	

@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
@@ -34,6 +35,9 @@ public class BundleRepositoryTests {
 
 	@Autowired
 	private BundleRepository bundleRepository;
+
+	@Autowired
+	private AmpUserService userService;
 
 	@Autowired
     private TestHelper testHelper;
@@ -78,7 +82,7 @@ public class BundleRepositoryTests {
 	}
 
 	@Test
-	public void shouldQueryBundle() throws Exception {
+	public void shouldQueryBundleByName() throws Exception {
 
 		mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
@@ -86,6 +90,21 @@ public class BundleRepositoryTests {
 
 		mockMvc.perform(
 				get("/bundles/search/findByName?name={name}", "Bundle 1").header("Authorization", "Bearer " + token)).andExpect(
+						status().isOk()).andExpect(
+								jsonPath("$._embedded.bundles[0].name").value(
+										"Bundle 1"));
+	}
+
+	@Test
+	public void shouldQueryBundleByNameAndCreatedBy() throws Exception {
+//		String username = userService.getCurrentUsername();
+		
+		mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+				"{ \"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
+						status().isCreated());
+
+		mockMvc.perform(
+				get("/bundles/search/findByName?name={name}&createdBy={createdBy}", "Bundle 1", TestHelper.TEST_USER).header("Authorization", "Bearer " + token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.bundles[0].name").value(
 										"Bundle 1"));

@@ -57,6 +57,7 @@ public class TestHelper {
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_OUTPUT = "out_file1";
 	public static final String TASK_MANAGER = "Jira";	
+	public static final String TEST_USER = "pilotuser@iu.edu";	
 
 	@Autowired
     private JwtTokenUtil tokenUtil;
@@ -302,21 +303,19 @@ public class TestHelper {
 	/*
 	 * Create a test user
 	 */
-	public AmpUser createTestUser() {
-		
-		String username = "pilotuser@iu.edu";
-		AmpUser ampUser = ampUserService.getUser(username);
+	public AmpUser createTestUser() {	
+		AmpUser ampUser = ampUserService.getUser(TEST_USER);
 		if(ampUser==null) {
 			ampUser = new AmpUser();
-			ampUser.setEmail(username);
-			ampUser.setUsername(username);
-			ampUser.setPassword(username);
+			ampUser.setEmail(TEST_USER);
+			ampUser.setUsername(TEST_USER);
+			ampUser.setPassword(TEST_USER);
 			ampUser.setFirstName("AMP");
 			ampUser.setLastName("USER");
 			ampUser.setStatus(AmpUser.State.ACCEPTED);
 			ampUserService.registerAmpUser(ampUser);
 		}
-		ampUser.setPassword(username);
+		ampUser.setPassword(TEST_USER);
 		
     	return ampUser;
 	}
