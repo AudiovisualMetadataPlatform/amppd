@@ -57,6 +57,15 @@ public interface JobService {
 	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
 	
 	/**
+	 * Create new Amppd jobs by submitting to Galaxy the given workflow on the given primaryfiles, along with the given parameters.
+	 * @param workflowId ID of the given workflow
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @param parameters step parameters for running the workflow
+	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 */
+	public Map<Long, WorkflowOutputs> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters);
+	
+	/**
 	 * Create a bundle of multiple Amppd jobs, one job for each primaryfile included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle

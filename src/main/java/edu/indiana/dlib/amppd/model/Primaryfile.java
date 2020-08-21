@@ -4,8 +4,6 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -42,17 +40,18 @@ public class Primaryfile extends Asset {
     private String historyId;			
 
 	@OneToMany(mappedBy="primaryfile")
+	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
 	@ManyToOne
 	private Item item;
 		
-    @ManyToMany
+    @ManyToMany(mappedBy = "primaryfiles")
 	@JsonBackReference(value="bundles")
     private Set<Bundle> bundles;  
     
-    @OneToMany(mappedBy="primaryfile")
-    private Set<Job> jobs;        
+//    @OneToMany(mappedBy="primaryfile")
+//    private Set<Job> jobs;        
     	    
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<Bag> bags;        

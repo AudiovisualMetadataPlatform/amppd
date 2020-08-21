@@ -39,6 +39,9 @@ public class ItemRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 	
+//	@Autowired
+//	AmpUserService ampUserservice;
+	
 	@Autowired 
 	private ObjectMapper mapper = new ObjectMapper();
 	private Item item ;
@@ -120,12 +123,13 @@ public class ItemRepositoryTests {
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
+//		String username = ampUserservice.getCurrentUsername();
 		mockMvc.perform(
-				get("/items/search/findByCreatedBy?createdBy={createdBy}", item.getCreatedBy()).header("Authorization", "Bearer " + token)).andDo(
+				get("/items/search/findByCreatedBy?createdBy={createdBy}", TestHelper.TEST_USER).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.items[0].createdBy").value(
-										item.getCreatedBy()));
+										TestHelper.TEST_USER));
 	}
 	
 	@Test

@@ -4,9 +4,13 @@ import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,9 +29,11 @@ import lombok.ToString;
 // Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Bundle extends Dataentity {
 
-	// TODO following annotation was added to resolve a recursive reference issue due to M:M relationship with Item, but it causes exceptions in repository requests   
+	// let Bundle owns the many to many relationship, since conceptually bundle is the container of primaryfiles, 
+	// and our use case is often updating bundle's primaryfiles instead of the other way around
+	@ManyToMany
+    @JoinTable(name = "bundle_primaryfile", joinColumns = @JoinColumn(name = "bundle_id"), inverseJoinColumns = @JoinColumn(name = "primaryfile_id"))
 //	@JsonManagedReference	
-	@ManyToMany(mappedBy = "bundles")
     private Set<Primaryfile> primaryfiles;
 
 //	@ManyToMany(mappedBy = "bundles")

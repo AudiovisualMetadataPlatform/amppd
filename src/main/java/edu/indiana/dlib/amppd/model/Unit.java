@@ -8,6 +8,8 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -25,6 +27,7 @@ import lombok.ToString;
 public class Unit extends Content {
 
 	@OneToMany(mappedBy="unit")
+	@JsonBackReference(value="collections")
     private Set<Collection> collections;
 
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 

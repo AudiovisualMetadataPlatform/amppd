@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -275,7 +276,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		// if authentication is turned off and no login, then userDetails will be a String with value anonymousUser
 		// in this case, use the default AMPPD user as current user; otherwise even authentication property is set to false,
 		// user can still go through login, in which case userDetails will be the current AmpUser
-		Object userDetails = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		// in unit tests however, authentication could be null during setup, so an extra NP checking is needed
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();		
+		Object userDetails = auth == null ? null : auth.getPrincipal();
 		AmpUser user = userDetails != null && userDetails instanceof AmpUser ? (AmpUser) userDetails : null;
 		String username = user != null && StringUtils.isNotEmpty(user.getUsername()) ? user.getUsername() : amppdPropertyConfig.getUsername();
 		return username;

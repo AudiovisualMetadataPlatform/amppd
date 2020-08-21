@@ -110,7 +110,7 @@ public class BatchServiceImpl implements BatchService {
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
 		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId());
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource());
 		/*
 		 * if(errors.size()>0) return;
 		 */
@@ -396,7 +396,10 @@ public class BatchServiceImpl implements BatchService {
 			{ 
 				if((p.getName() != null && p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
 				{
-					if(item.getExternalId() != null && item.getExternalId() == batchFile.getExternalItemId()) 
+					boolean matchesExternalId = item.getExternalId() != null && item.getExternalId().equals(batchFile.getExternalItemId());
+					boolean matchesExternalSource = batchFile.getExternalSource().isBlank() || (item.getExternalSource() != null && item.getExternalSource().equals(batchFile.getExternalSource()));
+
+					if((matchesExternalId && matchesExternalSource)) 
 					{
 						if(item.getCollection() != null && item.getCollection().getId() == batchfileCollection.getId()) 
 						{ 
@@ -404,10 +407,11 @@ public class BatchServiceImpl implements BatchService {
 							log.error("BATCH PROCESSING : primary file name already exists");
 							errors.add("ERROR: In row "+currRow+" primary file name already exists");
 							break; 
-							} 
+							 
 						} 
 					} 
 				}
+			}
 		}
 		// If it doesn't exist, create a new one
 		if(!found) {
@@ -430,7 +434,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Gets an Item object.  If one already exists, 
 	 */
-	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId) {
+	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId, String externalSource) {
 		Item item = null;
 		Set<Item> items = collection.getItems();
 		boolean found = false;
@@ -439,7 +443,10 @@ public class BatchServiceImpl implements BatchService {
 			for(Item i : items) {
 				if(!externalItemId.isBlank()) 
 				{
-					if(i.getExternalId() != null && i.getExternalId() == externalItemId)
+					boolean matchesExternalId = i.getExternalId() != null && i.getExternalId().equals(externalItemId);
+					boolean matchesExternalSource = externalSource.isBlank() || (i.getExternalSource()!=null && externalSource.equals(i.getExternalSource()));
+							
+					if(matchesExternalId && matchesExternalSource)
 					{
 						found = true;
 						item = i;
@@ -467,6 +474,9 @@ public class BatchServiceImpl implements BatchService {
 			item.setName(itemName);
 			if(!externalItemId.isBlank()) {
 				item.setExternalId(externalItemId);
+			}
+			if(!externalSource.isBlank()) {
+				item.setExternalSource(externalSource);
 			}
 			item.setDescription(itemDescription);
 			item.setCreatedBy(createdBy);

@@ -30,10 +30,10 @@ public class ModelTemplates implements TemplateLoader {
 		    add("id", random(Long.class, range(1L, 200L)));
 	    	add("name", "Collection ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 	    	add("items", new HashSet<Item>());
 	    	add("supplements",new HashSet<CollectionSupplement>()); 
 	    	}}); 
@@ -43,10 +43,10 @@ public class ModelTemplates implements TemplateLoader {
 			add("id", random(Long.class, range(1L, 200L)));
 			add("name", "CollectionSupplement ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 			//add("collection", new Collection());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
@@ -59,10 +59,10 @@ public class ModelTemplates implements TemplateLoader {
 	    	add("id", random(Long.class, range(1L, 200L)));
 	    	add("name", "Item ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 	    	//add("collection", one(Collection.class, "valid"));
 			add("primaryfiles", new HashSet<Primaryfile>()); 
 			add("supplements", new HashSet<ItemSupplement>()); 
@@ -73,12 +73,12 @@ public class ModelTemplates implements TemplateLoader {
 	    	add("id", random(Long.class, range(1L, 200L)));
 	    	add("name", "Primaryfile ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 	    	add("supplements", new HashSet<PrimaryfileSupplement>());
-			add("jobs", new HashSet<Job>());
+//			add("jobs", new HashSet<Job>());
 			add("originalFilename", firstName());
 			add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
@@ -91,10 +91,10 @@ public class ModelTemplates implements TemplateLoader {
 			add("id", random(Long.class, range(1L, 200L)));
 			add("name", "ItemSupplement ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
@@ -107,10 +107,10 @@ public class ModelTemplates implements TemplateLoader {
 	    	add("id", random(Long.class, range(1L, 200L)));
 			add("name", "Bundle ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 	    	}});
 	    
 		
@@ -119,10 +119,10 @@ public class ModelTemplates implements TemplateLoader {
 			add("id", random(Long.class, range(1L, 200L)));
 			add("name", "PrimaryfileSupplement ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 			//add("collection", new Collection());
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
@@ -137,10 +137,10 @@ public class ModelTemplates implements TemplateLoader {
 	    	add("id", random(Long.class, range(1L, 200L)));
 			add("name", "Unit ${id}");
 	    	add("description", "Description for ${name}");	
-			add("createdDate", new Date()); 
-			add("modifiedDate", new Date()); 
-			add("createdBy", firstName());
-			add("modifiedBy", firstName());
+//			add("createdDate", new Date()); 
+//			add("modifiedDate", new Date()); 
+//			add("createdBy", firstName());
+//			add("modifiedBy", firstName());
 	    	}});
 	
 	    	}
