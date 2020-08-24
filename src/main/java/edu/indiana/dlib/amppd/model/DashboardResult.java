@@ -48,5 +48,5 @@ public class DashboardResult {
 	private GalaxyJobState status;
 	private Date date;
 	private Date updateDate;
-	private Boolean isFinal;	// indicate if the output will be included in the bag to be exported
+	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
 }
