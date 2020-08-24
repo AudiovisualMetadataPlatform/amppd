@@ -9,10 +9,11 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-// TODO this class can be removed at some point
-// Currently we assume that bundle is associated with primaryfiles directly. 
-// We will not use the concept of Bag for now. If a workflow needs to have supplements to go with the primaryfile, 
+// TODO This class is not currently used.  We can repurpose this class from Bag for Inputs to Bag for Outputs, or both.
+// Currently we assume that bundle is associated with primaryfiles directly,  
+// so we do not need a separate class Bag for Inputs now. If a workflow needs to have supplements to go with the primaryfile, 
 // we assume supplements associated with it at all levels will apply to the workflow. 
+// We do not need a separate class Bag for Outputs either, since it would just be a list of BagOutputs.
 
 /**
  * Bag represents the set of inputs to feed into a workflow. It contains one primaryfile and none or multiple supplement files,
