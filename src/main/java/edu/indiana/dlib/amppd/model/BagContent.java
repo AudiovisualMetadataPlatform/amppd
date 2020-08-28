@@ -30,9 +30,9 @@ public class BagContent {
 	private String stepId;
 	private String outputId;	
 	private String workflowName;
-	private String workflowStep;
-	private String toolVersion;
+	private String workflowStep; // same as tool_id
+	private String toolVersion;	 
 	private String outputFile;
 	private String outputType;
-	private String outputLink;	// obscure symlink generated for the output file
+	private String outputUrl;	// this is not stored in DashboardResult but generated as {baseUrl}/dashboard/{id}/output for Dashboard
 }

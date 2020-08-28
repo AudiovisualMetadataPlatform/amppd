@@ -34,14 +34,16 @@ public class DashboardResult {
 	private String historyId;
 	
 	private String workflowName;
-	private String workflowStep;
+	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
 	private String toolVersion;
 	
 	private String outputFile;
 	private String outputType;
 	private String outputPath;	// full absolute path of the output file
 	private String outputLink;	// obscure symlink generated for the output file
-	private String outputUrl;	// full download URL in Galaxy
+	
+	// we don't use Galaxy downloard URL, so outputUrl can be removed
+//	private String outputUrl;	// full download URL in Galaxy. 
 
 	private String submitter;
 	private GalaxyJobState status;
