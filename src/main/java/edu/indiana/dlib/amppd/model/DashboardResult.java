@@ -2,14 +2,12 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.metamodel.StaticMetamodel;
+import javax.persistence.Table;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -18,6 +16,7 @@ import lombok.Data;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(name = "workflow_result")
 @Data
 public class DashboardResult {
 	@Id
