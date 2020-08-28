@@ -26,6 +26,6 @@ public abstract class Supplement extends Asset {
 	
 	// TODO double check the relationship
 //	@ManyToMany
-//	private Set<Bag> bags;
+//	private Set<InputBag> bags;
 	
 }
