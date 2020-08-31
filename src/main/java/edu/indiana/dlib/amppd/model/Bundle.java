@@ -40,7 +40,7 @@ public class Bundle extends Dataentity {
 //    private Set<Item> items;
     
 //    @ManyToMany(mappedBy = "bundles")
-//    private Set<Bag> bags;
+//    private Set<InputBag> bags;
 
 }
   

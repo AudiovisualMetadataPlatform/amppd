@@ -183,13 +183,13 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setStepId(step.getId());
 						
 						result.setPrimaryfileId(thisFile.getId());
-						result.setSourceFilename(thisFile.getOriginalFilename());
+						result.setSourceFilename(thisFile.getName());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
 						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
-						result.setOutputUrl(dataset.getFullDownloadUrl());
+//						result.setOutputUrl(dataset.getFullDownloadUrl());
 						
 						result.setUpdateDate(new Date());
 						results.add(result);
@@ -277,7 +277,6 @@ public class DashboardServiceImpl implements DashboardService{
 						// Show only relevant output
 						if(dataset!=null && !dataset.getVisible()) continue;
 						
-
 						DashboardResult result = new DashboardResult();
 						result.setHistoryId(detail.getHistoryId());
 						result.setWorkflowId(detail.getWorkflowId());
@@ -291,13 +290,13 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setStepId(step.getId());
 						
 						result.setPrimaryfileId(thisFile.getId());
-						result.setSourceFilename(thisFile.getOriginalFilename());
+						result.setSourceFilename(thisFile.getName());
 						result.setSourceItem(thisFile.getItem().getName());
 												
 						result.setOutputFile(key);
 						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
-						result.setOutputUrl(dataset.getFullDownloadUrl());
+//						result.setOutputUrl(dataset.getFullDownloadUrl());
 						
 						result.setUpdateDate(new Date());
 						results.add(result);
