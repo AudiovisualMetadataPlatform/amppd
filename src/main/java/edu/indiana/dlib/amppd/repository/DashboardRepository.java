@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -11,5 +13,5 @@ public interface DashboardRepository extends PagingAndSortingRepository<Dashboar
 	@Query(value = "select case when count(*)>0 then true else false end from DashboardResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);
 		
-	
+	List<DashboardResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
 }

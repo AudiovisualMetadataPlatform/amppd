@@ -14,8 +14,9 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class ItemBag {
-	private Long id;				// id of the item
-    private String externalId;
+	private Long itemId;
+	private String itemName;
     private String externalSource;
-    List<BagContent> bagContents;
+    private String externalId;
+    private List<PrimaryfileBag> primaryfileBags;
 }

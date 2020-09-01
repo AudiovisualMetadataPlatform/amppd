@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
-import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -21,8 +20,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class BagContent {	    
-	private Long id;			// the id in DashboardResult
-	private Long primaryfileId;
+	private Long resultId;			// the id in DashboardResult
 	private String submitter;
 	private Date date;
 	private String workflowId;
@@ -34,5 +32,6 @@ public class BagContent {
 	private String toolVersion;	 
 	private String outputFile;
 	private String outputType;
-	private String outputUrl;	// this is not stored in DashboardResult but generated as {baseUrl}/dashboard/{id}/output for Dashboard
+	private String outputUrl;	// not stored in DashboardResult but generated as {baseUrl}/dashboard/{id}/output for Dashboard
+	// primaryfile ID and name are kept in PrimaryfileBag as they are the same for each BagContent within PrimaryfileBag
 }
