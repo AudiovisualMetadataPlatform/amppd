@@ -21,6 +21,7 @@ import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.BagService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -38,6 +39,9 @@ public class BagServiceImpl implements BagService {
 	
 	@Autowired
 	private CollectionRepository collectionRepository;
+	
+	@Autowired
+	private MediaService mediaService;
 		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.BagService.getPrimaryfileBag(Long)
@@ -65,8 +69,8 @@ public class BagServiceImpl implements BagService {
 			bcontent.setWorkflowStep(result.getWorkflowStep()); 
 			bcontent.setToolVersion(result.getToolVersion());	 
 			bcontent.setOutputFile(result.getOutputFile());
-			bcontent.setOutputType(result.getOutputType());
-			bcontent.setOutputUrl(result.getOutputLink());	
+			bcontent.setOutputType(result.getOutputType());			
+			bcontent.setOutputUrl(mediaService.getDashboardOutputUrl(result.getId()));	
 			bcontents.add(bcontent);
 		}
 		

@@ -24,16 +24,19 @@ import com.google.common.io.Resources;
 import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -52,9 +55,12 @@ public class TestHelper {
 	public static final List<String> AUDIO_TYPES = new ArrayList<>(List.of("mp3", "wav", "m4a", "ogg"));
 	public static final List<String> VIDEO_TYPES = new ArrayList<>(List.of("mp4", "mov", "avi", "wmv"));
 	public static final String TEST_AUDIO = "TestAudio";
-	public static final String TEST_VIDEO = "TestVideo";	// TODO put a small sample TestVideo.mp4 into repository test resources
+	public static final String TEST_VIDEO = "TestVideo";	
+	public static final String TEST_EXTERNAL_SOURCE = "TestExternalSource";	
+	public static final String TEST_EXTERNAL_ID = "TestExternalId";	
 	public static final String TEST_WORKFLOW = "TestWorkflow";
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
+	public static final String TEST_WORKFLOW_STEP = "remove_trailing_silence";
 	public static final String TEST_OUTPUT = "out_file1";
 	public static final String TASK_MANAGER = "Jira";	
 	public static final String TEST_USER = "pilotuser@iu.edu";	
@@ -83,6 +89,12 @@ public class TestHelper {
 	@Autowired
 	private JobService jobService;
 	
+	@Autowired
+    private DashboardService dashboardService;
+	
+	@Autowired
+	private DashboardRepository dashboardRepository;  
+
 	@Autowired
 	private AmpUserService ampUserService;
 	
@@ -177,7 +189,9 @@ public class TestHelper {
     	
     	Item item = new Item();
     	item.setName("Item for " + primaryfileName);
-    	item.setDescription("item for tests");  	
+    	item.setDescription("item for tests");  
+    	item.setExternalSource(TEST_EXTERNAL_SOURCE);
+    	item.setExternalSource(TEST_EXTERNAL_ID);
     	item.setCollection(collection);
     	item = itemRepository.save(item);
 
@@ -248,6 +262,33 @@ public class TestHelper {
 			// otherwise run the job once and return the WorkflowOutputs
 			return jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 		}
+	}	
+	
+	/**
+	 * Check whether Dashboard has been populated with test workflow invocation results for test primaryfile; 
+	 * if not, run test workflow on it and add the output to Dashboard with the last step result set as final.
+	 * @param useAudio if true use TestAudio, otherwise use TestVideo as the primaryfile
+	 * @return the prepared list of DashboardResults 
+	 */
+	public List<DashboardResult> ensureTestDashboard(boolean useAudio) {	
+		Primaryfile primaryfile = useAudio ? ensureTestAudio() : ensureTestVideo();
+    	Workflow workflow = ensureTestWorkflow();
+    	Invocation invocation = ensureTestJob(useAudio);
+    	
+		List<DashboardResult> results = dashboardRepository.findByPrimaryfileId(primaryfile.getId());
+		if (!results.iterator().hasNext()) {
+			dashboardService.addDashboardResult(workflow.getId(), workflow.getName(), primaryfile.getId(), primaryfile.getHistoryId());
+			results = dashboardRepository.findByPrimaryfileId(primaryfile.getId());
+		}
+			
+		for (DashboardResult result : results) {
+			if (result.getWorkflowStep() == TEST_WORKFLOW_STEP) {
+				result.setIsFinal(true);
+				dashboardRepository.save(result);
+			}
+		}
+		
+		return results;
 	}	
 	
 	/**

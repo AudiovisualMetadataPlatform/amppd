@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import br.com.six2six.fixturefactory.Fixture;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -98,6 +97,14 @@ public class MediaServiceTests {
 		Assert.assertTrue(url.endsWith(pf.getSymlink()));
 	}
     
+	@Test
+    public void shouldReturnDashboardOutputUrl() {    	      
+		String url = mediaService.getDashboardOutputUrl(1L);
+		Assert.assertTrue(url.startsWith("http://"));
+		Assert.assertTrue(url.contains("/dashboard/" + 1));
+		Assert.assertTrue(url.endsWith("/output"));
+	}
+    	
 	@Test
 	public void shouldReturnJsonExtensionForJsonOutput() {
 		DashboardResult dashboardResult = new DashboardResult();

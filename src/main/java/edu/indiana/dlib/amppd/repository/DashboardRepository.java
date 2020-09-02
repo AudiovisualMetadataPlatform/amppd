@@ -13,5 +13,7 @@ public interface DashboardRepository extends PagingAndSortingRepository<Dashboar
 	@Query(value = "select case when count(*)>0 then true else false end from DashboardResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);
 		
+	List<DashboardResult> findByPrimaryfileId(Long primaryfileId);
 	List<DashboardResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
+
 }
