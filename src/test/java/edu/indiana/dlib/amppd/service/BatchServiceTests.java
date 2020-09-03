@@ -188,6 +188,7 @@ public class BatchServiceTests {
 	}
 	
 	// TODO remove ignore once we have ffmpeg and MediaProbe installed on Bamboo
+	@Ignore
 	@Test
 	public void shouldBeValid() throws Exception {
 		String fileName = "batch_manifest_for_testing.csv";
