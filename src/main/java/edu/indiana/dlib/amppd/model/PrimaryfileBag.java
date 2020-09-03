@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * PrimaryfileBag is OutputBag for Primaryfile including all BagContents associated with the primaryfile.
+ * PrimaryfileBag is the OutputBag for a primaryfile containing all the BagContents associated with the primaryfile.
  * @author yingfeng
  */
 @Data

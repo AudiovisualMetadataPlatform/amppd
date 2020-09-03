@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * CollectionBag is OutputBag for Collection including all ItemBags associated with the items contained in the Collection.
+ * CollectionBag is the OutputBag for a collection containing all the ItemBags associated with the items contained in the Collection.
  * @author yingfeng
  */
 @Data

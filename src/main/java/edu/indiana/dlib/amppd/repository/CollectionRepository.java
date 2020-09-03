@@ -14,7 +14,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 @RepositoryRestResource(collectionResourceRel = "collections", path = "collections")
 public interface CollectionRepository extends ContentRepository<Collection> {
 	
-	@Query(value = "select c from Collection c where c.unit.name = :unitNamea and c.name = :name")
+	@Query(value = "select c from Collection c where c.unit.name = :unitName and c.name = :name")
 	List<Collection> findByUnitNameAndName(String unitName, String name);
 
 }

@@ -152,7 +152,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	 */
 	public GalaxyObject uploadFileToGalaxy(String filePath, String libraryName) {
 		GalaxyObject uploadData = null;
-		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + "\t Galaxy Library:" + libraryName;
+		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + ", Galaxy Library:" + libraryName;
 		log.info(msg);
 
 		// if the target library is the shared amppd (i.e. sharedLibrary), no need to retrieve by name

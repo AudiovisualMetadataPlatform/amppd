@@ -14,7 +14,7 @@ import edu.indiana.dlib.amppd.service.BagService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Controller to handle requests related to BagOutput at various levels.
+ * Controller to handle requests related to OutputBag at various levels.
  * @author yingfeng
  *
  */
@@ -29,7 +29,7 @@ public class BagController {
 	/**
 	 * Gets the PrimaryfileBag associated with the given primaryfile.
 	 * @param primaryfileId ID of the given primaryfile
-	 * @return the PrimaryfileBag created
+	 * @return the PrimaryfileBag retrieved
 	 */
 	@GetMapping("/bags/primaryfile/{primaryfileId}")
 	public PrimaryfileBag getPrimaryfileBag(@PathVariable Long primaryfileId) {
@@ -40,7 +40,7 @@ public class BagController {
 	/**
 	 * Gets the ItemBag associated with the given item.
 	 * @param itemId ID of the given item
-	 * @return the ItemBag created
+	 * @return the ItemBag retrieved
 	 */
 	@GetMapping("/bags/item/{itemId}")
 	public ItemBag getItemBag(@PathVariable Long itemId) {
@@ -52,7 +52,7 @@ public class BagController {
 	 * Gets the ItemBag associated with the given item.
 	 * @param externalSource externalSource of the given item
 	 * @param externalId externalId of the given item
-	 * @return the ItemBag created
+	 * @return the ItemBag retrieved
 	 */
 	@GetMapping("/bags/item/")
 	public ItemBag getItemBag(@RequestParam String externalSource, @RequestParam String externalId) {
@@ -63,7 +63,7 @@ public class BagController {
 	/**
 	 * Gets the CollectionBag associated with the given collection.
 	 * @param collectionId ID of the given collection
-	 * @return the CollectionBag created
+	 * @return the CollectionBag retrieved
 	 */
 	@GetMapping("/bags/collection/{collectionId}")
 	public CollectionBag getCollectionBag(@PathVariable Long collectionId) {
@@ -75,7 +75,7 @@ public class BagController {
 	 * Gets the CollectionBag associated with the given collection.
 	 * @param unitName name of the given collection's parent unit
 	 * @param collectionName name of the given collection
-	 * @return the CollectionBag created
+	 * @return the CollectionBag retrieved
 	 */
 	@GetMapping("/bags/collection/")
 	public CollectionBag getCollectionBag(@RequestParam String unitName, @RequestParam String collectionName) {

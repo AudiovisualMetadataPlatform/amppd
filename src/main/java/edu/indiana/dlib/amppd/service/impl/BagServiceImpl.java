@@ -107,7 +107,7 @@ public class BagServiceImpl implements BagService {
 	 */
 	public ItemBag getItemBag(String externalSource, String externalId) {
 		List<Item> items = itemRepository.findByExternalSourceAndExternalId(externalSource, externalId);    		
-		if (items.size() > 0 ) {
+		if (items.size() > 1 ) {
 			throw new StorageException("More than one item is found for external source-id " + externalSource + "-" + externalId);
 		}
 		
@@ -127,6 +127,7 @@ public class BagServiceImpl implements BagService {
 		
 		cbag.setCollectionId(collectionId);
 		cbag.setCollectionName(collection.getName());
+		cbag.setUnitName(collection.getUnit().getName());
 		List<ItemBag> ibags = new ArrayList<ItemBag>();
 		cbag.setItemBags(ibags);		
 		Set<Item> items = collection.getItems();
@@ -145,7 +146,7 @@ public class BagServiceImpl implements BagService {
 	 */
 	public CollectionBag getCollectionBag(String unitName, String collectionName) {
 		List<Collection> collections = collectionRepository.findByUnitNameAndName(unitName, collectionName);    		
-		if (collections.size() > 0 ) {
+		if (collections.size() > 1 ) {
 			throw new StorageException("More than one collection is found for unitName-collectionName " + unitName + "-" + collectionName);
 		}
 		

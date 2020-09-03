@@ -60,7 +60,7 @@ public class TestHelper {
 	public static final String TEST_EXTERNAL_ID = "TestExternalId";	
 	public static final String TEST_WORKFLOW = "TestWorkflow";
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
-	public static final String TEST_WORKFLOW_STEP = "remove_trailing_silence";
+	public static final String TEST_WORKFLOW_STEP = "remove_trailing_silence"; // the last step in TestWorkflow
 	public static final String TEST_OUTPUT = "out_file1";
 	public static final String TASK_MANAGER = "Jira";	
 	public static final String TEST_USER = "pilotuser@iu.edu";	
@@ -282,7 +282,7 @@ public class TestHelper {
 		}
 			
 		for (DashboardResult result : results) {
-			if (result.getWorkflowStep() == TEST_WORKFLOW_STEP) {
+			if (result.getWorkflowStep() == TEST_WORKFLOW_STEP && result.getInvocationId() == invocation.getId()) {
 				result.setIsFinal(true);
 				dashboardRepository.save(result);
 			}
