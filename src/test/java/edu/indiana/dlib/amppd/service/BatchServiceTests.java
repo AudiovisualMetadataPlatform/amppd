@@ -149,8 +149,6 @@ public class BatchServiceTests {
         Assert.assertTrue(srcFile.exists());
         
         // Create necessary directories
-        
-        
         Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
         Path unitPath = dropboxService.getDropboxPath(unitName);
         Path collectionPath = dropboxService.getDropboxPath(unitName, collectionName);
@@ -190,7 +188,6 @@ public class BatchServiceTests {
 	}
 	
 	// TODO remove ignore once we have ffmpeg and MediaProbe installed on Bamboo
-	@Ignore
 	@Test
 	public void shouldBeValid() throws Exception {
 		String fileName = "batch_manifest_for_testing.csv";

@@ -389,27 +389,19 @@ public class BatchServiceImpl implements BatchService {
 		Primaryfile primaryFile =null;
 		boolean found = false;
 		Set <Primaryfile> primaryFiles = item.getPrimaryfiles();
+		
+		
+		// For primary files in a given item, file names must be unique.
 		if(primaryFiles != null && primaryFiles.size() >= 0) 
 		{
-			log.info("BATCH PROCESSING : loop to see if primary file name already exists for this item");
 			for(Primaryfile p : primaryFiles) 
 			{ 
 				if((p.getName() != null && p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) 
 				{
-					boolean matchesExternalId = item.getExternalId() != null && item.getExternalId().equals(batchFile.getExternalItemId());
-					boolean matchesExternalSource = batchFile.getExternalSource().isBlank() || (item.getExternalSource() != null && item.getExternalSource().equals(batchFile.getExternalSource()));
-
-					if((matchesExternalId && matchesExternalSource)) 
-					{
-						if(item.getCollection() != null && item.getCollection().getId() == batchfileCollection.getId()) 
-						{ 
-							found = true;
-							log.error("BATCH PROCESSING : primary file name already exists");
-							errors.add("ERROR: In row "+currRow+" primary file name already exists");
-							break; 
-							 
-						} 
-					} 
+					found = true;
+					log.error("BATCH PROCESSING : primary file name already exists");
+					errors.add("ERROR: In row "+currRow+" primary file name already exists");
+					break; 
 				}
 			}
 		}
