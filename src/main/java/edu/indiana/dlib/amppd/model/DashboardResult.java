@@ -35,7 +35,7 @@ public class DashboardResult {
 	
 	private String workflowName;
 	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
-	private String toolVersion;
+	private String toolInfo;
 	
 	private String outputFile;
 	private String outputType;

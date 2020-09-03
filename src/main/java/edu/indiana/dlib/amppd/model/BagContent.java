@@ -25,7 +25,7 @@ public class BagContent {
 	private String outputId;	
 	private String workflowName;
 	private String workflowStep; // same as tool_id
-	private String toolVersion;	 
+	private String toolInfo;	 
 	private String outputFile;
 	private String outputType;
 	private String outputUrl;	// not stored in DashboardResult but generated as {baseUrl}/dashboard/{id}/output for Dashboard
