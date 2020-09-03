@@ -149,8 +149,6 @@ public class BatchServiceTests {
         Assert.assertTrue(srcFile.exists());
         
         // Create necessary directories
-        
-        
         Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
         Path unitPath = dropboxService.getDropboxPath(unitName);
         Path collectionPath = dropboxService.getDropboxPath(unitName, collectionName);

@@ -22,7 +22,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.opencsv.CSVReader;
 
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Batch;
 import edu.indiana.dlib.amppd.model.BatchFile;
@@ -39,15 +38,11 @@ import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.service.DropboxService;
-import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
 @Service
 @Transactional
 public class BatchValidationServiceImpl implements BatchValidationService {
-	
-	@Autowired
-	private AmppdPropertyConfig propertyConfig;
 	
 	@Autowired
     private UnitRepository unitRepository;
@@ -67,8 +62,6 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	@Autowired
 	private DropboxService dropboxService;
 
-	@Autowired
-    private FileStorageService fileStorageService;
 	
 	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
 		BatchValidationResponse response;
@@ -298,7 +291,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     		errors.add(String.format("Row: %s: Duplicate primary file %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
 		}
 		
-		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getRowNum())) {
+		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getExternalItemId(), batchFile.getItemName(), batchFile.getRowNum())) {
     		errors.add(String.format("Row: %s: Duplicate primary file name %s", batchFile.getRowNum(), batchFile.getPrimaryfileName()));
 		}
     	return errors;
