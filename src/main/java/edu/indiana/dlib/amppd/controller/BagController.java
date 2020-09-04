@@ -54,7 +54,7 @@ public class BagController {
 	 * @param externalId externalId of the given item
 	 * @return the ItemBag retrieved
 	 */
-	@GetMapping("/bags/item/")
+	@GetMapping("/bags/item")
 	public ItemBag getItemBag(@RequestParam String externalSource, @RequestParam String externalId) {
 		log.info("Getting ItemBag for external source-id " + externalSource + "-" + externalId + " ...");
 		return bagService.getItemBag(externalSource, externalId);		
@@ -77,7 +77,7 @@ public class BagController {
 	 * @param collectionName name of the given collection
 	 * @return the CollectionBag retrieved
 	 */
-	@GetMapping("/bags/collection/")
+	@GetMapping("/bags/collection")
 	public CollectionBag getCollectionBag(@RequestParam String unitName, @RequestParam String collectionName) {
 		log.info("Getting CollectionBag for unitName-collectionName " + unitName + "-" + collectionName);
 		return bagService.getCollectionBag(unitName, collectionName);		
