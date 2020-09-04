@@ -112,6 +112,15 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputUrl(Long)
+	 */
+	@Override
+	public String getDashboardOutputUrl(Long dashboardId) {
+		String url = amppdPropertyConfig.getUrl() + "/dashboard/" + dashboardId + "/output";
+		return url;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getAssetMediaInfoPath(Asset)
 	 */
 	@Override

@@ -7,15 +7,16 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * ItemBag is OutputBag for Item including all BagContents associated with the primaryfiles contained in the item.
+ * ItemBag is the OutputBag for an item containing all the PrimaryfileBags associated with the primaryfiles contained in the item.
  * @author yingfeng
  */
 @Data
 @EqualsAndHashCode
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class ItemBag {
-	private Long id;				// id of the item
-    private String externalId;
+	private Long itemId;
+	private String itemName;
     private String externalSource;
-    List<BagContent> bagContents;
+    private String externalId;
+    private List<PrimaryfileBag> primaryfileBags;
 }
