@@ -75,14 +75,7 @@ public class MediaController {
     	}
         return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
     }
-	
-	
-//	public String servePrimaryfile(@PathVariable("id") Long id) {		
-//    	log.info("Serving media file for primaryfile ID " + id);
-//    	String url = mediaService.getPrimaryfileSymlinkUrl(id);
-//    	return "redirect: " + url;
-//    }
-	
+		
 	@CrossOrigin(origins = "*")
 	@GetMapping(path = "/primaryfiles/search/findByItemOrFileName")
 	public @ResponseBody ItemSearchResponse searchFile(@RequestParam("keyword") String keyword, @RequestParam("mediaType") String mediaType) {	
