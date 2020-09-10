@@ -25,6 +25,8 @@ public interface ItemRepository extends ContentRepository<Item> {
 	@Query(value = "select i from Item i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
 	List<Item> findByKeyword(@Param("keyword") String keyword);
 		
+	List<Item> findByExternalSourceAndExternalId(String externalSource, String externalId);
+	
 	@Transactional
 	@Modifying
 	@Query(value = "update Item set name = :name where id = :id") 

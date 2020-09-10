@@ -45,6 +45,13 @@ public interface MediaService {
 	public String createSymlink(Asset asset);
 	
 	/**
+	 * Get the output file access URL for the given DashboardResult.
+	 * @param dashboardId ID of the given DashboardResult
+	 * @return the generated output URL
+	 */
+	public String getDashboardOutputUrl(Long dashboardId);
+
+	/**
 	 * Get the output symlink URL for the given dashboardResult:
 	 * create a new one if not existing yet; or reuse the existing symlink if already created.
 	 * @param id ID of the given dashboardResult

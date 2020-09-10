@@ -54,6 +54,6 @@ public class Primaryfile extends Asset {
 //    private Set<Job> jobs;        
     	    
 //    @OneToMany(mappedBy="primaryfile")
-//    private Set<Bag> bags;        
+//    private Set<InputBag> bags;        
 
 }

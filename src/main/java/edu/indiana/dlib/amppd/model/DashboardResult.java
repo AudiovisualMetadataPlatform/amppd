@@ -2,14 +2,12 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.metamodel.StaticMetamodel;
+import javax.persistence.Table;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -18,28 +16,38 @@ import lombok.Data;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(name = "workflow_result")
 @Data
 public class DashboardResult {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
-	private Date date;
-	private String submitter;
-	private String workflowName;
-	private String sourceItem;
+
 	private Long primaryfileId;
+	private String sourceItem;
 	private String sourceFilename;
-	private String workflowStep;
+
+	private String workflowId;
+	private String invocationId;
+	private String stepId;
+	private String outputId;	// we don't need datasetId as it is the same as outputId
+	private String historyId;
+	
+	private String workflowName;
+	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
+	private String toolInfo;
+	
 	private String outputFile;
-	private String outputType;	// type of output file, indicated by its file extension 
+	private String outputType;
 	private String outputPath;	// full absolute path of the output file
 	private String outputLink;	// obscure symlink generated for the output file
-	private String outputUrl;	// full download URL in Galaxy
+	
+	// we don't use Galaxy downloard URL, so outputUrl can be removed
+//	private String outputUrl;	// full download URL in Galaxy. 
+
+	private String submitter;
 	private GalaxyJobState status;
-	private String workflowId;
-	private String historyId;
-	private String outputId;	// we don't need datasetId as it is the same as outputId
-	private String invocationId;
+	private Date date;
 	private Date updateDate;
-	private String stepId;
+	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
 }

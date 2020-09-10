@@ -42,7 +42,7 @@ public class Job {
 //    private Primaryfile primaryfile;
 
 //    @ManyToOne
-//    private Bag bag;
+//    private InputBag bag;
 
     @ManyToOne
     private Workflow workflow;
