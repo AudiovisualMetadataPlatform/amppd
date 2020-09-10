@@ -222,7 +222,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	response.addErrors(primaryFileErrors);
         	
         	// Check for duplicate primary files
-        	if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
+        	SupplementType supplementType = batchFile.getSupplementType();
+        	if(supplementType == null || supplementType==SupplementType.PRIMARYFILE) {
             	List<String> duplicatePrimaryFileErrors = validateUniquePrimaryfile(batch, batchFile);
             	response.addErrors(duplicatePrimaryFileErrors);
         	}
