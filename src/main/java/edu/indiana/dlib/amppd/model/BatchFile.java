@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -41,14 +42,26 @@ public class BatchFile {
 	@JsonIgnore
 	@ManyToOne
 	private Collection collection;
+    
+	@Type(type="text")
 	private String collectionName;
+    
+	@Type(type="text")
 	private String externalSource;
+	@Type(type="text")
 	private String externalItemId;
+	
+	@Type(type="text")
 	private String itemName;
+	@Type(type="text")
 	private String itemDescription;
+	
 	private String primaryfileFilename;
+	@Type(type="text")
 	private String primaryfileName;
+	@Type(type="text")
 	private String primaryfileDescription;
+
 	private SupplementType supplementType; 
 	
 	@OneToMany(mappedBy="batchFile")

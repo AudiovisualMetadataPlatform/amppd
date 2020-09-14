@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
@@ -24,8 +25,10 @@ public class DashboardResult {
 	private Long id;
 
 	private Long primaryfileId;
-	private String sourceItem;
-	private String sourceFilename;
+	@Type(type="text")
+	private String sourceItem;		// item name	
+	@Type(type="text")
+	private String sourceFilename;	// primaryfile name
 
 	private String workflowId;
 	private String invocationId;
