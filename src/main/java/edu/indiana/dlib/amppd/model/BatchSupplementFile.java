@@ -7,6 +7,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -29,7 +30,11 @@ public class BatchSupplementFile {
 	private Long id;
 	private int supplementNum;
 	private String supplementFilename;	
+	
+    @Type(type="text")
 	private String supplementName;
+    
+    @Type(type="text")
 	private String supplementDescription;
 
 	@JsonBackReference(value="batch-file")
