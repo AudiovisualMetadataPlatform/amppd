@@ -190,7 +190,9 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
 //						result.setOutputUrl(dataset.getFullDownloadUrl());
-										
+						
+						// TODO add logic to populate tool info		
+						
 						result.setUpdateDate(new Date());
 						results.add(result);
 					}
@@ -297,6 +299,8 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
 //						result.setOutputUrl(dataset.getFullDownloadUrl());
+						
+						// TODO add logic to populate tool info
 						
 						result.setUpdateDate(new Date());
 						results.add(result);
