@@ -10,7 +10,10 @@ import javax.persistence.Id;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 /**
@@ -23,6 +26,7 @@ import lombok.NonNull;
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Data
+@NoArgsConstructor
 public class MgmTool {
 
     @Id
@@ -39,6 +43,7 @@ public class MgmTool {
     private String version;	// version of the MGM model
     
     @NonNull
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
     private Date upgradeDate; // date when this version of the MGM model is installed (for local tools) or released (for cloud tools)
 
 }
