@@ -53,11 +53,13 @@ public class MediaServiceImpl implements MediaService {
 	public static int SYMLINK_LENGTH = 16;
 
 	// Galaxy data types extended by AMPPD 
-	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments"});
+	public static List<String> TYPE_TXT = Arrays.asList(new String[] {"txt", "html", "vtt", "csv"});
+	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments", "transcript", "ner", "vocr", "shot"});
 	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
 	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
 
 	// file extensions used by dashboard output symlinks, corresponding to Galaxy data types
+	public static String FILE_EXT_TXT = "txt";
 	public static String FILE_EXT_JSON = "json";
 	public static String FILE_EXT_AUDIO = "wav";
 	public static String FILE_EXT_VIDEO = "mp4";
@@ -206,6 +208,9 @@ public class MediaServiceImpl implements MediaService {
 		// all audio outputs are of wav format
 		// all video outputs are of mp4 format
 		// We can refine the data types and the associated file extensions in the future as our use case grow
+		if (TYPE_TXT.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_TXT;				
+		}
 		if (TYPE_JSON.contains(dashboardResult.getOutputType())) {
 			return FILE_EXT_JSON;				
 		}

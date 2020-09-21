@@ -14,11 +14,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Table(name = "workflow_result")
 @Data
+@NoArgsConstructor
 public class DashboardResult {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -46,7 +48,6 @@ public class DashboardResult {
 	private String outputLink;	// obscure symlink generated for the output file
 	
 	// we don't use Galaxy downloard URL, so outputUrl can be removed
-//	private String outputUrl;	// full download URL in Galaxy. 
 
 	private String submitter;
 	private GalaxyJobState status;

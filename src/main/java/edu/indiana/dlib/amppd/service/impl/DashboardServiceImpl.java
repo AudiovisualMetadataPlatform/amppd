@@ -21,8 +21,10 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.DashboardRepository;
+import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
@@ -41,6 +43,8 @@ public class DashboardServiceImpl implements DashboardService{
 	private GalaxyPropertyConfig galaxyPropertyConfig;
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
+	@Autowired
+	private MgmToolRepository mgmToolRepository;
 	@Autowired
 	private JobService jobService;
 	@Autowired
@@ -154,11 +158,15 @@ public class DashboardServiceImpl implements DashboardService{
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
 					String jobName = "";
+					String toolInfo = "";
 					for(Job job : jobs) {
-						// Concatenate the job names in case we have more than one. 
+						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
 						date = job.getCreated();
 						status = getJobStatus(job.getState());
+						String tinfo = getMgmToolInfo(job.getToolId(), date);
+						String divider = toolInfo == "" ? "" : ", ";
+						toolInfo += tinfo == null ? "" : divider + tinfo;
 					}
 
 					// For each output, create a record.
@@ -189,9 +197,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputFile(key);
 						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
-//						result.setOutputUrl(dataset.getFullDownloadUrl());
-						
-						// TODO add logic to populate tool info		
+						result.setToolInfo(toolInfo);
 						
 						result.setUpdateDate(new Date());
 						results.add(result);
@@ -263,11 +269,15 @@ public class DashboardServiceImpl implements DashboardService{
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
 					String jobName = "";
+					String toolInfo = "";
 					for(Job job : jobs) {
-						// Concatenate the job names in case we have more than one. 
+						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
 						date = job.getCreated();
 						status = getJobStatus(job.getState());
+						String tinfo = getMgmToolInfo(job.getToolId(), date);
+						String divider = toolInfo == "" ? "" : ", ";
+						toolInfo += tinfo == null ? "" : divider + tinfo;
 					}
 
 					// For each output, create a record.
@@ -298,9 +308,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputFile(key);
 						result.setOutputType(dataset.getFileExt());
 						result.setOutputPath(dataset.getFileName());
-//						result.setOutputUrl(dataset.getFullDownloadUrl());
-						
-						// TODO add logic to populate tool info
+						result.setToolInfo(toolInfo);
 						
 						result.setUpdateDate(new Date());
 						results.add(result);
@@ -339,6 +347,20 @@ public class DashboardServiceImpl implements DashboardService{
 			status = GalaxyJobState.PAUSED;
 		}
 		return status;
+	}
+	
+	/*
+	 * Get the latest model/version of the specified MGM tool at the point when the Galaxy job was run.
+	 * @param toolId Galaxy tool ID for the MGM tool
+	 * @param invocationTime the invocation time of the Galaxy job
+	 * @return the latest tool information found or null if not found
+	 */
+	private String getMgmToolInfo(String toolId, Date invocationTime) {
+		List<MgmTool> tools = mgmToolRepository.findLatestByToolId(toolId, invocationTime);
+		if (tools == null || tools.size() == 0)
+			return null;
+		String info = tools.get(0).getMgmName() + " " + tools.get(0).getVersion();
+		return info;
 	}
 	
 }
