@@ -54,13 +54,15 @@ public class MediaServiceImpl implements MediaService {
 
 	// Galaxy data types extended by AMPPD 
 	public static List<String> TYPE_TXT = Arrays.asList(new String[] {"txt", "html", "vtt", "csv"});
-	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments", "transcript", "ner", "vocr", "shot"});
-	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
+	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments", "transcript", "ner", "vocr", "shot", "face"});
+	public static List<String> TYPE_IMAGE = Arrays.asList(new String[] {"pdf", "png", "jpg", "gif", "tiff", "bmp"});
+	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "wav", "speech", "music"});
 	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
 
 	// file extensions used by dashboard output symlinks, corresponding to Galaxy data types
 	public static String FILE_EXT_TXT = "txt";
 	public static String FILE_EXT_JSON = "json";
+	public static String FILE_EXT_IMAGE = "pdf";
 	public static String FILE_EXT_AUDIO = "wav";
 	public static String FILE_EXT_VIDEO = "mp4";
 	public static String FILE_EXT_DEFAULT = "dat";
@@ -213,6 +215,9 @@ public class MediaServiceImpl implements MediaService {
 		}
 		if (TYPE_JSON.contains(dashboardResult.getOutputType())) {
 			return FILE_EXT_JSON;				
+		}
+		else if (TYPE_IMAGE.contains(dashboardResult.getOutputType())) {
+			return FILE_EXT_IMAGE;		
 		}
 		else if (TYPE_AUDIO.contains(dashboardResult.getOutputType())) {
 			return FILE_EXT_AUDIO;				
