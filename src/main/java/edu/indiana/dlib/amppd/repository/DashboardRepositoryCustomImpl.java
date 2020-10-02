@@ -53,7 +53,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
     }
 
 	private List<DashboardResult> getDashboardRows(DashboardSearchQuery searchQuery){
-		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage()) + 1;
+		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage());
 		
 		
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -136,7 +136,6 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 			Predicate toDate = cb.lessThanOrEqualTo(root.get("date").as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
 			Predicate datePredicate = cb.and(fromDate, toDate);
             predicates.add(datePredicate);
-			
 		}
         
         if(searchQuery.getFilterByWorkflows().length>0) {
