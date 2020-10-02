@@ -202,10 +202,11 @@ public class MediaServiceImpl implements MediaService {
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputExtension(DashboardResult)
 	 */
 	public String getDashboardOutputExtension(DashboardResult dashboardResult) {
+		String extension = dashboardResult.getOutputType();
+		
 		// We make the following assumptions based on current Galaxy tool output data types and file types:
 		// all audio/music/speech outputs are of wav format
 		// all video outputs are of mp4 format
-		String extension = dashboardResult.getOutputType();
 		if (TYPE_TXT.contains(extension)) {
 			return FILE_EXT_TXT;				
 		}
