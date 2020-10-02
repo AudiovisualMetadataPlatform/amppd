@@ -106,6 +106,14 @@ public class MediaServiceTests {
 	}
     	
 	@Test
+	public void shouldReturnTxtExtensionForTxtOutput() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType(MediaServiceImpl.TYPE_TXT.get(0));
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_TXT);
+	}
+	
+	@Test
 	public void shouldReturnJsonExtensionForJsonOutput() {
 		DashboardResult dashboardResult = new DashboardResult();
 		dashboardResult.setOutputType(MediaServiceImpl.TYPE_JSON.get(0));
@@ -119,6 +127,14 @@ public class MediaServiceTests {
 		dashboardResult.setOutputType(MediaServiceImpl.TYPE_AUDIO.get(0));
 		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
 		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_AUDIO);
+	}
+	
+	@Test
+	public void shouldReturnStandardardExtensionAsIs() {
+		DashboardResult dashboardResult = new DashboardResult();
+		dashboardResult.setOutputType("png");
+		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		Assert.assertEquals(extension, "png");
 	}
 	
 	@Test
