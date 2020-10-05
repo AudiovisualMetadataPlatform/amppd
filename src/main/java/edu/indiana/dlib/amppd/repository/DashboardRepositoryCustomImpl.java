@@ -70,7 +70,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         }
         DashboardSortRule sort = searchQuery.getSortRule();
         if(sort!=null && !sort.getColumnName().isEmpty()) {
-        	if(sort.getColumnName()=="outputFile") {
+        	if(sort.getColumnName().equals("outputFile")) {
     			List<Order> orderList = new ArrayList<Order>();
         		if(sort.isOrderByDescending()) {        			
         			orderList.add(cb.desc(root.get("outputFile")));
