@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -325,7 +326,20 @@ public class DashboardServiceImpl implements DashboardService{
 		cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
 		return results;
 	}
-	
+
+	public boolean setResultIsFinal(long dashboardResultId) {
+		
+		Optional<DashboardResult> dashboardResultOpt  = dashboardRepository.findById(dashboardResultId);
+		
+		if(dashboardResultOpt.isPresent()) {
+			DashboardResult result = dashboardResultOpt.get();
+			result.setIsFinal(!result.getIsFinal());
+			dashboardRepository.save(result);
+			
+			return true;
+		}
+		return false;
+	}
 	
 	
 	// Map the status in Galaxy to what we want on the front end.
