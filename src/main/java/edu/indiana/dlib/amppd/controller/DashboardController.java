@@ -38,7 +38,7 @@ public class DashboardController {
 	@PostMapping(path = "/dashboard/isfinal/{id}", consumes = "application/json", produces = "application/json")
 	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
 		log.info("Setting file to final: " + id);
-		return dashboardService.setResultIsFinal(id);
+		return dashboardService.setResultIsFinal(id, isFinal);
 	}
 
 	@PostMapping("/dashboard/refresh")
