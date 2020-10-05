@@ -70,14 +70,16 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         }
         DashboardSortRule sort = searchQuery.getSortRule();
         if(sort!=null && !sort.getColumnName().isEmpty()) {
-        	if(sort.getColumnName()=="workflowStep") {
+        	if(sort.getColumnName()=="outputFile") {
     			List<Order> orderList = new ArrayList<Order>();
         		if(sort.isOrderByDescending()) {        			
-        			orderList.add(cb.desc(root.get("workflowStep")));
-        			orderList.add(cb.asc(root.get("workflowName")));
+        			orderList.add(cb.desc(root.get("outputFile")));
+        			orderList.add(cb.asc(root.get("workflowStep")));
+            		orderList.add(cb.asc(root.get("workflowName")));
         			orderList.add(cb.desc(root.get("date")));
         		}
             	else {
+            		orderList.add(cb.asc(root.get("outputFile")));
             		orderList.add(cb.asc(root.get("workflowStep")));
             		orderList.add(cb.asc(root.get("workflowName")));
             		orderList.add(cb.desc(root.get("date")));
