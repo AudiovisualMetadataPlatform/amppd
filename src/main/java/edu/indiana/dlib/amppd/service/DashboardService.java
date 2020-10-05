@@ -26,5 +26,5 @@ public interface DashboardService {
 	 */
 	List<DashboardResult> refreshAllDashboardResults();
 
-	boolean setResultIsFinal(long dashboardResultId);
+	boolean setResultIsFinal(long dashboardResultId, boolean isFinal);
 }

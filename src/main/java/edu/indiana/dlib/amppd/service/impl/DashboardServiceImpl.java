@@ -327,13 +327,13 @@ public class DashboardServiceImpl implements DashboardService{
 		return results;
 	}
 
-	public boolean setResultIsFinal(long dashboardResultId) {
+	public boolean setResultIsFinal(long dashboardResultId, boolean isFinal) {
 		
 		Optional<DashboardResult> dashboardResultOpt  = dashboardRepository.findById(dashboardResultId);
 		
 		if(dashboardResultOpt.isPresent()) {
 			DashboardResult result = dashboardResultOpt.get();
-			result.setIsFinal(!result.getIsFinal());
+			result.setIsFinal(isFinal);
 			dashboardRepository.save(result);
 			
 			return true;
