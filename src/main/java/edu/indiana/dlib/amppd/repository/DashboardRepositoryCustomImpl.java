@@ -167,7 +167,11 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
             Predicate predicate = path.in((Object[])searchQuery.getFilterByStatuses());
             predicates.add(predicate);
         }
-                
+
+        if(searchQuery.isFilterByFinal()) {
+        	Predicate predicate = cb.equal(root.get("isFinal"), true);
+            predicates.add(predicate);
+        }
         return predicates;
 	}
 	
