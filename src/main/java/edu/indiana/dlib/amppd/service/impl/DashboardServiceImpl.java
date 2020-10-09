@@ -156,8 +156,8 @@ public class DashboardServiceImpl implements DashboardService{
 					
 					// in case a step has no jobs (i.e. the input step of the workflow), 
 					// use step update timestamp for both the job create and update time
-					Date date = step.getUpdateTime();
-					Date createDate = step.getUpdateTime();
+					Date dateCreated = step.getUpdateTime();
+					Date dateUpdated = step.getUpdateTime();
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -166,10 +166,10 @@ public class DashboardServiceImpl implements DashboardService{
 					for(Job job : jobs) {
 						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
-						date = job.getUpdated();
-				 		createDate = job.getCreated();
+						dateCreated = job.getCreated();
+				 		dateUpdated = job.getUpdated();
 						status = getJobStatus(job.getState());
-						String tinfo = getMgmToolInfo(job.getToolId(), date);
+						String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
 						String divider = toolInfo == "" ? "" : ", ";
 						toolInfo += tinfo == null ? "" : divider + tinfo;
 					}
@@ -189,8 +189,8 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputId(output.getId());
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
-						result.setDate(date);
-						result.setCreateDate(createDate);
+						result.setDateCreated(dateCreated);
+						result.setDateUpdated(dateUpdated);
 						result.setStatus(status);
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
@@ -272,8 +272,8 @@ public class DashboardServiceImpl implements DashboardService{
 					
 					// in case a step has no jobs (i.e. the input step of the workflow), 
 					// use step update timestamp for both the job create and update time
-					Date date = step.getUpdateTime();
-					Date createDate = step.getUpdateTime();
+					Date dateCreated = step.getUpdateTime();
+					Date dateUpdated = step.getUpdateTime();
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -282,10 +282,10 @@ public class DashboardServiceImpl implements DashboardService{
 					for(Job job : jobs) {
 						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
-						date = job.getUpdated();
-				 		createDate = job.getCreated();
+						dateCreated = job.getCreated();
+				 		dateUpdated = job.getUpdated();
 						status = getJobStatus(job.getState());
-						String tinfo = getMgmToolInfo(job.getToolId(), date);
+						String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
 						String divider = toolInfo == "" ? "" : ", ";
 						toolInfo += tinfo == null ? "" : divider + tinfo;
 					}
@@ -305,8 +305,8 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputId(output.getId());
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
-						result.setDate(date);
-						result.setCreateDate(createDate);
+						result.setDateCreated(dateCreated);
+						result.setDateUpdated(dateUpdated);
 						result.setStatus(status);
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
