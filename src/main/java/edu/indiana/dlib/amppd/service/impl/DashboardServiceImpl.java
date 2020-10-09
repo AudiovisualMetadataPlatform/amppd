@@ -96,7 +96,7 @@ public class DashboardServiceImpl implements DashboardService{
 			log.info("Unable to update the status of invocation " + result.getInvocationId() + " from Galaxy");
 		}
 		
-		result.setUpdateDate(new Date());
+		result.setDateRefreshed(new Date());
 		
 		dashboardRepository.save(result);
 		
@@ -115,7 +115,7 @@ public class DashboardServiceImpl implements DashboardService{
 		DashboardResponse response = dashboardRepository.searchResults(query);
 		
 		for(DashboardResult result : response.getRows()) {
-			if(shouldRefreshJobState(result.getStatus(), result.getUpdateDate())) {
+			if(shouldRefreshJobState(result.getStatus(), result.getDateRefreshed())) {
 				result = updateDashboardResult(result);
 			}
 		}
@@ -154,7 +154,10 @@ public class DashboardServiceImpl implements DashboardService{
 					List<Job> jobs = step.getJobs();
 					if(jobs.isEmpty()) continue;
 					
+					// in case a step has no jobs (i.e. the input step of the workflow), 
+					// use step update timestamp for both the job create and update time
 					Date date = step.getUpdateTime();
+					Date createDate = step.getUpdateTime();
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -163,7 +166,8 @@ public class DashboardServiceImpl implements DashboardService{
 					for(Job job : jobs) {
 						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
-						date = job.getCreated();
+						date = job.getUpdated();
+				 		createDate = job.getCreated();
 						status = getJobStatus(job.getState());
 						String tinfo = getMgmToolInfo(job.getToolId(), date);
 						String divider = toolInfo == "" ? "" : ", ";
@@ -186,6 +190,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
 						result.setDate(date);
+						result.setCreateDate(createDate);
 						result.setStatus(status);
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
@@ -200,7 +205,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputPath(dataset.getFileName());
 						result.setToolInfo(toolInfo);
 						
-						result.setUpdateDate(new Date());
+						result.setDateRefreshed(new Date());
 						results.add(result);
 					}
 				}
@@ -265,7 +270,10 @@ public class DashboardServiceImpl implements DashboardService{
 						workflowDetails.put(detail.getWorkflowId(), workflowName);
 					}
 					
+					// in case a step has no jobs (i.e. the input step of the workflow), 
+					// use step update timestamp for both the job create and update time
 					Date date = step.getUpdateTime();
+					Date createDate = step.getUpdateTime();
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -274,7 +282,8 @@ public class DashboardServiceImpl implements DashboardService{
 					for(Job job : jobs) {
 						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
-						date = job.getCreated();
+						date = job.getUpdated();
+				 		createDate = job.getCreated();
 						status = getJobStatus(job.getState());
 						String tinfo = getMgmToolInfo(job.getToolId(), date);
 						String divider = toolInfo == "" ? "" : ", ";
@@ -297,6 +306,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
 						result.setDate(date);
+						result.setCreateDate(createDate);
 						result.setStatus(status);
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
@@ -311,7 +321,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputPath(dataset.getFileName());
 						result.setToolInfo(toolInfo);
 						
-						result.setUpdateDate(new Date());
+						result.setDateRefreshed(new Date());
 						results.add(result);
 						
 					}

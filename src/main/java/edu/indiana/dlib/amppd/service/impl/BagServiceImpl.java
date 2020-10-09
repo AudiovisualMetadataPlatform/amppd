@@ -60,7 +60,8 @@ public class BagServiceImpl implements BagService {
 			BagContent bcontent = new BagContent();
 			bcontent.setResultId(result.getId());
 			bcontent.setSubmitter(result.getSubmitter());
-			bcontent.setDate(result.getDate());
+			bcontent.setDateCreated(result.getCreateDate());
+			bcontent.setDateUpdated(result.getDate());
 			bcontent.setWorkflowId(result.getWorkflowId());
 			bcontent.setInvocationId(result.getInvocationId());
 			bcontent.setStepId(result.getStepId());
