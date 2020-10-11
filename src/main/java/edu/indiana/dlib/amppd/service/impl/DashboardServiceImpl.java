@@ -150,14 +150,17 @@ public class DashboardServiceImpl implements DashboardService{
 				
 				// Iterate through each step.  Each of which has a list of jobs (unless it is the initial input)				
 				for(InvocationStepDetails step : detail.getSteps()) {
-					// If we have no jobs, don't add a result here
+					// If we have no jobs, don't add a result here (this is the case for the input step of a workflow)
 					List<Job> jobs = step.getJobs();
 					if(jobs.isEmpty()) continue;
 					
-					// in case a step has no jobs (i.e. the input step of the workflow), 
-					// use step update timestamp for both the job create and update time
-					Date dateCreated = step.getUpdateTime();
-					Date dateUpdated = step.getUpdateTime();
+					// TODO confirm what Galaxy step/job timestamps represent
+					// Theoretically the timestamps of a step and its job should be the same; 
+					// however only the updated timestamp of a step is available in step detail; 
+					// and it differs from either the created or updated timestamp of the job;
+					// for now we use the created/updated timestamp of the job in the result
+					Date dateCreated = step.getUpdateTime(); // will be overwritten below
+					Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -270,10 +273,13 @@ public class DashboardServiceImpl implements DashboardService{
 						workflowDetails.put(detail.getWorkflowId(), workflowName);
 					}
 					
-					// in case a step has no jobs (i.e. the input step of the workflow), 
-					// use step update timestamp for both the job create and update time
-					Date dateCreated = step.getUpdateTime();
-					Date dateUpdated = step.getUpdateTime();
+					// TODO confirm what Galaxy step/job timestamps represent
+					// Theoretically the timestamps of a step and its job should be the same; 
+					// however only the updated timestamp of a step is available in step detail; 
+					// and it differs from either the created or updated timestamp of the job;
+					// for now we use the created/updated timestamp of the job in the result
+					Date dateCreated = step.getUpdateTime(); // will be overwritten below
+					Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
