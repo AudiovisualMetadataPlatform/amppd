@@ -52,16 +52,17 @@ public class MediaServiceImpl implements MediaService {
 
 	public static int SYMLINK_LENGTH = 16;
 
-	// Galaxy data types extended by AMPPD 
-	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"json", "segments"});
-	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music", "wav"});
+	// AMP extended Galaxy data types that need extension converted to standard media types viewable by browsers    
+	public static List<String> TYPE_TXT = Arrays.asList(new String[] {"vtt"});
+	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"segment", "transcript", "ner", "vocr", "shot", "face"});
+	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music"});
 	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
 
-	// file extensions used by dashboard output symlinks, corresponding to Galaxy data types
+	// corresponding standard media types to convert to for dashboard output symlinks
+	public static String FILE_EXT_TXT = "txt";
 	public static String FILE_EXT_JSON = "json";
 	public static String FILE_EXT_AUDIO = "wav";
 	public static String FILE_EXT_VIDEO = "mp4";
-	public static String FILE_EXT_DEFAULT = "dat";
 
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
@@ -201,22 +202,29 @@ public class MediaServiceImpl implements MediaService {
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputExtension(DashboardResult)
 	 */
 	public String getDashboardOutputExtension(DashboardResult dashboardResult) {
-		// We make the following assumptions based on current on Galaxy tool output data types and file types:
-		// all text outputs are of json format
-		// all audio outputs are of wav format
+		String extension = dashboardResult.getOutputType();
+		
+		// We make the following assumptions based on current Galaxy tool output data types and file types:
+		// all audio/music/speech outputs are of wav format
 		// all video outputs are of mp4 format
-		// We can refine the data types and the associated file extensions in the future as our use case grow
-		if (TYPE_JSON.contains(dashboardResult.getOutputType())) {
+		if (TYPE_TXT.contains(extension)) {
+			return FILE_EXT_TXT;				
+		}
+		if (TYPE_JSON.contains(extension)) {
 			return FILE_EXT_JSON;				
 		}
-		else if (TYPE_AUDIO.contains(dashboardResult.getOutputType())) {
+		if (TYPE_AUDIO.contains(extension)) {
 			return FILE_EXT_AUDIO;				
 		}
-		else if (TYPE_VIDEO.contains(dashboardResult.getOutputType())) {
+		if (TYPE_VIDEO.contains(extension)) {
 			return FILE_EXT_VIDEO;				
 		}
-		// the default extension
-		return FILE_EXT_DEFAULT;
+		
+		// TODO if more data types are added with extensions that need standardization, 
+		// logic should be added here to handle those
+		
+		// for data types already with standard extension (such as csv, pdf, png), just return as is
+		return extension;				
 	}
 	
 

@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.repository;
+	package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
 
@@ -13,6 +13,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -53,7 +54,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
     }
 
 	private List<DashboardResult> getDashboardRows(DashboardSearchQuery searchQuery){
-		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage()) + 1;
+		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage());
 		
 		
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -62,15 +63,30 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 
         // Setup predicates (where statements)
         List<Predicate> predicates = getPredicates(searchQuery, root, cb);
-        
-
+                
         if(!predicates.isEmpty()) {
         	Predicate[] preds = predicates.toArray(new Predicate[0]);
             cq.where(preds);
         }
         DashboardSortRule sort = searchQuery.getSortRule();
         if(sort!=null && !sort.getColumnName().isEmpty()) {
-        	if(sort.isOrderByDescending()) {
+        	if(sort.getColumnName().equals("outputFile")) {
+    			List<Order> orderList = new ArrayList<Order>();
+        		if(sort.isOrderByDescending()) {        			
+        			orderList.add(cb.desc(root.get("outputFile")));
+        			orderList.add(cb.asc(root.get("workflowStep")));
+            		orderList.add(cb.asc(root.get("workflowName")));
+        			orderList.add(cb.desc(root.get("date")));
+        		}
+            	else {
+            		orderList.add(cb.asc(root.get("outputFile")));
+            		orderList.add(cb.asc(root.get("workflowStep")));
+            		orderList.add(cb.asc(root.get("workflowName")));
+            		orderList.add(cb.desc(root.get("date")));
+            	}
+        		cq.orderBy(orderList);
+        	}
+        	else if(sort.isOrderByDescending()) {
                 cq.orderBy(cb.desc(root.get(sort.getColumnName())));
         	}
         	else {
@@ -136,7 +152,6 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
 			Predicate toDate = cb.lessThanOrEqualTo(root.get("date").as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
 			Predicate datePredicate = cb.and(fromDate, toDate);
             predicates.add(datePredicate);
-			
 		}
         
         if(searchQuery.getFilterByWorkflows().length>0) {
@@ -168,7 +183,11 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
             Predicate predicate = path.in((Object[])searchQuery.getFilterByStatuses());
             predicates.add(predicate);
         }
-                
+
+        if(searchQuery.isFilterByFinal()) {
+        	Predicate predicate = cb.equal(root.get("isFinal"), true);
+            predicates.add(predicate);
+        }
         return predicates;
 	}
 	

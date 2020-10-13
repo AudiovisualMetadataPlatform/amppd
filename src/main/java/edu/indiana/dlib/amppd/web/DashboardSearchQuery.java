@@ -1,10 +1,9 @@
 package edu.indiana.dlib.amppd.web;
 
-import lombok.Data;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 @Data
 public class DashboardSearchQuery {
@@ -19,4 +18,5 @@ public class DashboardSearchQuery {
 	private String[] filterBySearchTerm;	
 	private DashboardSortRule sortRule;
 	private List <Date> filterByDates;
+	private boolean filterByFinal;
 }

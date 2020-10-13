@@ -32,6 +32,7 @@ public abstract class Dataentity {
     private Long id;
     
     @NonNull
+    @Type(type="text")
     private String name;
     
     @NonNull

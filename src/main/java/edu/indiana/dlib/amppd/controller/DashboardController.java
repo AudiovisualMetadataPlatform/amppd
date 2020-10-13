@@ -8,8 +8,10 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.service.DashboardService;
@@ -31,6 +33,12 @@ public class DashboardController {
 	public DashboardResponse getDashboardResults(@RequestBody DashboardSearchQuery query){
 		log.info("Received request inside getDashboardResults");
 		return dashboardService.getDashboardResults(query);
+	}
+	
+	@PostMapping(path = "/dashboard/isfinal/{id}", consumes = "application/json", produces = "application/json")
+	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
+		log.info("Setting file to final: " + id);
+		return dashboardService.setResultIsFinal(id, isFinal);
 	}
 
 	@PostMapping("/dashboard/refresh")
