@@ -21,15 +21,13 @@ import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.BagService;
+import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class BagServiceImpl implements BagService {
-
-	@Autowired
-	private DashboardRepository dashboardRepository;
 
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
@@ -43,6 +41,9 @@ public class BagServiceImpl implements BagService {
 	@Autowired
 	private MediaService mediaService;
 		
+	@Autowired
+	private DashboardService dashboardService;
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.BagService.getPrimaryfileBag(Long)
 	 */
@@ -54,7 +55,7 @@ public class BagServiceImpl implements BagService {
 		pbag.setPrimaryfileName(primaryfile.getName());
 		List<BagContent> bcontents = new ArrayList<BagContent>();
 		pbag.setBagContents(bcontents);		
-		List<DashboardResult> results = dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId);
+		List<DashboardResult> results = dashboardService.getFinalDashboardResults(primaryfileId);
 		
 		for (DashboardResult result : results) {
 			BagContent bcontent = new BagContent();

@@ -65,9 +65,11 @@ public class DashboardServiceImpl implements DashboardService{
 	 * @return
 	 */
 	private boolean shouldRefreshJobState(GalaxyJobState jobState, Date lastUpdated) {
+		// if the result is recent within a threshold (ex 1 min) no need to update
 		if(lastUpdated.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES))>0) {
 			return false;
 		}
+		// otherwise update unless the status is COMPLETE or ERROR
 		switch(jobState) {
 			case COMPLETE:
 			case ERROR:
@@ -104,25 +106,40 @@ public class DashboardServiceImpl implements DashboardService{
 	}
 	
 	/**
-	 * Gets all records from the database and updates where appropriate
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.updateDashboardResultsAsNeeded(List<DashboardResult>)
 	 */
-	public DashboardResponse getDashboardResults(DashboardSearchQuery query){
-		//List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);
-		
-		//if(results!=null) {
-		//	return results;
-		//}
-		DashboardResponse response = dashboardRepository.searchResults(query);
-		
-		for(DashboardResult result : response.getRows()) {
+	public List<DashboardResult> updateDashboardResultsAsNeeded(List<DashboardResult> dashboardResults) {
+		for(DashboardResult result : dashboardResults) {
 			if(shouldRefreshJobState(result.getStatus(), result.getDateRefreshed())) {
 				result = updateDashboardResult(result);
 			}
 		}
+		return dashboardResults;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.getDashboardResults(DashboardSearchQuery)
+	 */
+	public DashboardResponse getDashboardResults(DashboardSearchQuery query){
+		//List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);		
+		//if(results!=null) {
+		//	return results;
+		//}
+		
+		DashboardResponse response = dashboardRepository.searchResults(query);
+		updateDashboardResultsAsNeeded(response.getRows());
 		return response;
 	}
+	
 	/**
-	 * Adds a record to galaxy
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.getFinalDashboardResults(Long)
+	 */
+	public List<DashboardResult> getFinalDashboardResults(Long primaryfileId) {
+		return updateDashboardResultsAsNeeded(dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.addDashboardResult(String, String, long, String)
 	 */
 	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId) 
 	{
@@ -225,8 +242,7 @@ public class DashboardServiceImpl implements DashboardService{
 	}
 	
 	/**
-	 * This method is to refresh all galaxy jobs data in the dashbord table.  Only needed
-	 * to prevent a cold start
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshAllDashboardResults()
 	 */
 	public List<DashboardResult> refreshAllDashboardResults(){
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
@@ -343,6 +359,9 @@ public class DashboardServiceImpl implements DashboardService{
 		return results;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.setResultIsFinal(long, boolean)
+	 */
 	public boolean setResultIsFinal(long dashboardResultId, boolean isFinal) {
 		
 		Optional<DashboardResult> dashboardResultOpt  = dashboardRepository.findById(dashboardResultId);
