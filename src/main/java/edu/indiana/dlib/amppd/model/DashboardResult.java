@@ -51,7 +51,9 @@ public class DashboardResult {
 
 	private String submitter;
 	private GalaxyJobState status;
-	private Date date;
-	private Date updateDate;
+	private Date dateCreated;	// job created timestamp from Galaxy job details query
+	private Date dateUpdated;	// job updated timestamp from Galaxy job details query
+	
+	private Date dateRefreshed;	// timestamp of this record last being refreshed from Galaxy query result
 	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
 }

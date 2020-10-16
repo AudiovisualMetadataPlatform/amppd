@@ -65,9 +65,11 @@ public class DashboardServiceImpl implements DashboardService{
 	 * @return
 	 */
 	private boolean shouldRefreshJobState(GalaxyJobState jobState, Date lastUpdated) {
+		// if the result is recent within a threshold (ex 1 min) no need to update
 		if(lastUpdated.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES))>0) {
 			return false;
 		}
+		// otherwise update unless the status is COMPLETE or ERROR
 		switch(jobState) {
 			case COMPLETE:
 			case ERROR:
@@ -96,7 +98,7 @@ public class DashboardServiceImpl implements DashboardService{
 			log.info("Unable to update the status of invocation " + result.getInvocationId() + " from Galaxy");
 		}
 		
-		result.setUpdateDate(new Date());
+		result.setDateRefreshed(new Date());
 		
 		dashboardRepository.save(result);
 		
@@ -104,25 +106,40 @@ public class DashboardServiceImpl implements DashboardService{
 	}
 	
 	/**
-	 * Gets all records from the database and updates where appropriate
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.updateDashboardResultsAsNeeded(List<DashboardResult>)
 	 */
-	public DashboardResponse getDashboardResults(DashboardSearchQuery query){
-		//List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);
-		
-		//if(results!=null) {
-		//	return results;
-		//}
-		DashboardResponse response = dashboardRepository.searchResults(query);
-		
-		for(DashboardResult result : response.getRows()) {
-			if(shouldRefreshJobState(result.getStatus(), result.getUpdateDate())) {
+	public List<DashboardResult> updateDashboardResultsAsNeeded(List<DashboardResult> dashboardResults) {
+		for(DashboardResult result : dashboardResults) {
+			if(shouldRefreshJobState(result.getStatus(), result.getDateRefreshed())) {
 				result = updateDashboardResult(result);
 			}
 		}
+		return dashboardResults;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.getDashboardResults(DashboardSearchQuery)
+	 */
+	public DashboardResponse getDashboardResults(DashboardSearchQuery query){
+		//List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);		
+		//if(results!=null) {
+		//	return results;
+		//}
+		
+		DashboardResponse response = dashboardRepository.searchResults(query);
+		updateDashboardResultsAsNeeded(response.getRows());
 		return response;
 	}
+	
 	/**
-	 * Adds a record to galaxy
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.getFinalDashboardResults(Long)
+	 */
+	public List<DashboardResult> getFinalDashboardResults(Long primaryfileId) {
+		return updateDashboardResultsAsNeeded(dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.addDashboardResult(String, String, long, String)
 	 */
 	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId) 
 	{
@@ -150,11 +167,17 @@ public class DashboardServiceImpl implements DashboardService{
 				
 				// Iterate through each step.  Each of which has a list of jobs (unless it is the initial input)				
 				for(InvocationStepDetails step : detail.getSteps()) {
-					// If we have no jobs, don't add a result here
+					// If we have no jobs, don't add a result here (this is the case for the input step of a workflow)
 					List<Job> jobs = step.getJobs();
 					if(jobs.isEmpty()) continue;
 					
-					Date date = step.getUpdateTime();
+					// TODO confirm what Galaxy step/job timestamps represent
+					// Theoretically the timestamps of a step and its job should be the same; 
+					// however only the updated timestamp of a step is available in step detail; 
+					// and it differs from either the created or updated timestamp of the job;
+					// for now we use the created/updated timestamp of the job in the result
+					Date dateCreated = step.getUpdateTime(); // will be overwritten below
+					Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -163,9 +186,10 @@ public class DashboardServiceImpl implements DashboardService{
 					for(Job job : jobs) {
 						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
-						date = job.getCreated();
+						dateCreated = job.getCreated();
+				 		dateUpdated = job.getUpdated();
 						status = getJobStatus(job.getState());
-						String tinfo = getMgmToolInfo(job.getToolId(), date);
+						String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
 						String divider = toolInfo == "" ? "" : ", ";
 						toolInfo += tinfo == null ? "" : divider + tinfo;
 					}
@@ -185,7 +209,8 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputId(output.getId());
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
-						result.setDate(date);
+						result.setDateCreated(dateCreated);
+						result.setDateUpdated(dateUpdated);
 						result.setStatus(status);
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(invocation.getId());
@@ -200,7 +225,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputPath(dataset.getFileName());
 						result.setToolInfo(toolInfo);
 						
-						result.setUpdateDate(new Date());
+						result.setDateRefreshed(new Date());
 						results.add(result);
 					}
 				}
@@ -217,8 +242,7 @@ public class DashboardServiceImpl implements DashboardService{
 	}
 	
 	/**
-	 * This method is to refresh all galaxy jobs data in the dashbord table.  Only needed
-	 * to prevent a cold start
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshAllDashboardResults()
 	 */
 	public List<DashboardResult> refreshAllDashboardResults(){
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
@@ -265,7 +289,13 @@ public class DashboardServiceImpl implements DashboardService{
 						workflowDetails.put(detail.getWorkflowId(), workflowName);
 					}
 					
-					Date date = step.getUpdateTime();
+					// TODO confirm what Galaxy step/job timestamps represent
+					// Theoretically the timestamps of a step and its job should be the same; 
+					// however only the updated timestamp of a step is available in step detail; 
+					// and it differs from either the created or updated timestamp of the job;
+					// for now we use the created/updated timestamp of the job in the result
+					Date dateCreated = step.getUpdateTime(); // will be overwritten below
+					Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 					
 					// It's possible to have more than one job per step, although we don't have any examples at the moment
 					GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -274,9 +304,10 @@ public class DashboardServiceImpl implements DashboardService{
 					for(Job job : jobs) {
 						// Concatenate the job names and tool info in case we have more than one. 
 						jobName = jobName + job.getToolId() + " ";
-						date = job.getCreated();
+						dateCreated = job.getCreated();
+				 		dateUpdated = job.getUpdated();
 						status = getJobStatus(job.getState());
-						String tinfo = getMgmToolInfo(job.getToolId(), date);
+						String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
 						String divider = toolInfo == "" ? "" : ", ";
 						toolInfo += tinfo == null ? "" : divider + tinfo;
 					}
@@ -296,7 +327,8 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputId(output.getId());
 						result.setWorkflowStep(jobName);
 						result.setSubmitter(galaxyPropertyConfig.getUsername());
-						result.setDate(date);
+						result.setDateCreated(dateCreated);
+						result.setDateUpdated(dateUpdated);
 						result.setStatus(status);
 						result.setWorkflowName(workflowName);
 						result.setInvocationId(detail.getId());
@@ -311,7 +343,7 @@ public class DashboardServiceImpl implements DashboardService{
 						result.setOutputPath(dataset.getFileName());
 						result.setToolInfo(toolInfo);
 						
-						result.setUpdateDate(new Date());
+						result.setDateRefreshed(new Date());
 						results.add(result);
 						
 					}
@@ -327,6 +359,9 @@ public class DashboardServiceImpl implements DashboardService{
 		return results;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.setResultIsFinal(long, boolean)
+	 */
 	public boolean setResultIsFinal(long dashboardResultId, boolean isFinal) {
 		
 		Optional<DashboardResult> dashboardResultOpt  = dashboardRepository.findById(dashboardResultId);
