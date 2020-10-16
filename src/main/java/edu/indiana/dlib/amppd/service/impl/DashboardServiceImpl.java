@@ -360,6 +360,21 @@ public class DashboardServiceImpl implements DashboardService{
 	}
 
 	/**
+	 * 
+	 */
+	public List<DashboardResult> refreshDashboardResults() {
+		List<Primaryfile> primaryfiles = primaryfileRepository.findByHistoryIdNotNull();
+		
+		// query Galaxy invocation details per primaryfile instead of retrieving all, in order to avoid timeout issue in Galaxy
+		for (Primaryfile primaryfile : primaryfiles) {
+			List<InvocationDetails> details = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), null, primaryfile.getHistoryId());
+			
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DashboardService.setResultIsFinal(long, boolean)
 	 */
 	public boolean setResultIsFinal(long dashboardResultId, boolean isFinal) {
