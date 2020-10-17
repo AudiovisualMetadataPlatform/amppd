@@ -15,5 +15,5 @@ public interface DashboardRepository extends PagingAndSortingRepository<Dashboar
 		
 	List<DashboardResult> findByPrimaryfileId(Long primaryfileId);
 	List<DashboardResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
-
+	List<DashboardResult> findByOutputId(String outputId);
 }

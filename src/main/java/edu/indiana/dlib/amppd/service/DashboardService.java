@@ -27,16 +27,7 @@ public interface DashboardService {
 	 * @param primaryfileId
 	 * @param historyId
 	 */
-	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId);
-	
-	/**
-	 * Update the specified dashboardResults as needed by retrieving corresponding information from Galaxy.
-	 * A DashboardResult needs update if it's existing status could still change (i.e. not COMPLETE or ERROR)
-	 * and its last update timestamp is older than the refresh rate threshold.
-	 * @param dashboardResults the specified list of dashboardResults
-	 * @return the list of updated dashboardResults
-	 */
-	public List<DashboardResult> updateDashboardResultsAsNeeded(List<DashboardResult> dashboardResults);
+	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId);	
 	
 	/**
 	 * Refreshes the database. Should only be used for initial population of database or when new columns are added. 
