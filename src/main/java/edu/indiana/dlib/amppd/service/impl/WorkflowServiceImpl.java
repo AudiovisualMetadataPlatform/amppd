@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -27,7 +31,11 @@ public class WorkflowServiceImpl implements WorkflowService {
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
-		
+	
+	// use hashmap to save workflow names to avoid frequent query request to Galaxy when refreshing workflow results
+	// since workflow names don't change much (not more often than app restart), we initialize it once at the beginning 
+	private Map<String, String> workflowNames = new HashMap<String, String>();
+			
 	/**
 	 * Initialize the WorkflowServiceImpl bean.
 	 */
@@ -48,5 +56,35 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		return null;
 	}
+		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflowName(String)
+	 */
+	public String getWorkflowName(String workflowId) {
+		String workflowName = workflowNames.get(workflowId);		
+		if (workflowName != null) return workflowName;
+		
+		try {
+			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+			if (workflow != null) {
+				workflowName = workflow.getName();
+			}
+			else {
+				// a workflow may not be found in Galaxy if its ID is not a StoredWorkflow ID;
+				// in this case, use the ID itself as a temporary solution.
+				// TODO this issue may be resolved when upgrading to Galaxy 20.*
+				workflowName = workflowId;
+			}
+		}
+		catch(Exception ex) {
+			workflowName = workflowId;
+			String msg = "Unable to retrieve workflows from Galaxy.";
+			log.error(msg);
+		}
+		
+		workflowNames.put(workflowId, workflowName);
+		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
+		return workflowName;
+	}	
 	
 }

@@ -61,66 +61,53 @@ public class DashboardServiceImpl implements DashboardService{
 	private int REFRESH_MINUTES;
 	private String CACHE_KEY ="DashboardResults";
 	
-	private Map<String, String> workflowNames;
 	
 	/**
-	 * Check to see whether or not we should get job status from galaxy
-	 * @param jobState Current job state
-	 * @param lastUpdated Date the database was last updated
-	 * @return
+	 * Return true if the specified dateRefreshed is recent (i.e. within a predefined period); false otherwise.
 	 */
-	private boolean shouldRefreshJobState(GalaxyJobState jobState, Date lastUpdated) {
-		// if the result is recent within a threshold (ex 1 min) no need to update
-		if(lastUpdated.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES))>0) {
-			return false;
-		}
-		// otherwise update unless the status is COMPLETE or ERROR
-		switch(jobState) {
-			case COMPLETE:
-			case ERROR:
-				return false;
-			default:
-				return true;
-		}
+	private boolean isDateRefreshedRecent(Date dateRefreshed) {		
+		// TODO This method is used by both refreshing the result status and refreshing the whole table,
+		// for the former, the refresh rate is based on how long a Galaxy job takes to complete;
+		// for the latter, the refresh rate is based on how long it takes to refresh the whole table;
+		// if the time differs a lot we may need to define the thresholds separately
+		return dateRefreshed != null && dateRefreshed.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES)) > 0;
+	}
+		
+	/**
+	 * Return true if we should refresh the status of the specified DashboardResult from job status in galaxy.
+	 * A DashboardResult needs refresh if it's existing status could still change (i.e. not COMPLETE or ERROR)
+	 * and its last refreshed timestamp is older than the refresh rate threshold.
+	 */
+	private boolean shouldRefreshResultStatus(DashboardResult result) {
+		return !isDateRefreshedRecent(result.getDateRefreshed()) && result.getStatus() != GalaxyJobState.COMPLETE && result.getStatus() != GalaxyJobState.ERROR;
 	}
 	
 	/**
-	 * Updates job status from galaxy
-	 * @param result
-	 * @return
+	 * Refresh the status of the specified DashboardResult from job status in galaxy.
 	 */
-	private DashboardResult refreshJobState(DashboardResult result) {
+	private DashboardResult refreshResultStatus(DashboardResult result) {
 		try {
 			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 			String state = ds.getState();
-			
 			GalaxyJobState status = getJobStatus(state);
-			
 			result.setStatus(status);
-			
 		}
 		catch(Exception ex) {
 			log.info("Unable to update the status of invocation " + result.getInvocationId() + " from Galaxy");
 		}
 		
-		result.setDateRefreshed(new Date());
-		
-		dashboardRepository.save(result);
-		
+		result.setDateRefreshed(new Date());		
+		dashboardRepository.save(result);		
 		return result;		
 	}
 			
 	/**
-	 * Update the specified dashboardResults as needed by retrieving corresponding information from Galaxy.
-	 * A DashboardResult needs update if it's existing status could still change (i.e. not COMPLETE or ERROR)
-	 * and its last update timestamp is older than the refresh rate threshold.
-	 * @param dashboardResults the specified list of dashboardResults
-	 * @return the list of updated dashboardResults
+	 * Refresh status of the specified dashboardResults as needed by retrieving corresponding job status from Galaxy.
 	 */
-	private List<DashboardResult> refreshJobStatesAsNeeded(List<DashboardResult> dashboardResults) {
+	private List<DashboardResult> refreshResultsStatusAsNeeded(List<DashboardResult> dashboardResults) {
 		for(DashboardResult result : dashboardResults) {
-			if(shouldRefreshJobState(result.getStatus(), result.getDateRefreshed())) {
-				result = refreshJobState(result);
+			if(shouldRefreshResultStatus(result)) {
+				result = refreshResultStatus(result);
 			}
 		}
 		return dashboardResults;
@@ -136,7 +123,7 @@ public class DashboardServiceImpl implements DashboardService{
 		//}
 		
 		DashboardResponse response = dashboardRepository.searchResults(query);
-		refreshJobStatesAsNeeded(response.getRows());
+		refreshResultsStatusAsNeeded(response.getRows());
 		return response;
 	}
 	
@@ -144,7 +131,7 @@ public class DashboardServiceImpl implements DashboardService{
 	 * @see edu.indiana.dlib.amppd.service.DashboardService.getFinalDashboardResults(Long)
 	 */
 	public List<DashboardResult> getFinalDashboardResults(Long primaryfileId) {
-		return refreshJobStatesAsNeeded(dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+		return refreshResultsStatusAsNeeded(dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
 	}
 	
 	/**
@@ -252,25 +239,25 @@ public class DashboardServiceImpl implements DashboardService{
 	/**
 	 * 
 	 */
-	@Transactional
 	public List<DashboardResult> refreshDashboardResults() {				
-		// initialize the workflow names map to save time from querying Galaxy for this
-		workflowNames = new HashMap<String, String>();
-		
+		List<DashboardResult> allResults = new ArrayList<DashboardResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByHistoryIdNotNull();
 
 		// process Galaxy invocation details per primaryfile instead of retrieving all, in order to avoid timeout issue in Galaxy
 		for (Primaryfile primaryfile : primaryfiles) {
+			// skip the primaryfile if all of its results have been recently refreshed;
+			// this allows rerun of the refresh to continue with unfinished primaryfiles in case of a failure
+			Date oldestDateRefreshed = this.dashboardRepository.findOldestDateRefreshedByPrimaryfileId(primaryfile.getId());
+			if (isDateRefreshedRecent(oldestDateRefreshed)) continue;
+			
 			List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), null, primaryfile.getHistoryId());
 			for (InvocationDetails invocation : invocations) {
-				List<DashboardResult> results = generateDashboardResult(primaryfile, invocation);
+				List<DashboardResult> results = refreshDashboardResults(invocation, null, primaryfile);
+				allResults.addAll(results);
 			}
 		}
-		
-		// since we are refreshing all workflow results,  make sure the table is empty before adding refreshed results 
-		dashboardRepository.deleteAll();
-		
-		return null;
+				
+		return allResults;
 	}
 	
 	/**
@@ -394,33 +381,31 @@ public class DashboardServiceImpl implements DashboardService{
 	/**
 	 * 
 	 */
-	private List<DashboardResult> generateDashboardResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
+	private List<DashboardResult> refreshDashboardResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
+		
+		// if the passed-in primaryfile is null, get primaryfile info by its ID from the passed-in invocation
+		if (primaryfile == null) {
+			// Check to see if we have an associated primary file.
+			List<Primaryfile> files = primaryfileRepository.findByHistoryId(invocation.getHistoryId());
+			
+			// If not, skip this invocation as it is not invoked by AMP
+			if (files.isEmpty()) return results;
+			
+			// Grab the first primary file, although should only be one.
+			primaryfile = files.get(0);	
+		}
+
+		// get workflow name either from the passed-in workflow, or retrieve it by its ID from the passed-in invocation 
+		String workflowName = workflow != null ? workflow.getName() : workflowService.getWorkflowName(invocation.getWorkflowId());
+		
 		
 		// Iterate through each step, each of which has a list of jobs (unless it is the initial input)				
 		for(InvocationStepDetails step : invocation.getSteps()) {
 			// If we have no jobs, don't add a result here
 			List<Job> jobs = step.getJobs();
-			if(jobs.isEmpty()) continue;
-			
-			String workflowName = "";
-			if (workflow != null) {
-				workflowName = workflow.getName();
-			}
-			else {
-				try {
-					WorkflowDetails workflow = workflowService.getWorkflowsClient().showWorkflowInstance(invocation.getWorkflowId());
-					if(workflow!=null) {
-						workflowName = workflow.getName();
-					}
-				}
-				catch(Exception ex) {
-					String msg = "Unable to retrieve workflows from Galaxy.";
-					log.error(msg);
-				}
-				workflowDetails.put(invocation.getWorkflowId(), workflowName);
-			}
-			
+			if (jobs.isEmpty()) continue;
+						
 			// TODO confirm what Galaxy step/job timestamps represent
 			// Theoretically the timestamps of a step and its job should be the same; 
 			// however only the updated timestamp of a step is available in step invocation; 
@@ -433,7 +418,7 @@ public class DashboardServiceImpl implements DashboardService{
 			GalaxyJobState status = GalaxyJobState.UNKNOWN;
 			String stepLabel = "";
 			String toolInfo = "";
-			for(Job job : jobs) {
+			for (Job job : jobs) {
 				// Concatenate the job names and tool info in case we have more than one. 
 				stepLabel = stepLabel + job.getToolId() + " ";
 				dateCreated = job.getCreated();
@@ -480,7 +465,7 @@ public class DashboardServiceImpl implements DashboardService{
 						}
 					}
 				}
-				
+								
 				result.setPrimaryfileId(primaryfile.getId());
 				result.setSourceFilename(primaryfile.getName());
 				result.setSourceItem(primaryfile.getItem().getName());
@@ -512,7 +497,7 @@ public class DashboardServiceImpl implements DashboardService{
 
 		return results;
 	}
-		
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DashboardService.setResultIsFinal(long, boolean)
 	 */

@@ -11,15 +11,25 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 public interface WorkflowService {
 
 	/**
-	 * Return the WorkflowsClient instance.
+	 * Get the WorkflowsClient instance.
 	 */
 	public WorkflowsClient getWorkflowsClient();
 	
 	/**
-	 * Return the workflow with the given name.
+	 * Get the workflow with the specified name.
 	 * @param workflowName the name of the specified workflow
 	 * @return the workflow requested
 	 */
 	public Workflow getWorkflow(String workflowName);
+	
+	/**
+	 * Get the name of the specified workflow and store it in a local cache: 
+	 * first, search in the local cache;
+	 * if not found. query Galaxy;
+	 * if still not found, use the ID as the name.
+	 * @param workflowId the ID of the specified workflow
+	 * @return the workflow name
+	 */
+	public String getWorkflowName(String workflowId);
 	
 }
