@@ -32,8 +32,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Getter
 	private WorkflowsClient workflowsClient;
 	
-	// use hashmap to save workflow names to avoid frequent query request to Galaxy when refreshing workflow results
-	// since workflow names don't change much (not more often than app restart), we initialize it once at the beginning 
+	// use hashmap to cache workflow names to avoid frequent query request to Galaxy when refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
 			
 	/**
@@ -75,16 +74,24 @@ public class WorkflowServiceImpl implements WorkflowService {
 				// TODO this issue may be resolved when upgrading to Galaxy 20.*
 				workflowName = workflowId;
 			}
+			workflowNames.put(workflowId, workflowName);
+			log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		}
-		catch(Exception ex) {
+		catch(Exception e) {
+			// in case of exception, use workflow ID as name, but don't cache it
 			workflowName = workflowId;
-			String msg = "Unable to retrieve workflows from Galaxy.";
-			log.error(msg);
+			log.error("Failed to get name for workflow " + workflowId + " from Galaxy.");
 		}
 		
-		workflowNames.put(workflowId, workflowName);
-		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		return workflowName;
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowNamesCache()
+	 */
+	public void clearWorkflowNamesCache() {
+		workflowNames.clear();
+		log.info("Workflow names cache has been cleared up.");
+	}
 	
 }

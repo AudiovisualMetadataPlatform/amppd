@@ -42,8 +42,15 @@ public class DashboardController {
 	}
 
 	@PostMapping("/dashboard/refresh")
-	public void refreshDashboardResults(){
-		dashboardService.refreshAllDashboardResults();
+	public void refreshDashboardResults(@RequestParam(required = false) Boolean lumpsum) {
+		if (lumpsum != null && lumpsum) {
+			log.info("Refreshing DashboardResults in a lump sum manner ... ");
+			dashboardService.refreshDashboardResultsLumpsum();
+		}
+		else {
+			log.info("Refreshing DashboardResults iteratively per primaryfile ... ");
+			dashboardService.refreshDashboardResultsIterative();
+		}
 	}
 
 }

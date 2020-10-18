@@ -32,4 +32,9 @@ public interface WorkflowService {
 	 */
 	public String getWorkflowName(String workflowId);
 	
+	/**
+	 * Clear up the workflow names cache to its initial state. 
+	 */
+	public void clearWorkflowNamesCache();
+	
 }

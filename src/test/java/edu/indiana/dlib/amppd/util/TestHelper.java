@@ -277,7 +277,7 @@ public class TestHelper {
     	
 		List<DashboardResult> results = dashboardRepository.findByPrimaryfileId(primaryfile.getId());
 		if (!results.iterator().hasNext()) {
-			dashboardService.addDashboardResult(workflow.getId(), workflow.getName(), primaryfile.getId(), primaryfile.getHistoryId());
+			dashboardService.addDashboardResults(invocation, workflow, primaryfile);
 			results = dashboardRepository.findByPrimaryfileId(primaryfile.getId());
 		}
 			
