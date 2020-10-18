@@ -50,5 +50,27 @@ public class WorkflowServiceTests {
     	Assert.assertNull(workflowRetrieved);
     }
 
-
+    @Test
+    public void shouldGetStoredWorkflowName() {
+    	workflowService.clearWorkflowNamesCache();
+    	String name = workflowService.getWorkflowName(workflow.getId());
+    	Assert.assertEquals(name, workflow.getName());  	
+    	Assert.assertEquals(workflowService.workflowNamesCacheSize(), (Integer)1);  	
+    }
+    
+    @Test
+    public void shouldGetNonStoredWorkflowIdAsName() {
+    	workflowService.clearWorkflowNamesCache();
+    	String id = "nonstoredworkflowid";
+    	
+    	// first call to get name, cache size increased to 1
+    	String name = workflowService.getWorkflowName(id);
+    	Assert.assertEquals(name, id);
+    	Assert.assertEquals(workflowService.workflowNamesCacheSize(), (Integer)1);
+    	
+    	// second call to get name for the same id, cache is hit and size remains 1
+    	workflowService.getWorkflowName(id);
+    	Assert.assertEquals(workflowService.workflowNamesCacheSize(), (Integer)1);
+    }
+    
 }

@@ -37,4 +37,9 @@ public interface WorkflowService {
 	 */
 	public void clearWorkflowNamesCache();
 	
+	/**
+	 * Returns the size of the workflow names cache. 
+	 */
+	public Integer workflowNamesCacheSize();
+	
 }

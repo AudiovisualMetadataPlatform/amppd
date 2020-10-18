@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
@@ -20,8 +18,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.model.DashboardResult;
@@ -33,7 +29,6 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.DashboardService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
-import edu.indiana.dlib.amppd.util.CacheHelper;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
@@ -56,7 +51,6 @@ public class DashboardServiceImpl implements DashboardService {
 	@Autowired
 	private DashboardRepository dashboardRepository;
 
-	// TODO do we still need cache?
 //	@Autowired
 //	private CacheHelper cache;
 //	private String CACHE_KEY ="DashboardResults";
@@ -109,7 +103,7 @@ public class DashboardServiceImpl implements DashboardService {
 	 */
 	private List<DashboardResult> refreshResultsStatusAsNeeded(List<DashboardResult> dashboardResults) {
 		for(DashboardResult result : dashboardResults) {
-			if(shouldRefreshResultStatus(result)) {
+			if (shouldRefreshResultStatus(result)) {
 				result = refreshResultStatus(result);
 			}
 		}
@@ -136,125 +130,34 @@ public class DashboardServiceImpl implements DashboardService {
 	public List<DashboardResult> getFinalDashboardResults(Long primaryfileId) {
 		return refreshResultsStatusAsNeeded(dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
 	}
-	
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.DashboardService.addDashboardResult(String, String, long, String)
-//	 */
-//	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId) 
-//	{
-//		List<DashboardResult> results = new ArrayList<DashboardResult>();
-//		
-//		try {
-//			List<Invocation> invocations = jobService.listJobs(workflowId, primaryfileId);
-//			
-//			if(invocations.isEmpty()) return;
-//			
-//			for(Invocation invocation : invocations) {
-//				if(dashboardRepository.invocationExists(invocation.getId())) {
-//					continue;
-//				}
-//				InvocationDetails detail = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflowId, invocation.getId(), true);
-//				
-//				// Check to see if we have an associated primary file.
-//				List<Primaryfile> files = primaryfileRepository.findByHistoryId(detail.getHistoryId());
-//				
-//				// If not, skip this invocation
-//				if(files.isEmpty()) continue;
-//				
-//				// Grab the first primary file, although should only be one.
-//				Primaryfile thisFile = files.get(0);
-//				
-//				// Iterate through each step.  Each of which has a list of jobs (unless it is the initial input)				
-//				for(InvocationStepDetails step : detail.getSteps()) {
-//					// If we have no jobs, don't add a result here (this is the case for the input step of a workflow)
-//					List<Job> jobs = step.getJobs();
-//					if(jobs.isEmpty()) continue;
-//					
-//					// TODO confirm what Galaxy step/job timestamps represent
-//					// Theoretically the timestamps of a step and its job should be the same; 
-//					// however only the updated timestamp of a step is available in step detail; 
-//					// and it differs from either the created or updated timestamp of the job;
-//					// for now we use the created/updated timestamp of the job in the result
-//					Date dateCreated = step.getUpdateTime(); // will be overwritten below
-//					Date dateUpdated = step.getUpdateTime(); // will be overwritten below
-//					
-//					// It's possible to have more than one job per step, although we don't have any examples at the moment
-//					GalaxyJobState status = GalaxyJobState.UNKNOWN;
-//					String jobName = "";
-//					String toolInfo = "";
-//					for(Job job : jobs) {
-//						// Concatenate the job names and tool info in case we have more than one. 
-//						jobName = jobName + job.getToolId() + " ";
-//						dateCreated = job.getCreated();
-//				 		dateUpdated = job.getUpdated();
-//						status = getJobStatus(job.getState());
-//						String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
-//						String divider = toolInfo == "" ? "" : ", ";
-//						toolInfo += tinfo == null ? "" : divider + tinfo;
-//					}
-//
-//					// For each output, create a record.
-//					Map<String, JobInputOutput> outputs = step.getOutputs();
-//					for(String key : outputs.keySet()) {
-//						JobInputOutput output = outputs.get(key);
-//						Dataset dataset = jobService.showJobStepOutput(detail.getWorkflowId(), detail.getId(), step.getId(), output.getId());
-//						
-//						// Show only relevant output
-//						if(dataset!=null && !dataset.getVisible()) continue;
-//						
-//						DashboardResult result = new DashboardResult();
-//						result.setHistoryId(historyId);
-//						result.setWorkflowId(workflowId);
-//						result.setOutputId(output.getId());
-//						result.setWorkflowStep(jobName);
-//						result.setSubmitter(galaxyPropertyConfig.getUsername());
-//						result.setDateCreated(dateCreated);
-//						result.setDateUpdated(dateUpdated);
-//						result.setStatus(status);
-//						result.setWorkflowName(workflowName);
-//						result.setInvocationId(invocation.getId());
-//						result.setStepId(step.getId());
-//						
-//						result.setPrimaryfileId(thisFile.getId());
-//						result.setSourceFilename(thisFile.getName());
-//						result.setSourceItem(thisFile.getItem().getName());
-//												
-//						result.setOutputFile(key);
-//						result.setOutputType(dataset.getFileExt());
-//						result.setOutputPath(dataset.getFileName());
-//						result.setToolInfo(toolInfo);
-//						
-//						result.setDateRefreshed(new Date());
-//						results.add(result);
-//					}
-//				}
-//					
-//			}
-//			
-//			dashboardRepository.saveAll(results);
-//			
-//			// TODO do we still need cache?
-//			// Expunge the cache
-//			cache.remove(CACHE_KEY);
-//		}
-//		catch(Exception ex) {
-//			log.error("Error getting dashboard results", ex);
-//		}
-//	}
-	
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DashboardService.addDashboardResults(Invocation, Workflow, Primaryfile)
 	 */
 	public List<DashboardResult> addDashboardResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
-		// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs, 
-		// instance, and we need to retrieve invocation details for the workflowOutputs, because even though 
-		// workflowOutputs contains most info we need including steps, it doesn't include details of the steps
-		InvocationDetails invocationDetails = invocation instanceof InvocationDetails ?
+		List<DashboardResult> results = new ArrayList<DashboardResult>();
+
+		try {
+			// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs 
+			// instance, and we need to retrieve invocation details for the workflowOutputs, because even though 
+			// workflowOutputs contains most info we need including steps, it doesn't include details of the steps
+			InvocationDetails invocationDetails = invocation instanceof InvocationDetails ?
 				(InvocationDetails)invocation : 
 				(InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
-		
-		// add results to the table using info from the invocation
-		List<DashboardResult> results = refreshDashboardResults(invocationDetails, workflow, primaryfile);
+
+			// add results to the table using info from the invocation
+			results = refreshDashboardResults(invocationDetails, workflow, primaryfile);
+			log.info("Successfully added results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());				
+		}
+		catch (Exception e) {
+			// TODO should we rethrow exception or not 
+			// if we don't rethrow the exception, results aren't added but there is no notification
+			// if we do, users will see error even though jobs are submitted in success
+			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());
+		}
+
+//		// Expunge the cache
+//		cache.remove(CACHE_KEY);
 		return results;
 	}
 	
@@ -269,7 +172,7 @@ public class DashboardServiceImpl implements DashboardService {
 		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
 		workflowService.clearWorkflowNamesCache();
 		
-		// process Galaxy invocation details per primaryfile instead of retrieving all, in order to avoid timeout issue in Galaxy
+		// process Galaxy invocation details per primaryfile instead of retrieving all at once, in order to avoid timeout issue in Galaxy
 		for (Primaryfile primaryfile : primaryfiles) {
 			try {
 				// skip the primaryfile if all of its results have been recently refreshed;
@@ -289,7 +192,7 @@ public class DashboardServiceImpl implements DashboardService {
 				}
 			}
 			catch (Exception e) {
-				// continue with the rest even if we fail on one primaryfile,
+				// continue with the rest even if we fail on some primaryfile,
 				// as we can rerun the refresh to continue on the failed ones
 				log.error("Failed to refresh results for primaryfile " + primaryfile.getId());
 			}
@@ -319,14 +222,13 @@ public class DashboardServiceImpl implements DashboardService {
 				log.info("Successfully refreshed results for invocation " + invocation.getId());				
 			}
 			catch(Exception e) {
-				// continue with the rest even if we fail on one invocation,
+				// continue with the rest even if we fail on some invocation,
 				// as we can rerun the refresh to continue on the failed ones
 				log.error("Failed to refresh results for invocation " + invocation.getId(), e);
 			}				
 		}
 
-		// TODO do we still need cache?
-		//		cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
+		// cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
 
 		log.info("Successfully refreshed " + allResults.size() + " DashboardResults in lump sum.");
 		return allResults;
@@ -335,7 +237,7 @@ public class DashboardServiceImpl implements DashboardService {
 	/**
 	 * Refresh DashboardResults for the given invocation;
 	 * if the workflow for the invocation is provided, use the workflow name from that;
-	 * if the primaryfile for the invocation is provided, use the associated entity names from that;
+	 * if the primaryfile for the invocation is provided, use the associated entity names from that.
 	 */
 	private List<DashboardResult> refreshDashboardResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<DashboardResult> results = new ArrayList<DashboardResult>();
@@ -353,7 +255,7 @@ public class DashboardServiceImpl implements DashboardService {
 			
 			// if we find more than one, then there is some error in the table
 			if (primaryfiles.size() > 1) {
-				log.warn("Found " + primaryfiles.size() + " primaryfiles with the historyId " + invocation.getHistoryId());
+				log.warn("Error in Primaryfile table: Found " + primaryfiles.size() + " primaryfiles with historyId " + invocation.getHistoryId());
 			}
 		}
 
@@ -362,7 +264,7 @@ public class DashboardServiceImpl implements DashboardService {
 		
 		// Iterate through each step, each of which has a list of jobs (unless it is the initial input)				
 		for(InvocationStepDetails step : invocation.getSteps()) {
-			// If we have no jobs, don't add a result here
+			// If we have no jobs, don't add any result here, skip the step
 			List<Job> jobs = step.getJobs();
 			if (jobs.isEmpty()) continue;
 						
@@ -410,17 +312,19 @@ public class DashboardServiceImpl implements DashboardService {
 					// oldresults is unique throughout Galaxy, so there should only be one result per output
 					result = oldResults.get(0);
 					
-					// if there are more than one result then there must have been some DB inconsistency
+					// if there are more than one result then there must have been some DB inconsistency,
 					// scan the results to see if any is final, if so use that one, and delete all others
 					if (oldResults.size() > 1) {
-						log.warn("Found " + oldResults.size() + " workflow results for output: " + output.getId());						
+						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " results for output: " + output.getId());						
 						for (DashboardResult oldResult : oldResults) {
 							if (oldResult.getIsFinal() && !result.getIsFinal()) {
 								dashboardRepository.delete(result);
+								log.warn("Deleted redundant workflow result " + result.getId());						
 								result = oldResult;
 							}
 							else {
 								dashboardRepository.delete(oldResult);
+								log.warn("Deleted redundant workflow result " + oldResult.getId());						
 							}
 						}
 					}

@@ -26,7 +26,7 @@ public interface DashboardService {
 	
 	/**
 	 * Adds initial results for the given invocation upon submitting the given primaryfile to the give workflow.
-	 * @param workflowOutputs the given workflowOutputs
+	 * @param invocation the given invocation
 	 * @param workflow the give workflow
 	 * @param primaryfile the given primaryfile
 	 * @return the list of DashboardResults added
@@ -47,7 +47,7 @@ public interface DashboardService {
 
 	/**
 	 * Refreshes DashboardResults table by retrieving and processing all workflow invocations at once.
-	 * Use this method only if invocations in Galaxy are within a limited volume that can be retrieved all at once.
+	 * Use this method only if invocations in Galaxy are within a limited volume that can be retrieved in a lump sum manner.
 	 * The DashboardResults table is typically refreshed for the following cases:
 	 * - initial population of the table;
 	 * - new fields are added;
