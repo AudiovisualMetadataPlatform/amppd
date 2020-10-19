@@ -98,9 +98,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.POST, "/account/reset-password").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
-			.antMatchers(HttpMethod.POST, "/hmgm/authorize-editor").permitAll()
+			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
+			
 			// TODO remove below hmgm paths after we done development with HMGM
-			.antMatchers("/hmgm/**").permitAll()
 			.anyRequest().authenticated().and().
 			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
