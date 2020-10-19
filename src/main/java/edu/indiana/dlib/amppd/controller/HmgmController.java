@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.service.AuthService;
 import edu.indiana.dlib.amppd.service.HmgmNerService;
 import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
@@ -23,6 +24,12 @@ public class HmgmController {
 		
 	@Autowired HmgmTranscriptService hmgmTranscriptService;
 	@Autowired HmgmNerService hmgmNerService;
+	@Autowired AuthService authService;
+	
+	@GetMapping(path = "/hmgm/authorize-editor", produces = "application/json")
+	public @ResponseBody Boolean authorizeEditor(String authString, String userToken, String editorInput) {	
+		return authService.compareAuthStrings(authString, userToken, editorInput);
+	}
 	
 	@GetMapping(path = "/hmgm/transcript-editor", produces = "application/json")
 	public @ResponseBody TranscriptEditorResponse transcriptEditor(String datasetPath, boolean reset) {			
