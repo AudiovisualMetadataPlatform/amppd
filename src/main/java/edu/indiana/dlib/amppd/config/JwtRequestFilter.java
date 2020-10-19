@@ -50,8 +50,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
 	private boolean ValidRefUrl(String referer) {
-		String cleanedRef = referer.replace("https://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
-		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1") + "timeliner.html";
+		String cleanedRef = referer.replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
+		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1") + "timeliner.html";
 		logger.debug(cleanedUiUrl + " starts with " + cleanedRef + " : " + cleanedUiUrl.startsWith(cleanedRef));
 		return cleanedRef.startsWith(cleanedUiUrl);
 	}
