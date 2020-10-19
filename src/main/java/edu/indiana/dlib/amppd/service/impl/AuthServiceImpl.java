@@ -37,20 +37,4 @@ public class AuthServiceImpl implements AuthService {
 		String originalString = userToken + editorInput + amppdUiPropertyConfig.getHmgmSecretKey();
 		return org.apache.commons.codec.digest.DigestUtils.sha256Hex(originalString);
 	}
-
-	@Override
-	public boolean isAuthorized(String authString, String userToken, String editorInput) {
-		try {
-			AmpUser user = ampUserService.getCurrentUser();
-			return true;
-		}
-		catch(RuntimeException ex) {
-			// Current user not found.  Check token
-			return compareAuthStrings(authString, userToken, editorInput);
-		}
-		catch(Exception ex) {
-			// We caught an exception...
-			return false;
-		}
-	}
 }
