@@ -9,8 +9,10 @@ import java.nio.file.Files;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edu.indiana.dlib.amppd.service.AuthService;
 import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
@@ -23,10 +25,11 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 	private String TEMP_EXTENSION=".tmp";
 	private String COMPLETE_EXTENSION=".complete";
 	
+	
 	/*
 	 * Get the json of a transcript
 	 */
-	public TranscriptEditorResponse getTranscript(String datasetPath, boolean reset) {			
+	public TranscriptEditorResponse getTranscript(String datasetPath, boolean reset) {	
 		JSONParser parser = new JSONParser();
 		TranscriptEditorResponse response = new TranscriptEditorResponse();
 		try {

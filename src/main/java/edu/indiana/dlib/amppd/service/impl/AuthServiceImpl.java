@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
+import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +17,9 @@ public class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	private AmppdUiPropertyConfig amppdUiPropertyConfig;
+	
+	@Autowired
+	private AmpUserService ampUserService;
 	
 	@Override
 	public boolean compareAuthStrings(String authString, String userToken, String editorInput) {

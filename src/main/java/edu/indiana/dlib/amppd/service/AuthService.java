@@ -10,5 +10,6 @@ public interface AuthService {
 	 * @return
 	 */
 	boolean compareAuthStrings(String authString, String userToken, String editorInput);
+	
 
 }

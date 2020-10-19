@@ -32,7 +32,7 @@ public class HmgmController {
 	}
 	
 	@GetMapping(path = "/hmgm/transcript-editor", produces = "application/json")
-	public @ResponseBody TranscriptEditorResponse transcriptEditor(String datasetPath, boolean reset) {			
+	public @ResponseBody TranscriptEditorResponse transcriptEditor(String datasetPath, boolean reset) {		
 		return hmgmTranscriptService.getTranscript(datasetPath, reset);
 	}
 	
