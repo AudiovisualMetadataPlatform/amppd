@@ -68,7 +68,7 @@ public class DashboardServiceTests {
 	}
 	@Test
 	public void shouldFillDashboardTable() {
-		dashboardService.refreshAllDashboardResults();
+		dashboardService.refreshDashboardResultsLumpsum();
 		
 		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
     			(WorkflowOutputs)invocation  :

@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -27,7 +31,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
-		
+	
+	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
+	private Map<String, String> workflowNames = new HashMap<String, String>();
+			
 	/**
 	 * Initialize the WorkflowServiceImpl bean.
 	 */
@@ -47,6 +54,52 @@ public class WorkflowServiceImpl implements WorkflowService {
 			}
 		}
 		return null;
+	}
+		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflowName(String)
+	 */
+	public String getWorkflowName(String workflowId) {
+		String workflowName = workflowNames.get(workflowId);		
+		if (workflowName != null) return workflowName;
+		
+		try {
+			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+			if (workflow != null) {
+				workflowName = workflow.getName();
+			}
+			else {
+				// if the workflow can't be found in Galaxy, use its ID as name as a temporary solution.
+				workflowName = workflowId;
+				log.warn("Failed to get name for workflow " + workflowId + " from Galaxy; will use ID as name");
+			}
+		}
+		catch(Exception e) {
+			// when Galaxy can't find the workflow by the given ID, it throws exception (instead of returning null);
+			// this is likely because the ID is not a StoredWorkflow ID; in this case use workflow ID as name
+			// TODO this issue may be resolved when upgrading to Galaxy 20.*
+			workflowName = workflowId;
+			log.warn("Failed to get name for workflow " + workflowId + " from Galaxy; will use ID as name.", e);
+		}
+		
+		workflowNames.put(workflowId, workflowName);
+		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
+		return workflowName;
+	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowNamesCache()
+	 */
+	public void clearWorkflowNamesCache() {
+		workflowNames.clear();
+		log.info("Workflow names cache has been cleared up.");
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.workflowNamesCacheSize()
+	 */
+	public Integer workflowNamesCacheSize() {
+		return workflowNames.size();
 	}
 	
 }

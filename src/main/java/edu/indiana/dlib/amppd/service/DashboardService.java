@@ -2,7 +2,11 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+
 import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
 import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
 
@@ -21,28 +25,27 @@ public interface DashboardService {
 	public List<DashboardResult> getFinalDashboardResults(Long primaryfileId);
 	
 	/**
-	 * Adds initial record to the dashboard results in database
-	 * @param workflowId
-	 * @param workflowName
-	 * @param primaryfileId
-	 * @param historyId
+	 * Adds initial results for the given invocation upon submitting the given primaryfile to the give workflow.
+	 * @param invocation the given invocation
+	 * @param workflow the give workflow
+	 * @param primaryfile the given primaryfile
+	 * @return the list of DashboardResults added
 	 */
-	public void addDashboardResult(String workflowId, String workflowName, long primaryfileId, String historyId);
+	public List<DashboardResult> addDashboardResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile);	
 	
 	/**
-	 * Update the specified dashboardResults as needed by retrieving corresponding information from Galaxy.
-	 * A DashboardResult needs update if it's existing status could still change (i.e. not COMPLETE or ERROR)
-	 * and its last update timestamp is older than the refresh rate threshold.
-	 * @param dashboardResults the specified list of dashboardResults
-	 * @return the list of updated dashboardResults
+	 * Refreshes DashboardResults table iteratively by retrieving and processing workflow invocations per primaryfile.
+	 * Use this method instead of refreshDashboardResultsLumpsum if request to Galaxy tends to timeout due to large amount of records.
+	 * @return the list of DashboardResults refreshed
 	 */
-	public List<DashboardResult> updateDashboardResultsAsNeeded(List<DashboardResult> dashboardResults);
-	
+	public List<DashboardResult> refreshDashboardResultsIterative();
+
 	/**
-	 * Refreshes the database. Should only be used for initial population of database or when new columns are added. 
-	 * @return
+	 * Refreshes DashboardResults table by retrieving and processing all workflow invocations at once.
+	 * Use this method only if invocations in Galaxy are within a limited volume that can be retrieved in a lump sum manner.
+	 * @return the list of DashboardResults refreshed
 	 */
-	public List<DashboardResult> refreshAllDashboardResults();
+	public List<DashboardResult> refreshDashboardResultsLumpsum();
 
 	/**
 	 * Sets the specified dashboardResult according to the specified final status

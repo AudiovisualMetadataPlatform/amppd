@@ -42,8 +42,8 @@ public class DashboardResult {
 	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
 	private String toolInfo;
 	
-	private String outputFile;
-	private String outputType;
+	private String outputFile;	// name of the output
+	private String outputType;	// data type file extension of the output
 	private String outputPath;	// full absolute path of the output file
 	private String outputLink;	// obscure symlink generated for the output file
 	
