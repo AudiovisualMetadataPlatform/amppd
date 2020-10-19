@@ -147,13 +147,14 @@ public class DashboardServiceImpl implements DashboardService {
 
 			// add results to the table using info from the invocation
 			results = refreshDashboardResults(invocationDetails, workflow, primaryfile);
-			log.info("Successfully added results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());				
+			log.info("Successfully added " + results.size() + " DashboardResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());				
 		}
 		catch (Exception e) {
 			// TODO should we rethrow exception or not 
 			// if we don't rethrow the exception, results aren't added but there is no notification
 			// if we do, users will see error even though jobs are submitted in success
-			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());
+			log.error("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId(), e);
+//			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());
 		}
 
 //		// Expunge the cache
@@ -188,13 +189,13 @@ public class DashboardServiceImpl implements DashboardService {
 				for (InvocationDetails invocation : invocations) {
 					List<DashboardResult> results = refreshDashboardResults(invocation, null, primaryfile);
 					allResults.addAll(results);
-					log.info("Successfully refreshed results for primaryfile " + primaryfile.getId());				
 				}
+				log.info("Successfully refreshed results for primaryfile " + primaryfile.getId() + ", total of " + allResults.size() + " results refreshed so far ...");				
 			}
 			catch (Exception e) {
 				// continue with the rest even if we fail on some primaryfile,
 				// as we can rerun the refresh to continue on the failed ones
-				log.error("Failed to refresh results for primaryfile " + primaryfile.getId());
+				log.error("Failed to refresh results for primaryfile " + primaryfile.getId(), e);
 			}
 		}
 				
@@ -219,7 +220,10 @@ public class DashboardServiceImpl implements DashboardService {
 			try {
 				List<DashboardResult> results = refreshDashboardResults(invocation, null, null);
 				allResults.addAll(results);
-				log.info("Successfully refreshed results for invocation " + invocation.getId());				
+				if (results.size() > 0) {
+					log.info("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId());
+				}
+				// otherwise either the invocation is not submitted via AMP or it has no output
 			}
 			catch(Exception e) {
 				// continue with the rest even if we fail on some invocation,
@@ -255,12 +259,14 @@ public class DashboardServiceImpl implements DashboardService {
 			
 			// if we find more than one, then there is some error in the table
 			if (primaryfiles.size() > 1) {
-				log.warn("Error in Primaryfile table: Found " + primaryfiles.size() + " primaryfiles with historyId " + invocation.getHistoryId());
+				log.warn("Error in Primaryfile table: Found more than 1 (" + primaryfiles.size() + ") primaryfiles with the same historyId " + invocation.getHistoryId());
 			}
 		}
 
 		// get workflow name either from the passed-in workflow, or retrieve it by its ID from the passed-in invocation 
 		String workflowName = workflow != null ? workflow.getName() : workflowService.getWorkflowName(invocation.getWorkflowId());		
+		
+		log.debug("Refreshing workflow results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + ", pirmaryfile " + primaryfile.getId());
 		
 		// Iterate through each step, each of which has a list of jobs (unless it is the initial input)				
 		for(InvocationStepDetails step : invocation.getSteps()) {
@@ -308,21 +314,24 @@ public class DashboardServiceImpl implements DashboardService {
 				// so we can preserve the isFinal field in case it has been set; also, this allows update of existing records, 
 				// otherwise we have to delete all rows before adding refreshed results in order to avoid redundancy
 				List<DashboardResult> oldResults = dashboardRepository.findByOutputId(output.getId());				
-				if (oldResults != null) {
+				if (oldResults != null && !oldResults.isEmpty()) {
 					// oldresults is unique throughout Galaxy, so there should only be one result per output
 					result = oldResults.get(0);
 					
 					// if there are more than one result then there must have been some DB inconsistency,
 					// scan the results to see if any is final, if so use that one, and delete all others
 					if (oldResults.size() > 1) {
-						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " results for output: " + output.getId());						
+						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " redundant results for output: " + output.getId());						
 						for (DashboardResult oldResult : oldResults) {
-							if (oldResult.getIsFinal() && !result.getIsFinal()) {
+							if ((oldResult.getIsFinal() != null && oldResult.getIsFinal()) && (oldResult.getIsFinal() == null || !result.getIsFinal())) {
+								// found a final result for the first time, keep this one and delete the first result which must be non-final
 								dashboardRepository.delete(result);
 								log.warn("Deleted redundant workflow result " + result.getId());						
 								result = oldResult;
 							}
-							else {
+							else if (oldResult != result) {
+								// delete all non-final results except the first one, which, if is final, will be kept; 
+								// otherwise will be deleted as above when the first final result is found
 								dashboardRepository.delete(oldResult);
 								log.warn("Deleted redundant workflow result " + oldResult.getId());						
 							}
@@ -360,6 +369,7 @@ public class DashboardServiceImpl implements DashboardService {
 		}
 
 		dashboardRepository.saveAll(results);
+		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + ", pirmaryfile " + primaryfile.getId());
 		return results;
 	}
 	

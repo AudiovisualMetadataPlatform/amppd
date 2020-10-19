@@ -69,20 +69,21 @@ public class WorkflowServiceImpl implements WorkflowService {
 				workflowName = workflow.getName();
 			}
 			else {
-				// a workflow may not be found in Galaxy if its ID is not a StoredWorkflow ID;
-				// in this case, use its ID as name as a temporary solution.
-				// TODO this issue may be resolved when upgrading to Galaxy 20.*
+				// if the workflow can't be found in Galaxy, use its ID as name as a temporary solution.
 				workflowName = workflowId;
+				log.warn("Failed to get name for workflow " + workflowId + " from Galaxy; will use ID as name");
 			}
-			workflowNames.put(workflowId, workflowName);
-			log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		}
 		catch(Exception e) {
-			// in case of exception, use workflow ID as name, but don't cache it
+			// when Galaxy can't find the workflow by the given ID, it throws exception (instead of returning null);
+			// this is likely because the ID is not a StoredWorkflow ID; in this case use workflow ID as name
+			// TODO this issue may be resolved when upgrading to Galaxy 20.*
 			workflowName = workflowId;
-			log.error("Failed to get name for workflow " + workflowId + " from Galaxy.");
+			log.warn("Failed to get name for workflow " + workflowId + " from Galaxy; will use ID as name.", e);
 		}
 		
+		workflowNames.put(workflowId, workflowName);
+		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		return workflowName;
 	}	
 	

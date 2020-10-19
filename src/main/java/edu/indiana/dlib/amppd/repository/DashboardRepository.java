@@ -18,7 +18,7 @@ public interface DashboardRepository extends PagingAndSortingRepository<Dashboar
 	@Query(value = "select case when count(*)>0 then true else false end from DashboardResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);
 	
-	@Query(value = "select min(date_refreshed) from DashboardResult d where d.primaryfileId = :primaryfileId")
+	@Query(value = "select min(dateRefreshed) from DashboardResult d where d.primaryfileId = :primaryfileId")
 	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);	
 	
 }

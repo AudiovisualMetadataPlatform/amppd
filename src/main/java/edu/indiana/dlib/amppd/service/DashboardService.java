@@ -36,11 +36,6 @@ public interface DashboardService {
 	/**
 	 * Refreshes DashboardResults table iteratively by retrieving and processing workflow invocations per primaryfile.
 	 * Use this method instead of refreshDashboardResultsLumpsum if request to Galaxy tends to timeout due to large amount of records.
-	 * The DashboardResults table is typically refreshed for the following cases:
-	 * - initial population of the table;
-	 * - new fields are added;
-	 * - non ID fields (for ex, names) have value changes across many rows;
-	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
 	 * @return the list of DashboardResults refreshed
 	 */
 	public List<DashboardResult> refreshDashboardResultsIterative();
@@ -48,11 +43,6 @@ public interface DashboardService {
 	/**
 	 * Refreshes DashboardResults table by retrieving and processing all workflow invocations at once.
 	 * Use this method only if invocations in Galaxy are within a limited volume that can be retrieved in a lump sum manner.
-	 * The DashboardResults table is typically refreshed for the following cases:
-	 * - initial population of the table;
-	 * - new fields are added;
-	 * - non ID fields (for ex, names) have value changes across many rows;
-	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
 	 * @return the list of DashboardResults refreshed
 	 */
 	public List<DashboardResult> refreshDashboardResultsLumpsum();
