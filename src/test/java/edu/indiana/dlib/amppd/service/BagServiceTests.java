@@ -26,7 +26,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
-@Ignore
+//@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class BagServiceTests {
