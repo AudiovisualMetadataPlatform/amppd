@@ -323,7 +323,7 @@ public class DashboardServiceImpl implements DashboardService {
 					if (oldResults.size() > 1) {
 						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " redundant results for output: " + output.getId());						
 						for (DashboardResult oldResult : oldResults) {
-							if ((oldResult.getIsFinal() != null && oldResult.getIsFinal()) && (oldResult.getIsFinal() == null || !result.getIsFinal())) {
+							if ((oldResult.getIsFinal() != null && oldResult.getIsFinal()) && (result.getIsFinal() == null || !result.getIsFinal())) {
 								// found a final result for the first time, keep this one and delete the first result which must be non-final
 								dashboardRepository.delete(result);
 								log.warn("Deleted redundant workflow result " + result.getId());						
