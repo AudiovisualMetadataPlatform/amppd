@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
+import com.sun.jersey.api.client.UniformInterfaceException;
 
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -71,15 +72,15 @@ public class WorkflowServiceImpl implements WorkflowService {
 			else {
 				// if the workflow can't be found in Galaxy, use its ID as name as a temporary solution.
 				workflowName = workflowId;
-				log.warn("Failed to get name for workflow " + workflowId + " from Galaxy; will use ID as name");
+				log.warn("Can't find workflow " + workflowId + " in Galaxy; will use the ID as its name");
 			}
 		}
-		catch(Exception e) {
+		catch(UniformInterfaceException e) {
 			// when Galaxy can't find the workflow by the given ID, it throws exception (instead of returning null);
 			// this is likely because the ID is not a StoredWorkflow ID; in this case use workflow ID as name
 			// TODO this issue may be resolved when upgrading to Galaxy 20.*
 			workflowName = workflowId;
-			log.warn("Failed to get name for workflow " + workflowId + " from Galaxy; will use ID as name.", e);
+			log.warn("Can't find workflow " + workflowId + " in Galaxy; will use the ID as its name\n" + e.getMessage());
 		}
 		
 		workflowNames.put(workflowId, workflowName);

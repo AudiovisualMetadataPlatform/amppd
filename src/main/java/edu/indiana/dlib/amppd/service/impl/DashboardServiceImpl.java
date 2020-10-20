@@ -55,19 +55,24 @@ public class DashboardServiceImpl implements DashboardService {
 //	private CacheHelper cache;
 //	private String CACHE_KEY ="DashboardResults";
 	
-	@Value("${amppd.refreshDashboardMinutes}")
-	private int REFRESH_MINUTES;
+	@Value("${amppd.refreshResultsStatusMinutes}")
+	private int REFRESH_STATUS_MINUTES;
 	
+	@Value("${amppd.refreshResultsTableMinutes}")
+	private int REFRESH_TABLE_MINUTES;
 	
 	/**
-	 * Return true if the specified dateRefreshed is recent (i.e. within a predefined period); false otherwise.
+	 * Return true if the specified dateRefreshed is recent, i.e. within the given refreshMinutes; false otherwise.
 	 */
-	private boolean isDateRefreshedRecent(Date dateRefreshed) {		
-		// TODO This method is used by both refreshing the result status and refreshing the whole table,
-		// for the former, the refresh rate is based on how long a Galaxy job takes to complete;
-		// for the latter, the refresh rate is based on how long it takes to refresh the whole table;
-		// if the time differs a lot we may need to define the thresholds separately
-		return dateRefreshed != null && dateRefreshed.compareTo(DateUtils.addMinutes(new Date(), -REFRESH_MINUTES)) > 0;
+	private boolean isDateRefreshedRecent(Date dateRefreshed, int refreshMinutes) {		
+		// This method is used by both refreshing the result status and refreshing the whole table.
+		// refreshMinutes reflects the reverse of the refresh frequency, i.e. the gap between two refresh processes:
+		// for the former, it should be longer than the average time Galaxy jobs takes to complete, 
+		// but shorter than the gap between user accesses to the result;
+		// for the latter, it should be longer than the average time refreshing the whole table takes,
+		// and should be long enough to avoid picking up just refreshed records when rerun is needed in case of 
+		// interruption or failure, the upper limit here is not a concern since we don't regularly need such refresh.
+		return dateRefreshed != null && dateRefreshed.compareTo(DateUtils.addMinutes(new Date(), -refreshMinutes)) > 0;
 	}
 		
 	/**
@@ -76,7 +81,7 @@ public class DashboardServiceImpl implements DashboardService {
 	 * and its last refreshed timestamp is older than the refresh rate threshold.
 	 */
 	private boolean shouldRefreshResultStatus(DashboardResult result) {
-		return !isDateRefreshedRecent(result.getDateRefreshed()) && result.getStatus() != GalaxyJobState.COMPLETE && result.getStatus() != GalaxyJobState.ERROR;
+		return !isDateRefreshedRecent(result.getDateRefreshed(), REFRESH_STATUS_MINUTES) && result.getStatus() != GalaxyJobState.COMPLETE && result.getStatus() != GalaxyJobState.ERROR;
 	}
 	
 	/**
@@ -147,14 +152,14 @@ public class DashboardServiceImpl implements DashboardService {
 
 			// add results to the table using info from the invocation
 			results = refreshDashboardResults(invocationDetails, workflow, primaryfile);
-			log.info("Successfully added " + results.size() + " DashboardResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());				
+			log.info("Successfully added " + results.size() + " DashboardResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());				
 		}
 		catch (Exception e) {
 			// TODO should we rethrow exception or not 
 			// if we don't rethrow the exception, results aren't added but there is no notification
 			// if we do, users will see error even though jobs are submitted in success
-			log.error("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId(), e);
-//			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", pirmaryfile " + primaryfile.getId());
+			log.error("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId(), e);
+//			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());
 		}
 
 //		// Expunge the cache
@@ -170,8 +175,11 @@ public class DashboardServiceImpl implements DashboardService {
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " primaryfiles with Galaxy history ...");
 
-		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
-		workflowService.clearWorkflowNamesCache();
+//		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
+//		workflowService.clearWorkflowNamesCache();
+		// TODO replace below code with above commented code once we upgrade to Galaxy 20.*		
+		// get all workflows as a work-around to retrieve invocations per workflow per primaryfile
+		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();
 		
 		// process Galaxy invocation details per primaryfile instead of retrieving all at once, in order to avoid timeout issue in Galaxy
 		for (Primaryfile primaryfile : primaryfiles) {
@@ -179,17 +187,32 @@ public class DashboardServiceImpl implements DashboardService {
 				// skip the primaryfile if all of its results have been recently refreshed;
 				// this allows rerun of the refresh to continue with unfinished primaryfiles in case of a failure
 				Date oldestDateRefreshed = dashboardRepository.findOldestDateRefreshedByPrimaryfileId(primaryfile.getId());
-				if (isDateRefreshedRecent(oldestDateRefreshed)) {
+				if (isDateRefreshedRecent(oldestDateRefreshed, REFRESH_TABLE_MINUTES)) {
 					log.info("Skipping primaryfile " + primaryfile.getId() + " as its results are recently refreshed.");
 					continue;
 				}
-				
-				// get all Galaxy invocations for the primaryfile and refresh results with them
-				List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), null, primaryfile.getHistoryId());
-				for (InvocationDetails invocation : invocations) {
-					List<DashboardResult> results = refreshDashboardResults(invocation, null, primaryfile);
-					allResults.addAll(results);
+
+//				// get all Galaxy invocations for the primaryfile and refresh results with them
+//				List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), null, primaryfile.getHistoryId());
+//				for (InvocationDetails invocation : invocations) {
+//					List<DashboardResult> results = refreshDashboardResults(invocation, null, primaryfile);
+//					allResults.addAll(results);
+//				}
+				/* TODO replace below code with above commented code once we upgrade to Galaxy 20.*
+				 *  retrieving all invocations for the primaryfile as above is more efficient; however
+				 *  we will not get the proper workflow name using workflow ID returned from invocations,
+				 *  due to the non-stored workflow ID issue in current Galaxy version;
+				 *  as a work-around, we loop through all workflows and retrieve invocations per workflow for this primaryfile,
+				 *  this way we have the stored workflow ID in hand
+				 */
+				for (Workflow workflow : workflows) {
+					List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), workflow.getId(), primaryfile.getHistoryId());
+					for (InvocationDetails invocation : invocations) {
+						List<DashboardResult> results = refreshDashboardResults(invocation, workflow, primaryfile);
+						allResults.addAll(results);
+					}
 				}
+								
 				log.info("Successfully refreshed results for primaryfile " + primaryfile.getId() + ", total of " + allResults.size() + " results refreshed so far ...");				
 			}
 			catch (Exception e) {
@@ -264,9 +287,10 @@ public class DashboardServiceImpl implements DashboardService {
 		}
 
 		// get workflow name either from the passed-in workflow, or retrieve it by its ID from the passed-in invocation 
-		String workflowName = workflow != null ? workflow.getName() : workflowService.getWorkflowName(invocation.getWorkflowId());		
+		String workflowName = workflow != null ? workflow.getName() : workflowService.getWorkflowName(invocation.getWorkflowId());
+		String workflowId = workflow != null ? workflow.getId() : ""; // the stored workflow ID if available
 		
-		log.debug("Refreshing workflow results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + ", pirmaryfile " + primaryfile.getId());
+//		log.debug("Refreshing workflow results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + ", primaryfile " + primaryfile.getId());
 		
 		// Iterate through each step, each of which has a list of jobs (unless it is the initial input)				
 		for(InvocationStepDetails step : invocation.getSteps()) {
@@ -369,7 +393,7 @@ public class DashboardServiceImpl implements DashboardService {
 		}
 
 		dashboardRepository.saveAll(results);
-		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + ", pirmaryfile " + primaryfile.getId());
+		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + "(" + workflowId + "), primaryfile " + primaryfile.getId());
 		return results;
 	}
 	
