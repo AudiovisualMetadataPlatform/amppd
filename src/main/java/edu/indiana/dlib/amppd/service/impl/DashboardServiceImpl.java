@@ -306,20 +306,30 @@ public class DashboardServiceImpl implements DashboardService {
 			Date dateCreated = step.getUpdateTime(); // will be overwritten below
 			Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 			
-			// It's possible to have more than one job per step, although we don't have any examples at the moment
+			// It's possible to have multiple jobs for a step, likely when the step is rerun within the same invocation; iIn any case
+			// the tool used should be the same, so we can just use the info from the last job assuming that's the latest one
 			GalaxyJobState status = GalaxyJobState.UNKNOWN;
 			String stepLabel = "";
 			String toolInfo = "";
-			for (Job job : jobs) {
-				// Concatenate the job names and tool info in case we have more than one. 
-				stepLabel = stepLabel + job.getToolId() + " ";
+			if (!jobs.isEmpty()) {
+				Job job = jobs.get(jobs.size()-1);
+				stepLabel = job.getToolId();
 				dateCreated = job.getCreated();
 		 		dateUpdated = job.getUpdated();
 				status = getJobStatus(job.getState());
-				String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
-				String divider = toolInfo == "" ? "" : ", ";
-				toolInfo += tinfo == null ? "" : divider + tinfo;
+				String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);				
 			}
+			
+//			// Concatenate the job names and tool info in case we have more than one. 
+//			for (Job job : jobs) {
+//				stepLabel += stepLabel == "" ? job.getToolId() : " " + job.getToolId();
+//				dateCreated = job.getCreated();
+//		 		dateUpdated = job.getUpdated();
+//				status = getJobStatus(job.getState());
+//				String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
+//				String divider = toolInfo == "" ? "" : ", ";
+//				toolInfo += tinfo == null ? "" : divider + tinfo;
+//			}
 
 			// For each output, create a result record.
 			Map<String, JobInputOutput> outputs = step.getOutputs();
