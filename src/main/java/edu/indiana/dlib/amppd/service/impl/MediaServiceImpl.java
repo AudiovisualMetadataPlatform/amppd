@@ -54,9 +54,10 @@ public class MediaServiceImpl implements MediaService {
 
 	// AMP extended Galaxy data types that need extension converted to standard media types viewable by browsers    
 	public static List<String> TYPE_TXT = Arrays.asList(new String[] {"vtt"});
-	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"segment", "transcript", "ner", "vocr", "shot", "face"});
+	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"segments, segment", "transcript", "ner", "vocr", "shot", "face"});
 	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music"});
 	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
+	// NOTE: segments is deprecated in Galaxy and replaced by segment; we still handle it here for the existing legacy datasets of this type.
 
 	// corresponding standard media types to convert to for dashboard output symlinks
 	public static String FILE_EXT_TXT = "txt";
