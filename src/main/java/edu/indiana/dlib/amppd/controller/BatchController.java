@@ -62,6 +62,8 @@ public class BatchController {
 	}
 
 	/**
+	 * Note: This is temporary and can be removed/disabled when batch ingest is fixed
+	 *
 	 * Run preprocessing on existing primary files to create and set media info
 	 * @param (optional) primaryfileId, if included, will preprocess specified file,
 	 * 	if not included will preprocess all files that are missing mediainfo
