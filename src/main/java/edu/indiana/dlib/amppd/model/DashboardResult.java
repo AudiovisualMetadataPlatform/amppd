@@ -42,8 +42,8 @@ public class DashboardResult {
 	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
 	private String toolInfo;
 	
-	private String outputFile;
-	private String outputType;
+	private String outputFile;	// name of the output
+	private String outputType;	// data type file extension of the output
 	private String outputPath;	// full absolute path of the output file
 	private String outputLink;	// obscure symlink generated for the output file
 	
@@ -51,7 +51,9 @@ public class DashboardResult {
 
 	private String submitter;
 	private GalaxyJobState status;
-	private Date date;
-	private Date updateDate;
+	private Date dateCreated;	// job created timestamp from Galaxy job details query
+	private Date dateUpdated;	// job updated timestamp from Galaxy job details query
+	
+	private Date dateRefreshed;	// timestamp of this record last being refreshed from Galaxy query result
 	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
 }

@@ -23,6 +23,7 @@ import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.DashboardRepository;
+import edu.indiana.dlib.amppd.repository.DashboardRepositoryCustomImpl;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.DashboardResponse;
@@ -67,7 +68,7 @@ public class DashboardServiceTests {
 	}
 	@Test
 	public void shouldFillDashboardTable() {
-		dashboardService.refreshAllDashboardResults();
+		dashboardService.refreshDashboardResultsLumpsum();
 		
 		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
     			(WorkflowOutputs)invocation  :
@@ -129,7 +130,7 @@ public class DashboardServiceTests {
     	query.setPageNum(1);
     	query.setResultsPerPage(5);
     	DashboardSortRule sort = new DashboardSortRule();
-    	sort.setColumnName("Date");
+    	sort.setColumnName(DashboardRepositoryCustomImpl.DATE_PROPERTY);
     	
     	query.setSortRule(sort);
     	
@@ -156,7 +157,7 @@ public class DashboardServiceTests {
     	Assert.assertNotNull(result.getWorkflowName());
     	Assert.assertNotNull(result.getWorkflowStep());
     	Assert.assertNotNull(result.getStatus());
-    	Assert.assertNotNull(result.getDate());
+    	Assert.assertNotNull(result.getDateCreated());
 	}
 	
 	

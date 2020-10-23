@@ -89,8 +89,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		// if authentication is turned on, add JWT token filter
-		if (this.amppdPropertyConfig.getAuth()) {
+		// if authentication is turned on (either auth property is not defined or is true), add JWT token filter
+		if (amppdPropertyConfig.getAuth() == null || amppdPropertyConfig.getAuth()) {
 			httpSecurity.cors().and().csrf().disable().authorizeRequests()
 			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
@@ -98,8 +98,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.POST, "/account/reset-password").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
+			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
+			.antMatchers(HttpMethod.GET, "/primaryfiles/*/media").permitAll()
+			
 			// TODO remove below hmgm paths after we done development with HMGM
-			.antMatchers("/hmgm/**").permitAll()
 			.anyRequest().authenticated().and().
 			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

@@ -18,7 +18,8 @@ import lombok.ToString;
 public class BagContent {	    
 	private Long resultId;		// the id in DashboardResult
 	private String submitter;
-	private Date date;
+	private Date dateCreated;	// job start time
+	private Date dateUpdated;	// job end time
 	private String workflowId;
 	private String invocationId;
 	private String stepId;

@@ -31,6 +31,8 @@ import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
 @Slf4j
 public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom {
+	public static String DATE_PROPERTY = "dateCreated";
+	
 	@PersistenceContext
     EntityManager em;
 	public DashboardResponse searchResults(DashboardSearchQuery searchQuery) {
@@ -76,13 +78,13 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         			orderList.add(cb.desc(root.get("outputFile")));
         			orderList.add(cb.asc(root.get("workflowStep")));
             		orderList.add(cb.asc(root.get("workflowName")));
-        			orderList.add(cb.desc(root.get("date")));
+        			orderList.add(cb.desc(root.get(DATE_PROPERTY)));
         		}
             	else {
             		orderList.add(cb.asc(root.get("outputFile")));
             		orderList.add(cb.asc(root.get("workflowStep")));
             		orderList.add(cb.asc(root.get("workflowName")));
-            		orderList.add(cb.desc(root.get("date")));
+            		orderList.add(cb.desc(root.get(DATE_PROPERTY)));
             	}
         		cq.orderBy(orderList);
         	}
@@ -148,8 +150,8 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         
         //Build the predicate for Date filter
 		if(searchQuery.getFilterByDates().size()>0) { 
-			Predicate fromDate = cb.greaterThanOrEqualTo(root.get("date").as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
-			Predicate toDate = cb.lessThanOrEqualTo(root.get("date").as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
+			Predicate fromDate = cb.greaterThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
+			Predicate toDate = cb.lessThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
 			Predicate datePredicate = cb.and(fromDate, toDate);
             predicates.add(datePredicate);
 		}
@@ -210,7 +212,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
-        List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get("date").as(java.sql.Date.class))).getResultList();
+        List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
         List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();

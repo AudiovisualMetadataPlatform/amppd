@@ -23,6 +23,7 @@ public class AmppdUiPropertyConfig {
     @NotNull private String url;
     @NotNull private String documentRoot;
     @NotNull private String symlinkDir;
+    @NotNull private String hmgmSecretKey;
 
 }
 
