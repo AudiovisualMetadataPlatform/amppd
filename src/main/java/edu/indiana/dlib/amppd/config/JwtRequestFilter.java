@@ -49,11 +49,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
-	private boolean ValidRefUrl(String referer) {
+	// Determine whether referrer and url match "whitelisted" values.  This is likely temporary until the 
+	// NER editor uses it's own auth.  
+	private boolean ValidRefUrl(String referer, String uri) {
 		if(referer==null) return false;
+		// Only continue if it's the NER editor
+		if(!uri.equals("/hmgm/ner-editor")) {
+			return false;
+		}
+		// Standardize cleaning URLs to avoid oddities
 		String cleanedRef = referer.replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
 		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
 		logger.debug(cleanedRef + " starts with " + cleanedUiUrl + " : " + cleanedRef.startsWith(cleanedUiUrl));
+		
 		return cleanedRef.startsWith(cleanedUiUrl);
 	}
 	@Override
@@ -66,8 +74,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		String authToken = null;
 		
+		// Get the referrer and URI
 		String referer = request.getHeader("referer");
-		if(ValidRefUrl(referer)) {
+		String uri = request.getRequestURI();
+		// If it is the NER-editor and a valid referrer, create anonymous 
+		if(ValidRefUrl(referer, uri)) {
 			logger.debug("Valid referer:  " + referer  + ". Creating anonymous auth");
 			CreateAnonymousAuth(request);
 		}
