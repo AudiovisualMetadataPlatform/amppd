@@ -49,11 +49,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
-	private boolean ValidRefUrl(String referer) {
+	// Determine whether referrer and url match "whitelisted" values.  This is likely temporary until the 
+	// NER editor uses it's own auth.  
+	private boolean ValidRefUrl(String referer, String uri) {
 		if(referer==null) return false;
+		// Only continue if it's the NER editor
+		if(!uri.equals("/hmgm/ner-editor")) {
+			return false;
+		}
+		// Standardize cleaning URLs to avoid oddities
 		String cleanedRef = referer.replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
-		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1") + "timeliner.html";
-		logger.debug(cleanedUiUrl + " starts with " + cleanedRef + " : " + cleanedUiUrl.startsWith(cleanedRef));
+		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
+		logger.debug(cleanedRef + " starts with " + cleanedUiUrl + " : " + cleanedRef.startsWith(cleanedUiUrl));
+		
 		return cleanedRef.startsWith(cleanedUiUrl);
 	}
 	@Override
@@ -66,11 +74,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
 		String authToken = null;
 		
-		
-		if(ValidRefUrl(request.getHeader("referer"))) {
+		// Get the referrer and URI
+		String referer = request.getHeader("referer");
+		String uri = request.getRequestURI();
+		// If it is the NER-editor and a valid referrer, create anonymous 
+		if(ValidRefUrl(referer, uri)) {
+			logger.debug("Valid referer:  " + referer  + ". Creating anonymous auth");
 			CreateAnonymousAuth(request);
 		}
 		else if (requestTokenHeader != null && requestTokenHeader.startsWith("AMPPD ")) {
+			logger.debug("Request token starts with amppd");
 			authToken = requestTokenHeader.substring(6);
 			String[] parts = authToken.split(";;;;");
 			String editorInput = parts[0];
@@ -79,6 +92,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			
 			if(authService.compareAuthStrings(authString, userToken, editorInput)){
 				CreateAnonymousAuth(request);
+				logger.debug("Auth string is valid.  Creating anon auth");
+			}
+			else {
+				logger.debug("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " editor input: " + editorInput);
 			}
 			
 		}
@@ -88,9 +105,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				try {
 					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
 				} catch (IllegalArgumentException e) {
-					System.out.println("Unable to get JWT Token");
+					logger.debug("Unable to get JWT Token");
 				} catch (ExpiredJwtException e) {
-					System.out.println("JWT Token has expired");
+					logger.debug("JWT Token has expired");
 				}
 			} else {
 				logger.warn("JWT Token does not begin with Bearer String");
