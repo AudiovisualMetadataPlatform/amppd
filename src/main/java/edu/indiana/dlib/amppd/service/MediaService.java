@@ -3,7 +3,7 @@ package edu.indiana.dlib.amppd.service;
 import java.nio.file.Path;
 
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 
@@ -45,34 +45,34 @@ public interface MediaService {
 	public String createSymlink(Asset asset);
 	
 	/**
-	 * Get the output file access URL for the given DashboardResult.
-	 * @param dashboardId ID of the given DashboardResult
+	 * Get the output file access URL for the given WorkflowResult.
+	 * @param WorkflowResultId ID of the given WorkflowResult
 	 * @return the generated output URL
 	 */
-	public String getDashboardOutputUrl(Long dashboardId);
+	public String getWorkflowResultOutputUrl(Long workflowResultId);
 
 	/**
-	 * Get the output symlink URL for the given dashboardResult:
+	 * Get the output symlink URL for the given WorkflowResult:
 	 * create a new one if not existing yet; or reuse the existing symlink if already created.
-	 * @param id ID of the given dashboardResult
+	 * @param id ID of the given WorkflowResult
 	 * @return the absolute path of the output symlink
 	 */
-	public String getDashboardOutputSymlinkUrl(Long id);
+	public String getWorkflowResultOutputSymlinkUrl(Long id);
 
 	/**
-	 * Get the output file extension for the given dashboardResult, based on its dataset type/extension.
-	 * @param the given dashboardResult
+	 * Get the output file extension for the given WorkflowResult, based on its dataset type/extension.
+	 * @param the given WorkflowResult
 	 * @return the file extension of the output file
 	 */
-	public String getDashboardOutputExtension(DashboardResult dashboardResult);
+	public String getWorkflowResultOutputExtension(WorkflowResult workflowResult);
 	
 	/**
-	 * Create an obscure symlink for the output of the given dashboardResult, if it hasn't been created,
+	 * Create an obscure symlink for the output of the given WorkflowResult, if it hasn't been created,
 	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
-	 * @param the given dashboardResult
+	 * @param the given WorkflowResult
 	 * @return the created symlink.
 	 */
-	public String createSymlink(DashboardResult dashboardResult);
+	public String createSymlink(WorkflowResult workflowResult);
 	
 	/**
 	 * Resolve the path for the given pathname relative to the AMPPD media symlink root.

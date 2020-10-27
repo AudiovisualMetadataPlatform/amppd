@@ -12,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.DashboardResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.impl.MediaServiceImpl;
 import edu.indiana.dlib.amppd.util.TestHelper;
@@ -98,50 +98,50 @@ public class MediaServiceTests {
 	}
     
 	@Test
-    public void shouldReturnDashboardOutputUrl() {    	      
-		String url = mediaService.getDashboardOutputUrl(1L);
+    public void shouldReturnWorkflowResultOutputUrl() {    	      
+		String url = mediaService.getWorkflowResultOutputUrl(1L);
 		Assert.assertTrue(url.startsWith("http://"));
-		Assert.assertTrue(url.contains("/dashboard/" + 1));
+		Assert.assertTrue(url.contains("/WorkflowResult/" + 1));
 		Assert.assertTrue(url.endsWith("/output"));
 	}
     	
 	@Test
 	public void shouldReturnTxtExtensionForTxtOutput() {
-		DashboardResult dashboardResult = new DashboardResult();
-		dashboardResult.setOutputType(MediaServiceImpl.TYPE_TXT.get(0));
-		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		WorkflowResult WorkflowResultResult = new WorkflowResult();
+		WorkflowResultResult.setOutputType(MediaServiceImpl.TYPE_TXT.get(0));
+		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
 		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_TXT);
 	}
 	
 	@Test
 	public void shouldReturnJsonExtensionForJsonOutput() {
-		DashboardResult dashboardResult = new DashboardResult();
-		dashboardResult.setOutputType(MediaServiceImpl.TYPE_JSON.get(0));
-		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		WorkflowResult WorkflowResultResult = new WorkflowResult();
+		WorkflowResultResult.setOutputType(MediaServiceImpl.TYPE_JSON.get(0));
+		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
 		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_JSON);
 	}
 	
 	@Test
 	public void shouldReturnAudioExtensionForAudioOutput() {
-		DashboardResult dashboardResult = new DashboardResult();
-		dashboardResult.setOutputType(MediaServiceImpl.TYPE_AUDIO.get(0));
-		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		WorkflowResult WorkflowResultResult = new WorkflowResult();
+		WorkflowResultResult.setOutputType(MediaServiceImpl.TYPE_AUDIO.get(0));
+		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
 		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_AUDIO);
 	}
 	
 	@Test
 	public void shouldReturnStandardardExtensionAsIs() {
-		DashboardResult dashboardResult = new DashboardResult();
-		dashboardResult.setOutputType("png");
-		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		WorkflowResult WorkflowResultResult = new WorkflowResult();
+		WorkflowResultResult.setOutputType("png");
+		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
 		Assert.assertEquals(extension, "png");
 	}
 	
 	@Test
 	public void shouldReturnVideoExtensionForVideoOutput() {
-		DashboardResult dashboardResult = new DashboardResult();
-		dashboardResult.setOutputType(MediaServiceImpl.TYPE_VIDEO.get(0));
-		String extension = mediaService.getDashboardOutputExtension(dashboardResult);
+		WorkflowResult WorkflowResultResult = new WorkflowResult();
+		WorkflowResultResult.setOutputType(MediaServiceImpl.TYPE_VIDEO.get(0));
+		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
 		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_VIDEO);
 	}
 	

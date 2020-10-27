@@ -20,23 +20,23 @@ import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.repository.DashboardRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.service.DashboardService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
-import edu.indiana.dlib.amppd.web.DashboardResponse;
-import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
+import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
+import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class DashboardServiceImpl implements DashboardService {
+public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 	@Autowired
 	private GalaxyPropertyConfig galaxyPropertyConfig;
@@ -49,11 +49,11 @@ public class DashboardServiceImpl implements DashboardService {
 	@Autowired
 	private WorkflowService workflowService;
 	@Autowired
-	private DashboardRepository dashboardRepository;
+	private WorkflowResultRepository workflowResultRepository;
 
 //	@Autowired
 //	private CacheHelper cache;
-//	private String CACHE_KEY ="DashboardResults";
+//	private String CACHE_KEY ="WorkflowResults";
 	
 	@Value("${amppd.refreshResultsStatusMinutes}")
 	private int REFRESH_STATUS_MINUTES;
@@ -76,18 +76,18 @@ public class DashboardServiceImpl implements DashboardService {
 	}
 		
 	/**
-	 * Return true if we should refresh the status of the specified DashboardResult from job status in galaxy.
-	 * A DashboardResult needs refresh if it's existing status could still change (i.e. not COMPLETE or ERROR)
+	 * Return true if we should refresh the status of the specified WorkflowResult from job status in galaxy.
+	 * A WorkflowResult needs refresh if it's existing status could still change (i.e. not COMPLETE or ERROR)
 	 * and its last refreshed timestamp is older than the refresh rate threshold.
 	 */
-	private boolean shouldRefreshResultStatus(DashboardResult result) {
+	private boolean shouldRefreshResultStatus(WorkflowResult result) {
 		return !isDateRefreshedRecent(result.getDateRefreshed(), REFRESH_STATUS_MINUTES) && result.getStatus() != GalaxyJobState.COMPLETE && result.getStatus() != GalaxyJobState.ERROR;
 	}
 	
 	/**
-	 * Refresh the status of the specified DashboardResult from job status in galaxy.
+	 * Refresh the status of the specified WorkflowResult from job status in galaxy.
 	 */
-	private DashboardResult refreshResultStatus(DashboardResult result) {
+	private WorkflowResult refreshResultStatus(WorkflowResult result) {
 		try {
 			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 			String state = ds.getState();
@@ -99,48 +99,48 @@ public class DashboardServiceImpl implements DashboardService {
 		}
 		
 		result.setDateRefreshed(new Date());		
-		dashboardRepository.save(result);		
+		workflowResultRepository.save(result);		
 		return result;		
 	}
 			
 	/**
-	 * Refresh status of the specified dashboardResults as needed by retrieving corresponding job status from Galaxy.
+	 * Refresh status of the specified WorkflowResults as needed by retrieving corresponding job status from Galaxy.
 	 */
-	private List<DashboardResult> refreshResultsStatusAsNeeded(List<DashboardResult> dashboardResults) {
-		for(DashboardResult result : dashboardResults) {
+	private List<WorkflowResult> refreshResultsStatusAsNeeded(List<WorkflowResult> WorkflowResults) {
+		for(WorkflowResult result : WorkflowResults) {
 			if (shouldRefreshResultStatus(result)) {
 				result = refreshResultStatus(result);
 			}
 		}
-		return dashboardResults;
+		return WorkflowResults;
 	}
 		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.getDashboardResults(DashboardSearchQuery)
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.getWorkflowResults(WorkflowResultSearchQuery)
 	 */
-	public DashboardResponse getDashboardResults(DashboardSearchQuery query){
-		//List<DashboardResult> results = (List<DashboardResult>) cache.get(CACHE_KEY, false);		
+	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
+		//List<WorkflowResult> results = (List<WorkflowResult>) cache.get(CACHE_KEY, false);		
 		//if(results!=null) {
 		//	return results;
 		//}
 		
-		DashboardResponse response = dashboardRepository.searchResults(query);
+		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
 		refreshResultsStatusAsNeeded(response.getRows());
 		return response;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.getFinalDashboardResults(Long)
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.getFinalWorkflowResults(Long)
 	 */
-	public List<DashboardResult> getFinalDashboardResults(Long primaryfileId) {
-		return refreshResultsStatusAsNeeded(dashboardRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+	public List<WorkflowResult> getFinalWorkflowResults(Long primaryfileId) {
+		return refreshResultsStatusAsNeeded(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
 	}
 		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.addDashboardResults(Invocation, Workflow, Primaryfile)
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.addWorkflowResults(Invocation, Workflow, Primaryfile)
 	 */
-	public List<DashboardResult> addDashboardResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
-		List<DashboardResult> results = new ArrayList<DashboardResult>();
+	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
+		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 
 		try {
 			// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs 
@@ -151,8 +151,8 @@ public class DashboardServiceImpl implements DashboardService {
 				(InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
 
 			// add results to the table using info from the invocation
-			results = refreshDashboardResults(invocationDetails, workflow, primaryfile);
-			log.info("Successfully added " + results.size() + " DashboardResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());				
+			results = refreshWorkflowResults(invocationDetails, workflow, primaryfile);
+			log.info("Successfully added " + results.size() + " WorkflowResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());				
 		}
 		catch (Exception e) {
 			// TODO should we rethrow exception or not 
@@ -168,10 +168,10 @@ public class DashboardServiceImpl implements DashboardService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshDashboardResultsIterative()
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshWorkflowResultsIterative()
 	 */
-	public List<DashboardResult> refreshDashboardResultsIterative() {				
-		List<DashboardResult> allResults = new ArrayList<DashboardResult>();
+	public List<WorkflowResult> refreshWorkflowResultsIterative() {				
+		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " primaryfiles with Galaxy history ...");
 
@@ -186,7 +186,7 @@ public class DashboardServiceImpl implements DashboardService {
 			try {
 				// skip the primaryfile if all of its results have been recently refreshed;
 				// this allows rerun of the refresh to continue with unfinished primaryfiles in case of a failure
-				Date oldestDateRefreshed = dashboardRepository.findOldestDateRefreshedByPrimaryfileId(primaryfile.getId());
+				Date oldestDateRefreshed = workflowResultRepository.findOldestDateRefreshedByPrimaryfileId(primaryfile.getId());
 				if (isDateRefreshedRecent(oldestDateRefreshed, REFRESH_TABLE_MINUTES)) {
 					log.info("Skipping primaryfile " + primaryfile.getId() + " as its results are recently refreshed.");
 					continue;
@@ -195,7 +195,7 @@ public class DashboardServiceImpl implements DashboardService {
 //				// get all Galaxy invocations for the primaryfile and refresh results with them
 //				List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), null, primaryfile.getHistoryId());
 //				for (InvocationDetails invocation : invocations) {
-//					List<DashboardResult> results = refreshDashboardResults(invocation, null, primaryfile);
+//					List<WorkflowResult> results = refreshWorkflowResults(invocation, null, primaryfile);
 //					allResults.addAll(results);
 //				}
 				/* TODO replace below code with above commented code once we upgrade to Galaxy 20.*
@@ -208,7 +208,7 @@ public class DashboardServiceImpl implements DashboardService {
 				for (Workflow workflow : workflows) {
 					List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), workflow.getId(), primaryfile.getHistoryId());
 					for (InvocationDetails invocation : invocations) {
-						List<DashboardResult> results = refreshDashboardResults(invocation, workflow, primaryfile);
+						List<WorkflowResult> results = refreshWorkflowResults(invocation, workflow, primaryfile);
 						allResults.addAll(results);
 					}
 				}
@@ -222,15 +222,15 @@ public class DashboardServiceImpl implements DashboardService {
 			}
 		}
 				
-		log.info("Successfully refreshed " + allResults.size() + " DashboardResults iteratively.");
+		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults iteratively.");
 		return allResults;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshDashboardResultsLumpsum()
+	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshWorkflowResultsLumpsum()
 	 */
-	public List<DashboardResult> refreshDashboardResultsLumpsum(){
-		List<DashboardResult> allResults = new ArrayList<DashboardResult>();
+	public List<WorkflowResult> refreshWorkflowResultsLumpsum(){
+		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 
 		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
 		workflowService.clearWorkflowNamesCache();
@@ -241,7 +241,7 @@ public class DashboardServiceImpl implements DashboardService {
 		// refresh results for each AMP invocation
 		for (InvocationDetails invocation : invocations) {
 			try {
-				List<DashboardResult> results = refreshDashboardResults(invocation, null, null);
+				List<WorkflowResult> results = refreshWorkflowResults(invocation, null, null);
 				allResults.addAll(results);
 				if (results.size() > 0) {
 					log.info("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId());
@@ -257,17 +257,17 @@ public class DashboardServiceImpl implements DashboardService {
 
 		// cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
 
-		log.info("Successfully refreshed " + allResults.size() + " DashboardResults in lump sum.");
+		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults in lump sum.");
 		return allResults;
 	}
 	
 	/**
-	 * Refresh DashboardResults for the given invocation;
+	 * Refresh WorkflowResults for the given invocation;
 	 * if the workflow for the invocation is provided, use the workflow name from that;
 	 * if the primaryfile for the invocation is provided, use the associated entity names from that.
 	 */
-	private List<DashboardResult> refreshDashboardResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
-		List<DashboardResult> results = new ArrayList<DashboardResult>();
+	private List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
+		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 		
 		// if the passed-in primaryfile is null, get primaryfile info by its ID from the passed-in invocation
 		if (primaryfile == null) {
@@ -341,13 +341,13 @@ public class DashboardServiceImpl implements DashboardService {
 				if (dataset == null || !dataset.getVisible()) continue;
 				
 				// initialize result as not final
-				DashboardResult result = new DashboardResult(); 
+				WorkflowResult result = new WorkflowResult(); 
 				result.setIsFinal(false);
 
 				// retrieve the result for this output if already existing in the workflow result table,
 				// so we can preserve the isFinal field in case it has been set; also, this allows update of existing records, 
 				// otherwise we have to delete all rows before adding refreshed results in order to avoid redundancy
-				List<DashboardResult> oldResults = dashboardRepository.findByOutputId(output.getId());				
+				List<WorkflowResult> oldResults = workflowResultRepository.findByOutputId(output.getId());				
 				if (oldResults != null && !oldResults.isEmpty()) {
 					// oldresults is unique throughout Galaxy, so there should only be one result per output
 					result = oldResults.get(0);
@@ -356,17 +356,17 @@ public class DashboardServiceImpl implements DashboardService {
 					// scan the results to see if any is final, if so use that one, and delete all others
 					if (oldResults.size() > 1) {
 						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " redundant results for output: " + output.getId());						
-						for (DashboardResult oldResult : oldResults) {
+						for (WorkflowResult oldResult : oldResults) {
 							if ((oldResult.getIsFinal() != null && oldResult.getIsFinal()) && (result.getIsFinal() == null || !result.getIsFinal())) {
 								// found a final result for the first time, keep this one and delete the first result which must be non-final
-								dashboardRepository.delete(result);
+								workflowResultRepository.delete(result);
 								log.warn("Deleted redundant workflow result " + result.getId());						
 								result = oldResult;
 							}
 							else if (oldResult != result) {
 								// delete all non-final results except the first one, which, if is final, will be kept; 
 								// otherwise will be deleted as above when the first final result is found
-								dashboardRepository.delete(oldResult);
+								workflowResultRepository.delete(oldResult);
 								log.warn("Deleted redundant workflow result " + oldResult.getId());						
 							}
 						}
@@ -390,7 +390,7 @@ public class DashboardServiceImpl implements DashboardService {
 				result.setOutputFile(outputName);
 				result.setOutputType(dataset.getFileExt());
 				result.setOutputPath(dataset.getFileName());
-				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on dashboard
+				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on workflow result
 
 				result.setSubmitter(galaxyPropertyConfig.getUsername());
 				result.setStatus(status);
@@ -402,22 +402,22 @@ public class DashboardServiceImpl implements DashboardService {
 			}
 		}
 
-		dashboardRepository.saveAll(results);
+		workflowResultRepository.saveAll(results);
 		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + "(" + workflowId + "), primaryfile " + primaryfile.getId());
 		return results;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.setResultIsFinal(long, boolean)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setResultIsFinal(long, boolean)
 	 */
-	public boolean setResultIsFinal(long dashboardResultId, boolean isFinal) {
+	public boolean setResultIsFinal(long workflowResultId, boolean isFinal) {
 		
-		Optional<DashboardResult> dashboardResultOpt  = dashboardRepository.findById(dashboardResultId);
+		Optional<WorkflowResult> workflowResultOpt  = workflowResultRepository.findById(workflowResultId);
 		
-		if(dashboardResultOpt.isPresent()) {
-			DashboardResult result = dashboardResultOpt.get();
+		if(workflowResultOpt.isPresent()) {
+			WorkflowResult result = workflowResultOpt.get();
 			result.setIsFinal(isFinal);
-			dashboardRepository.save(result);
+			workflowResultRepository.save(result);
 			
 			return true;
 		}
