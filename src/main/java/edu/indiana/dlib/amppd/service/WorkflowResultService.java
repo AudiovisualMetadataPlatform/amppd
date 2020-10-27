@@ -12,7 +12,7 @@ import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 public interface WorkflowResultService {
 	/***
-	 * Get a list of all results to display in the workflow dashboard
+	 * Get a list of all results to display in the workflow results dashboard and deliverables UI
 	 * @return
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query);

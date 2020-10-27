@@ -116,7 +116,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.getWorkflowResults(WorkflowResultSearchQuery)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowResults(WorkflowResultSearchQuery)
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
 		//List<WorkflowResult> results = (List<WorkflowResult>) cache.get(CACHE_KEY, false);		
@@ -130,14 +130,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.getFinalWorkflowResults(Long)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getFinalWorkflowResults(Long)
 	 */
 	public List<WorkflowResult> getFinalWorkflowResults(Long primaryfileId) {
 		return refreshResultsStatusAsNeeded(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
 	}
 		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.addWorkflowResults(Invocation, Workflow, Primaryfile)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.addWorkflowResults(Invocation, Workflow, Primaryfile)
 	 */
 	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
@@ -168,7 +168,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshWorkflowResultsIterative()
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {				
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
@@ -227,7 +227,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DashboardService.refreshWorkflowResultsLumpsum()
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsLumpsum()
 	 */
 	public List<WorkflowResult> refreshWorkflowResultsLumpsum(){
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();

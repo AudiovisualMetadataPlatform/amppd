@@ -59,7 +59,7 @@ public class MediaServiceImpl implements MediaService {
 	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
 	// NOTE: segments is deprecated in Galaxy and replaced by segment; we still handle it here for the existing legacy datasets of this type.
 
-	// corresponding standard media types to convert to for dashboard output symlinks
+	// corresponding standard media types to convert to for workflow output symlinks
 	public static String FILE_EXT_TXT = "txt";
 	public static String FILE_EXT_JSON = "json";
 	public static String FILE_EXT_AUDIO = "wav";
@@ -114,7 +114,7 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputUrl(Long)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputUrl(Long)
 	 */
 	@Override
 	public String getWorkflowResultOutputUrl(Long workflowResultId) {
@@ -188,14 +188,14 @@ public class MediaServiceImpl implements MediaService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getDashboardOutputSymlinkUrl(Long)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputSymlinkUrl(Long)
 	 */
 	@Override
 	public String getWorkflowResultOutputSymlinkUrl(Long id) {
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
 		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
 		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
-		log.info("Output symlink URL for dashboardResult <" + id + "> is: " + url);
+		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
 		return url;
 	}
 
@@ -235,10 +235,10 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String createSymlink(WorkflowResult workflowResult) {
 		if (workflowResult == null) {
-			throw new RuntimeException("The given dashboardResult for creating symlink is null.");
+			throw new RuntimeException("The given workflowResult for creating symlink is null.");
 		}
 		if (workflowResult.getOutputPath() == null ) {
-			throw new StorageException("Can't create output symlink for dashboardResult " + workflowResult.getId() + ": its output file path is null.");
+			throw new StorageException("Can't create output symlink for workflowResult " + workflowResult.getId() + ": its output file path is null.");
 		}
 
 		// if symlink hasn't been created, create it
@@ -249,7 +249,7 @@ public class MediaServiceImpl implements MediaService {
 
 		// use a random string to obscure the symlink for security
 		// prefix O stands for Output
-		// include dashboardResult ID to rule out any chance of name collision
+		// include workflowResult ID to rule out any chance of name collision
 		// add file extension to help browser decide file type so to use proper display app 
 		String symlink = "O-" + workflowResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + getWorkflowResultOutputExtension(workflowResult);
 		Path path = Paths.get(workflowResult.getOutputPath());
@@ -263,7 +263,7 @@ public class MediaServiceImpl implements MediaService {
 			throw new StorageException("Error creating output symlink for workflowResult " + workflowResult.getId(), e);		    	
 		}
 
-		// save the symlink into dashboardResult
+		// save the symlink into workflowResult
 		workflowResult.setOutputLink(symlink);
 		workflowResultRepository.save(workflowResult);
 
