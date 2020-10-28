@@ -19,18 +19,18 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkflowResultController {
 	
 	@Autowired
-	private WorkflowResultService workflowResultsService;
+	private WorkflowResultService workflowResultService;
 	
 	@PostMapping(path = "/workflow-results", consumes = "application/json", produces = "application/json")
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
 		log.info("Received request inside getWorkflowResults");
-		return workflowResultsService.getWorkflowResults(query);
+		return workflowResultService.getWorkflowResults(query);
 	}
 	
 	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
 	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
 		log.info("Setting file to final: " + id);
-		return workflowResultsService.setResultIsFinal(id, isFinal);
+		return workflowResultService.setResultIsFinal(id, isFinal);
 	}
 
 	/* TODO
@@ -47,23 +47,23 @@ public class WorkflowResultController {
 	 * Refreshes the whole WorkflowResults table iteratively by retrieving and processing workflow invocations per primaryfile,
 	 * unless the lumpsum mode is specified and true, in which case, retrieve and process all workflow invocations at once.
 	 * It's recommended to turn lumpsum off if request to Galaxy tends to timeout due to large amount of records.
-	 * The WorkflowResults table is typically refreshed for the following cases:
+	 * The WorkflowResult table is typically refreshed for the following cases:
 	 * - initial population of the table;
 	 * - new fields are added;
 	 * - non ID fields (for ex, names) have value changes across many rows;
 	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
 	 * @param lumpsum whether to refresh the table in the lumpsum mode
-	 * @return the list of WorkflowResults refreshed
+	 * @return the list of WorkflowResult refreshed
 	 */	
 	@PostMapping("/workflow-results/refresh")
 	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
-			workflowResultsService.refreshWorkflowResultsLumpsum();
+			workflowResultService.refreshWorkflowResultsLumpsum();
 		}
 		else {
 			log.info("Refreshing Workflow Results iteratively per primaryfile ... ");
-			workflowResultsService.refreshWorkflowResultsIterative();
+			workflowResultService.refreshWorkflowResultsIterative();
 		}
 	}
 

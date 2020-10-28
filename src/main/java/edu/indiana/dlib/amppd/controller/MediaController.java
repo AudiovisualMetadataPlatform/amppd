@@ -55,7 +55,7 @@ public class MediaController {
 	 * @param id ID of the given workflowResult
 	 * @return the content of the output file
 	 */
-	@GetMapping("/workflow-result/{id}/output")
+	@GetMapping("/workflow-results/{id}/output")
 	public ResponseEntity<Object> serveWorkflowOutput(@PathVariable("id") Long id) {		
     	log.info("Serving output for workflowResult ID " + id);
     	String url = mediaService.getWorkflowResultOutputSymlinkUrl(id);
