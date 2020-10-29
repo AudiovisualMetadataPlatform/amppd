@@ -2,10 +2,12 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
@@ -31,11 +33,11 @@ public abstract class Dataentity {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-    @NonNull
+	@NotNull
+	@Index
     @Type(type="text")
     private String name;
     
-    @NonNull
     @Type(type="text")
     private String description;
 

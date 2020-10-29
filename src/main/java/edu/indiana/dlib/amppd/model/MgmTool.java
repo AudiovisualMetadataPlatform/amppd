@@ -2,11 +2,13 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -25,6 +27,7 @@ import lombok.NonNull;
  */
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Index(members={"toolId","upgradeDate"}, unique="true")
 @Data
 @NoArgsConstructor
 public class MgmTool {
@@ -33,16 +36,18 @@ public class MgmTool {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-    @NonNull
+	@NotNull
+	@Index
     private String toolId;	// ID of the MGM adapter tool in galaxy
     
-    @NonNull
+	@NotNull
     private String mgmName;	// name of the underlying MGM model used by the adapter
         
-    @NonNull
+	@NotNull
     private String version;	// version of the MGM model
     
-    @NonNull
+	@NotNull
+	@Index
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
     private Date upgradeDate; // date when this version of the MGM model is installed (for local tools) or released (for cloud tools)
 

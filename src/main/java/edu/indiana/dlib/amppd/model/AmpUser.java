@@ -1,9 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
 
-import java.util.Set;
-
-import javax.persistence.Column;
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
@@ -11,7 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -39,18 +37,25 @@ public class AmpUser {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 	
-	//@Column(unique=true)
+	@NotNull
+	@Index(unique="true")
 	private String username;
 	
-	@Column(unique=true)
-	private String email;	
+	@NotNull
+	@Index(unique="true")
+	private String email;	// email is always the same as username
+	
+	@NotNull
 	private String password;
+
 	private String firstName;
 	private String lastName;
-	private Role role;
-	
+		
+	@Index
+	@NotNull
 	@Enumerated(EnumType.STRING)
 	private State status = State.REQUESTED;
 	
-	
+	private Role role;	// currently not used
+
 }

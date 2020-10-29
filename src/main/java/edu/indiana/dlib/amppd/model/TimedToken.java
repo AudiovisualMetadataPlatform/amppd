@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
@@ -27,11 +29,15 @@ public class TimedToken {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
   
-    private String token;
-  
+	@NotNull
+	@Index    
     @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private AmpUser user;
   
-    private Date expiryDate;
+	@NotNull
+	@Index
+    private String token;  
+
+	private Date expiryDate;
 }    

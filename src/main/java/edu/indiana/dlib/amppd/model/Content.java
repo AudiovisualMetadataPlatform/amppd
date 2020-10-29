@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.Type;
@@ -14,14 +15,16 @@ import lombok.ToString;
  *
  */
 @MappedSuperclass
+@Index(members={"externalSource","externalId"}, unique="true")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 public abstract class Content extends Dataentity {
 
     @Type(type="text")
-    private String externalId;
-    @Type(type="text")
     private String externalSource;
 
+    @Type(type="text")
+    private String externalId;
+    
 }
