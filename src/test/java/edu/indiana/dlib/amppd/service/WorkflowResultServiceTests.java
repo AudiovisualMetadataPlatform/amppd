@@ -33,7 +33,6 @@ import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Ignore
 public class WorkflowResultServiceTests {
 
 	@MockBean

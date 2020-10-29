@@ -15,7 +15,6 @@ import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 // TODO remove ignore once we have ffmpeg and MediaProbe installed on Bamboo
-@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class PreprocessServiceTests {
