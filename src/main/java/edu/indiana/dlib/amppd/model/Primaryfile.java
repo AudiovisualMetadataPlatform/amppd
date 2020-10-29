@@ -39,7 +39,7 @@ public class Primaryfile extends Asset {
 	 *   their associated primaryfile. So the historyId is only needed for primaryfile, not for supplements.
 	 */	
 	// ID of the history where all output datasets of all AMP jobs running against this primaryfile is stored in Galaxy.
-	@Index
+	@Index(unique="true")	// historyId could be null, but it should be unique among all primaryfiles
     private String historyId;			
 
 	@OneToMany(mappedBy="primaryfile")

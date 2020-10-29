@@ -39,6 +39,7 @@ public abstract class Asset extends Content {
     private String symlink;				// the symlink under the static content directory used for serving large media file
     
     // Note: mediaInfo must be a valid json string
+	@NotNull
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private String mediaInfo;			// technical media information extracted from the asset file, to be stored as a JSON blob 

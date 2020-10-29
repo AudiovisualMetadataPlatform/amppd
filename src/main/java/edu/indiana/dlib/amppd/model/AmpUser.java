@@ -51,8 +51,8 @@ public class AmpUser {
 	private String firstName;
 	private String lastName;
 		
-	@Index
 	@NotNull
+	@Index
 	@Enumerated(EnumType.STRING)
 	private State status = State.REQUESTED;
 	
