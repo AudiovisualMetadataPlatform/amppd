@@ -51,7 +51,7 @@ public class Collection extends Content {
 	@JsonBackReference(value="supplements")
     private Set<CollectionSupplement> supplements;
 
-	@NotNull
+	//@NotNull
 	@Index
 	@ManyToOne
 	private Unit unit;

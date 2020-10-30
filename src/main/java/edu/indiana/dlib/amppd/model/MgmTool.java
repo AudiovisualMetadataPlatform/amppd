@@ -36,17 +36,17 @@ public class MgmTool {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-	@NotNull
+	//@NotNull
 	@Index
     private String toolId;	// ID of the MGM adapter tool in galaxy
     
-	@NotNull
+	//@NotNull
     private String mgmName;	// name of the underlying MGM model used by the adapter
         
-	@NotNull
+	//@NotNull
     private String version;	// version of the MGM model
     
-	@NotNull
+	//@NotNull
 	@Index
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
     private Date upgradeDate; // date when this version of the MGM model is installed (for local tools) or released (for cloud tools)

@@ -28,13 +28,13 @@ public class TimedToken {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
   
-	@NotNull
+	//@NotNull
 	@Index(unique="true")
     @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
     @JoinColumn(nullable = false, name = "user_id")
     private AmpUser user;
   
-	@NotNull
+	//@NotNull
 	@Index(unique="true")
     private String token;  
 

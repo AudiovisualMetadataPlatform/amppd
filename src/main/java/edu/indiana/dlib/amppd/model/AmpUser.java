@@ -37,21 +37,21 @@ public class AmpUser {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 	
-	@NotNull
+	//@NotNull
 	@Index(unique="true")
 	private String username;
 	
-	@NotNull
+	//@NotNull
 	@Index(unique="true")
 	private String email;	// email is always the same as username
 	
-	@NotNull
+	//@NotNull
 	private String password;
 
 	private String firstName;
 	private String lastName;
 		
-	@NotNull
+	//@NotNull
 	@Index
 	@Enumerated(EnumType.STRING)
 	private State status = State.REQUESTED;

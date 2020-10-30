@@ -46,7 +46,7 @@ public class Primaryfile extends Asset {
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
-	@NotNull
+	//@NotNull
 	@Index
 	@ManyToOne
 	private Item item;

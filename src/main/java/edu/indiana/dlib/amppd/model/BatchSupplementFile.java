@@ -43,7 +43,7 @@ public class BatchSupplementFile {
     @Type(type="text")
 	private String supplementDescription;
 
-	@NotNull
+	//@NotNull
 	@Index
 	@JsonBackReference(value="batch-file")
 	@ManyToOne

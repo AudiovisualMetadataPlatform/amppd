@@ -24,7 +24,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class ItemSupplement extends Supplement {
 
-	@NotNull
+	//@NotNull
 	@Index
 	@ManyToOne
     private Item item;

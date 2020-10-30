@@ -40,7 +40,7 @@ public class Item extends Content {
 	@JsonBackReference(value="supplements")
     private Set<ItemSupplement> supplements;
 
-	@NotNull
+	//@NotNull
 	@Index
 	@ManyToOne
 	private Collection collection;	

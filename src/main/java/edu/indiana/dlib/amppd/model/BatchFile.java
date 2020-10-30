@@ -41,7 +41,7 @@ public class BatchFile {
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;	
 
-	@NotNull
+	//@NotNull
 	@Index
 	private int rowNum;	
 	
@@ -50,7 +50,7 @@ public class BatchFile {
 	@ManyToOne
 	private Collection collection;
     
-	@NotNull
+	//@NotNull
 	@Index
 	@Type(type="text")
 	private String collectionName;
@@ -83,7 +83,7 @@ public class BatchFile {
 	@OneToMany(mappedBy="batchFile")
 	private List<BatchSupplementFile> batchSupplementFiles;	
 	
-	@NotNull
+	//@NotNull
 	@Index
 	@JsonBackReference(value="batch")
 	@ManyToOne

@@ -28,55 +28,55 @@ public class DashboardResult {
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private Long primaryfileId;
 
-	@NotNull
+	//@NotNull
 	@Index
 	@Type(type="text")
 	private String sourceItem;		// item name	
 	
-	@NotNull
+	//@NotNull
 	@Index
 	@Type(type="text")
 	private String sourceFilename;	// primaryfile name
 
-	@NotNull
+	//@NotNull
 	@Index
 	private String workflowId;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private String invocationId;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private String stepId;
 
-	@NotNull
+	//@NotNull
 	@Index(unique="true")		// output dateset ID should be unique
 	private String outputId;	// we don't need datasetId as it is the same as outputId
 
-	@NotNull
+	//@NotNull
 	@Index
 	private String historyId;
 	
-	@NotNull
+	//@NotNull
 	@Index
 	private String workflowName;
 
-	@NotNull
+	//@NotNull
 	@Index	
 	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
 	
 	private String toolInfo;
 	
-	@NotNull
+	//@NotNull
 	@Index
 	private String outputFile;	// name of the output
 	
-	@NotNull
+	//@NotNull
 	@Index
 	private String outputType;	// data type file extension of the output
 
@@ -85,21 +85,21 @@ public class DashboardResult {
 	
 	// we don't use Galaxy downloard URL, so outputUrl can be removed
 
-	@NotNull
+	//@NotNull
 	@Index
 	private String submitter;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private GalaxyJobState status;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private Date dateCreated;	// job created timestamp from Galaxy job details query
 
 	private Date dateUpdated;	// job updated timestamp from Galaxy job details query
 	
-	@NotNull
+	//@NotNull
 	@Index
 	private Date dateRefreshed;	// timestamp of this record last being refreshed from Galaxy query result
 

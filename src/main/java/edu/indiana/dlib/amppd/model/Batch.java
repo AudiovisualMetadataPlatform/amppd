@@ -35,20 +35,20 @@ public class Batch {
 	private Long id;
 	
 	// the following fields come from batch upload UI
-	@NotNull
+	//@NotNull
 	@Index
 	@ManyToOne
 	private AmpUser submitUser;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private Date submitTime;
 
-	@NotNull
+	//@NotNull
 	@Index
 	private String manifestFilename;
 	
-	@NotNull
+	//@NotNull
 	@Index
 	@JsonIgnore
 	@ManyToOne

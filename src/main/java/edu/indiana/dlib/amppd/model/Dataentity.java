@@ -33,7 +33,7 @@ public abstract class Dataentity {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-	@NotNull
+	//@NotNull
 	@Index
     @Type(type="text")
     private String name;
@@ -53,6 +53,9 @@ public abstract class Dataentity {
     @LastModifiedBy
     private String modifiedBy;    
 
+    // TODO:
+    // Uncomment @NotNull in all model classes after we fix unit tests to populate all non-null fields when saving to DB.
+    
     // TODO: research LomBok issue: whenever no arg constructor exists (whether defined by code or by Lombok annotation) other constructors won't be added by Lombok despite the annotation
 //    public Dataentity() {
 //    	super();

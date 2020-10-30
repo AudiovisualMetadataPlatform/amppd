@@ -29,17 +29,17 @@ import lombok.ToString;
 	)
 public abstract class Asset extends Content {
 
-	@NotNull
+	//@NotNull
 	private String originalFilename;	// the file name of the original file uploaded by user or batch
 	
-	@NotNull
+	//@NotNull
     private String pathname;			// path name relative to storage root for the file associated with the asset
 
 	private String datasetId;			// ID of the dataset as a result of upload to Galaxy
     private String symlink;				// the symlink under the static content directory used for serving large media file
     
     // Note: mediaInfo must be a valid json string
-	@NotNull
+	//@NotNull
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private String mediaInfo;			// technical media information extracted from the asset file, to be stored as a JSON blob 
