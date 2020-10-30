@@ -11,17 +11,16 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.BagContent;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionBag;
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.DashboardRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.BagService;
-import edu.indiana.dlib.amppd.service.DashboardService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +41,7 @@ public class BagServiceImpl implements BagService {
 	private MediaService mediaService;
 		
 	@Autowired
-	private DashboardService dashboardService;
+	private WorkflowResultService workflowResultService;
 		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.BagService.getPrimaryfileBag(Long)
@@ -55,9 +54,9 @@ public class BagServiceImpl implements BagService {
 		pbag.setPrimaryfileName(primaryfile.getName());
 		List<BagContent> bcontents = new ArrayList<BagContent>();
 		pbag.setBagContents(bcontents);		
-		List<DashboardResult> results = dashboardService.getFinalDashboardResults(primaryfileId);
+		List<WorkflowResult> results = workflowResultService.getFinalWorkflowResults(primaryfileId);
 		
-		for (DashboardResult result : results) {
+		for (WorkflowResult result : results) {
 			BagContent bcontent = new BagContent();
 			bcontent.setResultId(result.getId());
 			bcontent.setSubmitter(result.getSubmitter());
@@ -72,7 +71,7 @@ public class BagServiceImpl implements BagService {
 			bcontent.setToolInfo(result.getToolInfo());	 
 			bcontent.setOutputFile(result.getOutputFile());
 			bcontent.setOutputType(result.getOutputType());			
-			bcontent.setOutputUrl(mediaService.getDashboardOutputUrl(result.getId()));	
+			bcontent.setOutputUrl(mediaService.getWorkflowResultOutputUrl(result.getId()));	
 			bcontents.add(bcontent);
 		}
 		

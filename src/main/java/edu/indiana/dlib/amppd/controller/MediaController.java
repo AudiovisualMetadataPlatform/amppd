@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.controller;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -11,17 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,14 +51,14 @@ public class MediaController {
     }
 
 	/**
-	 * Serve the output file of the given dashboardResult by redirecting the request to the AMPPD UI Apache server.
-	 * @param id ID of the given dashboardResult
+	 * Serve the output file of the given workflowResult by redirecting the request to the AMPPD UI Apache server.
+	 * @param id ID of the given workflowResult
 	 * @return the content of the output file
 	 */
-	@GetMapping("/dashboard/{id}/output")
-	public ResponseEntity<Object> serveDashboardOutput(@PathVariable("id") Long id) {		
-    	log.info("Serving output for dashboardResult ID " + id);
-    	String url = mediaService.getDashboardOutputSymlinkUrl(id);
+	@GetMapping("/workflow-results/{id}/output")
+	public ResponseEntity<Object> serveWorkflowOutput(@PathVariable("id") Long id) {		
+    	log.info("Serving output for workflowResult ID " + id);
+    	String url = mediaService.getWorkflowResultOutputSymlinkUrl(id);
     	HttpHeaders httpHeaders = new HttpHeaders();
     	try {
     		httpHeaders.setLocation(new URI(url));

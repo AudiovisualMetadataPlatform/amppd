@@ -35,7 +35,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.service.DashboardService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
@@ -79,7 +79,7 @@ public class JobServiceImpl implements JobService {
     private MediaService mediaService;	
 	
 	@Autowired
-    private DashboardService dashboardService;	
+    private WorkflowResultService workflowResultService;	
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -323,7 +323,7 @@ public class JobServiceImpl implements JobService {
     		woutputs = workflowsClient.runWorkflow(winputs);
     		
     		// add workflow results to the table for the newly created invocation
-    		dashboardService.addDashboardResults(woutputs, workflowDetails, primaryfile);
+    		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
     	}
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);

@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class DashboardFilterValues {
+public class WorkflowResultFilterValues {
 	private List<String> submitters;
 	private List<String> workflows;
 	private List<String> items;

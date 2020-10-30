@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "workflow_result")
 @Data
 @NoArgsConstructor
-public class DashboardResult {
+public class WorkflowResult {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
