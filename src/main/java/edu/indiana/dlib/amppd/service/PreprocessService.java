@@ -42,13 +42,6 @@ public interface PreprocessService {
 	 * @@asset the given asset
 	 * @return the preprocessed asset
 	 */
-	public Asset preprocess(Asset asset);
-
-	Asset retrieveMediaInfo(Asset asset, String filepath);
-
-	Asset preprocess(Asset asset, String filepath);
-
-	Asset convertFlac(Asset asset, String filePath);
-	
+	public Asset preprocess(Asset asset);	
 
 }
