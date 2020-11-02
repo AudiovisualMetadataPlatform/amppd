@@ -19,21 +19,22 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
-import edu.indiana.dlib.amppd.repository.DashboardRepository;
-import edu.indiana.dlib.amppd.repository.DashboardRepositoryCustomImpl;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepositoryCustomImpl;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
-import edu.indiana.dlib.amppd.web.DashboardResponse;
-import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
-import edu.indiana.dlib.amppd.web.DashboardSortRule;
+import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
+import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
+import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Ignore
-public class DashboardServiceTests {
+public class WorkflowResultServiceTests {
 
 	@MockBean
     private BundleRepository bundleRepository;
@@ -41,12 +42,12 @@ public class DashboardServiceTests {
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
 	@Autowired
-    private DashboardService dashboardService;
+    private WorkflowResultService workflowResultService;
 
 	@Autowired
 	private JobService jobService;  
 	@Autowired
-	private DashboardRepository dashboardRepository;    
+	private WorkflowResultRepository dashboardRepository;    
 		
 	@Autowired
 	private TestHelper testHelper;   
@@ -68,7 +69,7 @@ public class DashboardServiceTests {
 	}
 	@Test
 	public void shouldFillDashboardTable() {
-		dashboardService.refreshDashboardResultsLumpsum();
+		workflowResultService.refreshWorkflowResultsLumpsum();
 		
 		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
     			(WorkflowOutputs)invocation  :
@@ -92,9 +93,9 @@ public class DashboardServiceTests {
     	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
     	
     	
-		Iterable<DashboardResult> results = dashboardRepository.findAll();
+		Iterable<WorkflowResult> results = dashboardRepository.findAll();
 	
-		for(DashboardResult result : results) {
+		for(WorkflowResult result : results) {
     		validateResult(result);
     	}
 		
@@ -126,20 +127,20 @@ public class DashboardServiceTests {
     	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
     	
     	
-    	DashboardSearchQuery query = new DashboardSearchQuery();
+    	WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
     	query.setPageNum(1);
     	query.setResultsPerPage(5);
-    	DashboardSortRule sort = new DashboardSortRule();
-    	sort.setColumnName(DashboardRepositoryCustomImpl.DATE_PROPERTY);
+    	WorkflowResultSortRule sort = new WorkflowResultSortRule();
+    	sort.setColumnName(WorkflowResultRepositoryCustomImpl.DATE_PROPERTY);
     	
     	query.setSortRule(sort);
     	
-    	DashboardResponse results = dashboardService.getDashboardResults(query);
-    	List<DashboardResult> records = results.getRows();
+    	WorkflowResultResponse results = workflowResultService.getWorkflowResults(query);
+    	List<WorkflowResult> records = results.getRows();
     	
     	Assert.assertTrue(!records.isEmpty());
     	boolean returnedPrimaryFile = false;
-    	for(DashboardResult result : records) {
+    	for(WorkflowResult result : records) {
     		validateResult(result);
     		if(result.getSourceFilename().equals(pf1.getOriginalFilename()) &&
     				result.getSourceItem().equals(pf1.getItem().getName())) {
@@ -149,7 +150,7 @@ public class DashboardServiceTests {
     	Assert.assertTrue(returnedPrimaryFile);
     	
 	}
-	private void validateResult(DashboardResult result) {
+	private void validateResult(WorkflowResult result) {
 		Assert.assertNotNull(result.getOutputFile());
     	Assert.assertNotNull(result.getSourceItem());
     	Assert.assertNotNull(result.getSourceFilename());

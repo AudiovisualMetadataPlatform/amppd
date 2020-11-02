@@ -6,5 +6,6 @@ public enum GalaxyJobState {
 	IN_PROGRESS,
 	ERROR,
 	COMPLETE,
-	PAUSED
+	PAUSED,
+	DELETED
 }
