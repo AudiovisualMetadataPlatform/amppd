@@ -3,10 +3,12 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Set;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +40,8 @@ public class Item extends Content {
 	@JsonBackReference(value="supplements")
     private Set<ItemSupplement> supplements;
 
+	//@NotNull
+	@Index
 	@ManyToOne
 	private Collection collection;	
 		

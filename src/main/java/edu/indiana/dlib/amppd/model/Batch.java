@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -33,11 +35,21 @@ public class Batch {
 	private Long id;
 	
 	// the following fields come from batch upload UI
+	//@NotNull
+	@Index
 	@ManyToOne
 	private AmpUser submitUser;
+
+	//@NotNull
+	@Index
 	private Date submitTime;
+
+	//@NotNull
+	@Index
 	private String manifestFilename;
 	
+	//@NotNull
+	@Index
 	@JsonIgnore
 	@ManyToOne
 	private Unit unit;

@@ -2,11 +2,13 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Set;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -37,12 +39,15 @@ public class Primaryfile extends Asset {
 	 *   their associated primaryfile. So the historyId is only needed for primaryfile, not for supplements.
 	 */	
 	// ID of the history where all output datasets of all AMP jobs running against this primaryfile is stored in Galaxy.
+	@Index(unique="true")	// historyId could be null, but it should be unique among all primaryfiles
     private String historyId;			
 
 	@OneToMany(mappedBy="primaryfile")
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
+	//@NotNull
+	@Index
 	@ManyToOne
 	private Item item;
 		

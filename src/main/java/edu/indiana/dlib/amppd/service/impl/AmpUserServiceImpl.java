@@ -49,26 +49,16 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private AmpUserRepository ampUserRepository;
 	  
 	  @Autowired
-	  private TimedTokenRepository timedTokenRepository;
-	 		
-	  @NotNull
-	  private static String ampEmailId ;
-	  
-	  @NotNull
-	  private static String ampAdmin ;
-	  
-	  @NotNull
-	  private static int passwordResetTokenExpiration;
-	  
-	  @NotNull
-	  private static int accountActivationTokenExpiration;
-	  
-	  @NotNull
-	  private static String uiUrl ;
+	  private TimedTokenRepository timedTokenRepository;		
 	  
 	  @Autowired
 	  private JavaMailSender mailSender;
-	  
+
+	  private static String ampEmailId ;
+	  private static String ampAdmin ;
+	  private static int passwordResetTokenExpiration;
+	  private static int accountActivationTokenExpiration;
+	  private static String uiUrl ;	  
 	  
 	  @Autowired 
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdPropertyConfig, AmppdUiPropertyConfig amppdUiPropertyConfig) { 

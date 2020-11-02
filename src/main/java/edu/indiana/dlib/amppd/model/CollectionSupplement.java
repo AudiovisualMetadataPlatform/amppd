@@ -1,8 +1,10 @@
 package edu.indiana.dlib.amppd.model;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -22,6 +24,8 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class CollectionSupplement extends Supplement {
 
+	//@NotNull
+	@Index
 	@ManyToOne
     private Collection collection;
     

@@ -25,7 +25,7 @@ import lombok.Setter;
 @Setter
 public class MD5Encryption {
 
-    @NotNull static String secret;
+    private static String secret;
     
 	@Autowired
 	public MD5Encryption(AmppdPropertyConfig amppdconfig) {
