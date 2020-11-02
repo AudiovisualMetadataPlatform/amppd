@@ -31,6 +31,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 
 // TODO remove ignore once we have ffmpeg and MediaProbe installed on Bamboo
+@Ignore
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
