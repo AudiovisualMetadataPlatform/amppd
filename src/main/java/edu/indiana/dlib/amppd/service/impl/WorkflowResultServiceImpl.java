@@ -442,6 +442,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else if(jobStatus.equals("paused")) {
 			status = GalaxyJobState.PAUSED;
 		}
+		else if(jobStatus.equals("deleted")) {
+			status = GalaxyJobState.DELETED;
+		}
 		return status;
 	}
 	
