@@ -91,7 +91,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		try {
 			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 			String state = ds.getState();
-			System.out.print(String.format("refreshResultStatus: workflowId: %s\ninvocationId: %s\nstepId: %s\noutputId: %s\n", result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId()));
+			log.debug(String.format("refreshResultStatus: workflowId: %s\ninvocationId: %s\nstepId: %s\noutputId: %s\n", result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId()));
 			GalaxyJobState status = getJobStatus(state);
 			result.setStatus(status);
 		}
@@ -446,7 +446,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else if(jobStatus.equals("deleted")) {
 			status = GalaxyJobState.DELETED;
 		}
-		System.out.println(String.format("getJobStatus:\ninput string: %s\noutput status: %s\noutput string: %s\n", jobStatus, status, status.toString()));
+		log.debug(String.format("getJobStatus:\ninput string: %s\noutput status: %s\noutput string: %s\n", jobStatus, status, status.toString()));
 		return status;
 	}
 	
