@@ -107,18 +107,18 @@ public class PreprocessServiceImpl implements PreprocessService {
 	}
 	
 	@Override
-	public Asset convertFlac(Asset asset, String filePath) {
-		String targetFilePath = convertFlacToWav(filePath);
+	public Asset convertFlac(Asset asset, String filepath) {
+		String targetFilePath = convertFlacToWav(filepath);
 				
 		// note that we do not remove the original flac file just in case of future use
 		if (targetFilePath != null) {
 			asset.setPathname(targetFilePath);
 			Asset updatedAsset = saveAsset(asset); 
-			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
+			log.info("Updated media file path after flac->wav conversion for asset: " + filepath);
 			return updatedAsset;		
 		}
 
-		log.info("No conversion is needed for asset: " + asset.getId());
+		log.info("No conversion is needed for asset: " + filepath);
 		return asset;
 	}
 	/**
@@ -190,7 +190,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 	public Asset retrieveMediaInfo(Asset asset, String filepath) {
 		String mediaInfo = retrieveMediaInfo(filepath);
 		if (StringUtils.isEmpty(mediaInfo)) {
-			throw new PreprocessException("Error retrieving media info for Asset " + asset.getId() + ": the result is empty");
+			throw new PreprocessException("Error retrieving media info for " + filepath + ": the result is empty");
 		}
 
 		asset.setMediaInfo(mediaInfo);
@@ -204,13 +204,12 @@ public class PreprocessServiceImpl implements PreprocessService {
 	 */
 	@Override	
 	public Asset preprocess(Asset asset) {
-		log.info("Preprocessing asset: " + asset.getId());
 		return retrieveMediaInfo(convertFlac(asset));
 	}
 
 	@Override	
 	public Asset preprocess(Asset asset, String filepath) {
-		log.info("Preprocessing asset: " + asset.getId());
+		log.info("Preprocessing asset: " + filepath);
 		return retrieveMediaInfo(convertFlac(asset, filepath), filepath);
 	}
 	

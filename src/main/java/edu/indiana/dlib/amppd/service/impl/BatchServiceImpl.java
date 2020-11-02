@@ -169,13 +169,14 @@ public class BatchServiceImpl implements BatchService {
 				}
 				primaryfilesSet.add(primaryFile);
 				item.setPrimaryfiles(primaryfilesSet);
-				primaryfileRepository.save(primaryFile);
 				
 
 				Path existingFile = Paths.get(sourceDir, batchFile.getPrimaryfileFilename());	
 				
 				// preprocess the supplement after ingest
 				preprocessService.preprocess(primaryFile, existingFile.toString());
+				
+				primaryfileRepository.save(primaryFile);
 				
 				log.info("BATCH PROCESSING : Move the primary file from the dropbox to amppd file storage");
 				String targetDir = fileStorageService.getDirPathname(item);
