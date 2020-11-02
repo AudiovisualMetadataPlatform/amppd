@@ -3,7 +3,7 @@ package edu.indiana.dlib.amppd.web;
 import lombok.Data;
 
 @Data
-public class DashboardSortRule {
+public class WorkflowResultSortRule {
 	String columnName;
 	boolean orderByDescending;
 }

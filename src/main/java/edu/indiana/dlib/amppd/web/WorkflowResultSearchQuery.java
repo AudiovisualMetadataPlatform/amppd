@@ -6,7 +6,7 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class DashboardSearchQuery {
+public class WorkflowResultSearchQuery {
 	private int pageNum;
 	private int resultsPerPage;
 	private String[] filterBySubmitters;
@@ -16,7 +16,7 @@ public class DashboardSearchQuery {
 	private String[] filterBySteps;
 	private GalaxyJobState[] filterByStatuses;
 	private String[] filterBySearchTerm;	
-	private DashboardSortRule sortRule;
+	private WorkflowResultSortRule sortRule;
 	private List <Date> filterByDates;
 	private boolean filterByFinal;
 }

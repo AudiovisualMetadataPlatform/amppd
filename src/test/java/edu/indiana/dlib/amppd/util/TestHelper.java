@@ -24,19 +24,19 @@ import com.google.common.io.Resources;
 import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.DashboardRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.service.DashboardService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
@@ -90,10 +90,10 @@ public class TestHelper {
 	private JobService jobService;
 	
 	@Autowired
-    private DashboardService dashboardService;
+    private WorkflowResultService workflowResultService;
 	
 	@Autowired
-	private DashboardRepository dashboardRepository;  
+	private WorkflowResultRepository workflowResultRepository;  
 
 	@Autowired
 	private AmpUserService ampUserService;
@@ -265,26 +265,26 @@ public class TestHelper {
 	}	
 	
 	/**
-	 * Check whether Dashboard has been populated with test workflow invocation results for test primaryfile; 
-	 * if not, run test workflow on it and add the output to Dashboard with the last step result set as final.
+	 * Check whether Workflow Results has been populated with test workflow invocation results for test primaryfile; 
+	 * if not, run test workflow on it and add the output to WorkflowResults with the last step result set as final.
 	 * @param useAudio if true use TestAudio, otherwise use TestVideo as the primaryfile
-	 * @return the prepared list of DashboardResults 
+	 * @return the prepared list of WorkflowResults 
 	 */
-	public List<DashboardResult> ensureTestDashboard(boolean useAudio) {	
+	public List<WorkflowResult> ensureTestWorkflowResults(boolean useAudio) {	
 		Primaryfile primaryfile = useAudio ? ensureTestAudio() : ensureTestVideo();
     	Workflow workflow = ensureTestWorkflow();
     	Invocation invocation = ensureTestJob(useAudio);
     	
-		List<DashboardResult> results = dashboardRepository.findByPrimaryfileId(primaryfile.getId());
+		List<WorkflowResult> results = workflowResultRepository.findByPrimaryfileId(primaryfile.getId());
 		if (!results.iterator().hasNext()) {
-			dashboardService.addDashboardResults(invocation, workflow, primaryfile);
-			results = dashboardRepository.findByPrimaryfileId(primaryfile.getId());
+			workflowResultService.addWorkflowResults(invocation, workflow, primaryfile);
+			results = workflowResultRepository.findByPrimaryfileId(primaryfile.getId());
 		}
 			
-		for (DashboardResult result : results) {
+		for (WorkflowResult result : results) {
 			if (result.getWorkflowStep() == TEST_WORKFLOW_STEP && result.getInvocationId() == invocation.getId()) {
 				result.setIsFinal(true);
-				dashboardRepository.save(result);
+				workflowResultRepository.save(result);
 			}
 		}
 		
