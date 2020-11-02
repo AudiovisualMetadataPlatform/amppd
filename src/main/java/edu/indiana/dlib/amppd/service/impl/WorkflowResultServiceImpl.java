@@ -91,7 +91,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		try {
 			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 			String state = ds.getState();
-			log.debug(String.format("refreshResultStatus: workflowId: %s\ninvocationId: %s\nstepId: %s\noutputId: %s\n", result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId()));
 			GalaxyJobState status = getJobStatus(state);
 			result.setStatus(status);
 		}
@@ -443,10 +442,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else if(jobStatus.equals("paused")) {
 			status = GalaxyJobState.PAUSED;
 		}
-		else if(jobStatus.equals("deleted")) {
+		else if(jobStatus.equals("deleted")||jobStatus.equals("discarded")) {
 			status = GalaxyJobState.DELETED;
 		}
-		log.debug(String.format("getJobStatus:\ninput string: %s\noutput status: %s\noutput string: %s\n", jobStatus, status, status.toString()));
 		return status;
 	}
 	
