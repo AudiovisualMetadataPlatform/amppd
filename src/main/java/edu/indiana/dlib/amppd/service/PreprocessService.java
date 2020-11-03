@@ -42,6 +42,8 @@ public interface PreprocessService {
 	 * @@asset the given asset
 	 * @return the preprocessed asset
 	 */
-	public Asset preprocess(Asset asset);	
+	public Asset preprocess(Asset asset);
+
+	String getMediaInfoJsonPath(String filepath);	
 
 }

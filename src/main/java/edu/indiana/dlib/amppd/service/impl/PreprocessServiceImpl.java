@@ -114,13 +114,16 @@ public class PreprocessServiceImpl implements PreprocessService {
 		log.info("No conversion is needed for asset: " + asset.getId());
 		return asset;
 	}
-	
+	@Override
+	public String getMediaInfoJsonPath(String filepath) {
+		return FilenameUtils.getFullPath(filepath) + FilenameUtils.getBaseName(filepath) + ".json";
+	}
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.retrieveMediaInfo(String)
 	 */
 	@Override
 	public String retrieveMediaInfo(String filepath) {
-		String jsonpath = FilenameUtils.getFullPath(filepath) + FilenameUtils.getBaseName(filepath) + ".json";
+		String jsonpath = getMediaInfoJsonPath(filepath);
 		ProcessBuilder pb = new ProcessBuilder(
 				amppdPropertyConfig.getPythonPath(), 
 				amppdPropertyConfig.getMediaprobeDir() + "media_probe.py", 
