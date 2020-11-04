@@ -1,7 +1,6 @@
 	package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
-
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -18,50 +17,46 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import edu.indiana.dlib.amppd.model.DashboardResult;
-import edu.indiana.dlib.amppd.web.DashboardFilterValues;
-import edu.indiana.dlib.amppd.web.DashboardResponse;
-import edu.indiana.dlib.amppd.web.DashboardSearchQuery;
-import edu.indiana.dlib.amppd.web.DashboardSortRule;
-
+import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
+import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
+import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
+import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
 import lombok.extern.slf4j.Slf4j;
 
-
-import edu.indiana.dlib.amppd.web.GalaxyJobState;
-
 @Slf4j
-public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom {
+public class WorkflowResultRepositoryCustomImpl implements WorkflowResultRepositoryCustom {
 	public static String DATE_PROPERTY = "dateCreated";
 	
 	@PersistenceContext
     EntityManager em;
-	public DashboardResponse searchResults(DashboardSearchQuery searchQuery) {
+	public WorkflowResultResponse searchResults(WorkflowResultSearchQuery searchQuery) {
 		
         int count = getTotalCount(searchQuery);
         
-        List<DashboardResult> rows = getDashboardRows(searchQuery);
+        List<WorkflowResult> rows = getWorkflowResultRows(searchQuery);
 
         
-        DashboardFilterValues filters = getFilterValues();
+        WorkflowResultFilterValues filters = getFilterValues();
 
-        
         
         // Format the response
-        DashboardResponse response = new DashboardResponse();
+        WorkflowResultResponse response = new WorkflowResultResponse();
         response.setRows(rows);
         response.setTotalResults(count);
-        // TODO we don't need to update filters with each query; we should update filters each time the DashboardResult table gets updated
+        // TODO we don't need to update filters with each query; we should update filters each time the WorkflowResult table gets updated
         response.setFilters(filters);
         return response;
     }
 
-	private List<DashboardResult> getDashboardRows(DashboardSearchQuery searchQuery){
+	private List<WorkflowResult> getWorkflowResultRows(WorkflowResultSearchQuery searchQuery){
 		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage());
 		
 		
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<DashboardResult> cq = cb.createQuery(DashboardResult.class);
-        Root<DashboardResult> root = cq.from(DashboardResult.class);
+        CriteriaQuery<WorkflowResult> cq = cb.createQuery(WorkflowResult.class);
+        Root<WorkflowResult> root = cq.from(WorkflowResult.class);
 
         // Setup predicates (where statements)
         List<Predicate> predicates = getPredicates(searchQuery, root, cb);
@@ -70,7 +65,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         	Predicate[] preds = predicates.toArray(new Predicate[0]);
             cq.where(preds);
         }
-        DashboardSortRule sort = searchQuery.getSortRule();
+        WorkflowResultSortRule sort = searchQuery.getSortRule();
         if(sort!=null && !sort.getColumnName().isEmpty()) {
         	if(sort.getColumnName().equals("outputFile")) {
     			List<Order> orderList = new ArrayList<Order>();
@@ -97,7 +92,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         }
 
         // Get the actual rows
-        TypedQuery<DashboardResult> query = em.createQuery(cq);
+        TypedQuery<WorkflowResult> query = em.createQuery(cq);
         log.info("=======>>>>QUERY IS:"+query.unwrap(org.hibernate.Query.class).getQueryString()  );
         query.setFirstResult(firstResult);
         query.setMaxResults(searchQuery.getResultsPerPage());
@@ -105,10 +100,10 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         return query.getResultList();
 	}
 	
-	private int getTotalCount(DashboardSearchQuery searchQuery) {
+	private int getTotalCount(WorkflowResultSearchQuery searchQuery) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<DashboardResult> root = countQuery.from(DashboardResult.class);
+        Root<WorkflowResult> root = countQuery.from(WorkflowResult.class);
         countQuery.select(cb.count(root));
 
         // Setup predicates (where statements)
@@ -125,7 +120,7 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         return count.intValue();
 	}
 	
-	private List<Predicate> getPredicates(DashboardSearchQuery searchQuery, Root<DashboardResult> root, CriteriaBuilder cb) {
+	private List<Predicate> getPredicates(WorkflowResultSearchQuery searchQuery, Root<WorkflowResult> root, CriteriaBuilder cb) {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		
 		if(searchQuery.getFilterBySearchTerm().length>0) {        	
@@ -193,20 +188,20 @@ public class DashboardRepositoryCustomImpl implements DashboardRepositoryCustom 
         return predicates;
 	}
 	
-	private DashboardFilterValues getFilterValues() {
+	private WorkflowResultFilterValues getFilterValues() {
 
-		DashboardFilterValues filters = new DashboardFilterValues();		
+		WorkflowResultFilterValues filters = new WorkflowResultFilterValues();		
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
         CriteriaQuery<Date> queryDate = cb.createQuery(Date.class);
-        Root<DashboardResult> root = query.from(DashboardResult.class);
-        Root<DashboardResult> rootDateCriteria = queryDate.from(DashboardResult.class);
+        Root<WorkflowResult> root = query.from(WorkflowResult.class);
+        Root<WorkflowResult> rootDateCriteria = queryDate.from(WorkflowResult.class);
         CriteriaQuery<GalaxyJobState> queryGjs = cb.createQuery(GalaxyJobState.class);
-        Root<DashboardResult> rootGjs = queryGjs.from(DashboardResult.class);
+        Root<WorkflowResult> rootGjs = queryGjs.from(WorkflowResult.class);
         
         // We treat each filter independently, i.e. its possible value set is not dependent on current selected values in other filters;
-        // rather, we populate each filter with distinct values existing in the current dashboard table.
+        // rather, we populate each filter with distinct values existing in the current Workflow table.
         // Making filter value set context-dependent will result in deadlock queries. 
 
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();

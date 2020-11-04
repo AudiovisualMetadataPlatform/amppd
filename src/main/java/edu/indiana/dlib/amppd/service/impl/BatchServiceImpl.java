@@ -169,17 +169,26 @@ public class BatchServiceImpl implements BatchService {
 				}
 				primaryfilesSet.add(primaryFile);
 				item.setPrimaryfiles(primaryfilesSet);
+				
+				Path existingFile = Paths.get(sourceDir, batchFile.getPrimaryfileFilename());	
+				primaryFile.setPathname(existingFile.toString());
+				
+				// preprocess the supplement after ingest
+				preprocessService.preprocess(primaryFile);
+
+		    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
+		    	
 				primaryfileRepository.save(primaryFile);
 				
 				log.info("BATCH PROCESSING : Move the primary file from the dropbox to amppd file storage");
 				String targetDir = fileStorageService.getDirPathname(item);
+				
 				Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryFile));
-		    	primaryFile.setPathname(fileStorageService.getFilePathname(primaryFile));
-		
+				
+				
+				
 		    	logFileCreated(primaryFile, targetPath);	    	
 				
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(primaryFile);
 			}
 	    	return primaryFile;
 		}
@@ -198,16 +207,22 @@ public class BatchServiceImpl implements BatchService {
 			PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryFile, batchSupplementFile, username, errors);
 			if(errors.size()==0 && supplement != null)
 			{
-				primaryfileSupplementRepository.save(supplement);
+				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
+				supplement.setPathname(existingFile.toString());
+				
+				// preprocess the supplement after ingest
+				preprocessService.preprocess(supplement);
+				
 			
 				// Move the file from the dropbox to amppd file storage
 				Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
 				supplement.setPathname(fileStorageService.getFilePathname(supplement));
+
+				primaryfileSupplementRepository.save(supplement);
 				
 				// Log that the file was created
 		    	logFileCreated(supplement, targetSuppPath);
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
+		    	
 			}
 		}
 		catch(IOException ex) {
@@ -226,15 +241,21 @@ public class BatchServiceImpl implements BatchService {
 			CollectionSupplement supplement = getCollectionSupplement(collection, batchSupplementFile, username, errors);
 			if(supplement != null && errors.size()==0)
 			{
-				collectionSupplementRepository.save(supplement);
+
+				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
+				supplement.setPathname(existingFile.toString());
+				
+				// preprocess the supplement after ingest
+				preprocessService.preprocess(supplement);
 				
 				// Move the file from the dropbox to amppd file storage
 				Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
 				supplement.setPathname(fileStorageService.getFilePathname(supplement));
+
+				collectionSupplementRepository.save(supplement);
+				
 				// Log that the file was created
 				logFileCreated(supplement, targetSuppPath);
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
 			}
 		}
 		catch(IOException ex) {
@@ -252,15 +273,21 @@ public class BatchServiceImpl implements BatchService {
 			ItemSupplement supplement = getItemSupplement(item, batchSupplementFile, username, errors);
 			if(supplement != null && errors.size()==0)
 			{
-				itemSupplementRepository.save(supplement);
+
+				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
+				supplement.setPathname(existingFile.toString());
+				
+				// preprocess the supplement after ingest
+				preprocessService.preprocess(supplement);
 				
 				// Move the file from the dropbox to amppd file storage
 				Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
 				supplement.setPathname(fileStorageService.getFilePathname(supplement));
+				
+				itemSupplementRepository.save(supplement);
+				
 				// Log that the file was created
 				logFileCreated(supplement, targetSuppPath);
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
 			}
 		}
 		catch(IOException ex) {
@@ -498,8 +525,12 @@ public class BatchServiceImpl implements BatchService {
 		Path existingFile = Paths.get(sourceDir, sourceFilename);	
 		Path newLink = Paths.get(propertyConfig.getFileStorageRoot(), targetFilename);	
 		
+		String existingJson = preprocessService.getMediaInfoJsonPath(existingFile.toString());
+		String newJson = preprocessService.getMediaInfoJsonPath(newLink.toString());
+		
 		// Move the file
 		fileStorageService.moveFile(existingFile, newLink);
+		fileStorageService.moveFile(Paths.get(existingJson), Paths.get(newJson));
 		
 		return newLink;
 	}

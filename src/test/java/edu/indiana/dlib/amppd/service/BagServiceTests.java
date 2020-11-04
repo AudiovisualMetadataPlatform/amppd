@@ -17,14 +17,13 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import edu.indiana.dlib.amppd.model.BagContent;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionBag;
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
-
 
 @Ignore
 @RunWith(SpringRunner.class)
@@ -40,7 +39,7 @@ public class BagServiceTests {
 	private Primaryfile primaryfile;
 	private Workflow workflow;
 	private Invocation invocation;
-	private List<DashboardResult> results;
+	private List<WorkflowResult> results;
 
 	/**
 	 * Initialize Dashboard.
@@ -51,7 +50,7 @@ public class BagServiceTests {
 		primaryfile = testHelper.ensureTestAudio();
 		workflow = testHelper.ensureTestWorkflow();
 		invocation = testHelper.ensureTestJob(true);
-		results = testHelper.ensureTestDashboard(true);		
+		results = testHelper.ensureTestWorkflowResults(true);		
 	}
 	
 	@Test

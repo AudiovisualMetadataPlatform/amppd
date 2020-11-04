@@ -3,7 +3,7 @@ package edu.indiana.dlib.amppd.web;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.indiana.dlib.amppd.model.DashboardResult;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import lombok.Data;
 
 @Data

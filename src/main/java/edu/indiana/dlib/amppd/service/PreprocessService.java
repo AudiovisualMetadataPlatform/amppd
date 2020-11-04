@@ -43,6 +43,7 @@ public interface PreprocessService {
 	 * @return the preprocessed asset
 	 */
 	public Asset preprocess(Asset asset);
-	
+
+	String getMediaInfoJsonPath(String filepath);	
 
 }

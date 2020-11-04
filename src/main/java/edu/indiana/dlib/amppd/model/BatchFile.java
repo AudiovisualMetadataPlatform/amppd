@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -10,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -29,6 +31,7 @@ import lombok.Data;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Index(members={"externalSource","externalItemId"})
 @Data
 public class BatchFile {	
 	// in batch manifest the types are indicated as "C", "I", "P"
@@ -37,36 +40,51 @@ public class BatchFile {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;	
+
+	//@NotNull
+	@Index
 	private int rowNum;	
 	
+	@Index
 	@JsonIgnore
 	@ManyToOne
 	private Collection collection;
     
+	//@NotNull
+	@Index
 	@Type(type="text")
 	private String collectionName;
     
 	@Type(type="text")
 	private String externalSource;
+	
 	@Type(type="text")
 	private String externalItemId;
 	
+	@Index
 	@Type(type="text")
 	private String itemName;
+
 	@Type(type="text")
 	private String itemDescription;
 	
 	private String primaryfileFilename;
+
+	@Index
 	@Type(type="text")
 	private String primaryfileName;
+
 	@Type(type="text")
 	private String primaryfileDescription;
 
+	@Index
 	private SupplementType supplementType; 
 	
 	@OneToMany(mappedBy="batchFile")
 	private List<BatchSupplementFile> batchSupplementFiles;	
 	
+	//@NotNull
+	@Index
 	@JsonBackReference(value="batch")
 	@ManyToOne
 	private Batch batch;
