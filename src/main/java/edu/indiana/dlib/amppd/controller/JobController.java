@@ -21,6 +21,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,7 +48,7 @@ public class JobController {
 	 * @return outputs of the invocation returned by Galaxy
 	 */
 	@PostMapping("/jobs/submitFile")
-	public WorkflowOutputs createJob(
+	public WorkflowOutputResult createJob(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId, 
 			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
@@ -66,7 +67,7 @@ public class JobController {
 	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
 	 */
 	@PostMapping("/jobs/submitFiles")
-	public Map<Long, WorkflowOutputs> createJobs(			
+	public List<WorkflowOutputResult> createJobs(			
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileIds") Long[] primaryfileIds, 
 			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
@@ -86,7 +87,7 @@ public class JobController {
 	 */
 	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/submitBundle")
-	public Map<Long, WorkflowOutputs> createJobBundle(
+	public List<WorkflowOutputResult> createJobBundle(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("bundleId") Long bundleId, 
 			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
