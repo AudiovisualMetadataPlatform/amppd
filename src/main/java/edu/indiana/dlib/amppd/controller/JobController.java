@@ -45,7 +45,7 @@ public class JobController {
 	 * @param workflowId the ID of the workflow 
 	 * @param primaryfileId the ID of the primaryfile
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return outputs of the invocation returned by Galaxy
+	 * @return WorkflowOutputResult containing detailed information for the file submitted
 	 */
 	@PostMapping("/jobs/submitFile")
 	public WorkflowOutputResult createJob(
@@ -64,7 +64,7 @@ public class JobController {
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters step parameters for running the workflow
-	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 * @return list of WorkflowOutputResult containing detailed information for the file submitted
 	 */
 	@PostMapping("/jobs/submitFiles")
 	public List<WorkflowOutputResult> createJobs(			
@@ -83,7 +83,7 @@ public class JobController {
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 * @return list of WorkflowOutputResult containing detailed information for the file submitted
 	 */
 	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/submitBundle")
