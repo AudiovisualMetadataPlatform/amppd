@@ -304,9 +304,11 @@ public class JobServiceImpl implements JobService {
 		Collection c = item.getCollection();
 	
 		result.setCollectionLabel(c.getName());
+		result.setPrimaryfileId(primaryfile.getId());
 		result.setFileLabel(primaryfile.getName());
 		result.setFileName(primaryfile.getOriginalFilename());
 		result.setItemLabel(item.getName());
+		
 		return result;
 	}
 	/**
@@ -348,7 +350,7 @@ public class JobServiceImpl implements JobService {
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);
     		result.setError(e.toString());
-    		throw new GalaxyWorkflowException("Error creating " + msg, e);
+    		//throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
 		log.info("Successfully created " + msg + msg_param);

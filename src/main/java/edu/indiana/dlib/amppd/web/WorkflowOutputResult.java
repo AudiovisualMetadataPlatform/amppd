@@ -13,5 +13,6 @@ public class WorkflowOutputResult {
 	private String fileLabel;
 	private String fileName;
 	private String error;
+	private long primaryfileId;
 	//collection label, item label, file label, and file name
 }
