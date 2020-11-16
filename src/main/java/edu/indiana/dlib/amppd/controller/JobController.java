@@ -45,7 +45,7 @@ public class JobController {
 	 * @param workflowId the ID of the workflow 
 	 * @param primaryfileId the ID of the primaryfile
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return WorkflowOutputResult containing detailed information for the file submitted
+	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@PostMapping("/jobs/submitFile")
 	public WorkflowOutputResult createJob(
@@ -64,7 +64,7 @@ public class JobController {
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters step parameters for running the workflow
-	 * @return list of WorkflowOutputResult containing detailed information for the file submitted
+	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@PostMapping("/jobs/submitFiles")
 	public List<WorkflowOutputResult> createJobs(			
@@ -83,7 +83,7 @@ public class JobController {
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return list of WorkflowOutputResult containing detailed information for the file submitted
+	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/submitBundle")
