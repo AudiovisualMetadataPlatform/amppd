@@ -35,6 +35,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 
 // TODO remove ignore once we have Galaxy Bootstrap working on Bamboo
 @Ignore
@@ -159,8 +160,7 @@ public class JobServiceTests {
     
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
-    	WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
-    			(WorkflowOutputs)invocation  :
+    	WorkflowOutputResult result = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
     	// now the dataset ID and history ID shall be set
@@ -168,6 +168,7 @@ public class JobServiceTests {
     	Assert.assertNotNull(pf.getDatasetId());
     	Assert.assertNotNull(pf.getHistoryId());
     	
+    	WorkflowOutputs woutputs = result.getResult();
     	// returned workflow outputs shall have contents
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
@@ -183,8 +184,11 @@ public class JobServiceTests {
     
     @Test
     public void shouldCreateJobOnValidHmgmInputs() {    	              
-    	WorkflowOutputs woutputs = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+        
+    	WorkflowOutputResult result = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
+    	WorkflowOutputs woutputs = result.getResult();
+    	
     	// now the dataset ID and history ID shall be set
 		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertNotNull(pf.getDatasetId());
@@ -225,13 +229,15 @@ public class JobServiceTests {
     	bundle.getPrimaryfiles().add(pf);
     	
     	// use the dummy bundle we set up for this test
-    	Map<Long, WorkflowOutputs> woutputsMap = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
+    	List<WorkflowOutputResult> woutputsMap = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
 
     	// only one primaryfile is valid, so only one workflow outputs shall exist in the list returned
     	Assert.assertNotNull(woutputsMap);
     	Assert.assertEquals(woutputsMap.size(), 1);
-    	Assert.assertTrue(woutputsMap.containsKey(primaryfile.getId()));
-    	Assert.assertNotNull(woutputsMap.get(primaryfile.getId()));
+    	WorkflowOutputResult result = woutputsMap.get(0);
+    	
+    	Assert.assertTrue(result.isSuccess());
+    	Assert.assertNotNull(result);
     }
     
     @Test

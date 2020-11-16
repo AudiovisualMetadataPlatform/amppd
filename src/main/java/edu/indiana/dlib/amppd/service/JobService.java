@@ -11,6 +11,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 
 
 /**
@@ -52,27 +53,27 @@ public interface JobService {
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileId ID of the given primaryfile
 	 * @param parameters step parameters for running the workflow
-	 * @return the WorkflowOutputs returned from Galaxy
+	 * @return WorkflowOutputResult containing detailed information for the file submitted
 	 */
-	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
+	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
 	
 	/**
 	 * Create new Amppd jobs by submitting to Galaxy the given workflow on the given primaryfiles, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters step parameters for running the workflow
-	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 * @return WorkflowOutputResult containing detailed information for the file submitted
 	 */
-	public Map<Long, WorkflowOutputs> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters);
+	public List<WorkflowOutputResult> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters);
 	
 	/**
 	 * Create a bundle of multiple Amppd jobs, one job for each primaryfile included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 * @return list of WorkflowOutputResult containing detailed information for the file submitted
 	 */
-	public Map<Long, WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
+	public List<WorkflowOutputResult> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
 	
 	/**
 	 * List all AMP jobs run on the specified workflow against the specified primaryfile.

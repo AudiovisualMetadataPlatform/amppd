@@ -31,11 +31,14 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
@@ -295,12 +298,25 @@ public class JobServiceImpl implements JobService {
 		
 		return str;
 	}
+	private WorkflowOutputResult createJobResult(Primaryfile primaryfile) {
+		WorkflowOutputResult result = new WorkflowOutputResult();
+		Item item = primaryfile.getItem();
+		Collection c = item.getCollection();
 	
+		result.setCollectionLabel(c.getName());
+		result.setPrimaryfileId(primaryfile.getId());
+		result.setFileLabel(primaryfile.getName());
+		result.setFileName(primaryfile.getOriginalFilename());
+		result.setItemLabel(item.getName());
+		
+		return result;
+	}
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String,Long,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public WorkflowOutputs createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
+	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
+		
 		WorkflowOutputs woutputs = null;
 		String msg = "Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId;
 		String msg_param = ", parameters (user defined): " + parameters;
@@ -309,6 +325,8 @@ public class JobServiceImpl implements JobService {
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
 		preparePrimaryfileForJobs(primaryfile);
+		
+		WorkflowOutputResult result = createJobResult(primaryfile);
 
 		// invoke the workflow 
     	try {
@@ -322,24 +340,29 @@ public class JobServiceImpl implements JobService {
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		woutputs = workflowsClient.runWorkflow(winputs);
     		
+    		result.setResult(woutputs);
+    		
     		// add workflow results to the table for the newly created invocation
     		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
+    		
+    		result.setSuccess(true);
     	}
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);
-    		throw new GalaxyWorkflowException("Error creating " + msg, e);
+    		result.setError(e.toString());
+    		//throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
 		log.info("Successfully created " + msg + msg_param);
     	log.info("Galaxy workflow outputs: " + woutputs);
-    	return woutputs;
+    	return result;
 	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[], Map<String, Map<String, String>>)
 	 */
-	public Map<Long, WorkflowOutputs> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
-		HashMap<Long, WorkflowOutputs> woutputsMap = new HashMap<Long, WorkflowOutputs>();
+	public List<WorkflowOutputResult> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
+		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
 		String msg = "a list of Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameters: " + parameters;
 		log.info("Creating " + msg);		
 
@@ -355,7 +378,7 @@ public class JobServiceImpl implements JobService {
 			
 			try {
 				Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
-				woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));
+				woutputs.add(createJob(workflowId, primaryfile.getId(), parameters));
 				nSuccess++;
 			}
 			catch (Exception e) {
@@ -367,15 +390,15 @@ public class JobServiceImpl implements JobService {
 
 		log.info("Number of Amppd jobs successfully created for the primaryfiles: " + nSuccess);    	
 		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
-    	return woutputsMap;		
+    	return woutputs;		
 	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String,Long,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public Map<Long, WorkflowOutputs> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
-		HashMap<Long, WorkflowOutputs> woutputsMap = new HashMap<Long, WorkflowOutputs>();
+	public List<WorkflowOutputResult> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
+		List<WorkflowOutputResult> woutputsMap = new ArrayList<WorkflowOutputResult>();
 		String msg = "a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
 		log.info("Creating " + msg);
 		
@@ -388,7 +411,7 @@ public class JobServiceImpl implements JobService {
     	else { 
     		for (Primaryfile primaryfile : bundle.getPrimaryfiles() ) {
     			try {
-    				woutputsMap.put(primaryfile.getId(), createJob(workflowId, primaryfile.getId(), parameters));
+    				woutputsMap.add(createJob(workflowId, primaryfile.getId(), parameters));
     				nSuccess++;
     			}
     			catch (Exception e) {
