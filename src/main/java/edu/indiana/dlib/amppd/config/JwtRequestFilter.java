@@ -54,7 +54,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private boolean ValidRefUrl(String referer, String uri) {
 		if(referer==null) return false;
 		// Only continue if it's the NER editor
-		if(!uri.equals("/hmgm/ner-editor")) {
+		if(!uri.equals("/rest/hmgm/ner-editor")) {
 			return false;
 		}
 		// Standardize cleaning URLs to avoid oddities
