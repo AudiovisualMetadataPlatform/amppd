@@ -21,6 +21,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,10 +45,10 @@ public class JobController {
 	 * @param workflowId the ID of the workflow 
 	 * @param primaryfileId the ID of the primaryfile
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return outputs of the invocation returned by Galaxy
+	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@PostMapping("/jobs/submitFile")
-	public WorkflowOutputs createJob(
+	public WorkflowOutputResult createJob(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileId") Long primaryfileId, 
 			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
@@ -63,10 +64,10 @@ public class JobController {
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters step parameters for running the workflow
-	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@PostMapping("/jobs/submitFiles")
-	public Map<Long, WorkflowOutputs> createJobs(			
+	public List<WorkflowOutputResult> createJobs(			
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("primaryfileIds") Long[] primaryfileIds, 
 			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
@@ -82,11 +83,11 @@ public class JobController {
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return map between primaryfile IDs to the outputs of the jobs created successfully
+	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/submitBundle")
-	public Map<Long, WorkflowOutputs> createJobBundle(
+	public List<WorkflowOutputResult> createJobBundle(
 			@RequestParam("workflowId") String workflowId, 
 			@RequestParam("bundleId") Long bundleId, 
 			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	

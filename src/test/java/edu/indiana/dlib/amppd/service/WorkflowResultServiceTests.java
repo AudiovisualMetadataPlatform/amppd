@@ -27,6 +27,7 @@ import edu.indiana.dlib.amppd.repository.WorkflowResultRepositoryCustomImpl;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
@@ -71,10 +72,10 @@ public class WorkflowResultServiceTests {
 	public void shouldFillDashboardTable() {
 		workflowResultService.refreshWorkflowResultsLumpsum();
 		
-		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
-    			(WorkflowOutputs)invocation  :
+		WorkflowOutputResult r = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
+		WorkflowOutputs woutputs = r.getResult();
     	// now the dataset ID and history ID shall be set
 		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertNotNull(pf.getDatasetId());
@@ -105,10 +106,11 @@ public class WorkflowResultServiceTests {
 	}
 	@Test
 	public void shouldReturnRows() {
-		WorkflowOutputs woutputs = invocation instanceof WorkflowOutputs ? 
-    			(WorkflowOutputs)invocation  :
+
+		WorkflowOutputResult r = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
+		WorkflowOutputs woutputs = r.getResult();
     	// now the dataset ID and history ID shall be set
 		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertNotNull(pf.getDatasetId());
