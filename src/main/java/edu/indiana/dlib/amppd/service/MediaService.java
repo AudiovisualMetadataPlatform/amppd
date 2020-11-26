@@ -17,10 +17,10 @@ public interface MediaService {
 
 	/**
 	 * Get the absolute pathname of the supplement, given its name, type, and parent to which the given primaryfile belongs. 
-	 * @param primaryfile the given primaryfile whose ancestor is the associated parent of the supplement 
+	 * @param primaryfile the given primaryfile whose ancestor is the parent associated with the supplement 
 	 * @param name name of the supplement
 	 * @param type association type of the supplement
-	 * @return pathname of the supplement if found, or null otherwise
+	 * @return absolute pathname of the supplement if found, or null otherwise
 	 */
 	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
 	

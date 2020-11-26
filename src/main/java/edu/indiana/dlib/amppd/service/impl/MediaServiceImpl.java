@@ -91,7 +91,7 @@ public class MediaServiceImpl implements MediaService {
 	@Autowired
 	private AmppdUiPropertyConfig amppduiConfig; 	
 	
-	// path of the root directory for symlinks
+	// absolute path of the root directory for symlinks
 	private Path root;
 
 	@Autowired
@@ -106,30 +106,6 @@ public class MediaServiceImpl implements MediaService {
 			throw new StorageException("Could not initialize media symlink root directory " + root, e);
 		}		
 	}	
-	
-//	/**
-//	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String)
-//	 */
-//	@Override
-//	public String getCollectionSupplementPathname(Primaryfile primaryfile, String name) {
-//		// find the CollectionSupplement by collection ID and name
-//		Long collectionId = primaryfile.getItem().getCollection().getId();
-//		List<CollectionSupplement> supplements = collectionSupplementRepository.findByCollectionIdAndName(collectionId, name);
-//		CollectionSupplement supplement = null;
-//		
-//		// supplement should be unique by name within its parent's scope
-//		if (supplements.size() == 1) {
-//			supplement = supplements.get(0);
-//		}	
-//		
-//		// if supplement found, return its pathname; otherwise return null
-//		if (supplement != null) {
-//			return supplement.getPathname();
-//		}
-//		else {
-//			return null;
-//		}
-//	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String, SupplementType)
@@ -149,7 +125,7 @@ public class MediaServiceImpl implements MediaService {
 			supplements = itemSupplementRepository.findByItemIdAndName(primaryfile.getItem().getId(), name);
 			break;
 		case PRIMARYFILE:
-			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getId(), name);
+			supplements = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), name);
 			break;
 		}		
 		
