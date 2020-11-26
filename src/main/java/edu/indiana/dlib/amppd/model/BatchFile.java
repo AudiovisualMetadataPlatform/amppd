@@ -11,7 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -20,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import lombok.Data;
 
 /**
  * Class containing information of a batch file, which corresponds to a row in a batch manifest spreadsheet. 
@@ -75,7 +75,7 @@ public class BatchFile {
 	private String primaryfileDescription;
 
 	@Index
-	private Supplement.SupplementType supplementType; 
+	private SupplementType supplementType; 
 	
 	@OneToMany(mappedBy="batchFile")
 	private List<BatchSupplementFile> batchSupplementFiles;	

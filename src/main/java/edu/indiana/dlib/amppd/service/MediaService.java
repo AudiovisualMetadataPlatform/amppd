@@ -3,10 +3,10 @@ package edu.indiana.dlib.amppd.service;
 import java.nio.file.Path;
 
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 
 /**
  * Service for serving media files for primaryfiles and supplements. 
@@ -16,13 +16,13 @@ import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 public interface MediaService {
 
 	/**
-	 * Get the absolute pathname of the supplement, given its name, association type, and parent asset to which the given primaryfile belongs. 
-	 * @param primaryfile the given primaryfile 
+	 * Get the absolute pathname of the supplement, given its name, type, and parent to which the given primaryfile belongs. 
+	 * @param primaryfile the given primaryfile whose ancestor is the associated parent of the supplement 
 	 * @param name name of the supplement
-	 * @param type type of the supplement
+	 * @param type association type of the supplement
 	 * @return pathname of the supplement if found, or null otherwise
 	 */
-	public String getCollectionSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
+	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
 	
 	/**
 	 * Get the media file download URL for the given primaryfile.

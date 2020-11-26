@@ -23,19 +23,20 @@ import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
-import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
@@ -106,28 +107,63 @@ public class MediaServiceImpl implements MediaService {
 		}		
 	}	
 	
+//	/**
+//	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String)
+//	 */
+//	@Override
+//	public String getCollectionSupplementPathname(Primaryfile primaryfile, String name) {
+//		// find the CollectionSupplement by collection ID and name
+//		Long collectionId = primaryfile.getItem().getCollection().getId();
+//		List<CollectionSupplement> supplements = collectionSupplementRepository.findByCollectionIdAndName(collectionId, name);
+//		CollectionSupplement supplement = null;
+//		
+//		// supplement should be unique by name within its parent's scope
+//		if (supplements.size() == 1) {
+//			supplement = supplements.get(0);
+//		}	
+//		
+//		// if supplement found, return its pathname; otherwise return null
+//		if (supplement != null) {
+//			return supplement.getPathname();
+//		}
+//		else {
+//			return null;
+//		}
+//	}
+	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String, SupplementType)
 	 */
 	@Override
-	public String getCollectionSupplementPathname(Primaryfile primaryfile, String name) {
-		// find the CollectionSupplement by collection ID and name
-		Long collectionId = primaryfile.getItem().getCollection().getId();
-		List<CollectionSupplement> supplements = collectionSupplementRepository.findByCollectionIdAndName(collectionId, name);
-		CollectionSupplement supplement = null;
+	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type) {
+		String pathname = null;
+		Supplement supplement = null;
+		List<? extends Supplement> supplements = null;
 		
-		// supplement should be unique by name within its parent's scope
-		if (supplements.size() == 1) {
+		// find the supplements by its name and associated parent's ID
+		switch(type) {
+		case COLLECTION:
+			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getItem().getCollection().getId(), name);
+			break;
+		case ITEM:
+			supplements = itemSupplementRepository.findByItemIdAndName(primaryfile.getItem().getId(), name);
+			break;
+		case PRIMARYFILE:
+			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getId(), name);
+			break;
+		}		
+		
+		// there should be exactly one supplement found, as supplement is unique by name within its parent's scope
+		if (supplements != null && supplements.size() == 1) {
 			supplement = supplements.get(0);
 		}	
 		
-		// if supplement found, return its pathname; otherwise return null
+		// if the exact supplement is found, resolve its pathname to the absolute path
 		if (supplement != null) {
-			return supplement.getPathname();
+			pathname = fileStorageService.resolve(supplement.getPathname()).toString();
 		}
-		else {
-			return null;
-		}
+		
+		return pathname;
 	}
 	
 	/**

@@ -29,7 +29,6 @@ import edu.indiana.dlib.amppd.model.BatchSupplementFile;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.BatchFileRepository;
@@ -140,7 +139,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	}
         	
         	// Process supplements
-        	Supplement.SupplementType supplementType = null;
+        	SupplementType supplementType = null;
         	
         	// If a supplement type is supplied, get the enum value for the textual value
         	if(line.length>8) {
@@ -223,8 +222,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	response.addErrors(primaryFileErrors);
         	
         	// Check for duplicate primary files
-        	Supplement.SupplementType supplementType = batchFile.getSupplementType();
-        	if(supplementType == null || supplementType==Supplement.SupplementType.PRIMARYFILE) {
+        	SupplementType supplementType = batchFile.getSupplementType();
+        	if(supplementType == null || supplementType==SupplementType.PRIMARYFILE) {
             	List<String> duplicatePrimaryFileErrors = validateUniquePrimaryfile(batch, batchFile);
             	response.addErrors(duplicatePrimaryFileErrors);
         	}
@@ -323,13 +322,13 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the primary file values
 	 */
-	private List<String> validatePrimaryFile(Unit unit, Collection collection, String primaryFile, String primaryFileLabel, Supplement.SupplementType supplementType, int lineNum){
+	private List<String> validatePrimaryFile(Unit unit, Collection collection, String primaryFile, String primaryFileLabel, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
 		
 		// If the supplement type is for a primary file, or no supplement is supplied, we need make sure primary file values are supplied
-		if(supplementType == Supplement.SupplementType.PRIMARYFILE || supplementType == null) {
+		if(supplementType == SupplementType.PRIMARYFILE || supplementType == null) {
 	    	if(primaryFile.isBlank()) {
-	    		if(supplementType == Supplement.SupplementType.PRIMARYFILE) {
+	    		if(supplementType == SupplementType.PRIMARYFILE) {
 		    		errors.add(String.format("Row: %s: Primary file name is missing for supplement type Primary", lineNum));
 	    		}
 	    		else {
@@ -337,7 +336,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	    		}
 	    	}
 	    	if(primaryFileLabel.isBlank()) {
-	    		if(supplementType == Supplement.SupplementType.PRIMARYFILE) {
+	    		if(supplementType == SupplementType.PRIMARYFILE) {
 		    		errors.add(String.format("Row: %s: Primary file label is missing for supplement type Primary", lineNum));
 	    		}
 	    		else {
@@ -355,7 +354,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 				}
 			}
 		}
-		else if(supplementType == Supplement.SupplementType.ITEM || supplementType == Supplement.SupplementType.COLLECTION) {
+		else if(supplementType == SupplementType.ITEM || supplementType == SupplementType.COLLECTION) {
 			if(!primaryFile.isBlank()) {
 	    		errors.add(String.format("Row: %s: Primary file name should be blank for supplement type Item", lineNum));
 			}
@@ -390,7 +389,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the supplement
 	 */
-	private List<String> validateSupplement(Unit unit, Collection collection, String supplementalFile, String supplementalFileLabel, Supplement.SupplementType supplementType, int lineNum){
+	private List<String> validateSupplement(Unit unit, Collection collection, String supplementalFile, String supplementalFileLabel, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
 		if(supplementalFile.isBlank() && supplementalFileLabel.isBlank()) {
 			return errors;
@@ -410,18 +409,18 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     		errors.add(String.format("Row: %s: Supplemental file label not supplied for supplement type %s", lineNum, supplementType));
 		}
 		else {
-			if(supplementType==Supplement.SupplementType.PRIMARYFILE) {
+			if(supplementType==SupplementType.PRIMARYFILE) {
 				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
 		    		errors.add(String.format("Row: %s: Primary supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 				}
 				
 			}
-			else if(supplementType==Supplement.SupplementType.ITEM){
+			else if(supplementType==SupplementType.ITEM){
 				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
 		    		errors.add(String.format("Row: %s: Item supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 				}
 			}
-			else if(supplementType==Supplement.SupplementType.ITEM){
+			else if(supplementType==SupplementType.ITEM){
 				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
 			    	errors.add(String.format("Row: %s: Collection supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
 				}
@@ -504,17 +503,17 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Convert supplemental file type string to an enum
 	 */
-	private Supplement.SupplementType getSupplementalFileType(String supplementalFileType) {
+	private SupplementType getSupplementalFileType(String supplementalFileType) {
 		switch(supplementalFileType.trim().toLowerCase()) {
 			case "p":
 			case "primary":
-				return Supplement.SupplementType.PRIMARYFILE;
+				return SupplementType.PRIMARYFILE;
 			case "i":
 			case "item":
-				return Supplement.SupplementType.ITEM;
+				return SupplementType.ITEM;
 			case "c":
 			case "collection":
-				return Supplement.SupplementType.COLLECTION;
+				return SupplementType.COLLECTION;
 			default:
 				return null;
 		}

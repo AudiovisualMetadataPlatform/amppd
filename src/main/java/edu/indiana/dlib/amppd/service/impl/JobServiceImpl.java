@@ -32,11 +32,10 @@ import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
-import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -211,19 +210,22 @@ public class JobServiceImpl implements JobService {
 	 * Populate parameters that need special handling for certain MGMs such as HMGM and FR (Face Recognition):
 	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those 
 	 * as json string into the context parameter of each HMGM step in the workflow;
-	 * If the given workflow contains steps using FRs, translate the training photo parameter from CollectionSupplement name 
-	 * defined by user in the workflow, into the corresponding local filepath of the CollectionSupplement.
-	 * Note that the passed-in parameters here are part of the workflow inputs already populated with user-defined ones;
-	 * and the context parameters are purely system generated and shall be transparent to users.
+	 * If the given workflow contains steps using FRs, translate the training_photos parameter from CollectionSupplement name 
+	 * defined by user in the workflow, into the corresponding absolute pathname of the CollectionSupplement's media.
+	 * Note that the passed-in parameters here are part of the workflow inputs already populated with user-defined values;
+	 * while the context and absolute path parameters are system generated and shall be transparent to users.
 	 * @param workflowDetails the given workflow
 	 * @param primaryfile the given primaryfile
 	 * @param parameters the parameters for the workflow
-	 * @return the number of parameters updated
+	 * @return a list of IDs of the steps for which parameters are added/changed
 	 */
-	protected Integer populateMgmParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
+	protected List<String> populateMgmParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
 		// we store context in StringBuffer instead of String because foreach doesn't allow updating local variable defined outside its scope
 		StringBuffer context = new StringBuffer(); 
-		int previousSize = parameters.size();
+		
+		// store the IDs of the steps for which parameters are added/changed
+		List<String> stepsChanged = new ArrayList<String>();		
+//		int previousSize = parameters.size();
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
 			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX)) {
@@ -239,7 +241,8 @@ public class JobServiceImpl implements JobService {
 					parameters.put(stepId, stepParams);
 				}
 				stepParams.put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
-				log.info("Adding HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
+				stepsChanged.add(stepId);
+				log.info("Added HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}
 			else if (StringUtils.startsWith(stepDef.getToolId(), FR_TOOL_ID_PREFIX)) {
 				String msg =  ", for MGM " + stepDef.getToolId() + " in step " + stepId + " of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();
@@ -255,30 +258,31 @@ public class JobServiceImpl implements JobService {
 					throw new GalaxyWorkflowException(err + msg);
 				}
 				
-				// find the CollectionSupplement by collection ID and name
-				Long collectionId = primaryfile.getItem().getCollection().getId();
-				List<CollectionSupplement> supplements = collectionSupplementRepository.findByCollectionIdAndName(collectionId, name);
-				CollectionSupplement supplement = null;
-				if (supplements.size() == 1) {
-					supplement = supplements.get(0);
-				}
-				err = "Could not find the exact training photo supplement with the name defined: " + name;
-				if (supplement == null) {
+				// get the collection supplement's absolute pathname, given its name and the associated primaryfile
+				String pathname = mediaService.getSupplementPathname(primaryfile, name, SupplementType.COLLECTION);
+				if (StringUtils.isEmpty(pathname)) {
+					err = "Could not find the exact training photo supplement with the name defined: " + name;
 					throw new GalaxyWorkflowException(err + msg);
 				}
-				stepParams.put(FR_TRAIN_PARAMETER_NAME, supplement.getPathname());
-				log.info("Translated parameter " + FR_TRAIN_PARAMETER_NAME + " from supplement name " + name + " to filepath " + supplement.getPathname() + msg);				
+				
+				// update the training_photos parameter
+				stepParams.put(FR_TRAIN_PARAMETER_NAME, pathname);
+				stepsChanged.add(stepId);
+				log.info("Translated parameter " + FR_TRAIN_PARAMETER_NAME + " from supplement name " + name + " to filepath " + pathname + msg);				
 			}
 		});
+
+		log.info("Successfully updated parameters for " + stepsChanged.size() + " steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());
+		return stepsChanged;
 		
-		int nstep = parameters.size() - previousSize;
-		if (nstep > 0 ) {
-			log.info("Successfully populated job context for " + nstep + " HMGM steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());
-		}
-		else {
-			log.info("No HMGM steps found in workflow " + workflowDetails.getId());
-		}
-		return context.toString();		
+//		int nstep = parameters.size() - previousSize;
+//		if (nstep > 0 ) {
+//			log.info("Successfully populated job context for " + nstep + " HMGM steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());
+//		}
+//		else {
+//			log.info("No HMGM steps found in workflow " + workflowDetails.getId());
+//		}
+//		return context.toString();		
 	}
 	
 	/**
