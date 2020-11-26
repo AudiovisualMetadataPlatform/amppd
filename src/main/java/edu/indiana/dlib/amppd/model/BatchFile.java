@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import lombok.Data;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 
 /**
  * Class containing information of a batch file, which corresponds to a row in a batch manifest spreadsheet. 
@@ -34,9 +34,6 @@ import lombok.Data;
 @Index(members={"externalSource","externalItemId"})
 @Data
 public class BatchFile {	
-	// in batch manifest the types are indicated as "C", "I", "P"
-	public enum SupplementType { COLLECTION, ITEM, PRIMARYFILE };
-
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;	
@@ -78,7 +75,7 @@ public class BatchFile {
 	private String primaryfileDescription;
 
 	@Index
-	private SupplementType supplementType; 
+	private Supplement.SupplementType supplementType; 
 	
 	@OneToMany(mappedBy="batchFile")
 	private List<BatchSupplementFile> batchSupplementFiles;	

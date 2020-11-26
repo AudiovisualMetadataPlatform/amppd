@@ -22,7 +22,8 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public abstract class Supplement extends Asset {
+public abstract class Supplement extends Asset {// in batch manifest the types are indicated as "C", "I", "P"
+	public enum SupplementType { COLLECTION, ITEM, PRIMARYFILE }
 	
 	// TODO double check the relationship
 //	@ManyToMany

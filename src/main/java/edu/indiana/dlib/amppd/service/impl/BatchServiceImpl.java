@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.Batch;
 import edu.indiana.dlib.amppd.model.BatchFile;
-import edu.indiana.dlib.amppd.model.BatchFile.SupplementType;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.BatchSupplementFile;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;

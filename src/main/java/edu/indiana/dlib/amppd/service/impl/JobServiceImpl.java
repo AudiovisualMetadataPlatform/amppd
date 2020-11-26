@@ -32,18 +32,20 @@ import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.service.WorkflowResultService;
-import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,6 +61,8 @@ public class JobServiceImpl implements JobService {
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
+	public static final String FR_TOOL_ID_PREFIX = "dlib_face";
+	public static final String FR_TRAIN_PARAMETER_NAME = "training_photos";
 	
 	@Autowired
     private BundleRepository bundleRepository;
@@ -204,16 +208,19 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those as json string 
-	 * into the context parameter of each HMGM step in the workflow, and return the context; otherwise return empty string. 
+	 * Populate parameters that need special handling for certain MGMs such as HMGM and FR (Face Recognition):
+	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those 
+	 * as json string into the context parameter of each HMGM step in the workflow;
+	 * If the given workflow contains steps using FRs, translate the training photo parameter from CollectionSupplement name 
+	 * defined by user in the workflow, into the corresponding local filepath of the CollectionSupplement.
 	 * Note that the passed-in parameters here are part of the workflow inputs already populated with user-defined ones;
 	 * and the context parameters are purely system generated and shall be transparent to users.
 	 * @param workflowDetails the given workflow
 	 * @param primaryfile the given primaryfile
 	 * @param parameters the parameters for the workflow
-	 * @return true if the given parameters are updated with HMGM context
+	 * @return the number of parameters updated
 	 */
-	protected String populateHmgmContextParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
+	protected Integer populateMgmParameters(WorkflowDetails workflowDetails, Primaryfile primaryfile, Map<Object, Map<String, Object>> parameters) {
 		// we store context in StringBuffer instead of String because foreach doesn't allow updating local variable defined outside its scope
 		StringBuffer context = new StringBuffer(); 
 		int previousSize = parameters.size();
@@ -233,7 +240,35 @@ public class JobServiceImpl implements JobService {
 				}
 				stepParams.put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
 				log.info("Adding HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
-			}			
+			}
+			else if (StringUtils.startsWith(stepDef.getToolId(), FR_TOOL_ID_PREFIX)) {
+				String msg =  ", for MGM " + stepDef.getToolId() + " in step " + stepId + " of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();
+				
+				// the training_photos parameter should have been populated with the supplement name associated with the primaryfile's collection
+				Map<String, Object> stepParams = parameters.get(stepId);				
+				String err = "No training photo supplement name is defined";
+				if (stepParams == null) {
+					throw new GalaxyWorkflowException(err + msg);
+				}
+				String name = (String)stepParams.get(FR_TRAIN_PARAMETER_NAME);
+				if (StringUtils.isEmpty(name)) {
+					throw new GalaxyWorkflowException(err + msg);
+				}
+				
+				// find the CollectionSupplement by collection ID and name
+				Long collectionId = primaryfile.getItem().getCollection().getId();
+				List<CollectionSupplement> supplements = collectionSupplementRepository.findByCollectionIdAndName(collectionId, name);
+				CollectionSupplement supplement = null;
+				if (supplements.size() == 1) {
+					supplement = supplements.get(0);
+				}
+				err = "Could not find the exact training photo supplement with the name defined: " + name;
+				if (supplement == null) {
+					throw new GalaxyWorkflowException(err + msg);
+				}
+				stepParams.put(FR_TRAIN_PARAMETER_NAME, supplement.getPathname());
+				log.info("Translated parameter " + FR_TRAIN_PARAMETER_NAME + " from supplement name " + name + " to filepath " + supplement.getPathname() + msg);				
+			}
 		});
 		
 		int nstep = parameters.size() - previousSize;
@@ -315,8 +350,7 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String,Long,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
-		
+	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {		
 		WorkflowOutputs woutputs = null;
 		String msg = "Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId;
 		String msg_param = ", parameters (user defined): " + parameters;
@@ -324,8 +358,7 @@ public class JobServiceImpl implements JobService {
 		
 		// retrieve primaryfile via ID
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-		preparePrimaryfileForJobs(primaryfile);
-		
+		preparePrimaryfileForJobs(primaryfile);		
 		WorkflowOutputResult result = createJobResult(primaryfile);
 
 		// invoke the workflow 
@@ -336,15 +369,15 @@ public class JobServiceImpl implements JobService {
 			}
 			
     		WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
-    		populateHmgmContextParameters(workflowDetails, primaryfile, winputs.getParameters());
+    		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
-    		woutputs = workflowsClient.runWorkflow(winputs);
-    		
-    		result.setResult(woutputs);
+    		woutputs = workflowsClient.runWorkflow(winputs);    		
     		
     		// add workflow results to the table for the newly created invocation
-    		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
+    		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);   
     		
+    		// set up result response
+    		result.setResult(woutputs);
     		result.setSuccess(true);
     	}
     	catch (Exception e) {    	
