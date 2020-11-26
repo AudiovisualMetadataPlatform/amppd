@@ -67,7 +67,7 @@ public class MediaServiceTests {
 		// initially symlink in primaryfile is not populated
 		Assert.assertNull(primaryfile.getSymlink());
 		
-		String symlink = mediaService.createSymlink(primaryfile);	
+		mediaService.createSymlink(primaryfile);	
 		
 		// after creating, symlink in primaryfile should be populated
 		Assert.assertNotNull(primaryfile.getSymlink());

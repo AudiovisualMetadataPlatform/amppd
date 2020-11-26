@@ -16,7 +16,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
-import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
+import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import lombok.Getter;
@@ -172,12 +172,12 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			catch (Exception e) {
 				msg = "Upload failed. " + e.getMessage();
 				log.error(msg);
-				throw new GalaxyFileUploadException(msg, e);
+				throw new GalaxyDataException(msg, e);
 			}
 		} else {
 			msg = "Upload failed, unable to find the data library " + libraryName;
 			log.error(msg);
-			throw new GalaxyFileUploadException(msg);
+			throw new GalaxyDataException(msg);
 		}
 
 		return uploadData;

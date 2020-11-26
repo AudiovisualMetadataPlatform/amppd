@@ -390,6 +390,10 @@ public class MediaServiceImpl implements MediaService {
 		return asset;
 	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.findItemOrFile(String, String)
+	 */
+	@Override
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
 		log.info("Executing file search in media service");
 		ItemSearchResponse response = new ItemSearchResponse();

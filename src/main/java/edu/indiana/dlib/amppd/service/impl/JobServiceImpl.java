@@ -28,6 +28,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
+import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
@@ -148,7 +149,7 @@ public class JobServiceImpl implements JobService {
 				log.info("Initialized the Galaxy output history " + history.getId() + " for primaryfile " + primaryfile.getId());
 			}
 			catch (Exception e) {
-				throw new RuntimeException("Cannot create Galaxy output history for primaryfile " + primaryfile.getId(), e);
+				throw new GalaxyDataException("Cannot create Galaxy output history for primaryfile " + primaryfile.getId(), e);
 			}		
 		}			
 		else {
@@ -249,7 +250,7 @@ public class JobServiceImpl implements JobService {
 				
 				// the training_photos parameter should have been populated with the supplement name associated with the primaryfile's collection
 				Map<String, Object> stepParams = parameters.get(stepId);				
-				String err = "No training photo supplement name is defined";
+				String err = "No training photos supplement name is defined";
 				if (stepParams == null) {
 					throw new GalaxyWorkflowException(err + msg);
 				}
@@ -261,7 +262,7 @@ public class JobServiceImpl implements JobService {
 				// get the collection supplement's absolute pathname, given its name and the associated primaryfile
 				String pathname = mediaService.getSupplementPathname(primaryfile, name, SupplementType.COLLECTION);
 				if (StringUtils.isEmpty(pathname)) {
-					err = "Could not find the exact training photo supplement with the name defined: " + name;
+					err = "Could not find the exact training photos collection supplement with the name defined: " + name;
 					throw new GalaxyWorkflowException(err + msg);
 				}
 				

@@ -102,6 +102,12 @@ public interface MediaService {
 	 */
 	public void cleanup();
 	
+	/**
+	 * Find items and/or primaryfiles with names containing the given keyword, and with media of the given media type. 
+	 * @param keyword the given keyword
+	 * @param mediaType the given media type
+	 * @return an instance of ItemSearchResponse containing information of the found items/primaryfiles
+	 */
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType);
 	
 }
