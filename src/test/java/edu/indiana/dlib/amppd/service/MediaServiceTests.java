@@ -55,9 +55,11 @@ public class MediaServiceTests {
 	}
 
 	@Test
-    public void shouldReturnCollectionSupplementPathname() {    	      
-		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_SUPPLEMENT, SupplementType.COLLECTION);
+    public void collectionSupplement() {    	      
+		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_IMAGES, SupplementType.COLLECTION);
 		Assert.assertNotNull(pathname);
+		Assert.assertTrue(pathname.contains(primaryfileS.getItem().getCollection().getId().toString()));
+		Assert.assertTrue(pathname.contains(collectionSupplement.getId().toString()));
 		Assert.assertTrue(pathname.endsWith(".zip"));
 	}
 
@@ -69,13 +71,13 @@ public class MediaServiceTests {
 	
 	@Test
     public void shouldReturnNullForNullPrimaryfileAssociatedSupplement() {    	      
-		String pathname = mediaService.getSupplementPathname(null, TestHelper.TEST_SUPPLEMENT,  SupplementType.COLLECTION);
+		String pathname = mediaService.getSupplementPathname(null, TestHelper.TEST_IMAGES,  SupplementType.COLLECTION);
 		Assert.assertNull(pathname);
 	}
 	
 	@Test
     public void shouldReturnNullForNonPreparedItemSupplement() {    	      
-		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_SUPPLEMENT,  SupplementType.ITEM);
+		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_IMAGES,  SupplementType.ITEM);
 		Assert.assertNull(pathname);
 	}
 	
