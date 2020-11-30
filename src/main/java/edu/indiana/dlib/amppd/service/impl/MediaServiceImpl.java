@@ -112,6 +112,11 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type) {
+		// validate passed in parameters
+		if (primaryfile == null || name == null || type == null) {
+			return null;
+		}
+		
 		String pathname = null;
 		Supplement supplement = null;
 		List<? extends Supplement> supplements = null;
@@ -130,14 +135,11 @@ public class MediaServiceImpl implements MediaService {
 		}		
 		
 		// there should be exactly one supplement found, as supplement is unique by name within its parent's scope
+		// in this case, resolve its pathname to the absolute path; otherwise pathname will be null
 		if (supplements != null && supplements.size() == 1) {
 			supplement = supplements.get(0);
-		}	
-		
-		// if the exact supplement is found, resolve its pathname to the absolute path
-		if (supplement != null) {
 			pathname = fileStorageService.resolve(supplement.getPathname()).toString();
-		}
+		}	
 		
 		return pathname;
 	}

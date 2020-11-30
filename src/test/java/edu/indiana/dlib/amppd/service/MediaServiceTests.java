@@ -12,7 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.impl.MediaServiceImpl;
@@ -32,13 +34,18 @@ public class MediaServiceTests {
 	@Autowired
 	private TestHelper testHelper;   
 
-	private Primaryfile primaryfile;
+	private Primaryfile primaryfile, primaryfileS;
+	private CollectionSupplement collectionSupplement;
 
 	@Before
 	public void setup() {
 		// prepare the primaryfile with empty symlink for testing
 		primaryfile = testHelper.ensureTestAudio();
 		primaryfile.setSymlink(null);
+		
+		// prepare the collectionSupplement zip file for testing
+		primaryfileS = testHelper.ensureTestVideo();
+		collectionSupplement = testHelper.ensureTestCollectionSupplementZip(primaryfileS);
 	}
 
 	@After
@@ -47,6 +54,31 @@ public class MediaServiceTests {
 		mediaService.cleanup();
 	}
 
+	@Test
+    public void shouldReturnCollectionSupplementPathname() {    	      
+		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_SUPPLEMENT, SupplementType.COLLECTION);
+		Assert.assertNotNull(pathname);
+		Assert.assertTrue(pathname.endsWith(".zip"));
+	}
+
+	@Test
+    public void shouldReturnNullForNonExistingCollectionSupplement() {    	      
+		String pathname = mediaService.getSupplementPathname(primaryfileS, "foo", SupplementType.COLLECTION);
+		Assert.assertNull(pathname);
+	}
+	
+	@Test
+    public void shouldReturnNullForNullPrimaryfileAssociatedSupplement() {    	      
+		String pathname = mediaService.getSupplementPathname(null, TestHelper.TEST_SUPPLEMENT,  SupplementType.COLLECTION);
+		Assert.assertNull(pathname);
+	}
+	
+	@Test
+    public void shouldReturnNullForNonPreparedItemSupplement() {    	      
+		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_SUPPLEMENT,  SupplementType.ITEM);
+		Assert.assertNull(pathname);
+	}
+	
 	@Test
     public void shouldReturnPrimaryfileMediaUrl() {    	      
 		String url = mediaService.getPrimaryfileMediaUrl(primaryfile);
