@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.io.File;
 import java.nio.file.Files;
 
 import org.junit.After;
@@ -58,7 +59,7 @@ public class MediaServiceTests {
     public void shouldReturnCollectionSupplementPathname() {    	      
 		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_IMAGES, SupplementType.COLLECTION);
 		Assert.assertNotNull(pathname);
-		Assert.assertTrue(pathname.startsWith("/"));
+		Assert.assertTrue(pathname.startsWith(File.separator));
 		Assert.assertTrue(pathname.contains(primaryfileS.getItem().getCollection().getId().toString()));
 		Assert.assertTrue(pathname.contains(collectionSupplement.getId().toString()));
 		Assert.assertTrue(pathname.endsWith(".zip"));
