@@ -55,9 +55,10 @@ public class MediaServiceTests {
 	}
 
 	@Test
-    public void collectionSupplement() {    	      
+    public void shouldReturnCollectionSupplementPathname() {    	      
 		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_IMAGES, SupplementType.COLLECTION);
 		Assert.assertNotNull(pathname);
+		Assert.assertTrue(pathname.startsWith("/"));
 		Assert.assertTrue(pathname.contains(primaryfileS.getItem().getCollection().getId().toString()));
 		Assert.assertTrue(pathname.contains(collectionSupplement.getId().toString()));
 		Assert.assertTrue(pathname.endsWith(".zip"));
