@@ -26,15 +26,17 @@ import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
@@ -89,6 +91,7 @@ public class MediaServiceImpl implements MediaService {
 	@Autowired
 	private AmppdUiPropertyConfig amppduiConfig; 	
 	
+	// absolute path of the root directory for symlinks
 	private Path root;
 
 	@Autowired
@@ -103,6 +106,43 @@ public class MediaServiceImpl implements MediaService {
 			throw new StorageException("Could not initialize media symlink root directory " + root, e);
 		}		
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String, SupplementType)
+	 */
+	@Override
+	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type) {
+		// validate passed in parameters
+		if (primaryfile == null || name == null || type == null) {
+			return null;
+		}
+		
+		String pathname = null;
+		Supplement supplement = null;
+		List<? extends Supplement> supplements = null;
+		
+		// find the supplements by its name and associated parent's ID
+		switch(type) {
+		case COLLECTION:
+			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getItem().getCollection().getId(), name);
+			break;
+		case ITEM:
+			supplements = itemSupplementRepository.findByItemIdAndName(primaryfile.getItem().getId(), name);
+			break;
+		case PRIMARYFILE:
+			supplements = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), name);
+			break;
+		}		
+		
+		// there should be exactly one supplement found, as supplement is unique by name within its parent's scope
+		// in this case, resolve its pathname to the absolute path; otherwise pathname will be null
+		if (supplements != null && supplements.size() == 1) {
+			supplement = supplements.get(0);
+			pathname = fileStorageService.resolve(supplement.getPathname()).toString();
+		}	
+		
+		return pathname;
+	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Primaryfile)
@@ -328,6 +368,10 @@ public class MediaServiceImpl implements MediaService {
 		return asset;
 	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.findItemOrFile(String, String)
+	 */
+	@Override
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
 		log.info("Executing file search in media service");
 		ItemSearchResponse response = new ItemSearchResponse();
@@ -394,7 +438,7 @@ public class MediaServiceImpl implements MediaService {
 		return response;
 	}
 	
-	public String getMediaTypeFromJson(Primaryfile p) {
+	protected String getMediaTypeFromJson(Primaryfile p) {
 		String mime_type = new String();
 		String media_type = p.getMediaInfo();
 		try {
