@@ -378,15 +378,16 @@ public class JobServiceImpl implements JobService {
     		// set up result response
     		result.setResult(woutputs);
     		result.setSuccess(true);
+    		log.info("Successfully created " + msg + msg_param);
+        	log.info("Galaxy workflow outputs: " + woutputs);
     	}
     	catch (Exception e) {    	
     		log.error("Error creating " + msg + msg_param);
+			log.error(e.getStackTrace().toString());	
     		result.setError(e.toString());
     		//throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
-		log.info("Successfully created " + msg + msg_param);
-    	log.info("Galaxy workflow outputs: " + woutputs);
     	return result;
 	}
 
