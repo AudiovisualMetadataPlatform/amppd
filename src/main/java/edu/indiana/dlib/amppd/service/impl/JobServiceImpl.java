@@ -382,8 +382,7 @@ public class JobServiceImpl implements JobService {
         	log.info("Galaxy workflow outputs: " + woutputs);
     	}
     	catch (Exception e) {    	
-    		log.error("Error creating " + msg + msg_param);
-			log.error(e.getStackTrace().toString());	
+    		log.error("Error creating " + msg + msg_param, e);	
     		result.setError(e.toString());
     		//throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
@@ -416,7 +415,7 @@ public class JobServiceImpl implements JobService {
 			}
 			catch (Exception e) {
 				// if error occurs with this primaryfile we still want to continue with other primaryfiles
-				log.error(e.getStackTrace().toString());	
+				log.error("Error creating Amppd job for primaryfile " + primaryfileId, e);	
 				nFailed++;
 			}
 		}  	
@@ -449,7 +448,7 @@ public class JobServiceImpl implements JobService {
     			}
     			catch (Exception e) {
     				// if error occurs with this primaryfile we still want to continue with other primaryfiles
-    				log.error(e.getStackTrace().toString());	
+    				log.error("Error creating Amppd job for primaryfile " + primaryfile.getId(), e);		
     				nFailed++;
     			}
     		}
