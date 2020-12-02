@@ -44,7 +44,7 @@ public class JobController {
 	 * Creating an Amppd job to invoke the given workflow in Galaxy against the given primaryfile with the given step parameters.
 	 * @param workflowId the ID of the workflow 
 	 * @param primaryfileId the ID of the primaryfile
-	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@PostMapping("/jobs/submitFile")
@@ -63,7 +63,7 @@ public class JobController {
 	 * Create new Amppd jobs by submitting to Galaxy the given workflow on the given primaryfiles, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
-	 * @param parameters step parameters for running the workflow
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@PostMapping("/jobs/submitFiles")
@@ -82,7 +82,7 @@ public class JobController {
 	 * Creating a bundle of multiple Amppd jobs, one for each primaryfile included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
-	 * @param parameters the parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
 	 */
 	@CrossOrigin(origins = "*")

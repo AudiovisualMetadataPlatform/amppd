@@ -234,38 +234,48 @@ public class JobServiceImpl implements JobService {
 					context.append(getHmgmContext(workflowDetails, primaryfile));
 					log.info("Generated HMGM context for primaryfile + " + primaryfile.getId() + " and workflow " + workflowDetails.getId() + " is: " + context.toString());
 				}
+				
 				// the context parameter shouldn't have been populated; if for some reason it is, it will be overwritten here anyways
 				Map<String, Object> stepParams = parameters.get(stepId);
 				if (stepParams == null) {
 					stepParams = new HashMap<String, Object>();
 					parameters.put(stepId, stepParams);
 				}
+				
 				stepParams.put(HMGM_CONTEXT_PARAMETER_NAME, context.toString());
 				stepsChanged.add(stepId);
 				log.info("Added HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}
 			else if (StringUtils.startsWith(stepDef.getToolId(), FR_TOOL_ID_PREFIX)) {
-				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();
-				
-				// the training_photos parameter should have been populated with the supplement name associated with the primaryfile's collection
+				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();				
+
+				// the training_photos parameter should have been populated with the supplement name associated with the primaryfile's collection,
+				// either in the passed-in dynamic parameters, i.e. parameters provided upon workflow submission,
+				// or in the static parameters, i.e. parameters defined in the steps of a workflow, which could be overwritten by the former.
 				Map<String, Object> stepParams = parameters.get(stepId);				
-				String err = "No training photos supplement name is defined";
 				if (stepParams == null) {
-					throw new GalaxyWorkflowException(err + msg);
-				}
-				String name = (String)stepParams.get(FR_TRAIN_PARAMETER_NAME);
-				if (StringUtils.isEmpty(name)) {
-					throw new GalaxyWorkflowException(err + msg);
+					stepParams = new HashMap<String, Object>();
+					parameters.put(stepId, stepParams);
 				}
 				
-				// get the collection supplement's absolute pathname, given its name and the associated primaryfile
+				// first look for the parameter in the passed in dynamic parameters
+				String name = (String)stepParams.get(FR_TRAIN_PARAMETER_NAME);				
+				// if not found, look in the static parameters in workflow detail
+				if (StringUtils.isEmpty(name)) {
+					name = (String)stepDef.getToolInputs().get(FR_TRAIN_PARAMETER_NAME);
+				}				
+				// if still not found, throw error
+				if (StringUtils.isEmpty(name)) {
+					throw new GalaxyWorkflowException("No training photos supplement name is defined in the workflow parameters" + msg);
+				}
+				
+				// now the parameter is found, get the collection supplement's absolute pathname, given its name and the associated primaryfile
 				String pathname = mediaService.getSupplementPathname(primaryfile, name, SupplementType.COLLECTION);
 				if (StringUtils.isEmpty(pathname)) {
-					err = "Could not find the exact training photos collection supplement with the name defined: " + name;
-					throw new GalaxyWorkflowException(err + msg);
+					throw new GalaxyWorkflowException("Could not find the exact training photos collection supplement with the name defined: " + name + msg);
 				}
 				
-				// update the training_photos parameter
+				// now the supplement pathname is found, update the training_photos parameter
 				stepParams.put(FR_TRAIN_PARAMETER_NAME, pathname);
 				stepsChanged.add(stepId);
 				log.info("Translated parameter " + FR_TRAIN_PARAMETER_NAME + " from supplement name " + name + " to filepath " + pathname + msg);				
