@@ -18,7 +18,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 
-import edu.indiana.dlib.amppd.exception.GalaxyFileUploadException;
+import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
@@ -105,7 +105,7 @@ public class GalaxyDataServiceTests {
     	Assert.assertNotNull(dataset.getUrl());
     }
     
-    @Test(expected = GalaxyFileUploadException.class)
+    @Test(expected = GalaxyDataException.class)
     public void shouldThrowExceptionUploadingToNonExistingLibrary() {
     	galaxyDataService.uploadFileToGalaxy(testFile, "bar");
     }

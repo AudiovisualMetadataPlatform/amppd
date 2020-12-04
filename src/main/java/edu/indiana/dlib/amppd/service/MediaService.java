@@ -3,8 +3,9 @@ package edu.indiana.dlib.amppd.service;
 import java.nio.file.Path;
 
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 
 /**
@@ -14,6 +15,15 @@ import edu.indiana.dlib.amppd.web.ItemSearchResponse;
  */
 public interface MediaService {
 
+	/**
+	 * Get the absolute pathname of the supplement, given its name, type, and parent to which the given primaryfile belongs. 
+	 * @param primaryfile the given primaryfile whose ancestor is the parent associated with the supplement 
+	 * @param name name of the supplement
+	 * @param type association type of the supplement
+	 * @return absolute pathname of the supplement if found, or null otherwise
+	 */
+	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
+	
 	/**
 	 * Get the media file download URL for the given primaryfile.
 	 * @param primaryfile the given primaryfile
@@ -92,6 +102,12 @@ public interface MediaService {
 	 */
 	public void cleanup();
 	
+	/**
+	 * Find items and/or primaryfiles with names containing the given keyword, and with media of the given media type. 
+	 * @param keyword the given keyword
+	 * @param mediaType the given media type
+	 * @return an instance of ItemSearchResponse containing information of the found items/primaryfiles
+	 */
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType);
 	
 }

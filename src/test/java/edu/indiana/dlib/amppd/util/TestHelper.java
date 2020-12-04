@@ -24,21 +24,29 @@ import com.google.common.io.Resources;
 import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
 import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
@@ -59,6 +67,7 @@ public class TestHelper {
 	public static final String TEST_VIDEO = "TestVideo";	
 	public static final String TEST_EXTERNAL_SOURCE = "TestExternalSource";	
 	public static final String TEST_EXTERNAL_ID = "TestExternalId";	
+	public static final String TEST_IMAGES = "TestImages";	
 	public static final String TEST_WORKFLOW = "TestWorkflow";
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_WORKFLOW_STEP = "remove_trailing_silence"; // the last step in TestWorkflow
@@ -80,6 +89,15 @@ public class TestHelper {
 	
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
+	
+	@Autowired
+	PrimaryfileSupplementRepository primaryfileSupplementRepository;
+
+	@Autowired
+	ItemSupplementRepository itemSupplementRepository;
+
+	@Autowired
+	CollectionSupplementRepository collectionSupplementRepository;
 	
 	@Autowired
     private FileStorageService fileStorageService; 
@@ -122,6 +140,16 @@ public class TestHelper {
 	}
 	
 	/**
+	 * Check whether the collectionSupplement named TestImaegs with zip file extension is associated with the given primaryfile in Amppd; 
+	 * if not, upload it from its resource file.
+	 * @param primaryfile the given primaryfile
+	 * @return the prepared collectionSupplement as existing in Amppd 
+	 */
+	public CollectionSupplement ensureTestCollectionSupplementZip(Primaryfile primaryfile) {
+		return (CollectionSupplement)ensureSupplement(primaryfile, TEST_IMAGES, SupplementType.COLLECTION, "zip");
+	}
+	
+	/**
 	 * Check whether the workflow named TestWorkflow exists in Galaxy; if not, upload it from its resource file.
 	 * @return the prepared workflow as existing in Galaxy 
 	 */
@@ -158,12 +186,13 @@ public class TestHelper {
 	/**
 	 * Check whether the specified primaryfile exists in Amppd; if not, upload it from the resource file with a filename same as the primaryfile name, 
 	 * and with the specified extension. 
-	 * @param workflowName the name of the specified workflow
-	 * @param extension the media file extension of the specified primaryfile 
+	 * @param name name of the specified primaryfile
+	 * @param extension media file extension of the specified primaryfile 
 	 * @return the prepared primaryfile
 	 */
-	public Primaryfile ensurePrimaryfile(String primaryfileName, String extension) {
-		String filename = primaryfileName + "." + extension;
+	public Primaryfile ensurePrimaryfile(String name, String extension) {
+		// retrieve primaryfile from DB via original filename
+		String filename = name + "." + extension;
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByOriginalFilename(filename);
 		Primaryfile primaryfile = primaryfiles.size() > 0 ? primaryfiles.get(0): null;
 
@@ -174,22 +203,22 @@ public class TestHelper {
 		}
 
 		// otherwise, create a primaryfile with the given name	
-		// and set up the parent hierarchy as needed by tile upload file path calculation
+		// and set up the parent hierarchy as needed by file upload file path calculation
 
 		Unit unit = new Unit();
-    	unit.setName("Unit for " + primaryfileName);
+    	unit.setName("Unit for " + name);
     	unit.setDescription("unit for tests");	  
     	unit = unitRepository.save(unit);
     	
 		Collection collection = new Collection();
-		collection.setName("Collection for " + primaryfileName);
+		collection.setName("Collection for " + name);
 		collection.setDescription("collection for tests");  	
 		collection.setTaskManager(TASK_MANAGER);  	
     	collection.setUnit(unit);
     	collection = collectionRepository.save(collection);
     	
     	Item item = new Item();
-    	item.setName("Item for " + primaryfileName);
+    	item.setName("Item for " + name);
     	item.setDescription("item for tests");  
     	item.setExternalSource(TEST_EXTERNAL_SOURCE);
     	item.setExternalSource(TEST_EXTERNAL_ID);
@@ -197,7 +226,7 @@ public class TestHelper {
     	item = itemRepository.save(item);
 
 		primaryfile = new Primaryfile();
-		primaryfile.setName("Primaryfile for " + primaryfileName);
+		primaryfile.setName("Primaryfile for " + name);
 		primaryfile.setDescription("primaryfile for tests");			
     	primaryfile.setItem(item);
 		primaryfile = primaryfileRepository.save(primaryfile);
@@ -214,6 +243,191 @@ public class TestHelper {
 		// return the persisted primaryfile with ID populated 
 		log.info("Successfully created primaryfile " + primaryfile.getId() + " and uploaded media for it from resoruce " + filename);
 		return primaryfile;
+	}
+
+	/**
+	 * Check whether the supplement with the specified name, type and the associated primaryfile exists in Amppd; if not, 
+	 * upload it from the resource file with a filename same as the supplement name and with the specified extension. 
+	 * @param primaryfile the specified primaryfile whose ancestor is the parent associated with the supplement 
+	 * @param name name of the specified supplement
+	 * @param type the association type of the specified supplement to its parent 
+	 * @param extension media file extension of the specified supplement 
+	 * @return the prepared supplement
+	 */
+	public Supplement ensureSupplement(Primaryfile primaryfile, String name, SupplementType type, String extension) {
+		// retrieve supplement from DB for the given primaryfile, supplement name, based on its association type 
+		List<? extends Supplement> supplements = null;
+		switch(type) {
+		case COLLECTION:
+			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getItem().getCollection().getId(), name);
+			break;
+		case ITEM:
+			supplements = itemSupplementRepository.findByItemIdAndName(primaryfile.getItem().getId(), name);
+			break;
+		case PRIMARYFILE:
+			supplements = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), name);
+			break;
+		default:
+			throw new RuntimeException("Invalid SupplementType " + type);
+		}		
+
+		// if the supplement already exists in DB, just return it 
+		Supplement supplement = supplements !=  null && supplements.size() > 0 ? supplements.get(0): null;
+		if (supplement != null) {
+			log.info(type + " Supplement " + supplement.getId() + " with name " + name + " already exists for primaryfile " + primaryfile.getId() + ", will use it for testing.");
+			return supplement;
+		}
+		
+		// otherwise, prepare the resource file name.extension for upload
+		String filename = name + "." + extension;
+    	MultipartFile file = null;
+		try {
+			file = new MockMultipartFile(filename, filename, getContentType(extension), new ClassPathResource(filename).getInputStream());
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Unable to create MultipartFile for uploading " + filename + " to supplement.", e);
+		}
+
+		// and create a supplement with the given name and type for the associated primaryfile, and upload its resource file	
+		switch(type) {
+		case COLLECTION:
+	    	supplement = new CollectionSupplement();
+	    	((CollectionSupplement)supplement).setCollection(primaryfile.getItem().getCollection());
+			supplement.setName(name);
+			supplement.setDescription(type + " Supplement for tests");			
+			supplement = collectionSupplementRepository.save((CollectionSupplement)supplement);
+			supplement = fileStorageService.uploadCollectionSupplement((CollectionSupplement)supplement, file);
+			break;
+		case ITEM:
+	    	supplement = new ItemSupplement();
+	    	((ItemSupplement)supplement).setItem(primaryfile.getItem());
+			supplement.setName(name);
+			supplement.setDescription(type + " Supplement for tests");			
+			supplement = itemSupplementRepository.save((ItemSupplement)supplement);
+			supplement = fileStorageService.uploadItemSupplement((ItemSupplement)supplement, file);
+			break;
+		case PRIMARYFILE:
+	    	supplement = new PrimaryfileSupplement();
+	    	((PrimaryfileSupplement)supplement).setPrimaryfile(primaryfile);
+			supplement.setName(name);
+			supplement.setDescription(type + " Supplement for tests");			
+			supplement = primaryfileSupplementRepository.save((PrimaryfileSupplement)supplement);
+			supplement = fileStorageService.uploadPrimaryfileSupplement((PrimaryfileSupplement)supplement, file);
+			break;
+		}			
+
+		// return the persisted supplement with ID populated 
+		log.info("Successfully created " + type + " Supplement " + supplement.getId() + " for primaryfile " + primaryfile.getId() + ", and uploaded media for it from resoruce " + filename);		
+		return supplement;
+	}
+	
+	/**
+	 * Check whether the specified supplement exists in Amppd; if not, upload it from the resource file with the filename name_type.extension. 
+	 * @param name name of the specified supplement
+	 * @param type the association type of the specified supplement to its parent 
+	 * @param extension media file extension of the specified supplement 
+	 * @return the prepared supplement
+	 */
+	public Supplement ensureSupplement(String name, SupplementType type, String extension) {
+		// filename of the resource is name_type.extension
+		String filename = name + "_" + type + "." + extension;
+		List<? extends Supplement> supplements = null;
+
+		// retrieve supplement from DB via original filename
+		switch(type) {
+		case COLLECTION:
+			supplements = collectionSupplementRepository.findByOriginalFilename(filename);
+			break;
+		case ITEM:
+			supplements = itemSupplementRepository.findByOriginalFilename(filename);
+			break;
+		case PRIMARYFILE:
+			supplements = primaryfileSupplementRepository.findByOriginalFilename(filename);
+			break;
+		default:
+			throw new RuntimeException("Invalid SupplementType " + type);
+		}			
+
+		// if the supplement with the filename already exist in DB, just return it 
+		Supplement supplement = supplements.size() > 0 ? supplements.get(0): null;
+		if (supplement != null) {
+			log.info("Supplement " + supplement.getId() + " already exists and uploaded with " + filename + ", will use it for testing.");
+			return supplement;
+		}
+
+		// otherwise, prepare the parent hierarchy as needed by file upload file path calculation
+		Unit unit = new Unit();
+    	unit.setName("Unit for " + name);
+    	unit.setDescription("unit for tests");	  
+    	unit = unitRepository.save(unit);
+    	Collection collection = null;
+    	Item item = null;
+    	Primaryfile primaryfile = null;
+    	
+    	if (type == SupplementType.COLLECTION || type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
+			collection = new Collection();
+			collection.setName("Collection for " + name);
+			collection.setDescription("collection for tests");  	
+			collection.setTaskManager(TASK_MANAGER);  	
+	    	collection.setUnit(unit);
+	    	collection = collectionRepository.save(collection);
+    	
+	    	if (type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
+	    		item = new Item();
+	    		item.setName("Item for " + name);
+	    		item.setDescription("item for tests");  
+	    		item.setExternalSource(TEST_EXTERNAL_SOURCE);
+	    		item.setExternalSource(TEST_EXTERNAL_ID);
+	    		item.setCollection(collection);
+	    		item = itemRepository.save(item);
+
+	    		if (type == SupplementType.PRIMARYFILE) {
+	    			primaryfile = new Primaryfile();
+	    			primaryfile.setName("Primaryfile for " + name);
+	    			primaryfile.setDescription("primaryfile for tests");			
+	    	    	primaryfile.setItem(item);
+	    			primaryfile = primaryfileRepository.save(primaryfile);
+	    		}
+	    	}
+    	}    	
+		
+		// and prepare the resource file with the above filename 
+    	MultipartFile file = null;
+		try {
+			file = new MockMultipartFile(filename, filename, getContentType(extension), new ClassPathResource(filename).getInputStream());
+		}
+		catch (IOException e) {
+			throw new RuntimeException("Unable to create MultipartFile for uploading " + filename + " to supplement.", e);
+		}
+
+		// and create a supplement with the given name and the created parent hierarchy, and upload its resource file	
+		switch(type) {
+		case COLLECTION:
+	    	supplement = new CollectionSupplement();
+	    	((CollectionSupplement)supplement).setCollection(collection);
+			supplement.setName(type + " Supplement for " + name);
+			supplement.setDescription(type + " Supplement for tests");						
+			supplement = collectionSupplementRepository.save((CollectionSupplement)supplement);
+			supplement = fileStorageService.uploadCollectionSupplement((CollectionSupplement)supplement, file);
+		case ITEM:
+	    	supplement = new ItemSupplement();
+	    	((ItemSupplement)supplement).setItem(item);
+			supplement.setName(type + " Supplement for " + name);
+			supplement.setDescription(type + " Supplement for tests");			
+			supplement = itemSupplementRepository.save((ItemSupplement)supplement);
+			supplement = fileStorageService.uploadItemSupplement((ItemSupplement)supplement, file);
+		case PRIMARYFILE:
+	    	supplement = new PrimaryfileSupplement();
+	    	((PrimaryfileSupplement)supplement).setPrimaryfile(primaryfile);
+			supplement.setName(type + " Supplement for " + name);
+			supplement.setDescription(type + " Supplement for tests");			
+			supplement = primaryfileSupplementRepository.save((PrimaryfileSupplement)supplement);
+			supplement = fileStorageService.uploadPrimaryfileSupplement((PrimaryfileSupplement)supplement, file);
+		}			
+
+		// return the persisted supplement with ID populated 
+		log.info("Successfully created supplement " + supplement.getId() + " and uploaded media for it from resoruce " + filename);
+		return supplement;
 	}
 
 	/**
