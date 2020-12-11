@@ -26,8 +26,7 @@ public class WorkflowResultsScheduler {
    
    
    // Every day at 1 am
-   //@Scheduled(cron = "0 0 1 1/1 * *")
-   @Scheduled(cron = "0/5 * * ? * *")
+   @Scheduled(cron = "0 0 1 1/1 * *")
    public void refreshAllResults() {
 	      System.out.println("Starting refreshWorkflowResultsIterative at " + sdf.format(new Date()));
 	      workflowResultService.refreshWorkflowResultsIterative();
