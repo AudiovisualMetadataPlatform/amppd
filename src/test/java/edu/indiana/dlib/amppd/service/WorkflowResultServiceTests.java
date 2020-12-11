@@ -32,7 +32,6 @@ import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class WorkflowResultServiceTests {

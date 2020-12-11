@@ -108,24 +108,24 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	private List<WorkflowResult> refreshResultsStatusAsNeeded(List<WorkflowResult> WorkflowResults) {
 		for(WorkflowResult result : WorkflowResults) {
-			if (shouldRefreshResultStatus(result)) {
-				result = refreshResultStatus(result);
-			}
+			result = refreshResultStatus(result);
 		}
 		return WorkflowResults;
 	}
-		
+	
+	public void refreshIncompleteResults() {	
+		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
+		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED, GalaxyJobState.UNKNOWN};
+		query.setFilterByStatuses(filterByStatuses);
+		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
+		refreshResultsStatusAsNeeded(response.getRows());
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowResults(WorkflowResultSearchQuery)
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
-		//List<WorkflowResult> results = (List<WorkflowResult>) cache.get(CACHE_KEY, false);		
-		//if(results!=null) {
-		//	return results;
-		//}
-		
 		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
-		refreshResultsStatusAsNeeded(response.getRows());
 		return response;
 	}
 	
@@ -170,7 +170,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
-	public List<WorkflowResult> refreshWorkflowResultsIterative() {				
+	public List<WorkflowResult> refreshWorkflowResultsIterative() {
+		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " primaryfiles with Galaxy history ...");
@@ -221,11 +222,20 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				log.error("Failed to refresh results for primaryfile " + primaryfile.getId(), e);
 			}
 		}
+		List<WorkflowResult> deletedResults = deleteObsoleteWorkflowResults();
 				
 		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults iteratively.");
 		return allResults;
 	}
-	
+	private List<WorkflowResult> deleteObsoleteWorkflowResults() {
+		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);
+		List<WorkflowResult> toDelete = workflowResultRepository.findObsolete(dateObsolete);
+		
+		workflowResultRepository.deleteAll(toDelete);
+		
+		log.info("Deleted " + toDelete.size() + " workflow results");
+		return toDelete;
+	}
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsLumpsum()
 	 */
