@@ -119,6 +119,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		query.setFilterByStatuses(filterByStatuses);
 		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
 		refreshResultsStatusAsNeeded(response.getRows());
+		log.debug("Refreshed the status of " + response.getRows().size());
 	}
 	
 	/**
@@ -227,6 +228,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults iteratively.");
 		return allResults;
 	}
+	/**
+	 * Delete results that haven't been refreshed in a given period of time
+	 * @return a list of deleted workflow results 
+	 */
 	private List<WorkflowResult> deleteObsoleteWorkflowResults() {
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);
 		List<WorkflowResult> toDelete = workflowResultRepository.findObsolete(dateObsolete);
