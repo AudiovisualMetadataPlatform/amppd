@@ -17,7 +17,7 @@ public class WorkflowResultsScheduler {
    
    // On the 20 minute mark
    // THis will run every 5 seconds for testing @Scheduled(cron = "0/5 * * ? * *")
-   @Scheduled(cron = "0 0/20 * ? * *")
+   @Scheduled(cron = "${amppd.refreshWorkflowResultsStatusCron}")
    public void refreshStatus() {
       System.out.println("Starting refresh status at " + sdf.format(new Date()));
       workflowResultService.refreshIncompleteResults();
@@ -26,7 +26,7 @@ public class WorkflowResultsScheduler {
    
    
    // Every day at 1 am
-   @Scheduled(cron = "0 0 1 1/1 * *")
+   @Scheduled(cron = "${amppd.refreshWorkflowResultsAllCron}")
    public void refreshAllResults() {
 	      System.out.println("Starting refreshWorkflowResultsIterative at " + sdf.format(new Date()));
 	      workflowResultService.refreshWorkflowResultsIterative();
