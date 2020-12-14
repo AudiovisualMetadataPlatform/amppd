@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
@@ -12,6 +13,7 @@ import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import lombok.extern.slf4j.Slf4j;
 
 @SpringBootApplication
+@EnableScheduling
 //@EnableJdbcHttpSession
 @EnableJpaRepositories("edu.indiana.dlib.amppd.repository")
 @EnableConfigurationProperties({GalaxyPropertyConfig.class, AmppdPropertyConfig.class, AmppdUiPropertyConfig.class})
