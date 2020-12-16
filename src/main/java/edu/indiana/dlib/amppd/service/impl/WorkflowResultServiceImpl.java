@@ -20,18 +20,18 @@ import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
-import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -75,38 +75,50 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		return dateRefreshed != null && dateRefreshed.compareTo(DateUtils.addMinutes(new Date(), -refreshMinutes)) > 0;
 	}
 		
-	/**
-	 * Return true if we should refresh the status of the specified WorkflowResult from job status in galaxy.
-	 * A WorkflowResult needs refresh if it's existing status could still change (i.e. not COMPLETE or ERROR)
-	 * and its last refreshed timestamp is older than the refresh rate threshold.
-	 */
-	private boolean shouldRefreshResultStatus(WorkflowResult result) {
-		return !isDateRefreshedRecent(result.getDateRefreshed(), REFRESH_STATUS_MINUTES) && result.getStatus() != GalaxyJobState.COMPLETE && result.getStatus() != GalaxyJobState.ERROR;
-	}
+//	/**
+//	 * Return true if we should refresh the status of the specified WorkflowResult from job status in galaxy.
+//	 * A WorkflowResult needs refresh if it's existing status could still change (i.e. not COMPLETE or ERROR)
+//	 * and its last refreshed timestamp is older than the refresh rate threshold.
+//	 */
+//	private boolean shouldRefreshResultStatus(WorkflowResult result) {
+//		return !isDateRefreshedRecent(result.getDateRefreshed(), REFRESH_STATUS_MINUTES) && result.getStatus() != GalaxyJobState.COMPLETE && result.getStatus() != GalaxyJobState.ERROR;
+//	}
 	
+	/**
+	 * Returns true if the given dataset should be excluded from workflow results, i.e. it's hidden or deleted.
+	 */
+	private Boolean shouldExcludeDataset(Dataset dataset) {
+		return dataset == null || !dataset.getVisible() || dataset.isDeleted() || dataset.isPurged();
+	}
+
 	/**
 	 * Refresh the status of the specified WorkflowResult from job status in galaxy.
 	 */
 	private WorkflowResult refreshResultStatus(WorkflowResult result) {
 		try {
-			Dataset ds = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
-			String state = ds.getState();
-			GalaxyJobState status = getJobStatus(state);
-			result.setStatus(status);
+			Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
+			if (shouldExcludeDataset(dataset)) {
+				workflowResultRepository.delete(result);
+			}
+			else {
+				String state = dataset.getState();
+				GalaxyJobState status = getJobStatus(state);			
+				result.setStatus(status);
+				result.setDateRefreshed(new Date());		
+				workflowResultRepository.save(result);	
+			}
 		}
-		catch(Exception ex) {
-			log.info("Unable to update the status of invocation " + result.getInvocationId() + " from Galaxy");
+		catch(Exception e) {
+			log.error("Failed to refresh the status for WorkflowResult " + result.getId(), e);
 		}
 		
-		result.setDateRefreshed(new Date());		
-		workflowResultRepository.save(result);		
 		return result;		
 	}
 			
 	/**
 	 * Refresh status of the specified WorkflowResults as needed by retrieving corresponding job status from Galaxy.
 	 */
-	private List<WorkflowResult> refreshResultsStatusAsNeeded(List<WorkflowResult> WorkflowResults) {
+	private List<WorkflowResult> refreshResultsStatus(List<WorkflowResult> WorkflowResults) {
 		for(WorkflowResult result : WorkflowResults) {
 			result = refreshResultStatus(result);
 		}
@@ -118,7 +130,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED, GalaxyJobState.UNKNOWN};
 		query.setFilterByStatuses(filterByStatuses);
 		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
-		refreshResultsStatusAsNeeded(response.getRows());
+		refreshResultsStatus(response.getRows());
 		log.debug("Refreshed the status of " + response.getRows().size());
 	}
 	
@@ -134,7 +146,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getFinalWorkflowResults(Long)
 	 */
 	public List<WorkflowResult> getFinalWorkflowResults(Long primaryfileId) {
-		return refreshResultsStatusAsNeeded(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+		return refreshResultsStatus(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
 	}
 		
 	/**
@@ -171,8 +183,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
-	public List<WorkflowResult> refreshWorkflowResultsIterative() {
-		
+	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " primaryfiles with Galaxy history ...");
@@ -223,24 +234,37 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				log.error("Failed to refresh results for primaryfile " + primaryfile.getId(), e);
 			}
 		}
-		List<WorkflowResult> deletedResults = deleteObsoleteWorkflowResults();
 				
 		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults iteratively.");
+		deleteObsoleteWorkflowResults();
 		return allResults;
 	}
+	
 	/**
-	 * Delete results that haven't been refreshed in a given period of time
-	 * @return a list of deleted workflow results 
+	 * Delete obsolete workflow results, i.e. those that didn't get refreshed during the most recent whole table refresh.
+	 * @return a list of the deleted workflow results 
 	 */
 	private List<WorkflowResult> deleteObsoleteWorkflowResults() {
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);
-		List<WorkflowResult> toDelete = workflowResultRepository.findObsolete(dateObsolete);
+		List<WorkflowResult> deleteResults = workflowResultRepository.findObsolete(dateObsolete);	
+
+		if (deleteResults.size() > 0) {
+			try {
+				workflowResultRepository.deleteAll(deleteResults);
+				log.info("Successfully deleted " + deleteResults.size() + " obsolete workflow results");
+				log.info("A sample of deleted workflow results: " + deleteResults.get(0));
+			}
+			catch (Exception e) {
+				log.error("Failed to delete " + deleteResults.size() + " obsolete workflow results.", e);
+			}
+		}
+		else {
+			log.info("No obsolete workflow result is found after refreshing the whole table.");				
+		}
 		
-		workflowResultRepository.deleteAll(toDelete);
-		
-		log.info("Deleted " + toDelete.size() + " workflow results");
-		return toDelete;
+		return deleteResults;
 	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsLumpsum()
 	 */
@@ -334,7 +358,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				status = getJobStatus(job.getState());
 				String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);				
 			}
-			
+
+	 		// TODO 
+			// Note that in this method, we use job status as the workflow results status, 
+			// while in refreshResultStatus, we use the dataset status as the workflow results status;
+			// the two statuses are mostly the same in Galaxy (although this remains to be confirmed);
+			// except when HMGM jobs are stopped by job manager, job status is changed to error,
+			// while output dataset status doesn't change to error.
+
 //			// Concatenate the job names and tool info in case we have more than one. 
 //			for (Job job : jobs) {
 //				stepLabel += stepLabel == "" ? job.getToolId() : " " + job.getToolId();
@@ -345,24 +376,31 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 //				String divider = toolInfo == "" ? "" : ", ";
 //				toolInfo += tinfo == null ? "" : divider + tinfo;
 //			}
-
+			
 			// For each output, create a result record.
 			Map<String, JobInputOutput> outputs = step.getOutputs();
 			for (String outputName : outputs.keySet()) {
 				JobInputOutput output = outputs.get(outputName);
 				Dataset dataset = jobService.showJobStepOutput(invocation.getWorkflowId(), invocation.getId(), step.getId(), output.getId());
 				
-				// Show only relevant output
-				if (dataset == null || !dataset.getVisible()) continue;
+				// retrieve the result for this output if already existing in the workflow result table
+				List<WorkflowResult> oldResults = workflowResultRepository.findByOutputId(output.getId());		
+				
+				// delete all existing workflow results for this output if its dataset becomes hidden or deleted in Galaxy
+				if (shouldExcludeDataset(dataset) && oldResults != null) {
+					for (WorkflowResult oldResult : oldResults) {
+						workflowResultRepository.delete(oldResult);
+					}
+					continue;
+				}
 				
 				// initialize result as not final
 				WorkflowResult result = new WorkflowResult(); 
 				result.setIsFinal(false);
-
-				// retrieve the result for this output if already existing in the workflow result table,
-				// so we can preserve the isFinal field in case it has been set; also, this allows update of existing records, 
+				
+				// go though the existing workflow results for this output, if any, so we can
+				// preserve the isFinal field in case it has been set; also, this allows update of existing records, 
 				// otherwise we have to delete all rows before adding refreshed results in order to avoid redundancy
-				List<WorkflowResult> oldResults = workflowResultRepository.findByOutputId(output.getId());				
 				if (oldResults != null && !oldResults.isEmpty()) {
 					// oldresults is unique throughout Galaxy, so there should only be one result per output
 					result = oldResults.get(0);
