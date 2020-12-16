@@ -50,10 +50,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	private WorkflowService workflowService;
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
-
-//	@Autowired
-//	private CacheHelper cache;
-//	private String CACHE_KEY ="WorkflowResults";
 	
 	@Value("${amppd.refreshResultsStatusMinutes}")
 	private int REFRESH_STATUS_MINUTES;
@@ -95,43 +91,54 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Refresh the status of the specified WorkflowResult from job status in galaxy.
 	 */
 	private WorkflowResult refreshResultStatus(WorkflowResult result) {
-		try {
-			Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
-			if (shouldExcludeDataset(dataset)) {
-				workflowResultRepository.delete(result);
-			}
-			else {
-				String state = dataset.getState();
-				GalaxyJobState status = getJobStatus(state);			
-				result.setStatus(status);
-				result.setDateRefreshed(new Date());		
-				workflowResultRepository.save(result);	
-			}
+		Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
+		
+		if (shouldExcludeDataset(dataset)) {
+			workflowResultRepository.delete(result);
+			log.warn("Deleted workflow result for hidden/deleted Galaxy dataset: " + result);
 		}
-		catch(Exception e) {
-			log.error("Failed to refresh the status for WorkflowResult " + result.getId(), e);
+		else {
+			String state = dataset.getState();
+			GalaxyJobState status = getJobStatus(state);			
+			result.setStatus(status);
+			result.setDateRefreshed(new Date());		
+			workflowResultRepository.save(result);	
 		}
 		
 		return result;		
 	}
 			
 	/**
-	 * Refresh status of the specified WorkflowResults as needed by retrieving corresponding job status from Galaxy.
+	 * Refresh status of the specified WorkflowResults by retrieving corresponding output status from Galaxy.
 	 */
 	private List<WorkflowResult> refreshResultsStatus(List<WorkflowResult> WorkflowResults) {
+		List<WorkflowResult> refreshedResults = new ArrayList<WorkflowResult>();
+		
 		for(WorkflowResult result : WorkflowResults) {
-			result = refreshResultStatus(result);
+			try {
+				refreshedResults.add(refreshResultStatus(result));
+			}
+			catch(Exception e) {
+				throw new RuntimeException("Failed to refresh the status from Galaxy for WorkflowResult " + result.getId(), e);
+			}			
 		}
-		return WorkflowResults;
+		
+		return refreshedResults;
 	}
 	
+	/**
+	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
+	 */
 	public void refreshIncompleteResults() {	
+		// for now we exclude ERROR and PAUSED for now, as these jobs will need manual rerun for their status to be changed
+		// in most cases we likely will need to delete these outputs and resubmit whole workflow
+		// TODO we might want to add ERROR and PAUSED to the status list for update in the future
 		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
 		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED, GalaxyJobState.UNKNOWN};
 		query.setFilterByStatuses(filterByStatuses);
 		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
-		refreshResultsStatus(response.getRows());
-		log.debug("Refreshed the status of " + response.getRows().size());
+		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
+		log.debug("Successfully refreshed status for a total of " + refreshedResults.size() + " workflow results");
 	}
 	
 	/**
@@ -175,8 +182,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 //			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());
 		}
 
-//		// Expunge the cache
-//		cache.remove(CACHE_KEY);
 		return results;
 	}
 	
@@ -190,6 +195,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 //		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
 //		workflowService.clearWorkflowNamesCache();
+		
 		// TODO replace below code with above commented code once we upgrade to Galaxy 20.*		
 		// get all workflows as a work-around to retrieve invocations per workflow per primaryfile
 		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();
@@ -294,8 +300,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			}				
 		}
 
-		// cache.put(CACHE_KEY, results, REFRESH_MINUTES * 60);
-
 		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults in lump sum.");
 		return allResults;
 	}
@@ -345,6 +349,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			Date dateCreated = step.getUpdateTime(); // will be overwritten below
 			Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 			
+			// TODO check if the last job is the newest rerun to replace previously failed ones
 			// It's possible to have multiple jobs for a step, likely when the step is rerun within the same invocation; iIn any case
 			// the tool used should be the same, so we can just use the info from the last job assuming that's the latest one
 			GalaxyJobState status = GalaxyJobState.UNKNOWN;
@@ -365,17 +370,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// the two statuses are mostly the same in Galaxy (although this remains to be confirmed);
 			// except when HMGM jobs are stopped by job manager, job status is changed to error,
 			// while output dataset status doesn't change to error.
-
-//			// Concatenate the job names and tool info in case we have more than one. 
-//			for (Job job : jobs) {
-//				stepLabel += stepLabel == "" ? job.getToolId() : " " + job.getToolId();
-//				dateCreated = job.getCreated();
-//		 		dateUpdated = job.getUpdated();
-//				status = getJobStatus(job.getState());
-//				String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);
-//				String divider = toolInfo == "" ? "" : ", ";
-//				toolInfo += tinfo == null ? "" : divider + tinfo;
-//			}
 			
 			// For each output, create a result record.
 			Map<String, JobInputOutput> outputs = step.getOutputs();
