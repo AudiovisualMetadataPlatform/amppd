@@ -356,7 +356,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				dateCreated = job.getCreated();
 		 		dateUpdated = job.getUpdated();
 				status = getJobStatus(job.getState());
-				String tinfo = getMgmToolInfo(job.getToolId(), dateCreated);				
+				toolInfo = getMgmToolInfo(job.getToolId(), dateCreated);				
 			}
 
 	 		// TODO 
@@ -463,8 +463,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setResultIsFinal(long, boolean)
 	 */
-	public boolean setResultIsFinal(long workflowResultId, boolean isFinal) {
-		
+	public boolean setResultIsFinal(long workflowResultId, boolean isFinal) {		
 		Optional<WorkflowResult> workflowResultOpt  = workflowResultRepository.findById(workflowResultId);
 		
 		if(workflowResultOpt.isPresent()) {
