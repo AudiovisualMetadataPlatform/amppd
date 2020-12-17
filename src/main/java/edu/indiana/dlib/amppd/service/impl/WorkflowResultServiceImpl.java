@@ -332,15 +332,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// TODO check if the last job is the newest rerun to replace previously failed ones
 			// It's possible to have multiple jobs for a step, likely when the step is rerun within the same invocation; iIn any case
 			// the tool used should be the same, so we can just use the info from the last job assuming that's the latest one
-			GalaxyJobState status = GalaxyJobState.UNKNOWN;
 			String stepLabel = "";
 			String toolInfo = "";
 			if (!jobs.isEmpty()) {
 				Job job = jobs.get(jobs.size()-1);
 				stepLabel = job.getToolId();
 				dateCreated = job.getCreated();
-//		 		dateUpdated = job.getUpdated();
-				status = getJobStatus(job.getState());
 				toolInfo = getMgmToolInfo(job.getToolId(), dateCreated);				
 			}
 
@@ -423,7 +420,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
 
 				result.setSubmitter(galaxyPropertyConfig.getUsername());
-				result.setStatus(status);
+				result.setStatus(getJobStatus(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
 								
