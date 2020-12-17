@@ -98,10 +98,16 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			log.warn("Deleted WorkflowResult for hidden/deleted Galaxy dataset: " + result);
 		}
 		else {
+			// besides status, we should also update create/update timestamps from the dataset, 
+			// since these could change too as the status change;
+			// on the other hand, we don't set dateRefreshed here, to avoid conflict with the refresh table job, 
+			// which uses this field to distinguish recently refreshed WorkflowResults from obsolete ones;
+			// the dateUpdated field should be good enough to indicate the most recent update on the dataset status
 			String state = dataset.getState();
 			GalaxyJobState status = getJobStatus(state);			
 			result.setStatus(status);
-			result.setDateRefreshed(new Date());		
+			result.setDateCreated(dataset.getCreateTime());
+			result.setDateUpdated(dataset.getUpdateTime());
 			workflowResultRepository.save(result);	
 		}
 		
@@ -321,7 +327,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// and it differs from either the created or updated timestamp of the job;
 			// for now we use the created/updated timestamp of the job in the result
 			Date dateCreated = step.getUpdateTime(); // will be overwritten below
-			Date dateUpdated = step.getUpdateTime(); // will be overwritten below
+//			Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 			
 			// TODO check if the last job is the newest rerun to replace previously failed ones
 			// It's possible to have multiple jobs for a step, likely when the step is rerun within the same invocation; iIn any case
@@ -333,17 +339,18 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				Job job = jobs.get(jobs.size()-1);
 				stepLabel = job.getToolId();
 				dateCreated = job.getCreated();
-		 		dateUpdated = job.getUpdated();
+//		 		dateUpdated = job.getUpdated();
 				status = getJobStatus(job.getState());
 				toolInfo = getMgmToolInfo(job.getToolId(), dateCreated);				
 			}
 
-	 		// TODO 
-			// Note that in this method, we use job status as the WorkflowResult status, 
-			// while in refreshResultStatus, we use the dataset status as the WorkflowResult status;
+			// Note that in this method, we can use either job or dataset status as the WorkflowResult status, 
+			// while in refreshResultStatus, we can only use the dataset status as the WorkflowResult status;
 			// the two statuses are mostly the same in Galaxy (although this remains to be confirmed);
 			// except when HMGM jobs are stopped by job manager, job status is changed to error,
 			// while output dataset status doesn't change to error.
+			// to be consistent, we will use dataset status in both methods.
+			// Similarly, for dateCreated and dateUpdated, we will use the timestamps from dataset instead of job.
 			
 			// For each output, create a result record.
 			Map<String, JobInputOutput> outputs = step.getOutputs();
@@ -383,14 +390,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 							if ((oldResult.getIsFinal() != null && oldResult.getIsFinal()) && (result.getIsFinal() == null || !result.getIsFinal())) {
 								// found a final result for the first time, keep this one and delete the first result which must be non-final
 								workflowResultRepository.delete(result);
-								log.warn("Deleted redundant WorkflowResult " + result.getId());						
+								log.warn("Deleted redundant WorkflowResult " + result);						
 								result = oldResult;
 							}
 							else if (oldResult != result) {
 								// delete all non-final results except the first one, which, if is final, will be kept; 
 								// otherwise will be deleted as above when the first final result is found
 								workflowResultRepository.delete(oldResult);
-								log.warn("Deleted redundant WorkflowResult " + oldResult.getId());						
+								log.warn("Deleted redundant WorkflowResult " + oldResult);						
 							}
 						}
 					}
@@ -417,8 +424,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 				result.setSubmitter(galaxyPropertyConfig.getUsername());
 				result.setStatus(status);
-				result.setDateCreated(dateCreated);
-				result.setDateUpdated(dateUpdated);
+				result.setDateCreated(dataset.getCreateTime());
+				result.setDateUpdated(dataset.getUpdateTime());
 								
 				result.setDateRefreshed(new Date());
 				results.add(result);				

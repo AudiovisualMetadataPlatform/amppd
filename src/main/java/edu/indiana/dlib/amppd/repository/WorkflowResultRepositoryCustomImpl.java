@@ -93,7 +93,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 
         // Get the actual rows
         TypedQuery<WorkflowResult> query = em.createQuery(cq);
-        log.info("=======>>>>QUERY IS:"+query.unwrap(org.hibernate.Query.class).getQueryString()  );
+        log.debug("=======>>>>QUERY IS:"+query.unwrap(org.hibernate.Query.class).getQueryString()  );
         query.setFirstResult(firstResult);
         query.setMaxResults(searchQuery.getResultsPerPage());
         

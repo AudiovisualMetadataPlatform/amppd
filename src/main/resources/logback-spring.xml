@@ -39,10 +39,12 @@
 		<appender-ref ref="Console" />
 	</root>
 
-	<!-- LOG amppd at TRACE level -->
-	<logger name="edu.indiana.dlib.amppd" level="debug" additivity="false">
+	<!-- LOG amppd at info level -->
+	<logger name="edu.indiana.dlib.amppd" level="info" additivity="false">
 		<appender-ref ref="RollingFile" />
 		<appender-ref ref="Console" />
 	</logger>
+
+	<!-- customize log levels for individual packages/classes here -->
 
 </configuration>

@@ -107,6 +107,7 @@ public class WorkflowResult {
 	public String toString() {
 		String str = "WorkflowResult";
 		str += "<id: " + id;
+		str += ", primaryfileId: " + primaryfileId;
 		str += ", workflowId: " + workflowId;
 		str += ", invocationId: " + invocationId;
 		str += ", stepId: " + stepId;
