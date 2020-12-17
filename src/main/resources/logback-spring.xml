@@ -33,13 +33,13 @@
 		</rollingPolicy>
 	</appender>
 
-	<!-- LOG everything at INFO level -->
+	<!-- log everything at info level -->
 	<root level="info">
 		<appender-ref ref="RollingFile" />
 		<appender-ref ref="Console" />
 	</root>
 
-	<!-- LOG amppd at debug level -->
+	<!-- log amppd at debug level -->
 	<logger name="edu.indiana.dlib.amppd" level="debug" additivity="false">
 		<appender-ref ref="RollingFile" />
 		<appender-ref ref="Console" />
