@@ -325,7 +325,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// and it differs from either the created or updated timestamp of the job;
 			// for now we use the created/updated timestamp of the job in the result
 			Date dateCreated = step.getUpdateTime(); // will be overwritten below
-//			Date dateUpdated = step.getUpdateTime(); // will be overwritten below
 			
 			// TODO check if the last job is the newest rerun to replace previously failed ones
 			// It's possible to have multiple jobs for a step, likely when the step is rerun within the same invocation; iIn any case

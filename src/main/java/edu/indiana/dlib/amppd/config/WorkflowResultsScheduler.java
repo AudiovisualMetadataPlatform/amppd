@@ -26,7 +26,6 @@ public class WorkflowResultsScheduler {
 		log.info("Finished running refresh status at " + sdf.format(new Date()));
 	}
 
-
 	// Runs every night at 1 am
 	@Scheduled(cron = "${amppd.refreshWorkflowResultsAllCron}")
 	public void refreshAllResults() {
