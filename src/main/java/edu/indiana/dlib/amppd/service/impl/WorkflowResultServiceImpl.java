@@ -361,7 +361,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				if (shouldExcludeDataset(dataset)) {
 					if (oldResults != null && !oldResults.isEmpty()) {
 						workflowResultRepository.deleteAll(oldResults);
-						log.warn("Deleted " + oldResults.size() + " WorkflowResults for hidden/deleted Galaxy dataset: " + oldResults.get(0));
+						log.warn("Deleted " + oldResults.size() + " WorkflowResults for hidden/deleted Galaxy datasets: " + oldResults.get(0));
 					}
 					continue;
 				}
