@@ -144,7 +144,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		query.setFilterByStatuses(filterByStatuses);
 		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
 		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
-		log.debug("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
+		log.info("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
 	}
 	
 	/**
@@ -312,9 +312,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// get workflow name either from the passed-in workflow, or retrieve it by its ID from the passed-in invocation 
 		String workflowName = workflow != null ? workflow.getName() : workflowService.getWorkflowName(invocation.getWorkflowId());
 		String workflowId = workflow != null ? workflow.getId() : ""; // the stored workflow ID if available
-		
-//		log.debug("Refreshing WorkflowResults for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + ", primaryfile " + primaryfile.getId());
-		
+				
 		// Iterate through each step, each of which has a list of jobs (unless it is the initial input)				
 		for(InvocationStepDetails step : invocation.getSteps()) {
 			// If we have no jobs, don't add any result here, skip the step

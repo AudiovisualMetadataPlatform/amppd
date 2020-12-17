@@ -66,7 +66,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  this.amppdUiPropertyConfig = amppdUiPropertyConfig;
 		  ampEmailId = amppdPropertyConfig.getUsername();
 		  ampAdmin = amppdPropertyConfig.getAdmin();
-		  log.debug("Fetched email id from property file:"+ampAdmin);
+		  log.trace("Fetched email id from property file:"+ampAdmin);
 		  uiUrl = amppdUiPropertyConfig.getUrl();
 		  passwordResetTokenExpiration = amppdPropertyConfig.getPasswordResetTokenExpiration();
 		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
@@ -186,7 +186,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		Calendar cal = Calendar.getInstance();
 	    if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
 	    	log.error("Error occurred as link has expired");
-	    	log.debug("passToken.getExpiryDate().getTime():"+passToken.getExpiryDate().getTime()+","+cal.getTime().getTime());
+	    	log.trace("passToken.getExpiryDate().getTime():"+passToken.getExpiryDate().getTime()+","+cal.getTime().getTime());
 	    	response.addError("Link Expired");
 			response.setSuccess(false);
 	    }		

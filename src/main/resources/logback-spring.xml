@@ -39,8 +39,8 @@
 		<appender-ref ref="Console" />
 	</root>
 
-	<!-- LOG amppd at info level -->
-	<logger name="edu.indiana.dlib.amppd" level="info" additivity="false">
+	<!-- LOG amppd at debug level -->
+	<logger name="edu.indiana.dlib.amppd" level="debug" additivity="false">
 		<appender-ref ref="RollingFile" />
 		<appender-ref ref="Console" />
 	</logger>
