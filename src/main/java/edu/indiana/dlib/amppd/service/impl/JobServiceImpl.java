@@ -514,7 +514,7 @@ public class JobServiceImpl implements JobService {
 			throw new GalaxyWorkflowException(msg, e);
 		}
 
-		log.info("Found dataset for: workflowId: " + workflowId + ", invocationId: " + invocationId + ", datasetId: " + datasetId);
+		log.debug("Found dataset for: workflowId: " + workflowId + ", invocationId: " + invocationId + ", datasetId: " + datasetId);
 		return dataset;
 	}
 	

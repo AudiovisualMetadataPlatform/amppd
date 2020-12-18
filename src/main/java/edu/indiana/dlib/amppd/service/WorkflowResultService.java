@@ -54,4 +54,9 @@ public interface WorkflowResultService {
 	 * @return
 	 */
 	public boolean setResultIsFinal(long workflowResultId, boolean isFinal);
+	
+	/**
+	 * Refreshes incomplete workflow results status values
+	 */
+	public void refreshIncompleteResults();
 }

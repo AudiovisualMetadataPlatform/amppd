@@ -381,7 +381,6 @@ public class MediaServiceImpl implements MediaService {
 			ItemSearchResult result = new ItemSearchResult();;
 			Map <String, Object>primaryFileinfo;
 			ArrayList<Map> primaryFilerows = new ArrayList<Map>();
-			//log.debug("the first object is:"+matchedFiles.get(0).toString());
 			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
 				//reset if the current item is a new entry

@@ -8,7 +8,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -103,5 +102,28 @@ public class WorkflowResult {
 
 	@Index
 	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
+	
+	@Override
+	public String toString() {
+		String str = "WorkflowResult";
+		str += "<id: " + id;
+		str += ", primaryfileId: " + primaryfileId;
+		str += ", workflowId: " + workflowId;
+		str += ", invocationId: " + invocationId;
+		str += ", stepId: " + stepId;
+		str += ", outputId: " + outputId;
+		str += ", historyId: " + historyId;
+		str += ", primaryfileName: " + sourceFilename;
+		str += ", workflowName: " + workflowName;
+		str += ", workflowStep: " + workflowStep;
+		str += ", outputFile: " + outputFile;
+		str += ", submitter: " + submitter;
+		str += ", status: " + status;
+		str += ", dateCreated: " + dateCreated;
+		str += ", dateRefreshed: " + dateRefreshed;
+		str += ", isFinal: " + isFinal;
+		str += ">";
+		return str;
+	}
 	
 }

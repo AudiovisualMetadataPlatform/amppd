@@ -19,6 +19,9 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	boolean invocationExists(@Param("invocationId") String invocationId);
 	
 	@Query(value = "select min(dateRefreshed) from WorkflowResult d where d.primaryfileId = :primaryfileId")
-	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);	
+	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);
+	
+	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
+	List<WorkflowResult> findObsolete(Date dateObsolete);
 	
 }
