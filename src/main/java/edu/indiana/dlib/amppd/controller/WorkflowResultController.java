@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
-import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
+import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -21,12 +21,23 @@ public class WorkflowResultController {
 	@Autowired
 	private WorkflowResultService workflowResultService;
 	
+	/**
+	 * Get a all workflow results satisfying the given query.
+	 * @param query the search query for workflow results
+	 * @return the WorkflowResultResponse containing the list of queried workflow results
+	 */
 	@PostMapping(path = "/workflow-results", consumes = "application/json", produces = "application/json")
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
 		log.info("Received request inside getWorkflowResults");
 		return workflowResultService.getWorkflowResults(query);
 	}
 	
+	/**
+	 * Set the given WorkflowRresult isFinal status to the given value.
+	 * @param id ID of the given WorkflowRresult
+	 * @param isFinal the boolean value of the isFinal status to set
+	 * @return true if request is successful; false otherwise
+	 */
 	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
 	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
 		log.info("Setting file to final: " + id);
@@ -44,7 +55,7 @@ public class WorkflowResultController {
 	 * parimaryfile/bundle to add the results.
 	 */	
 	/**
-	 * Refreshes the whole WorkflowResults table iteratively by retrieving and processing workflow invocations per primaryfile,
+	 * Refreshe the whole WorkflowResults table iteratively by retrieving and processing workflow invocations per primaryfile,
 	 * unless the lumpsum mode is specified and true, in which case, retrieve and process all workflow invocations at once.
 	 * It's recommended to turn lumpsum off if request to Galaxy tends to timeout due to large amount of records.
 	 * The WorkflowResult table is typically refreshed for the following cases:
@@ -52,11 +63,15 @@ public class WorkflowResultController {
 	 * - new fields are added;
 	 * - non ID fields (for ex, names) have value changes across many rows;
 	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
+	 * If removeIrrelevant is set to true (false by default), set all irrelevant output datasets to invisible in Galaxy and
+	 * remove them from the WorkflowResults table. Note that this removal process only needs to be done by manually refreshing
+	 * the table once when somehow irrelevant outputs failed to be set as invisible in Galaxy.
 	 * @param lumpsum whether to refresh the table in the lumpsum mode
+	 * @param removeIrrelevant whether to set/remove invisible/irrelevant output datasets
 	 * @return the list of WorkflowResult refreshed
 	 */	
 	@PostMapping("/workflow-results/refresh")
-	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
+	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum, @RequestParam(required = false) Boolean removeIrrelevant) {
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
 			workflowResultService.refreshWorkflowResultsLumpsum();
@@ -67,4 +82,14 @@ public class WorkflowResultController {
 		}
 	}
 
+	/**
+	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
+	 * and remove the row from the WorkflowResult table.
+	 */
+	@PostMapping("/workflow-results/hide")
+	public void hideIrrelevantWorkflowResults() {
+		log.info("Hiding irrelevant workflow results ...");
+		workflowResultService.hideIrrelevantWorkflowResults();
+	}
+	
 }

@@ -2,6 +2,8 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.PostMapping;
+
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
@@ -12,7 +14,7 @@ import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 public interface WorkflowResultService {
 	/***
-	 * Get a list of all results to display in the workflow results dashboard and deliverables UI
+	 * Get a list of all results to display in the workflow results dashboard and deliverables UI.
 	 * @return
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query);
@@ -59,4 +61,11 @@ public interface WorkflowResultService {
 	 * Refreshes incomplete workflow results status values
 	 */
 	public void refreshIncompleteResults();
+	
+	/**
+	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
+	 * and remove the row from the WorkflowResult table.
+	 */
+	public void hideIrrelevantWorkflowResults();
+	
 }
