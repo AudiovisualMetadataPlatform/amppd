@@ -63,15 +63,11 @@ public class WorkflowResultController {
 	 * - new fields are added;
 	 * - non ID fields (for ex, names) have value changes across many rows;
 	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
-	 * If removeIrrelevant is set to true (false by default), set all irrelevant output datasets to invisible in Galaxy and
-	 * remove them from the WorkflowResults table. Note that this removal process only needs to be done by manually refreshing
-	 * the table once when somehow irrelevant outputs failed to be set as invisible in Galaxy.
 	 * @param lumpsum whether to refresh the table in the lumpsum mode
-	 * @param removeIrrelevant whether to set/remove invisible/irrelevant output datasets
 	 * @return the list of WorkflowResult refreshed
 	 */	
 	@PostMapping("/workflow-results/refresh")
-	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum, @RequestParam(required = false) Boolean removeIrrelevant) {
+	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
 			workflowResultService.refreshWorkflowResultsLumpsum();
@@ -84,7 +80,8 @@ public class WorkflowResultController {
 
 	/**
 	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
-	 * and remove the row from the WorkflowResult table.
+	 * and remove the row from the WorkflowResult table. This process only needs to be done once manually (preferably 
+	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
 	 */
 	@PostMapping("/workflow-results/hide")
 	public void hideIrrelevantWorkflowResults() {

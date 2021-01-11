@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
@@ -20,6 +22,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
@@ -456,6 +459,51 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		return deleteResults;
 	}
 		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
+	 */	
+	public void hideIrrelevantWorkflowResults() {
+		// all outputs of the following workflow steps are irrelevant, disregarding its output name
+		List<String> stepsToHide = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "remove_silence_music", "pyscenedetect_shot_detection");
+		
+		// all outputs with the following names are irrelevant, disregarding its workflow step
+		List<String> outputsToHide = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");
+		
+		// all outputs with the following workflowStep-outputFile tuples are irrelevant
+		String[][] stepsOutputsToHide = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
+		
+		// Note: 
+		// The above list are based on current WorkflowResult table data. 
+		// It's subject to change if we have new cases of irrelevant outputs in the future. 
+		
+		// get all irrelevant results from WorkflowResult table
+		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
+		results.addAll(workflowResultRepository.findByWorkflowStepIn(stepsToHide));
+		results.addAll(workflowResultRepository.findByOutputFileIn(outputsToHide));		
+		for (String[] stepOutput : stepsOutputsToHide ) {
+			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputFile(stepOutput[0], stepOutput[1]));
+		}		
+		log.info("Found " + results.size() + " irrelevant workflowResults to hide");
+		
+		// set datasets of the irrelevant results to invisible in Galaxy
+		HistoriesClient historiesClient = jobService.getHistoriesClient();
+		for (WorkflowResult result : results) {
+			try {
+				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
+				dataset.setVisible(false);
+				historiesClient.updateDataset(dataset);
+			} 
+			catch (Exception e) {
+				throw new GalaxyWorkflowException("Failed to hide irrelevant workflowResult in Galaxy: " + result, e);
+			}
+		}
+		log.info("Successfully hide  " + results.size() + " workflowResults in Galaxy");		
+		
+		// remove all irrelevant results from WorkflowResult table
+		workflowResultRepository.deleteAll(results);
+		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults in Galaxy");				
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setResultIsFinal(long, boolean)
 	 */
