@@ -14,7 +14,10 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
 	List<WorkflowResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
 	List<WorkflowResult> findByOutputId(String outputId);
-	
+	List<WorkflowResult> findByWorkflowStepAndOutputFile(String workflowStep, String outputFile);
+	List<WorkflowResult> findByWorkflowStepIn(List<String> workflowSteps);
+	List<WorkflowResult> findByOutputFileIn(List<String> outputFiles);
+
 	@Query(value = "select case when count(*)>0 then true else false end from WorkflowResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);
 	

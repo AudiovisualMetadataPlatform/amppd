@@ -5,15 +5,16 @@ import java.util.List;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 public interface WorkflowResultService {
-	/***
-	 * Get a list of all results to display in the workflow results dashboard and deliverables UI
-	 * @return
+	/**
+	 * Get a list of all workflow results satisfying the given query.
+	 * @param query the search query for workflow results
+	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query);
 	
@@ -51,7 +52,7 @@ public interface WorkflowResultService {
 	 * Sets the specified WorkflowResult according to the specified final status
 	 * @param WorkflowResultId id of the specified WorkflowResult
 	 * @param isFinal the specified final status
-	 * @return
+	 * @return true if request is successful; false otherwise
 	 */
 	public boolean setResultIsFinal(long workflowResultId, boolean isFinal);
 	
@@ -59,4 +60,11 @@ public interface WorkflowResultService {
 	 * Refreshes incomplete workflow results status values
 	 */
 	public void refreshIncompleteResults();
+	
+	/**
+	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
+	 * and remove the row from the WorkflowResult table.
+	 */
+	public void hideIrrelevantWorkflowResults();
+	
 }
