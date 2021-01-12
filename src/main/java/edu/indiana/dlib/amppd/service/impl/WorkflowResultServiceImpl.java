@@ -514,10 +514,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		if(workflowResultOpt.isPresent()) {
 			WorkflowResult result = workflowResultOpt.get();
 			result.setIsFinal(isFinal);
-			workflowResultRepository.save(result);
-			
+			workflowResultRepository.save(result);			
 			return true;
 		}
+		
 		return false;
 	}
 		

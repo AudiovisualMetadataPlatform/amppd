@@ -22,7 +22,7 @@ public class WorkflowResultController {
 	private WorkflowResultService workflowResultService;
 	
 	/**
-	 * Get a all workflow results satisfying the given query.
+	 * Get a list of all workflow results satisfying the given query.
 	 * @param query the search query for workflow results
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
@@ -33,9 +33,9 @@ public class WorkflowResultController {
 	}
 	
 	/**
-	 * Set the given WorkflowRresult isFinal status to the given value.
-	 * @param id ID of the given WorkflowRresult
-	 * @param isFinal the boolean value of the isFinal status to set
+	 * Sets the specified WorkflowResult according to the specified final status
+	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * @param isFinal the specified final status
 	 * @return true if request is successful; false otherwise
 	 */
 	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
@@ -55,7 +55,7 @@ public class WorkflowResultController {
 	 * parimaryfile/bundle to add the results.
 	 */	
 	/**
-	 * Refreshe the whole WorkflowResults table iteratively by retrieving and processing workflow invocations per primaryfile,
+	 * Refresh the whole WorkflowResults table iteratively by retrieving and processing workflow invocations per primaryfile,
 	 * unless the lumpsum mode is specified and true, in which case, retrieve and process all workflow invocations at once.
 	 * It's recommended to turn lumpsum off if request to Galaxy tends to timeout due to large amount of records.
 	 * The WorkflowResult table is typically refreshed for the following cases:
