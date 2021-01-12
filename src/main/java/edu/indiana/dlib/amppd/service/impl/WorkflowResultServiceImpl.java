@@ -87,7 +87,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Returns true if the given dataset should be excluded from WorkflowResults, i.e. it's hidden or deleted.
 	 */
 	private Boolean shouldExcludeDataset(Dataset dataset) {
-		return dataset == null || !dataset.getVisible() || dataset.isDeleted() || dataset.isPurged();
+		return dataset == null || !dataset.getVisible() || dataset.isDeleted() || dataset.isPurged()
+				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;
 	}
 
 	/**
@@ -539,7 +540,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else if(jobStatus.equals("paused")) {
 			status = GalaxyJobState.PAUSED;
 		}
-		else if(jobStatus.equals("deleted")||jobStatus.equals("discarded")) {
+		else if(jobStatus.equals("deleted") || jobStatus.equals("discarded")) {
 			status = GalaxyJobState.DELETED;
 		}
 		return status;
