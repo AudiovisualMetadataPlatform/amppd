@@ -373,9 +373,10 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
-		log.info("Executing file search in media service");
+		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		ItemSearchResponse response = new ItemSearchResponse();
 		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
+		
 		try {
 			List<Primaryfile> matchedFiles = primaryfileRepository.findByItemOrFileName(keyword);
 			ItemSearchResult result = new ItemSearchResult();;
@@ -386,7 +387,7 @@ public class MediaServiceImpl implements MediaService {
 				//reset if the current item is a new entry
 				primaryFileinfo = new HashMap<String, Object>();
 				if(p.getItem().getId() != curr_item_id && primaryFilerows.size()>0) {
-					log.info("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
+					log.trace("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
 					result.setPrimaryFiles(primaryFilerows);
 					rows.add(result);
 					result = new ItemSearchResult();
@@ -422,17 +423,15 @@ public class MediaServiceImpl implements MediaService {
 				rows.add(result);
 				response.setRows(rows);
 			}
-			else
-			{
+			else {
 				response.setError("No primary file found");
 			}
 			response.setSuccess(true);
-			
+			log.info("Successfully found " + rows.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			response.setError(e.getMessage());
 			response.setSuccess(false);
+			log.error("Error searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType, e);			
 		}
 		return response;
 	}
@@ -445,7 +444,7 @@ public class MediaServiceImpl implements MediaService {
 				JSONObject jsonObject = new JSONObject(media_type);
 				JSONObject jsonObject_container = new JSONObject(jsonObject.getString("container"));
 				mime_type = jsonObject_container.getString("mime_type");
-				log.info("====>>>>>MIME TYPE IS:"+jsonObject_container.getString("mime_type"));
+				log.trace("====>>>>>MIME TYPE IS:"+jsonObject_container.getString("mime_type"));
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
