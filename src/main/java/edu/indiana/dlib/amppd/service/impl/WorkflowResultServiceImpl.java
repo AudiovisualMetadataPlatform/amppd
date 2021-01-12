@@ -465,7 +465,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */	
 	public void hideIrrelevantWorkflowResults() {
 		// all outputs of the following workflow steps are irrelevant, disregarding its output name
-		List<String> stepsToHide = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "remove_silence_music", "pyscenedetect_shot_detection");
+		List<String> stepsToHide = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_timestamps", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");
 		
 		// all outputs with the following names are irrelevant, disregarding its workflow step
 		List<String> outputsToHide = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");
