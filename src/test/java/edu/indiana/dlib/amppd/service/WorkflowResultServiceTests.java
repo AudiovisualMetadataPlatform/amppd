@@ -163,5 +163,6 @@ public class WorkflowResultServiceTests {
     	Assert.assertNotNull(result.getDateCreated());
 	}
 	
+	// TODO add tests for other public methods in WorkflowResultService.
 	
 }
