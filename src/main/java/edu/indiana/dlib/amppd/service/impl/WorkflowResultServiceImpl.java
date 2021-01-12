@@ -483,7 +483,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		for (String[] stepOutput : stepsOutputsToHide ) {
 			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputFile(stepOutput[0], stepOutput[1]));
 		}		
-		log.info("Found " + results.size() + " irrelevant workflowResults to hide");
+		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
 		
 		// set datasets of the irrelevant results to invisible in Galaxy
 		HistoriesClient historiesClient = jobService.getHistoriesClient();
@@ -491,17 +491,18 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			try {
 				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
 				dataset.setVisible(false);
-				historiesClient.updateDataset(dataset);
+				historiesClient.updateDataset(result.getHistoryId(), dataset);
+				log.info("Successfully hid irrelevant workflowResult in Galaxy: " + result);
 			} 
 			catch (Exception e) {
 				throw new GalaxyWorkflowException("Failed to hide irrelevant workflowResult in Galaxy: " + result, e);
 			}
 		}
-		log.info("Successfully hide  " + results.size() + " workflowResults in Galaxy");		
+		log.info("Successfully hid  " + results.size() + " irrelevant workflowResults in Galaxy");		
 		
 		// remove all irrelevant results from WorkflowResult table
 		workflowResultRepository.deleteAll(results);
-		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults in Galaxy");				
+		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults from AMP table");				
 	}
 	
 	/**
