@@ -92,7 +92,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			
 			if(authService.compareAuthStrings(authString, userToken, editorInput)){
 				CreateAnonymousAuth(request);
-				logger.trace("Auth string is valid.  Creating anonymous auth");
+				logger.trace("Auth string is valid. Creating anonymous auth");
 			}
 			else {
 				logger.warn("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " editor input: " + editorInput);
@@ -123,7 +123,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 					usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			
 					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-					logger.debug("Authentication succeeded with valid token for user \" + username");
+					logger.debug("Authentication succeeded with valid token for user " + username);
 				}
 				else {
 					logger.warn("Authentication failed with invalid token for user " + username);
