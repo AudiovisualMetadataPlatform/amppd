@@ -477,7 +477,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// The above lists are based on current WorkflowResult table data. 
 		// It's subject to change if we have new cases of irrelevant outputs in the future. 
 		// If we need to run this process and change the above lists frequently, 
-		// we can consider putting the lists in a table instead of hard-code.
+		// we can consider putting the lists in a DB table instead of hard-code.
 		
 		// get all irrelevant results from WorkflowResult table
 		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
