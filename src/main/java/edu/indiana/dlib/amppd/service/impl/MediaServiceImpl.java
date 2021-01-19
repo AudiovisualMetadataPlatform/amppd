@@ -373,7 +373,6 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
-		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		ItemSearchResponse response = new ItemSearchResponse();
 		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
 		

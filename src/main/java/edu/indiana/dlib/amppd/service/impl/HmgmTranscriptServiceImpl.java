@@ -36,34 +36,38 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 			String pathToFile = datasetPath;
 			if(new File(pathToFile + COMPLETE_EXTENSION).exists()) {
 				response.setComplete(true);
+				log.error("Error getting transcript editor input: editor already completed with " + pathToFile);
 				return response;
 			}
 			if(!new File(pathToFile).exists()) {
+				log.error("Error getting transcript editor input: file does not exist: " + pathToFile);
 				return response;
 			}
 			File tempFile = new File(datasetPath + TEMP_EXTENSION);
-			if(reset) {
+			if (reset) {
 				if(tempFile.exists()) {
 					tempFile.delete();
+					log.info("Successfully reset transcript editor by deleting temporary file: " + tempFile);
+				}
+				else {
+					log.warn("Transcript editor reset not done: temporary file has never been saved: " + tempFile);
 				}
 			}
-			else {
-				if(tempFile.exists()) {
-					pathToFile = tempFile.getAbsolutePath();
-					response.setTemporaryFile(true);
-				}
+			else if (tempFile.exists()) {
+				pathToFile = tempFile.getAbsolutePath();
+				response.setTemporaryFile(true);
+				log.info("Temporary transcript editor input file exists, using this version instead of the original input.");				
 			}
 			
 	        FileReader fileReader = new FileReader(pathToFile);
 	        JSONObject json = (JSONObject) parser.parse(fileReader);
 	        response.setContent(json.toJSONString());
 	        response.setSuccess(true);
-			
+	        log.info("Successfully got transcript editor input: " + pathToFile);
 		} catch (IOException e) {
-			e.printStackTrace();
-			log.error("Error getting transcript: " + e.getMessage());
+			log.error("Error getting transcript editor input: " + datasetPath, e);
 		} catch (ParseException e) {
-			log.error("Error parsing transcript: " + e.toString());
+			log.error("Error getting transcript editor input: failed to parse transcript JSON: " + datasetPath, e);
 		}
 		return response;
 	}
@@ -79,13 +83,13 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 			try (FileWriter file = new FileWriter(request.getFilePath())) {
 				file.write(jsonTmp.toJSONString());
 			} catch (IOException e) {
-				log.error("Error converting transcript to json: " + e.getMessage());
+				log.error("Error converting and saving transcript to json: " + request.getFilePath(), e);
 				return false;
 			}
-			
+			log.info("Successfully saved transcript editor content to JSON file: " + request.getFilePath());							
 			return true;
 		} catch (ParseException e) {
-			e.printStackTrace();
+			log.error("Error saving transcript editor content: failed to parse JSON content for file " + request.getFilePath(), e);
 		}
 		return false;
 	}
@@ -110,6 +114,7 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 			}
 			
 			if(!source.exists()) {
+				log.error("Error completing transcript edits: the original source file does not exist: " + request.getFilePath());
 				return false;
 			}
 			
@@ -124,11 +129,12 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 				// copy original file to complete file
 				Files.copy(source.toPath(), dest.toPath());
 			}			
-			
+			log.info("Successfully completed transcript edits into file: " + destFilePath);			
 		} catch (Exception e) {
-			log.error("Error completing transcript: " + e.getMessage());
+			log.error("Error completing transcript edits: " + request.getFilePath(), e);
 			return false;
 		}
+		
 		return true;
 	}
 	
