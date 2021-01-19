@@ -28,7 +28,7 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results", consumes = "application/json", produces = "application/json")
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
-		log.info("Received request inside getWorkflowResults");
+		log.info("Retrieving WorkflowResults for query ...");
 		return workflowResultService.getWorkflowResults(query);
 	}
 	
@@ -40,7 +40,7 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
 	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
-		log.info("Setting file to final: " + id);
+		log.info("Setting workflow result to final: " + id);
 		return workflowResultService.setResultIsFinal(id, isFinal);
 	}
 
