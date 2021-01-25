@@ -96,8 +96,8 @@ public class WorkflowResultController {
 		workflowResultService.hideIrrelevantWorkflowResults();
 	}
 
-	@PostMapping("/workflow-results/export")
-	public void exportToCSV(HttpServletResponse response, WorkflowResultSearchQuery query) throws IOException {
+	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
+	public void exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
         response.setContentType("text/csv");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateTime = dateFormatter.format(new Date());
