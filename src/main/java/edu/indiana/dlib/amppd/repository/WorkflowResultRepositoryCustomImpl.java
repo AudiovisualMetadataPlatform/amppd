@@ -67,16 +67,16 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         }
         WorkflowResultSortRule sort = searchQuery.getSortRule();
         if(sort!=null && !sort.getColumnName().isEmpty()) {
-        	if(sort.getColumnName().equals("outputFile")) {
+        	if(sort.getColumnName().equals("outputName")) {
     			List<Order> orderList = new ArrayList<Order>();
         		if(sort.isOrderByDescending()) {        			
-        			orderList.add(cb.desc(root.get("outputFile")));
+        			orderList.add(cb.desc(root.get("outputName")));
         			orderList.add(cb.asc(root.get("workflowStep")));
             		orderList.add(cb.asc(root.get("workflowName")));
         			orderList.add(cb.desc(root.get(DATE_PROPERTY)));
         		}
             	else {
-            		orderList.add(cb.asc(root.get("outputFile")));
+            		orderList.add(cb.asc(root.get("outputName")));
             		orderList.add(cb.asc(root.get("workflowStep")));
             		orderList.add(cb.asc(root.get("workflowName")));
             		orderList.add(cb.desc(root.get(DATE_PROPERTY)));

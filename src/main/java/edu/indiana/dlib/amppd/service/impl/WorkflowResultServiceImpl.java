@@ -426,7 +426,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setWorkflowStep(stepLabel);
 				result.setToolInfo(toolInfo);
 
-				result.setOutputFile(outputName);
+				result.setOutputName(outputName);
 				result.setOutputType(dataset.getFileExt());
 				result.setOutputPath(dataset.getFileName());
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
@@ -496,9 +496,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// get all irrelevant results from WorkflowResult table
 		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
 		results.addAll(workflowResultRepository.findByWorkflowStepIn(stepsToHide));
-		results.addAll(workflowResultRepository.findByOutputFileIn(outputsToHide));		
+		results.addAll(workflowResultRepository.findByOutputNameIn(outputsToHide));		
 		for (String[] stepOutput : stepsOutputsToHide ) {
-			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputFile(stepOutput[0], stepOutput[1]));
+			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
 		}		
 		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
 		

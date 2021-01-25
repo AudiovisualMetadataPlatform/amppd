@@ -69,7 +69,7 @@ public class BagServiceImpl implements BagService {
 			bcontent.setWorkflowName(result.getWorkflowName());
 			bcontent.setWorkflowStep(result.getWorkflowStep()); 
 			bcontent.setToolInfo(result.getToolInfo());	 
-			bcontent.setOutputFile(result.getOutputFile());
+			bcontent.setOutputName(result.getOutputName());
 			bcontent.setOutputType(result.getOutputType());			
 			bcontent.setOutputUrl(mediaService.getWorkflowResultOutputUrl(result.getId()));	
 			bcontents.add(bcontent);

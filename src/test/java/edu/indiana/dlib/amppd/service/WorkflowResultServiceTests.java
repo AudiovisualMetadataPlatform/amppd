@@ -153,7 +153,7 @@ public class WorkflowResultServiceTests {
     	
 	}
 	private void validateResult(WorkflowResult result) {
-		Assert.assertNotNull(result.getOutputFile());
+		Assert.assertNotNull(result.getOutputName());
     	Assert.assertNotNull(result.getItemName());
     	Assert.assertNotNull(result.getPrimaryfileName());
     	Assert.assertNotNull(result.getSubmitter());

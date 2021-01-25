@@ -71,7 +71,7 @@ public class WorkflowResult {
 	
 	//@NotNull
 	@Index
-	private String outputFile;	// name of the output
+	private String outputName;	// name of the output
 	
 	//@NotNull
 	@Index
@@ -124,7 +124,7 @@ public class WorkflowResult {
 		str += ", primaryfileName: " + primaryfileName;
 		str += ", workflowName: " + workflowName;
 		str += ", workflowStep: " + workflowStep;
-		str += ", outputFile: " + outputFile;
+		str += ", outputName: " + outputName;
 		str += ", submitter: " + submitter;
 		str += ", status: " + status;
 		str += ", dateCreated: " + dateCreated;
