@@ -2,6 +2,8 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
@@ -66,5 +68,12 @@ public interface WorkflowResultService {
 	 * and remove the row from the WorkflowResult table.
 	 */
 	public void hideIrrelevantWorkflowResults();
+	
+	/**
+	 * Set and export workflow result csv file as part of reponse
+	 * @param response HttpServletResponse
+	 * @param query WorkflowResultSearchQuery
+	 */
+	public void exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query);
 	
 }

@@ -144,8 +144,8 @@ public class WorkflowResultServiceTests {
     	boolean returnedPrimaryFile = false;
     	for(WorkflowResult result : records) {
     		validateResult(result);
-    		if(result.getSourceFilename().equals(pf1.getOriginalFilename()) &&
-    				result.getSourceItem().equals(pf1.getItem().getName())) {
+    		if(result.getPrimaryfileName().equals(pf1.getOriginalFilename()) &&
+    				result.getItemName().equals(pf1.getItem().getName())) {
     			returnedPrimaryFile = true;
     		}
     	}
@@ -153,9 +153,9 @@ public class WorkflowResultServiceTests {
     	
 	}
 	private void validateResult(WorkflowResult result) {
-		Assert.assertNotNull(result.getOutputFile());
-    	Assert.assertNotNull(result.getSourceItem());
-    	Assert.assertNotNull(result.getSourceFilename());
+		Assert.assertNotNull(result.getOutputName());
+    	Assert.assertNotNull(result.getItemName());
+    	Assert.assertNotNull(result.getPrimaryfileName());
     	Assert.assertNotNull(result.getSubmitter());
     	Assert.assertNotNull(result.getWorkflowName());
     	Assert.assertNotNull(result.getWorkflowStep());
