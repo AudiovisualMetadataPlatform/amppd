@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -7,10 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.jdo.annotations.Index;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.annotations.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
@@ -23,6 +31,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
@@ -400,10 +410,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 						}
 					}
 				}
-								
+				Item item = primaryfile.getItem();
+				Collection collection = item.getCollection();	
 				result.setPrimaryfileId(primaryfile.getId());
-				result.setSourceFilename(primaryfile.getName());
-				result.setSourceItem(primaryfile.getItem().getName());
+				result.setPrimaryfileName(primaryfile.getName());
+				result.setItemName(primaryfile.getItem().getName());
 										
 				result.setWorkflowId(invocation.getWorkflowId());
 				result.setInvocationId(invocation.getId());
@@ -424,7 +435,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setStatus(getJobStatus(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
-								
+				result.setCollectionId(collection.getId());
+				result.setItemId(item.getId());
+				result.setExternalId(primaryfile.getExternalId());
+				result.setCollectionName(collection.getName());
 				result.setDateRefreshed(new Date());
 				results.add(result);				
 			}
@@ -560,6 +574,35 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			return null;
 		String info = tools.get(0).getMgmName() + " " + tools.get(0).getVersion();
 		return info;
+	}
+
+	@Override
+	public void exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query) {
+
+        try {
+        	long totalResults = workflowResultRepository.count();
+        	query.setResultsPerPage((int)totalResults);
+			WorkflowResultResponse results = getWorkflowResults(query);
+			ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+			
+	        String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Source Item", "Source Filename", "Workflow Step", "Output File", "Status"};
+	        String[] nameMapping = {"dateCreated", "submitter", "collectionId", "itemId", "primaryfileId", "sourceItem", "sourceFilename", "workflowStep", "outputFile", "status"};
+	         
+	        
+			csvWriter.writeHeader(csvHeader);
+	         
+	        for (WorkflowResult r : results.getRows()) {
+	            csvWriter.write(r, nameMapping);
+	        }
+	         
+	        csvWriter.close();
+	        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+         
+		
 	}
 	
 }

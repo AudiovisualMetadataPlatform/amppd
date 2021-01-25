@@ -32,12 +32,12 @@ public class WorkflowResult {
 	//@NotNull
 	@Index
 	@Type(type="text")
-	private String sourceItem;		// item name	
+	private String itemName;
 	
 	//@NotNull
 	@Index
 	@Type(type="text")
-	private String sourceFilename;	// primaryfile name
+	private String primaryfileName;	// primaryfile name
 
 	//@NotNull
 	@Index
@@ -103,6 +103,14 @@ public class WorkflowResult {
 	@Index
 	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
 	
+	
+	private Long itemId;
+	private String externalId;
+	private Long collectionId;
+
+	@Index
+	private String collectionName;
+	
 	@Override
 	public String toString() {
 		String str = "WorkflowResult";
@@ -113,7 +121,7 @@ public class WorkflowResult {
 		str += ", stepId: " + stepId;
 		str += ", outputId: " + outputId;
 		str += ", historyId: " + historyId;
-		str += ", primaryfileName: " + sourceFilename;
+		str += ", primaryfileName: " + primaryfileName;
 		str += ", workflowName: " + workflowName;
 		str += ", workflowStep: " + workflowStep;
 		str += ", outputFile: " + outputFile;
