@@ -125,7 +125,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 		
 		if(searchQuery.getFilterBySearchTerm().length>0) {        	
         	In<String> inClause = cb.in(root.get("sourceItem"));
-        	In<String> inClause2 = cb.in(root.get("sourceFilename"));
+        	In<String> inClause2 = cb.in(root.get("primaryfileName"));
         	
         	for (String term : searchQuery.getFilterBySearchTerm()) {
         	    inClause.value(term);
@@ -164,7 +164,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         }
         
         if(searchQuery.getFilterByFiles().length>0) {
-        	Path<String> path = root.get("sourceFilename");
+        	Path<String> path = root.get("primaryfileName");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByFiles());
             predicates.add(predicate);
         }
@@ -205,7 +205,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // Making filter value set context-dependent will result in deadlock queries. 
 
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
-        List<String> filenames = em.createQuery(query.select(root.get("sourceFilename")).distinct(true)).getResultList();
+        List<String> filenames = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
