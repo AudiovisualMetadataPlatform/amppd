@@ -124,7 +124,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		
 		if(searchQuery.getFilterBySearchTerm().length>0) {        	
-        	In<String> inClause = cb.in(root.get("sourceItem"));
+        	In<String> inClause = cb.in(root.get("itemName"));
         	In<String> inClause2 = cb.in(root.get("primaryfileName"));
         	
         	for (String term : searchQuery.getFilterBySearchTerm()) {
@@ -158,7 +158,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         }
         
         if(searchQuery.getFilterByItems().length>0) {
-        	Path<String> path = root.get("sourceItem");
+        	Path<String> path = root.get("itemName");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByItems());
             predicates.add(predicate);
         }
@@ -206,7 +206,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> filenames = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
-        List<String> items = em.createQuery(query.select(root.get("sourceItem")).distinct(true)).getResultList();
+        List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
