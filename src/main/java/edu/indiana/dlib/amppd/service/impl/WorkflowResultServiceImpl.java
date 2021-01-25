@@ -437,7 +437,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setDateUpdated(dataset.getUpdateTime());
 				result.setCollectionId(collection.getId());
 				result.setItemId(item.getId());
-				result.setExternalId(primaryfile.getExternalId());
+				result.setExternalId(item.getExternalId());
 				result.setCollectionName(collection.getName());
 				result.setDateRefreshed(new Date());
 				results.add(result);				
