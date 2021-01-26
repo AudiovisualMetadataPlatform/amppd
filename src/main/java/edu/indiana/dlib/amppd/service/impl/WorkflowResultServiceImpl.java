@@ -585,13 +585,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			WorkflowResultResponse results = getWorkflowResults(query);
 			ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
 			
-	        String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Source Item", "Source Filename", "Workflow Step", "Output File", "Status"};
-	        String[] nameMapping = {"dateCreated", "submitter", "collectionId", "itemId", "primaryfileId", "itemName", "primaryfileName", "workflowStep", "outputName", "status"};
+	        String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Workflow", "Source Item", "Source Filename", "Workflow Step", "Output File", "Status"};
+	        String[] nameMapping = {"dateCreated", "submitter", "collectionId", "itemId", "primaryfileId", "workflowName", "itemName", "primaryfileName", "workflowStep", "outputName", "status"};
 	         
 	        
 			csvWriter.writeHeader(csvHeader);
 	         
 	        for (WorkflowResult r : results.getRows()) {
+	        	
 	            csvWriter.write(r, nameMapping);
 	        }
 	         
