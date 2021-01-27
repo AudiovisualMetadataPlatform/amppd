@@ -60,15 +60,15 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */   
 	// map between all obsolete workflow step names to their standard current names
 	private static final HashMap<String, String> STEPS_MAP = new HashMap<String, String>() {{
-		put("VTTgenerator", "vtt_generator");
 		put("aws_comprehend", "aws_comprehend_ner");
 		put("aws_transcribe", "aws_transcribe_stt");
+		put("VTTgenerator", "vtt_generator");
 	}};
 	// map between all obsolete output names to their standard current names
 	private static final HashMap<String, String> OUTPUTS_MAP = new HashMap<String, String>() {{
 		put("amp_entity_extraction", "amp_entities");
-		put("webVtt", "web_vtt");
 		put("audio_file", "audio_extracted");
+		put("webVtt", "web_vtt");
 		put("amp_segmentation", "amp_segments");
 		put("aws_transcribe_transcript", "aws_transcript");
 		put("corrected_draftjs_transcript", "draftjs_corrected");
@@ -504,6 +504,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		if (standardName == null)
 			return name;
 		
+		log.debug("Standardized obsolete " + name + " to " + standardName);
 		return standardName;
 	}
 	
