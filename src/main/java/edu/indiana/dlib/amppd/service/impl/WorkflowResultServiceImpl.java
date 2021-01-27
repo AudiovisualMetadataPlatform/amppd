@@ -453,12 +453,19 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 						}
 					}
 				}
+				
 				Item item = primaryfile.getItem();
-				Collection collection = item.getCollection();	
+				Collection collection = item.getCollection();
+				
 				result.setPrimaryfileId(primaryfile.getId());
 				result.setPrimaryfileName(primaryfile.getName());
-				result.setItemName(primaryfile.getItem().getName());
-										
+				result.setItemId(item.getId());
+				result.setItemName(item.getName());
+				result.setExternalSource(item.getExternalSource());
+				result.setExternalId(item.getExternalId());
+				result.setCollectionId(collection.getId());
+				result.setCollectionName(collection.getName());
+				
 				result.setWorkflowId(invocation.getWorkflowId());
 				result.setInvocationId(invocation.getId());
 				result.setStepId(step.getId());
@@ -480,10 +487,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setStatus(getJobStatus(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
-				result.setCollectionId(collection.getId());
-				result.setItemId(item.getId());
-				result.setExternalId(item.getExternalId());
-				result.setCollectionName(collection.getName());
 				result.setDateRefreshed(new Date());
 				results.add(result);				
 			}
