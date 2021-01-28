@@ -158,7 +158,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getWorkflowResultOutputUrl(Long workflowResultId) {
-		String url = amppdPropertyConfig.getUrl() + "/workflow-result/" + workflowResultId + "/output";
+		String url = amppdPropertyConfig.getUrl() + "/workflow-results/" + workflowResultId + "/output";
 		return url;
 	}
 	
