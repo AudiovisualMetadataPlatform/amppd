@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.CsvMapWriter;
 import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
@@ -40,6 +43,7 @@ import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
@@ -61,6 +65,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	private JobService jobService;
 	@Autowired
 	private WorkflowService workflowService;
+	@Autowired
+	private MediaService mediaService;
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
 	
@@ -583,17 +589,36 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
         	long totalResults = workflowResultRepository.count();
         	query.setResultsPerPage((int)totalResults);
 			WorkflowResultResponse results = getWorkflowResults(query);
-			ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
 			
-	        String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Workflow", "Source Item", "Source Filename", "Workflow Step", "Output File", "Status"};
-	        String[] nameMapping = {"dateCreated", "submitter", "collectionId", "itemId", "primaryfileId", "workflowName", "itemName", "primaryfileName", "workflowStep", "outputName", "status"};
+	        String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Workflow", "Source Item", "Source Filename", "Source File Url", "Workflow Step", "Output File", "Output File Url", "Status"};
+	        //tring[] nameMapping = {"dateCreated", "submitter", "collectionId", "itemId", "primaryfileId", "workflowName", "itemName", "primaryfileName", "workflowStep", "outputName", "status"};
 	         
 	        
 			csvWriter.writeHeader(csvHeader);
 	         
 	        for (WorkflowResult r : results.getRows()) {
 	        	
-	            csvWriter.write(r, nameMapping);
+	        	Map<String, Object> output = new HashMap<String, Object>();
+	        	output.put(csvHeader[0], r.getDateCreated());
+	        	output.put(csvHeader[1], r.getSubmitter());
+	        	output.put(csvHeader[2], r.getSubmitter());
+	        	output.put(csvHeader[3], r.getCollectionId());
+	        	output.put(csvHeader[4], r.getItemId());
+	        	output.put(csvHeader[5], r.getPrimaryfileId());
+	        	output.put(csvHeader[6], r.getWorkflowName());
+	        	output.put(csvHeader[7], r.getItemName());
+	        	output.put(csvHeader[8], r.getPrimaryfileName());
+	        	output.put(csvHeader[9], mediaService.getPrimaryfileSymlinkUrl(r.getPrimaryfileId()));
+	        	output.put(csvHeader[10], r.getWorkflowStep());
+	        	output.put(csvHeader[11], r.getOutputName()); 
+	        	output.put(csvHeader[12], mediaService.getWorkflowResultOutputUrl(r.getId())); 
+	        	output.put(csvHeader[13], r.getStatus());
+	        	
+	        	csvWriter.write(output, csvHeader);
+	        	
+	        	
+	            //csvWriter.write(r, nameMapping);
 	        }
 	         
 	        csvWriter.close();
