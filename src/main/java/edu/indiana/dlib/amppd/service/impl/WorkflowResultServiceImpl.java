@@ -645,18 +645,17 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	        	Map<String, Object> output = new HashMap<String, Object>();
 	        	output.put(csvHeader[0], r.getDateCreated());
 	        	output.put(csvHeader[1], r.getSubmitter());
-	        	output.put(csvHeader[2], r.getSubmitter());
-	        	output.put(csvHeader[3], r.getCollectionId());
-	        	output.put(csvHeader[4], r.getItemId());
-	        	output.put(csvHeader[5], r.getPrimaryfileId());
-	        	output.put(csvHeader[6], r.getWorkflowName());
-	        	output.put(csvHeader[7], r.getItemName());
-	        	output.put(csvHeader[8], r.getPrimaryfileName());
-	        	output.put(csvHeader[9], mediaService.getPrimaryfileSymlinkUrl(r.getPrimaryfileId()));
-	        	output.put(csvHeader[10], r.getWorkflowStep());
-	        	output.put(csvHeader[11], r.getOutputName()); 
-	        	output.put(csvHeader[12], mediaService.getWorkflowResultOutputUrl(r.getId())); 
-	        	output.put(csvHeader[13], r.getStatus());
+	        	output.put(csvHeader[2], r.getCollectionId());
+	        	output.put(csvHeader[3], r.getItemId());
+	        	output.put(csvHeader[4], r.getPrimaryfileId());
+	        	output.put(csvHeader[5], r.getWorkflowName());
+	        	output.put(csvHeader[6], r.getItemName());
+	        	output.put(csvHeader[7], r.getPrimaryfileName());
+	        	output.put(csvHeader[8], mediaService.getPrimaryfileSymlinkUrl(r.getPrimaryfileId()));
+	        	output.put(csvHeader[9], r.getWorkflowStep());
+	        	output.put(csvHeader[10], r.getOutputName()); 
+	        	output.put(csvHeader[11], mediaService.getWorkflowResultOutputUrl(r.getId())); 
+	        	output.put(csvHeader[12], r.getStatus());
 	        	
 	        	csvWriter.write(output, csvHeader);
 	        	
