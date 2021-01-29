@@ -24,7 +24,7 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public abstract class Supplement extends Asset {
 	// Currently, we don't have UNIT type Supplement, it might be added later as needed.
-	// In batch manifest the types are indicated as "C", "I", "P"
+	// In batch manifest the types are indicated as "collection", "item", "primaryfile"
 	public enum SupplementType { UNIT, COLLECTION, ITEM, PRIMARYFILE }
 	
 	// TODO double check the relationship

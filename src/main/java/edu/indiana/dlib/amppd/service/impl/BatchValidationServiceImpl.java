@@ -214,7 +214,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     			continue;
     		}
     		
-        	List<String> itemErrors = validateItemColumns( batchFile.getItemName(), batchFile.getRowNum());
+    		// item
+        	List<String> itemErrors = validateItemColumns( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
         	// Validate the primary file
@@ -274,13 +275,18 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate item columns
 	 */
-	private List<String> validateItemColumns( String itemTitle, int lineNum) {
+	private List<String> validateItemColumns(String itemTitle, SupplementType supplementType, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 		
-    	if(itemTitle.isBlank()) {
+		// item title is required except for collection supplement 
+    	if (supplementType != SupplementType.COLLECTION && itemTitle.isBlank()) {
     		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
     	}
-    	
+		// item title should be blank for collection supplement 
+		else if (supplementType == SupplementType.COLLECTION && !itemTitle.isBlank()) {
+	    	errors.add(String.format("Row: %s: Item title should be blank for Collection Supplement", lineNum));
+		}
+
     	return errors;
 	}
 	
@@ -329,18 +335,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		if(supplementType == SupplementType.PRIMARYFILE || supplementType == null) {
 	    	if(primaryFile.isBlank()) {
 	    		if(supplementType == SupplementType.PRIMARYFILE) {
-		    		errors.add(String.format("Row: %s: Primary file name is missing for supplement type Primary", lineNum));
+		    		errors.add(String.format("Row: %s: Primary file name is missing for Primaryfile Supplement", lineNum));
 	    		}
 	    		else {
 		    		errors.add(String.format("Row: %s: Primary file name is missing", lineNum));
-	    		}
-	    	}
-	    	if(primaryFileLabel.isBlank()) {
-	    		if(supplementType == SupplementType.PRIMARYFILE) {
-		    		errors.add(String.format("Row: %s: Primary file label is missing for supplement type Primary", lineNum));
-	    		}
-	    		else {
-		    		errors.add(String.format("Row: %s: Primary file label is missing", lineNum));
 	    		}
 	    	}
 
@@ -354,12 +352,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 				}
 			}
 		}
+		// primaryfile name should be blank for collection/item supplement 
 		else if(supplementType == SupplementType.ITEM || supplementType == SupplementType.COLLECTION) {
 			if(!primaryFile.isBlank()) {
-	    		errors.add(String.format("Row: %s: Primary file name should be blank for supplement type Item", lineNum));
-			}
-			if(!primaryFile.isBlank()) {
-	    		errors.add(String.format("Row: %s: Primary file label should be blank for supplement type Item", lineNum));
+	    		errors.add(String.format("Row: %s: Primary file name should be blank for Collection/Item Supplement", lineNum));
 			}
 		}
     	return errors;
