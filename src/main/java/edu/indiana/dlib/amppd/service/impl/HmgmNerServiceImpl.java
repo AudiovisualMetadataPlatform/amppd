@@ -39,31 +39,31 @@ public class HmgmNerServiceImpl implements HmgmNerService {
 		try {
 			if (new File(pathToFile + COMPLETE_EXTENSION).exists()) {
 				// TODO should throw exception?
-				log.error("Error getting NER input: editor already completed with " + pathToFile);
+				log.error("Error getting NER editor input: editor already completed with " + pathToFile);
 				return null;
 			}
 			if (!new File(pathToFile).exists()) {
-				log.error("Error getting NER input: file does not exist: " + pathToFile);
+				log.error("Error getting NER editor input: file does not exist: " + pathToFile);
 				return null;
 			}
 			
 			File tempFile = new File(resourcePath + TMP_EXTENSION);
 			if (tempFile.exists()) {
 				pathToFile = tempFile.getAbsolutePath();
-		        log.info("Temporary NER input file exists, using this version instead of the original input.");
+		        log.info("Temporary NER editor input file exists, using this version instead of the original input.");
 			}
 			
 	        FileReader fileReader = new FileReader(pathToFile);
 	        JSONObject json = (JSONObject) parser.parse(fileReader);
 	        fileReader.close();
-	        log.info("Successfully got NER input: " + pathToFile);
+	        log.info("Successfully got NER editor input: " + pathToFile);
 	        
 	        return json.toJSONString();			
 		} catch (IOException e) {
-			log.error("Error reading NER input: " + pathToFile, e);
+			log.error("Error reading NER editor input: " + pathToFile, e);
 			return null;
 		} catch (ParseException e) {
-			log.error("Error parsing NER input when reading file: " + pathToFile, e);
+			log.error("Error parsing NER editor input when reading file: " + pathToFile, e);
 			return null;
 		}
 	}

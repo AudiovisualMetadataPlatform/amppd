@@ -1,5 +1,12 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +35,7 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results", consumes = "application/json", produces = "application/json")
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
-		log.info("Received request inside getWorkflowResults");
+		log.info("Retrieving WorkflowResults for query ...");
 		return workflowResultService.getWorkflowResults(query);
 	}
 	
@@ -40,7 +47,7 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
 	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
-		log.info("Setting file to final: " + id);
+		log.info("Setting workflow result to final: " + id);
 		return workflowResultService.setResultIsFinal(id, isFinal);
 	}
 
@@ -88,5 +95,20 @@ public class WorkflowResultController {
 		log.info("Hiding irrelevant workflow results ...");
 		workflowResultService.hideIrrelevantWorkflowResults();
 	}
+
+	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
+	public void exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
+        response.setContentType("text/csv");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String currentDateTime = dateFormatter.format(new Date());
+         
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=AmpDashboardExport_" + currentDateTime + ".csv";
+        response.setHeader(headerKey, headerValue);
+
+		log.info("Exporting CSV " + headerValue);
+		
+		workflowResultService.exportWorkflowResults(response, query);
+    }
 	
 }

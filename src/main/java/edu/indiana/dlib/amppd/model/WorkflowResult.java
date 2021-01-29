@@ -31,13 +31,34 @@ public class WorkflowResult {
 
 	//@NotNull
 	@Index
-	@Type(type="text")
-	private String sourceItem;		// item name	
+	private Long itemId;
+
+	//@NotNull
+	@Index
+	private Long collectionId;
 	
 	//@NotNull
 	@Index
 	@Type(type="text")
-	private String sourceFilename;	// primaryfile name
+	private String primaryfileName;
+
+	//@NotNull
+	@Index
+	@Type(type="text")
+	private String itemName;
+
+	//@NotNull
+	@Index
+	@Type(type="text")
+	private String collectionName;
+
+	//@NotNull
+	@Index
+	private String externalSource;
+
+	//@NotNull
+	@Index
+	private String externalId;
 
 	//@NotNull
 	@Index
@@ -71,7 +92,7 @@ public class WorkflowResult {
 	
 	//@NotNull
 	@Index
-	private String outputFile;	// name of the output
+	private String outputName;	// name of the output
 	
 	//@NotNull
 	@Index
@@ -102,7 +123,7 @@ public class WorkflowResult {
 
 	@Index
 	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
-	
+		
 	@Override
 	public String toString() {
 		String str = "WorkflowResult";
@@ -113,10 +134,10 @@ public class WorkflowResult {
 		str += ", stepId: " + stepId;
 		str += ", outputId: " + outputId;
 		str += ", historyId: " + historyId;
-		str += ", primaryfileName: " + sourceFilename;
+		str += ", primaryfileName: " + primaryfileName;
 		str += ", workflowName: " + workflowName;
 		str += ", workflowStep: " + workflowStep;
-		str += ", outputFile: " + outputFile;
+		str += ", outputName: " + outputName;
 		str += ", submitter: " + submitter;
 		str += ", status: " + status;
 		str += ", dateCreated: " + dateCreated;

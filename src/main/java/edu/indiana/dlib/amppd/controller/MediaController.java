@@ -72,9 +72,9 @@ public class MediaController {
 	@CrossOrigin(origins = "*")
 	@GetMapping(path = "/primaryfiles/search/findByItemOrFileName")
 	public @ResponseBody ItemSearchResponse searchFile(@RequestParam("keyword") String keyword, @RequestParam("mediaType") String mediaType) {	
+		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		ItemSearchResponse res = new ItemSearchResponse();
 		res = mediaService.findItemOrFile(keyword, mediaType);
-		log.info("returning from findItemOrFile");
 		return res;
 	}
 	

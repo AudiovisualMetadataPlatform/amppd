@@ -158,7 +158,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getWorkflowResultOutputUrl(Long workflowResultId) {
-		String url = amppdPropertyConfig.getUrl() + "/workflow-result/" + workflowResultId + "/output";
+		String url = amppdPropertyConfig.getUrl() + "/workflow-results/" + workflowResultId + "/output";
 		return url;
 	}
 	
@@ -373,7 +373,6 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
-		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		ItemSearchResponse response = new ItemSearchResponse();
 		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
 		

@@ -1,16 +1,25 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.CsvMapWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.io.ICsvMapWriter;
+import org.supercsv.prefs.CsvPreference;
 
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
@@ -23,6 +32,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
@@ -30,6 +41,7 @@ import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
@@ -40,6 +52,49 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class WorkflowResultServiceImpl implements WorkflowResultService {
+
+
+	/* Note: 
+	 * The two maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
+	 * Their values are based on current WorkflowResult table data. 
+	 * Since the obsolete MGMs don't exist in the system anymore, no more obsolete IDs/names should be generated,
+	 * thus the maps are inclusive for the future. Once we delete obsolete outputs from Galaxy, 
+	 * we won't need to call standardize and these maps can be removed as well.
+	 */   
+	// map between all obsolete workflow step names to their standard current names
+	private static final HashMap<String, String> STEPS_MAP = new HashMap<String, String>() {{
+		put("aws_comprehend", "aws_comprehend_ner");
+		put("aws_transcribe", "aws_transcribe_stt");
+		put("VTTgenerator", "vtt_generator");
+	}};
+	// map between all obsolete output names to their standard current names
+	private static final HashMap<String, String> OUTPUTS_MAP = new HashMap<String, String>() {{
+		put("amp_entity_extraction", "amp_entities");
+		put("audio_file", "audio_extracted");
+		put("webVtt", "web_vtt");
+		put("amp_segmentation", "amp_segments");
+		put("aws_transcribe_transcript", "aws_transcript");
+		put("corrected_draftjs_transcript", "draftjs_corrected");
+		put("original_draftjs_transcript", "draftjs_uncorrected");
+	}};
+
+	/* Note: 
+	 * The three lists below are used by the hideIrrelevantWorkflowResults process.
+	 * Their values are based on current WorkflowResult table data. 
+	 * They are subject to change if we have new cases of irrelevant outputs in the future. 
+	 * If we need to run the hideIrrelevantWorkflowResults process and change these lists frequently, 
+	 * we can consider using a DB table instead of hard-coded constants.
+	 * Also, only standard step/output names need to be included, thanks to the standardize method.
+	 */
+	// all outputs of the following workflow steps are irrelevant, disregarding its output name
+	private static final List<String> STEPS_TO_HIDE = Arrays.asList("ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");	
+	// all outputs with the following names are irrelevant, disregarding its workflow step
+	private static final List<String> OUTPUTS_TO_HIDE = Arrays.asList("draftjs_corrected", "draftjs_uncorrected", "task_info", "iiif_corrected", "iiif_uncorrected");	
+	// all outputs with the following workflowStep-outputFile tuples are irrelevant
+	private static final String[][] STEPS_OUTPUTS_TO_HIDE = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
+//	public static final List<String> STEPS_TO_HIDE = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_timestamps", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");	
+//	public static final List<String> OUTPUTS_TO_HIDE = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");	
+//	public static final String[][] STEPS_OUTPUTS_TO_HIDE = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
 
 	@Autowired
 	private GalaxyPropertyConfig galaxyPropertyConfig;
@@ -52,6 +107,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Autowired
 	private WorkflowService workflowService;
 	@Autowired
+	private MediaService mediaService;
+	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
 	
 	@Value("${amppd.refreshResultsStatusMinutes}")
@@ -59,6 +116,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	
 	@Value("${amppd.refreshResultsTableMinutes}")
 	private int REFRESH_TABLE_MINUTES;
+		
 	
 	/**
 	 * Return true if the specified dateRefreshed is recent, i.e. within the given refreshMinutes; false otherwise.
@@ -400,11 +458,19 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 						}
 					}
 				}
-								
+				
+				Item item = primaryfile.getItem();
+				Collection collection = item.getCollection();
+				
 				result.setPrimaryfileId(primaryfile.getId());
-				result.setSourceFilename(primaryfile.getName());
-				result.setSourceItem(primaryfile.getItem().getName());
-										
+				result.setPrimaryfileName(primaryfile.getName());
+				result.setItemId(item.getId());
+				result.setItemName(item.getName());
+				result.setExternalSource(item.getExternalSource());
+				result.setExternalId(item.getExternalId());
+				result.setCollectionId(collection.getId());
+				result.setCollectionName(collection.getName());
+				
 				result.setWorkflowId(invocation.getWorkflowId());
 				result.setInvocationId(invocation.getId());
 				result.setStepId(step.getId());
@@ -412,10 +478,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setHistoryId(invocation.getHistoryId());
 
 				result.setWorkflowName(workflowName);
-				result.setWorkflowStep(stepLabel);
+				// translate possible obsolete tool ID to standardized current tool ID
+				result.setWorkflowStep(standardize(stepLabel, STEPS_MAP)); 
 				result.setToolInfo(toolInfo);
 
-				result.setOutputFile(outputName);
+				// translate possible obsolete output name to standardized current output name
+				result.setOutputName(standardize(outputName, OUTPUTS_MAP));
 				result.setOutputType(dataset.getFileExt());
 				result.setOutputPath(dataset.getFileName());
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
@@ -424,7 +492,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setStatus(getJobStatus(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
-								
 				result.setDateRefreshed(new Date());
 				results.add(result);				
 			}
@@ -433,6 +500,20 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		workflowResultRepository.saveAll(results);
 		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + "(" + workflowId + "), primaryfile " + primaryfile.getId());
 		return results;
+	}
+	
+	/**
+	 * Translate the given name to its corresponding standard name using the given obsolete-to-standard name map.
+	 */
+	private String standardize(String name, HashMap<String, String> map) {
+		String standardName = map.get(name);
+
+		// if the name doesn't exist in the map, that means it's already a standard name
+		if (standardName == null)
+			return name;
+		
+		log.debug("Standardized obsolete " + name + " to " + standardName);
+		return standardName;
 	}
 	
 	/**
@@ -463,28 +544,13 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
 	 */	
-	public void hideIrrelevantWorkflowResults() {
-		// all outputs of the following workflow steps are irrelevant, disregarding its output name
-		List<String> stepsToHide = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_timestamps", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");
-		
-		// all outputs with the following names are irrelevant, disregarding its workflow step
-		List<String> outputsToHide = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");
-		
-		// all outputs with the following workflowStep-outputFile tuples are irrelevant
-		String[][] stepsOutputsToHide = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
-		
-		// Note: 
-		// The above lists are based on current WorkflowResult table data. 
-		// It's subject to change if we have new cases of irrelevant outputs in the future. 
-		// If we need to run this process and change the above lists frequently, 
-		// we can consider putting the lists in a DB table instead of hard-code.
-		
+	public void hideIrrelevantWorkflowResults() {		
 		// get all irrelevant results from WorkflowResult table
 		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
-		results.addAll(workflowResultRepository.findByWorkflowStepIn(stepsToHide));
-		results.addAll(workflowResultRepository.findByOutputFileIn(outputsToHide));		
-		for (String[] stepOutput : stepsOutputsToHide ) {
-			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputFile(stepOutput[0], stepOutput[1]));
+		results.addAll(workflowResultRepository.findByWorkflowStepIn(STEPS_TO_HIDE));
+		results.addAll(workflowResultRepository.findByOutputNameIn(OUTPUTS_TO_HIDE));		
+		for (String[] stepOutput : STEPS_OUTPUTS_TO_HIDE ) {
+			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
 		}		
 		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
 		
@@ -560,6 +626,49 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			return null;
 		String info = tools.get(0).getMgmName() + " " + tools.get(0).getVersion();
 		return info;
+	}
+
+	@Override
+	public void exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query) {
+        try {
+        	long totalResults = workflowResultRepository.count();
+        	query.setResultsPerPage((int)totalResults);
+			WorkflowResultResponse results = getWorkflowResults(query);
+			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
+			
+	    String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Workflow", "Source Item", "Source Filename", "Source File Url", "Workflow Step", "Output File", "Output File Url", "Status"};
+	        
+			csvWriter.writeHeader(csvHeader);
+	         
+	        for (WorkflowResult r : results.getRows()) {
+	        	
+	        	Map<String, Object> output = new HashMap<String, Object>();
+	        	output.put(csvHeader[0], r.getDateCreated());
+	        	output.put(csvHeader[1], r.getSubmitter());
+	        	output.put(csvHeader[2], r.getCollectionId());
+	        	output.put(csvHeader[3], r.getItemId());
+	        	output.put(csvHeader[4], r.getPrimaryfileId());
+	        	output.put(csvHeader[5], r.getWorkflowName());
+	        	output.put(csvHeader[6], r.getItemName());
+	        	output.put(csvHeader[7], r.getPrimaryfileName());
+	        	output.put(csvHeader[8], mediaService.getPrimaryfileSymlinkUrl(r.getPrimaryfileId()));
+	        	output.put(csvHeader[9], r.getWorkflowStep());
+	        	output.put(csvHeader[10], r.getOutputName()); 
+	        	output.put(csvHeader[11], mediaService.getWorkflowResultOutputUrl(r.getId())); 
+	        	output.put(csvHeader[12], r.getStatus());
+	        	
+	        	csvWriter.write(output, csvHeader);
+	        	
+	        	
+	            //csvWriter.write(r, nameMapping);
+	        }
+	         
+	        csvWriter.close();
+	        
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
