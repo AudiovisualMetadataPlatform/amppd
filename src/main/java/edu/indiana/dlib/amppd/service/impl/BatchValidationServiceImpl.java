@@ -214,7 +214,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     			continue;
     		}
     		
-    		// item
+    		// validate item title
         	List<String> itemErrors = validateItemColumns( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
