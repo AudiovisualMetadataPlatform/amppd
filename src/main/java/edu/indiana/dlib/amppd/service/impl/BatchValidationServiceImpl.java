@@ -126,7 +126,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	batchFile.setItemName(line[3]);
         	batchFile.setItemDescription(line[4]);
         	        	
-        	// Get the primary file info
+        	// Get the primaryfile info
         	batchFile.setPrimaryfileFilename(line[5]);
         	batchFile.setPrimaryfileName(line[6]);
         	
@@ -143,7 +143,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	
         	// If a supplement type is supplied, get the enum value for the textual value
         	if(line.length>8) {
-        		supplementType = getSupplementalFileType(line[8]);
+        		supplementType = getSupplementType(line[8]);
         	}
         	
         	batchFile.setSupplementType(supplementType);
@@ -178,7 +178,6 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	 * Validate the CSV
 	 */
 	public BatchValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent) {
-
 		BatchValidationResponse response = new BatchValidationResponse();
 		
 		// Turn the string into a list of string arrays representing rows
@@ -200,10 +199,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		if(unitErrors.size()>0) {
 			return response;
 		}
-
 				
-        for(BatchFile batchFile : batch.getBatchFiles()) {
-        	
+        for(BatchFile batchFile : batch.getBatchFiles()) {        	
     		// Validate supplied collection name
     		List<String> collectionNameErrors = validateCollection(batch.getUnit(), batchFile.getCollection(), batchFile.getRowNum(), batchFile.getCollectionName());
         	response.addErrors(collectionNameErrors);
@@ -214,19 +211,19 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     			continue;
     		}
     		
-    		// validate item title
-        	List<String> itemErrors = validateItemColumns( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
+    		// validate item label
+        	List<String> itemErrors = validateItem( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
-        	// Validate the primary file
-        	List<String> primaryFileErrors = validatePrimaryFile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
+        	// Validate the primaryfile
+        	List<String> primaryFileErrors = validatePrimaryfile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(primaryFileErrors);
         	
-        	// Check for duplicate primary files
+        	// Check for duplicate primaryfiles
         	SupplementType supplementType = batchFile.getSupplementType();
         	if(supplementType == null || supplementType==SupplementType.PRIMARYFILE) {
-            	List<String> duplicatePrimaryFileErrors = validateUniquePrimaryfile(batch, batchFile);
-            	response.addErrors(duplicatePrimaryFileErrors);
+            	List<String> duplicatePrimaryfileErrors = validateUniquePrimaryfile(batch, batchFile);
+            	response.addErrors(duplicatePrimaryfileErrors);
         	}
         	
         	// For each supplement, validate the values and make sure there are no duplicates
@@ -248,8 +245,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         		batchSupplementFileRepository.saveAll(batchFile.getBatchSupplementFiles());
         	}
         	
-        	response.setBatch(batch);
-        	
+        	response.setBatch(batch);        	
         	response.setSuccess(true);
         }
         
@@ -275,34 +271,40 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate item columns
 	 */
-	private List<String> validateItemColumns(String itemTitle, SupplementType supplementType, int lineNum) {
+	private List<String> validateItem(String itemName, SupplementType supplementType, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 		
-		// item title is required except for collection supplement 
-    	if (supplementType != SupplementType.COLLECTION && itemTitle.isBlank()) {
-    		errors.add(String.format("Row: %s: Item Title is missing", lineNum));
+		// item label is required except for collection supplement 
+    	if (supplementType != SupplementType.COLLECTION && itemName.isBlank()) {
+    		errors.add(String.format("Row: %s: Item label is missing", lineNum));
     	}
-		// item title should be blank for collection supplement 
-		else if (supplementType == SupplementType.COLLECTION && !itemTitle.isBlank()) {
-	    	errors.add(String.format("Row: %s: Item title should be blank for Collection Supplement", lineNum));
+		// item label should be blank for collection supplement 
+		else if (supplementType == SupplementType.COLLECTION && !itemName.isBlank()) {
+	    	errors.add(String.format("Row: %s: Item label should be blank for Collection Supplement", lineNum));
 		}
 
     	return errors;
 	}
 	
 	/*
-	 * Make sure primary files are unique to this file
+	 * Make sure primaryfiles are unique to this file
 	 */
 	private List<String> validateUniquePrimaryfile(Batch batch, BatchFile batchFile) {
 		List<String> errors = new ArrayList<String>();
 		
+		// check duplicate only if we are ingesting primaryfile
+		if (batchFile.getPrimaryfileFilename().isBlank()) {
+			return errors;
+		}
+		
 		if(batch.isDuplicatePrimaryfileFilename(batchFile.getPrimaryfileFilename(), batchFile.getRowNum())) {
-    		errors.add(String.format("Row: %s: Duplicate primary file %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
+    		errors.add(String.format("Row: %s: Duplicate primaryfile filename %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
 		}
 		
 		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getExternalItemId(), batchFile.getItemName(), batchFile.getRowNum())) {
-    		errors.add(String.format("Row: %s: Duplicate primary file name %s", batchFile.getRowNum(), batchFile.getPrimaryfileName()));
+    		errors.add(String.format("Row: %s: Duplicate primaryfile name %s", batchFile.getRowNum(), batchFile.getPrimaryfileName()));
 		}
+		
     	return errors;
 	}
 	
@@ -326,44 +328,48 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	}
 	
 	/*
-	 * Validate the primary file values
+	 * Validate the primaryfile values
 	 */
-	private List<String> validatePrimaryFile(Unit unit, Collection collection, String primaryFile, String primaryFileLabel, SupplementType supplementType, int lineNum){
+	private List<String> validatePrimaryfile(Unit unit, Collection collection, String primaryfileFilename, String primaryfileName, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
-		
-		// If the supplement type is for a primary file, or no supplement is supplied, we need make sure primary file values are supplied
-		if(supplementType == SupplementType.PRIMARYFILE || supplementType == null) {
-	    	if(primaryFile.isBlank()) {
-	    		if(supplementType == SupplementType.PRIMARYFILE) {
-		    		errors.add(String.format("Row: %s: Primary file name is missing for Primaryfile Supplement", lineNum));
-	    		}
-	    		else {
-		    		errors.add(String.format("Row: %s: Primary file name is missing", lineNum));
-	    		}
-	    	}
+
+		// If no supplement is supplied, i.e. this is for primaryfile, make sure primaryfile values are supplied
+		if(supplementType == null) {
+			if(primaryfileFilename.isBlank()) {
+				errors.add(String.format("Row: %s: Primaryfile filename is missing", lineNum));
+			}
 
 			// Check to see if file exists in database
-			boolean primaryFileExists = primaryFileExistsInCollection(collection, primaryFileLabel);
+			boolean primaryFileExists = primaryFileExistsInCollection(collection, primaryfileName);
 
 			// If not - new file - Make sure it exists on file system
 			if(!primaryFileExists) {
-				if(!primaryFile.isBlank() && !fileExists(unit.getName(), collection.getName(), primaryFile)) {
-		    		errors.add(String.format("Row: %s: Primary file %s does not exist in the dropbox", lineNum, primaryFile));
+				if(!primaryfileFilename.isBlank() && !fileExists(unit.getName(), collection.getName(), primaryfileFilename)) {
+					errors.add(String.format("Row: %s: Primaryfile %s does not exist in the dropbox", lineNum, primaryfileFilename));
 				}
-			}
+			}			
+			// TODO what when primaryFileExists
+		}
+		// primaryfile name should not be blank for primaryfile supplement 
+		else if (supplementType == SupplementType.PRIMARYFILE) {
+			if(primaryfileName.isBlank()) {
+				errors.add(String.format("Row: %s: Primaryfile label is missing for Primaryfile Supplement", lineNum));
+			}			
 		}
 		// primaryfile name should be blank for collection/item supplement 
-		else if(supplementType == SupplementType.ITEM || supplementType == SupplementType.COLLECTION) {
-			if(!primaryFile.isBlank()) {
-	    		errors.add(String.format("Row: %s: Primary file name should be blank for Collection/Item Supplement", lineNum));
+		else if (supplementType == SupplementType.ITEM || supplementType == SupplementType.COLLECTION) {
+			if(!primaryfileFilename.isBlank()) {
+				errors.add(String.format("Row: %s: Primaryfile label should be blank for Collection/Item Supplement", lineNum));
 			}
 		}
-    	return errors;
+		
+		return errors;
 	}
 	
 	/*
-	 * Check to see if this primary file exists in a collection already
+	 * Check to see if this primaryfile exists in a collection already
 	 */
+	// TODO this search should be done with PrimaryfileRepository, more efficient than java code
 	private boolean primaryFileExistsInCollection(Collection collection, String name) {
 		if(collection.getItems() == null) {
 			return false;
@@ -373,8 +379,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			if(item.getPrimaryfiles()==null) {
 				continue;
 			}
-			for(Primaryfile primaryFile : item.getPrimaryfiles()) {
-				if(primaryFile.getName()==name) {
+			for(Primaryfile primaryfile : item.getPrimaryfiles()) {
+				if(primaryfile.getName()==name) {
 					return true;
 				}
 			}
@@ -385,47 +391,47 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the supplement
 	 */
-	private List<String> validateSupplement(Unit unit, Collection collection, String supplementalFile, String supplementalFileLabel, SupplementType supplementType, int lineNum){
+	private List<String> validateSupplement(Unit unit, Collection collection, String supplementFilename, String supplementName, SupplementType supplementType, int lineNum){
 		List<String> errors = new ArrayList<String>();
-		if(supplementalFile.isBlank() && supplementalFileLabel.isBlank()) {
+		if(supplementType==null && supplementFilename.isBlank() && supplementName.isBlank()) {
 			return errors;
 		}
-		else if(supplementType==null) {
-			if(!supplementalFile.isBlank()) {
-	    		errors.add(String.format("Row: %s: Supplemental file name supplied without a supplement type", lineNum));
+		if(supplementType==null) {
+			if(!supplementFilename.isBlank()) {
+	    		errors.add(String.format("Row: %s: Supplement filename supplied without a supplement type", lineNum));
 			}
-			if(!supplementalFileLabel.isBlank()){
-	    		errors.add(String.format("Row: %s: Supplemental file label supplied without a supplement type", lineNum));
+			if(!supplementName.isBlank()){
+	    		errors.add(String.format("Row: %s: Supplement label supplied without a supplement type", lineNum));
 			}
-		}
-		else if(supplementalFile.isBlank()) {
-    		errors.add(String.format("Row: %s: Supplemental file name not supplied for supplement type %s", lineNum, supplementType));
-		}
-		else if(supplementalFileLabel.isBlank()) {
-    		errors.add(String.format("Row: %s: Supplemental file label not supplied for supplement type %s", lineNum, supplementType));
 		}
 		else {
-			if(supplementType==SupplementType.PRIMARYFILE) {
-				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
-		    		errors.add(String.format("Row: %s: Primary supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
-				}
-				
+			if(supplementName.isBlank()) {
+				errors.add(String.format("Row: %s: Supplement label not supplied for supplement type %s", lineNum, supplementType));
+			}
+			if(supplementFilename.isBlank()) {
+				errors.add(String.format("Row: %s: Supplement filename not supplied for supplement type %s", lineNum, supplementType));
+			}
+			else if(supplementType==SupplementType.PRIMARYFILE) {
+				if(!fileExists(unit.getName(), collection.getName(), supplementFilename)) {
+		    		errors.add(String.format("Row: %s: Primaryfile Supplement file %s does not exist in the dropbox", lineNum, supplementFilename));
+				}				
 			}
 			else if(supplementType==SupplementType.ITEM){
-				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
-		    		errors.add(String.format("Row: %s: Item supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
+				if(!fileExists(unit.getName(), collection.getName(), supplementFilename)) {
+		    		errors.add(String.format("Row: %s: Item Supplement file %s does not exist in the dropbox", lineNum, supplementFilename));
 				}
 			}
-			else if(supplementType==SupplementType.ITEM){
-				if(!fileExists(unit.getName(), collection.getName(), supplementalFile)) {
-			    	errors.add(String.format("Row: %s: Collection supplement file %s does not exist in the dropbox", lineNum, supplementalFile));
+			else if(supplementType==SupplementType.COLLECTION){
+				if(!fileExists(unit.getName(), collection.getName(), supplementFilename)) {
+			    	errors.add(String.format("Row: %s: Collection Supplement file %s does not exist in the dropbox", lineNum, supplementFilename));
 				}
 			}
-
 		}
+		// TODO need to verify item/primaryfile exists for supplement type Item/Primaryfile
 		
 		return errors;
 	}
+	
 	/*
 	 * Validate the unit
 	 */
@@ -440,6 +446,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		}
 		return errors;
 	}
+	
 	/*
 	 * Validate the collection
 	 */
@@ -499,10 +506,11 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Convert supplemental file type string to an enum
 	 */
-	private SupplementType getSupplementalFileType(String supplementalFileType) {
-		switch(supplementalFileType.trim().toLowerCase()) {
+	private SupplementType getSupplementType(String supplementType) {
+		switch(supplementType.trim().toLowerCase()) {
 			case "p":
 			case "primary":
+			case "primaryfile":
 				return SupplementType.PRIMARYFILE;
 			case "i":
 			case "item":

@@ -8,19 +8,15 @@ import lombok.Data;
 
 @Data
 public class BatchValidationResponse {
-
+	private boolean success;	
+	private Batch batch;	
+	private List<String> validationErrors;	
+	private List<String> processingErrors;
+	
 	public BatchValidationResponse() {
 		validationErrors = new ArrayList<String>();
 		processingErrors = new ArrayList<String>();
 	}
-	
-	boolean success;
-	
-	Batch batch;
-	
-	private List<String> validationErrors;
-	
-	private List<String> processingErrors;
 	
 	public void addError(String error) {
 		validationErrors.add(error);
