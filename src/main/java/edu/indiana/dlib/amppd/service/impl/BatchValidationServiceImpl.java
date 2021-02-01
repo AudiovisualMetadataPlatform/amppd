@@ -211,17 +211,17 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     			continue;
     		}
     		
-    		// validate item label
+    		// validate item fields
         	List<String> itemErrors = validateItem( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
         	
-        	// Validate the primaryfile
+        	// validate primaryfile fields
         	List<String> primaryFileErrors = validatePrimaryfile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(primaryFileErrors);
         	
-        	// Check for duplicate primaryfiles
+        	// Check for duplicate primaryfiles if ingesting primaryfile
         	SupplementType supplementType = batchFile.getSupplementType();
-        	if(supplementType == null || supplementType==SupplementType.PRIMARYFILE) {
+        	if(supplementType == null || (supplementType==SupplementType.PRIMARYFILE && !batchFile.getPrimaryfileFilename().isBlank())) {
             	List<String> duplicatePrimaryfileErrors = validateUniquePrimaryfile(batch, batchFile);
             	response.addErrors(duplicatePrimaryfileErrors);
         	}
@@ -297,9 +297,11 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			return errors;
 		}
 		
-		if(batch.isDuplicatePrimaryfileFilename(batchFile.getPrimaryfileFilename(), batchFile.getRowNum())) {
-    		errors.add(String.format("Row: %s: Duplicate primaryfile filename %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
-		}
+		// below rule should not be used, we should allow multiple primaryfiles share same physical filename
+		// especially, these files may even come from different collection directories
+//		if(batch.isDuplicatePrimaryfileFilename(batchFile.getPrimaryfileFilename(), batchFile.getRowNum())) {
+//    		errors.add(String.format("Row: %s: Duplicate primaryfile filename %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
+//		}
 		
 		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getExternalItemId(), batchFile.getItemName(), batchFile.getRowNum())) {
     		errors.add(String.format("Row: %s: Duplicate primaryfile name %s", batchFile.getRowNum(), batchFile.getPrimaryfileName()));
@@ -315,9 +317,13 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		List<String> errors = new ArrayList<String>();
 		for(BatchFile testRow : batch.getBatchFiles()) {
 			if(testRow.getSupplementType() == null) continue;
-			if(testRow.containsSupplementFilename(batchSupplementFile.getSupplementFilename(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
-	    		errors.add(String.format("Row: %s: Duplicate supplement file %s", batchFile.getRowNum(), batchSupplementFile.getSupplementFilename()));
-			}
+			
+			// below rule should not be used, we should allow multiple supplements share same physical filename
+			// especially, these files may even come from different collection directories
+//			if(testRow.containsSupplementFilename(batchSupplementFile.getSupplementFilename(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
+//	    		errors.add(String.format("Row: %s: Duplicate supplement file %s", batchFile.getRowNum(), batchSupplementFile.getSupplementFilename()));
+//			}
+			
 			if(testRow.containsSupplementName(batchSupplementFile.getSupplementName(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
 	    		errors.add(String.format("Row: %s: Duplicate supplement name %s", batchFile.getRowNum(), batchSupplementFile.getSupplementName()));
 			}
@@ -335,8 +341,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 
 		// If no supplement is supplied, i.e. this is for primaryfile, make sure primaryfile values are supplied
 		if(supplementType == null) {
-			if(primaryfileFilename.isBlank()) {
-				errors.add(String.format("Row: %s: Primaryfile filename is missing", lineNum));
+			if(primaryfileFilename.isBlank() || primaryfileName.isBlank()) {
+				errors.add(String.format("Row: %s: Primaryfile label/filename is missing", lineNum));
 			}
 
 			// Check to see if file exists in database
@@ -358,8 +364,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		}
 		// primaryfile name should be blank for collection/item supplement 
 		else if (supplementType == SupplementType.ITEM || supplementType == SupplementType.COLLECTION) {
-			if(!primaryfileFilename.isBlank()) {
-				errors.add(String.format("Row: %s: Primaryfile label should be blank for Collection/Item Supplement", lineNum));
+			if(!primaryfileName.isBlank() || !primaryfileFilename.isBlank()) {
+				errors.add(String.format("Row: %s: Primaryfile label/filename should be blank for Collection/Item Supplement", lineNum));
 			}
 		}
 		

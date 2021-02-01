@@ -62,10 +62,10 @@ public class Batch {
 		batchFiles.add(batchFile);
 	}
 
-	public boolean isDuplicatePrimaryfileFilename(String fileName, int rowNum) {
+	public boolean isDuplicatePrimaryfileFilename(String filename, int rowNum) {
 		for(BatchFile row : batchFiles) {
 			if(row.getRowNum()==rowNum) continue;
-			if(row.getPrimaryfileFilename().equals(fileName)) {
+			if(row.getPrimaryfileFilename().equals(filename)) {
 				return true;
 			}
 		}
@@ -76,7 +76,7 @@ public class Batch {
 		for(BatchFile row : batchFiles) {
 			if(row.getRowNum()==rowNum) continue;
 
-			// File names need to be unique within an item
+			// Primaryfile names need to be unique within an item
 			// Uniqueness of items is determined by source ID if provided, OR item name when source ID is not provided.
 			boolean primaryfileNameMatches = row.getPrimaryfileName().equals(name);
 			boolean itemSourceIdMatches = !itemExternalSourceId.isEmpty() && !row.getExternalItemId().isEmpty() && row.getExternalItemId().equals(itemExternalSourceId);

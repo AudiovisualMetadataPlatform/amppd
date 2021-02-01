@@ -116,7 +116,7 @@ public class BatchServiceImpl implements BatchService {
 			// Either get an existing or create a primaryfile
 			log.info("BATCH PROCESSING : Get an existing primaryfile otherwise create a new one");
 			Primaryfile primaryfile = createPrimaryfile(collection, item, batchFile, username, sourceDir, errors);
-			if(errors.size()>0 )
+			if (errors.size()>0)
 				return;
 	    	
 			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
@@ -400,19 +400,26 @@ public class BatchServiceImpl implements BatchService {
 			}
 		}
 		
-		// If it doesn't exist, create a new one
+		// If no existing primaryfile
 		if(!found) {
-			// Create Primaryfiles		
-			primaryfile = new Primaryfile();
-			primaryfile.setName(batchFile.getPrimaryfileName());
-			primaryfile.setDescription(batchFile.getPrimaryfileDescription());
-			primaryfile.setOriginalFilename(batchFile.getPrimaryfileFilename());
-			primaryfile.setCreatedBy(username);
-			primaryfile.setCreatedDate(new Date());
-			primaryfile.setModifiedBy(username);
-			primaryfile.setModifiedDate(new Date());
-			primaryfile.setItem(item);
-			log.info("BATCH PROCESSING : created new primaryfile object");
+			// if this is ingesting primaryfile supplment only, we need an existing primaryfile
+			if (batchFile.getSupplementType()==SupplementType.PRIMARYFILE && batchFile.getPrimaryfileFilename().isBlank()) {
+				log.error("BATCH PROCESSING : primaryfile does't exist for ingesting primaryfile supplment only");
+				errors.add("ERROR: In row "+currRow+" primaryfile does't exist for ingesting primaryfile supplment only");				
+			}
+			// otherwise create a new Primaryfile	
+			else {					
+				primaryfile = new Primaryfile();
+				primaryfile.setName(batchFile.getPrimaryfileName());
+				primaryfile.setDescription(batchFile.getPrimaryfileDescription());
+				primaryfile.setOriginalFilename(batchFile.getPrimaryfileFilename());
+				primaryfile.setCreatedBy(username);
+				primaryfile.setCreatedDate(new Date());
+				primaryfile.setModifiedBy(username);
+				primaryfile.setModifiedDate(new Date());
+				primaryfile.setItem(item);
+				log.info("BATCH PROCESSING : created new primaryfile object");
+			}
 		}
 		
 		return primaryfile;				
@@ -438,7 +445,7 @@ public class BatchServiceImpl implements BatchService {
 						if(!i.getName().contentEquals(itemName)) {
 							log.info("BATCH PROCESSING : External Item id already exists"); 
 							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
-							itemRepository.updateTitle(itemName,i.getId());
+							itemRepository.updateName(itemName,i.getId());
 						}
 					}
 				}
