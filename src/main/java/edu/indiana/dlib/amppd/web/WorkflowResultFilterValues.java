@@ -9,6 +9,7 @@ import lombok.Data;
 public class WorkflowResultFilterValues {
 	private List<String> submitters;
 	private List<String> workflows;
+	private List<String> collections;
 	private List<String> items;
 	private List<String> files;
 	private List<String> steps;

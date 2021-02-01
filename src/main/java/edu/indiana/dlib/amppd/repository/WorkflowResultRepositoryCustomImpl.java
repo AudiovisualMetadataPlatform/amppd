@@ -157,6 +157,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             predicates.add(predicate);
         }
         
+        if(searchQuery.getFilterByCollections().length>0) {
+        	Path<String> path = root.get("collectionName");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByCollections());
+            predicates.add(predicate);
+        }
+        
         if(searchQuery.getFilterByItems().length>0) {
         	Path<String> path = root.get("itemName");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByItems());
@@ -209,6 +215,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
+        List<String> collections = em.createQuery(query.select(root.get("collectionName")).distinct(true)).getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
         List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();
         List<String> searchTerms= union(filenames, items);
@@ -217,6 +224,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         filters.setSubmitters(submitters);
         filters.setDateFilter(dateFilters);
         filters.setWorkflows(workflows);
+        filters.setCollections(collections);
         filters.setSteps(steps);
         filters.setItems(items);
         filters.setFiles(filenames);
