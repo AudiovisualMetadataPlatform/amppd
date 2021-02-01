@@ -30,6 +30,6 @@ public interface ItemRepository extends ContentRepository<Item> {
 	@Transactional
 	@Modifying
 	@Query(value = "update Item set name = :name where id = :id") 
-	int updateTitle(@Param("name") String name, @Param("id") Long id);
+	int updateName(@Param("name") String name, @Param("id") Long id);
 	 
 }
