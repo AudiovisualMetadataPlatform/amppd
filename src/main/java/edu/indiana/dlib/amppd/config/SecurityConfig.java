@@ -78,12 +78,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
-
 	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 	    CorsConfiguration config = new CorsConfiguration();
 	    source.registerCorsConfiguration("/**", config.applyPermitDefaultValues());
-	    config.setExposedHeaders(Arrays.asList("Authorization"));
-
+	    // 'location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
+	    config.setExposedHeaders(Arrays.asList("Authorization", "Location")); 
 	    return source;
 	}
 	
