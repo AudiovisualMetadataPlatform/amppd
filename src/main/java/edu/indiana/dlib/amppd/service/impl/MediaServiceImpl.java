@@ -55,7 +55,8 @@ public class MediaServiceImpl implements MediaService {
 	public static int SYMLINK_LENGTH = 16;
 
 	// AMP extended Galaxy data types that need extension converted to standard media types viewable by browsers    
-	public static List<String> TYPE_TXT = Arrays.asList(new String[] {"vtt"});
+	// NOTE: .vtt is a standard format browsers can handle, no need to translate to .txt
+//	public static List<String> TYPE_TXT = Arrays.asList(new String[] {"vtt"});
 	public static List<String> TYPE_JSON = Arrays.asList(new String[] {"segments, segment", "transcript", "ner", "vocr", "shot", "face"});
 	public static List<String> TYPE_AUDIO = Arrays.asList(new String[] {"audio", "speech", "music"});
 	public static List<String> TYPE_VIDEO = Arrays.asList(new String[] {"video"});
@@ -248,9 +249,9 @@ public class MediaServiceImpl implements MediaService {
 		// We make the following assumptions based on current Galaxy tool output data types and file types:
 		// all audio/music/speech outputs are of wav format
 		// all video outputs are of mp4 format
-		if (TYPE_TXT.contains(extension)) {
-			return FILE_EXT_TXT;				
-		}
+//		if (TYPE_TXT.contains(extension)) {
+//			return FILE_EXT_TXT;				
+//		}
 		if (TYPE_JSON.contains(extension)) {
 			return FILE_EXT_JSON;				
 		}

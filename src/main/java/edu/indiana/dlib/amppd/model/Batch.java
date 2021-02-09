@@ -12,7 +12,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -63,26 +62,27 @@ public class Batch {
 		batchFiles.add(batchFile);
 	}
 
-	public boolean isDuplicatePrimaryfileFilename(String fileName, int rowNum) {
+	public boolean isDuplicatePrimaryfileFilename(String filename, int rowNum) {
 		for(BatchFile row : batchFiles) {
 			if(row.getRowNum()==rowNum) continue;
-			if(row.getPrimaryfileFilename().equals(fileName)) {
+			if(row.getPrimaryfileFilename().equals(filename)) {
 				return true;
 			}
 		}
 		return false;
 	}
+	
 	public boolean isDuplicatePrimaryfileName(String name, String itemExternalSourceId, String itemName, int rowNum) {
 		for(BatchFile row : batchFiles) {
 			if(row.getRowNum()==rowNum) continue;
 
-			// File names need to be unique within an item
+			// Primaryfile names need to be unique within an item
 			// Uniqueness of items is determined by source ID if provided, OR item name when source ID is not provided.
-			boolean fileNameMatches = row.getPrimaryfileName().equals(name);
+			boolean primaryfileNameMatches = row.getPrimaryfileName().equals(name);
 			boolean itemSourceIdMatches = !itemExternalSourceId.isEmpty() && !row.getExternalItemId().isEmpty() && row.getExternalItemId().equals(itemExternalSourceId);
 			boolean itemNameMatches = (itemExternalSourceId.isEmpty() || row.getExternalItemId().isEmpty()) && row.getItemName().equals(itemName);
 			
-			if(fileNameMatches && (itemSourceIdMatches || itemNameMatches)) {
+			if(primaryfileNameMatches && (itemSourceIdMatches || itemNameMatches)) {
 				return true;
 			}
 		}

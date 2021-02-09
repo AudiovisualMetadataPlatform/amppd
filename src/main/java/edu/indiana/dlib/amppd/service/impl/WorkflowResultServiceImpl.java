@@ -15,9 +15,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.CsvMapWriter;
-import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
@@ -633,6 +631,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
         try {
         	long totalResults = workflowResultRepository.count();
         	query.setResultsPerPage((int)totalResults);
+        	query.setPageNum(1);
 			WorkflowResultResponse results = getWorkflowResults(query);
 			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
 			

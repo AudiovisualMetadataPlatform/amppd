@@ -13,6 +13,7 @@ public class WorkflowResultSearchQuery {
 		resultsPerPage = Integer.MAX_VALUE;
 		filterBySubmitters = new String[0];
 		filterByWorkflows = new String[0];
+		filterByCollections = new String[0];
 		filterByItems = new String[0];
 		filterByFiles = new String[0];
 		filterBySteps = new String[0];
@@ -28,6 +29,7 @@ public class WorkflowResultSearchQuery {
 	private int resultsPerPage;
 	private String[] filterBySubmitters;
 	private String[] filterByWorkflows;
+	private String[] filterByCollections;
 	private String[] filterByItems;
 	private String[] filterByFiles;
 	private String[] filterBySteps;

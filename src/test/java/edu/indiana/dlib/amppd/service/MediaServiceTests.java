@@ -141,13 +141,13 @@ public class MediaServiceTests {
 		Assert.assertTrue(url.endsWith("/output"));
 	}
     	
-	@Test
-	public void shouldReturnTxtExtensionForTxtOutput() {
-		WorkflowResult WorkflowResultResult = new WorkflowResult();
-		WorkflowResultResult.setOutputType(MediaServiceImpl.TYPE_TXT.get(0));
-		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
-		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_TXT);
-	}
+//	@Test
+//	public void shouldReturnTxtExtensionForTxtOutput() {
+//		WorkflowResult WorkflowResultResult = new WorkflowResult();
+//		WorkflowResultResult.setOutputType(MediaServiceImpl.TYPE_TXT.get(0));
+//		String extension = mediaService.getWorkflowResultOutputExtension(WorkflowResultResult);
+//		Assert.assertEquals(extension, MediaServiceImpl.FILE_EXT_TXT);
+//	}
 	
 	@Test
 	public void shouldReturnJsonExtensionForJsonOutput() {
