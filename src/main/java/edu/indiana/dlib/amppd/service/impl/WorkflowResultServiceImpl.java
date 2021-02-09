@@ -631,6 +631,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
         try {
         	long totalResults = workflowResultRepository.count();
         	query.setResultsPerPage((int)totalResults);
+        	query.setPageNum(1);
 			WorkflowResultResponse results = getWorkflowResults(query);
 			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
 			
