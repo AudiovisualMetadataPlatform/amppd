@@ -190,6 +190,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String createSymlink(Asset asset) {
+		// make sure the asset exists and its pathname populated
 		if (asset == null) {
 			throw new RuntimeException("The given asset for creating symlink is null.");
 		}
@@ -197,24 +198,26 @@ public class MediaServiceImpl implements MediaService {
 			throw new StorageException("Can't create symlink for asset " + asset.getId() + ": its media file hasn't been uploaded.");
 		}
 
-		// if symlink hasn't been created, create it
-		if (asset.getSymlink() != null ) {
-			log.info("Symlink for asset " + asset.getId() + " already exists, will reuse it");
-			return asset.getSymlink();
-		}
-
 		// make sure the asset's media file exists
 		Path path = fileStorageService.resolve(asset.getPathname());
 		if (!Files.exists(path)) {
-			throw new StorageException("Error creating symlink for asset " + asset.getId() + ": its media file " + path + " doesn't exist");	
+			throw new StorageException("Can't create symlink for asset " + asset.getId() + ": its media file " + path + " doesn't exist");	
 		}
 
+		// if symlink was created and exists, reuse it
+		String symlink = asset.getSymlink();
+		if ( symlink != null && Files.exists(resolve(symlink))) {
+			log.info("Symlink for asset " + asset.getId() + " already exists, will reuse it");
+			return asset.getSymlink();
+		}
+		// otherwise, create a new one
+		
 		// use a random string to obscure the symlink for security
 		// prefix A stands for Asset
 		// include asset ID to rule out any chance of name collision
 		// add file extension to help browser decide file type so to use proper display app
 		String fileExt = FilenameUtils.getExtension(asset.getPathname());
-		String symlink = "A-" + asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + fileExt;			    
+		symlink = "A-" + asset.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + fileExt;			    
 		Path link = resolve(symlink);
 
 		// create the symbolic link for the original media file using the random string
@@ -280,6 +283,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String createSymlink(WorkflowResult workflowResult) {
+		// make sure the workflowResult exists and its outputPath populated
 		if (workflowResult == null) {
 			throw new RuntimeException("The given workflowResult for creating symlink is null.");
 		}
@@ -287,23 +291,25 @@ public class MediaServiceImpl implements MediaService {
 			throw new StorageException("Can't create output symlink for workflowResult " + workflowResult.getId() + ": its output file path is null.");
 		}
 
-		// if symlink hasn't been created, create it
-		if (workflowResult.getOutputLink() != null ) {
-			log.info("Output symlink for workflowResult " + workflowResult.getId() + " already exists, will reuse it");
-			return workflowResult.getOutputLink();
-		}
-
 		// make sure the output file exists
 		Path path = Paths.get(workflowResult.getOutputPath());
 		if (!Files.exists(path)) {
-			throw new StorageException("Error creating symlink for workflowResult " + workflowResult.getId() + ": its output file " + path + " doesn't exist");	
+			throw new StorageException("Can't create output symlink for workflowResult " + workflowResult.getId() + ": its output file " + path + " doesn't exist");	
 		}
+
+		// if symlink was created and exists, reuse it
+		String symlink = workflowResult.getOutputLink();
+		if ( symlink != null  && Files.exists(resolve(symlink))) {
+			log.info("Output symlink for workflowResult " + workflowResult.getId() + " already exists, will reuse it");
+			return workflowResult.getOutputLink();
+		}
+		// otherwise, create a new one
 
 		// use a random string to obscure the symlink for security
 		// prefix O stands for Output
 		// include workflowResult ID to rule out any chance of name collision
 		// add file extension to help browser decide file type so to use proper display app 
-		String symlink = "O-" + workflowResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + getWorkflowResultOutputExtension(workflowResult);
+		symlink = "O-" + workflowResult.getId() + "-" + RandomStringUtils.random(SYMLINK_LENGTH, true, true) + "." + getWorkflowResultOutputExtension(workflowResult);
 		Path link = resolve(symlink);
 
 		// create the symbolic link for the output file using the random string
