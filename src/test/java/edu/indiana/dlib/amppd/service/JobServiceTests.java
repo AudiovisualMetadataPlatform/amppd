@@ -168,7 +168,7 @@ public class JobServiceTests {
     	Assert.assertNotNull(pf.getDatasetId());
     	Assert.assertNotNull(pf.getHistoryId());
     	
-    	WorkflowOutputs woutputs = result.getResult();
+    	WorkflowOutputs woutputs = result.getOutputs();
     	// returned workflow outputs shall have contents
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
@@ -187,7 +187,7 @@ public class JobServiceTests {
         
     	WorkflowOutputResult result = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
-    	WorkflowOutputs woutputs = result.getResult();
+    	WorkflowOutputs woutputs = result.getOutputs();
     	
     	// now the dataset ID and history ID shall be set
 		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));

@@ -75,7 +75,7 @@ public class WorkflowResultServiceTests {
 		WorkflowOutputResult r = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
-		WorkflowOutputs woutputs = r.getResult();
+		WorkflowOutputs woutputs = r.getOutputs();
     	// now the dataset ID and history ID shall be set
 		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertNotNull(pf.getDatasetId());
@@ -110,7 +110,7 @@ public class WorkflowResultServiceTests {
 		WorkflowOutputResult r = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
-		WorkflowOutputs woutputs = r.getResult();
+		WorkflowOutputs woutputs = r.getOutputs();
     	// now the dataset ID and history ID shall be set
 		Primaryfile pf = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertNotNull(pf.getDatasetId());

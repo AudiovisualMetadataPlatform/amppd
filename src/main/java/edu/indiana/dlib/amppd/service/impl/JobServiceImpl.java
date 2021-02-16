@@ -36,8 +36,10 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
@@ -69,6 +71,9 @@ public class JobServiceImpl implements JobService {
 
 	@Autowired
     private PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
+    private WorkflowResultRepository workflowResultRepository;
 
 	@Autowired
     private FileStorageService fileStorageService;	
@@ -111,7 +116,7 @@ public class JobServiceImpl implements JobService {
 	 * @param primaryfile the given primaryfile
 	 * @return true if the primaryfile has been updated; false otherwise.
 	 */
-	protected boolean preparePrimaryfileForJobs(Primaryfile primaryfile) {
+	protected boolean preparePrimaryfileForJobs(Primaryfile primaryfile) {	
 		boolean save = false;
 
 		/* Note: 
@@ -162,6 +167,67 @@ public class JobServiceImpl implements JobService {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Build the workflow inputs to feed the given dataset and history along with the given user-defined parameters into the given Galaxy workflow.
+	 * Note that the passed-in parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
+	 * @param workflowId ID of the given workflow
+	 * @param datasetId ID of the given dataset
+	 * @param historyId ID of the given history
+	 * @param parameters step parameters for running the workflow
+	 * @return the built WorkflowInputs instance
+	 */
+	protected WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, String[] outputIds, String historyId, Map<String, Map<String, String>> parameters) {
+		// count total number of provided inputs
+		Integer count = 0;
+		if (datasetId != null) {
+			count++;
+		}
+		if (outputIds != null) {
+			count += outputIds.length;
+		}
+		
+		// each input in the workflow corresponds to an input step with a unique ID, the inputs of workflow detail is a map of {stepId: {label: value}}
+		Set<String> inputIds = workflowDetails.getInputs().keySet();
+		
+		// the total number of provided inputs must equal the total number of expected inputs in the workflow
+		if (inputIds.size() != count) {
+			throw new GalaxyWorkflowException("Workflow " + workflowDetails.getId() + " expects " + inputIds.size() + " inputs, but a total of " + count + " inputs are provided.");
+		}
+
+		WorkflowInputs winputs = new WorkflowInputs();
+		winputs.setDestination(new ExistingHistory(historyId));
+		winputs.setImportInputsToHistory(false);
+		winputs.setWorkflowId(workflowDetails.getId());
+
+		// if primaryfile dataset is provided, it's assumed to be the first input in the workflow, which has key "0"
+		Integer index = 0;
+		if (datasetId != null) {
+			String inputId = (index++).toString();
+			WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+			winputs.setInput(inputId, winput);		
+		}
+
+		// if outputs are provided, it's assumed that they are in the order of the input keys, starting after primaryfile input if any
+		if (outputIds != null) {
+			for (String outputId : outputIds) {
+				String inputId = (index++).toString();
+				WorkflowInput winput = new WorkflowInput(outputId, InputSourceType.HDA);
+				winputs.setInput(inputId, winput);		
+			}
+		}
+
+		parameters.forEach((stepId, stepParams) -> {
+			stepParams.forEach((paramName, paramValue) -> {
+				winputs.setStepParameter(stepId, paramName, paramValue);
+			});
+		});
+
+		String datasetMsg = datasetId == null ? "" : ", datasetId: " + datasetId;
+		String outputsMsg = outputIds == null ? "" : ", outputIds: " + outputIds;
+		log.info("Successfully built job inputs, workflowId: " + workflowDetails.getId() + datasetMsg + outputsMsg + ", parameters: " + parameters);
+		return winputs;
 	}
 	
 	/**
@@ -338,8 +404,12 @@ public class JobServiceImpl implements JobService {
 		
 		return str;
 	}
-	private WorkflowOutputResult createJobResult(Primaryfile primaryfile) {
-		WorkflowOutputResult result = new WorkflowOutputResult();
+	
+	private WorkflowOutputResult updateJobResponse(WorkflowOutputResult result, Primaryfile primaryfile) {
+		if (primaryfile == null) {
+			return result;
+		}
+		
 		Item item = primaryfile.getItem();
 		Collection c = item.getCollection();
 	
@@ -351,6 +421,108 @@ public class JobServiceImpl implements JobService {
 		
 		return result;
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long, String[], Map<String, Map<String, String>>)
+	 */	
+	@Override
+	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, String[] outputIds, Map<String, Map<String, String>> parameters) {
+		WorkflowOutputs woutputs = null;
+		String primaryfileMsg = primaryfileId == null ? "" : ", primaryfileId: " + primaryfileId;
+		String outputsMsg = "";
+		if ( outputIds != null) {
+			outputsMsg = ", outputIds: [";
+			for (String outputId : outputIds) {
+				outputsMsg += outputId + ",";
+			}
+			outputsMsg += "]";
+		}
+		String msg = "Amppd job for: workflowId: " + workflowId + primaryfileMsg + outputsMsg;
+		String msg_param = ", parameters (user defined): " + parameters;
+		log.info("Creating " + msg + msg_param);
+				
+		// initialize job creation response
+		WorkflowOutputResult result = new WorkflowOutputResult();
+
+		try {
+			// handle primaryfile as input if provided
+			Primaryfile primaryfile = null;
+    		if (primaryfileId != null) {
+    			// retrieve primaryfile via ID
+    			primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+        		// get the Galaxy history created and input dataset uploaded
+        		preparePrimaryfileForJobs(primaryfile);	
+    		}
+    		
+    		// handle previous outputs as input if provided
+			Long sharedPrimaryfileId = primaryfileId;
+			String sharedHistoryId = primaryfileId == null ? null : primaryfile.getHistoryId();
+//			List<WorkflowResult>  workflowResults = new ArrayList<WorkflowResult>();
+    		if (outputIds != null) {
+    			for (String outputId : outputIds) {
+    				List<WorkflowResult> foundResults = workflowResultRepository.findByOutputId(outputId);
+    				WorkflowResult foundResult = null;
+    				if (foundResults.size() == 0) {
+    					throw new StorageException("Can't find WorkflowResult output with ID " + outputId);
+    				}
+    				else if (foundResults.size() > 1) {
+    					foundResult = foundResults.get(0);
+    					log.warn("Found more than 1 WorkflowResult output with ID " + outputId + " will use the first one.");
+    				}
+    				// all provided outputs must share the same primaryfileId and historyId as the provided primaryfile 
+    				if (sharedPrimaryfileId == null) {
+    					sharedPrimaryfileId = foundResult.getPrimaryfileId();
+    				}
+    				else if (sharedPrimaryfileId != foundResult.getPrimaryfileId()) {
+    					throw new GalaxyWorkflowException("WorkflowResult output " + outputId + " doesn't share the same primaryfileId " + sharedPrimaryfileId);
+    				}
+    				if (sharedHistoryId == null) {
+    					sharedHistoryId = foundResult.getHistoryId();
+    				}
+    				else if (sharedHistoryId != foundResult.getHistoryId()) {
+    					throw new GalaxyWorkflowException("WorkflowResult output " + outputId + " doesn't share the same historyId " + sharedHistoryId);
+    				}    				
+    			}
+    		}
+
+    		// at least one of the input source, i.e. primaryfile or outputs must be provided
+    		if (sharedHistoryId == null) {
+				throw new GalaxyWorkflowException("No valid primaryfile or workflow outputs are provided as the workflow inputs.");    			
+    		}
+
+    		// retrieve the workflow 
+			WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
+			if (workflowDetails == null) {
+				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
+			}
+			
+    		// invoke the workflow 
+			String datasetId = primaryfileId == null ? null : primaryfile.getDatasetId();
+    		WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, datasetId, outputIds, sharedHistoryId, parameters);
+    		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
+    		msg_param = ", parameters (system updated): " + winputs.getParameters();
+    		woutputs = workflowsClient.runWorkflow(winputs);    		
+    		
+    		// add workflow results to the table for the newly created invocation
+    		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
+    		
+    		// set up result response
+    		updateJobResponse(result, primaryfile);
+    		result.setOutputs(woutputs);
+    		result.setSuccess(true);
+    		log.info("Successfully created " + msg + msg_param);
+        	log.info("Galaxy workflow outputs: " + woutputs);
+    	}
+
+    	catch (Exception e) {    	
+    		log.error("Error creating " + msg + msg_param, e);	
+    		result.setError(e.toString());
+    		//throw new GalaxyWorkflowException("Error creating " + msg, e);
+    	}
+    	
+    	return result;
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String,Long,Map<String, Map<String, String>>)
 	 */	
@@ -361,17 +533,17 @@ public class JobServiceImpl implements JobService {
 		String msg_param = ", parameters (user defined): " + parameters;
 		log.info("Creating " + msg + msg_param);
 		
-		// retrieve primaryfile via ID
-		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-		
-		// get the Galaxy history created and input dataset uploaded
-		preparePrimaryfileForJobs(primaryfile);	
-		
 		// initialize job creation response
-		WorkflowOutputResult result = createJobResult(primaryfile);
+		WorkflowOutputResult result = new WorkflowOutputResult();
 
-		// invoke the workflow 
-    	try {
+		try {
+    		// retrieve primaryfile via ID
+    		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+
+    		// get the Galaxy history created and input dataset uploaded
+    		preparePrimaryfileForJobs(primaryfile);	
+
+    		// invoke the workflow 
 			WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
 			if (workflowDetails == null) {
 				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
@@ -386,7 +558,8 @@ public class JobServiceImpl implements JobService {
     		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
     		
     		// set up result response
-    		result.setResult(woutputs);
+    		updateJobResponse(result, primaryfile);
+    		result.setOutputs(woutputs);
     		result.setSuccess(true);
     		log.info("Successfully created " + msg + msg_param);
         	log.info("Galaxy workflow outputs: " + woutputs);

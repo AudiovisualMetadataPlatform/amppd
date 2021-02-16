@@ -55,6 +55,15 @@ public interface JobService {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return WorkflowOutputResult containing detailed information for the file submitted
 	 */
+	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, String[] outputIds, Map<String, Map<String, String>> parameters);
+
+	/**
+	 * Create a new Amppd job by submitting to Galaxy the given workflow on the given primaryfile, along with the given parameters.
+	 * @param workflowId ID of the given workflow
+	 * @param primaryfileId ID of the given primaryfile
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @return WorkflowOutputResult containing detailed information for the file submitted
+	 */
 	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
 	
 	/**

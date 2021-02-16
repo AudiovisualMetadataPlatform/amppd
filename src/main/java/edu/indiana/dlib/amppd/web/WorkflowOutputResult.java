@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class WorkflowOutputResult {
-	private WorkflowOutputs result;
+	private WorkflowOutputs outputs;
 	private boolean success;
 	private String collectionLabel;
 	private String itemLabel;
