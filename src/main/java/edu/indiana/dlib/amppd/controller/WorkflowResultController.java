@@ -96,6 +96,11 @@ public class WorkflowResultController {
 		workflowResultService.hideIrrelevantWorkflowResults();
 	}
 
+	/**
+	 * Set and export workflow result csv file as part of reponse
+	 * @param response HttpServletResponse
+	 * @param query WorkflowResultSearchQuery
+	 */	
 	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
 	public void exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
         response.setContentType("text/csv");
@@ -106,8 +111,7 @@ public class WorkflowResultController {
         String headerValue = "attachment; filename=AmpDashboardExport_" + currentDateTime + ".csv";
         response.setHeader(headerKey, headerValue);
 
-		log.info("Exporting CSV " + headerValue);
-		
+		log.info("Exporting CSV " + headerValue);		
 		workflowResultService.exportWorkflowResults(response, query);
     }
 	
