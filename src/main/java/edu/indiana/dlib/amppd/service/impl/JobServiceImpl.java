@@ -227,6 +227,7 @@ public class JobServiceImpl implements JobService {
 			}
 		}
 
+		log.info("Succesfully validated and retrieved " + outputIds.size() + " workflow result outputs for the shared primaryfile " + primaryfileId);
 		return primaryfile;
 	}
 	
@@ -690,28 +691,88 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, Boolean, Map<String, Map<String, String>>)
 	 */
 	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile inputCsv, Boolean includePrimaryfile, Map<String, Map<String, String>> parameters) {
+		// parse the input CSV
+		List<Long> primaryfileIds = new ArrayList<Long>();
+		List<Long[]> resultIdss = new ArrayList<Long[]>();	
+		parseInputCsv(inputCsv, primaryfileIds, resultIdss);
+		
+		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
+		int nSuccess = 0;
+		int nTtotal = resultIdss.size();
+		
+		// create job for each row in the csv
+		for (int i=0; i < resultIdss.size(); i++) {
+			Long[] resultIds = resultIdss.get(i);
+			
+			// no need to catch exception as createJob catches all and always returns a response 
+			WorkflowOutputResult response = null;
+			if (includePrimaryfile) {
+				response = createJob(workflowId, primaryfileIds.get(i), resultIds, parameters);
+			}
+			else {
+				response = createJob(workflowId, resultIds, parameters);
+			}
+			
+			woutputs.add(response);			
+			if (response.isSuccess()) {
+				nSuccess++;
+			}			
+		}
+		
+		log.info("Number of Amppd jobs successfully created for the inputCsv: " + nSuccess);    	
+		log.info("Number of Amppd jobs failed to be created for the inputCsv: " + (nTtotal - nSuccess));    		  	
+		return woutputs;
+	}
+
+	/**
+	 * Parse the given inputCsv into the given primaryfileIds and resultIdss.
+	 * @param inputCsv the given inputCsv
+	 * @param primaryfileIds the given primaryfileIds
+	 * @param resultIdss the given resultIdss
+	 */
+	protected void parseInputCsv(MultipartFile inputCsv, List<Long> primaryfileIds, List<Long[]> resultIdss) {		
 		try {
 			// parse csvFile into a list of string arrays
 			CSVReader reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(inputCsv.getInputStream())))
-					.withSkipLines(1)           // skip the first line, header info
 					.build();
 			List<String[]> rows = reader.readAll();
             
-			for (String[] row : rows) {
+			if (rows.isEmpty()) {
+        		throw new ParserException("The input CSV file is empty!");				
+			}		
+			
+			// record the number of columns in rows[0], i.e. the CSV header
+			int ncol = rows.get(0).length; 
+			
+			// process the rows after the header 
+			for (int i=1; i < rows.size(); i++) {
+				String[] columns = rows.get(i);
+
+				// each row should have the same number of columns as the header
+				if (columns.length != ncol) {
+            		throw new ParserException("Row " + i + " has " + columns.length + " instead of the expected " + ncol + " columns!");
+            	}
+				
+				// first column should be primaryfileId
+            	Long primaryfileId = Long.parseLong(columns[0].trim());  
             	
+            	// the rest of the columns should be resultIds in the order of workflow inputs
+            	Long[] resultIds = new Long[columns.length - 1];
+            	for (int j=1; j < columns.length; j++) {
+            		resultIds[j-1] = Long.parseLong(columns[j].trim());  
+            	}
+            	            	
+            	primaryfileIds.add(primaryfileId);
+            	resultIdss.add(resultIds);
             }
+			
+			log.info("Successfully parsed the inputCsv into " + rows.size() + " rows, each of one primaryfile and " + (ncol-1) + " workflowResultIds");
 		}
 		catch(Exception e) {
 			String msg = "Error parsing the CSV file for workflow submission.";
 			log.error(msg, e);
 			throw new ParserException(msg, e);
 		}
-		
-		return null; 
-	}
-
-	public void parseInputCsv(MultipartFile inputCsv, Boolean includePrimaryfile) {
-		
 	}
 	
 	/**

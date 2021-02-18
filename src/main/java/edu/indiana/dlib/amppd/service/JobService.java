@@ -50,7 +50,7 @@ public interface JobService {
 	 * @param text text to be sanitized
 	 * @return
 	 */
-	public String sanitizeText(String text);
+	public String sanitizeText(String text);	
 	
 //	/**
 //	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given primaryfile and previous outputs, 
