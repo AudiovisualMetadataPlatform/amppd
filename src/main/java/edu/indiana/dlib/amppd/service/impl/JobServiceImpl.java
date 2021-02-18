@@ -122,8 +122,8 @@ public class JobServiceImpl implements JobService {
 	 * @param primaryfile the given primaryfile
 	 * @return true if the primaryfile has been updated; false otherwise.
 	 */
-	protected boolean preparePrimaryfileForJobs(Primaryfile primaryfile) {	
-		boolean save = false;
+	protected Boolean preparePrimaryfileForJobs(Primaryfile primaryfile) {	
+		Boolean save = false;
 
 		/* Note: 
     	 * We do a lazy upload from Amppd to Galaxy, i.e. we only upload the primaryfile to Galaxy when a workflow is invoked in Galaxy against the primaryfile, 
@@ -180,11 +180,11 @@ public class JobServiceImpl implements JobService {
 	 * and share the same primaryfileId and historyId, and share those with the provided primaryfile if not null; 
 	 * if all results are valid, add their outputIds to the given list, and return the shared primaryfile; 
 	 * otherwise throw exception.
-	 * @param primaryfileId ID of the given primaryfile
-	 * @param resultIds array of the IDs of the given workflow results
-	 * @param outputIds list of the outputIds of the given workflow results
+	 * @param primaryfile ID the given primaryfile, could be null
+	 * @param resultIds array of the IDs of the given workflow results, assumed not null but could be empty
+	 * @param outputIds list of the outputIds of the given workflow results. assumed to be initialized to empty list
 	 */
-	protected Primaryfile retrieveValidResultOutputs(Primaryfile primaryfile, Long[] resultIds, List<String> outputIds) {
+	protected Primaryfile retrieveSharedPrimaryfileValidateOutputs(Primaryfile primaryfile, Long[] resultIds, List<String> outputIds) {
 		Long primaryfileId = primaryfile == null ? null : primaryfile.getId();
 		String historyId = primaryfile == null ? null : primaryfile.getHistoryId();
  
@@ -218,7 +218,8 @@ public class JobServiceImpl implements JobService {
 			throw new GalaxyWorkflowException("No valid primaryfile or previous results are provided as the workflow inputs.");    			
 		}
 		
-		// make sure the shared primaryfile actually exists and has the same historyId as shared by the results
+		// if passed in primaryfile is not null, use it; otherwise retrieve the shared primaryfile 
+		// to make sure it actually exists and has the same historyId as shared by the results
 		if (primaryfile == null) {
 			Long id = primaryfileId; // Java compiler disallows using non-final local variable such as primaryfileId in below line
 			primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
@@ -469,11 +470,10 @@ public class JobServiceImpl implements JobService {
 		Item item = primaryfile.getItem();
 		Collection c = item.getCollection();
 	
-		result.setCollectionLabel(c.getName());
 		result.setPrimaryfileId(primaryfile.getId());
-		result.setFileLabel(primaryfile.getName());
-		result.setFileName(primaryfile.getOriginalFilename());
-		result.setItemLabel(item.getName());
+		result.setCollectionName(c.getName());
+		result.setPrimaryfileName(primaryfile.getName());
+		result.setItemName(item.getName());
 		result.setOutputs(woutputs);
 		result.setSuccess(true);
 
@@ -481,10 +481,20 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long, Long[], Map<String, Map<String, String>>)
-	 */	
-	@Override
-	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters) {
+	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given primaryfile and/or previous WorkflowResult outputs, 
+	 * along with the given parameters, based on the given includePrimaryfile indicator:
+	 * if resultIds is null, includePrimaryfile is ignored, only primaryfile will be used as the input;
+	 * otherwise, if includePrimaryfile is true, include the primaryfile shared by the workflowResults as the first input, 
+	 * with the outputs from the workflowResults as the following inputs in the same order;
+	 * otherwise (includePrimaryfile is false), exclude the primaryfile and use only the outputs as the workflow inputs.
+	 * @param workflowId ID of the given workflow
+	 * @param primaryfileId ID of the given primaryfile
+	 * @param resultIds array of IDs of the given WorkflowResults
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param includePrimaryfile the given indicator on whether or not to include primaryfile as workflow input
+	 * @return WorkflowOutputResult containing detailed information for the job submitted
+	 */
+	protected WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		String primaryfileMsg = primaryfileId == null ? "" : ", primaryfileId: " + primaryfileId;
 		String resultsMsg = "";
 		if (resultIds != null) {
@@ -520,9 +530,9 @@ public class JobServiceImpl implements JobService {
     		// handle previous results as input if provided
     		List<String> outputIds = new ArrayList<String>();
     		if (resultIds != null) {
-    			// make sure that all results share the same primaryfile and history
+    			// make sure that all results have valid outputs and share the same primaryfile and history
     			outputIds = new ArrayList<String>();
-    			primaryfile = retrieveValidResultOutputs(primaryfile, resultIds, outputIds);
+    			primaryfile = retrieveSharedPrimaryfileValidateOutputs(primaryfile, resultIds, outputIds);
     		}
     		
     		/* TODO 
@@ -540,9 +550,8 @@ public class JobServiceImpl implements JobService {
     		 */
 
     		// build inputs and invoke the workflow 
-			// need to use primaryfileId not primaryfile to check if we should pass in the primaryfile as an input
-			// as the latter might have been populated with that shared by the results
-			String datasetId = primaryfileId == null ? null : primaryfile.getDatasetId();
+    		// when resultIds is not provided, includePrimaryfile will be ignored, and primaryfile will be the only input 
+			String datasetId = resultIds == null || includePrimaryfile ? primaryfile.getDatasetId() : null; 
 			WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, datasetId, outputIds, primaryfile.getHistoryId(), parameters);
     		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
@@ -571,58 +580,14 @@ public class JobServiceImpl implements JobService {
 	 */	
 	@Override
 	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
-		return createJob(workflowId, primaryfileId, null, parameters);
-		
-//		WorkflowOutputs woutputs = null;
-//		String msg = "Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId;
-//		String msg_param = ", parameters (user defined): " + parameters;
-//		log.info("Creating " + msg + msg_param);
-//		
-//		// initialize job creation response
-//		WorkflowOutputResult result = new WorkflowOutputResult();
-//
-//		try {
-//    		// retrieve primaryfile via ID
-//    		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-//
-//    		// get the Galaxy history created and input dataset uploaded
-//    		preparePrimaryfileForJobs(primaryfile);	
-//
-//    		// invoke the workflow 
-//			WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-//			if (workflowDetails == null) {
-//				throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-//			}
-//			
-//    		WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, primaryfile.getDatasetId(), primaryfile.getHistoryId(), parameters);
-//    		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
-//    		msg_param = ", parameters (system updated): " + winputs.getParameters();
-//    		woutputs = workflowsClient.runWorkflow(winputs);    		
-//    		
-//    		// add workflow results to the table for the newly created invocation
-//    		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
-//    		
-//    		// set up result response
-//    		updateJobResponse(result, primaryfile);
-//    		result.setOutputs(woutputs);
-//    		result.setSuccess(true);
-//    		log.info("Successfully created " + msg + msg_param);
-//        	log.info("Galaxy workflow outputs: " + woutputs);
-//    	}
-//    	catch (Exception e) {    	
-//    		log.error("Error creating " + msg + msg_param, e);	
-//    		result.setError(e.toString());
-//    		//throw new GalaxyWorkflowException("Error creating " + msg, e);
-//    	}
-//    	
-//    	return result;
+		return createJob(workflowId, primaryfileId, null, parameters, true);
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long[], Map<String, Map<String, String>>)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long[], Map<String, Map<String, String>>, Boolean)
 	 */
-	public WorkflowOutputResult createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters) {
-		return createJob(workflowId, null, resultIds, parameters);
+	public WorkflowOutputResult createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+		return createJob(workflowId, null, resultIds, parameters, includePrimaryfile);
 	}
 
 	/**
@@ -645,7 +610,7 @@ public class JobServiceImpl implements JobService {
 			// no need to catch exception as createJob catches all and always returns a response 
 			WorkflowOutputResult response = createJob(workflowId, primaryfileId, parameters);
 			woutputs.add(response);
-			if (response.isSuccess()) {
+			if (response.getSuccess()) {
 				nSuccess++;
 			}
 		}  	
@@ -677,7 +642,7 @@ public class JobServiceImpl implements JobService {
 			// no need to catch exception as createJob catches all and always returns a response 
 			WorkflowOutputResult response = createJob(workflowId, primaryfile.getId(), parameters);
 			woutputs.add(response);
-			if (response.isSuccess()) {
+			if (response.getSuccess()) {
 				nSuccess++;
 			}
 		}
@@ -688,9 +653,36 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, Boolean, Map<String, Map<String, String>>)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[][], Map<String, Map<String, String>>, Boolean)
 	 */
-	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile inputCsv, Boolean includePrimaryfile, Map<String, Map<String, String>> parameters) {
+	public List<WorkflowOutputResult> createJobs(String workflowId, Long[][] resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
+		int nSuccess = 0;
+		int nTtotal = resultIdss.length;
+		
+		// create job for each row in the csv
+		for (int i=0; i < resultIdss.length; i++) {
+			Long[] resultIds = resultIdss[i];
+			
+			// no need to catch exception as createJob catches all and always returns a response 
+			WorkflowOutputResult response = null;
+			response = createJob(workflowId, null, resultIds, parameters, includePrimaryfile);
+			
+			woutputs.add(response);			
+			if (response.getSuccess()) {
+				nSuccess++;
+			}			
+		}
+		
+		log.info("Number of Amppd jobs successfully created for the inputCsv: " + nSuccess);    	
+		log.info("Number of Amppd jobs failed to be created for the inputCsv: " + (nTtotal - nSuccess));    		  	
+		return woutputs;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, Map<String, Map<String, String>>, Boolean)
+	 */
+	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		// parse the input CSV
 		List<Long> primaryfileIds = new ArrayList<Long>();
 		List<Long[]> resultIdss = new ArrayList<Long[]>();	
@@ -701,23 +693,8 @@ public class JobServiceImpl implements JobService {
 		int nTtotal = resultIdss.size();
 		
 		// create job for each row in the csv
-		for (int i=0; i < resultIdss.size(); i++) {
-			Long[] resultIds = resultIdss.get(i);
-			
-			// no need to catch exception as createJob catches all and always returns a response 
-			WorkflowOutputResult response = null;
-			if (includePrimaryfile) {
-				response = createJob(workflowId, primaryfileIds.get(i), resultIds, parameters);
-			}
-			else {
-				response = createJob(workflowId, resultIds, parameters);
-			}
-			
-			woutputs.add(response);			
-			if (response.isSuccess()) {
-				nSuccess++;
-			}			
-		}
+		Long[][] resultsArray = (Long[][])resultIdss.toArray();
+		createJobs(workflowId, resultsArray, parameters, includePrimaryfile);
 		
 		log.info("Number of Amppd jobs successfully created for the inputCsv: " + nSuccess);    	
 		log.info("Number of Amppd jobs failed to be created for the inputCsv: " + (nTtotal - nSuccess));    		  	

@@ -236,7 +236,7 @@ public class JobServiceTests {
     	Assert.assertEquals(woutputsMap.size(), 1);
     	WorkflowOutputResult result = woutputsMap.get(0);
     	
-    	Assert.assertTrue(result.isSuccess());
+    	Assert.assertTrue(result.getSuccess());
     	Assert.assertNotNull(result);
     }
     

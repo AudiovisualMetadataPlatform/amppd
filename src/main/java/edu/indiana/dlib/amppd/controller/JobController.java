@@ -41,70 +41,6 @@ public class JobController {
 	@Autowired
 	private JobService jobService;
 	
-	/**
-	 * Create an Amppd job by submitting to Galaxy the given workflow against the given primaryfile and previous outputs, 
-	 * along with the given parameters.
-	 * @param workflowId ID of the given workflow
-	 * @param primaryfileId ID of the given primaryfile; if not null, then the primaryfile must be the first workflow input; 
-	 * 			otherwise no primaryfile is used as input.
-	 * @param resultIds array of WorkflowResult IDs of the given outputs; if null then no output is used as workflow input
-	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the inputs
-	 */
-	@PostMapping("/jobs/submitFileOutputs")
-	public WorkflowOutputResult createJob(
-			@RequestParam String workflowId, 
-			@RequestParam(required = false) Long primaryfileId,
-			@RequestParam(required = false) Long[] resultIds, 
-			@RequestParam(required = false) Map<String, Map<String, String>> parameters) {
-		if (parameters == null ) {
-			parameters = new HashMap<String, Map<String, String>>();
-		}
-		log.info("Processing request to submit a workflow against a primaryfile and previous workflow results with parameters ... ");
-		return jobService.createJob(workflowId, primaryfileId, resultIds, parameters);
-	}
-	
-//	/**
-//	 * Create an Amppd job by submitting to Galaxy the given workflow against the given primaryfile and previous outputs, 
-//	 * along with the given parameters.
-//	 * @param workflowId ID of the given workflow
-//	 * @param primaryfileId ID of the given primaryfile; if not null, then the primaryfile must be the first workflow input; 
-//	 * 			otherwise no primaryfile is used as input.
-//	 * @param outputIds array of IDs of the given outputs; if null then no output is used as workflow input
-//	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-//	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the inputs
-//	 */
-//	@PostMapping("/jobs/submitFileOutputs")
-//	public WorkflowOutputResult createJob(
-//			@RequestParam String workflowId, 
-//			@RequestParam(required = false) Long primaryfileId,
-//			@RequestParam(required = false) String[] outputIds, 
-//			@RequestParam(required = false) Map<String, Map<String, String>> parameters) {
-//		if (parameters == null ) {
-//			parameters = new HashMap<String, Map<String, String>>();
-//		}
-//		log.info("Processing request to submit a workflow against a primaryfile and outputs with parameters ... ");
-//		return jobService.createJob(workflowId, primaryfileId, outputIds, parameters);
-//	}
-	
-//	/**
-//	 * Creating an Amppd job to invoke the given workflow in Galaxy against the given primaryfile with the given step parameters.
-//	 * @param workflowId the ID of the workflow 
-//	 * @param primaryfileId the ID of the primaryfile
-//	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-//	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
-//	 */
-//	@PostMapping("/jobs/submitFile")
-//	public WorkflowOutputResult createJob(
-//			@RequestParam("workflowId") String workflowId, 
-//			@RequestParam("primaryfileId") Long primaryfileId, 
-//			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
-//		if (parameters == null ) {
-//			parameters = new HashMap<String, Map<String, String>>();
-//		}
-//		log.info("Creating Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters);
-//		return jobService.createJob(workflowId, primaryfileId, parameters);
-//	}
 
 	/**
 	 * Create new Amppd jobs by submitting to Galaxy the given workflow against the given primaryfiles, along with the given parameters.
@@ -147,6 +83,31 @@ public class JobController {
 	}
 
 	/**
+	 * Create Amppd jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
+	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
+	 * @param workflowId ID of the given workflow
+	 * @param resultIdss array of array of WorkflowResult IDs of the given outputs
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
+	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
+	 */
+	@PostMapping("/jobs/submitResults")
+	public List<WorkflowOutputResult> createJobs(
+			@RequestParam String workflowId, 
+			@RequestParam Long[][] resultIdss, 
+			@RequestParam(required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(required = false) Boolean includePrimaryfile) {
+		if (parameters == null ) {
+			parameters = new HashMap<String, Map<String, String>>();
+		}
+		if (includePrimaryfile == null ) {
+			includePrimaryfile = false;
+		}
+		log.info("Processing request to submit a workflow against an array of workflow result output arrays with parameters ... ");
+		return jobService.createJobs(workflowId, resultIdss, parameters, includePrimaryfile);
+	}
+
+	/**
 	 * Create Amppd jobs, one for each row of primaryfile and outputs specified in the given csvFile, 
 	 * by submitting to Galaxy the given workflow along with the given parameters.
 	 * @param workflowId ID of the given workflow
@@ -159,8 +120,8 @@ public class JobController {
 	public List<WorkflowOutputResult> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
-			@RequestParam(required = false) Boolean includePrimaryfile,
-			@RequestParam(required = false) Map<String, Map<String, String>> parameters) {
+			@RequestParam(required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
 		}
@@ -168,7 +129,7 @@ public class JobController {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
 		log.info("Processing request to submit a workflow against a csvFile containing primaryfiles and outputs with parameters ... ");
-		return jobService.createJobs(workflowId, inputCsv, includePrimaryfile, parameters);
+		return jobService.createJobs(workflowId, inputCsv, parameters, includePrimaryfile);
 	}
 	
 	/**

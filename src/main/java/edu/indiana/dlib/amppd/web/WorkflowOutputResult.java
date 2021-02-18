@@ -6,13 +6,11 @@ import lombok.Data;
 
 @Data
 public class WorkflowOutputResult {
-	private WorkflowOutputs outputs;
-	private boolean success;
-	private String collectionLabel;
-	private String itemLabel;
-	private String fileLabel;
-	private String fileName;
+	private Boolean success;
 	private String error;
-	private long primaryfileId;
-	//collection label, item label, file label, and file name
+	private Long primaryfileId;
+	private String collectionName;
+	private String itemName;
+	private String primaryfileName;
+	private WorkflowOutputs outputs;
 }

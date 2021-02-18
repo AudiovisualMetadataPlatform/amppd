@@ -52,30 +52,6 @@ public interface JobService {
 	 */
 	public String sanitizeText(String text);	
 	
-//	/**
-//	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given primaryfile and previous outputs, 
-//	 * along with the given parameters.
-//	 * @param workflowId ID of the given workflow
-//	 * @param primaryfileId ID of the given primaryfile; if not null, then the primaryfile must be the first workflow input; 
-//	 * 			otherwise no primaryfile is used as input.
-//	 * @param outputIds array of IDs of the given outputs; if null then no output is used as workflow input
-//	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-//	 * @return WorkflowOutputResult containing detailed information for the file submitted
-//	 */
-//	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, String[] outputIds, Map<String, Map<String, String>> parameters);
-
-	/**
-	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given primaryfile and previous WorkflowResult outputs, 
-	 * along with the given parameters.
-	 * @param workflowId ID of the given workflow
-	 * @param primaryfileId ID of the given primaryfile; if not null, then the primaryfile must be the first workflow input; 
-	 * 			otherwise no primaryfile is used as input.
-	 * @param resultIds array of WorkflowResult IDs of the given outputs; if null then no output is used as workflow input
-	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return WorkflowOutputResult containing detailed information for the job submitted
-	 */
-	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters);
-
 	/**
 	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given primaryfile, along with the given parameters.
 	 * @param workflowId ID of the given workflow
@@ -86,20 +62,22 @@ public interface JobService {
 	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
 	
 	/**
-	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given previous outputs, along with the given parameters.
+	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given previous WorkflowResult outputs, 
+	 * along with the given parameters, including the associated primaryfile as the first input if the given indicator is true. 
 	 * @param workflowId ID of the given workflow
 	 * @param resultIds array of WorkflowResult IDs of the given outputs
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param includePrimaryfile if true include the primaryfile as the first input
 	 * @return WorkflowOutputResult containing detailed information for the job submitted
 	 */
-	public WorkflowOutputResult createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters);
+	public WorkflowOutputResult createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
 
 	/**
 	 * Create new Amppd jobs to invoke the given workflow in Galaxy on the given primaryfiles, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return WorkflowOutputResult containing detailed information for the job submitted
+	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
 	public List<WorkflowOutputResult> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters);
 	
@@ -108,20 +86,31 @@ public interface JobService {
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return list of WorkflowOutputResult containing detailed information for the job submitted
+	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
 	public List<WorkflowOutputResult> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
 	
 	/**
-	 * Create Amppd jobs, one for each row of primaryfile and outputs specified in the given inputCsv, 
-	 * to invoke the given workflow in Galaxy along with the given parameters.
+	 * Create Amppd jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
+	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
+	 * @param workflowId ID of the given workflow
+	 * @param resultIdss array of array of WorkflowResult IDs of the given outputs
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
+	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
+	 */
+	public List<WorkflowOutputResult> createJobs(String workflowId, Long[][] resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
+
+	/**
+	 * Create Amppd jobs, one for each row of primaryfile and outputs specified in the given inputCsv, to invoke the given workflow in
+	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
 	 * @param workflowId ID of the given workflow
 	 * @param inputCsv CSV file each row specifying the primaryfile and previous outputs to use as workflow inputs
-	 * @param includePrimaryfile if true include the primaryfile as the first input for each job; otherwise ignore the primaryfile
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return WorkflowOutputResult containing detailed information for the job submitted
+	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
+	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
-	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile inputCsv, Boolean includePrimaryfile, Map<String, Map<String, String>> parameters);
+	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
 
 	/**
 	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
