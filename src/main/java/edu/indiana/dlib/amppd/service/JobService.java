@@ -3,8 +3,6 @@ package edu.indiana.dlib.amppd.service;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
@@ -12,7 +10,6 @@ import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
@@ -59,7 +56,7 @@ public interface JobService {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the job submitted
 	 */
-	public CreateJobResponse createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters);
+	public CreateJobResponse createJob(WorkflowDetails workflowDetails, Long primaryfileId, Map<String, Map<String, String>> parameters);
 	
 	/**
 	 * Create a new Amppd job to invoke the given workflow in Galaxy on the given previous WorkflowResult outputs, 
@@ -70,7 +67,7 @@ public interface JobService {
 	 * @param includePrimaryfile if true include the primaryfile as the first input
 	 * @return CreateJobResponse containing detailed information for the job submitted
 	 */
-	public CreateJobResponse createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
+	public CreateJobResponse createJob(WorkflowDetails workflowDetails, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
 
 	/**
 	 * Create new Amppd jobs to invoke the given workflow in Galaxy on the given primaryfiles, along with the given parameters.

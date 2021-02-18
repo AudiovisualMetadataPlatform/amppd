@@ -465,18 +465,18 @@ public class TestHelper {
 	 */
 	public Invocation ensureTestJob(boolean useAudio) {				
 		Primaryfile primaryfile = useAudio ? ensureTestAudio() : ensureTestVideo();
-		Workflow workflow = ensureTestWorkflow();
-		List<Invocation> invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+		WorkflowDetails workflowDetails = ensureTestWorkflowDetails();
+		List<Invocation> invocations = jobService.listJobs(workflowDetails.getId(), primaryfile.getId());
 		if (invocations.size() > 0) {
 			// some job has been run on the workflow-primaryfile, just return the first invocation
-			log.info("There are already " + invocations.size() + " AMP test jobs existing for Primaryfile " + primaryfile.getId() + " and Workflow " + workflow.getId()
+			log.info("There are already " + invocations.size() + " AMP test jobs existing for Primaryfile " + primaryfile.getId() + " and Workflow " + workflowDetails.getId()
 				+ ", will use job " + invocations.get(0).getId() + " in history " + invocations.get(0).getHistoryId() + " for testing.");
 			return invocations.get(0);
 		}
 		else {
 			// otherwise run the job once and return the WorkflowOutputs
-			CreateJobResponse result = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
-			invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
+			CreateJobResponse result = jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
+			invocations = jobService.listJobs(workflowDetails.getId(), primaryfile.getId());
 			return invocations.get(0);
 		}
 	}	

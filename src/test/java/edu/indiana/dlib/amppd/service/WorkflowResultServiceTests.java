@@ -15,17 +15,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
-import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepositoryCustomImpl;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -54,7 +53,7 @@ public class WorkflowResultServiceTests {
 	private TestHelper testHelper;   
 	
 	private Primaryfile primaryfile;
-	private Workflow workflow;
+	private WorkflowDetails workflowDetails;
 	private Invocation invocation;
 	
 		
@@ -65,7 +64,7 @@ public class WorkflowResultServiceTests {
 	public void setup() {
     	// prepare the primaryfile, workflow, and the AMP job for testing
     	primaryfile = testHelper.ensureTestAudio();
-    	workflow = testHelper.ensureTestWorkflow();
+    	workflowDetails = testHelper.ensureTestWorkflowDetails();
     	invocation = testHelper.ensureTestJob(true);
 	}
 	@Test
@@ -73,7 +72,7 @@ public class WorkflowResultServiceTests {
 		workflowResultService.refreshWorkflowResultsLumpsum();
 		
 		CreateJobResponse r = 
-    			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    			jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
 		WorkflowOutputs woutputs = r.getOutputs();
     	// now the dataset ID and history ID shall be set
@@ -88,7 +87,7 @@ public class WorkflowResultServiceTests {
     	Assert.assertNotNull(woutputs.getOutputIds());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
-    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
 		Primaryfile pf1 = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertEquals(pf1.getDatasetId(), pf.getDatasetId());
     	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
@@ -108,7 +107,7 @@ public class WorkflowResultServiceTests {
 	public void shouldReturnRows() {
 
 		CreateJobResponse r = 
-    			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    			jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
 		WorkflowOutputs woutputs = r.getOutputs();
     	// now the dataset ID and history ID shall be set
@@ -123,7 +122,7 @@ public class WorkflowResultServiceTests {
     	Assert.assertNotNull(woutputs.getOutputIds());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
-    	jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
 		Primaryfile pf1 = primaryfileRepository.findById(primaryfile.getId()).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfile.getId() + "> does not exist!"));
     	Assert.assertEquals(pf1.getDatasetId(), pf.getDatasetId());
     	Assert.assertEquals(pf1.getHistoryId(), pf.getHistoryId());
