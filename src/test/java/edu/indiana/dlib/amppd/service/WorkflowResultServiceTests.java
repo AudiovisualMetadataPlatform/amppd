@@ -27,7 +27,7 @@ import edu.indiana.dlib.amppd.repository.WorkflowResultRepositoryCustomImpl;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
-import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
+import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
@@ -72,7 +72,7 @@ public class WorkflowResultServiceTests {
 	public void shouldFillDashboardTable() {
 		workflowResultService.refreshWorkflowResultsLumpsum();
 		
-		WorkflowOutputResult r = 
+		CreateJobResponse r = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
 		WorkflowOutputs woutputs = r.getOutputs();
@@ -107,7 +107,7 @@ public class WorkflowResultServiceTests {
 	@Test
 	public void shouldReturnRows() {
 
-		WorkflowOutputResult r = 
+		CreateJobResponse r = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
 		WorkflowOutputs woutputs = r.getOutputs();

@@ -53,7 +53,7 @@ import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
-import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
+import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -462,7 +462,7 @@ public class JobServiceImpl implements JobService {
 		return str;
 	}
 	
-	protected WorkflowOutputResult updateJobResponse(WorkflowOutputResult result, Primaryfile primaryfile, WorkflowOutputs woutputs) {
+	protected CreateJobResponse updateJobResponse(CreateJobResponse result, Primaryfile primaryfile, WorkflowOutputs woutputs) {
 		if (primaryfile == null) {
 			return result;
 		}
@@ -492,9 +492,9 @@ public class JobServiceImpl implements JobService {
 	 * @param resultIds array of IDs of the given WorkflowResults
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @param includePrimaryfile the given indicator on whether or not to include primaryfile as workflow input
-	 * @return WorkflowOutputResult containing detailed information for the job submitted
+	 * @return CreateJobResponse containing detailed information for the job submitted
 	 */
-	protected WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+	protected CreateJobResponse createJob(String workflowId, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		String primaryfileMsg = primaryfileId == null ? "" : ", primaryfileId: " + primaryfileId;
 		String resultsMsg = "";
 		if (resultIds != null) {
@@ -509,7 +509,7 @@ public class JobServiceImpl implements JobService {
 		log.info("Creating " + msg + msg_param);
 				
 		// initialize job creation response
-		WorkflowOutputResult result = new WorkflowOutputResult();
+		CreateJobResponse result = new CreateJobResponse();
 
 		try {
     		// retrieve the workflow 
@@ -579,23 +579,23 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long, Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
+	public CreateJobResponse createJob(String workflowId, Long primaryfileId, Map<String, Map<String, String>> parameters) {
 		return createJob(workflowId, primaryfileId, null, parameters, true);
 	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long[], Map<String, Map<String, String>>, Boolean)
 	 */
-	public WorkflowOutputResult createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+	public CreateJobResponse createJob(String workflowId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		return createJob(workflowId, null, resultIds, parameters, includePrimaryfile);
 	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[], Map<String, Map<String, String>>)
 	 */
-	public List<WorkflowOutputResult> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
+	public List<CreateJobResponse> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
 		log.info("Creating a list of Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameters: " + parameters);		
-		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
+		List<CreateJobResponse> woutputs = new ArrayList<CreateJobResponse>();
 		int nSuccess = 0;
 
 		// remove redundant primaryfile IDs
@@ -608,7 +608,7 @@ public class JobServiceImpl implements JobService {
 			if (primaryfileId == null) continue; 
 
 			// no need to catch exception as createJob catches all and always returns a response 
-			WorkflowOutputResult response = createJob(workflowId, primaryfileId, parameters);
+			CreateJobResponse response = createJob(workflowId, primaryfileId, parameters);
 			woutputs.add(response);
 			if (response.getSuccess()) {
 				nSuccess++;
@@ -624,9 +624,9 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String,Long,Map<String, Map<String, String>>)
 	 */	
 	@Override
-	public List<WorkflowOutputResult> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
+	public List<CreateJobResponse> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
 		log.info("Creating a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters);
-		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
+		List<CreateJobResponse> woutputs = new ArrayList<CreateJobResponse>();
 		int nSuccess = 0;
 		
 		// retrieve bundle
@@ -640,7 +640,7 @@ public class JobServiceImpl implements JobService {
 		Set<Primaryfile> primaryfiles = bundle.getPrimaryfiles();
 		for (Primaryfile primaryfile : primaryfiles) {
 			// no need to catch exception as createJob catches all and always returns a response 
-			WorkflowOutputResult response = createJob(workflowId, primaryfile.getId(), parameters);
+			CreateJobResponse response = createJob(workflowId, primaryfile.getId(), parameters);
 			woutputs.add(response);
 			if (response.getSuccess()) {
 				nSuccess++;
@@ -655,8 +655,8 @@ public class JobServiceImpl implements JobService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[][], Map<String, Map<String, String>>, Boolean)
 	 */
-	public List<WorkflowOutputResult> createJobs(String workflowId, Long[][] resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
-		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
+	public List<CreateJobResponse> createJobs(String workflowId, Long[][] resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+		List<CreateJobResponse> woutputs = new ArrayList<CreateJobResponse>();
 		int nSuccess = 0;
 		int nTtotal = resultIdss.length;
 		
@@ -665,7 +665,7 @@ public class JobServiceImpl implements JobService {
 			Long[] resultIds = resultIdss[i];
 			
 			// no need to catch exception as createJob catches all and always returns a response 
-			WorkflowOutputResult response = null;
+			CreateJobResponse response = null;
 			response = createJob(workflowId, null, resultIds, parameters, includePrimaryfile);
 			
 			woutputs.add(response);			
@@ -682,13 +682,13 @@ public class JobServiceImpl implements JobService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, Map<String, Map<String, String>>, Boolean)
 	 */
-	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		// parse the input CSV
 		List<Long> primaryfileIds = new ArrayList<Long>();
 		List<Long[]> resultIdss = new ArrayList<Long[]>();	
 		parseInputCsv(inputCsv, primaryfileIds, resultIdss);
 		
-		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
+		List<CreateJobResponse> woutputs = new ArrayList<CreateJobResponse>();
 		int nSuccess = 0;
 		int nTtotal = resultIdss.size();
 		
@@ -805,7 +805,7 @@ public class JobServiceImpl implements JobService {
 //	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(String, Long, String[], Map<String, Map<String, String>>)
 //	 */	
 //	@Override
-//	public WorkflowOutputResult createJob(String workflowId, Long primaryfileId, String[] outputIds, Map<String, Map<String, String>> parameters) {
+//	public CreateJobResponse createJob(String workflowId, Long primaryfileId, String[] outputIds, Map<String, Map<String, String>> parameters) {
 //		String primaryfileMsg = primaryfileId == null ? "" : ", primaryfileId: " + primaryfileId;
 //		String outputsMsg = "";
 //		if ( outputIds != null) {
@@ -820,7 +820,7 @@ public class JobServiceImpl implements JobService {
 //		log.info("Creating " + msg + msg_param);
 //				
 //		// initialize job creation response
-//		WorkflowOutputResult result = new WorkflowOutputResult();
+//		CreateJobResponse result = new CreateJobResponse();
 //
 //		try {
 //			// handle primaryfile as input if provided

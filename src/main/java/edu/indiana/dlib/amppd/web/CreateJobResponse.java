@@ -5,7 +5,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import lombok.Data;
 
 @Data
-public class WorkflowOutputResult {
+public class CreateJobResponse {
 	private Boolean success;
 	private String error;
 	private Long primaryfileId;

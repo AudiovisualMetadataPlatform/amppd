@@ -35,7 +35,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
-import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
+import edu.indiana.dlib.amppd.web.CreateJobResponse;
 
 // TODO remove ignore once we have Galaxy Bootstrap working on Bamboo
 @Ignore
@@ -160,7 +160,7 @@ public class JobServiceTests {
     
     @Test
     public void shouldCreateJobOnValidInputs() {    	              
-    	WorkflowOutputResult result = 
+    	CreateJobResponse result = 
     			jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
     	// now the dataset ID and history ID shall be set
@@ -185,7 +185,7 @@ public class JobServiceTests {
     @Test
     public void shouldCreateJobOnValidHmgmInputs() {    	              
         
-    	WorkflowOutputResult result = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+    	CreateJobResponse result = jobService.createJob(hmgmWorkflowDetails.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
     	WorkflowOutputs woutputs = result.getOutputs();
     	
@@ -229,12 +229,12 @@ public class JobServiceTests {
     	bundle.getPrimaryfiles().add(pf);
     	
     	// use the dummy bundle we set up for this test
-    	List<WorkflowOutputResult> woutputsMap = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
+    	List<CreateJobResponse> woutputsMap = jobService.createJobBundle(workflow.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
 
     	// only one primaryfile is valid, so only one workflow outputs shall exist in the list returned
     	Assert.assertNotNull(woutputsMap);
     	Assert.assertEquals(woutputsMap.size(), 1);
-    	WorkflowOutputResult result = woutputsMap.get(0);
+    	CreateJobResponse result = woutputsMap.get(0);
     	
     	Assert.assertTrue(result.getSuccess());
     	Assert.assertNotNull(result);

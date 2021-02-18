@@ -49,7 +49,7 @@ import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
-import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
+import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -475,7 +475,7 @@ public class TestHelper {
 		}
 		else {
 			// otherwise run the job once and return the WorkflowOutputs
-			WorkflowOutputResult result = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
+			CreateJobResponse result = jobService.createJob(workflow.getId(), primaryfile.getId(), new HashMap<String, Map<String, String>>());
 			invocations = jobService.listJobs(workflow.getId(), primaryfile.getId());
 			return invocations.get(0);
 		}
