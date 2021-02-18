@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,9 +30,12 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.exception.ParserException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -556,12 +561,11 @@ public class JobServiceImpl implements JobService {
     		log.info("Successfully created " + msg + msg_param);
         	log.info("Galaxy workflow outputs: " + woutputs);
     	}
-
     	catch (Exception e) {  
     		String errmsg = "Error creating " + msg + msg_param;
     		log.error(errmsg, e);	
+    		result.setSuccess(false);
     		result.setError(errmsg + "\n" + e.toString());
-    		//throw new GalaxyWorkflowException("Error creating " + msg, e);
     	}
     	
     	return result;
@@ -630,34 +634,29 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[], Map<String, Map<String, String>>)
 	 */
 	public List<WorkflowOutputResult> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
+		log.info("Creating a list of Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameters: " + parameters);		
 		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
-		String msg = "a list of Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameters: " + parameters;
-		log.info("Creating " + msg);		
+		int nSuccess = 0;
 
 		// remove redundant primaryfile IDs
 		Set<Long> pidset = primaryfileIds == null ? new HashSet<Long>() : new HashSet<Long>(Arrays.asList(primaryfileIds));
 		Long[] pids = pidset.toArray(primaryfileIds);		
-		int nSuccess = 0;
-		int nFailed = 0;
 
+		// create AMP job for each primaryfile in the array
 		for (Long primaryfileId : pids) {
 			// skip null primaryfileId, which could result from redundant IDs passed from request parameter being changed to null
 			if (primaryfileId == null) continue; 
-			
-			try {
-				Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
-				woutputs.add(createJob(workflowId, primaryfile.getId(), parameters));
+
+			// no need to catch exception as createJob catches all and always returns a response 
+			WorkflowOutputResult response = createJob(workflowId, primaryfileId, parameters);
+			woutputs.add(response);
+			if (response.isSuccess()) {
 				nSuccess++;
-			}
-			catch (Exception e) {
-				// if error occurs with this primaryfile we still want to continue with other primaryfiles
-				log.error("Error creating Amppd job for primaryfile " + primaryfileId, e);	
-				nFailed++;
 			}
 		}  	
 
 		log.info("Number of Amppd jobs successfully created for the primaryfiles: " + nSuccess);    	
-		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
+		log.info("Number of Amppd jobs failed to be created for the primaryfiles: " + (pids.length - nSuccess));    	
     	return woutputs;		
 	}
 	
@@ -666,42 +665,61 @@ public class JobServiceImpl implements JobService {
 	 */	
 	@Override
 	public List<WorkflowOutputResult> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
-		List<WorkflowOutputResult> woutputsMap = new ArrayList<WorkflowOutputResult>();
-		String msg = "a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters;
-		log.info("Creating " + msg);
-		
+		log.info("Creating a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters);
+		List<WorkflowOutputResult> woutputs = new ArrayList<WorkflowOutputResult>();
 		int nSuccess = 0;
-		int nFailed = 0;
+		
+		// retrieve bundle
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("Bundle <" + bundleId + "> does not exist!"));        	
-    	if (bundle.getPrimaryfiles() == null || bundle.getPrimaryfiles().isEmpty()) {
-    		log.warn("Bundle <\" + bundleId + \"> does not contain any primaryfile.");
-    	}
-    	else { 
-    		for (Primaryfile primaryfile : bundle.getPrimaryfiles() ) {
-    			try {
-    				woutputsMap.add(createJob(workflowId, primaryfile.getId(), parameters));
-    				nSuccess++;
-    			}
-    			catch (Exception e) {
-    				// if error occurs with this primaryfile we still want to continue with other primaryfiles
-    				log.error("Error creating Amppd job for primaryfile " + primaryfile.getId(), e);		
-    				nFailed++;
-    			}
-    		}
-    	}	  	
+		if (bundle.getPrimaryfiles() == null || bundle.getPrimaryfiles().isEmpty()) {
+			log.warn("Bundle <\" + bundleId + \"> does not contain any primaryfile, so no jobs will be created.");
+			return woutputs;
+		}
+
+		// create AMP job for each primaryfile in the bundle
+		Set<Primaryfile> primaryfiles = bundle.getPrimaryfiles();
+		for (Primaryfile primaryfile : primaryfiles) {
+			// no need to catch exception as createJob catches all and always returns a response 
+			WorkflowOutputResult response = createJob(workflowId, primaryfile.getId(), parameters);
+			woutputs.add(response);
+			if (response.isSuccess()) {
+				nSuccess++;
+			}
+		}
 
 		log.info("Number of Amppd jobs successfully created for the bundle: " + nSuccess);    	
-		log.info("Number of Amppd jobs failed to be created: " + nFailed);    	
-    	return woutputsMap;
+		log.info("Number of Amppd jobs failed to be created for the bundle: " + (primaryfiles.size() - nSuccess));    		  	
+		return woutputs;
 	}	
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, Boolean, Map<String, Map<String, String>>)
 	 */
 	public List<WorkflowOutputResult> createJobs(String workflowId, MultipartFile csvFile, Boolean includePrimaryfile, Map<String, Map<String, String>> parameters) {
+		try {
+			// parse csvFile into a list of string arrays
+			CSVReader reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(csvFile.getInputStream())))
+					.withSkipLines(1)           // skip the first line, header info
+					.build();
+			List<String[]> rows = reader.readAll();
+            
+			for (String[] row : rows) {
+            	
+            }
+		}
+		catch(Exception e) {
+			String msg = "Error parsing the CSV file for workflow submission.";
+			log.error(msg, e);
+			throw new ParserException(msg, e);
+		}
+		
 		return null; 
 	}
 
+	public void parseCsv(MultipartFile csvFile, Boolean includePrimaryfile) {
+		
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.listJobs(String,Long)
 	 */	
