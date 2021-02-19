@@ -146,12 +146,20 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Long)
+	 */
+	@Override
+	public String getPrimaryfileMediaUrl(Long primaryfileId) {		
+		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfileId + "/media";
+		return url;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Primaryfile)
 	 */
 	@Override
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
-		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfile.getId() + "/media";
-		return url;
+		return getPrimaryfileMediaUrl(primaryfile.getId());
 	}
 	
 	/**

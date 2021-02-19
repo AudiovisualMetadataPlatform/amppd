@@ -25,6 +25,14 @@ public interface MediaService {
 	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
 	
 	/**
+	 * Get the media file download URL for the given primaryfile ID.
+	 * Note that this method does not verify that the primaryfile for this ID exists in the system.
+	 * @param primaryfileId the given primaryfile ID
+	 * @return the generated media URL
+	 */
+	public String getPrimaryfileMediaUrl(Long primaryfileId);
+
+	/**
 	 * Get the media file download URL for the given primaryfile.
 	 * @param primaryfile the given primaryfile
 	 * @return the generated media URL

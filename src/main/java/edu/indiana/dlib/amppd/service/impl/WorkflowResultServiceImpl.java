@@ -666,7 +666,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				output.put(csvHeader[6], r.getItemName());
 				output.put(csvHeader[7], r.getPrimaryfileId());
 				output.put(csvHeader[8], r.getPrimaryfileName());
-				output.put(csvHeader[9], mediaService.getPrimaryfileSymlinkUrl(r.getPrimaryfileId()));
+				output.put(csvHeader[9], mediaService.getPrimaryfileMediaUrl(r.getPrimaryfileId()));
 				output.put(csvHeader[10], r.getWorkflowName());
 				output.put(csvHeader[11], r.getWorkflowStep());
 				output.put(csvHeader[12], r.getOutputId()); 
