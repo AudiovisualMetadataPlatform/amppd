@@ -30,8 +30,8 @@ public class CreateJobResponse {
 	 */
 	public void setNames(Primaryfile primaryfile) {
 		Item item = primaryfile.getItem();
-		Collection c = item.getCollection();	
-		setCollectionName(c.getName());
+		Collection collection = item.getCollection();	
+		setCollectionName(collection.getName());
 		setPrimaryfileName(primaryfile.getName());
 		setItemName(item.getName());
 	}

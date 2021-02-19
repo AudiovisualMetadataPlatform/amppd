@@ -25,7 +25,7 @@ import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Controller for REST operations on Amppd jobs.
+ * Controller for REST operations on AMP jobs.
  * @author yingfeng
  *
  */
@@ -42,7 +42,7 @@ public class JobController {
 	
 
 	/**
-	 * Create new Amppd jobs by submitting to Galaxy the given workflow against the given primaryfiles, along with the given parameters.
+	 * Create AMP jobs by submitting to Galaxy the given workflow against the given primaryfiles, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
@@ -61,13 +61,12 @@ public class JobController {
 	}
 	
 	/**
-	 * Creating a bundle of multiple Amppd jobs, one for each primaryfile included in the given bundle, by submitting to Galaxy the given workflow with the given step parameters.
+	 * Create a bundle of AMP jobs, one for each primaryfile included in the given bundle, by submitting to Galaxy the given workflow with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@CrossOrigin(origins = "*")
 	@PostMapping("/jobs/submitBundle")
 	public List<CreateJobResponse> createJobBundle(
 			@RequestParam String workflowId, 
@@ -82,7 +81,7 @@ public class JobController {
 	}
 
 	/**
-	 * Create Amppd jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
+	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
 	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
 	 * @param workflowId ID of the given workflow
 	 * @param resultIdss array of array of WorkflowResult IDs of the given outputs
@@ -102,12 +101,12 @@ public class JobController {
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
 		}
-		log.info("Processing request to submit a workflow against an array of workflow result output arrays with parameters ... ");
+		log.info("Processing request to submit a workflow against a 2D array of workflow result outputs with parameters ... ");
 		return jobService.createJobs(workflowId, resultIdss, parameters, includePrimaryfile);
 	}
 
 	/**
-	 * Create Amppd jobs, one for each row of primaryfile and outputs specified in the given csvFile, 
+	 * Create AMP jobs, one for each row of primaryfile and outputs specified in the given csvFile, 
 	 * by submitting to Galaxy the given workflow along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param inputCsv CSV file each row specifying the primaryfile and previous outputs to use as workflow inputs
@@ -121,13 +120,13 @@ public class JobController {
 			@RequestParam MultipartFile inputCsv,
 			@RequestParam(required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
-		if (includePrimaryfile == null ) {
-			includePrimaryfile = false;
-		}
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
-		log.info("Processing request to submit a workflow against a csvFile containing primaryfiles and outputs with parameters ... ");
+		if (includePrimaryfile == null ) {
+			includePrimaryfile = false;
+		}
+		log.info("Processing request to submit a workflow against an inputCsv file containing primaryfile IDs and workflow result IDs with parameters ... ");
 		return jobService.createJobs(workflowId, inputCsv, parameters, includePrimaryfile);
 	}
 	
