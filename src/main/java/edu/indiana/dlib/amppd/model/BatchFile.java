@@ -40,7 +40,7 @@ public class BatchFile {
 
 	//@NotNull
 	@Index
-	private int rowNum;	
+	private Integer rowNum;	
 	
 	@Index
 	@JsonIgnore

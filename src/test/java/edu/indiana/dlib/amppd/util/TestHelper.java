@@ -499,7 +499,7 @@ public class TestHelper {
 		}
 			
 		for (WorkflowResult result : results) {
-			if (result.getWorkflowStep() == TEST_WORKFLOW_STEP && result.getInvocationId() == invocation.getId()) {
+			if (result.getWorkflowStep().equals(TEST_WORKFLOW_STEP) && result.getInvocationId().equals(invocation.getId())) {
 				result.setIsFinal(true);
 				workflowResultRepository.save(result);
 			}

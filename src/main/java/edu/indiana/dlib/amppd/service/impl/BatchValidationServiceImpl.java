@@ -386,7 +386,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 				continue;
 			}
 			for(Primaryfile primaryfile : item.getPrimaryfiles()) {
-				if(primaryfile.getName()==name) {
+				if(primaryfile.getName().equals(name)) {
 					return true;
 				}
 			}
