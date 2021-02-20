@@ -52,7 +52,7 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(			
 			@RequestParam String workflowId, 
 			@RequestParam Long[] primaryfileIds, 
-			@RequestParam(required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
@@ -71,7 +71,7 @@ public class JobController {
 	public List<CreateJobResponse> createJobBundle(
 			@RequestParam String workflowId, 
 			@RequestParam Long bundleId, 
-			@RequestParam(required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
 		// if parameters is not specified in the request, use an empty map for it
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
@@ -93,7 +93,7 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam Long[][] resultIdss, 
-			@RequestParam(required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
@@ -118,7 +118,7 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
-			@RequestParam(required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();

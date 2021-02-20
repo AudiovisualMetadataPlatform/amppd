@@ -202,7 +202,7 @@ public class JobServiceImpl implements JobService {
 				// assign the first non-empty primaryfileId among the results as the shared one to compare against
 				primaryfileId = result.getPrimaryfileId();
 			}
-			else if (primaryfileId != result.getPrimaryfileId()) {
+			else if (!primaryfileId.equals(result.getPrimaryfileId())) {
 				throw new GalaxyWorkflowException("WorkflowResult " + resultId + " has a different primaryfileId " + result.getPrimaryfileId() + " than the shared " + primaryfileId);
 			}
 			
@@ -214,7 +214,7 @@ public class JobServiceImpl implements JobService {
 				// assign the first non-empty historyId among the results as the shared one to compare against
 				historyId = result.getHistoryId();
 			}
-			else if (historyId != result.getHistoryId()) {
+			else if (!historyId.equals(result.getHistoryId())) {
 				throw new GalaxyWorkflowException("WorkflowResult " + resultId + " has a different historyId " + result.getPrimaryfileId() + " than the shared " + historyId);
 			}
 			
@@ -231,7 +231,7 @@ public class JobServiceImpl implements JobService {
 		if (primaryfile == null) {
 			Long id = primaryfileId; // Java compiler disallows using non-final local variable such as primaryfileId in below line
 			primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
-			if (primaryfile.getHistoryId() != historyId) {
+			if (!primaryfile.getHistoryId().equals(historyId)) {
 				throw new GalaxyWorkflowException("Primaryfile " + id + " shared by the results has a different historyId " + primaryfile.getHistoryId() + " than the shared " + historyId);				
 			}
 		}
@@ -519,8 +519,14 @@ public class JobServiceImpl implements JobService {
         	log.info("Galaxy workflow outputs: " + woutputs);
     	}
     	catch (Exception e) {  
+    		String error = "";
+			// if not done yet, initialize job creation response with primaryfile info
+    		if (response == null) {
+    			response = new CreateJobResponse(0l); // use an invalid primaryfileId since no primaryfile was retrieved
+    			error = "Failed to retrieve/validate primaryfile/results!\n";
+    		}
     		// update response with failure job creation status
-    		response.setStatus(false, e.toString(), null);
+    		response.setStatus(false, error + e.toString(), null);
     		log.error("Failed to create " + msg + msg_param, e);	
     	}
     	
@@ -672,14 +678,12 @@ public class JobServiceImpl implements JobService {
 	 * @see edu.indiana.dlib.amppd.service.JobService.parseInputCsv(MultipartFile)
 	 */
 	public Long[][] parseInputCsv(MultipartFile inputCsv) {		
-		log.info("Parsing input CSV file " + inputCsv.getName() + " for workflow submission ...");
+		log.info("Parsing input CSV file " + inputCsv.getOriginalFilename() + " for workflow submission ...");
 		
-		// initialize
-		List<Long[]> resultIdss = new ArrayList<Long[]>();	
 		List<String[]> rows = null;
+		int nrow = 0;
 		int ncol = 0;
-		String errmsg = "Failed to parse the input CSV file for workflow submission!";
-		StringBuilder errors = new StringBuilder();
+		String errmsg = "Failed to parse the input CSV file " + inputCsv.getOriginalFilename() + " for workflow submission!";
 
 		// overall process
 		try {
@@ -689,43 +693,44 @@ public class JobServiceImpl implements JobService {
 			
 			// there should be at least the header row
 			if (rows.isEmpty()) {
-				throw new ParserException("The input CSV file has no row!");				
+				throw new ParserException("The input CSV file has no row, at least the header row must be present!");				
 			}	
 
 			// record the number of columns in the CSV header
 			ncol = rows.get(0).length;
+			nrow = rows.size();
 			
 			// there should be the primaryfileId plus at least one workflowResultId column
 			if (ncol < 2) {
-				throw new ParserException("The input CSV file has no column for WorkflowResult IDs!");				
+				throw new ParserException("The input CSV file has no column for WorkflowResult IDs, besides the primaryfileId column, at least one WorkflowResultId column must be present!");				
 			}				
 		}
 		catch(Exception e) {
 			log.error(errmsg, e);
-			throw new ParserException(errmsg, e);
+			throw new ParserException(errmsg + e.getMessage(), e);
 		}	
 
+		Long[][] resultIdss = new Long[nrow-1][ncol-1];	
+		StringBuilder errors = new StringBuilder();
+		
 		// process each row after the header, append error message if any
 		for (int i=1; i < rows.size(); i++) {
 			String[] columns = rows.get(i);
 			Long primaryfileId = null;
 			
 			try {
-				// first column should be primaryfileId, we don't rely on its value but better validate its format
-				primaryfileId = Long.parseLong(columns[0].trim());  
-
-				// the rest of the columns should be resultIds in the order of workflow inputs
-				Long[] resultIds = new Long[columns.length - 1];
-				for (int j=1; j < columns.length; j++) {
-					resultIds[j-1] = Long.parseLong(columns[j].trim());  
-				}
-
 				// each row should have the same number of columns as the header
 				if (columns.length != ncol) {
 					throw new ParserException("There are " + columns.length + " instead of the expected " + ncol + " columns!");
 				}
 
-				resultIdss.add(resultIds);
+				// first column should be primaryfileId, we don't rely on its value but better validate its format
+				primaryfileId = Long.parseLong(columns[0].trim());  
+
+				// the rest of the columns should be resultIds in the order of workflow inputs
+				for (int j=1; j < columns.length; j++) {
+					resultIdss[i-1][j-1] = Long.parseLong(columns[j].trim());  
+				}
 			}
 			catch(Exception e) {
 				String err = "Error on row " + i + " for primaryfile " + primaryfileId + ": ";
@@ -741,8 +746,8 @@ public class JobServiceImpl implements JobService {
 			throw new ParserException(errmsgs);
 		}					
 
-		log.info("Successfully parsed the input CSV file into " + resultIdss.size() + " rows of " + (ncol-1) + " workflowResultIds");
-		return (Long[][])resultIdss.toArray();
+		log.info("Successfully parsed the input CSV file into " + (nrow-1) + " rows of " + (ncol-1) + " workflowResultIds");
+		return resultIdss;
 	}
 	
 	/**
