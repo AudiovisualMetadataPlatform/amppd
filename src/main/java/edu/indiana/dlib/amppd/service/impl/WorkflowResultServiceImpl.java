@@ -628,45 +628,58 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 	@Override
 	public void exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query) {
-        try {
-        	long totalResults = workflowResultRepository.count();
-        	query.setResultsPerPage((int)totalResults);
-        	query.setPageNum(1);
+		log.info("Exporting current dashboard to CSV file ...");
+		
+		try {
+			long totalResults = workflowResultRepository.count();
+			query.setResultsPerPage((int)totalResults);
+			query.setPageNum(1);
 			WorkflowResultResponse results = getWorkflowResults(query);
-			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);
 			
-	    String[] csvHeader = {"Date", "Submitter", "Collection Id", "Item Id", "Primary File Id", "Workflow", "Source Item", "Source Filename", "Source File Url", "Workflow Step", "Output File", "Output File Url", "Status"};
-	        
+			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);			
+			String[] csvHeader = {
+					"WorkflowResult ID", 
+					"Date", "Submitter", 
+					"Collection ID", 
+					"Collection", 
+					"Item ID", 
+					"Item", 
+					"Primaryfile ID", 
+					"Primaryfile", 
+					"Primaryfile URL", 
+					"Workflow", 
+					"Workflow Step", 
+					"Output ID", 
+					"Output", 
+					"Output URL", 
+					"Status"};
 			csvWriter.writeHeader(csvHeader);
-	         
-	        for (WorkflowResult r : results.getRows()) {
-	        	
-	        	Map<String, Object> output = new HashMap<String, Object>();
-	        	output.put(csvHeader[0], r.getDateCreated());
-	        	output.put(csvHeader[1], r.getSubmitter());
-	        	output.put(csvHeader[2], r.getCollectionId());
-	        	output.put(csvHeader[3], r.getItemId());
-	        	output.put(csvHeader[4], r.getPrimaryfileId());
-	        	output.put(csvHeader[5], r.getWorkflowName());
-	        	output.put(csvHeader[6], r.getItemName());
-	        	output.put(csvHeader[7], r.getPrimaryfileName());
-	        	output.put(csvHeader[8], mediaService.getPrimaryfileSymlinkUrl(r.getPrimaryfileId()));
-	        	output.put(csvHeader[9], r.getWorkflowStep());
-	        	output.put(csvHeader[10], r.getOutputName()); 
-	        	output.put(csvHeader[11], mediaService.getWorkflowResultOutputUrl(r.getId())); 
-	        	output.put(csvHeader[12], r.getStatus());
-	        	
-	        	csvWriter.write(output, csvHeader);
-	        	
-	        	
-	            //csvWriter.write(r, nameMapping);
-	        }
-	         
-	        csvWriter.close();
-	        
+
+			for (WorkflowResult r : results.getRows()) {
+				Map<String, Object> output = new HashMap<String, Object>();
+				output.put(csvHeader[0], r.getId());
+				output.put(csvHeader[1], r.getDateCreated());
+				output.put(csvHeader[2], r.getSubmitter());
+				output.put(csvHeader[3], r.getCollectionId());
+				output.put(csvHeader[4], r.getCollectionName());
+				output.put(csvHeader[5], r.getItemId());
+				output.put(csvHeader[6], r.getItemName());
+				output.put(csvHeader[7], r.getPrimaryfileId());
+				output.put(csvHeader[8], r.getPrimaryfileName());
+				output.put(csvHeader[9], mediaService.getPrimaryfileMediaUrl(r.getPrimaryfileId()));
+				output.put(csvHeader[10], r.getWorkflowName());
+				output.put(csvHeader[11], r.getWorkflowStep());
+				output.put(csvHeader[12], r.getOutputId()); 
+				output.put(csvHeader[13], r.getOutputName()); 
+				output.put(csvHeader[14], mediaService.getWorkflowResultOutputUrl(r.getId())); 
+				output.put(csvHeader[15], r.getStatus());
+				csvWriter.write(output, csvHeader);				
+			}
+			
+			csvWriter.close();
+			log.info("Successfully exported current dashboard to CSV file.");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Failed to export current dashboard to CSV file.", e);
 		}
 	}
 	

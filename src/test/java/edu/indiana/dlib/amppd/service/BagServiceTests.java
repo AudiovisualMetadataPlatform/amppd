@@ -17,12 +17,12 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import edu.indiana.dlib.amppd.model.BagContent;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionBag;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @Ignore
@@ -56,11 +56,11 @@ public class BagServiceTests {
 	@Test
 	public void shouldGetPrimaryfileBag() {
 		PrimaryfileBag pbag = bagService.getPrimaryfileBag(primaryfile.getId());
-		Assert.assertTrue(pbag.getPrimaryfileId() == primaryfile.getId());
-		Assert.assertTrue(pbag.getPrimaryfileName() == primaryfile.getName());
+		Assert.assertEquals(pbag.getPrimaryfileId(), primaryfile.getId());
+		Assert.assertEquals(pbag.getPrimaryfileName(), primaryfile.getName());
 
 		List<BagContent> contents = pbag.getBagContents();
-		Assert.assertTrue(contents.size() == 1);	// only the TEST_WORKFLOW_STEP output is final
+		Assert.assertEquals(contents.size(), 1);	// only the TEST_WORKFLOW_STEP output is final
 
 		BagContent content = contents.get(0);
 		Assert.assertEquals(content.getInvocationId(), invocation.getId());
@@ -74,11 +74,11 @@ public class BagServiceTests {
 		Item item = primaryfile.getItem();		
 		
 		ItemBag ibag = bagService.getItemBag(item.getId());
-		Assert.assertTrue(ibag.getItemId() == item.getId());
-		Assert.assertTrue(ibag.getItemName() == item.getName());
+		Assert.assertEquals(ibag.getItemId(), item.getId());
+		Assert.assertEquals(ibag.getItemName(), item.getName());
 
 		List<PrimaryfileBag> pbags = ibag.getPrimaryfileBags();
-		Assert.assertTrue(pbags.size() == 1);	// primaryfile is the only child of its parent item
+		Assert.assertEquals(pbags.size(), 1);	// primaryfile is the only child of its parent item
 
 		PrimaryfileBag pbag = pbags.get(0);
 		Assert.assertEquals(pbag.getPrimaryfileId(), primaryfile.getId());		
@@ -89,12 +89,12 @@ public class BagServiceTests {
 		Item item = primaryfile.getItem();		
 		
 		ItemBag ibag = bagService.getItemBag(item.getExternalSource(), item.getExternalId());
-		Assert.assertTrue(ibag.getItemId() == item.getId());
-		Assert.assertTrue(ibag.getExternalSource() == item.getExternalSource());
-		Assert.assertTrue(ibag.getExternalId() == item.getExternalId());
+		Assert.assertEquals(ibag.getItemId(), item.getId());
+		Assert.assertEquals(ibag.getExternalSource(), item.getExternalSource());
+		Assert.assertEquals(ibag.getExternalId(), item.getExternalId());
 
 		List<PrimaryfileBag> pbags = ibag.getPrimaryfileBags();
-		Assert.assertTrue(pbags.size() == 1);
+		Assert.assertEquals(pbags.size(), 1);
 
 		PrimaryfileBag pbag = pbags.get(0);
 		Assert.assertEquals(pbag.getPrimaryfileId(), primaryfile.getId());		
@@ -106,11 +106,11 @@ public class BagServiceTests {
 		Collection collection = item.getCollection();		
 		
 		CollectionBag cbag = bagService.getCollectionBag(collection.getId());
-		Assert.assertTrue(cbag.getCollectionId() == collection.getId());
-		Assert.assertTrue(cbag.getCollectionName() == collection.getName());
+		Assert.assertEquals(cbag.getCollectionId(), collection.getId());
+		Assert.assertEquals(cbag.getCollectionName(), collection.getName());
 
 		List<ItemBag> ibags = cbag.getItemBags();
-		Assert.assertTrue(ibags.size() == 1);	// item is the only child of its parent collection
+		Assert.assertEquals(ibags.size(), 1);	// item is the only child of its parent collection
 
 		ItemBag ibag = ibags.get(0);
 		Assert.assertEquals(ibag.getItemId(), item.getId());		
@@ -123,12 +123,12 @@ public class BagServiceTests {
 		Unit unit = collection.getUnit();		
 		
 		CollectionBag cbag = bagService.getCollectionBag(unit.getName(), collection.getName());
-		Assert.assertTrue(cbag.getCollectionId() == collection.getId());
-		Assert.assertTrue(cbag.getUnitName() == unit.getName());
-		Assert.assertTrue(cbag.getCollectionName() == collection.getName());
+		Assert.assertEquals(cbag.getCollectionId(), collection.getId());
+		Assert.assertEquals(cbag.getUnitName(), unit.getName());
+		Assert.assertEquals(cbag.getCollectionName(), collection.getName());
 
 		List<ItemBag> ibags = cbag.getItemBags();
-		Assert.assertTrue(ibags.size() == 1);
+		Assert.assertEquals(ibags.size(), 1);
 
 		ItemBag ibag = ibags.get(0);
 		Assert.assertEquals(ibag.getItemId(), item.getId());		
