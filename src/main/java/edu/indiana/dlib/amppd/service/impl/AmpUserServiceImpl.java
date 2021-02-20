@@ -178,7 +178,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
 		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
-		if ((passToken == null) || (user == null) || (passToken.getUser().getId() != user.getId())) {
+		if ((passToken == null) || (user == null) || (!passToken.getUser().getId().equals(user.getId()))) {
 			log.error("Error occurred as token and email id do not match");
 			response.addError("Incorrect Link");
 			response.setSuccess(false);
