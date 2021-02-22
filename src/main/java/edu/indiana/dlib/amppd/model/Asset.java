@@ -27,7 +27,7 @@ import lombok.ToString;
 	    name = "jsonb",
 	    typeClass = JsonBinaryType.class
 	)
-public abstract class Asset extends Content {
+public abstract class Asset extends Dataentity {
 
 	//@NotNull
 	private String originalFilename;	// the file name of the original file uploaded by user or batch
