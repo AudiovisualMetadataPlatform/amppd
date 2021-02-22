@@ -51,7 +51,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalId", new String());
+		  	//add("externalId", new String());
 		  	}});
 		 
 		 
@@ -82,7 +82,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 			add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalId", new String());
+		  	//add("externalId", new String());
 			}});
 	    
 		
@@ -98,7 +98,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalId", new String());
+		  	//add("externalId", new String());
 			}});
 		 
 	    
@@ -127,7 +127,7 @@ public class ModelTemplates implements TemplateLoader {
 			add("originalFilename", firstName());
 		  	add("pathname", "C:/New Folder/${name}");
 		  	add("mediaInfo", "{}");
-		  	add("externalId", new String());
+		  	//add("externalId", new String());
 		  }});
 		 
 	  
