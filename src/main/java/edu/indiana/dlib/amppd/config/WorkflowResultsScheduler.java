@@ -22,7 +22,7 @@ public class WorkflowResultsScheduler {
 	@Scheduled(cron = "${amppd.refreshWorkflowResultsStatusCron}")
 	public void refreshStatus() {
 		log.info("Starting refresh status at " + sdf.format(new Date()));
-		workflowResultService.refreshIncompleteResults();
+		workflowResultService.refreshIncompleteWorkflowResults();
 		log.info("Finished running refresh status at " + sdf.format(new Date()));
 	}
 

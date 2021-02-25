@@ -188,7 +188,7 @@ public class JobServiceImpl implements JobService {
  
 		for (Long resultId : resultIds) {
 			// retrieve WorkflowResult by ID and make sure the outputId is populated
-			WorkflowResult result = workflowResultRepository.findById(resultId).orElseThrow(() -> new StorageException("WorkflowResult <" + resultId + "> does not exist!"));;
+			WorkflowResult result = workflowResultRepository.findById(resultId).orElseThrow(() -> new StorageException("WorkflowResult <" + resultId + "> does not exist!"));
 			String outputId = result.getOutputId();
 			if (StringUtils.isEmpty(outputId)) {
 				throw new StorageException("WorkflowResult " + resultId + " has empty outputId!");

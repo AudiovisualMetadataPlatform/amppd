@@ -23,6 +23,7 @@ public class WorkflowResultSearchQuery {
 		sortRule.setColumnName("id");
 		sortRule.setOrderByDescending(false);
 		filterByDates = new ArrayList<Date>();
+		filterByRelevant = true;
 		filterByFinal = false;
 	}
 	private int pageNum;
@@ -37,5 +38,6 @@ public class WorkflowResultSearchQuery {
 	private String[] filterBySearchTerm;	
 	private WorkflowResultSortRule sortRule;
 	private List <Date> filterByDates;
+	private boolean filterByRelevant;
 	private boolean filterByFinal;
 }

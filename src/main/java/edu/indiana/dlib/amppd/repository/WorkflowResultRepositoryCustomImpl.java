@@ -31,15 +31,10 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	
 	@PersistenceContext
     EntityManager em;
-	public WorkflowResultResponse searchResults(WorkflowResultSearchQuery searchQuery) {
-		
-        int count = getTotalCount(searchQuery);
-        
-        List<WorkflowResult> rows = getWorkflowResultRows(searchQuery);
-
-        
+	public WorkflowResultResponse searchResults(WorkflowResultSearchQuery searchQuery) {		
+        int count = getTotalCount(searchQuery);        
+        List<WorkflowResult> rows = getWorkflowResultRows(searchQuery);       
         WorkflowResultFilterValues filters = getFilterValues();
-
         
         // Format the response
         WorkflowResultResponse response = new WorkflowResultResponse();
@@ -52,8 +47,6 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 
 	private List<WorkflowResult> getWorkflowResultRows(WorkflowResultSearchQuery searchQuery){
 		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage());
-		
-		
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<WorkflowResult> cq = cb.createQuery(WorkflowResult.class);
         Root<WorkflowResult> root = cq.from(WorkflowResult.class);
@@ -143,7 +136,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             predicates.add(predicate);
         }
         
-        //Build the predicate for Date filter
+        // Build the predicate for Date filter
 		if(searchQuery.getFilterByDates().size()>0) { 
 			Predicate fromDate = cb.greaterThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
 			Predicate toDate = cb.lessThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class), searchQuery.getFilterByDates().get(1)); 
@@ -187,17 +180,21 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             predicates.add(predicate);
         }
 
+        if(searchQuery.isFilterByRelevant()) {
+        	Predicate predicate = cb.equal(root.get("relevant"), true);
+            predicates.add(predicate);
+        }
+
         if(searchQuery.isFilterByFinal()) {
         	Predicate predicate = cb.equal(root.get("isFinal"), true);
             predicates.add(predicate);
         }
+
         return predicates;
 	}
 	
 	private WorkflowResultFilterValues getFilterValues() {
-
 		WorkflowResultFilterValues filters = new WorkflowResultFilterValues();		
-
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
         CriteriaQuery<Date> queryDate = cb.createQuery(Date.class);

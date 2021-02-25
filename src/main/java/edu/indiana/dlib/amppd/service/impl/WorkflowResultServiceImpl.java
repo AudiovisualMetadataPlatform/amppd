@@ -30,6 +30,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmTool;
@@ -119,7 +120,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * Return true if the specified dateRefreshed is recent, i.e. within the given refreshMinutes; false otherwise.
 	 */
-	private boolean isDateRefreshedRecent(Date dateRefreshed, int refreshMinutes) {		
+	protected boolean isDateRefreshedRecent(Date dateRefreshed, int refreshMinutes) {		
 		// This method is used by both refreshing the result status and refreshing the whole table.
 		// refreshMinutes reflects the reverse of the refresh frequency, i.e. the gap between two refresh processes:
 		// for the former, it should be longer than the average time Galaxy jobs takes to complete, 
@@ -140,17 +141,19 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 //	}
 	
 	/**
-	 * Returns true if the given dataset should be excluded from WorkflowResults, i.e. it's hidden or deleted.
+	 * Returns true if the given dataset should be excluded from WorkflowResults, i.e. it's deleted, purged or discarded.
 	 */
-	private Boolean shouldExcludeDataset(Dataset dataset) {
-		return dataset == null || !dataset.getVisible() || dataset.isDeleted() || dataset.isPurged()
-				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;
+	protected Boolean shouldExcludeDataset(Dataset dataset) {
+		return dataset == null || dataset.isDeleted() || dataset.isPurged()
+				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;		
+//		return dataset == null || !dataset.getVisible() || dataset.isDeleted() || dataset.isPurged()
+//				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;
 	}
 
 	/**
 	 * Refresh the status of the specified WorkflowResult from job status in galaxy.
 	 */
-	private WorkflowResult refreshResultStatus(WorkflowResult result) {
+	protected WorkflowResult refreshResultStatus(WorkflowResult result) {
 		Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 		
 		if (shouldExcludeDataset(dataset)) {
@@ -177,7 +180,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * Refresh status of the specified WorkflowResults by retrieving corresponding output status from Galaxy.
 	 */
-	private List<WorkflowResult> refreshResultsStatus(List<WorkflowResult> WorkflowResults) {
+	protected List<WorkflowResult> refreshResultsStatus(List<WorkflowResult> WorkflowResults) {
 		List<WorkflowResult> refreshedResults = new ArrayList<WorkflowResult>();
 		
 		for(WorkflowResult result : WorkflowResults) {
@@ -195,7 +198,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
 	 */
-	public void refreshIncompleteResults() {	
+	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
 		// for now we exclude ERROR and PAUSED for now, as these jobs will need manual rerun for their status to be changed
 		// in most cases we likely will need to delete these outputs and resubmit whole workflow
 		// TODO we might want to add ERROR and PAUSED to the status list for update in the future
@@ -205,6 +208,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
 		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
 		log.info("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
+		return refreshedResults;
 	}
 	
 	/**
@@ -349,7 +353,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * if the workflow for the invocation is provided, use the workflow name from that;
 	 * if the primaryfile for the invocation is provided, use the associated entity names from that.
 	 */
-	private List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
+	protected List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 		
 		// if the passed-in primaryfile is null, get primaryfile info by its ID from the passed-in invocation
@@ -415,7 +419,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				// retrieve the result for this output if already existing in the WorkflowResult table
 				List<WorkflowResult> oldResults = workflowResultRepository.findByOutputId(output.getId());		
 				
-				// if the dataset becomes hidden or deleted in Galaxy, delete any existing WorkflowResult for this output,
+				// if the dataset becomes discarded or deleted in Galaxy, delete any existing WorkflowResult for this output,
 				// then skip this output for further WorkflowResult creation or update
 				if (shouldExcludeDataset(dataset)) {
 					if (oldResults != null && !oldResults.isEmpty()) {
@@ -487,6 +491,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
 
 				result.setSubmitter(galaxyPropertyConfig.getUsername());
+				result.setRelevant(dataset.getVisible()); // result is relevant if and only if its Galaxy dataset is visible
 				result.setStatus(getJobStatus(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
@@ -503,7 +508,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * Translate the given name to its corresponding standard name using the given obsolete-to-standard name map.
 	 */
-	private String standardize(String name, HashMap<String, String> map) {
+	protected String standardize(String name, HashMap<String, String> map) {
 		String standardName = map.get(name);
 
 		// if the name doesn't exist in the map, that means it's already a standard name
@@ -518,7 +523,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Delete obsolete WorkflowResults, i.e. those that didn't get refreshed during the most recent whole table refresh.
 	 * @return a list of the deleted WorkflowResults 
 	 */
-	private List<WorkflowResult> deleteObsoleteWorkflowResults() {
+	protected List<WorkflowResult> deleteObsoleteWorkflowResults() {
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);
 		List<WorkflowResult> deleteResults = workflowResultRepository.findObsolete(dateObsolete);	
 
@@ -542,7 +547,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
 	 */	
-	public void hideIrrelevantWorkflowResults() {		
+	public List<WorkflowResult> hideIrrelevantWorkflowResults() {		
 		// get all irrelevant results from WorkflowResult table
 		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
 		results.addAll(workflowResultRepository.findByWorkflowStepIn(STEPS_TO_HIDE));
@@ -569,27 +574,57 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
 		// remove all irrelevant results from WorkflowResult table
 		workflowResultRepository.deleteAll(results);
-		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults from AMP table");				
+		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults from AMP table");	
+		return results;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setResultIsFinal(long, boolean)
-	 */
-	public boolean setResultIsFinal(long workflowResultId, boolean isFinal) {		
-		Optional<WorkflowResult> workflowResultOpt  = workflowResultRepository.findById(workflowResultId);
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultsRelevant(List<Map<String, String>>, Boolean)
+	 */	
+	public List<WorkflowResult> setWorkflowResultsRelevant(List<Map<String, String>> criteria, Boolean relevant) {
+		// get all irrelevant results from WorkflowResult table
+		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
+		results.addAll(workflowResultRepository.findByWorkflowStepIn(STEPS_TO_HIDE));
+		results.addAll(workflowResultRepository.findByOutputNameIn(OUTPUTS_TO_HIDE));		
+		for (String[] stepOutput : STEPS_OUTPUTS_TO_HIDE ) {
+			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
+		}		
+		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
 		
-		if(workflowResultOpt.isPresent()) {
-			WorkflowResult result = workflowResultOpt.get();
-			result.setIsFinal(isFinal);
-			workflowResultRepository.save(result);			
-			return true;
+		// set datasets of the irrelevant results to invisible in Galaxy
+		HistoriesClient historiesClient = jobService.getHistoriesClient();
+		for (WorkflowResult result : results) {
+			try {
+				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
+				dataset.setVisible(false);
+				historiesClient.updateDataset(result.getHistoryId(), dataset);
+				log.info("Successfully hid irrelevant workflowResult in Galaxy: " + result);
+			} 
+			catch (Exception e) {
+				throw new GalaxyWorkflowException("Failed to hide irrelevant workflowResult in Galaxy: " + result, e);
+			}
 		}
+		log.info("Successfully hid  " + results.size() + " irrelevant workflowResults in Galaxy");		
 		
-		return false;
+		// remove all irrelevant results from WorkflowResult table
+		workflowResultRepository.deleteAll(results);
+		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults from AMP table");	
+		return results;
+	}
+	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultFinal(Long, Boolean)
+	 */
+	public WorkflowResult setWorkflowResultFinal(Long workflowResultId, Boolean isFinal) {		
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
+		result.setIsFinal(isFinal);
+		workflowResultRepository.save(result);			
+		return result;
 	}
 		
 	// Map the status in Galaxy to what we want on the front end.
-	private GalaxyJobState getJobStatus(String jobStatus) {
+	protected GalaxyJobState getJobStatus(String jobStatus) {
 		GalaxyJobState status = GalaxyJobState.UNKNOWN;
 		if(jobStatus.equals("ok")) {
 			status = GalaxyJobState.COMPLETE;
@@ -618,7 +653,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * @param invocationTime the invocation time of the Galaxy job
 	 * @return the latest tool information found or null if not found
 	 */
-	private String getMgmToolInfo(String toolId, Date invocationTime) {
+	protected String getMgmToolInfo(String toolId, Date invocationTime) {
 		List<MgmTool> tools = mgmToolRepository.findLatestByToolId(toolId, invocationTime);
 		if (tools == null || tools.size() == 0)
 			return null;
@@ -627,14 +662,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 
 	@Override
-	public void exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query) {
+	public List<WorkflowResult> exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query) {
 		log.info("Exporting current dashboard to CSV file ...");
 		
 		try {
 			long totalResults = workflowResultRepository.count();
 			query.setResultsPerPage((int)totalResults);
 			query.setPageNum(1);
-			WorkflowResultResponse results = getWorkflowResults(query);
+			WorkflowResultResponse wresponse = getWorkflowResults(query);
 			
 			ICsvMapWriter csvWriter = new CsvMapWriter(response.getWriter(), CsvPreference.STANDARD_PREFERENCE);			
 			String[] csvHeader = {
@@ -655,7 +690,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 					"Status"};
 			csvWriter.writeHeader(csvHeader);
 
-			for (WorkflowResult r : results.getRows()) {
+			for (WorkflowResult r : wresponse.getRows()) {
 				Map<String, Object> output = new HashMap<String, Object>();
 				output.put(csvHeader[0], r.getId());
 				output.put(csvHeader[1], r.getDateCreated());
@@ -678,8 +713,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			
 			csvWriter.close();
 			log.info("Successfully exported current dashboard to CSV file.");
+			return wresponse.getRows();
 		} catch (IOException e) {
-			log.error("Failed to export current dashboard to CSV file.", e);
+			throw new RuntimeException("Failed to export current dashboard to CSV file.", e);
 		}
 	}
 	

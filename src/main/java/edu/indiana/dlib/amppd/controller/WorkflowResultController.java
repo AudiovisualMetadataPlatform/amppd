@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -39,18 +41,6 @@ public class WorkflowResultController {
 		return workflowResultService.getWorkflowResults(query);
 	}
 	
-	/**
-	 * Sets the specified WorkflowResult according to the specified final status
-	 * @param WorkflowResultId id of the specified WorkflowResult
-	 * @param isFinal the specified final status
-	 * @return true if request is successful; false otherwise
-	 */
-	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
-	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
-		log.info("Setting workflow result to final: " + id);
-		return workflowResultService.setResultIsFinal(id, isFinal);
-	}
-
 	/* TODO
 	 * More request params can be added to allow various scope of partial refresh. 
 	 * For ex, the scope of records to be refreshed can be defined by the following criteria:
@@ -74,14 +64,14 @@ public class WorkflowResultController {
 	 * @return the list of WorkflowResult refreshed
 	 */	
 	@PostMapping("/workflow-results/refresh")
-	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
+	public int refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
-			workflowResultService.refreshWorkflowResultsLumpsum();
+			return workflowResultService.refreshWorkflowResultsLumpsum().size();
 		}
 		else {
 			log.info("Refreshing Workflow Results iteratively per primaryfile ... ");
-			workflowResultService.refreshWorkflowResultsIterative();
+			return workflowResultService.refreshWorkflowResultsIterative().size();
 		}
 	}
 
@@ -91,9 +81,33 @@ public class WorkflowResultController {
 	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
 	 */
 	@PostMapping("/workflow-results/hide")
-	public void hideIrrelevantWorkflowResults() {
+	public int hideIrrelevantWorkflowResults() {
 		log.info("Hiding irrelevant workflow results ...");
-		workflowResultService.hideIrrelevantWorkflowResults();
+		return workflowResultService.hideIrrelevantWorkflowResults().size();
+	}
+
+	/**
+	 * Set the WorkflowResults satisfying the given criteria as relevant/irrelevant, and accordingly,
+	 * update their corresponding output datasets in Galaxy as visible/invisible.
+	 * @param criteria the given list of workflow-step-output map identifying which results should be set
+	 * @param relevant the given boolean to set the relevant field of WorkflowResults
+	 * @return the list of WorkflowResults updated
+	 */
+	public int setWorkflowResultsRelevant(@RequestParam List<Map<String, String>> criteria, @RequestParam Boolean relevant) {
+		log.info("Setting WorkflowResults Relevant ...");
+		return workflowResultService.setWorkflowResultsRelevant(criteria, relevant).size();
+	}
+	
+	/**
+	 * Sets the specified WorkflowResult according to the specified final status
+	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * @param isFinal the specified final status
+	 * @return true if request is successful; false otherwise
+	 */
+	@PostMapping(path = "/workflow-results/{id}", consumes = "application/json", produces = "application/json")
+	public boolean setWorkflowResultFinal(@PathVariable Long id, @RequestParam Boolean isFinal){
+		log.info("Setting workflow result to final: " + id);
+		return workflowResultService.setWorkflowResultFinal(id, isFinal) != null;
 	}
 
 	/**
@@ -102,7 +116,7 @@ public class WorkflowResultController {
 	 * @param query WorkflowResultSearchQuery
 	 */	
 	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
-	public void exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
+	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
         response.setContentType("text/csv");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateTime = dateFormatter.format(new Date());
@@ -112,7 +126,7 @@ public class WorkflowResultController {
         response.setHeader(headerKey, headerValue);
 
 		log.info("Exporting CSV " + headerValue);		
-		workflowResultService.exportWorkflowResults(response, query);
+		return workflowResultService.exportWorkflowResults(response, query).size();
     }
 	
 }
