@@ -116,6 +116,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	private List<Predicate> getPredicates(WorkflowResultSearchQuery searchQuery, Root<WorkflowResult> root, CriteriaBuilder cb) {
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		
+        // Build the predicate for search terms
 		if(searchQuery.getFilterBySearchTerm().length>0) {        	
         	In<String> inClause = cb.in(root.get("itemName"));
         	In<String> inClause2 = cb.in(root.get("primaryfileName"));
@@ -130,12 +131,6 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             predicates.add(sourcePredicate);
         }
 		
-        if(searchQuery.getFilterBySubmitters().length>0) {
-            Path<String> path = root.get("submitter");
-            Predicate predicate = path.in((Object[])searchQuery.getFilterBySubmitters());
-            predicates.add(predicate);
-        }
-        
         // Build the predicate for Date filter
 		if(searchQuery.getFilterByDates().size()>0) { 
 			Predicate fromDate = cb.greaterThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class),searchQuery.getFilterByDates().get(0)); 
@@ -144,9 +139,9 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             predicates.add(datePredicate);
 		}
         
-        if(searchQuery.getFilterByWorkflows().length>0) {
-        	Path<String> path = root.get("workflowName");
-            Predicate predicate = path.in((Object[])searchQuery.getFilterByWorkflows());
+        if(searchQuery.getFilterBySubmitters().length>0) {
+            Path<String> path = root.get("submitter");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterBySubmitters());
             predicates.add(predicate);
         }
         
@@ -165,6 +160,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         if(searchQuery.getFilterByFiles().length>0) {
         	Path<String> path = root.get("primaryfileName");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByFiles());
+            predicates.add(predicate);
+        }
+        
+        if(searchQuery.getFilterByWorkflows().length>0) {
+        	Path<String> path = root.get("workflowName");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByWorkflows());
             predicates.add(predicate);
         }
         
@@ -207,35 +208,33 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // rather, we populate each filter with distinct values existing in the current Workflow table.
         // Making filter value set context-dependent will result in deadlock queries. 
 
-        List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
-        List<String> filenames = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
-        List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
-        List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
+        List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> collections = em.createQuery(query.select(root.get("collectionName")).distinct(true)).getResultList();
+        List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
+        List<String> files = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
+        List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
         List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();
-        List<String> searchTerms= union(filenames, items);
+        List<String> searchTerms = union(files, items);
         
-        filters.setSearchTerms(searchTerms);
-        filters.setSubmitters(submitters);
         filters.setDateFilter(dateFilters);
-        filters.setWorkflows(workflows);
+        filters.setSubmitters(submitters);
         filters.setCollections(collections);
-        filters.setSteps(steps);
         filters.setItems(items);
-        filters.setFiles(filenames);
+        filters.setFiles(files);
+        filters.setWorkflows(workflows);
+        filters.setSteps(steps);
         filters.setStatuses(statuses);
+        filters.setSearchTerms(searchTerms);
         
         return filters;
         
 	}
 	private <T> List<T> union(List<T> list1, List<T> list2) {
         Set<T> set = new HashSet<T>();
-
         set.addAll(list1);
         set.addAll(list2);
-
         return new ArrayList<T>(set);
     }
 }
