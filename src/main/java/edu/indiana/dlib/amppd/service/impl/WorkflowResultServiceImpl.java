@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class WorkflowResultServiceImpl implements WorkflowResultService {
-
+	public static final String WILD_CARD = "*";
 
 	/* Note: 
 	 * The two maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
@@ -86,7 +88,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Also, only standard step/output names need to be included, thanks to the standardize method.
 	 */
 	// all outputs of the following workflow steps are irrelevant, disregarding its output name
-	private static final List<String> STEPS_TO_HIDE = Arrays.asList("ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");	
+	private static final List<String> STEPS_TO_HIDE = Arrays.asList("ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "pyscenedetect_shot_detection");	
 	// all outputs with the following names are irrelevant, disregarding its workflow step
 	private static final List<String> OUTPUTS_TO_HIDE = Arrays.asList("draftjs_corrected", "draftjs_uncorrected", "task_info", "iiif_corrected", "iiif_uncorrected");	
 	// all outputs with the following workflowStep-outputFile tuples are irrelevant
@@ -205,7 +207,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
 		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED, GalaxyJobState.UNKNOWN};
 		query.setFilterByStatuses(filterByStatuses);
-		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
+		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
 		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
 		log.info("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
 		return refreshedResults;
@@ -215,7 +217,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowResults(WorkflowResultSearchQuery)
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
-		WorkflowResultResponse response = workflowResultRepository.searchResults(query);
+		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
 		return response;
 	}
 	
@@ -547,9 +549,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
 	 */	
-	public List<WorkflowResult> hideIrrelevantWorkflowResults() {		
+	@Deprecated
+	public Set<WorkflowResult> hideIrrelevantWorkflowResults() {		
 		// get all irrelevant results from WorkflowResult table
-		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
+		Set<WorkflowResult> results = new HashSet<WorkflowResult>();
 		results.addAll(workflowResultRepository.findByWorkflowStepIn(STEPS_TO_HIDE));
 		results.addAll(workflowResultRepository.findByOutputNameIn(OUTPUTS_TO_HIDE));		
 		for (String[] stepOutput : STEPS_OUTPUTS_TO_HIDE ) {
@@ -562,8 +565,16 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		for (WorkflowResult result : results) {
 			try {
 				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
+				
+				// no need to update if the dataset is already invisible
+				if (!dataset.getVisible()) continue;
+				
+				// otherwise set dataset invisible
 				dataset.setVisible(false);
 				historiesClient.updateDataset(result.getHistoryId(), dataset);
+				
+				// set result to irrelevant
+				result.setRelevant(false);
 				log.info("Successfully hid irrelevant workflowResult in Galaxy: " + result);
 			} 
 			catch (Exception e) {
@@ -572,54 +583,103 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 		log.info("Successfully hid  " + results.size() + " irrelevant workflowResults in Galaxy");		
 		
-		// remove all irrelevant results from WorkflowResult table
-		workflowResultRepository.deleteAll(results);
-		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults from AMP table");	
+		// save all updated results in WorkflowResult table
+		workflowResultRepository.saveAll(results);
+		log.info("Successfully saved " + results.size() + " updated irrelevant workflowResults to AMP table");	
 		return results;
 	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultsRelevant(List<Map<String, String>>, Boolean)
 	 */	
-	public List<WorkflowResult> setWorkflowResultsRelevant(List<Map<String, String>> criteria, Boolean relevant) {
-		// get all irrelevant results from WorkflowResult table
-		List<WorkflowResult> results = new ArrayList<WorkflowResult> ();
-		results.addAll(workflowResultRepository.findByWorkflowStepIn(STEPS_TO_HIDE));
-		results.addAll(workflowResultRepository.findByOutputNameIn(OUTPUTS_TO_HIDE));		
-		for (String[] stepOutput : STEPS_OUTPUTS_TO_HIDE ) {
-			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
-		}		
-		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
+	public Set<WorkflowResult> setWorkflowResultsRelevant(List<Map<String, String>> workflowStepOutputs, Boolean relevant) {
+		// the Set of results to be updated 
+		Set<WorkflowResult> updateResults = new HashSet<WorkflowResult>();
 		
-		// set datasets of the irrelevant results to invisible in Galaxy
+		// go through all search criteria map of workflowId-workflowStep-outputName
+		for (Map<String, String> workflowStepOutput : workflowStepOutputs) {
+			// each search criteria map contains workflowId, workflowStep, and outputName
+			String workflowId = workflowStepOutput.get("workflowId");
+			String workflowStep = workflowStepOutput.get("workflowStep");
+			String outputName = workflowStepOutput.get("outputName");
+			
+			// skip this criteria if any search field is empty
+			if (StringUtils.isEmpty(workflowId) || StringUtils.isEmpty(workflowStep) || StringUtils.isEmpty(outputName) ) {
+				continue;
+			}
+			
+			// get WorkflowResults matching the current criteria and the negation of relevant indicator;
+			// note that we search with the negation of relevant indicator as we only want the results that  
+			// need to be updated, i.e. whose relevant indicator is the opposite of the provided value
+			// a wild card "*" on a search field means match all for that field
+			Set<WorkflowResult> results = null;
+			if (workflowId.equals(WILD_CARD) && workflowStep.equals(WILD_CARD) && outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByRelevant(!relevant);
+			}
+			else if (!workflowId.equals(WILD_CARD) && workflowStep.equals(WILD_CARD) && outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByWorkflowIdAndRelevant(workflowId, !relevant);
+			}
+			else if (workflowId.equals(WILD_CARD) && !workflowStep.equals(WILD_CARD) && outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByWorkflowStepAndRelevant(workflowStep, !relevant);
+			}
+			else if (workflowId.equals(WILD_CARD) && workflowStep.equals(WILD_CARD) && !outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByOutputNameAndRelevant(outputName, !relevant);
+			}
+			else if (!workflowId.equals(WILD_CARD) && !workflowStep.equals(WILD_CARD) && outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByWorkflowIdAndWorkflowStepAndRelevant(workflowId, workflowStep, !relevant);
+			}
+			else if (!workflowId.equals(WILD_CARD) && workflowStep.equals(WILD_CARD) && !outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByWorkflowIdAndOutputNameAndRelevant(workflowId, outputName, !relevant);
+			}
+			else if (workflowId.equals(WILD_CARD) && !workflowStep.equals(WILD_CARD) && !outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByWorkflowStepAndOutputNameAndRelevant(workflowStep, outputName, !relevant);
+			}
+			else if (!workflowId.equals(WILD_CARD) && !workflowStep.equals(WILD_CARD) && !outputName.equals(WILD_CARD)) {
+				results = workflowResultRepository.findByWorkflowIdAndWorkflowStepAndOutputNameAndRelevant(workflowId, workflowStep, outputName, !relevant);
+			}			
+			
+			// add current results set to the updateResults set
+			// note that we use Set instead of List, as it's possible that the query with multiple criteria might return
+			// redundant results; Set ensures that only distinct results are kept, to avoid redundant calls to Galaxy
+			updateResults.addAll(results);
+		}		
+
+		// update relevant field of the matching results and visibility of the associated datasets in Galaxy
 		HistoriesClient historiesClient = jobService.getHistoriesClient();
-		for (WorkflowResult result : results) {
+		for (WorkflowResult result : updateResults) {
 			try {
 				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
-				dataset.setVisible(false);
+				dataset.setVisible(relevant);
 				historiesClient.updateDataset(result.getHistoryId(), dataset);
-				log.info("Successfully hid irrelevant workflowResult in Galaxy: " + result);
+				result.setRelevant(relevant);
+				log.info("Successfully updated dataset for workflowResult in Galaxy: " + result);
 			} 
 			catch (Exception e) {
-				throw new GalaxyWorkflowException("Failed to hide irrelevant workflowResult in Galaxy: " + result, e);
+				throw new GalaxyWorkflowException("Failed to update dataset for workflowResult in Galaxy: " + result, e);
 			}
 		}
-		log.info("Successfully hid  " + results.size() + " irrelevant workflowResults in Galaxy");		
+		log.info("Successfully updated visible to " + relevant + " for " + updateResults.size() + " datasets in Galaxy");		
 		
-		// remove all irrelevant results from WorkflowResult table
-		workflowResultRepository.deleteAll(results);
-		log.info("Successfully deleted " + results.size() + " irrelevant workflowResults from AMP table");	
-		return results;
+		// save all updated updateResults in WorkflowResult table
+		workflowResultRepository.saveAll(updateResults);
+		log.info("Successfully updated relevant to "  + relevant + " for " + updateResults.size() + " workflowResults in AMP table");	
+		return updateResults;
 	}
-	
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultFinal(Long, Boolean)
 	 */
 	public WorkflowResult setWorkflowResultFinal(Long workflowResultId, Boolean isFinal) {		
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
+		
+		// no need to update if the current isFinal value is the same as the one to be set
+		if (result.getIsFinal() == isFinal.booleanValue()) { 
+			return result;
+		}
+		
 		result.setIsFinal(isFinal);
-		workflowResultRepository.save(result);			
+		workflowResultRepository.save(result);	
+		log.info("Successfully set workflow result " + workflowResultId + " final to " + isFinal);	
 		return result;
 	}
 		

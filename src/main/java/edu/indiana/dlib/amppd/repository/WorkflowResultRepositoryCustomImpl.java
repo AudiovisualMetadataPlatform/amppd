@@ -1,4 +1,4 @@
-	package edu.indiana.dlib.amppd.repository;
+package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +31,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	
 	@PersistenceContext
     EntityManager em;
-	public WorkflowResultResponse searchResults(WorkflowResultSearchQuery searchQuery) {		
+	public WorkflowResultResponse findByQuery(WorkflowResultSearchQuery searchQuery) {		
         int count = getTotalCount(searchQuery);        
         List<WorkflowResult> rows = getWorkflowResultRows(searchQuery);       
         WorkflowResultFilterValues filters = getFilterValues();

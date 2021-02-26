@@ -61,7 +61,7 @@ public class WorkflowResultController {
 	 * - non ID fields (for ex, names) have value changes across many rows;
 	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
 	 * @param lumpsum whether to refresh the table in the lumpsum mode
-	 * @return the list of WorkflowResult refreshed
+	 * @return the number of WorkflowResult refreshed
 	 */	
 	@PostMapping("/workflow-results/refresh")
 	public int refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
@@ -76,10 +76,13 @@ public class WorkflowResultController {
 	}
 
 	/**
+	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
 	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table. This process only needs to be done once manually (preferably 
 	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
+	 * @return the number of WorkflowResults updated
 	 */
+	@Deprecated
 	@PostMapping("/workflow-results/hide")
 	public int hideIrrelevantWorkflowResults() {
 		log.info("Hiding irrelevant workflow results ...");
@@ -87,15 +90,17 @@ public class WorkflowResultController {
 	}
 
 	/**
-	 * Set the WorkflowResults satisfying the given criteria as relevant/irrelevant, and accordingly,
-	 * update their corresponding output datasets in Galaxy as visible/invisible.
-	 * @param criteria the given list of workflow-step-output map identifying which results should be set
-	 * @param relevant the given boolean to set the relevant field of WorkflowResults
-	 * @return the list of WorkflowResults updated
+	 * Set the WorkflowResults matching the given list of workflow-step-output maps as relevant/irrelevant, 
+	 * and update their corresponding output datasets in Galaxy as visible/invisible accordingly.
+	 * Note that if a wild card is used in a field of a search criteria map, then that criteria matches all values of that field.
+	 * @param workflowStepOutputs the list of workflowId-workflowStep-outputName maps identifying the results to be set
+	 * @param relevant indicator on whether or not to set WorkflowResults as relevant
+	 * @return the number of WorkflowResults updated
 	 */
-	public int setWorkflowResultsRelevant(@RequestParam List<Map<String, String>> criteria, @RequestParam Boolean relevant) {
-		log.info("Setting WorkflowResults Relevant ...");
-		return workflowResultService.setWorkflowResultsRelevant(criteria, relevant).size();
+	@PostMapping("/workflow-results/relevant")
+	public int setWorkflowResultsRelevant(@RequestParam List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
+		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
+		return workflowResultService.setWorkflowResultsRelevant(workflowStepOutputs, relevant).size();
 	}
 	
 	/**
@@ -106,14 +111,15 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results/{id}", consumes = "application/json", produces = "application/json")
 	public boolean setWorkflowResultFinal(@PathVariable Long id, @RequestParam Boolean isFinal){
-		log.info("Setting workflow result to final: " + id);
+		log.info("Setting workflow result "  + id + " final to " + isFinal);
 		return workflowResultService.setWorkflowResultFinal(id, isFinal) != null;
 	}
 
 	/**
-	 * Set and export workflow result csv file as part of reponse
+	 * Set and export workflow result csv file as part of response
 	 * @param response HttpServletResponse
 	 * @param query WorkflowResultSearchQuery
+	 * @return the number of WorkflowResults updated
 	 */	
 	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
 	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
