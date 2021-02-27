@@ -19,8 +19,8 @@ public class WorkflowResultSearchQuery {
 		filterByWorkflows = new String[0];
 		filterBySteps = new String[0];
 		filterByStatuses = new GalaxyJobState[0];
-		filterBySearchTerm = new String[0];
-		filterByRelevant = true;
+		filterBySearchTerms = new String[0];
+		filterByRelevant = false;
 		filterByFinal = false;
 		sortRule = new WorkflowResultSortRule();
 		sortRule.setColumnName("id");
@@ -36,7 +36,7 @@ public class WorkflowResultSearchQuery {
 	private String[] filterByWorkflows;
 	private String[] filterBySteps;
 	private GalaxyJobState[] filterByStatuses;
-	private String[] filterBySearchTerm;	
+	private String[] filterBySearchTerms;	
 	private boolean filterByRelevant;
 	private boolean filterByFinal;
 	private WorkflowResultSortRule sortRule;

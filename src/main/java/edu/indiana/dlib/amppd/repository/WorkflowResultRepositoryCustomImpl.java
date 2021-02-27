@@ -117,11 +117,11 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 		List<Predicate> predicates = new ArrayList<Predicate>();
 		
         // Build the predicate for search terms
-		if(searchQuery.getFilterBySearchTerm().length>0) {        	
+		if(searchQuery.getFilterBySearchTerms().length>0) {        	
         	In<String> inClause = cb.in(root.get("itemName"));
         	In<String> inClause2 = cb.in(root.get("primaryfileName"));
         	
-        	for (String term : searchQuery.getFilterBySearchTerm()) {
+        	for (String term : searchQuery.getFilterBySearchTerms()) {
         	    inClause.value(term);
         		inClause2.value(term);
         	}            
@@ -228,8 +228,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         filters.setStatuses(statuses);
         filters.setSearchTerms(searchTerms);
         
-        return filters;
-        
+        return filters;        
 	}
 	private <T> List<T> union(List<T> list1, List<T> list2) {
         Set<T> set = new HashSet<T>();
