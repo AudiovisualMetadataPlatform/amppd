@@ -221,6 +221,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
 		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
+		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search  query.");
 		return response;
 	}
 	
@@ -228,7 +229,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getFinalWorkflowResults(Long)
 	 */
 	public List<WorkflowResult> getFinalWorkflowResults(Long primaryfileId) {
-		return refreshResultsStatus(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+		List<WorkflowResult> results = refreshResultsStatus(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+		log.info("Successfully retrieved " + results.size() + " final WorkflowResults for primaryfile " + primaryfileId);
+		return results;
 	}
 		
 	/**

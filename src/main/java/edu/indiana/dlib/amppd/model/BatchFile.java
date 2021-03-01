@@ -31,7 +31,7 @@ import lombok.Data;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Index(members={"externalSource","externalItemId"})
+@Index(members={"externalSource","externalId"})
 @Data
 public class BatchFile {	
 	@Id
@@ -56,7 +56,7 @@ public class BatchFile {
 	private String externalSource;
 	
 	@Type(type="text")
-	private String externalItemId;
+	private String externalId;
 	
 	@Index
 	@Type(type="text")

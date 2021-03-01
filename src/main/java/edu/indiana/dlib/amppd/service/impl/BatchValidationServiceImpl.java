@@ -122,7 +122,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         		batchFile.setCollectionName(line[0]);
         	// Get the source and item        	
         	batchFile.setExternalSource(line[1]);
-        	batchFile.setExternalItemId(line[2]);
+        	batchFile.setExternalId(line[2]);
         	batchFile.setItemName(line[3]);
         	batchFile.setItemDescription(line[4]);
         	        	
@@ -303,7 +303,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 //    		errors.add(String.format("Row: %s: Duplicate primaryfile filename %s", batchFile.getRowNum(), batchFile.getPrimaryfileFilename()));
 //		}
 		
-		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getExternalItemId(), batchFile.getItemName(), batchFile.getRowNum())) {
+		if(batch.isDuplicatePrimaryfileName(batchFile.getPrimaryfileName(), batchFile.getExternalId(), batchFile.getItemName(), batchFile.getRowNum())) {
     		errors.add(String.format("Row: %s: Duplicate primaryfile name %s", batchFile.getRowNum(), batchFile.getPrimaryfileName()));
 		}
 		
