@@ -147,7 +147,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	protected Boolean shouldExcludeDataset(Dataset dataset) {
 		return dataset == null || dataset.isDeleted() || dataset.isPurged()
-				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;		
+				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;	
+		// we need to include invisible datasets in WorkflowResult table
 //		return dataset == null || !dataset.getVisible() || dataset.isDeleted() || dataset.isPurged()
 //				|| dataset.getState().equals("deleted") || dataset.getState().equals("discarded") ;
 	}
@@ -201,11 +202,13 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
 	 */
 	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
-		// for now we exclude ERROR and PAUSED for now, as these jobs will need manual rerun for their status to be changed
-		// in most cases we likely will need to delete these outputs and resubmit whole workflow
+		// for now we exclude ERROR, PAUSED and UNKNOWN for now, 
+		// as these jobs will need manual rerun for their status to be changed;
+		// in most cases we likely will need to delete these outputs and resubmit whole workflow;
+		// besides, all status will be updated during the nightly refresh whole table job.
 		// TODO we might want to add ERROR and PAUSED to the status list for update in the future
 		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
-		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED, GalaxyJobState.UNKNOWN};
+		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED};
 		query.setFilterByStatuses(filterByStatuses);
 		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
 		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
@@ -660,7 +663,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 		log.info("Successfully updated visible to " + relevant + " for " + updateResults.size() + " datasets in Galaxy");		
 		
-		// save all updated updateResults in WorkflowResult table
+		// save all updated results in WorkflowResult table
 		workflowResultRepository.saveAll(updateResults);
 		log.info("Successfully updated relevant to "  + relevant + " for " + updateResults.size() + " workflowResults in AMP table");	
 		return updateResults;
@@ -673,13 +676,13 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
 		
 		// no need to update if the current isFinal value is the same as the one to be set
-		if (result.getIsFinal() == isFinal.booleanValue()) { 
+		if (result.getIsFinal() != null && result.getIsFinal().equals(isFinal)) { 
 			return result;
 		}
 		
 		result.setIsFinal(isFinal);
 		workflowResultRepository.save(result);	
-		log.info("Successfully set workflow result " + workflowResultId + " final to " + isFinal);	
+		log.info("Successfully set workflow result " + workflowResultId + " isFinal to " + isFinal);	
 		return result;
 	}
 		
