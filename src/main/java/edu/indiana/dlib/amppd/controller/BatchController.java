@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +42,7 @@ public class BatchController {
 	@Autowired
     private PreprocessService preprocessService;
 	
-	@PostMapping(path = "/batch/ingest", consumes = "multipart/form-data", produces = "application/json")
+	@PostMapping(path = "/batch/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {	
 		
 		// the user submitting the batch shall be the current user logged in and should be recorded in the user session
@@ -68,8 +69,8 @@ public class BatchController {
 	 * 	if not included will preprocess all files that are missing mediainfo
 	 * @return string reporting initial file count, success count, and failure count
 	 */
-	@GetMapping(path = "/batch/runpreprocessing")
-	public @ResponseBody String runPreprocessingOnFilesWithoutMediaInfo(@RequestParam(value = "primaryfileId", required = false) Long primaryfileId) {
+	@GetMapping(path = "/batch/preprocess")
+	public String runPreprocessingOnFilesWithoutMediaInfo(@RequestParam(value = "primaryfileId", required = false) Long primaryfileId) {
 		List<Primaryfile> primaryfileList = new ArrayList<Primaryfile>();
 
 		if (primaryfileId != null) { // if primaryfileId is provided get primary file record

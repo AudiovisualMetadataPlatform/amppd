@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
   
   import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,9 +54,8 @@ import lombok.extern.slf4j.Slf4j;
 		  return ResponseEntity.ok("Success");
 	  }
 
-	  @PostMapping(path = "/account/register", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse register(
-			@RequestBody AmpUser user){ 
+	  @PostMapping(path = "/account/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse register(@RequestBody AmpUser user) { 
 		log.info("Registeration for User=> Name:"+ user.getUsername());	
 		log.info("Registeration for User=> Email:"+ user.getEmail());	
 		AuthResponse res = ampService.registerAmpUser(user);
@@ -63,55 +63,48 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 
-	  @PostMapping(path = "/account/forgot-password", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse forgotPassword(
-			  @RequestBody AuthRequest request){ 
+	  @PostMapping(path = "/account/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse forgotPassword(@RequestBody AuthRequest request) { 
 		log.info("Forgot Password for User=> Email:"+ request.getEmailid());	
 		AuthResponse res = ampService.emailResetPasswordToken(request.getEmailid());
 		log.info(" Forgot Password result: " + res);
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/account/reset-password", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse resetPassword(
-			  @RequestBody AuthRequest request){ 
+	  @PostMapping(path = "/account/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse resetPassword(@RequestBody AuthRequest request) { 
 		log.info("Reset Password for User=> Email:"+ request.getEmailid());	
 		AuthResponse res = ampService.resetPassword(request.getEmailid(), request.getPassword(), request.getToken());
 		log.info(" Reset Password result: " + res);
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/account/approve", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse approveUser(
-			  @RequestBody AuthRequest request){ 
+	  @PostMapping(path = "/account/approve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse approveUser(@RequestBody AuthRequest request) { 
 		log.info("Approve User=> id:"+ request.getUserId());	
 		AuthResponse res = ampService.accountAction(request.getUserId(), "approve");
 		log.info(" approve user result: " + res);
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/account/reject", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse rejectUser(
-			  @RequestBody AuthRequest request){ 
+	  @PostMapping(path = "/account/reject", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse rejectUser(@RequestBody AuthRequest request) { 
 		log.info("Reject User=> id:"+ request.getUserId());	
 		AuthResponse res = ampService.accountAction(request.getUserId(), "reject");
 		log.info(" reject user result: " + res);
 		return res;
 	  }
 	  
-	  @PostMapping(path = "/account/activate", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse activateUser(
-			  @RequestBody AuthRequest request){
+	  @PostMapping(path = "/account/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse activateUser(@RequestBody AuthRequest request) {
 		log.info("Activate User");	
 		AuthResponse res = ampService.activateAccount(request.getToken());
 		log.info(" activate user result: " + res);
 		return res;
 	  }
-
 	  
-	  @PostMapping(path = "/account/reset-password-getEmail", consumes = "application/json", produces = "application/json")
-	  public @ResponseBody AuthResponse resetPasswordGetEmail(
-			  @RequestBody AuthRequest request){ 
+	  @PostMapping(path = "/account/reset-password-getEmail", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AuthResponse resetPasswordGetEmail(@RequestBody AuthRequest request) {
 		log.info("Calling get email for a token using resetPasswordGetEmail()");	
 		AuthResponse res = ampService.resetPasswordGetEmail(request.getToken());
 		log.info(" Fetched Email id for a token using resetPasswordGetEmail():"+res.getEmailid());

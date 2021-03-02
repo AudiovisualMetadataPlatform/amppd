@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,11 +50,11 @@ public class JobController {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitFiles")
+	@PostMapping(path = "/jobs/submitFiles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(			
 			@RequestParam String workflowId, 
 			@RequestParam Long[] primaryfileIds, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
@@ -67,11 +69,11 @@ public class JobController {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitBundle")
+	@PostMapping(path = "/jobs/submitBundle", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobBundle(
 			@RequestParam String workflowId, 
 			@RequestParam Long bundleId, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
 		// if parameters is not specified in the request, use an empty map for it
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
@@ -89,12 +91,15 @@ public class JobController {
 	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of CreateJobResponses containing detailed information for the job submitted
 	 */
-	@PostMapping("/jobs/submitResults")
+	@PostMapping(path = "/jobs/submitResults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
-			@RequestParam Long[][] resultIdss, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
+			@RequestBody Long[][] resultIdss, 
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
+		if (resultIdss == null ) {
+			resultIdss = new Long[0][0];
+		}
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
@@ -114,11 +119,11 @@ public class JobController {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitCsv")
+	@PostMapping(path = "/jobs/submitCsv", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();

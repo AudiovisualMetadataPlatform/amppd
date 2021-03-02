@@ -358,7 +358,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	
 	/**
 	 * Refresh WorkflowResults for the given invocation;
-	 * if the workflow for the invocation is provided, use the workflow name from that;
+	 * if the workflow for the invocation is provided, use the workflow ID and name from that;
 	 * if the primaryfile for the invocation is provided, use the associated entity names from that.
 	 */
 	protected List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
@@ -383,7 +383,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 		// get workflow name either from the passed-in workflow, or retrieve it by its ID from the passed-in invocation 
 		String workflowName = workflow != null ? workflow.getName() : workflowService.getWorkflowName(invocation.getWorkflowId());
-		String workflowId = workflow != null ? workflow.getId() : ""; // the stored workflow ID if available
+		String workflowId = workflow != null ? workflow.getId() : invocation.getWorkflowId(); // use the stored workflow ID if available
 				
 		// Iterate through each step, each of which has a list of jobs (unless it is the initial input)				
 		for(InvocationStepDetails step : invocation.getSteps()) {
@@ -481,7 +481,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setCollectionId(collection.getId());
 				result.setCollectionName(collection.getName());
 				
-				result.setWorkflowId(invocation.getWorkflowId());
+				result.setWorkflowId(workflowId);
 				result.setInvocationId(invocation.getId());
 				result.setStepId(step.getId());
 				result.setOutputId(output.getId());

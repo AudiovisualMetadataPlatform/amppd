@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +36,7 @@ public class WorkflowResultController {
 	 * @param query the search query for workflow results
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
-	@PostMapping(path = "/workflow-results", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "/workflow-results", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
 		log.info("Retrieving WorkflowResults for query ...");
 		return workflowResultService.getWorkflowResults(query);
@@ -97,8 +98,8 @@ public class WorkflowResultController {
 	 * @param relevant indicator on whether or not to set WorkflowResults as relevant
 	 * @return the number of WorkflowResults updated
 	 */
-	@PostMapping("/workflow-results/relevant")
-	public int setWorkflowResultsRelevant(@RequestParam List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
+	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public int setWorkflowResultsRelevant(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
 		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
 		return workflowResultService.setWorkflowResultsRelevant(workflowStepOutputs, relevant).size();
 	}
@@ -109,7 +110,7 @@ public class WorkflowResultController {
 	 * @param isFinal the specified final status
 	 * @return true if request is successful; false otherwise
 	 */
-	@PostMapping(path = "/workflow-results/{id}", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "/workflow-results/{id}")
 	public boolean setWorkflowResultFinal(@PathVariable Long id, @RequestParam Boolean isFinal){
 		log.info("Setting workflow result "  + id + " final to " + isFinal);
 		return workflowResultService.setWorkflowResultFinal(id, isFinal) != null;
@@ -121,7 +122,7 @@ public class WorkflowResultController {
 	 * @param query WorkflowResultSearchQuery
 	 * @return the number of WorkflowResults updated
 	 */	
-	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
+	@PostMapping(path = "/workflow-results/export", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
         response.setContentType("text/csv");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
