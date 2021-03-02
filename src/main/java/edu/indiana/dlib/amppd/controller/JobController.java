@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,10 +84,10 @@ public class JobController {
 	}
 
 	/**
-	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
+	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given list of arrays, to invoke the given workflow in
 	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
 	 * @param workflowId ID of the given workflow
-	 * @param resultIdss array of array of WorkflowResult IDs of the given outputs
+	 * @param resultIdss list of arrays of WorkflowResult IDs of the given outputs
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of CreateJobResponses containing detailed information for the job submitted
@@ -94,19 +95,25 @@ public class JobController {
 	@PostMapping(path = "/jobs/submitResults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
-			@RequestBody Long[][] resultIdss, 
+			@RequestParam List<Long[]> resultIdss, 
 			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (resultIdss == null ) {
-			resultIdss = new Long[0][0];
+			resultIdss = new ArrayList<Long[]>();
+		}
+		else if (resultIdss.size() == 2 && resultIdss.get(1).length == 0) {
+			// when resultIdss has only one array of size N, the request parser tends to convert the parameter into N lists
+			// of size 1; to avoid this, one can add an empty array to the end of the parameter to clarify the dimension;
+			// in this case, we need to remove the last empty array
+			resultIdss.remove(1);
 		}
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
-		}
-		log.info("Processing request to submit a workflow against a 2D array of workflow result outputs with parameters ... ");
+		}		
+		log.info("Processing request to submit a workflow against a list of arrays of workflow result outputs with parameters ... ");
 		return jobService.createJobs(workflowId, resultIdss, parameters, includePrimaryfile);
 	}
 
