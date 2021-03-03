@@ -101,11 +101,11 @@ public class JobController {
 		if (resultIdss == null ) {
 			resultIdss = new ArrayList<Long[]>();
 		}
-		else if (resultIdss.size() == 2 && resultIdss.get(1).length == 0) {
-			// when resultIdss has only one array of size N, the request parser tends to convert the parameter into N lists
-			// of size 1; to avoid this, one can add an empty array to the end of the parameter to clarify the dimension;
-			// in this case, we need to remove the last empty array
-			resultIdss.remove(1);
+		else if (!resultIdss.isEmpty() && resultIdss.get(resultIdss.size()-1).length == 0) {
+			// with resultIdss[m][n] (m=1, n>1), the request parser tends to convert the parameter into n lists of size 1; 
+			// to avoid this, one can add an empty array to the end of the parameter to clarify the dimension,
+			// in which case, we need to remove the last empty array to avoid error
+			resultIdss.remove(resultIdss.size()-1);
 		}
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();

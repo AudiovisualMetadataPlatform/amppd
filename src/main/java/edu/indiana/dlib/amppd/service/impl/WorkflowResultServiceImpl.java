@@ -509,7 +509,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 
 		workflowResultRepository.saveAll(results);
-		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + invocation.getWorkflowId() + "(" + workflowId + "), primaryfile " + primaryfile.getId());
+		log.debug("Successfully refreshed " + results.size() + " results for invocation " + invocation.getId() + ", workflow " + workflowId + "(" + invocation.getWorkflowId() + "), primaryfile " + primaryfile.getId());
 		return results;
 	}
 	
