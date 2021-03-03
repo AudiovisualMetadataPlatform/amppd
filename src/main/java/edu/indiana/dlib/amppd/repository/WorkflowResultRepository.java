@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -14,9 +15,19 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
 	List<WorkflowResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
 	List<WorkflowResult> findByOutputId(String outputId);
-	List<WorkflowResult> findByWorkflowStepAndOutputName(String workflowStep, String outputName);
-	List<WorkflowResult> findByWorkflowStepIn(List<String> workflowSteps);
-	List<WorkflowResult> findByOutputNameIn(List<String> outputNames);
+	
+	Set<WorkflowResult> findByWorkflowStepAndOutputName(String workflowStep, String outputName);
+	Set<WorkflowResult> findByWorkflowStepIn(List<String> workflowSteps);
+	Set<WorkflowResult> findByOutputNameIn(List<String> outputNames);
+
+	Set<WorkflowResult> findByRelevant(Boolean relevant);
+	Set<WorkflowResult> findByWorkflowIdAndRelevant(String workflowId, Boolean relevant);
+	Set<WorkflowResult> findByWorkflowStepAndRelevant(String workflowStep, Boolean relevant);
+	Set<WorkflowResult> findByOutputNameAndRelevant(String outputName, Boolean relevant);
+	Set<WorkflowResult> findByWorkflowIdAndWorkflowStepAndRelevant(String workflowId, String workflowStep, Boolean relevant);
+	Set<WorkflowResult> findByWorkflowIdAndOutputNameAndRelevant(String workflowId, String outputName, Boolean relevant);
+	Set<WorkflowResult> findByWorkflowStepAndOutputNameAndRelevant(String workflowStep, String outputName, Boolean relevant);
+	Set<WorkflowResult> findByWorkflowIdAndWorkflowStepAndOutputNameAndRelevant(String workflowId, String workflowStep, String outputName, Boolean relevant);
 
 	@Query(value = "select case when count(*)>0 then true else false end from WorkflowResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);

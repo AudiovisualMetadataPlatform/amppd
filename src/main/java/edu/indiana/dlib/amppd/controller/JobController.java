@@ -1,14 +1,17 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,11 +51,11 @@ public class JobController {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitFiles")
+	@PostMapping(path = "/jobs/submitFiles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(			
 			@RequestParam String workflowId, 
 			@RequestParam Long[] primaryfileIds, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
@@ -67,11 +70,11 @@ public class JobController {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitBundle")
+	@PostMapping(path = "/jobs/submitBundle", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobBundle(
 			@RequestParam String workflowId, 
 			@RequestParam Long bundleId, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
 		// if parameters is not specified in the request, use an empty map for it
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
@@ -81,27 +84,36 @@ public class JobController {
 	}
 
 	/**
-	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
+	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given list of arrays, to invoke the given workflow in
 	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
 	 * @param workflowId ID of the given workflow
-	 * @param resultIdss array of array of WorkflowResult IDs of the given outputs
+	 * @param resultIdss list of arrays of WorkflowResult IDs of the given outputs
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of CreateJobResponses containing detailed information for the job submitted
 	 */
-	@PostMapping("/jobs/submitResults")
+	@PostMapping(path = "/jobs/submitResults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
-			@RequestParam Long[][] resultIdss, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam List<Long[]> resultIdss, 
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
+		if (resultIdss == null ) {
+			resultIdss = new ArrayList<Long[]>();
+		}
+		else if (!resultIdss.isEmpty() && resultIdss.get(resultIdss.size()-1).length == 0) {
+			// with resultIdss[m][n] (m=1, n>1), the request parser tends to convert the parameter into n lists of size 1; 
+			// to avoid this, one can add an empty array to the end of the parameter to clarify the dimension,
+			// in which case, we need to remove the last empty array to avoid error
+			resultIdss.remove(resultIdss.size()-1);
+		}
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
-		}
-		log.info("Processing request to submit a workflow against a 2D array of workflow result outputs with parameters ... ");
+		}		
+		log.info("Processing request to submit a workflow against a list of arrays of workflow result outputs with parameters ... ");
 		return jobService.createJobs(workflowId, resultIdss, parameters, includePrimaryfile);
 	}
 
@@ -114,11 +126,11 @@ public class JobController {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitCsv")
+	@PostMapping(path = "/jobs/submitCsv", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();

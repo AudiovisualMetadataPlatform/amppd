@@ -188,7 +188,7 @@ public class JobServiceImpl implements JobService {
  
 		for (Long resultId : resultIds) {
 			// retrieve WorkflowResult by ID and make sure the outputId is populated
-			WorkflowResult result = workflowResultRepository.findById(resultId).orElseThrow(() -> new StorageException("WorkflowResult <" + resultId + "> does not exist!"));;
+			WorkflowResult result = workflowResultRepository.findById(resultId).orElseThrow(() -> new StorageException("WorkflowResult <" + resultId + "> does not exist!"));
 			String outputId = result.getOutputId();
 			if (StringUtils.isEmpty(outputId)) {
 				throw new StorageException("WorkflowResult " + resultId + " has empty outputId!");
@@ -629,9 +629,9 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[][], Map<String, Map<String, String>>, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, List<Long[]>, Map<String, Map<String, String>>, Boolean)
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, Long[][] resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", resultIdss: " + resultIdss + ", parameters: " + parameters + ", includePrimaryfile: " + includePrimaryfile);
 
 		// initialize responses
@@ -646,17 +646,17 @@ public class JobServiceImpl implements JobService {
 		}
 				
 		// create job for each row in the csv
-		for (int i=0; i < resultIdss.length; i++) {
+		for (int i=0; i < resultIdss.size(); i++) {
 			// no need to catch exception as createJob catches all and always returns a response 
-			CreateJobResponse response = createJob(workflowDetails, null, resultIdss[i], parameters, includePrimaryfile);			
+			CreateJobResponse response = createJob(workflowDetails, null, resultIdss.get(i), parameters, includePrimaryfile);			
 			responses.add(response);						
 			if (response.getSuccess()) {
 				nSuccess++;
 			}			
 		}
 		
-		log.info("Number of AMP jobs successfully created for the inputCsv: " + nSuccess);    	
-		log.info("Number of AMP jobs failed to be created for the inputCsv: " + (resultIdss.length - nSuccess));    		  	
+		log.info("Number of AMP jobs successfully created for the list of arrays of workflow results: " + nSuccess);    	
+		log.info("Number of AMP jobs failed to be created for the list of arrays of workflow results: " + (resultIdss.size() - nSuccess));    		  	
 		return responses;
 	}
 	
@@ -666,18 +666,18 @@ public class JobServiceImpl implements JobService {
 	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
 		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", inputCsv: " + inputCsv.getOriginalFilename() + ", parameters: " + parameters + ", includePrimaryfile: " + includePrimaryfile);
 
-		// parse the input CSV into 2D array of WorkflowResults
-		Long[][] resultIdss = parseInputCsv(inputCsv);
+		// parse the input CSV into list of arrays of WorkflowResults
+		List<Long[]> resultIdss = parseInputCsv(inputCsv);
 		// TODO find a good way to return error instead of exception from parseInputCsv
 
-		// create jobs for WorkflowResults 2D array
+		// create jobs for WorkflowResults list of arrays
 		return createJobs(workflowId, resultIdss, parameters, includePrimaryfile); 
 	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.parseInputCsv(MultipartFile)
 	 */
-	public Long[][] parseInputCsv(MultipartFile inputCsv) {		
+	public List<Long[]> parseInputCsv(MultipartFile inputCsv) {		
 		log.info("Parsing input CSV file " + inputCsv.getOriginalFilename() + " for workflow submission ...");
 		
 		List<String[]> rows = null;
@@ -687,7 +687,7 @@ public class JobServiceImpl implements JobService {
 
 		// overall process
 		try {
-			// parse the CSV File into a list of string arrays
+			// parse the CSV file into a list of string arrays
 			CSVReader reader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(inputCsv.getInputStream()))).build();
 			rows = reader.readAll();
 			
@@ -710,13 +710,14 @@ public class JobServiceImpl implements JobService {
 			throw new ParserException(errmsg + e.getMessage(), e);
 		}	
 
-		Long[][] resultIdss = new Long[nrow-1][ncol-1];	
+		List<Long[]> resultIdss = new ArrayList<Long[]>();	
 		StringBuilder errors = new StringBuilder();
 		
 		// process each row after the header, append error message if any
 		for (int i=1; i < rows.size(); i++) {
 			String[] columns = rows.get(i);
 			Long primaryfileId = null;
+			Long[] resultIds = new Long[ncol-1];
 			
 			try {
 				// each row should have the same number of columns as the header
@@ -729,8 +730,10 @@ public class JobServiceImpl implements JobService {
 
 				// the rest of the columns should be resultIds in the order of workflow inputs
 				for (int j=1; j < columns.length; j++) {
-					resultIdss[i-1][j-1] = Long.parseLong(columns[j].trim());  
+					resultIds[j-1] = Long.parseLong(columns[j].trim());  
 				}
+				
+				resultIdss.add(resultIds);
 			}
 			catch(Exception e) {
 				String err = "Error on row " + i + " for primaryfile " + primaryfileId + ": ";

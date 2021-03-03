@@ -50,11 +50,11 @@ public interface JobService {
 	public String sanitizeText(String text);	
 	
 	/**
-	 * Parse the given input CSF file into a 2D array of WorkflowResult IDs.
+	 * Parse the given input CSF file into a list of arrays of WorkflowResult IDs.
 	 * @param inputCsv the given input CSF file
-	 * @return resultIdss the generated 2D array of WorkflowResult IDs
+	 * @return resultIdss the generated list of arrays of WorkflowResult IDs
 	 */
-	public Long[][] parseInputCsv(MultipartFile inputCsv);		
+	public List<Long[]> parseInputCsv(MultipartFile inputCsv);		
 	
 	/**
 	 * Create an AMP job to invoke the given workflow in Galaxy on the given primaryfile, along with the given parameters.
@@ -95,15 +95,15 @@ public interface JobService {
 	public List<CreateJobResponse> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
 	
 	/**
-	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given array, to invoke the given workflow in
+	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given list of arrays, to invoke the given workflow in
 	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
 	 * @param workflowId ID of the given workflow
-	 * @param resultIdss 2D array of WorkflowResult IDs of the given outputs
+	 * @param resultIdss list of arrays of WorkflowResult IDs of the given outputs
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, Long[][] resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
 
 	/**
 	 * Create AMP jobs, one for each row of primaryfile and outputs specified in the given inputCsv, to invoke the given workflow in

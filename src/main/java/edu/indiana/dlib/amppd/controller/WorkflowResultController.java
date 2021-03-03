@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,24 +36,12 @@ public class WorkflowResultController {
 	 * @param query the search query for workflow results
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
-	@PostMapping(path = "/workflow-results", consumes = "application/json", produces = "application/json")
+	@PostMapping(path = "/workflow-results", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
 		log.info("Retrieving WorkflowResults for query ...");
 		return workflowResultService.getWorkflowResults(query);
 	}
 	
-	/**
-	 * Sets the specified WorkflowResult according to the specified final status
-	 * @param WorkflowResultId id of the specified WorkflowResult
-	 * @param isFinal the specified final status
-	 * @return true if request is successful; false otherwise
-	 */
-	@PostMapping(path = "/workflow-results/isfinal/{id}", consumes = "application/json", produces = "application/json")
-	public boolean setIsFinal(@PathVariable("id") Long id, @RequestParam("isFinal") boolean isFinal){
-		log.info("Setting workflow result to final: " + id);
-		return workflowResultService.setResultIsFinal(id, isFinal);
-	}
-
 	/* TODO
 	 * More request params can be added to allow various scope of partial refresh. 
 	 * For ex, the scope of records to be refreshed can be defined by the following criteria:
@@ -71,38 +62,68 @@ public class WorkflowResultController {
 	 * - non ID fields (for ex, names) have value changes across many rows;
 	 * - the table is compromised (for ex, due to system exceptions, accidental manual operations).
 	 * @param lumpsum whether to refresh the table in the lumpsum mode
-	 * @return the list of WorkflowResult refreshed
+	 * @return the number of WorkflowResult refreshed
 	 */	
 	@PostMapping("/workflow-results/refresh")
-	public void refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
+	public int refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
-			workflowResultService.refreshWorkflowResultsLumpsum();
+			return workflowResultService.refreshWorkflowResultsLumpsum().size();
 		}
 		else {
 			log.info("Refreshing Workflow Results iteratively per primaryfile ... ");
-			workflowResultService.refreshWorkflowResultsIterative();
+			return workflowResultService.refreshWorkflowResultsIterative().size();
 		}
 	}
 
 	/**
+	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
 	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table. This process only needs to be done once manually (preferably 
 	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
+	 * @return the number of WorkflowResults updated
 	 */
+	@Deprecated
 	@PostMapping("/workflow-results/hide")
-	public void hideIrrelevantWorkflowResults() {
+	public int hideIrrelevantWorkflowResults() {
 		log.info("Hiding irrelevant workflow results ...");
-		workflowResultService.hideIrrelevantWorkflowResults();
+		return workflowResultService.hideIrrelevantWorkflowResults().size();
 	}
 
 	/**
-	 * Set and export workflow result csv file as part of reponse
+	 * Set the WorkflowResults matching the given list of workflow-step-output maps as relevant/irrelevant, 
+	 * and update their corresponding output datasets in Galaxy as visible/invisible accordingly.
+	 * Note that if a wild card is used in a field of a search criteria map, then that criteria matches all values of that field.
+	 * @param workflowStepOutputs the list of workflowId-workflowStep-outputName maps identifying the results to be set
+	 * @param relevant indicator on whether or not to set WorkflowResults as relevant
+	 * @return the number of WorkflowResults updated
+	 */
+	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public int setWorkflowResultsRelevant(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
+		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
+		return workflowResultService.setWorkflowResultsRelevant(workflowStepOutputs, relevant).size();
+	}
+	
+	/**
+	 * Sets the specified WorkflowResult according to the specified final status
+	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * @param isFinal the specified final status
+	 * @return true if request is successful; false otherwise
+	 */
+	@PostMapping(path = "/workflow-results/{id}")
+	public boolean setWorkflowResultFinal(@PathVariable Long id, @RequestParam Boolean isFinal){
+		log.info("Setting workflow result "  + id + " final to " + isFinal);
+		return workflowResultService.setWorkflowResultFinal(id, isFinal) != null;
+	}
+
+	/**
+	 * Set and export workflow result csv file as part of response
 	 * @param response HttpServletResponse
 	 * @param query WorkflowResultSearchQuery
+	 * @return the number of WorkflowResults updated
 	 */	
-	@PostMapping(path = "/workflow-results/export", consumes = "application/json")
-	public void exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
+	@PostMapping(path = "/workflow-results/export", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
         response.setContentType("text/csv");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateTime = dateFormatter.format(new Date());
@@ -112,7 +133,7 @@ public class WorkflowResultController {
         response.setHeader(headerKey, headerValue);
 
 		log.info("Exporting CSV " + headerValue);		
-		workflowResultService.exportWorkflowResults(response, query);
+		return workflowResultService.exportWorkflowResults(response, query).size();
     }
 	
 }
