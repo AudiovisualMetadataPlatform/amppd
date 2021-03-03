@@ -122,8 +122,21 @@ public class WorkflowResult {
 	private Date dateRefreshed;	// timestamp of this record last being refreshed from Galaxy query result
 
 	@Index
+	private Boolean relevant;	// indicate if the output dataset is visible thus will display on dashboard by default
+
+	@Index
 	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
 		
+	 @Override
+	 public int hashCode() { 
+		 return id.intValue();
+	 }
+
+	@Override
+	public boolean equals(Object result) {
+		return result != null && result instanceof WorkflowResult && id.equals(((WorkflowResult)result).getId());
+	}
+
 	@Override
 	public String toString() {
 		String str = "WorkflowResult";

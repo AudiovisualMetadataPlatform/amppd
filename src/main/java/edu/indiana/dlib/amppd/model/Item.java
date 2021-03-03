@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,12 @@ public class Item extends Content {
 	@Index
 	@ManyToOne
 	private Collection collection;	
-		
+
+    @Type(type="text")
+    private String externalSource;
+
+    @Type(type="text")
+    private String externalId;	
 //    @ManyToMany
 //    @JsonBackReference
 //    private Set<Bundle> bundles;      

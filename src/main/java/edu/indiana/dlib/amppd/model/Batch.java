@@ -79,8 +79,8 @@ public class Batch {
 			// Primaryfile names need to be unique within an item
 			// Uniqueness of items is determined by source ID if provided, OR item name when source ID is not provided.
 			boolean primaryfileNameMatches = row.getPrimaryfileName().equals(name);
-			boolean itemSourceIdMatches = !itemExternalSourceId.isEmpty() && !row.getExternalItemId().isEmpty() && row.getExternalItemId().equals(itemExternalSourceId);
-			boolean itemNameMatches = (itemExternalSourceId.isEmpty() || row.getExternalItemId().isEmpty()) && row.getItemName().equals(itemName);
+			boolean itemSourceIdMatches = !itemExternalSourceId.isEmpty() && !row.getExternalId().isEmpty() && row.getExternalId().equals(itemExternalSourceId);
+			boolean itemNameMatches = (itemExternalSourceId.isEmpty() || row.getExternalId().isEmpty()) && row.getItemName().equals(itemName);
 			
 			if(primaryfileNameMatches && (itemSourceIdMatches || itemNameMatches)) {
 				return true;

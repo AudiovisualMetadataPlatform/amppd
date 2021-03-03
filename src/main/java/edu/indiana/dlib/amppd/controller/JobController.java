@@ -1,31 +1,34 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationBriefs;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.service.JobService;
-import edu.indiana.dlib.amppd.web.WorkflowOutputResult;
+import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Controller for REST operations on Amppd jobs.
+ * Controller for REST operations on AMP jobs.
  * @author yingfeng
  *
  */
@@ -40,65 +43,105 @@ public class JobController {
 	@Autowired
 	private JobService jobService;
 	
-	/**
-	 * Creating an Amppd job to invoke the given workflow in Galaxy against the given primaryfile with the given step parameters.
-	 * @param workflowId the ID of the workflow 
-	 * @param primaryfileId the ID of the primaryfile
-	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
-	 */
-	@PostMapping("/jobs/submitFile")
-	public WorkflowOutputResult createJob(
-			@RequestParam("workflowId") String workflowId, 
-			@RequestParam("primaryfileId") Long primaryfileId, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
-		if (parameters == null ) {
-			parameters = new HashMap<String, Map<String, String>>();
-		}
-		log.info("Creating Amppd job for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId + " parameters: " + parameters);
-		return jobService.createJob(workflowId, primaryfileId, parameters);
-	}
 
 	/**
-	 * Create new Amppd jobs by submitting to Galaxy the given workflow on the given primaryfiles, along with the given parameters.
+	 * Create AMP jobs by submitting to Galaxy the given workflow against the given primaryfiles, along with the given parameters.
 	 * @param workflowId ID of the given workflow
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
+	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping("/jobs/submitFiles")
-	public List<WorkflowOutputResult> createJobs(			
-			@RequestParam("workflowId") String workflowId, 
-			@RequestParam("primaryfileIds") Long[] primaryfileIds, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+	@PostMapping(path = "/jobs/submitFiles", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<CreateJobResponse> createJobs(			
+			@RequestParam String workflowId, 
+			@RequestParam Long[] primaryfileIds, 
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
-		log.info("Creating Amppd jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + " parameters: " + parameters);
+		log.info("Processing request to submit a workflow against primaryfiles with parameters ... ");
 		return jobService.createJobs(workflowId, primaryfileIds, parameters);
 	}
 	
 	/**
-	 * Creating a bundle of multiple Amppd jobs, one for each primaryfile included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
+	 * Create a bundle of AMP jobs, one for each primaryfile included in the given bundle, by submitting to Galaxy the given workflow with the given step parameters.
 	 * @param workflowId the ID of the specified workflow 
 	 * @param bundleId the ID of the specified bundle
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @return list of WorkflowOutputResult containing detailed information for the workflow submission on the primaryfile
+	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@CrossOrigin(origins = "*")
-	@PostMapping("/jobs/submitBundle")
-	public List<WorkflowOutputResult> createJobBundle(
-			@RequestParam("workflowId") String workflowId, 
-			@RequestParam("bundleId") Long bundleId, 
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters) {	
+	@PostMapping(path = "/jobs/submitBundle", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<CreateJobResponse> createJobBundle(
+			@RequestParam String workflowId, 
+			@RequestParam Long bundleId, 
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
 		// if parameters is not specified in the request, use an empty map for it
 		if (parameters == null ) {
 			parameters = new HashMap<String, Map<String, String>>();
 		}
-		log.info("Creating a bundle of Amppd jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + " parameters: " + parameters);		
+		log.info("Processing request to submit a workflow against a bundle of primaryfiles with parameters ... ");
 		return jobService.createJobBundle(workflowId, bundleId, parameters);
 	}
 
+	/**
+	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given list of arrays, to invoke the given workflow in
+	 * Galaxy along with the given parameters, including their associated primaryfile as the first input if the given indicator is true. 
+	 * @param workflowId ID of the given workflow
+	 * @param resultIdss list of arrays of WorkflowResult IDs of the given outputs
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
+	 * @return list of CreateJobResponses containing detailed information for the job submitted
+	 */
+	@PostMapping(path = "/jobs/submitResults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<CreateJobResponse> createJobs(
+			@RequestParam String workflowId, 
+			@RequestParam List<Long[]> resultIdss, 
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(required = false) Boolean includePrimaryfile) {
+		if (resultIdss == null ) {
+			resultIdss = new ArrayList<Long[]>();
+		}
+		else if (!resultIdss.isEmpty() && resultIdss.get(resultIdss.size()-1).length == 0) {
+			// with resultIdss[m][n] (m=1, n>1), the request parser tends to convert the parameter into n lists of size 1; 
+			// to avoid this, one can add an empty array to the end of the parameter to clarify the dimension,
+			// in which case, we need to remove the last empty array to avoid error
+			resultIdss.remove(resultIdss.size()-1);
+		}
+		if (parameters == null ) {
+			parameters = new HashMap<String, Map<String, String>>();
+		}
+		if (includePrimaryfile == null ) {
+			includePrimaryfile = false;
+		}		
+		log.info("Processing request to submit a workflow against a list of arrays of workflow result outputs with parameters ... ");
+		return jobService.createJobs(workflowId, resultIdss, parameters, includePrimaryfile);
+	}
+
+	/**
+	 * Create AMP jobs, one for each row of primaryfile and outputs specified in the given csvFile, 
+	 * by submitting to Galaxy the given workflow along with the given parameters.
+	 * @param workflowId ID of the given workflow
+	 * @param inputCsv CSV file each row specifying the primaryfile and previous outputs to use as workflow inputs
+	 * @param includePrimaryfile if true include the primaryfile as the first input for each job; otherwise (default false) ignore the primaryfile
+	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
+	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
+	 */
+	@PostMapping(path = "/jobs/submitCsv", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<CreateJobResponse> createJobs(
+			@RequestParam String workflowId, 
+			@RequestParam MultipartFile inputCsv,
+			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(required = false) Boolean includePrimaryfile) {
+		if (parameters == null ) {
+			parameters = new HashMap<String, Map<String, String>>();
+		}
+		if (includePrimaryfile == null ) {
+			includePrimaryfile = false;
+		}
+		log.info("Processing request to submit a workflow against an inputCsv file containing primaryfile IDs and workflow result IDs with parameters ... ");
+		return jobService.createJobs(workflowId, inputCsv, parameters, includePrimaryfile);
+	}
+	
 	/**
 	 * List all AMP jobs with step details, i.e. all workflow invocations submitted via AMPPD UI to Galaxy.
 	 * @return a list of Invocations each containing basic information of an AMP job.
@@ -120,8 +163,8 @@ public class JobController {
 	 */
 	@GetMapping("/jobs")
 	public List<Invocation> listJobs(
-			@RequestParam("workflowId") String workflowId, 
-			@RequestParam("primaryfileId") Long primaryfileId) {
+			@RequestParam String workflowId, 
+			@RequestParam Long primaryfileId) {
 		log.info("Listing all AMP jobs for: workflowId: " + workflowId + ", primaryfileId: " + primaryfileId);		
 		return jobService.listJobs(workflowId, primaryfileId);
 	}
@@ -134,8 +177,8 @@ public class JobController {
 	 */
 	@GetMapping("/jobs/{invocationId}")
 	public InvocationBriefs showJob(
-			@RequestParam("workflowId") String workflowId, 
-			@PathVariable("invocationId") String invocationId) {
+			@RequestParam String workflowId, 
+			@PathVariable String invocationId) {
 		log.info("Showing information of the AMP job for: workflowId: " + workflowId + ", invocationId: " + invocationId);		
 		return (InvocationBriefs)jobService.getWorkflowsClient().showInvocation(workflowId, invocationId, false);
 	}
@@ -149,9 +192,9 @@ public class JobController {
 	 */
 	@GetMapping("/jobs/{invocationId}/steps/{stepId}")
 	public InvocationStepDetails showJobStep(
-			@RequestParam("workflowId") String workflowId, 
-			@PathVariable("invocationId") String invocationId,
-			@PathVariable("stepId") String stepId) {
+			@RequestParam String workflowId, 
+			@PathVariable String invocationId,
+			@PathVariable String stepId) {
 		log.info("Showing information of the AMP job step for: workflowId: " + workflowId + ", invocationId: " + invocationId + ", stepId: " + stepId);		
 		return jobService.getWorkflowsClient().showInvocationStep(workflowId, invocationId, stepId);
 	}
@@ -166,10 +209,10 @@ public class JobController {
 	 */
 	@GetMapping("/jobs/{invocationId}/steps/{stepId}/outputs/{datasetId}")
 	public Dataset showJobStepOutput(
-			@RequestParam("workflowId") String workflowId, 
-			@PathVariable("invocationId") String invocationId,
-			@PathVariable("stepId") String stepId,
-			@PathVariable("datasetId") String datasetId) {
+			@RequestParam String workflowId, 
+			@PathVariable String invocationId,
+			@PathVariable String stepId,
+			@PathVariable String datasetId) {
 		log.info("Showing information of the AMP job step output for: workflowId: " + workflowId + ", invocationId: " + invocationId + ", stepId: " + stepId + ", datasetId: " + datasetId);		
 		return (Dataset)jobService.showJobStepOutput(workflowId, invocationId, stepId, datasetId);
 	}

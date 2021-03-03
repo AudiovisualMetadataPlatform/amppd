@@ -106,7 +106,7 @@ public class BatchServiceImpl implements BatchService {
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
 		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
-		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalItemId(), batchFile.getExternalSource());
+		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalId(), batchFile.getExternalSource());
 		
 		collection.addItem(item);
 		log.info("BATCH PROCESSING : The item found was added to the collection");
@@ -428,15 +428,15 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Gets an Item object.  If one already exists, 
 	 */
-	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalItemId, String externalSource) {
+	private Item getItem(Collection collection, String itemName, String itemDescription, String createdBy, String externalId, String externalSource) {
 		Item item = null;
 		Set<Item> items = collection.getItems();
 		boolean found = false;
 		if(items!=null) {
 			log.info("BATCH PROCESSING : check for matching item in this collection"); 
 			for(Item i : items) {
-				if(!externalItemId.isBlank()) {
-					boolean matchesExternalId = i.getExternalId() != null && i.getExternalId().equals(externalItemId);
+				if(!externalId.isBlank()) {
+					boolean matchesExternalId = i.getExternalId() != null && i.getExternalId().equals(externalId);
 					boolean matchesExternalSource = externalSource.isBlank() || (i.getExternalSource()!=null && externalSource.equals(i.getExternalSource()));
 							
 					if(matchesExternalId && matchesExternalSource) {
@@ -463,8 +463,8 @@ public class BatchServiceImpl implements BatchService {
 		if(item==null && !found) {
 			item = new Item();
 			item.setName(itemName);
-			if(!externalItemId.isBlank()) {
-				item.setExternalId(externalItemId);
+			if(!externalId.isBlank()) {
+				item.setExternalId(externalId);
 			}
 			if(!externalSource.isBlank()) {
 				item.setExternalSource(externalSource);

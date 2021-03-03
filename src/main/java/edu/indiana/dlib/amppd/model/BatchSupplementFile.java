@@ -7,7 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -32,7 +31,7 @@ public class BatchSupplementFile {
 	private Long id;
 
 	@Index
-	private int supplementNum;
+	private Integer supplementNum;
 
 	private String supplementFilename;	
 	
