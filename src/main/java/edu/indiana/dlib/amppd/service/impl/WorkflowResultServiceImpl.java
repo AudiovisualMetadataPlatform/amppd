@@ -646,8 +646,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			
 			// add current results set to the updateResults set
 			// note that we use Set instead of List, as it's possible that the query with multiple criteria might return
-			// redundant results; Set ensures that only distinct results are kept, to avoid redundant calls to Galaxy
+			// redundant results; Set ensures that only distinct results are kept, to avoid redundant calls to Galaxy			
 			updateResults.addAll(results);
+			log.info("Found " + results.size() + " workflow results for critieria: workflowId = " + workflowId + ", workflowStep = " + workflowStep + ", outputName = " + outputName);
 		}		
 
 		// update relevant field of the matching results and visibility of the associated datasets in Galaxy
