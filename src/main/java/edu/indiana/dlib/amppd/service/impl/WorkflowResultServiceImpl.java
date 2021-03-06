@@ -77,6 +77,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("aws_transcribe_transcript", "aws_transcript");
 		put("corrected_draftjs_transcript", "draftjs_corrected");
 		put("original_draftjs_transcript", "draftjs_uncorrected");
+		put("output_transcript", "amp_transcript_corrected");
+		put("output_ner", "amp_entities_corrected");
 	}};
 
 	/* Note: 
