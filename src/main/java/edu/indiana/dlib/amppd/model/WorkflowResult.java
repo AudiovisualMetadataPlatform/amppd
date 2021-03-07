@@ -88,8 +88,6 @@ public class WorkflowResult {
 	@Index	
 	private String workflowStep; // in most cases it's the tool_id of the job in each invocation step
 	
-	private String toolInfo;
-	
 	//@NotNull
 	@Index
 	private String outputName;	// name of the output
@@ -103,6 +101,8 @@ public class WorkflowResult {
 	
 	// we don't use Galaxy downloard URL, so outputUrl can be removed
 
+	private String toolInfo;
+	
 	//@NotNull
 	@Index
 	private String submitter;
@@ -111,6 +111,12 @@ public class WorkflowResult {
 	@Index
 	private GalaxyJobState status;
 
+	@Index
+	private Boolean relevant;	// indicate if the output dataset is visible thus will display on dashboard by default
+
+	@Index
+	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
+		
 	//@NotNull
 	@Index
 	private Date dateCreated;	// job created timestamp from Galaxy job details query
@@ -121,12 +127,6 @@ public class WorkflowResult {
 	@Index
 	private Date dateRefreshed;	// timestamp of this record last being refreshed from Galaxy query result
 
-	@Index
-	private Boolean relevant;	// indicate if the output dataset is visible thus will display on dashboard by default
-
-	@Index
-	private Boolean isFinal;	// indicate if the output isFinal thus will be included in the bag to be exported
-		
 	 @Override
 	 public int hashCode() { 
 		 return id.intValue();
@@ -153,9 +153,10 @@ public class WorkflowResult {
 		str += ", outputName: " + outputName;
 		str += ", submitter: " + submitter;
 		str += ", status: " + status;
+		str += ", relevant: " + relevant;
+		str += ", isFinal: " + isFinal;
 		str += ", dateCreated: " + dateCreated;
 		str += ", dateRefreshed: " + dateRefreshed;
-		str += ", isFinal: " + isFinal;
 		str += ">";
 		return str;
 	}
