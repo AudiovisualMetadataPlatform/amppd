@@ -14,10 +14,12 @@ public class WorkflowResultSearchQuery {
 		filterByDates = new ArrayList<Date>();
 		filterBySubmitters = new String[0];
 		filterByCollections = new String[0];
+		filterByExternalIds = new String[0];
 		filterByItems = new String[0];
 		filterByFiles = new String[0];
 		filterByWorkflows = new String[0];
 		filterBySteps = new String[0];
+		filterByOutputs = new String[0];
 		filterByStatuses = new GalaxyJobState[0];
 		filterBySearchTerms = new String[0];
 		filterByRelevant = false;
@@ -31,10 +33,12 @@ public class WorkflowResultSearchQuery {
 	private List <Date> filterByDates;
 	private String[] filterBySubmitters;
 	private String[] filterByCollections;
+	private String[] filterByExternalIds;
 	private String[] filterByItems;
 	private String[] filterByFiles;
 	private String[] filterByWorkflows;
 	private String[] filterBySteps;
+	private String[] filterByOutputs;
 	private GalaxyJobState[] filterByStatuses;
 	private String[] filterBySearchTerms;	
 	private boolean filterByRelevant;

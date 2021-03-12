@@ -151,6 +151,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             predicates.add(predicate);
         }
         
+        if(searchQuery.getFilterByExternalIds().length>0) {
+        	Path<String> path = root.get("externalId");
+        	Predicate predicate = path.in((Object[])searchQuery.getFilterByExternalIds());
+        	predicates.add(predicate);
+        }
+        
         if(searchQuery.getFilterByItems().length>0) {
         	Path<String> path = root.get("itemName");
             Predicate predicate = path.in((Object[])searchQuery.getFilterByItems());
@@ -172,6 +178,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         if(searchQuery.getFilterBySteps().length>0) {
         	Path<String> path = root.get("workflowStep");
             Predicate predicate = path.in((Object[])searchQuery.getFilterBySteps());
+            predicates.add(predicate);
+        }
+        
+        if(searchQuery.getFilterByOutputs().length>0) {
+        	Path<String> path = root.get("outputName");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByOutputs());
             predicates.add(predicate);
         }
         
@@ -211,20 +223,24 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> collections = em.createQuery(query.select(root.get("collectionName")).distinct(true)).getResultList();
+        List<String> externalIds = em.createQuery(query.select(root.get("externalId")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
         List<String> files = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
         List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
+        List<String> outputs = em.createQuery(query.select(root.get("outputName")).distinct(true)).getResultList();
         List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();
         List<String> searchTerms = union(files, items);
         
         filters.setDateFilter(dateFilters);
         filters.setSubmitters(submitters);
         filters.setCollections(collections);
+        filters.setExternalIds(externalIds);
         filters.setItems(items);
         filters.setFiles(files);
         filters.setWorkflows(workflows);
         filters.setSteps(steps);
+        filters.setOutputs(outputs);
         filters.setStatuses(statuses);
         filters.setSearchTerms(searchTerms);
         
