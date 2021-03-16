@@ -29,6 +29,7 @@ import edu.indiana.dlib.amppd.model.BatchSupplementFile;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.BatchFileRepository;
@@ -143,7 +144,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	
         	// If a supplement type is supplied, get the enum value for the textual value
         	if(line.length>8) {
-        		supplementType = getSupplementType(line[8]);
+        		supplementType = Supplement.getSupplementType(line[8]);
         	}
         	
         	batchFile.setSupplementType(supplementType);
@@ -508,25 +509,6 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	private boolean collectionExists(String collectionName) {
 		List<Collection> collections = collectionRepository.findByName(collectionName);
 		return collections!=null && collections.size()>0;
-	}
-	/*
-	 * Convert supplemental file type string to an enum
-	 */
-	private SupplementType getSupplementType(String supplementType) {
-		switch(supplementType.trim().toLowerCase()) {
-			case "p":
-			case "primary":
-			case "primaryfile":
-				return SupplementType.PRIMARYFILE;
-			case "i":
-			case "item":
-				return SupplementType.ITEM;
-			case "c":
-			case "collection":
-				return SupplementType.COLLECTION;
-			default:
-				return null;
-		}
 	}
 	
 }

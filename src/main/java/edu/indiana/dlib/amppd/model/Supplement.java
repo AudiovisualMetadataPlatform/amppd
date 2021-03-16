@@ -7,6 +7,7 @@ import javax.persistence.InheritanceType;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -30,5 +31,25 @@ public abstract class Supplement extends Asset {
 	// TODO double check the relationship
 //	@ManyToMany
 //	private Set<InputBag> bags;
+	
+	/*
+	 * Convert the given supplemental file type string to the corresponding SupplementType enum.
+	 */
+	public static SupplementType getSupplementType(String type) {
+		switch(type.trim().toLowerCase()) {
+			case "p":
+			case "primary":
+			case "primaryfile":
+				return SupplementType.PRIMARYFILE;
+			case "i":
+			case "item":
+				return SupplementType.ITEM;
+			case "c":
+			case "collection":
+				return SupplementType.COLLECTION;
+			default:
+				return null;
+		}
+	}
 	
 }
