@@ -64,6 +64,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */   
 	// map between all obsolete workflow step names to their standard current names
 	private static final HashMap<String, String> STEPS_MAP = new HashMap<String, String>() {{
+		put("adjust_timestamps", "adjust_transcript_timestamps");
 		put("aws_comprehend", "aws_comprehend_ner");
 		put("aws_transcribe", "aws_transcribe_stt");
 		put("VTTgenerator", "vtt_generator");
@@ -77,7 +78,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("aws_transcribe_transcript", "aws_transcript");
 		put("corrected_draftjs_transcript", "draftjs_corrected");
 		put("original_draftjs_transcript", "draftjs_uncorrected");
+		put("output_transcript", "amp_transcript_corrected");
+		put("output_ner", "amp_entities_corrected");
 	}};
+	// map between obsolete output names for certain workflow steps to their standard current names
+	private static final HashMap<String, String> STEP_OUTPUTS_MAP = new HashMap<String, String>() {{
+		put("amp_transcript", "amp_transcript_adjusted");
+		put("amp_diarization", "amp_diarization_adjusted");
+	}};
+	// map between all standard workflow step names to maps between all obsolete output names to their standard current names
+	// this is used when we need both workflow step and output name to decide what the standard output name should be, 
+	// due to that some obsolete output names overlap with standard output name from other workflow steps
+	private static final HashMap<String, HashMap<String, String>> STEPS_OUTPUTS = new HashMap<String, HashMap<String, String>>() {{
+		put("adjust_transcript_timestamps", STEP_OUTPUTS_MAP);
+		put("adjust_diarization_timestamps", STEP_OUTPUTS_MAP);
+	}};
+
 
 	/* Note: 
 	 * The three lists below are used by the hideIrrelevantWorkflowResults process.
@@ -493,7 +509,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setToolInfo(toolInfo);
 
 				// translate possible obsolete output name to standardized current output name
-				result.setOutputName(standardize(outputName, OUTPUTS_MAP));
+				result.setOutputName(standardize(result.getWorkflowStep(), outputName, STEPS_OUTPUTS, OUTPUTS_MAP));
 				result.setOutputType(dataset.getFileExt());
 				result.setOutputPath(dataset.getFileName());
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
@@ -525,6 +541,23 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
 		log.debug("Standardized obsolete " + name + " to " + standardName);
 		return standardName;
+	}
+	
+	/**
+	 * Translate the given name to its corresponding standard name, based on its parent name, using either the given 
+	 * parent 2-layer map, or the given obsolete-to-standard name map.
+	 */
+	protected String standardize(String nameP, String name, HashMap<String, HashMap<String, String>> mapP, HashMap<String, String> map) {	
+		HashMap<String, String> mapN = mapP.get(nameP);
+		
+		// if the parent's name matches a key in the parent map, use the corresponding child map
+		if (mapN != null) {
+			return standardize(name, mapN);
+		}
+		// otherwise use the obsolete-to-standard name map
+		else {
+			return standardize(name, map);
+		}
 	}
 	
 	/**
@@ -646,8 +679,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			
 			// add current results set to the updateResults set
 			// note that we use Set instead of List, as it's possible that the query with multiple criteria might return
-			// redundant results; Set ensures that only distinct results are kept, to avoid redundant calls to Galaxy
+			// redundant results; Set ensures that only distinct results are kept, to avoid redundant calls to Galaxy			
 			updateResults.addAll(results);
+			log.info("Found " + results.size() + " workflow results for critieria: workflowId = " + workflowId + ", workflowStep = " + workflowStep + ", outputName = " + outputName);
 		}		
 
 		// update relevant field of the matching results and visibility of the associated datasets in Galaxy

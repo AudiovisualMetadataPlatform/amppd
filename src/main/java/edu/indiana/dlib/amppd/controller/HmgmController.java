@@ -28,16 +28,16 @@ public class HmgmController {
 	@Autowired AuthService authService;
 	
 	@GetMapping(path = "/hmgm/authorize-editor")
-	public boolean authorizeEditor(String authString, String userToken, String editorInput) {	
+	public boolean authorizeEditor(@RequestParam String authString, @RequestParam String userToken, @RequestParam String editorInput) {	
 		return authService.compareAuthStrings(authString, userToken, editorInput);
 	}
 	
 	@GetMapping(path = "/hmgm/transcript-editor", produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody TranscriptEditorResponse transcriptEditor(String datasetPath, boolean reset) {		
+	public @ResponseBody TranscriptEditorResponse getTranscript(@RequestParam String datasetPath, @RequestParam boolean reset) {		
 		return hmgmTranscriptService.getTranscript(datasetPath, reset);
 	}
 	
-	@PostMapping(path = "/hmgm/transcript-editor/save", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/hmgm/transcript-editor", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public boolean saveTranscript(@RequestBody SaveTranscriptRequest request) {			
 		return hmgmTranscriptService.saveTranscript(request);
 	}
@@ -47,7 +47,7 @@ public class HmgmController {
 		return hmgmTranscriptService.completeTranscript(request);
 	}
 	
-	@GetMapping(path = "/hmgm/ner-editor")
+	@GetMapping(path = "/hmgm/ner-editor", produces = MediaType.APPLICATION_JSON_VALUE)
 	public String getNer(@RequestParam String resourcePath) {		
 		return hmgmNerService.getNer(resourcePath);
 	}
