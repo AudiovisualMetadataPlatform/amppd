@@ -40,7 +40,6 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -72,8 +71,6 @@ public class JobServiceImpl implements JobService {
 	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
 	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
 	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
-//	public static final String FR_TOOL_ID_PREFIX = "dlib_face";
-//	public static final String FR_TRAIN_PARAMETER_NAME = "training_photos";
 	
 	@Autowired
     private BundleRepository bundleRepository;
@@ -385,40 +382,6 @@ public class JobServiceImpl implements JobService {
 				stepsChanged.add(stepId);
 				log.info("Populated parameter " + SUPPLEMENT_PATH_PARAMETER + " from supplement name: " + name + ", type: " + type + ", to filepath: " + pathname + msg);				
 			}			
-//			else if (StringUtils.startsWith(stepDef.getToolId(), FR_TOOL_ID_PREFIX)) {
-//				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();				
-//
-//				// the training_photos parameter should have been populated with the supplement name associated with the primaryfile's collection,
-//				// either in the passed-in dynamic parameters, i.e. parameters provided upon workflow submission,
-//				// or in the static parameters, i.e. parameters defined in the steps of a workflow, which could be overwritten by the former.
-//				Map<String, Object> stepParams = parameters.get(stepId);				
-//				if (stepParams == null) {
-//					stepParams = new HashMap<String, Object>();
-//					parameters.put(stepId, stepParams);
-//				}
-//				
-//				// first look for the parameter in the passed in dynamic parameters
-//				String name = (String)stepParams.get(FR_TRAIN_PARAMETER_NAME);				
-//				// if not found, look in the static parameters in workflow detail
-//				if (StringUtils.isEmpty(name)) {
-//					name = (String)stepDef.getToolInputs().get(FR_TRAIN_PARAMETER_NAME);
-//				}				
-//				// if still not found, throw error
-//				if (StringUtils.isEmpty(name)) {
-//					throw new GalaxyWorkflowException("No training photos supplement name is defined in the workflow parameters" + msg);
-//				}
-//				
-//				// now the parameter is found, get the collection supplement's absolute pathname, given its name and the associated primaryfile
-//				String pathname = mediaService.getSupplementPathname(primaryfile, name, SupplementType.COLLECTION);
-//				if (StringUtils.isEmpty(pathname)) {
-//					throw new GalaxyWorkflowException("Could not find the exact training photos collection supplement with the name defined: " + name + msg);
-//				}
-//				
-//				// now the supplement pathname is found, update the training_photos parameter
-//				stepParams.put(FR_TRAIN_PARAMETER_NAME, pathname);
-//				stepsChanged.add(stepId);
-//				log.info("Translated parameter " + FR_TRAIN_PARAMETER_NAME + " from supplement name " + name + " to filepath " + pathname + msg);				
-//			}
 		});
 
 		log.info("Successfully updated parameters for " + stepsChanged.size() + " steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());

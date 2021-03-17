@@ -7,7 +7,6 @@ import javax.persistence.InheritanceType;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
