@@ -39,7 +39,7 @@ import edu.indiana.dlib.amppd.exception.ParserException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -67,8 +67,10 @@ public class JobServiceImpl implements JobService {
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
-	public static final String FR_TOOL_ID_PREFIX = "dlib_face";
-	public static final String FR_TRAIN_PARAMETER_NAME = "training_photos";
+	public static final String SUPPLEMENT_TOOL_ID = "supplement";
+	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
+	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
+	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
 	
 	@Autowired
     private BundleRepository bundleRepository;
@@ -296,13 +298,13 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * Populate parameters that need special handling for certain MGMs such as HMGM (Human MGM) and FR (Face Recognition):
+	 * Populate parameters that need special handling for certain MGMs such as HMGMs (Human MGMs) and SMGM (Supplement MGM):
 	 * If the given workflow contains steps using HMGMs, generate context information needed by HMGM tasks and populate those 
-	 * as json string into the context parameter of each HMGM step in the workflow;
-	 * If the given workflow contains steps using FRs, translate the training_photos parameter from CollectionSupplement name 
-	 * defined by user in the workflow, into the corresponding absolute pathname of the CollectionSupplement's media.
+	 * as json strings into the context parameter of each HMGM step in the workflow;
+	 * If the given workflow contains steps using SMGMs, for each such step, infer the absolute file path of the supplement 
+	 * based on the supplement name/type parameters defined by in the workflow, and populate the supplement path parameter.
 	 * Note that the passed-in parameters here are part of the workflow inputs already populated with user-defined values;
-	 * while the context and absolute path parameters are system generated and shall be transparent to users.
+	 * while the context and supplement path parameters are system generated and shall be transparent to users.
 	 * @param workflowDetails the given workflow
 	 * @param primaryfile the given primaryfile
 	 * @param parameters the parameters for the workflow
@@ -334,10 +336,10 @@ public class JobServiceImpl implements JobService {
 				stepsChanged.add(stepId);
 				log.info("Added HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}
-			else if (StringUtils.startsWith(stepDef.getToolId(), FR_TOOL_ID_PREFIX)) {
+			else if (StringUtils.equals(stepDef.getToolId(), SUPPLEMENT_TOOL_ID)) {
 				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();				
 
-				// the training_photos parameter should have been populated with the supplement name associated with the primaryfile's collection,
+				// the name/type parameters should have been populated for the supplement associated with the primaryfile or its parent entities,
 				// either in the passed-in dynamic parameters, i.e. parameters provided upon workflow submission,
 				// or in the static parameters, i.e. parameters defined in the steps of a workflow, which could be overwritten by the former.
 				Map<String, Object> stepParams = parameters.get(stepId);				
@@ -347,27 +349,39 @@ public class JobServiceImpl implements JobService {
 				}
 				
 				// first look for the parameter in the passed in dynamic parameters
-				String name = (String)stepParams.get(FR_TRAIN_PARAMETER_NAME);				
+				String name = (String)stepParams.get(SUPPLEMENT_NAME_PARAMETER);				
+				String type = (String)stepParams.get(SUPPLEMENT_TYPE_PARAMETER);
+				
 				// if not found, look in the static parameters in workflow detail
 				if (StringUtils.isEmpty(name)) {
-					name = (String)stepDef.getToolInputs().get(FR_TRAIN_PARAMETER_NAME);
+					name = (String)stepDef.getToolInputs().get(SUPPLEMENT_NAME_PARAMETER);
 				}				
+				if (StringUtils.isEmpty(type)) {
+					type = (String)stepDef.getToolInputs().get(SUPPLEMENT_TYPE_PARAMETER);
+				}				
+
 				// if still not found, throw error
 				if (StringUtils.isEmpty(name)) {
-					throw new GalaxyWorkflowException("No training photos supplement name is defined in the workflow parameters" + msg);
+					throw new GalaxyWorkflowException("Parameter supplement_name is not defined" + msg);
+				}
+				if (StringUtils.isEmpty(type)) {
+					throw new GalaxyWorkflowException("Parameter supplement_type is not defined" + msg);
 				}
 				
-				// now the parameter is found, get the collection supplement's absolute pathname, given its name and the associated primaryfile
-				String pathname = mediaService.getSupplementPathname(primaryfile, name, SupplementType.COLLECTION);
+				// now the supplement name/type parameters are found, get the supplement's absolute pathname, 
+				// given its name/type and the parent associated with the primaryfile
+				String pathname = mediaService.getSupplementPathname(primaryfile, name, Supplement.getSupplementType(type));
 				if (StringUtils.isEmpty(pathname)) {
-					throw new GalaxyWorkflowException("Could not find the exact training photos collection supplement with the name defined: " + name + msg);
+					throw new GalaxyWorkflowException("Could not find the supplement with name: " + name + " and type: " + type + msg);
 				}
 				
-				// now the supplement pathname is found, update the training_photos parameter
-				stepParams.put(FR_TRAIN_PARAMETER_NAME, pathname);
+				// now the supplement pathname is found, update the path parameter
+				// Note that supplement_path is supposed to be system generated parameter, any pre-defined values, 
+				// either dynamic ones from submission, or static ones from workflow, will be ignored and overwritten
+				stepParams.put(SUPPLEMENT_PATH_PARAMETER, pathname);
 				stepsChanged.add(stepId);
-				log.info("Translated parameter " + FR_TRAIN_PARAMETER_NAME + " from supplement name " + name + " to filepath " + pathname + msg);				
-			}
+				log.info("Populated parameter " + SUPPLEMENT_PATH_PARAMETER + " from supplement name: " + name + ", type: " + type + ", to filepath: " + pathname + msg);				
+			}			
 		});
 
 		log.info("Successfully updated parameters for " + stepsChanged.size() + " steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());

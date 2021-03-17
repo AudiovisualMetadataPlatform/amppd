@@ -82,7 +82,7 @@ public class BatchServiceImpl implements BatchService {
 				}
 			}
 			catch(Exception ex) {
-				log.error("BATCH PROCESSING : Batch processing exception: " + ex.toString());
+				log.error("BATCH PROCESSING : Batch processing exception: " + ex);
 				batchValidation.addProcessingError("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
 			}
 		}	
@@ -179,7 +179,7 @@ public class BatchServiceImpl implements BatchService {
 	    	return primaryfile;
 		}
 		catch(IOException ex) {			
-			throw new Exception(String.format("Error creating primaryfile %s.  Error is: %s", batchFile.getPrimaryfileFilename(), ex.toString()));
+			throw new Exception(String.format("Error creating primaryfile %s: %s", batchFile.getPrimaryfileFilename(), ex.toString()), ex);
 		}
 	}
 	
@@ -208,7 +208,7 @@ public class BatchServiceImpl implements BatchService {
 			}
 		}
 		catch(IOException ex) {
-			throw new Exception(String.format("Error creating primaryfile supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
+			throw new Exception(String.format("Error creating primaryfile supplement %s: %s", batchSupplementFile.getSupplementFilename(), ex.toString()), ex);
 		}
 	}
 
@@ -239,7 +239,7 @@ public class BatchServiceImpl implements BatchService {
 			}
 		}
 		catch(IOException ex) {
-			throw new Exception(String.format("Error creating collection supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
+			throw new Exception(String.format("Error creating collection supplement %s: %s", batchSupplementFile.getSupplementFilename(), ex.toString()), ex);
 		}
 	}
 	
@@ -269,7 +269,7 @@ public class BatchServiceImpl implements BatchService {
 			}
 		}
 		catch(IOException ex) {
-			throw new Exception(String.format("Error creating item supplement %s.  Error is: %s", batchSupplementFile.getSupplementFilename(), ex.toString()));
+			throw new Exception(String.format("Error creating item supplement %s: %s", batchSupplementFile.getSupplementFilename(), ex.toString()), ex);
 		}
 	}
 	
