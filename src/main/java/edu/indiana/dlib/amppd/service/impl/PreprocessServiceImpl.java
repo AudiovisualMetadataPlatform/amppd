@@ -133,7 +133,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		// This is a hack to allow ProcessBuilder running on operating systems using /usr/local/bin to find ffprobe and pdfinfo for MediaProbe
 		Map<String, String> env = pb.environment();
 		String path = env.get("PATH");
-		if(path!=null && !path.contains("/usr/local/bin")) {
+		if (path!=null && !path.contains("/usr/local/bin")) {
 			path = path.concat(":/usr/local/bin");
 			env.put("PATH", path);
 		}

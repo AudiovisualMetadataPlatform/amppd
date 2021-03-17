@@ -68,7 +68,7 @@ public class JobServiceImpl implements JobService {
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
-	public static final String SUPPLEMENT_TOOL_ID = "get_supplement";
+	public static final String SUPPLEMENT_TOOL_ID = "supplement";
 	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
 	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
 	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
@@ -383,7 +383,7 @@ public class JobServiceImpl implements JobService {
 				// either dynamic ones from submission, or static ones from workflow, will be ignored and overwritten
 				stepParams.put(SUPPLEMENT_PATH_PARAMETER, pathname);
 				stepsChanged.add(stepId);
-				log.info("Populated parameter " + SUPPLEMENT_PATH_PARAMETER + " from supplement name: " + name + " and type: " + type + " to filepath " + pathname + msg);				
+				log.info("Populated parameter " + SUPPLEMENT_PATH_PARAMETER + " from supplement name: " + name + ", type: " + type + ", to filepath: " + pathname + msg);				
 			}			
 //			else if (StringUtils.startsWith(stepDef.getToolId(), FR_TOOL_ID_PREFIX)) {
 //				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();				
