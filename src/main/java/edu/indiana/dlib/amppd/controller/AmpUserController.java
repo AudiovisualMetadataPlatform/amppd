@@ -79,6 +79,12 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
+	  @PostMapping(path ="/account/approveUserData", consumes =MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	  public @ResponseBody AmpUser approveUserData(@RequestBody AuthRequest request) {
+		  AmpUser approveUserDetails=ampService.getUserById(request.getUserId());
+		  return approveUserDetails;
+	  }
+	  
 	  @PostMapping(path = "/account/approve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	  public @ResponseBody AuthResponse approveUser(@RequestBody AuthRequest request) { 
 		log.info("Approve User=> id:"+ request.getUserId());	
