@@ -77,6 +77,17 @@ public class WorkflowResultController {
 	}
 
 	/**
+	 * Fix workflow results with obsolete output types with correct data types and update the corresponding datasets in Galaxy.
+	 * Note that this is a one-time operation to back-fill existing data. We don't need this endpoint on-going.
+	 * @return the list of WorkflowResults updated
+	 */
+	@PostMapping("/workflow-results/output-type")
+	public int fixWorkflowResultsOutputType() {
+		log.info("Fixing workflow results with obsolete output types ...");
+		return workflowResultService.fixWorkflowResultsOutputType().size();
+	}
+
+	/**
 	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
 	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table. This process only needs to be done once manually (preferably 

@@ -56,7 +56,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public static final String WILD_CARD = "*";
 
 	/* Note: 
-	 * The two maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
+	 * The 4 maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
 	 * Their values are based on current WorkflowResult table data. 
 	 * Since the obsolete MGMs don't exist in the system anymore, no more obsolete IDs/names should be generated,
 	 * thus the maps are inclusive for the future. Once we delete obsolete outputs from Galaxy, 
@@ -65,6 +65,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	// map between all obsolete workflow step names to their standard current names
 	private static final HashMap<String, String> STANDARD_STEPS = new HashMap<String, String>() {{
 		put("adjust_timestamps", "adjust_transcript_timestamps");
+		put("adjust_segmentation_timestamps", "adjust_diarization_timestamps");
 		put("aws_comprehend", "aws_comprehend_ner");
 		put("aws_transcribe", "aws_transcribe_stt");
 		put("speech_segmenter", "ina_speech_segmenter");
@@ -93,6 +94,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS = new HashMap<String, String>() {{
 		put("amp_transcript", "amp_transcript_adjusted");
 		put("amp_diarization", "amp_diarization_adjusted");
+		put("amp_segments", "amp_diarization_adjusted");
 	}};
 	// map between all standard workflow step names to maps between all obsolete output names to their standard current names
 	// this is used when we need both workflow step and output name to decide what the standard output name should be, 
@@ -101,7 +103,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("adjust_transcript_timestamps", STANDARD_STEP_OUTPUTS);
 		put("adjust_diarization_timestamps", STANDARD_STEP_OUTPUTS);
 	}};
-	// 
+	
+	// map between output names for outputs with obsolete data types to the correct output types 
 	private static final HashMap<String, String> FIX_OUTPUT_TYPES = new HashMap<String, String>() {{
 		put("amp_diarization", "segment");
 		put("amp_diarization_adjusted", "segment");
@@ -565,8 +568,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * Translate the given name to its corresponding standard name, based on its parent name, using either the given 
-	 * parent 2-layer map, or the given obsolete-to-standard name map.
+	 * Translate the given name to its corresponding standard name, based on its parent name, 
+	 * using either the given parent 2-layer map, or the given obsolete-to-standard name map.
 	 */
 	protected String standardize(String nameP, String name, HashMap<String, HashMap<String, String>> mapP, HashMap<String, String> map) {	
 		HashMap<String, String> mapN = mapP.get(nameP);
@@ -607,6 +610,42 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 		
 	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.fixWorkflowResultsOutputType()
+	 */
+	public Set<WorkflowResult> fixWorkflowResultsOutputType() {
+		Set<WorkflowResult> updateResults = new HashSet<WorkflowResult>();
+
+		// ideally we should just retrieve the results with obsolete output types; but that would require dynamically 
+		// generated query from the fix map, as SQL doesn't support not/in with array of tuples (outputName, outputType)
+		Iterable<WorkflowResult> results = workflowResultRepository.findAll();
+		HistoriesClient historiesClient = jobService.getHistoriesClient();
+
+		// go through all results
+		for (WorkflowResult result : results) {
+			String type = FIX_OUTPUT_TYPES.get(result.getOutputName());
+			
+			// if the output name is among those with obsolete types, and the output type is not the correct one
+			if (type != null && !type.equals(result.getOutputType())) {
+				// update Galaxy dataset
+				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());				
+				dataset.setFileExt(type);
+				historiesClient.updateDataset(result.getHistoryId(), dataset);
+				
+				// update result
+				result.setOutputType(type);
+				updateResults.add(result);
+				log.info("Successfully fixed dataset of WorkflowResult with obsolete data type in Galaxy to: " + result);
+			}
+		}		
+		log.info("Successfully fixed dataset types of " + updateResults.size() + " WorkflowResults in Galaxy");		
+		
+		// save all updated results in WorkflowResult table
+		workflowResultRepository.saveAll(updateResults);
+		log.info("Successfully fixed output types for " + updateResults.size() + " workflowResults in AMP table");	
+		return updateResults;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
 	 */	
 	@Deprecated
@@ -635,13 +674,13 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				
 				// set result to irrelevant
 				result.setRelevant(false);
-				log.info("Successfully hid irrelevant workflowResult in Galaxy: " + result);
+				log.info("Successfully hid irrelevant WorkflowResult dataset in Galaxy: " + result);
 			} 
 			catch (Exception e) {
-				throw new GalaxyWorkflowException("Failed to hide irrelevant workflowResult in Galaxy: " + result, e);
+				throw new GalaxyWorkflowException("Failed to hide irrelevant WorkflowResult dataset in Galaxy: " + result, e);
 			}
 		}
-		log.info("Successfully hid  " + results.size() + " irrelevant workflowResults in Galaxy");		
+		log.info("Successfully hid " + results.size() + " irrelevant WorkflowResult datasets in Galaxy");		
 		
 		// save all updated results in WorkflowResult table
 		workflowResultRepository.saveAll(results);
