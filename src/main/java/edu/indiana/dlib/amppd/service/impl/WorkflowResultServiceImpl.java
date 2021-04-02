@@ -63,37 +63,58 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * we won't need to call standardize and these maps can be removed as well.
 	 */   
 	// map between all obsolete workflow step names to their standard current names
-	private static final HashMap<String, String> STEPS_MAP = new HashMap<String, String>() {{
+	private static final HashMap<String, String> STANDARD_STEPS = new HashMap<String, String>() {{
 		put("adjust_timestamps", "adjust_transcript_timestamps");
 		put("aws_comprehend", "aws_comprehend_ner");
 		put("aws_transcribe", "aws_transcribe_stt");
+		put("speech_segmenter", "ina_speech_segmenter");
 		put("VTTgenerator", "vtt_generator");
+		put("vtt_generator", "trasncript_to_webvtt");
 	}};
 	// map between all obsolete output names to their standard current names
-	private static final HashMap<String, String> OUTPUTS_MAP = new HashMap<String, String>() {{
+	private static final HashMap<String, String> STANDARD_OUTPUTS = new HashMap<String, String>() {{
 		put("amp_entity_extraction", "amp_entities");
+		put("amp_kept_segments", "kept_segments");
 		put("audio_file", "audio_extracted");
-		put("webVtt", "web_vtt");
 		put("amp_segmentation", "amp_segments");
 		put("aws_transcribe_transcript", "aws_transcript");
+		put("corrected_draftjs", "draftjs_corrected");
 		put("corrected_draftjs_transcript", "draftjs_corrected");
+		put("corrected_iiif", "iiif_corrected");
+		put("original_draftjs", "draftjs_uncorrected");
 		put("original_draftjs_transcript", "draftjs_uncorrected");
+		put("original_iiif", "iiif_uncorrected");
 		put("output_transcript", "amp_transcript_corrected");
 		put("output_ner", "amp_entities_corrected");
+		put("segmented_audio_file", "speech_audio");		
+		put("webVtt", "web_vtt");
 	}};
 	// map between obsolete output names for certain workflow steps to their standard current names
-	private static final HashMap<String, String> STEP_OUTPUTS_MAP = new HashMap<String, String>() {{
+	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS = new HashMap<String, String>() {{
 		put("amp_transcript", "amp_transcript_adjusted");
 		put("amp_diarization", "amp_diarization_adjusted");
 	}};
 	// map between all standard workflow step names to maps between all obsolete output names to their standard current names
 	// this is used when we need both workflow step and output name to decide what the standard output name should be, 
 	// due to that some obsolete output names overlap with standard output name from other workflow steps
-	private static final HashMap<String, HashMap<String, String>> STEPS_OUTPUTS = new HashMap<String, HashMap<String, String>>() {{
-		put("adjust_transcript_timestamps", STEP_OUTPUTS_MAP);
-		put("adjust_diarization_timestamps", STEP_OUTPUTS_MAP);
+	private static final HashMap<String, HashMap<String, String>> STANDARD_STEPS_OUTPUTS = new HashMap<String, HashMap<String, String>>() {{
+		put("adjust_transcript_timestamps", STANDARD_STEP_OUTPUTS);
+		put("adjust_diarization_timestamps", STANDARD_STEP_OUTPUTS);
 	}};
-
+	// 
+	private static final HashMap<String, String> FIX_OUTPUT_TYPES = new HashMap<String, String>() {{
+		put("amp_diarization", "segment");
+		put("amp_diarization_adjusted", "segment");
+		put("amp_entities", "ner");
+		put("amp_entities_corrected", "ner");
+		put("amp_segments", "segment");
+		put("amp_transcript", "transcript");
+		put("amp_transcript_adjusted", "transcript");
+		put("amp_transcript_corrected", "transcript");
+		put("audio_extracted", "wav");
+		put("speech_audio", "speech");
+		put("web_vtt", "vtt");
+	}};
 
 	/* Note: 
 	 * The three lists below are used by the hideIrrelevantWorkflowResults process.
@@ -104,14 +125,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Also, only standard step/output names need to be included, thanks to the standardize method.
 	 */
 	// all outputs of the following workflow steps are irrelevant, disregarding its output name
-	private static final List<String> STEPS_TO_HIDE = Arrays.asList("ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "pyscenedetect_shot_detection");	
+	private static final List<String> HIDE_STEPS = Arrays.asList("ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "pyscenedetect_shot_detection");	
 	// all outputs with the following names are irrelevant, disregarding its workflow step
-	private static final List<String> OUTPUTS_TO_HIDE = Arrays.asList("draftjs_corrected", "draftjs_uncorrected", "task_info", "iiif_corrected", "iiif_uncorrected");	
+	private static final List<String> HIDE_OUTPUTS = Arrays.asList("draftjs_corrected", "draftjs_uncorrected", "task_info", "iiif_corrected", "iiif_uncorrected");	
 	// all outputs with the following workflowStep-outputFile tuples are irrelevant
-	private static final String[][] STEPS_OUTPUTS_TO_HIDE = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
-//	public static final List<String> STEPS_TO_HIDE = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_timestamps", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");	
-//	public static final List<String> OUTPUTS_TO_HIDE = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");	
-//	public static final String[][] STEPS_OUTPUTS_TO_HIDE = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
+	private static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
+//	public static final List<String> HIDE_STEPS = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_timestamps", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");	
+//	public static final List<String> HIDE_OUTPUTS = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");	
+//	public static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
 
 	@Autowired
 	private GalaxyPropertyConfig galaxyPropertyConfig;
@@ -505,11 +526,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 				result.setWorkflowName(workflowName);
 				// translate possible obsolete tool ID to standardized current tool ID
-				result.setWorkflowStep(standardize(stepLabel, STEPS_MAP)); 
+				result.setWorkflowStep(standardize(stepLabel, STANDARD_STEPS)); 
 				result.setToolInfo(toolInfo);
 
 				// translate possible obsolete output name to standardized current output name
-				result.setOutputName(standardize(result.getWorkflowStep(), outputName, STEPS_OUTPUTS, OUTPUTS_MAP));
+				result.setOutputName(standardize(result.getWorkflowStep(), outputName, STANDARD_STEPS_OUTPUTS, STANDARD_OUTPUTS));
 				result.setOutputType(dataset.getFileExt());
 				result.setOutputPath(dataset.getFileName());
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
@@ -592,9 +613,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public Set<WorkflowResult> hideIrrelevantWorkflowResults() {		
 		// get all irrelevant results from WorkflowResult table
 		Set<WorkflowResult> results = new HashSet<WorkflowResult>();
-		results.addAll(workflowResultRepository.findByWorkflowStepIn(STEPS_TO_HIDE));
-		results.addAll(workflowResultRepository.findByOutputNameIn(OUTPUTS_TO_HIDE));		
-		for (String[] stepOutput : STEPS_OUTPUTS_TO_HIDE ) {
+		results.addAll(workflowResultRepository.findByWorkflowStepIn(HIDE_STEPS));
+		results.addAll(workflowResultRepository.findByOutputNameIn(HIDE_OUTPUTS));		
+		for (String[] stepOutput : HIDE_STEPS_OUTPUTS ) {
 			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
 		}		
 		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
