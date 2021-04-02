@@ -58,8 +58,14 @@ public interface WorkflowResultService {
 	public List<WorkflowResult> refreshIncompleteWorkflowResults();
 		
 	/**
+	 * Fix workflow results with obsolete output types with correct data types and update the corresponding datasets in Galaxy.
+	 * @return the list of WorkflowResults updated
+	 */
+	public Set<WorkflowResult> fixWorkflowResultsOutputType();
+	
+	/**
 	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
-	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
+	 * Hide all irrelevant workflow results by setting their corresponding output datasets in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table.
 	 * @return the list of WorkflowResults updated
 	 */
