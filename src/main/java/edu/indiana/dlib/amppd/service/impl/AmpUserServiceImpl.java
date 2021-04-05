@@ -366,7 +366,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			url = contextPath + "/account/approve/" + user.getId();
 			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
-			subject = "New User account request";
+			subject = amppdPropertyConfig.getEnvironment() + " New User account request: " + user.getUsername();
 			emailTo = ampAdmin;
 		}
 		else if(type.contentEquals("reset password"))

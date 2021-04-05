@@ -31,4 +31,5 @@ public class AmppdPropertyConfig {
     @NotNull private int passwordResetTokenExpiration;
     @NotNull private int accountActivationTokenExpiration;
     @NotNull private Boolean auth;
+    @NotNull private String environment;
 }
