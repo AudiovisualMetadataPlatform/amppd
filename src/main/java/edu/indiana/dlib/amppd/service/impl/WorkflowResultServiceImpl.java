@@ -69,7 +69,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("aws_comprehend", "aws_comprehend_ner");
 		put("aws_transcribe", "aws_transcribe_stt");
 		put("speech_segmenter", "ina_speech_segmenter");
-		put("VTTgenerator", "vtt_generator");
+		put("VTTgenerator", "trasncript_to_webvtt");
 		put("vtt_generator", "trasncript_to_webvtt");
 	}};
 	// map between all obsolete output names to their standard current names
@@ -95,6 +95,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("amp_transcript", "amp_transcript_adjusted");
 		put("amp_diarization", "amp_diarization_adjusted");
 		put("amp_segments", "amp_diarization_adjusted");
+		put("amp_segmentation", "amp_diarization_adjusted");
 	}};
 	// map between all standard workflow step names to maps between all obsolete output names to their standard current names
 	// this is used when we need both workflow step and output name to decide what the standard output name should be, 
