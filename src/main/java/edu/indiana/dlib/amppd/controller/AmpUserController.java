@@ -4,6 +4,8 @@ package edu.indiana.dlib.amppd.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,12 +81,6 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @PostMapping(path ="/account/approveUserData", consumes =MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	  public @ResponseBody AmpUser approveUserData(@RequestBody AuthRequest request) {
-		  AmpUser approveUserDetails=ampService.getUserById(request.getUserId());
-		  return approveUserDetails;
-	  }
-	  
 	  @PostMapping(path = "/account/approve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	  public @ResponseBody AuthResponse approveUser(@RequestBody AuthRequest request) { 
 		log.info("Approve User=> id:"+ request.getUserId());	
@@ -116,5 +112,14 @@ import lombok.extern.slf4j.Slf4j;
 		log.info(" Fetched Email id for a token using resetPasswordGetEmail():"+res.getEmailid());
 		return res;
 	  }
+	  
+	  @GetMapping(path="/account/getUser/{Id}")
+	  public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
+		  log.info("User=> id:"+ Id);
+		  AmpUser user =ampService.getUserById(Id);
+		  log.info("Fetched User by Id:"+ user);
+		  return user;
+	  }
+	  
   }
 		 

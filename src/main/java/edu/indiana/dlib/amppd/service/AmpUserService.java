@@ -79,6 +79,15 @@ public interface AmpUserService {
 	public AmpUser getUser(String username);
 	
 	/**
+	 * Gets an amp user by Id.  Will return null if the amp user is not found.  This does not take into account 
+	 * whether or not user is approved.
+	 * @param userId
+	 * @return AmpUser or null, depending on whether the user was found or not
+	 */
+
+	public AmpUser getUserById(Long userId);
+	
+	/**
 	 * Gets the current username from User Session.
 	 * @return the current username
 	 */

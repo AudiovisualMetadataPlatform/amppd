@@ -440,8 +440,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return null;
 	}
 	
-	public AmpUser getUserById(Long id) {
-		Optional <AmpUser> userOpt= ampUserRepository.findById(id);
+	public AmpUser getUserById(Long userId) {
+		Optional <AmpUser> userOpt= ampUserRepository.findById(userId);
 		if(userOpt.isPresent()) return userOpt.get();
 		return null;
 		
