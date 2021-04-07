@@ -194,7 +194,7 @@ public class AmpUserControllerTests {
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
     }
-
+    
     private AmpUser getAmpUser() {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 
