@@ -62,6 +62,8 @@ public class DropboxServiceImpl implements DropboxService {
 	@Override
 	public Path getDropboxPath(String unitName) {
 		String encodedUnitName = encodeUri(unitName);
+		log.info("Dropbox Root: "  + config.getDropboxRoot());
+		log.info("Encoded Unit Name: "  + encodedUnitName);
 		return Paths.get(config.getDropboxRoot(), encodedUnitName);
 	}
 
@@ -72,7 +74,7 @@ public class DropboxServiceImpl implements DropboxService {
 	public Path getDropboxPath(String unitName, String collectionName) {
 		Path unitPath = getDropboxPath(unitName);
 		String encodedCollectionName = encodeUri(collectionName);
-		System.out.println("Collection Name: "  + encodedCollectionName);
+		log.info("Encoded Collection Name: "  + encodedCollectionName);
 		return Paths.get(unitPath.toString(), encodedCollectionName);
 	}
 	
@@ -81,6 +83,9 @@ public class DropboxServiceImpl implements DropboxService {
 	 */
 	@Override
 	public Path getDropboxPath(Collection collection) {
+		log.info("Unit: "  + collection.getUnit());
+		log.info("Unit Name: "  + collection.getUnit().getName());
+		log.info("Collection Name: "  + collection.getName());
 		return getDropboxPath(collection.getUnit().getName(), collection.getName());
 	}
 	
@@ -91,7 +96,7 @@ public class DropboxServiceImpl implements DropboxService {
 	public Path createCollectionSubdir(Collection collection) {
 		Path path = getDropboxPath(collection);
 		try {
-			// directory is only created if not existin
+			// directory is only created if not existing
 			Files.createDirectories(path); 
 			log.info("Dropbox sub-directory " + path + " has been created." );
 			return path;
