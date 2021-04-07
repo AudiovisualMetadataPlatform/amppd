@@ -527,6 +527,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setStepId(step.getId());
 				result.setOutputId(output.getId());
 				result.setHistoryId(invocation.getHistoryId());
+				
+				/* Note: 
+				 * In below code where standardize is called, the order result fields get populated is important,
+				 * because each later standardize call relies on the previous field to be standardized.
+				 * The proper order is: workflowStep, outputName, outputType.
+				 */
 
 				result.setWorkflowName(workflowName);
 				// translate possible obsolete tool ID to standardized current tool ID
@@ -535,7 +541,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 				// translate possible obsolete output name to standardized current output name
 				result.setOutputName(standardize(result.getWorkflowStep(), outputName, STANDARD_STEPS_OUTPUTS, STANDARD_OUTPUTS));
-				result.setOutputType(dataset.getFileExt());
+				// translate possible obsolete output type to standardized current output type
+				// Note: this is a temporary workaround explained in fixWorkflowResultsOutputType()
+				result.setOutputType(standardize(result.getOutputName(), dataset.getFileExt(), FIX_OUTPUT_TYPES));
 				result.setOutputPath(dataset.getFileName());
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
 
@@ -566,6 +574,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
 		log.debug("Standardized obsolete " + name + " to " + standardName);
 		return standardName;
+	}
+	
+	/**
+	 * Translate the given type to its corresponding standard type, based on its name and the given standard name-type map.
+	 */
+	protected String standardize(String name, String type, HashMap<String, String> map) {	
+		String standardType = map.get(name);
+
+		// if the name matches a key in the map, use the corresponding standard type
+		if (standardType != null) {
+			return standardType;
+		}
+		// otherwise the type is already standard
+		else {
+			return type;
+		}
 	}
 	
 	/**
@@ -627,6 +651,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			
 			// if the output name is among those with obsolete types, and the output type is not the correct one
 			if (type != null && !type.equals(result.getOutputType())) {
+				/* Note: 
+				 * Below request to update dataset extension/type in Galaxy doesn't work currently, either due to some bug in Galaxy, 
+				 * or intentional restriction on updating certain fields of a dataset. As a workaround we need to infer the 
+				 * correct data type on AMP side based on the FIX_OUTPUT_TYPES map during table refresh, so that the un-updated
+				 * obsolete data type doesn't overwrite the fixed ones in workflow result table.
+				 */
 				// update Galaxy dataset
 				Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());				
 				dataset.setFileExt(type);
