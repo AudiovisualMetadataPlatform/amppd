@@ -108,11 +108,11 @@ public class DropboxServiceImpl implements DropboxService {
 	public void createCollectionSubdirs() {
 		Iterable<Collection> collections = collectionRepository.findAll();
 		
-		// we could choose to skip a collection and continue with the rest in case an exception occors;
+		// we could choose to skip a collection and continue with the rest in case an exception occurs;
 		// however, if such IO exception happens, it usually is caused by system-wide issue instead of per collection
 		// so likely there is no point to try other collections
 		// meanwhile, admin can fix whatever causing the exception and rerun this process, 
-		// in which case the creation will continue where it's stoppped before
+		// in which case the creation will continue where it's stopped before
 		
 		for (Collection collection : collections) {
 			createCollectionSubdir(collection);
