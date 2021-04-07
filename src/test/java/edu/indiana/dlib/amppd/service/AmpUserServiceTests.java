@@ -127,20 +127,6 @@ public class AmpUserServiceTests {
 		  }
     }
 	
-	@Test
-	public void shouldGetUserById() throws Exception{
-		AmpUser user = getAmpUser();
-		ampUserService.registerAmpUser(user);
-		try {
-			AmpUser fetchByUserName = ampUserRepository.findByUsername(user.getUsername()).get();
-			AmpUser fetchByUserId = ampUserService.getUserById(fetchByUserName.getId());
-			Assert.assertEquals(fetchByUserName,fetchByUserId);
-		  }
-		  catch(Exception ex) {
-			  System.out.println(ex.toString());
-		  }
-	}
-	
 	private AmpUser getAmpUser() {
         Random rand = new Random(); 
         int rand_int1 = rand.nextInt(1000); 

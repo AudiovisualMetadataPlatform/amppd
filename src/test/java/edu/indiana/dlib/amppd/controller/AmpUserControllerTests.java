@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -194,16 +193,6 @@ public class AmpUserControllerTests {
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(true));
-    }
-    
-    @Test
-    public void shouldTestGetUser() throws Exception {
-    	Random rand = new Random(); 
-    	int rand_Id = rand.nextInt(1000);
-    	String url = String.format("/account/getUser/"+rand_Id);
-    	mvc.perform(get(url).header("Authorization", "Bearer " + token)
-    			.accept(MediaType.APPLICATION_JSON))
-    	        .andExpect(status().isOk());
     }
     
     private AmpUser getAmpUser() {

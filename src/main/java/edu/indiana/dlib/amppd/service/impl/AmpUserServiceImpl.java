@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.TimedToken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
@@ -439,11 +440,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		
 		return null;
 	}
-	
+	@Override
 	public AmpUser getUserById(Long userId) {
-		Optional <AmpUser> userOpt= ampUserRepository.findById(userId);
-		if(userOpt.isPresent()) return userOpt.get();
-		return null;
+		 AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
+		 log.info("User fetched Successfully");
+		 return user;
 		
 	}
 

@@ -113,10 +113,12 @@ import lombok.extern.slf4j.Slf4j;
 		return res;
 	  }
 	  
-	  @GetMapping(path="/account/getUser/{Id}")
+	  @GetMapping(path="/account/{Id}")
 	  public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
-		  AmpUser user =ampService.getUserById(Id); 
-		  return user;
+		  log.info("User=> id:"+ Id);
+		  AmpUser ampuser= ampService.getUserById(Id);
+		  log.info("Fetched User for given Id using getUserById()"+ampuser.getId());
+		  return ampuser;
 	  }
 	  
   }
