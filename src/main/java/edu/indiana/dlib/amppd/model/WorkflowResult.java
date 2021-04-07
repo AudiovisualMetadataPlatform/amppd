@@ -151,6 +151,7 @@ public class WorkflowResult {
 		str += ", workflowName: " + workflowName;
 		str += ", workflowStep: " + workflowStep;
 		str += ", outputName: " + outputName;
+		str += ", outputType: " + outputType;
 		str += ", submitter: " + submitter;
 		str += ", status: " + status;
 		str += ", relevant: " + relevant;

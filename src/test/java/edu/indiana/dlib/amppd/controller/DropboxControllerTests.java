@@ -14,14 +14,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import lombok.extern.slf4j.Slf4j;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
+@Slf4j
 public class DropboxControllerTests {
 
     @Autowired
@@ -46,7 +50,13 @@ public class DropboxControllerTests {
 	
     @Test
     public void shouldCreateSubdirsForAllCollections() throws Exception {
-    	mvc.perform(post("/dropbox/create").header("Authorization", "Bearer " + token)).andExpect(status().isOk());   
+    	log.info("token = " + token);
+    	MockHttpServletRequestBuilder builder = post("/dropbox/create");
+    	builder = builder.header("Authorization", "Bearer " + token);
+    	ResultActions actions = mvc.perform(builder);
+    	log.info("actions = " + actions);  
+    	actions.andExpect(status().isOk());
+//    	mvc.perform(post("/dropbox/create").header("Authorization", "Bearer " + token)).andExpect(status().isOk());   
     	assertTrue(Files.exists(dropboxService.getDropboxPath(collection)));
     }
     
