@@ -523,6 +523,14 @@ public class TestHelper {
 	}
 	
 	/**
+	 * Delete all collections. 
+	 * Call this method to make sure that the test will use a freshly created collection instead of reusing those created in previous tests. 
+	 */
+	public void cleanupCollections() {
+		collectionRepository.deleteAll();
+	}
+
+	/**
 	 * Delete all primaryfiles. 
 	 * Call this method to make sure that the test will use a freshly created primaryfile instead of reusing those created in previous tests. 
 	 */
