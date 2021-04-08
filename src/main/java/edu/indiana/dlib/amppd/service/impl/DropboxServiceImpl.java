@@ -80,8 +80,8 @@ public class DropboxServiceImpl implements DropboxService {
 	 */
 	@Override
 	public Path getDropboxPath(Collection collection) {
-		log.info("collection = " + collection);
-		log.info("collection.getUnit() = "  + collection.getUnit());
+		log.trace("collection = " + collection);
+		log.trace("collection.getUnit() = "  + collection.getUnit());
 		return getDropboxPath(collection.getUnit().getName(), collection.getName());
 	}
 	
