@@ -50,13 +50,7 @@ public class DropboxControllerTests {
 	
     @Test
     public void shouldCreateSubdirsForAllCollections() throws Exception {
-    	log.info("token = " + token);
-    	MockHttpServletRequestBuilder builder = post("/dropbox/create");
-    	builder = builder.header("Authorization", "Bearer " + token);
-    	ResultActions actions = mvc.perform(builder);
-    	log.info("actions = " + actions);  
-    	actions.andExpect(status().isOk());
-//    	mvc.perform(post("/dropbox/create").header("Authorization", "Bearer " + token)).andExpect(status().isOk());   
+    	mvc.perform(post("/dropbox/create").header("Authorization", "Bearer " + token)).andExpect(status().isOk());   
     	assertTrue(Files.exists(dropboxService.getDropboxPath(collection)));
     }
     
