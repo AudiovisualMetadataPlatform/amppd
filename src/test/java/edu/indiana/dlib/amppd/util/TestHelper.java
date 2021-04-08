@@ -603,18 +603,15 @@ public class TestHelper {
 		else {
 			unit = new Unit();
 			unit.setName(unitName);
-//			unit.setModifiedBy("testuser");
-//			unit.setCreatedBy("testuser");
-//			unit.setModifiedDate(new Date());
-//			unit.setCreatedDate(new Date());
-			Unit newUnit = unitRepository.save(unit);
-			log.info("Created new unit with ID " + newUnit.getId());
+			unit = unitRepository.save(unit);
+			log.info("Created new unit with ID " + unit.getId());
 		}
 		return unit;
 	}
 	
 	public Collection createTestCollection() {		
 		Unit unit = createTestUnit();
+		log.info("created unit = " + unit);
 		
 		Collection collection = null;
 		String collectionName = "AMP Pilot Collection";
@@ -627,14 +624,12 @@ public class TestHelper {
 		else {
 			collection = new Collection();
 			collection.setName(collectionName);
-//			collection.setModifiedBy("testuser");
-//			collection.setCreatedBy("testuser");
-//			collection.setModifiedDate(new Date());
-//			collection.setCreatedDate(new Date());
 			collection.setUnit(unit);			
-			Collection newCollection = collectionRepository.save(collection);
-			log.info("Created new collection with ID " + newCollection.getId());
+			collection = collectionRepository.save(collection);
+			log.info("Created new collection with ID " + collection.getId());
 		}
+		log.info("Collection created = " + collection);
+		log.info("Collection's unit = " + collection.getUnit());
 		return collection;
 	}
 	
