@@ -619,7 +619,6 @@ public class TestHelper {
 	
 	public Collection createTestCollection() {		
 		Unit unit = createTestUnit();
-		log.info("created unit = " + unit);
 		
 		Collection collection = null;
 		String collectionName = "AMP Pilot Collection";
@@ -636,8 +635,6 @@ public class TestHelper {
 			collection = collectionRepository.save(collection);
 			log.info("Created new collection with ID " + collection.getId());
 		}
-		log.info("Collection created = " + collection);
-		log.info("Collection's unit = " + collection.getUnit());
 		return collection;
 	}
 	
