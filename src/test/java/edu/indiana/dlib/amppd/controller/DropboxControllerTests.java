@@ -14,14 +14,18 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import lombok.extern.slf4j.Slf4j;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
+@Slf4j
 public class DropboxControllerTests {
 
     @Autowired
@@ -39,6 +43,9 @@ public class DropboxControllerTests {
 	@Before
 	public void setup() {
 		token = testHelper.getToken();
+		
+		// clean up all existing collections in case those created by other tests don't have unit populated
+		testHelper.cleanupCollections();
 		
 		// ensure at least one collection exists for testing
 		collection = testHelper.createTestCollection();		

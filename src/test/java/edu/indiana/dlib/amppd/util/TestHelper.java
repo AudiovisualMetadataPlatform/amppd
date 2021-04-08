@@ -523,6 +523,14 @@ public class TestHelper {
 	}
 	
 	/**
+	 * Delete all collections. 
+	 * Call this method to make sure that the test will use a freshly created collection instead of reusing those created in previous tests. 
+	 */
+	public void cleanupCollections() {
+		collectionRepository.deleteAll();
+	}
+
+	/**
 	 * Delete all primaryfiles. 
 	 * Call this method to make sure that the test will use a freshly created primaryfile instead of reusing those created in previous tests. 
 	 */
@@ -598,15 +606,13 @@ public class TestHelper {
 		
 		if(units.size()>0) {
 			unit = units.get(0);
+			log.info("Found existing unit with ID " + unit.getId());
 		}
 		else {
 			unit = new Unit();
 			unit.setName(unitName);
-			unit.setModifiedBy("testuser");
-			unit.setCreatedBy("testuser");
-			unit.setModifiedDate(new Date());
-			unit.setCreatedDate(new Date());
-			unitRepository.save(unit);
+			unit = unitRepository.save(unit);
+			log.info("Created new unit with ID " + unit.getId());
 		}
 		return unit;
 	}
@@ -620,16 +626,14 @@ public class TestHelper {
 		
 		if(collections.size()>0) {
 			collection = collections.get(0);
+			log.info("Found existing collection with ID " + unit.getId());
 		}
 		else {
 			collection = new Collection();
 			collection.setName(collectionName);
-			collection.setModifiedBy("testuser");
-			collection.setCreatedBy("testuser");
-			collection.setModifiedDate(new Date());
-			collection.setCreatedDate(new Date());
 			collection.setUnit(unit);			
-			collectionRepository.save(collection);
+			collection = collectionRepository.save(collection);
+			log.info("Created new collection with ID " + collection.getId());
 		}
 		return collection;
 	}

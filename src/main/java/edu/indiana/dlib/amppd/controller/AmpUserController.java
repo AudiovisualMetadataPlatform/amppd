@@ -4,6 +4,8 @@ package edu.indiana.dlib.amppd.controller;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -110,5 +112,14 @@ import lombok.extern.slf4j.Slf4j;
 		log.info(" Fetched Email id for a token using resetPasswordGetEmail():"+res.getEmailid());
 		return res;
 	  }
+	  
+	  @GetMapping(path="/account/{Id}")
+	  public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
+		  log.info("User=> id:"+ Id);
+		  AmpUser ampuser= ampService.getUserById(Id);
+		  log.info("Fetched User for given Id using getUserById()"+ampuser.getId());
+		  return ampuser;
+	  }
+	  
   }
 		 

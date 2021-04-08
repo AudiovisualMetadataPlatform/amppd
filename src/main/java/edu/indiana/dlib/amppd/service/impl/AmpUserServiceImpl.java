@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.TimedToken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
@@ -366,7 +367,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			url = contextPath + "/account/approve/" + user.getId();
 			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
-			subject = "New User account request";
+			subject = amppdPropertyConfig.getEnvironment() + " New User account request: " + user.getUsername();
 			emailTo = ampAdmin;
 		}
 		else if(type.contentEquals("reset password"))
@@ -438,6 +439,13 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		if(userOpt.isPresent()) return userOpt.get();
 		
 		return null;
+	}
+	@Override
+	public AmpUser getUserById(Long userId) {
+		 AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
+		 log.info("User fetched Successfully");
+		 return user;
+		
 	}
 
 	public AmpUser getUserByEmail(String email) {
