@@ -426,18 +426,22 @@ public class MediaServiceImpl implements MediaService {
 							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
 						curr_item_id = p.getItem().getId();
 						result.setItemName(p.getItem().getName());
+						result.setExternalId(p.getItem().getExternalId());
 						primaryFileinfo.put("id", p.getId()); 
 						primaryFileinfo.put("name",p.getName());
 						primaryFileinfo.put("mediaType",mime_type);
+						primaryFileinfo.put("originalFilename",p.getOriginalFilename());
 						primaryFilerows.add(primaryFileinfo);
 					}
 				}
 				else {
 					curr_item_id = p.getItem().getId();
 					result.setItemName(p.getItem().getName());
+					result.setExternalId(p.getItem().getExternalId());
 					primaryFileinfo.put("id", p.getId()); 
 					primaryFileinfo.put("name",p.getName());
 					primaryFileinfo.put("mediaType",mime_type);
+					primaryFileinfo.put("originalFilename",p.getOriginalFilename());
 					primaryFilerows.add(primaryFileinfo);
 				}
 			}
