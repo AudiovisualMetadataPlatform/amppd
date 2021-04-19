@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class ItemSearchResult {
 	private String itemName;
+	private String externalId;
 	//private ArrayList<String> primaryFileNames;
 	private ArrayList<Map> primaryFiles;
 
