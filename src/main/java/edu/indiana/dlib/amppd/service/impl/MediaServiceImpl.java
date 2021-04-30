@@ -427,6 +427,7 @@ public class MediaServiceImpl implements MediaService {
 						curr_item_id = p.getItem().getId();
 						result.setItemName(p.getItem().getName());
 						result.setExternalId(p.getItem().getExternalId());
+						result.setCollectionName(p.getItem().getCollection().getName());
 						primaryFileinfo.put("id", p.getId()); 
 						primaryFileinfo.put("name",p.getName());
 						primaryFileinfo.put("mediaType",mime_type);
@@ -438,6 +439,7 @@ public class MediaServiceImpl implements MediaService {
 					curr_item_id = p.getItem().getId();
 					result.setItemName(p.getItem().getName());
 					result.setExternalId(p.getItem().getExternalId());
+					result.setCollectionName(p.getItem().getCollection().getName());
 					primaryFileinfo.put("id", p.getId()); 
 					primaryFileinfo.put("name",p.getName());
 					primaryFileinfo.put("mediaType",mime_type);
