@@ -202,7 +202,7 @@ public class MediaServiceTests {
 	}	
 	
 	@Test
-    public void shouldFindItemOrFileByName() {
+    public void shouldFindItemOrFileByPrimaryfileName() {
 		String primaryFileName=primaryfile.getName();
 		String mediaType="000";
 		ItemSearchResponse response= mediaService.findItemOrFile(primaryFileName.substring(0,4),mediaType);

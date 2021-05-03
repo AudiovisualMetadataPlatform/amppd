@@ -19,7 +19,10 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	@Query(value = "select p from Primaryfile p where lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.description) like lower(concat('%', :keyword,'%'))")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 
 		
-	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
+	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByItemOrFileName(@Param("keyword") String keyword);
+	
+	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
+	List<Primaryfile> findByCollectionOrItemOrFileName(@Param("keyword") String keyword);
 
 }

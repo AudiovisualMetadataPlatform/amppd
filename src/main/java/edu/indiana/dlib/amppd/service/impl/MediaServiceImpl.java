@@ -402,7 +402,7 @@ public class MediaServiceImpl implements MediaService {
 		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
 		
 		try {
-			List<Primaryfile> matchedFiles = primaryfileRepository.findByItemOrFileName(keyword);
+			List<Primaryfile> matchedFiles = primaryfileRepository.findByCollectionOrItemOrFileName(keyword);
 			ItemSearchResult result = new ItemSearchResult();;
 			Map <String, Object>primaryFileinfo;
 			ArrayList<Map> primaryFilerows = new ArrayList<Map>();
