@@ -319,7 +319,7 @@ public class JobServiceImpl implements JobService {
 		List<String> stepsChanged = new ArrayList<String>();		
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
-			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX) || StringUtils.startsWith(stepDef.getToolId(), APPLAUSE_TOOL_ID)) {
+			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX) || StringUtils.equals(stepDef.getToolId(), APPLAUSE_TOOL_ID)) {
 				// since all HMGMs in the workflow share the same context, we only need to compute it once when first needed, then reuse it
 				if (context.length() == 0) {
 					context.append(getHmgmContext(workflowDetails, primaryfile));
