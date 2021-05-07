@@ -21,8 +21,9 @@ import lombok.Setter;
 @Setter
 public class GalaxyPropertyConfig {
 
-    @NotNull private String host = "localhost";
-    @NotNull private Integer port = 8300;
+    @NotNull private String host;
+    @NotNull private Integer port;
+    @NotNull private String userId;
     @NotNull private String username;
     @NotNull private String password;
     
