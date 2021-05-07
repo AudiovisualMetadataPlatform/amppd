@@ -279,7 +279,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 * @see edu.indiana.dlib.amppd.service.AmpUserService.getCurrentUser()
 	 */
 	@Override
-	public AmpUser getCurrentUser() {
+	public AmpUser getGalaxyUser() {
 		String username = getCurrentUsername();
 		AmpUser currentUser = getUser(username);		
 		if (currentUser == null) {

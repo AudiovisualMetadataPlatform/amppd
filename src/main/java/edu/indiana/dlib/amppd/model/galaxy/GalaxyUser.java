@@ -15,7 +15,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class GalaxyUser {
+	/* TODO
+	 * Once user management and access control is impl'ed in AMP, this class could be merged into AmpUser.
+	 */
 
+	private String userId;
 	private String username;
 	private String password;
 	private String apiKey;

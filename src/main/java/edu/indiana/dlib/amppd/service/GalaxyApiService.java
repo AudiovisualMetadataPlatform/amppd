@@ -10,13 +10,11 @@ import edu.indiana.dlib.amppd.model.galaxy.GalaxyUser;
  */
 public interface GalaxyApiService {
     
-	// TODO further divide Galaxy related services into each own class, for ex, all workflow related methods can be moved into a separate GalaxyWorkflowService.
-	
 	/**
 	 * Retrieve the Galaxy user information for the current AMP user.
 	 * @return
 	 */
-	public GalaxyUser getCurrentUser();
+	public GalaxyUser gettGalaxyUser();
 	
 	/**
 	 * Returns Galaxy instance for the current user.
