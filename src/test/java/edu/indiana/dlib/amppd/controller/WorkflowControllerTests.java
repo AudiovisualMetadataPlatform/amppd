@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,7 @@ public class WorkflowControllerTests {
     }
 
 
+    @Ignore
     @Test
     public void shouldShowWorkflowDetails() throws Exception {    	
     	// there should be at least one workflow existing in Galaxy, and we can use one of these
