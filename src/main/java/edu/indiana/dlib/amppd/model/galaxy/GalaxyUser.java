@@ -16,12 +16,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GalaxyUser {
 
+	private String userId;
 	private String username;
 	private String password;
 	private String apiKey;
 	private GalaxyInstance instance;
 	
-	public GalaxyUser(String username, String password) {
+	public GalaxyUser(String userId, String username, String password) {
+		this.userId = userId;
 		this.username = username;
 		this.password = password;		
 	}

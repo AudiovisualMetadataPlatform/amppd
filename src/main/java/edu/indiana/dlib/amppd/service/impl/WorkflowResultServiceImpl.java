@@ -41,6 +41,7 @@ import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
@@ -138,27 +139,33 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 //	public static final List<String> HIDE_OUTPUTS = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");	
 //	public static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
 
-	@Autowired
-	private GalaxyPropertyConfig galaxyPropertyConfig;
-	@Autowired
-	private PrimaryfileRepository primaryfileRepository;
-	@Autowired
-	private MgmToolRepository mgmToolRepository;
-	@Autowired
-	private JobService jobService;
-	@Autowired
-	private WorkflowService workflowService;
-	@Autowired
-	private MediaService mediaService;
-	@Autowired
-	private WorkflowResultRepository workflowResultRepository;
-	
 	@Value("${amppd.refreshResultsStatusMinutes}")
 	private int REFRESH_STATUS_MINUTES;
 	
 	@Value("${amppd.refreshResultsTableMinutes}")
 	private int REFRESH_TABLE_MINUTES;
 		
+	@Autowired
+	private GalaxyPropertyConfig galaxyPropertyConfig;
+	
+	@Autowired
+	private PrimaryfileRepository primaryfileRepository;
+	
+	@Autowired
+	private MgmToolRepository mgmToolRepository;
+	
+	@Autowired
+	private WorkflowResultRepository workflowResultRepository;
+
+	@Autowired
+	private JobService jobService;
+	
+	@Autowired
+	private WorkflowService workflowService;
+	
+	@Autowired
+	private MediaService mediaService;
+	
 	
 	/**
 	 * Return true if the specified dateRefreshed is recent, i.e. within the given refreshMinutes; false otherwise.
@@ -316,7 +323,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 //		workflowService.clearWorkflowNamesCache();		
 		// TODO replace below code with above commented code once we upgrade to Galaxy 20.*		
 		// get all workflows as a work-around to retrieve invocations per workflow per primaryfile
-		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();
+		List<Workflow> workflows = workflowService.getWorkflowsClient().getWorkflows();		
+		
+		// record primaryfileIds for which workflowResults failed to be refreshed
+		List<Long> failedPrimaryfileIds = new ArrayList<Long>();
 		
 		// process Galaxy invocation details per primaryfile instead of retrieving all at once, in order to avoid timeout issue in Galaxy
 		for (Primaryfile primaryfile : primaryfiles) {
@@ -343,7 +353,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				 *  this way we have the stored workflow ID in hand
 				 */
 				for (Workflow workflow : workflows) {
-					List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUsername(), workflow.getId(), primaryfile.getHistoryId());
+					List<InvocationDetails> invocations = jobService.getWorkflowsClient().indexInvocationsDetails(galaxyPropertyConfig.getUserId(), workflow.getId(), primaryfile.getHistoryId());
 					for (InvocationDetails invocation : invocations) {
 						List<WorkflowResult> results = refreshWorkflowResults(invocation, workflow, primaryfile);
 						allResults.addAll(results);
@@ -353,6 +363,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				log.info("Successfully refreshed results for primaryfile " + primaryfile.getId() + ", total of " + allResults.size() + " results refreshed so far ...");				
 			}
 			catch (Exception e) {
+				// record primaryfileIds for which workflowResults failed to be refreshed and should not be deleted at the end
+				failedPrimaryfileIds.add(primaryfile.getId());
+				
 				// continue with the rest even if we fail on some primaryfile,
 				// as we can rerun the refresh to continue on the failed ones
 				log.error("Failed to refresh results for primaryfile " + primaryfile.getId(), e);
@@ -360,7 +373,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 				
 		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults iteratively.");
-		deleteObsoleteWorkflowResults();
+		log.info("Failed to refresh WorkflowResults for " + failedPrimaryfileIds.size() + " primaryfiles.");
+		deleteObsoleteWorkflowResults(failedPrimaryfileIds);
 		return allResults;
 	}
 	
@@ -610,12 +624,15 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * Delete obsolete WorkflowResults, i.e. those that didn't get refreshed during the most recent whole table refresh.
-	 * @return a list of the deleted WorkflowResults 
+	 * Delete obsolete WorkflowResults, i.e. those that didn't get refreshed (except those for the specified failedPrimaryfileIds 
+	 * due to exception) during the most recent whole table refresh, and return a list of the deleted WorkflowResults. 
 	 */
-	protected List<WorkflowResult> deleteObsoleteWorkflowResults() {
-		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);
-		List<WorkflowResult> deleteResults = workflowResultRepository.findObsolete(dateObsolete);	
+	protected List<WorkflowResult> deleteObsoleteWorkflowResults(List<Long> failedPrimaryfileIds) {
+		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
+		// as they might still be valid, and should be refreshed when the job is rerun
+		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
+		List<WorkflowResult> deleteResults = workflowResultRepository.findByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);	
+//		List<WorkflowResult> deleteResults = workflowResultRepository.findObsolete(dateObsolete);	
 
 		if (deleteResults != null && !deleteResults.isEmpty()) {
 			try {
