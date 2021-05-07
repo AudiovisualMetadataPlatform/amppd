@@ -41,7 +41,6 @@ import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
-import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
