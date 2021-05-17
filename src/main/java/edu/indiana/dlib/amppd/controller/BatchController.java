@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Primaryfile;
