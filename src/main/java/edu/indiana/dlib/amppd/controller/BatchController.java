@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -114,15 +116,20 @@ public class BatchController {
 	 */
 	  @GetMapping("/download/{fileName:.+}")
 	    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws Exception{
-			
+		    
 		    String resourcesStaticFilePath= "static/"+fileName;
 			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-			File file = new File(classLoader.getResource(resourcesStaticFilePath).getFile());
+			URL url =classLoader.getResource(resourcesStaticFilePath);
+			if(url==null) {
+				return ResponseEntity.notFound().build();
+			}
+			File file = new File(url.getFile());
 			Resource resource =fileStorageService.loadAsResource(file.getPath());
 			String headerKey = "Content-Disposition";
 			String headerValue = "attachment; filename="+fileName;
 			log.info("Serving " + headerValue);
 			return ResponseEntity.ok().header(headerKey,headerValue).body(resource);
+				
 	  }	
   
 }
