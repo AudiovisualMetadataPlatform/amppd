@@ -114,16 +114,15 @@ public class BatchController {
 	 */
 	  @GetMapping("/download/{fileName:.+}")
 	    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws Exception{
+			
 		    String resourcesStaticFilePath= "static/"+fileName;
 			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-	        File file = new File(classLoader.getResource(resourcesStaticFilePath).getFile());
-	        Resource resource =fileStorageService.loadAsResource(file.getPath());
-	    	String headerKey = "Content-Disposition";
+			File file = new File(classLoader.getResource(resourcesStaticFilePath).getFile());
+			Resource resource =fileStorageService.loadAsResource(file.getPath());
+			String headerKey = "Content-Disposition";
 			String headerValue = "attachment; filename="+fileName;
-			log.info("Download " + headerValue);
-	    	return ResponseEntity.ok()
-	                .header(headerKey,headerValue)
-	                .body(resource);
+			log.info("Serving " + headerValue);
+			return ResponseEntity.ok().header(headerKey,headerValue).body(resource);
 	  }	
   
 }
