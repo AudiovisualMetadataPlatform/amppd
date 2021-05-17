@@ -1,20 +1,24 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Asset;
@@ -23,6 +27,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +46,8 @@ public class BatchController {
     private PrimaryfileRepository primaryfileRepository;
 	@Autowired
     private PreprocessService preprocessService;
+	@Autowired
+    private FileStorageService fileStorageService;
 	
 	@PostMapping(path = "/batch/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {	
@@ -100,4 +107,28 @@ public class BatchController {
 
 		return String.format("Files initially missing media info: %s\nFiles with media info successfully added: %s\nFiles still missing media info: %s", missingMediaInfo, success, (missingMediaInfo - success));
 	}
+	
+	/**
+	 * Serve the  fileContent  from resources/static Folder based on given fileName.
+	 * @param fileName 
+	 * @return the  content of the  file
+	 */
+	  @GetMapping("/download/{fileName:.+}")
+	    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws Exception{
+		    
+		    String resourcesStaticFilePath= "static/"+fileName;
+			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+			URL url =classLoader.getResource(resourcesStaticFilePath);
+			if(url==null) {
+				return ResponseEntity.notFound().build();
+			}
+			File file = new File(url.getFile());
+			Resource resource =fileStorageService.loadAsResource(file.getPath());
+			String headerKey = "Content-Disposition";
+			String headerValue = "attachment; filename="+fileName;
+			log.info("Serving " + headerValue);
+			return ResponseEntity.ok().header(headerKey,headerValue).body(resource);
+				
+	  }	
+  
 }
