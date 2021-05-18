@@ -25,14 +25,14 @@ public class BatchControllerTests {
 	
 	@Test
 	public void shouldServeBatchIngestTemplateFile() throws Exception{
-		MvcResult result= mvc.perform(get("/download/{fileName:.+}","AmpBatchIngestTemplate.csv").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andReturn();
+		MvcResult result= mvc.perform(get("/serveFile/{fileName:.+}","AmpBatchIngestTemplate.csv").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andReturn();
 		Assert.assertEquals(200, result.getResponse().getStatus());
 		Assert.assertNotNull(result.getResponse().getContentAsString());
 	}
 	
 	@Test
 	public void shouldNotServeFileForInvalidFilename() throws Exception {
-		MvcResult result= mvc.perform(get("/download/{fileName:.+}","NofileCheck").header("Authorization", "Bearer " + token)).andExpect(status().isNotFound()).andReturn();
+		MvcResult result= mvc.perform(get("/serveFile/{fileName:.+}","NofileCheck").header("Authorization", "Bearer " + token)).andExpect(status().isNotFound()).andReturn();
 		Assert.assertEquals(404, result.getResponse().getStatus());
 		Assert.assertEquals(0,result.getResponse().getContentLength());
 	}

@@ -113,13 +113,14 @@ public class BatchController {
 	 * @param fileName 
 	 * @return the  content of the  file
 	 */
-	  @GetMapping("/download/{fileName:.+}")
+	  @GetMapping("/serveFile/{fileName:.+}")
 	    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws Exception{
-		    
+		    log.info("serveFile Initiated");
 		    String resourcesStaticFilePath= "static/"+fileName;
 			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 			URL url =classLoader.getResource(resourcesStaticFilePath);
 			if(url==null) {
+				log.info(fileName+ " Not Found");
 				return ResponseEntity.notFound().build();
 			}
 			File file = new File(url.getFile());
