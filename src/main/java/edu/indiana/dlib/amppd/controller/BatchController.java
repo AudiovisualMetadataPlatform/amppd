@@ -1,13 +1,12 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.io.File;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,7 +26,6 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
-import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +45,7 @@ public class BatchController {
 	@Autowired
     private PreprocessService preprocessService;
 	@Autowired
-    private FileStorageService fileStorageService;
+	private ResourceLoader resourceLoader;
 	
 	@PostMapping(path = "/batch/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {	
@@ -115,16 +113,10 @@ public class BatchController {
 	 */
 	  @GetMapping("/serveFile/{fileName:.+}")
 	    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws Exception{
+		    
 		    log.info("serveFile Initiated");
-		    String resourcesStaticFilePath= "static/"+fileName;
-			ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-			URL url =classLoader.getResource(resourcesStaticFilePath);
-			if(url==null) {
-				log.info(fileName+ " Not Found");
-				return ResponseEntity.notFound().build();
-			}
-			File file = new File(url.getFile());
-			Resource resource =fileStorageService.loadAsResource(file.getPath());
+		    String resourcesStaticFilePath= "classpath:static/"+fileName;
+		    Resource resource = resourceLoader.getResource(resourcesStaticFilePath);
 			String headerKey = "Content-Disposition";
 			String headerValue = "attachment; filename="+fileName;
 			log.info("Serving " + headerValue);
