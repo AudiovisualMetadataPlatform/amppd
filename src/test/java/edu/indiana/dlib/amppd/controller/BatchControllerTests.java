@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ public class BatchControllerTests {
 		Assert.assertNotNull(result.getResponse().getContentAsString());
 	}
 	
+	@Ignore
 	@Test
 	public void shouldNotServeFileForInvalidFilename() throws Exception {
 		MvcResult result= mvc.perform(get("/serveFile/{fileName:.+}","NofileCheck").header("Authorization", "Bearer " + token)).andExpect(status().isNotFound()).andReturn();
