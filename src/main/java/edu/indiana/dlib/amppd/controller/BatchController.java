@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,11 +118,14 @@ public class BatchController {
 		    log.info("serveFile Initiated");
 		    String resourcesStaticFilePath= "classpath:static/"+fileName;
 		    Resource resource = resourceLoader.getResource(resourcesStaticFilePath);
-			String headerKey = "Content-Disposition";
+		    if(!resource.exists()){
+		    	log.info(fileName +" File Not Found");
+		    	return ResponseEntity.notFound().build();
+		    }
+		    String headerKey = "Content-Disposition";
 			String headerValue = "attachment; filename="+fileName;
 			log.info("Serving " + headerValue);
 			return ResponseEntity.ok().header(headerKey,headerValue).body(resource);
-				
 	  }	
   
 }
