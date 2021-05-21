@@ -107,25 +107,4 @@ public class BatchController {
 		return String.format("Files initially missing media info: %s\nFiles with media info successfully added: %s\nFiles still missing media info: %s", missingMediaInfo, success, (missingMediaInfo - success));
 	}
 	
-	/**
-	 * Serve the  fileContent  from resources/static Folder based on given fileName.
-	 * @param fileName 
-	 * @return the  content of the  file
-	 */
-	  @GetMapping("/serveFile/{fileName:.+}")
-	    public ResponseEntity<Resource> serveFile(@PathVariable String fileName) throws Exception{
-		    
-		    log.info("serveFile Initiated");
-		    String resourcesStaticFilePath= "classpath:static/"+fileName;
-		    Resource resource = resourceLoader.getResource(resourcesStaticFilePath);
-		    if(!resource.exists()){
-		    	log.info(fileName +" File Not Found");
-		    	return ResponseEntity.notFound().build();
-		    }
-		    String headerKey = "Content-Disposition";
-			String headerValue = "attachment; filename="+fileName;
-			log.info("Serving " + headerValue);
-			return ResponseEntity.ok().header(headerKey,headerValue).body(resource);
-	  }	
-  
 }
