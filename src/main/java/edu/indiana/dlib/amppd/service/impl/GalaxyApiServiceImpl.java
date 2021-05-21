@@ -35,6 +35,7 @@ public class GalaxyApiServiceImpl implements GalaxyApiService {
 		 * Also, once we implement Amppd User, this method can be moved to UserService.
 		 */
 		GalaxyUser user = new GalaxyUser();
+		user.setUserId(config.getUserId());
 		user.setUsername(config.getUsername());
 		user.setPassword(config.getPassword());
 		return user;		

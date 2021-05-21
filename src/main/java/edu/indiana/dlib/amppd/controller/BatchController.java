@@ -1,20 +1,24 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Asset;
@@ -41,6 +45,8 @@ public class BatchController {
     private PrimaryfileRepository primaryfileRepository;
 	@Autowired
     private PreprocessService preprocessService;
+	@Autowired
+	private ResourceLoader resourceLoader;
 	
 	@PostMapping(path = "/batch/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {	
@@ -100,4 +106,5 @@ public class BatchController {
 
 		return String.format("Files initially missing media info: %s\nFiles with media info successfully added: %s\nFiles still missing media info: %s", missingMediaInfo, success, (missingMediaInfo - success));
 	}
+	
 }
