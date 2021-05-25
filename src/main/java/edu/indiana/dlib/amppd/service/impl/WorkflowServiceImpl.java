@@ -52,27 +52,27 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Override
 	public List<Workflow> getWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted) {
 		// TODO 
-		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list(trans, missing_tools=False, show_published=None, show_hidden=False, show_deleted=False, **kwd).
+		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list.
 		// Replace it with the commented code at the end of the method once the Galaxy bug is fixed.
 			
-		// if showUnpublished not specified, return both published and unpublished workflows
+		// if showPublished not specified, return both published and unpublished workflows
+		List <Workflow> workflows = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 		if (showPublished == null ) {
-			return workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
-//			return workflowsClient.getWorkflows();
+			return workflows;
 		}
 		
-		List <Workflow> workflows = new ArrayList <Workflow>();
-//		for (Workflow workflow : workflowsClient.getWorkflows()) {
-		for (Workflow workflow : workflowsClient.getWorkflows(null, showHidden, showDeleted, null)) {
+		// otherwise filter workflows based on showPublished
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		for (Workflow workflow : workflows) {
 			if (showPublished && workflow.isPublished()) {
-				workflows.add(workflow);			
+				filterWorkflows.add(workflow);			
 			}
 			else if (!showPublished && !workflow.isPublished()) {
-				workflows.add(workflow);			
+				filterWorkflows.add(workflow);			
 			}
-		}		
+		}				
+		return filterWorkflows;	
 		
-		return workflows;				
 //		return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);
 	}
 	

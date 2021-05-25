@@ -13,8 +13,8 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 public interface WorkflowService {
 
 	/**
-	 * List workflows satisfying the given criteria.
-	 * @param showUnpublished: if true, include also unpublished (in addition to published) workflows; otherwise include only published workflows
+	 * List workflows according to the given criteria.
+	 * @param showPublished: if None/True/False, include both, only published, or only unpublished workflows
 	 * @param showHidden: if true, include only hidden workflows; otherwise include only unhidden workflows
 	 * @param showDeleted: if true, include only deleted workflows; otherwise include only undeleted workflows
 	 * @return workflows satisfying the given criteria
