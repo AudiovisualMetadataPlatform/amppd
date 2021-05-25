@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.util.List;
+
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
@@ -10,6 +12,15 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
  */
 public interface WorkflowService {
 
+	/**
+	 * List workflows satisfying the given criteria.
+	 * @param showUnpublished: if true, include also unpublished (in addition to published) workflows; otherwise include only published workflows
+	 * @param showHidden: if true, include only hidden workflows; otherwise include only unhidden workflows
+	 * @param showDeleted: if true, include only deleted workflows; otherwise include only undeleted workflows
+	 * @return workflows satisfying the given criteria
+	 */
+	public List<Workflow> getWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted);
+	
 	/**
 	 * Get the WorkflowsClient instance.
 	 */

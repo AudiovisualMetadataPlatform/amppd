@@ -1,6 +1,8 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +45,36 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflows(Boolean, Boolean, Boolean)
+	 */	
+	@Override
+	public List<Workflow> getWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted) {
+		// TODO 
+		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list(trans, missing_tools=False, show_published=None, show_hidden=False, show_deleted=False, **kwd).
+		// Replace it with the commented code at the end of the method once the Galaxy bug is fixed.
+			
+		// if showUnpublished not specified, return both published and unpublished workflows
+		if (showPublished == null ) {
+			return workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
+//			return workflowsClient.getWorkflows();
+		}
+		
+		List <Workflow> workflows = new ArrayList <Workflow>();
+//		for (Workflow workflow : workflowsClient.getWorkflows()) {
+		for (Workflow workflow : workflowsClient.getWorkflows(null, showHidden, showDeleted, null)) {
+			if (showPublished && workflow.isPublished()) {
+				workflows.add(workflow);			
+			}
+			else if (!showPublished && !workflow.isPublished()) {
+				workflows.add(workflow);			
+			}
+		}		
+		
+		return workflows;				
+//		return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);
+	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflow(String)

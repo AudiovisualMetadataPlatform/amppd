@@ -34,12 +34,19 @@ public class WorkflowController {
 	 * @return a list of workflows with name, ID, and URL.
 	 */
 	@GetMapping("/workflows")
-	public List<Workflow> listWorkflows() {	
+	public List<Workflow> listWorkflows(
+			@RequestParam(required = false) Boolean showPublished, 
+			@RequestParam(required = false) Boolean showHidden, 
+			@RequestParam(required = false) Boolean showDeleted) {	
 		List<Workflow> workflows = null;
 	
 		try {
-			workflows = workflowService.getWorkflowsClient().getWorkflows();
-			log.info("Listing " + workflows.size() + " workflows currently existing in Galaxy: " + workflows);
+			workflows = workflowService.getWorkflows(showPublished, showHidden, showDeleted);
+			String published = showPublished == null ? "" : showPublished.toString(); 
+			String hidden = showHidden == null ? "" : showHidden.toString(); 
+			String deleted = showDeleted == null ? "" : showDeleted.toString(); 
+			log.info("Listing " + workflows.size() + " workflows currently existing in Galaxy, showPublished = " + published
+					+ ", showHidden = " + hidden + ", showDeleted = " + deleted);
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflows from Galaxy.";
@@ -58,7 +65,7 @@ public class WorkflowController {
 	 * @return all the details information of the queried workflow
 	 */
 	@GetMapping("/workflows/{workflowId}")
-	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId, @RequestParam(name = "instance", required = false) Boolean instance) {	
+	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId, @RequestParam(required = false) Boolean instance) {	
 		WorkflowDetails workflow = null;
 	
 		try {
