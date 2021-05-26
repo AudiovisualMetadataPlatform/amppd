@@ -78,7 +78,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public List<Workflow> listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted) {
 		// TODO 
 		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list.
-		// Replace it with the commented code at the end of the method once the Galaxy bug is fixed.
+		// We can replace it with the commented code at the end of the method once the Galaxy bug is fixed;
+		// provided that special care is taken to handle the case when the published tag is used.
 			
 		List <Workflow> workflows = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
