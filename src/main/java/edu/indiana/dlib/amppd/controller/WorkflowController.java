@@ -41,12 +41,11 @@ public class WorkflowController {
 		List<Workflow> workflows = null;
 	
 		try {
-			workflows = workflowService.getWorkflows(showPublished, showHidden, showDeleted);
-			String published = showPublished == null ? "" : showPublished.toString(); 
-			String hidden = showHidden == null ? "" : showHidden.toString(); 
-			String deleted = showDeleted == null ? "" : showDeleted.toString(); 
-			log.info("Listing " + workflows.size() + " workflows currently existing in Galaxy, showPublished = " + published
-					+ ", showHidden = " + hidden + ", showDeleted = " + deleted);
+			String published = showPublished == null ? "null" : showPublished.toString(); 
+			String hidden = showHidden == null ? "null" : showHidden.toString(); 
+			String deleted = showDeleted == null ? "null" : showDeleted.toString(); 
+			log.info("Listing workflows in Galaxy, showPublished = " + published + ", showHidden = " + hidden + ", showDeleted = " + deleted);
+			workflows = workflowService.listWorkflows(showPublished, showHidden, showDeleted);
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflows from Galaxy.";
