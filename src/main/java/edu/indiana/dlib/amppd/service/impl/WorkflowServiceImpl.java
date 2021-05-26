@@ -101,9 +101,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		
 		String published = showPublished == null ? "" : (showPublished ? "published " : "unpublished "); 
-		String hidden = showHidden != null && showHidden ? "" : "hidden "; 
-		String deleted = showDeleted != null && showDeleted ? "" : "deleted "; 
-		log.info("Successfully listed " + filterWorkflows.size() + published + hidden + deleted + "workflows currently existing in Galaxy.");
+		String hidden = showHidden != null && showHidden ? "hidden " : ""; 
+		String deleted = showDeleted != null && showDeleted ? "deleted " : ""; 
+		log.info("Successfully listed " + filterWorkflows.size() + " " + published + hidden + deleted + "workflows currently existing in Galaxy.");
 		return filterWorkflows;			
 		
 //		return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);

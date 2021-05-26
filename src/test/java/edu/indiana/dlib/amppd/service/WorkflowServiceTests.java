@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -25,13 +27,59 @@ public class WorkflowServiceTests {
 	private TestHelper testHelper;   
 
 	private Workflow workflow;	
+	private Workflow workflowPublished;	
 	
 	@Before
 	public void setup() {
     	// prepare the workflow for testing
     	workflow = testHelper.ensureTestWorkflow();  
+    	workflowPublished = testHelper.ensureTestWorkflowPublished();  
  	}
 		
+    @Test
+    public void shouldIdentifyWorkflowHasTagOrNot() {
+    	// workflowPublished should contain the published tag while workflow should not
+    	Assert.assertTrue(workflowService.hasWorkflowTag(workflowPublished, "published"));
+    	Assert.assertFalse(workflowService.hasWorkflowTag(workflow, "published"));
+    }
+
+    @Test
+    public void shouldIdentifyWorkflowPublishedOrNot() {
+    	// workflowPublished should be identified as published tag while workflow should not
+    	Assert.assertTrue(workflowService.isWorkflowPublished(workflowPublished));
+    	Assert.assertFalse(workflowService.isWorkflowPublished(workflow));
+    }
+
+    @Test
+    public void shouldListPublishedWorkflows() {
+    	// list both published and unpublished workflows
+    	List<Workflow> workflows = workflowService.listWorkflows(true, null, null);
+    	
+    	// there should be at least 1 published workflows
+    	Assert.assertNotNull(workflows);
+    	Assert.assertTrue(workflows.size() >= 1);
+    	
+    	// all listed workflows should be published
+    	for (Workflow workflow : workflows) {
+    		Assert.assertTrue(workflowService.isWorkflowPublished(workflow));
+    	}
+    }
+
+    @Test
+    public void shouldListUnpublishedWorkflows() {
+    	// list both published and unpublished workflows
+    	List<Workflow> workflows = workflowService.listWorkflows(false, null, null);
+    	
+    	// there should be at least 1 unpublished workflows
+    	Assert.assertNotNull(workflows);
+    	Assert.assertTrue(workflows.size() >= 1);
+    	
+    	// all listed workflows should be unpublished
+    	for (Workflow workflow : workflows) {
+    		Assert.assertFalse(workflowService.isWorkflowPublished(workflow));
+    	}
+    }
+
     @Test
     public void shouldGetExistingWorkflow() {
     	// retrieve the workflow by name
