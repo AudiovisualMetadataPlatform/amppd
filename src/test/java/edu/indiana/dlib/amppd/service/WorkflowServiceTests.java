@@ -44,7 +44,7 @@ public class WorkflowServiceTests {
     }
 
     @Test
-    public void shouldIdentifyWorkflowPublishedOrNot() {
+    public void shouldIdentifyWorkflowIsPublishedOrNot() {
     	// workflowPublished should be identified as published tag while workflow should not
     	Assert.assertTrue(workflowService.isWorkflowPublished(workflowPublished));
     	Assert.assertFalse(workflowService.isWorkflowPublished(workflow));
