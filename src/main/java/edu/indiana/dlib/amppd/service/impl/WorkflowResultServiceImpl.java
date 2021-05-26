@@ -69,8 +69,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("aws_comprehend", "aws_comprehend_ner");
 		put("aws_transcribe", "aws_transcribe_stt");
 		put("speech_segmenter", "ina_speech_segmenter");
-		put("VTTgenerator", "trasncript_to_webvtt");
-		put("vtt_generator", "trasncript_to_webvtt");
+		put("VTTgenerator", "transcript_to_webvtt");
+		put("vtt_generator", "transcript_to_webvtt");
 	}};
 	// map between all obsolete output names to their standard current names
 	private static final HashMap<String, String> STANDARD_OUTPUTS = new HashMap<String, String>() {{
