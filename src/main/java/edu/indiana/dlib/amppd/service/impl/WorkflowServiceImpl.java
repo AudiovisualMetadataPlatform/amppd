@@ -131,7 +131,18 @@ public class WorkflowServiceImpl implements WorkflowService {
 		if (workflowName != null) return workflowName;
 		
 		try {
-			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+			/* Note: 
+			 * It appears that when calling showWorkflowInstance, i.e. getting Workflow with supposedly storedWorkflowId
+			 * (by setting request param instance=true), Galaxy either throws UniformInterfaceException (if the storedWorkflowId 
+			 * does not exist), or return another workflow whose ID is totally different from the storedWorkflowId.
+			 * In the past when querying workflow, we relied on the workflow ID returned from invocation query, which tends to be
+			 * different from the real workflow ID, so we used showWorkflowInstance considering that ID was the storedWorkflowId.
+			 * That's not the case anymore: we now use the workflow ID returned from workflow index, which is always the real ID.
+			 * Thus, we should use showWorkflow instead of showWorkflowInstance, or we'd get wrong workflow or exception.
+			 */
+//			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+			
+			WorkflowDetails workflow = workflowsClient.showWorkflow(workflowId);
 			if (workflow != null) {
 				workflowName = workflow.getName();
 			}
@@ -144,7 +155,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 		catch(UniformInterfaceException e) {
 			// when Galaxy can't find the workflow by the given ID, it throws exception (instead of returning null);
 			// this is likely because the ID is not a StoredWorkflow ID; in this case use workflow ID as name
-			// TODO this issue may be resolved when upgrading to Galaxy 20.*
 			workflowName = workflowId;
 			log.warn("Can't find workflow " + workflowId + " in Galaxy; will use the ID as its name\n" + e.getMessage());
 		}
