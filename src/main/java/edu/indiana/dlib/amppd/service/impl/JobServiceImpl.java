@@ -70,7 +70,7 @@ public class JobServiceImpl implements JobService {
 	public static final List<String> MGM_TOOL_IDS = new ArrayList<String>() {
         {
             add("applause_detection_to_avalon_xml");
-            add("contact_sheets_collection");
+            add("collection_contact_sheets");
         }
     };
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
