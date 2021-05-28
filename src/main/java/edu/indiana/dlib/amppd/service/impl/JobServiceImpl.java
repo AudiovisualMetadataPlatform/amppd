@@ -66,8 +66,13 @@ public class JobServiceImpl implements JobService {
 	
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
-	public static final String APPLAUSE_TOOL_ID = "applause_detection_to_avalon_xml";
-	public static final String COLLECTION_CONTACT_SHEET_TOOL_ID = "contact_sheets_collection";
+	
+	public static final List<String> MGM_TOOL_IDS = new ArrayList<String>() {
+        {
+            add("applause_detection_to_avalon_xml");
+            add("contact_sheets_collection");
+        }
+    };
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
 	public static final String SUPPLEMENT_TOOL_ID = "supplement";
 	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
