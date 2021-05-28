@@ -66,7 +66,13 @@ public class JobServiceImpl implements JobService {
 	
 	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
-	public static final String APPLAUSE_TOOL_ID = "applause_detection_to_avalon_xml";
+	
+	public static final List<String> MGM_TOOL_IDS = new ArrayList<String>() {
+        {
+            add("applause_detection_to_avalon_xml");
+            add("contact_sheets_collection");
+        }
+    };
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
 	public static final String SUPPLEMENT_TOOL_ID = "supplement";
 	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
@@ -319,7 +325,7 @@ public class JobServiceImpl implements JobService {
 		List<String> stepsChanged = new ArrayList<String>();		
 		
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
-			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX) || StringUtils.equals(stepDef.getToolId(), APPLAUSE_TOOL_ID)) {
+			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX) || MGM_TOOL_IDS.contains(stepDef.getToolId())) {
 				// since all HMGMs in the workflow share the same context, we only need to compute it once when first needed, then reuse it
 				if (context.length() == 0) {
 					context.append(getHmgmContext(workflowDetails, primaryfile));
