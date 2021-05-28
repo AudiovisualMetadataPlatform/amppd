@@ -68,13 +68,13 @@ public class WorkflowController {
 		WorkflowDetails workflow = null;
 	
 		try {
-			if (instance != null && instance) {
+			if (instance == null || !instance) {
 				workflow = workflowService.getWorkflowsClient().showWorkflow(workflowId);
-				log.info("Showing stored workflow detail for ID: " +  workflowId);
+				log.info("Showing workflow detail with ID: " +  workflowId);
 			}
 			else {
 				workflow = workflowService.getWorkflowsClient().showWorkflowInstance(workflowId);
-				log.info("Showing possibly non-stored workflow instance detail for ID: " +  workflowId);				
+				log.info("Showing workflow detail with stored ID: " +  workflowId);				
 			}
 		}
 		catch (Exception e) {
