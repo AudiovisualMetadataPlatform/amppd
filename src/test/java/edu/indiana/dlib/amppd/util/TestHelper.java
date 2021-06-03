@@ -69,6 +69,7 @@ public class TestHelper {
 	public static final String TEST_EXTERNAL_ID = "TestExternalId";	
 	public static final String TEST_IMAGES = "TestImages";	
 	public static final String TEST_WORKFLOW = "TestWorkflow";
+	public static final String TEST_WORKFLOW_PUBLISHED = "TestWorkflowPublished";
 	public static final String TEST_HMGM_WORKFLOW = "TestHmgmWorkflow";
 	public static final String TEST_WORKFLOW_STEP = "remove_trailing_silence"; // the last step in TestWorkflow
 	public static final String TEST_OUTPUT = "out_file1";
@@ -164,6 +165,14 @@ public class TestHelper {
 	public WorkflowDetails ensureTestWorkflowDetails() {
 		Workflow workflow = ensureWorkflow(TEST_WORKFLOW);
 		return workflowService.getWorkflowsClient().showWorkflow(workflow.getId());
+	}
+	
+	/**
+	 * Check whether the workflow named TestWorkflow exists in Galaxy; if not, upload it from its resource file.
+	 * @return the prepared workflow as existing in Galaxy 
+	 */
+	public Workflow ensureTestWorkflowPublished() {
+		return ensureWorkflow(TEST_WORKFLOW_PUBLISHED);
 	}
 	
 	/**

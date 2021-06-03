@@ -22,7 +22,6 @@ import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
-@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class GalaxyDataServiceTests {

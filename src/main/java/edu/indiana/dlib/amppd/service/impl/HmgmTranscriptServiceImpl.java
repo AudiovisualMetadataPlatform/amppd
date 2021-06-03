@@ -95,7 +95,7 @@ public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {
 	}
 	
 	/*
-	 * Complete the transcript by copying latest file to file with .complete extention 
+	 * Complete the transcript by copying latest file to file with .complete extension 
 	 */
 	public boolean completeTranscript(TranscriptEditorRequest request) {			
 		try {

@@ -1,10 +1,13 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkflowServiceImpl implements WorkflowService {
 	
+	// tag for published workflow
+	public static String PUBLISHED = "published";
+	
 	@Autowired
 	private GalaxyApiService galaxyApiService;
 	
@@ -43,6 +49,66 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
 	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.hasWorkflowTag(Workflow, String)
+	 */
+	@Override
+	public Boolean hasWorkflowTag(Workflow workflow, String tag) {
+		for (String wtag : workflow.getTags()) {
+			if (StringUtils.equalsIgnoreCase(wtag, tag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.isWorkflowPublished(Workflow)
+	 */
+	@Override
+	public Boolean isWorkflowPublished(Workflow workflow) {
+		return workflow.isPublished() || hasWorkflowTag(workflow, PUBLISHED);
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflows(Boolean, Boolean, Boolean)
+	 */	
+	@Override
+	public List<Workflow> listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted) {
+		// TODO 
+		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list.
+		// We can replace it with the commented code at the end of the method once the Galaxy bug is fixed;
+		// provided that special care is taken to handle the case when the published tag is used.
+			
+		List <Workflow> workflows = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+
+		// if showPublished not specified, include both published and unpublished workflows
+		if (showPublished == null ) {
+			filterWorkflows = workflows;
+		}
+		// otherwise filter workflows based on showPublished
+		else {
+			for (Workflow workflow : workflows) {
+				Boolean isPublished = isWorkflowPublished(workflow);
+				if (showPublished && isPublished) {
+					filterWorkflows.add(workflow);			
+				}
+				else if (!showPublished && !isPublished) {
+					filterWorkflows.add(workflow);			
+				}
+			}
+		}
+		
+		String published = showPublished == null ? "" : (showPublished ? "published " : "unpublished "); 
+		String hidden = showHidden != null && showHidden ? "hidden " : ""; 
+		String deleted = showDeleted != null && showDeleted ? "deleted " : ""; 
+		log.info("Successfully listed " + filterWorkflows.size() + " " + published + hidden + deleted + "workflows currently existing in Galaxy.");
+		return filterWorkflows;			
+		
+//		return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);
+	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflow(String)
@@ -65,7 +131,18 @@ public class WorkflowServiceImpl implements WorkflowService {
 		if (workflowName != null) return workflowName;
 		
 		try {
-			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+			/* Note: 
+			 * It appears that when calling showWorkflowInstance, i.e. getting Workflow with supposedly storedWorkflowId
+			 * (by setting request param instance=true), Galaxy either throws UniformInterfaceException (if the storedWorkflowId 
+			 * does not exist), or return another workflow whose ID is totally different from the storedWorkflowId.
+			 * In the past when querying workflow, we relied on the workflow ID returned from invocation query, which tends to be
+			 * different from the real workflow ID, so we used showWorkflowInstance considering that ID was the storedWorkflowId.
+			 * That's not the case anymore: we now use the workflow ID returned from workflow index, which is always the real ID.
+			 * Thus, we should use showWorkflow instead of showWorkflowInstance, or we'd get wrong workflow or exception.
+			 */
+//			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+			
+			WorkflowDetails workflow = workflowsClient.showWorkflow(workflowId);
 			if (workflow != null) {
 				workflowName = workflow.getName();
 			}
@@ -78,7 +155,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 		catch(UniformInterfaceException e) {
 			// when Galaxy can't find the workflow by the given ID, it throws exception (instead of returning null);
 			// this is likely because the ID is not a StoredWorkflow ID; in this case use workflow ID as name
-			// TODO this issue may be resolved when upgrading to Galaxy 20.*
 			workflowName = workflowId;
 			log.warn("Can't find workflow " + workflowId + " in Galaxy; will use the ID as its name\n" + e.getMessage());
 		}
@@ -86,7 +162,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		workflowNames.put(workflowId, workflowName);
 		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		return workflowName;
-	}	
+	}		
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowNamesCache()
