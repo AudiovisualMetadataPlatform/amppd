@@ -201,7 +201,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 
 	/**
-	 * Refresh the status of the specified WorkflowResult from job status in galaxy.
+	 * Refresh the status of the specified WorkflowResult from job status in galaxy, and also update output file path.
 	 */
 	protected WorkflowResult refreshResultStatus(WorkflowResult result) {
 		Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
@@ -211,16 +211,23 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			log.warn("Deleted WorkflowResult for hidden/deleted Galaxy dataset: " + result);
 		}
 		else {
-			// besides status, we should also update create/update timestamps from the dataset, 
+			// update status which might have changed since last update
+			String state = dataset.getState();
+			GalaxyJobState status = getJobStatus(state);			
+			result.setStatus(status);
+
+			// beside, we need to update the output path, as it might have been changed from null (when the job is scheduled
+			// but not running yet) to the output dateset file path (only when the job starts running does output dataset get created)
+			result.setOutputPath(dataset.getFileName());
+
+			// also, we should also update create/update timestamps from the dataset, 
 			// since these could change too as the status change;
 			// on the other hand, we don't set dateRefreshed here, to avoid conflict with the refresh table job, 
 			// which uses this field to distinguish recently refreshed WorkflowResults from obsolete ones;
 			// the dateUpdated field should be good enough to indicate the most recent update on the dataset status
-			String state = dataset.getState();
-			GalaxyJobState status = getJobStatus(state);			
-			result.setStatus(status);
 			result.setDateCreated(dataset.getCreateTime());
 			result.setDateUpdated(dataset.getUpdateTime());
+			
 			workflowResultRepository.save(result);	
 		}
 		
@@ -249,7 +256,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
 	 */
 	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
-		// for now we exclude ERROR, PAUSED and UNKNOWN for now, 
+		// for now we exclude ERROR, PAUSED and UNKNOWN, 
 		// as these jobs will need manual rerun for their status to be changed;
 		// in most cases we likely will need to delete these outputs and resubmit whole workflow;
 		// besides, all status will be updated during the nightly refresh whole table job.
