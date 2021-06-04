@@ -55,7 +55,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  @Autowired
 	  private JavaMailSender mailSender;
 
-	  private static String ampEmailId ;
 	  private static String ampAdmin ;
 	  private static int passwordResetTokenExpiration;
 	  private static int accountActivationTokenExpiration;
@@ -65,9 +64,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdPropertyConfig, AmppdUiPropertyConfig amppdUiPropertyConfig) { 
 		  this.amppdPropertyConfig = amppdPropertyConfig;
 		  this.amppdUiPropertyConfig = amppdUiPropertyConfig;
-		  ampEmailId = amppdPropertyConfig.getUsername();
 		  ampAdmin = amppdPropertyConfig.getAdmin();
-		  log.trace("Fetched email id from property file:"+ampAdmin);
+		  log.trace("Fetched AMP admin email id from property file:"+ampAdmin);
 		  uiUrl = amppdUiPropertyConfig.getUrl();
 		  passwordResetTokenExpiration = amppdPropertyConfig.getPasswordResetTokenExpiration();
 		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
