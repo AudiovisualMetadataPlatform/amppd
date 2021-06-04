@@ -137,7 +137,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("c8a70d142838a440", "993ed019b422797e");
 		put("593aba5e186b2270", "1b7e5cfdf743a2bf");
 		put("4ca0faecf704e847", "6dd5f6a56568a0ca");
-//		put("78302cee1ae7fc9a", ""); // PFile 4792: Didn't find successful AMP Transcript Corrected 
 		put("98eb6279f2521c22", "2ce55ca1f8690842");
 		put("9057839ff8d53ff4", "fb65bf64a199b051");
 		put("a2c40ea0bdc9743b", "9dabcf180e389f58");
