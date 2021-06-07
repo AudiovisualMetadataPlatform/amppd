@@ -30,6 +30,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -90,19 +91,24 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("segmented_audio_file", "speech_audio");		
 		put("webVtt", "web_vtt");
 	}};
-	// map between obsolete output names for certain workflow steps to their standard current names
-	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS = new HashMap<String, String>() {{
+	// map between obsolete output names for group1 workflow steps to their standard current names
+	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS1 = new HashMap<String, String>() {{
 		put("amp_transcript", "amp_transcript_adjusted");
 		put("amp_diarization", "amp_diarization_adjusted");
 		put("amp_segments", "amp_diarization_adjusted");
 		put("amp_segmentation", "amp_diarization_adjusted");
 	}};
+	// map between obsolete output names for group2 workflow steps to their standard current names
+	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS2 = new HashMap<String, String>() {{
+		put("amp_transcript", "amp_transcript_aligned");
+	}};
 	// map between all standard workflow step names to maps between all obsolete output names to their standard current names
 	// this is used when we need both workflow step and output name to decide what the standard output name should be, 
 	// due to that some obsolete output names overlap with standard output name from other workflow steps
 	private static final HashMap<String, HashMap<String, String>> STANDARD_STEPS_OUTPUTS = new HashMap<String, HashMap<String, String>>() {{
-		put("adjust_transcript_timestamps", STANDARD_STEP_OUTPUTS);
-		put("adjust_diarization_timestamps", STANDARD_STEP_OUTPUTS);
+		put("adjust_transcript_timestamps", STANDARD_STEP_OUTPUTS1);
+		put("adjust_diarization_timestamps", STANDARD_STEP_OUTPUTS1);
+		put("gentle_forced_alignment", STANDARD_STEP_OUTPUTS2);
 	}};
 	
 	// map between output names for outputs with obsolete data types to the correct output types 
@@ -118,6 +124,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("audio_extracted", "wav");
 		put("speech_audio", "speech");
 		put("web_vtt", "vtt");
+	}};
+
+	/* Note:
+	 * Due to a bug in Galaxy, when a failed step in a workflow invocation is rerun, the new job isn't included in the original invocation.
+	 * To fix this (only in staging environment), the corresponding rerun outputs are collected from Galaxy history to replace the failed ones.
+	 */
+	// map between IDs of the outputs from failed jobs to the outputs from the rerun jobs
+	private static final HashMap<String, String> FIX_OUTPUT_IDS = new HashMap<String, String>() {{
+		put("b049459ef51d6ee4", "b56d4f9629e973b7");
+		put("bad3e3ccfe591b99", "4040b6ef040d6ae2");
+		put("c8a70d142838a440", "993ed019b422797e");
+		put("593aba5e186b2270", "1b7e5cfdf743a2bf");
+		put("4ca0faecf704e847", "6dd5f6a56568a0ca");
+		put("98eb6279f2521c22", "2ce55ca1f8690842");
+		put("9057839ff8d53ff4", "fb65bf64a199b051");
+		put("a2c40ea0bdc9743b", "9dabcf180e389f58");
 	}};
 
 	/* Note: 
@@ -144,6 +166,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Value("${amppd.refreshResultsTableMinutes}")
 	private int REFRESH_TABLE_MINUTES;
 		
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+	  
 	@Autowired
 	private GalaxyPropertyConfig galaxyPropertyConfig;
 	
@@ -379,7 +404,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 				
 		log.info("Successfully refreshed " + allResults.size() + " WorkflowResults iteratively.");
-		log.info("Failed to refresh WorkflowResults for " + failedPrimaryfileIds.size() + " primaryfiles.");
+		log.error("Failed to refresh WorkflowResults for " + failedPrimaryfileIds.size() + " primaryfiles.");
 		deleteObsoleteWorkflowResults(failedPrimaryfileIds);
 		return allResults;
 	}
@@ -483,10 +508,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			Map<String, JobInputOutput> outputs = step.getOutputs();
 			for (String outputName : outputs.keySet()) {
 				JobInputOutput output = outputs.get(outputName);
-				Dataset dataset = jobService.showJobStepOutput(invocation.getWorkflowId(), invocation.getId(), step.getId(), output.getId());
+				String outputId = fixOutputId(output.getId());
+				Dataset dataset = jobService.showJobStepOutput(invocation.getWorkflowId(), invocation.getId(), step.getId(), outputId);
 				
 				// retrieve the result for this output if already existing in the WorkflowResult table
-				List<WorkflowResult> oldResults = workflowResultRepository.findByOutputId(output.getId());		
+				List<WorkflowResult> oldResults = workflowResultRepository.findByOutputId(outputId);		
 				
 				// if the dataset becomes discarded or deleted in Galaxy, delete any existing WorkflowResult for this output,
 				// then skip this output for further WorkflowResult creation or update
@@ -512,7 +538,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 					// if there are more than one result then there must have been some DB inconsistency,
 					// scan the results to see if any is final, if so use that one, and delete all others
 					if (oldResults.size() > 1) {
-						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " redundant results for output: " + output.getId());						
+						log.warn("Error in WorkflowResult table: Found " + oldResults.size() + " redundant results for output: " + outputId);						
 						for (WorkflowResult oldResult : oldResults) {
 							if ((oldResult.getIsFinal() != null && oldResult.getIsFinal()) && (result.getIsFinal() == null || !result.getIsFinal())) {
 								// found a final result for the first time, keep this one and delete the first result which must be non-final
@@ -545,7 +571,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setWorkflowId(workflowId);
 				result.setInvocationId(invocation.getId());
 				result.setStepId(step.getId());
-				result.setOutputId(output.getId());
+				result.setOutputId(outputId);
 				result.setHistoryId(invocation.getHistoryId());
 				
 				/* Note: 
@@ -627,6 +653,23 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else {
 			return standardize(name, map);
 		}
+	}
+	
+	/**
+	 * Translate the given outputId from a failed step job to its corresponding outputId from its rerun step job.
+	 */
+	protected String fixOutputId(String outputId) {
+		// we only care to fix outputIds in staging environment
+		if (!"stg".equalsIgnoreCase(amppdPropertyConfig.getEnvironment())) {
+			return outputId;
+		}
+		
+		String newId = standardize(outputId, FIX_OUTPUT_IDS);
+		if (!StringUtils.equals(newId, outputId)) {
+			log.warn("Replacing error output " + outputId + " with rerun successful output " + newId);
+		}
+			
+		return newId; 	
 	}
 	
 	/**

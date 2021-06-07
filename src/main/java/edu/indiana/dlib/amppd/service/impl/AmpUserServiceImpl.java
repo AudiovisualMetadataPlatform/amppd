@@ -7,8 +7,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.constraints.NotNull;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
@@ -55,7 +53,6 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  @Autowired
 	  private JavaMailSender mailSender;
 
-	  private static String ampEmailId ;
 	  private static String ampAdmin ;
 	  private static int passwordResetTokenExpiration;
 	  private static int accountActivationTokenExpiration;
@@ -65,9 +62,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  public AmpUserServiceImpl(AmppdPropertyConfig amppdPropertyConfig, AmppdUiPropertyConfig amppdUiPropertyConfig) { 
 		  this.amppdPropertyConfig = amppdPropertyConfig;
 		  this.amppdUiPropertyConfig = amppdUiPropertyConfig;
-		  ampEmailId = amppdPropertyConfig.getUsername();
 		  ampAdmin = amppdPropertyConfig.getAdmin();
-		  log.trace("Fetched email id from property file:"+ampAdmin);
+		  log.trace("Fetched AMP admin email id from property file:"+ampAdmin);
 		  uiUrl = amppdUiPropertyConfig.getUrl();
 		  passwordResetTokenExpiration = amppdPropertyConfig.getPasswordResetTokenExpiration();
 		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
@@ -367,7 +363,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			url = contextPath + "/account/approve/" + user.getId();
 			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
-			subject = amppdPropertyConfig.getEnvironment() + " New User account request: " + user.getUsername();
+			subject = amppdPropertyConfig.getEnvironment() + ": New User account request: " + user.getUsername();
 			emailTo = ampAdmin;
 		}
 		else if(type.contentEquals("reset password"))
