@@ -660,12 +660,16 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	protected String fixOutputId(String outputId) {
 		// we only care to fix outputIds in staging environment
-		if ("stg".equalsIgnoreCase(amppdPropertyConfig.getEnvironment())) {
-			return standardize(outputId, FIX_OUTPUT_IDS);
-		}
-		else {
+		if (!"stg".equalsIgnoreCase(amppdPropertyConfig.getEnvironment())) {
 			return outputId;
 		}
+		
+		String newId = standardize(outputId, FIX_OUTPUT_IDS);
+		if (!StringUtils.equals(newId, outputId)) {
+			log.warn("Replacing error output " + outputId + " with rerun successful output " + newId);
+		}
+			
+		return newId; 	
 	}
 	
 	/**
