@@ -33,6 +33,9 @@ import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of AmpUserService.
+ */ 
 @Slf4j
 @Service
 public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {

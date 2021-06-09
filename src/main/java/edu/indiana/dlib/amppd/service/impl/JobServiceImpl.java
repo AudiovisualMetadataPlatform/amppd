@@ -58,7 +58,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Implementation of JobService.
  * @author yingfeng
- *
  */
 @Service
 @Slf4j

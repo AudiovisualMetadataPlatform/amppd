@@ -39,6 +39,9 @@ import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of BatchService.
+ */ 
 @Service
 @Transactional
 @Slf4j

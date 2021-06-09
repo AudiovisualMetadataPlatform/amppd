@@ -41,6 +41,9 @@ import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
+/**
+ * Implementation of BatchValidationService.
+ */ 
 @Service
 @Transactional
 public class BatchValidationServiceImpl implements BatchValidationService {
