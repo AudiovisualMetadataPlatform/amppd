@@ -33,6 +33,12 @@ import lombok.ToString;
 @Transactional(readOnly=true, noRollbackFor=Exception.class)
 public class Item extends Content {
 
+    @Type(type="text")
+    private String externalSource;	// external source/target system
+
+    @Type(type="text")
+    private String externalId;		// ID in the external system
+    
 	@OneToMany(mappedBy="item")
 	@JsonBackReference(value="primaryfiles")
     private Set<Primaryfile> primaryfiles;
@@ -45,12 +51,7 @@ public class Item extends Content {
 	@Index
 	@ManyToOne
 	private Collection collection;	
-
-    @Type(type="text")
-    private String externalSource;
-
-    @Type(type="text")
-    private String externalId;	
+    
 //    @ManyToMany
 //    @JsonBackReference
 //    private Set<Bundle> bundles;      
