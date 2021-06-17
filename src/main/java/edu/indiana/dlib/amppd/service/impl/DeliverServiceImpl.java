@@ -83,7 +83,8 @@ public class DeliverServiceImpl implements DeliverService {
 				// use symlink here instead of the outputUrl so that Avalon users don't need to login to AMP to access the output
 				String url = mediaService.getWorkflowResultOutputSymlinkUrl(bc.getResultId());
 				urls.add(url);
-				labels.add("AMP " + bc.getOutputType().toUpperCase() + " - " + pb.getPrimaryfileName() + " - " + bc.getDateCreated());
+				labels.add("AMP " + bc.getOutputName() + " - " + pb.getPrimaryfileName() + " - " + bc.getDateCreated());
+//				labels.add("AMP " + bc.getOutputType().toUpperCase() + " - " + pb.getPrimaryfileName() + " - " + bc.getDateCreated());
 			}
 		}
 				

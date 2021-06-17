@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,7 +39,7 @@ public class DeliverController {
 	 * @param itemId ID of the given item
 	 * @return the AvalonRelatedItems delivered
 	 */
-	@PostMapping("/deliver/avalon/item/{itemId}")
+	@PostMapping(path = "/deliver/avalon/item/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AvalonRelatedItems deliverAvalonItem(@PathVariable Long itemId) {
 		log.info("Deliver final results to Avalon for item " + itemId + " ... " );
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
@@ -62,7 +63,7 @@ public class DeliverController {
 	 * @param collectionId ID of the given collection
 	 * @return the list of AvalonRelatedItems delivered
 	 */
-	@PostMapping("/deliver/avalon/collection/{collectionId}")
+	@PostMapping(path = "/deliver/avalon/collection/{collectionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<AvalonRelatedItems> deliverAvalonCollection(@PathVariable Long collectionId) {
 		log.info("Deliver final results to Avalon for items in collection " + collectionId + " ... " );
 		return deliverService.deliverAvalonCollection(collectionId);
