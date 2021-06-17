@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
+import edu.indiana.dlib.amppd.config.AvalonPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableScheduling
 //@EnableJdbcHttpSession
 @EnableJpaRepositories("edu.indiana.dlib.amppd.repository")
-@EnableConfigurationProperties({GalaxyPropertyConfig.class, AmppdPropertyConfig.class, AmppdUiPropertyConfig.class})
+@EnableConfigurationProperties({AmppdUiPropertyConfig.class, AmppdPropertyConfig.class, GalaxyPropertyConfig.class, AvalonPropertyConfig.class})
 @Slf4j
 public class AmppdApplication {
 	

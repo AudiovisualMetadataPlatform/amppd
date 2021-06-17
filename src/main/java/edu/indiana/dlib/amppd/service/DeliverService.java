@@ -30,13 +30,13 @@ public interface DeliverService {
 	/**
 	 * Put (link) the AMP outputs contained in the AvalonRelatedItems to the Avalon media object corresponding to the given AMP item.
 	 * @param externalId the external ID of the AMP item corresponding to the Avalon media object
-	 * @param aris the AvalonRelatedItems containing AMP outputs for the item
+	 * @param aris the AvalonRelatedItems containing AMP final outputs urls/labels for the item
 	 */
 	public AvalonMediaObject putAvalonRelatedItems(String externalId, AvalonRelatedItems aris);
 
 	/**
 	 * Get Avalon media object URL for the given AMP item.
-	 * @param externalId the AMP item external ID corresponding to the Avalon media object ID
+	 * @param externalId the given AMP item external ID corresponding to the Avalon media object ID
 	 */
 	public String getAvalonMediaObjectUrl(String externalId);
 	

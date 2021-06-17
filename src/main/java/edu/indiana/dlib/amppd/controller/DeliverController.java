@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.service.DeliverService;
 import edu.indiana.dlib.amppd.service.impl.DeliverServiceImpl;
@@ -30,9 +29,6 @@ public class DeliverController {
 
 	@Autowired
 	private ItemRepository itemRepository;
-	
-	@Autowired
-	private CollectionRepository collectionRepository;
 
 	@Autowired
 	private DeliverService deliverService;
@@ -62,7 +58,7 @@ public class DeliverController {
 	}
 
 	/**
-	 * Deliver final results associated with the items within the given collection to target system Avalon.
+	 * Deliver final results associated with the items within the given collection to Avalon.
 	 * @param collectionId ID of the given collection
 	 * @return the list of AvalonRelatedItems delivered
 	 */
