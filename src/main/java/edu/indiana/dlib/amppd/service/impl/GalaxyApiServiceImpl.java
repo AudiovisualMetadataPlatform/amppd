@@ -12,9 +12,8 @@ import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementation of Galaxy service.
+ * Implementation of GalaxyApiService.
  * @author yingfeng
- *
  */
 // TODO change commented code to use galaxyRestTemplate as autowired
 //@ContextConfiguration(classes = GalaxyRestTemplateFactoryConfig.class)

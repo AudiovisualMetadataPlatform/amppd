@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
  * This serves as an extension to the blend4j data related clients such as LibraryClientImpl, HistoryClientImpl etc.,
  * since we cannot extend such classes as they are not public. 
  * @author yingfeng
- *
  */
 @Service
 @Slf4j

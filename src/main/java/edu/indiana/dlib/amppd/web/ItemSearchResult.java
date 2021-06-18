@@ -7,10 +7,11 @@ import lombok.Data;
 
 @Data
 public class ItemSearchResult {
-	private String itemName;
-	private String externalId;
+	private Long collectionId;
 	private String collectionName;
-	//private ArrayList<String> primaryFileNames;
-	private ArrayList<Map> primaryFiles;
-
+	private Long itemId;
+	private String itemName;
+	private String externalSource;
+	private String externalId;
+	private ArrayList<Map> primaryfiles;
 }

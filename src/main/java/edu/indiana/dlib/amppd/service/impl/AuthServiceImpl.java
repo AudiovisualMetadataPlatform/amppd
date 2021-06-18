@@ -11,6 +11,9 @@ import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of AuthService.
+ */
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {

@@ -41,6 +41,9 @@ import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
+/**
+ * Implementation of BatchValidationService.
+ */ 
 @Service
 @Transactional
 public class BatchValidationServiceImpl implements BatchValidationService {
@@ -217,8 +220,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         	response.addErrors(itemErrors);
         	
         	// validate primaryfile fields
-        	List<String> primaryFileErrors = validatePrimaryfile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
-        	response.addErrors(primaryFileErrors);
+        	List<String> primaryfileErrors = validatePrimaryfile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
+        	response.addErrors(primaryfileErrors);
         	
         	// Check for duplicate primaryfiles if ingesting primaryfile
         	SupplementType supplementType = batchFile.getSupplementType();
@@ -347,15 +350,15 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			}
 
 			// Check to see if file exists in database
-			boolean primaryFileExists = primaryFileExistsInCollection(collection, primaryfileName);
+			boolean primaryfileExists = primaryfileExistsInCollection(collection, primaryfileName);
 
 			// If not - new file - Make sure it exists on file system
-			if(!primaryFileExists) {
+			if(!primaryfileExists) {
 				if(!primaryfileFilename.isBlank() && !fileExists(unit.getName(), collection.getName(), primaryfileFilename)) {
 					errors.add(String.format("Row: %s: Primaryfile %s does not exist in the dropbox", lineNum, primaryfileFilename));
 				}
 			}			
-			// TODO what when primaryFileExists
+			// TODO what when primaryfileExists
 		}
 		// primaryfile name should not be blank for primaryfile supplement 
 		else if (supplementType == SupplementType.PRIMARYFILE) {
@@ -377,7 +380,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	 * Check to see if this primaryfile exists in a collection already
 	 */
 	// TODO this search should be done with PrimaryfileRepository, more efficient than java code
-	private boolean primaryFileExistsInCollection(Collection collection, String name) {
+	private boolean primaryfileExistsInCollection(Collection collection, String name) {
 		if(collection.getItems() == null) {
 			return false;
 		}

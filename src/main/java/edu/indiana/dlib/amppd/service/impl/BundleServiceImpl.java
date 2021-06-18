@@ -17,6 +17,10 @@ import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.BundleService;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of BundleService.
+ * @author yingfeng
+ */ 
 @Service
 @Slf4j
 public class BundleServiceImpl implements BundleService {

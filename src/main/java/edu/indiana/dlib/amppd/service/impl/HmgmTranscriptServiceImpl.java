@@ -19,6 +19,9 @@ import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of HmgmTranscriptService.
+ */ 
 @Service
 @Slf4j
 public class HmgmTranscriptServiceImpl implements HmgmTranscriptService {

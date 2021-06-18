@@ -51,18 +51,22 @@ import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of WorkflowResultService.
+ */ 
 @Service
 @Slf4j
 public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public static final String WILD_CARD = "*";
 
 	/* Note: 
-	 * The 4 maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
+	 * The STANDARD_* maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
 	 * Their values are based on current WorkflowResult table data. 
 	 * Since the obsolete MGMs don't exist in the system anymore, no more obsolete IDs/names should be generated,
 	 * thus the maps are inclusive for the future. Once we delete obsolete outputs from Galaxy, 
 	 * we won't need to call standardize and these maps can be removed as well.
 	 */   
+	
 	// map between all obsolete workflow step names to their standard current names
 	private static final HashMap<String, String> STANDARD_STEPS = new HashMap<String, String>() {{
 		put("adjust_timestamps", "adjust_transcript_timestamps");
@@ -73,6 +77,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("VTTgenerator", "transcript_to_webvtt");
 		put("vtt_generator", "transcript_to_webvtt");
 	}};
+	
 	// map between all obsolete output names to their standard current names
 	private static final HashMap<String, String> STANDARD_OUTPUTS = new HashMap<String, String>() {{
 		put("amp_entity_extraction", "amp_entities");
@@ -91,6 +96,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("segmented_audio_file", "speech_audio");		
 		put("webVtt", "web_vtt");
 	}};
+	
 	// map between obsolete output names for group1 workflow steps to their standard current names
 	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS1 = new HashMap<String, String>() {{
 		put("amp_transcript", "amp_transcript_adjusted");
@@ -98,10 +104,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("amp_segments", "amp_diarization_adjusted");
 		put("amp_segmentation", "amp_diarization_adjusted");
 	}};
+	
 	// map between obsolete output names for group2 workflow steps to their standard current names
 	private static final HashMap<String, String> STANDARD_STEP_OUTPUTS2 = new HashMap<String, String>() {{
 		put("amp_transcript", "amp_transcript_aligned");
 	}};
+	
 	// map between all standard workflow step names to maps between all obsolete output names to their standard current names
 	// this is used when we need both workflow step and output name to decide what the standard output name should be, 
 	// due to that some obsolete output names overlap with standard output name from other workflow steps
@@ -241,6 +249,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			GalaxyJobState status = getJobStatus(state);			
 			result.setStatus(status);
 
+			// when Galaxy first schedule a workflow, there appears to be a short period when all outputs visibility are set to
+			// to true by default; only later when the job gets to run when the visibility gets updated according to the workflow;
+			// thus upon workflow submission, the result might have the default value, so we should update it during status update
+			result.setRelevant(dataset.getVisible());
+			
 			// beside, we need to update the output path, as it might have been changed from null (when the job is scheduled
 			// but not running yet) to the output dateset file path (only when the job starts running does output dataset get created)
 			result.setOutputPath(dataset.getFileName());
