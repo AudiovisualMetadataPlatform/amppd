@@ -306,7 +306,7 @@ public class MediaServiceImpl implements MediaService {
 
 		// if symlink was created and exists, reuse it
 		String symlink = workflowResult.getOutputLink();
-		if ( symlink != null  && Files.exists(resolve(symlink))) {
+		if ( symlink != null && Files.exists(resolve(symlink))) {
 			log.info("Output symlink for workflowResult " + workflowResult.getId() + " already exists, will reuse it");
 			return workflowResult.getOutputLink();
 		}
@@ -424,9 +424,10 @@ public class MediaServiceImpl implements MediaService {
 							|| (mime_type.contains("video") && mediaType.substring(1, 2).contentEquals("1")) 
 							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
 						curr_item_id = p.getItem().getId();
-						result.setItemName(p.getItem().getName());
-						result.setExternalId(p.getItem().getExternalId());
 						result.setCollectionName(p.getItem().getCollection().getName());
+						result.setItemName(p.getItem().getName());
+						result.setExternalSource(p.getItem().getExternalSource());
+						result.setExternalId(p.getItem().getExternalId());
 						primaryFileinfo.put("id", p.getId()); 
 						primaryFileinfo.put("name",p.getName());
 						primaryFileinfo.put("mediaType",mime_type);
