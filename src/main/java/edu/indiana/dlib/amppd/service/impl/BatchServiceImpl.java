@@ -384,12 +384,12 @@ public class BatchServiceImpl implements BatchService {
 	private Primaryfile getPrimaryfile(Collection batchfileCollection, Item item, BatchFile batchFile, String username, List<String> errors) {
 		Primaryfile primaryfile =null;
 		boolean found = false;
-		Set <Primaryfile> primaryFiles = item.getPrimaryfiles();
+		Set <Primaryfile> primaryfiles = item.getPrimaryfiles();
 		
 		// TODO this search should be done with DB Repository, more efficient than java code
 		// For primaryfiles in a given item, names must be unique.
-		if(primaryFiles != null && primaryFiles.size() >= 0) {
-			for(Primaryfile p : primaryFiles) { 
+		if(primaryfiles != null && primaryfiles.size() >= 0) {
+			for(Primaryfile p : primaryfiles) { 
 				if((p.getName() != null && p.getName().contentEquals(batchFile.getPrimaryfileName()) ) ) {
 					// report duplicate error only if ingesting primaryfile, but not if only ingesting a supplement for it
 					if (!batchFile.getPrimaryfileFilename().isBlank()) {

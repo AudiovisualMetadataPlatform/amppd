@@ -403,18 +403,18 @@ public class MediaServiceImpl implements MediaService {
 		try {
 			List<Primaryfile> matchedFiles = primaryfileRepository.findByCollectionOrItemOrFileName(keyword);
 			ItemSearchResult result = new ItemSearchResult();;
-			Map <String, Object>primaryFileinfo;
-			ArrayList<Map> primaryFilerows = new ArrayList<Map>();
+			Map <String, Object>primaryfileinfo;
+			ArrayList<Map> primaryfilerows = new ArrayList<Map>();
 			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
 				//reset if the current item is a new entry
-				primaryFileinfo = new HashMap<String, Object>();
-				if(p.getItem().getId() != curr_item_id && primaryFilerows.size()>0) {
+				primaryfileinfo = new HashMap<String, Object>();
+				if(p.getItem().getId() != curr_item_id && primaryfilerows.size()>0) {
 					log.trace("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
-					result.setPrimaryFiles(primaryFilerows);
+					result.setPrimaryfiles(primaryfilerows);
 					rows.add(result);
 					result = new ItemSearchResult();
-					primaryFilerows = new ArrayList<Map>();
+					primaryfilerows = new ArrayList<Map>();
 					
 				}
 				String mime_type = getMediaTypeFromJson(p);
@@ -428,28 +428,29 @@ public class MediaServiceImpl implements MediaService {
 						result.setItemName(p.getItem().getName());
 						result.setExternalSource(p.getItem().getExternalSource());
 						result.setExternalId(p.getItem().getExternalId());
-						primaryFileinfo.put("id", p.getId()); 
-						primaryFileinfo.put("name",p.getName());
-						primaryFileinfo.put("mediaType",mime_type);
-						primaryFileinfo.put("originalFilename",p.getOriginalFilename());
-						primaryFilerows.add(primaryFileinfo);
+						primaryfileinfo.put("id", p.getId()); 
+						primaryfileinfo.put("name",p.getName());
+						primaryfileinfo.put("mediaType",mime_type);
+						primaryfileinfo.put("originalFilename",p.getOriginalFilename());
+						primaryfilerows.add(primaryfileinfo);
 					}
 				}
 				else {
 					curr_item_id = p.getItem().getId();
 					result.setItemName(p.getItem().getName());
+					result.setExternalSource(p.getItem().getExternalSource());
 					result.setExternalId(p.getItem().getExternalId());
 					result.setCollectionName(p.getItem().getCollection().getName());
-					primaryFileinfo.put("id", p.getId()); 
-					primaryFileinfo.put("name",p.getName());
-					primaryFileinfo.put("mediaType",mime_type);
-					primaryFileinfo.put("originalFilename",p.getOriginalFilename());
-					primaryFilerows.add(primaryFileinfo);
+					primaryfileinfo.put("id", p.getId()); 
+					primaryfileinfo.put("name",p.getName());
+					primaryfileinfo.put("mediaType",mime_type);
+					primaryfileinfo.put("originalFilename",p.getOriginalFilename());
+					primaryfilerows.add(primaryfileinfo);
 				}
 			}
 			//add the last item to the rows
-			if(primaryFilerows.size()>0) {
-				result.setPrimaryFiles(primaryFilerows);
+			if(primaryfilerows.size()>0) {
+				result.setPrimaryfiles(primaryfilerows);
 				rows.add(result);
 				response.setRows(rows);
 			}

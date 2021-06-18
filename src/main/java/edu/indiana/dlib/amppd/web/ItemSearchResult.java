@@ -11,6 +11,6 @@ public class ItemSearchResult {
 	private String itemName;
 	private String externalSource;
 	private String externalId;
-	private ArrayList<Map> primaryFiles;
+	private ArrayList<Map> primaryfiles;
 
 }
