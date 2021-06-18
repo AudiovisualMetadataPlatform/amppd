@@ -203,12 +203,12 @@ public class MediaServiceTests {
 	
 	@Test
     public void shouldFindItemOrFileByPrimaryfileName() {
-		String primaryFileName=primaryfile.getName();
+		String primaryfileName=primaryfile.getName();
 		String mediaType="000";
-		ItemSearchResponse response= mediaService.findItemOrFile(primaryFileName.substring(0,4),mediaType);
+		ItemSearchResponse response= mediaService.findItemOrFile(primaryfileName.substring(0,4),mediaType);
 		Assert.assertTrue(response.getRows().size()>=2);
-		ItemSearchResponse fileSearchResponse= mediaService.findItemOrFile(primaryFileName,mediaType);
-		Assert.assertEquals(primaryFileName,fileSearchResponse.getRows().get(0).getPrimaryFiles().get(0).get("name"));
+		ItemSearchResponse fileSearchResponse= mediaService.findItemOrFile(primaryfileName,mediaType);
+		Assert.assertEquals(primaryfileName,fileSearchResponse.getRows().get(0).getPrimaryfiles().get(0).get("name"));
 	}	
 	
 	@Test

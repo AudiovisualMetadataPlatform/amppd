@@ -24,6 +24,10 @@ import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Implementation of BagService.
+ * @author yingfeng
+ */
 @Service
 @Slf4j
 public class BagServiceImpl implements BagService {

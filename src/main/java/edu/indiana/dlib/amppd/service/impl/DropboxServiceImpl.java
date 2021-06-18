@@ -18,7 +18,7 @@ import edu.indiana.dlib.amppd.service.DropboxService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementation of FileStorageService.
+ * Implementation of DropboxService.
  * Dropbox contains sub-directories for users to drop their asset files for batch ingest. 
  * The sub-directories are organized in the same hierarchy as the asset contents, i.e. one directory per unit, 
  * under which one directory per collection. The names of the directories are encoded based on the unit/collection

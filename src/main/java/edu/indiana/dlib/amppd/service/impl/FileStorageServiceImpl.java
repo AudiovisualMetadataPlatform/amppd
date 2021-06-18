@@ -48,7 +48,6 @@ import lombok.extern.slf4j.Slf4j;
  * directory names abide to this format: <1st Letter of the entity class>-<ID of the entity>
  * file names abide to this format: <1st Letter of the entity class>-<ID of the entity>.<file extension>
  * @author yingfeng
- *
  */
 @Service
 @Slf4j

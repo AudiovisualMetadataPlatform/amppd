@@ -5,9 +5,8 @@ import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
 
 /**
- * Service for BagOutput related functions. 
+ * Service for output Bag related functions. 
  * @author yingfeng
- *
  */
 public interface BagService {
 
