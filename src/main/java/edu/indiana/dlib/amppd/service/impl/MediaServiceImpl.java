@@ -424,7 +424,9 @@ public class MediaServiceImpl implements MediaService {
 							|| (mime_type.contains("video") && mediaType.substring(1, 2).contentEquals("1")) 
 							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
 						curr_item_id = p.getItem().getId();
+						result.setCollectionId(p.getItem().getCollection().getId());
 						result.setCollectionName(p.getItem().getCollection().getName());
+						result.setItemId(p.getItem().getId());
 						result.setItemName(p.getItem().getName());
 						result.setExternalSource(p.getItem().getExternalSource());
 						result.setExternalId(p.getItem().getExternalId());
