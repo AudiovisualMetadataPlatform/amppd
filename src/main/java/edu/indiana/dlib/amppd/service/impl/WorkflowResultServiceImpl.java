@@ -249,6 +249,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			GalaxyJobState status = getJobStatus(state);			
 			result.setStatus(status);
 
+			// when Galaxy first schedule a workflow, there appears to be a short period when all outputs visibility are set to
+			// to true by default; only later when the job gets to run when the visibility gets updated according to the workflow;
+			// thus upon workflow submission, the result might have the default value, so we should update it during status update
+			result.setRelevant(dataset.getVisible());
+			
 			// beside, we need to update the output path, as it might have been changed from null (when the job is scheduled
 			// but not running yet) to the output dateset file path (only when the job starts running does output dataset get created)
 			result.setOutputPath(dataset.getFileName());
