@@ -76,6 +76,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("speech_segmenter", "ina_speech_segmenter");
 		put("VTTgenerator", "transcript_to_webvtt");
 		put("vtt_generator", "transcript_to_webvtt");
+		put("trasncript_to_webvtt", "transcript_to_webvtt");
 	}};
 	
 	// map between all obsolete output names to their standard current names
