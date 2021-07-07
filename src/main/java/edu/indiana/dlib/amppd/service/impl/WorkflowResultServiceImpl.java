@@ -76,6 +76,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("speech_segmenter", "ina_speech_segmenter");
 		put("VTTgenerator", "transcript_to_webvtt");
 		put("vtt_generator", "transcript_to_webvtt");
+		put("trasncript_to_webvtt", "transcript_to_webvtt");
 	}};
 	
 	// map between all obsolete output names to their standard current names
@@ -148,6 +149,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("98eb6279f2521c22", "2ce55ca1f8690842");
 		put("9057839ff8d53ff4", "fb65bf64a199b051");
 		put("a2c40ea0bdc9743b", "9dabcf180e389f58");
+		put("e00f87158d92e09b", "ac20b62acfe2a9f1");
+		put("d1c24e4a7a8d75be", "1da25ad227cd932c");
+		put("e00f87158d92e09b", "c1cdcaa4ca03df29");
+		
 	}};
 
 	/* Note: 

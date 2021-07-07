@@ -476,8 +476,12 @@ public class MediaServiceImpl implements MediaService {
 			if(media_type!=null) {
 				JSONObject jsonObject = new JSONObject(media_type);
 				JSONObject jsonObject_container = new JSONObject(jsonObject.getString("container"));
+				JSONObject jsonObject_streams = new JSONObject(jsonObject.getString("streams"));
 				mime_type = jsonObject_container.getString("mime_type");
-				log.trace("====>>>>>MIME TYPE IS:"+jsonObject_container.getString("mime_type"));
+				if("video/mp4".equals(mime_type) && !jsonObject_streams.has("video") && jsonObject_streams.has("audio")) {
+					mime_type="audio/mp4";
+				}
+				log.trace("====>>>>>MIME TYPE IS:"+mime_type);
 			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
