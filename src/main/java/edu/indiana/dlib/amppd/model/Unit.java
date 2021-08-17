@@ -24,7 +24,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
-public class Unit extends Content {
+public class Unit extends Dataentity {
 
 	@OneToMany(mappedBy="unit")
 	@JsonBackReference(value="collections")

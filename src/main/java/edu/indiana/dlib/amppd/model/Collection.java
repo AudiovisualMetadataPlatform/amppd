@@ -8,9 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -36,12 +34,6 @@ public class Collection extends Content {
 //	
 //	// task platform can be chosen upon collection creation (or edit) by collection managers
 //    private TaskManager taskManager;
-    
-    @Type(type="text")
-    private String externalSource;	// external source/target system
-
-    @Type(type="text")
-    private String externalId;		// ID in the external system
     
 	/* Note:
 	 * Originally TaskManager was defined as enum type, for the sake of ensuring only a predefined set of options are allowed.
