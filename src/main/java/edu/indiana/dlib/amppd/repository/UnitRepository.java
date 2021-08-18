@@ -7,6 +7,6 @@ import edu.indiana.dlib.amppd.model.Unit;
 
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "units", path = "units")
-public interface UnitRepository extends ContentRepository<Unit> {
+public interface UnitRepository extends DataentityRepository<Unit> {
 
 }
