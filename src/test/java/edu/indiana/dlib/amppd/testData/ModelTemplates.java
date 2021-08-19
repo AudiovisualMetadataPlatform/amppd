@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.testData;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 
 import br.com.six2six.fixturefactory.Fixture;
@@ -15,7 +13,6 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.model.unused.Job;
 
 //import edu.indiana.dlib.amppd.model.fixtures.TemplateLoader;
 
