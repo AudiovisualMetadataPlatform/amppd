@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.config;
+package edu.indiana.dlib.amppd.authentication;
 
 import java.io.IOException;
 
@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.AuthService;

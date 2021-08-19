@@ -4,7 +4,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-import edu.indiana.dlib.amppd.model.HmgmNote;
+import edu.indiana.dlib.amppd.model.unused.HmgmNote;
 
 @CrossOrigin(origins = "*")
 @RepositoryRestResource(collectionResourceRel = "hmgmNotes", path = "hmgmNotes")

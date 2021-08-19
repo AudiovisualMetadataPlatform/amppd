@@ -21,10 +21,10 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public abstract class Content extends Dataentity {
 
-    //@Type(type="text")
-    //private String externalSource;
+    @Type(type="text")
+    private String externalSource;	// external source/target system
 
-    //@Type(type="text")
-    //private String externalId;
+    @Type(type="text")
+    private String externalId;		// ID in the external system    	
     
 }

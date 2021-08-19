@@ -8,7 +8,6 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +19,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.indiana.dlib.amppd.authentication.JwtRequest;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.AuthRequest;
-import edu.indiana.dlib.amppd.web.JwtRequest;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc

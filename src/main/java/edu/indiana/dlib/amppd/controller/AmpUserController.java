@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.config.JwtTokenUtil;
+import edu.indiana.dlib.amppd.authentication.JwtRequest;
+import edu.indiana.dlib.amppd.authentication.JwtResponse;
+import edu.indiana.dlib.amppd.authentication.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
-import edu.indiana.dlib.amppd.web.JwtRequest;
-import edu.indiana.dlib.amppd.web.JwtResponse;
 import lombok.extern.slf4j.Slf4j;
   
  /**

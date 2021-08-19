@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -23,11 +22,8 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-@TypeDef(
-	    name = "jsonb",
-	    typeClass = JsonBinaryType.class
-	)
-public abstract class Asset extends Content {
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+public abstract class Asset extends Dataentity {
 
 	//@NotNull
 	private String originalFilename;	// the file name of the original file uploaded by user or batch

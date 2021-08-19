@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.unused;
 
 import java.net.URI;
 import java.sql.Timestamp;
