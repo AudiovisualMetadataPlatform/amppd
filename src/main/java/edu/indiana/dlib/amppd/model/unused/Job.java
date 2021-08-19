@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.unused;
 
 import java.sql.Timestamp;
 import java.util.Set;

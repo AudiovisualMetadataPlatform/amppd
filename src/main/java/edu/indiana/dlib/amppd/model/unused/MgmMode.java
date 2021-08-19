@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.unused;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -10,6 +10,7 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import edu.indiana.dlib.amppd.model.Dataentity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

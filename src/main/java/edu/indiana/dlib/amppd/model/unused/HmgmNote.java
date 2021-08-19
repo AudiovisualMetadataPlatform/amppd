@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.unused;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;

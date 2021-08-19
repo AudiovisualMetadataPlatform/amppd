@@ -1,11 +1,11 @@
-package edu.indiana.dlib.amppd.config;
+package edu.indiana.dlib.amppd.authentication.unused;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import edu.indiana.dlib.amppd.web.RestTemplateFactory;
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 
 /**
  * Configuration for generating a RestTemplate for a particular REST API via RestTemplateFactory.

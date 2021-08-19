@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.web;
+package edu.indiana.dlib.amppd.authentication;
 
 public class JwtRequest{
 	

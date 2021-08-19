@@ -21,7 +21,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import edu.indiana.dlib.amppd.config.JwtTokenUtil;
+import edu.indiana.dlib.amppd.authentication.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;

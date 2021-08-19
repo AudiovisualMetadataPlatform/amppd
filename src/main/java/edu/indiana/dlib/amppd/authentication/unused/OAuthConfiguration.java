@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.config;
+package edu.indiana.dlib.amppd.authentication.unused;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
