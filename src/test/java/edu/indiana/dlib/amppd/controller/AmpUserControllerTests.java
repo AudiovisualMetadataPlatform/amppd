@@ -19,8 +19,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.indiana.dlib.amppd.authentication.JwtRequest;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.security.JwtRequest;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.AuthRequest;

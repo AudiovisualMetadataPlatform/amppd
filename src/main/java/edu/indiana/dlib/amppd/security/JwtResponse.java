@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.authentication;
+package edu.indiana.dlib.amppd.security;
 
 public class JwtResponse {
 	private final String jwttoken;

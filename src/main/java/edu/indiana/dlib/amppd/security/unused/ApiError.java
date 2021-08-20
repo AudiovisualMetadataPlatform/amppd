@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.authentication.unused;
+package edu.indiana.dlib.amppd.security.unused;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

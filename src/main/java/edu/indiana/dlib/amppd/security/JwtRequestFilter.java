@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.authentication;
+package edu.indiana.dlib.amppd.security;
 
 import java.io.IOException;
 

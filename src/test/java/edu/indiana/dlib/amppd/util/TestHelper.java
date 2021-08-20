@@ -20,7 +20,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import edu.indiana.dlib.amppd.authentication.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -42,6 +41,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
