@@ -8,6 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
 @Transactional(readOnly=true, noRollbackFor=Exception.class)
 public class Item extends Content {
     
@@ -39,7 +43,7 @@ public class Item extends Content {
 	@JsonBackReference(value="supplements")
     private Set<ItemSupplement> supplements;
 
-	//@NotNull
+	@NotNull
 	@Index
 	@ManyToOne
 	private Collection collection;	

@@ -20,7 +20,8 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 public abstract class Content extends Dataentity {
-
+	// TODO at the moment we do not require externalSource/Id on every collection/item, but this could change later
+	
     @Type(type="text")
     private String externalSource;	// external source/target system
 

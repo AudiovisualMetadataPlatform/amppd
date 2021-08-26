@@ -10,10 +10,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.projection.DataentityBrief;
 
 
 @CrossOrigin(origins = "*")
-@RepositoryRestResource(collectionResourceRel = "items", path = "items")
+//@RepositoryRestResource(excerptProjection = DataentityBrief.class)
+//@RepositoryRestResource(collectionResourceRel = "items", path = "items")
 public interface ItemRepository extends ContentRepository<Item> {
 	
 	// TODO tried various ways below to achieve case-insensitive keyword match, but none worked

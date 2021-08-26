@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.repository;
+package edu.indiana.dlib.amppd.repository.unused;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
