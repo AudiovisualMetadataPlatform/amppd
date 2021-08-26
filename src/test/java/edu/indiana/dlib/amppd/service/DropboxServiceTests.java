@@ -65,6 +65,27 @@ public class DropboxServiceTests {
     }
 
     @Test
+    public void shouldRenameSubdirForUnit() {
+    	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
+    	Unit unit = collection.getUnit();
+    	Path pathOld = dropboxService.getDropboxPath(unit);
+    	unit.setName("Test Unit Updated");
+    	Path path = dropboxService.renameUnitSubdir(unit);
+    	Path pathCol = dropboxService.getDropboxPath(collection);
+    	assertFalse(Files.exists(pathOld));    	
+    	assertTrue(Files.exists(path));    	
+    	assertTrue(Files.exists(pathCol));    	
+    }
+    
+    @Test
+    public void shouldDeleteSubdirForUnit() {
+    	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");    
+    	Unit unit = collection.getUnit();
+    	Path path = dropboxService.deleteUnitSubdir(unit);
+    	assertFalse(Files.exists(path));    	   	
+    }
+        
+    @Test
     public void shouldCreateSubdirForCollection() {
     	Collection collection = new Collection();
     	Unit unit = testHelper.ensureUnit("Test Unit");
