@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -24,7 +25,10 @@ public class DropboxServiceTests {
 	@Autowired
 	private DropboxService dropboxService;
 	
-    @Test
+	@Autowired
+	private TestHelper testHelper;
+	
+	@Test
     public void shouldHandleInvalidCharacters() {
     	String path = "";
     	String originalPath = "TEST1._-";
@@ -62,17 +66,29 @@ public class DropboxServiceTests {
 
     @Test
     public void shouldCreateSubdirForCollection() {
-    	Unit unit = new Unit();
-    	unit.setId(1l);
-    	unit.setName("Test Unit");
-    	
     	Collection collection = new Collection();
-    	collection.setId(2l);
-    	collection.setName("Test Collection");
+    	Unit unit = testHelper.ensureUnit("Test Unit");
     	collection.setUnit(unit);
-    	
-    	Path path = dropboxService.createCollectionSubdir(collection);
+    	collection.setName("Test Collection");
+    	Path path = dropboxService.createCollectionSubdir(collection);    	
     	assertTrue(Files.exists(path));    	
+    }
+    
+    @Test
+    public void shouldRenameSubdirForCollection() {
+    	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
+    	Path pathOld = dropboxService.getDropboxPath(collection);
+    	collection.setName("Test Collection Updated");
+    	Path path = dropboxService.renameCollectionSubdir(collection);
+    	assertFalse(Files.exists(pathOld));    	
+    	assertTrue(Files.exists(path));    	
+    }
+    
+    @Test
+    public void shouldDeleteSubdirForCollection() {
+    	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");    	
+    	Path path = dropboxService.deleteCollectionSubdir(collection);
+    	assertFalse(Files.exists(path));    	   	
     }
     
     

@@ -192,6 +192,83 @@ public class TestHelper {
 	}
 	
 	/**
+	 * Check whether the specified unit exists in Amppd; if not, create one with the given name. 
+	 * @param name name of the specified unit
+	 * @return the prepared unit
+	 */
+	public Unit ensureUnit(String name) {
+		// retrieve unit from DB by name
+		List<Unit> units = unitRepository.findByName(name);
+		Unit unit = units.size() > 0 ? units.get(0): null;
+
+		// if the unit already exists in DB, just return it 
+		if (unit != null) {
+			return unit;
+		}
+
+		// otherwise, create a unit with the given name	
+		unit = new Unit();
+    	unit.setName(name);
+    	unit.setDescription("unit for tests");	  
+    	unit = unitRepository.save(unit);
+		return unit;
+	}
+	
+	/**
+	 * Check whether the specified collection exists in Amppd; if not, create one with the given unit name and name. 
+	 * @param unitName name of the specified unit
+	 * @param name name of the specified collection
+	 * @return the prepared collection
+	 */
+	public Collection ensureCollection(String unitName, String name) {
+		// retrieve collection from DB by unit name and name
+		List<Collection> collections = collectionRepository.findByUnitNameAndName(unitName, name);
+		Collection collection = collections.size() > 0 ? collections.get(0): null;
+		
+		// if the collection already exists in DB, just return it 
+		if (collection != null) {
+			return collection;
+		}
+
+		// otherwise, create a unit with the given name	
+		collection = new Collection();
+		Unit unit = ensureUnit(unitName);
+    	collection.setUnit(unit);
+    	collection.setName(name);
+    	collection.setDescription("collection for tests");
+    	collection.setTaskManager("Jira");
+    	collection = collectionRepository.save(collection);
+		return collection;
+	}
+		
+	/**
+	 * Check whether the specified item exists in Amppd; if not, create one with the given unit name, collection name, and name. 
+	 * @param unitName name of the specified unit
+	 * @param collectionName name of the specified unit
+	 * @param name name of the specified item
+	 * @return the prepared item
+	 */
+	public Item ensureItem(String unitName, String collectionName, String name) {
+		// retrieve item from DB by unit name, collection name, and name
+		List<Item> items = itemRepository.findByCollectionUnitNameAndCollectionNameAndName(unitName, collectionName, name);
+		Item item = items.size() > 0 ? items.get(0): null;
+		
+		// if the item already exists in DB, just return it 
+		if (item != null) {
+			return item;
+		}
+
+		// otherwise, create a unit with the given name	
+		item = new Item();
+		Collection collection = ensureCollection(unitName, collectionName);
+    	item.setCollection(collection);
+    	item.setName(name);
+    	item.setDescription("item for tests");
+    	item = itemRepository.save(item);
+		return item;
+	}
+		
+	/**
 	 * Check whether the specified primaryfile exists in Amppd; if not, upload it from the resource file with a filename same as the primaryfile name, 
 	 * and with the specified extension. 
 	 * @param name name of the specified primaryfile
@@ -212,32 +289,12 @@ public class TestHelper {
 
 		// otherwise, create a primaryfile with the given name	
 		// and set up the parent hierarchy as needed by file upload file path calculation
-
-		Unit unit = new Unit();
-    	unit.setName("Unit for " + name);
-    	unit.setDescription("unit for tests");	  
-    	unit = unitRepository.save(unit);
-    	
-		Collection collection = new Collection();
-		collection.setName("Collection for " + name);
-		collection.setDescription("collection for tests");  	
-		collection.setTaskManager(TASK_MANAGER);  	
-    	collection.setUnit(unit);
-    	collection = collectionRepository.save(collection);
-    	
-    	Item item = new Item();
-    	item.setName("Item for " + name);
-    	item.setDescription("item for tests");  
-    	item.setExternalSource(TEST_EXTERNAL_SOURCE);
-    	item.setExternalSource(TEST_EXTERNAL_ID);
-    	item.setCollection(collection);
-    	item = itemRepository.save(item);
-
 		primaryfile = new Primaryfile();
+		Item item = ensureItem("Unit for " + name, "Collection for " + name, "Item for " + name);
+		primaryfile.setItem(item);
 		primaryfile.setName("Primaryfile for " + name);
 		primaryfile.setDescription("primaryfile for tests");			
-    	primaryfile.setItem(item);
-		primaryfile = primaryfileRepository.save(primaryfile);
+    	primaryfile = primaryfileRepository.save(primaryfile);
 
 		// and upload to it the resource file with the same name
 		try {
