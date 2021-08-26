@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.repository.NoRepositoryBean;
 
 import edu.indiana.dlib.amppd.model.Content;
-import edu.indiana.dlib.amppd.model.Item;
+
 
 @NoRepositoryBean
 public interface ContentRepository<S extends Content> extends DataentityRepository<S> {

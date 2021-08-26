@@ -9,17 +9,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.TimedToken;
 
-@CrossOrigin(origins = "*")
-@RepositoryRestResource(collectionResourceRel = "token", path = "token")
-public interface TimedTokenRepository extends CrudRepository<TimedToken, Long>{
-		
-		Optional<TimedToken> findByToken(String token);
-		
+@RepositoryRestResource(exported = false)
+public interface TimedTokenRepository extends CrudRepository<TimedToken, Long>{		
+		Optional<TimedToken> findByToken(String token);		
 		Optional<TimedToken> findByUser(AmpUser user);
 		
 		@Transactional
