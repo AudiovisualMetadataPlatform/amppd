@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 
 
@@ -14,6 +15,7 @@ import edu.indiana.dlib.amppd.model.Item;
 public interface ItemRepository extends ContentRepository<Item> {
 	
 	List<Item> findByCollectionUnitNameAndCollectionNameAndName(String collectionUnitName, String collectionName, String name);
+	List<Item> findByCollectionIdAndName(Long collectionId, String name);
 	
 	// TODO tried various ways below to achieve case-insensitive keyword match, but none worked
 	//	// Note: ilike is a PostgreSQL extension, not part of standard SQL, so need to use nativeQuery. However, the query still fails with exception.

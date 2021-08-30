@@ -9,5 +9,6 @@ import edu.indiana.dlib.amppd.model.Collection;
 public interface CollectionRepository extends ContentRepository<Collection> {
 	
 	List<Collection> findByUnitNameAndName(String unitName, String name);
+	List<Collection> findByUnitIdAndName(Long unitId, String name);
 
 }

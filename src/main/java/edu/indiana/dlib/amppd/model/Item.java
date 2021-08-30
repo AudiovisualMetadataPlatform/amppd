@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -33,6 +34,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
 @Transactional(readOnly=true, noRollbackFor=Exception.class)
+@UniqueName
 public class Item extends Content {
     
 	@OneToMany(mappedBy="item")

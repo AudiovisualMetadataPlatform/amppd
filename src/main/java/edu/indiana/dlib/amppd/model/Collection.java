@@ -18,6 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -33,6 +34,7 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueCollectionNamePerUnit", columnNames = { "unit_id", "name" })})
+@UniqueName
 public class Collection extends Content {
     
 //	// the set of task management platforms AMPPD currently supports
@@ -47,7 +49,7 @@ public class Collection extends Content {
 	 * It would be better to use a string representation and give the referring code flexibility on how to process (and validate) the values.
 	 */
 	@NotBlank
-	@Pattern(regexp = "Jira|OpenProject|Redmine") // TODO read values from properties
+	@Pattern(regexp = "Jira|Trello|OpenProject|Redmine") // TODO read values from properties
 	private String taskManager;
 	
 	@OneToMany(mappedBy="collection")

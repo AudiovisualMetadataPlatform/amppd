@@ -1,10 +1,15 @@
 package edu.indiana.dlib.amppd.handler;
 
+
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.service.DropboxService;
@@ -16,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
  * @collection yingfeng
  */
 @RepositoryEventHandler(Collection.class)
+@Component
+@Validated
 @Slf4j
 public class CollectionHandler {    
 
@@ -23,7 +30,7 @@ public class CollectionHandler {
 	private DropboxService dropboxService;
 
     @HandleBeforeCreate
-    public void handleBeforeCreate(Collection collection){
+    public void handleBeforeCreate(@Valid Collection collection) {
         log.info("Before creating collection " + collection.getName() + " ...");
 
         // create dropbox subdir for the collection to be created, assume collection name has been validated
@@ -36,7 +43,7 @@ public class CollectionHandler {
 //    }
     
     @HandleBeforeSave
-    public void handleBeforeUpdate(Collection collection){
+    public void handleBeforeUpdate(@Valid Collection collection) {
         log.info("Before updating collection " + collection.getId() + " ...");
         
         // rename dropbox subdir for the collection to be updated, assume collection name has been validated
@@ -49,7 +56,7 @@ public class CollectionHandler {
 //    }
     
     @HandleBeforeDelete
-    public void handleBeforeDelete(Collection collection){
+    public void handleBeforeDelete(@Valid Collection collection) {
         log.info("Before deleting collection " + collection.getId() + " ...");
 
         // delete dropbox subdir for the collection to be deleted

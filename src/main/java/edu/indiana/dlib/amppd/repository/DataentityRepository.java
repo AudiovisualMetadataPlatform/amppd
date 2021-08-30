@@ -6,11 +6,13 @@ import java.util.List;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.projection.DataentityBrief;
 
 @NoRepositoryBean
-//@RepositoryRestResource(excerptProjection = DataentityBrief.class)
+@RepositoryRestResource(excerptProjection = DataentityBrief.class)
 public interface DataentityRepository<S extends Dataentity> extends PagingAndSortingRepository<S, Long> {
 	
 	List<S> findByName(@Param("name") String name);
