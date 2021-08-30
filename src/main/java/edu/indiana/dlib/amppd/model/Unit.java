@@ -12,7 +12,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,13 +21,12 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueUnitName", columnNames = {"name"})})
-@UniqueName
+@Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Unit extends Dataentity {
 
 	@OneToMany(mappedBy="unit")

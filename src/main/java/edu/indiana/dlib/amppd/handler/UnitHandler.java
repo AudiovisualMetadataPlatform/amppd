@@ -10,7 +10,6 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +29,11 @@ public class UnitHandler {
 	private DropboxService dropboxService;
     
     @HandleBeforeCreate
-    public void handleBeforeCreate(@Valid Unit unit){
-        log.info("Before creating unit " + unit.getId() + " ...");
-        
-    	// Note: We don't need to create dropbox sub-directory when creating a unit, as that can be handled when a collection is created.
+    public void handleBeforeCreate(@Valid Unit unit){        
+    	/* Note:
+    	 * The purpose of this method is to invoke validation before DB persistence.
+    	 * We don't need to create dropbox sub-directory when creating a unit, as that can be handled when a collection is created.
+    	 */    	
     }
 
     @HandleBeforeSave
@@ -43,14 +43,9 @@ public class UnitHandler {
         // rename dropbox subdir for the unit to be updated, assume unit name has been validated
         dropboxService.renameUnitSubdir(unit);
     }
-
-//    @HandleAfterSave
-//    public void handleAfterUpdate(Unit unit){
-//        log.info("After updating unit " + unit.getId() + " ...");
-//    }
     
     @HandleBeforeDelete
-    public void handleBeforeDelete(@Valid Unit unit){
+    public void handleBeforeDelete(Unit unit){
         log.info("Before deleting unit " + unit.getId() + " ...");
 
         // delete dropbox subdir for the unit to be deleted

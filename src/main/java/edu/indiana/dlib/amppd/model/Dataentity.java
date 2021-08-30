@@ -15,6 +15,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,6 +25,7 @@ import lombok.NoArgsConstructor;
  *
  */
 @MappedSuperclass
+@UniqueName
 @Data
 @NoArgsConstructor
 public abstract class Dataentity {

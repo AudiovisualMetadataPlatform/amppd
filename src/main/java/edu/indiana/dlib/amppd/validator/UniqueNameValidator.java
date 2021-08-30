@@ -28,9 +28,7 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
  * Validator for uniqueness of the name field within its parent's scope for all Dataentities.
  * @author yingfeng
  */
-public class UniqueNameValidator implements ConstraintValidator<UniqueName, Dataentity> {
-
-//	private	String parentId;    
+public class UniqueNameValidator implements ConstraintValidator<UniqueName, Dataentity> {  
 	
 	@Autowired
 	private UnitRepository unitRepository;
@@ -56,7 +54,6 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 	
 	@Override
 	public void initialize(UniqueName uwp) {
-//		this.parentId = uwp.parentId();
 	}
 
 	@Override

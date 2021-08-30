@@ -21,10 +21,10 @@ import lombok.ToString;
  *
  */
 @MappedSuperclass
-@Data
 @EqualsAndHashCode(callSuper=true)
-@ToString(callSuper=true)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+@Data
+@ToString(callSuper=true)
 public abstract class Asset extends Dataentity {
 
 	@NotBlank

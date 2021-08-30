@@ -6,10 +6,10 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 
 
 /**
- * Projection for brief view of all data entities.
+ * Projection for a brief view of all data entities.
  * @author yingfeng
  */
-@Projection(name = "brief", types = { Dataentity.class }) 
+@Projection(name = "brief", types = {Dataentity.class}) 
 public interface DataentityBrief {
 	
 	public String getName();

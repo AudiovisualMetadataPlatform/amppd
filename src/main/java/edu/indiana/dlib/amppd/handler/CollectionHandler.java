@@ -56,7 +56,7 @@ public class CollectionHandler {
 //    }
     
     @HandleBeforeDelete
-    public void handleBeforeDelete(@Valid Collection collection) {
+    public void handleBeforeDelete(Collection collection) {
         log.info("Before deleting collection " + collection.getId() + " ...");
 
         // delete dropbox subdir for the collection to be deleted

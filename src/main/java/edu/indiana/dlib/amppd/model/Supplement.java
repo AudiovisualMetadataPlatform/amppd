@@ -16,12 +16,12 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Data
-@EqualsAndHashCode(callSuper=true)
-@ToString(callSuper=true)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@Data
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public abstract class Supplement extends Asset {
 	// Currently, we don't have UNIT type Supplement, it might be added later as needed.
 	// In batch manifest the types are indicated as C or "Collection", I or "Item", P or "Primaryfile"

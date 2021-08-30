@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -20,13 +19,12 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"collection_id", "name"})})
-@UniqueName
+@Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class CollectionSupplement extends Supplement {
 
 	@NotNull

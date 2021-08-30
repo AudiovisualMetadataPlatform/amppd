@@ -21,8 +21,8 @@ import lombok.Data;
  *
  */
 
-@Data
 @Entity
+@Data
 public class TimedToken {  
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
