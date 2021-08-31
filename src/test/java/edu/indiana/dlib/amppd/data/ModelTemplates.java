@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.testData;
+package edu.indiana.dlib.amppd.data;
 
 import java.util.HashSet;
 

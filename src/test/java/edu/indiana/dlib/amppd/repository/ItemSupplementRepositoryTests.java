@@ -48,7 +48,7 @@ public class ItemSupplementRepositoryTests {
 	@BeforeClass
 	public static void setupTest() 
 	{
-	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.testData");
+	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.data");
 	}
 	
 	@Before
