@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.web;
+package edu.indiana.dlib.amppd.advice;
 
 import lombok.Data;
 

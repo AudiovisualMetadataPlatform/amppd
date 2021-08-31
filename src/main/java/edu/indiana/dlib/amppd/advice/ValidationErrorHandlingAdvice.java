@@ -11,24 +11,24 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import edu.indiana.dlib.amppd.web.ValidationError;
-import edu.indiana.dlib.amppd.web.ValidationErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Advice to handle validation errors.
  * @author yingfeng
  */
 @ControllerAdvice
+@Slf4j
 public class ValidationErrorHandlingAdvice {
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public ValidationErrorResponse onConstraintValidationException(ConstraintViolationException e) {
+		log.error("Error during validation: ", e);
 		ValidationErrorResponse error = new ValidationErrorResponse();
 		for (ConstraintViolation violation : e.getConstraintViolations()) {
-			error.getValidationErrors()
-					.add(new ValidationError(violation.getPropertyPath().toString(), violation.getMessage()));
+			error.getValidationErrors().add(new ValidationError(violation.getPropertyPath().toString(), violation.getMessage()));
 		}
 		return error;
 	}
@@ -37,6 +37,7 @@ public class ValidationErrorHandlingAdvice {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ResponseBody
 	public ValidationErrorResponse onMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+		log.error("Error during validation: ", e);
 		ValidationErrorResponse error = new ValidationErrorResponse();
 		for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
 			error.getValidationErrors().add(new ValidationError(fieldError.getField(), fieldError.getDefaultMessage()));

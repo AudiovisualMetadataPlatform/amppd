@@ -16,7 +16,9 @@ import edu.indiana.dlib.amppd.model.Item;
 @Projection(name = "detail", types = {Collection.class}) 
 public interface CollectionDetail extends ContentDetail {
 
+	public String getTaskManager();
 	public Set<Item> getItems();
 	public Set<CollectionSupplement> getSupplements();
+//	public Set<DataentityBrief> getItems();
 	
 }

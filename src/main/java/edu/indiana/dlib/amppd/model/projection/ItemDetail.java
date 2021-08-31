@@ -18,5 +18,6 @@ public interface ItemDetail extends ContentDetail {
 
 	public Set<Primaryfile> getPrimaryfiles();
 	public Set<ItemSupplement> getSupplements();
+//	public Set<DataentityBrief> getPrimaryfiles();
 
 }

@@ -16,5 +16,6 @@ import edu.indiana.dlib.amppd.model.Unit;
 public interface UnitDetail extends DataentityDetail {
 
 	public Set<Collection> getCollections();
+//	public Set<DataentityBrief> getCollections();
 	
 }
