@@ -21,7 +21,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -33,7 +32,9 @@ public class UnitRepositoryTests {
 
 	@Autowired
     private TestHelper testHelper;
-	String token = "";
+	
+	private String token = "";
+	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
 		// TODO do a more refined delete to remove all data that might cause conflicts for tests in this class 
@@ -46,14 +47,12 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-
 		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.units").exists());
 	}
 
 	@Test
 	public void shouldCreateUnit() throws Exception {
-
 		mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Unit 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
@@ -62,7 +61,6 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldRetrieveUnit() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Unit 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -75,7 +73,6 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldQueryUnit() throws Exception {
-
 		mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Unit 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated());
@@ -89,7 +86,6 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldUpdateUnit() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Unit 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -107,7 +103,6 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldPartiallyUpdateUnit() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Unit 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -125,7 +120,6 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldDeleteUnit() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Unit 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();

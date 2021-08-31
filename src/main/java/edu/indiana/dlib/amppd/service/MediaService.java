@@ -11,19 +11,9 @@ import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 /**
  * Service for serving media files for primaryfiles and supplements. 
  * @author yingfeng
- *
  */
 public interface MediaService {
 
-	/**
-	 * Get the absolute pathname of the supplement, given its name, type, and parent to which the given primaryfile belongs. 
-	 * @param primaryfile the given primaryfile whose ancestor is the parent associated with the supplement 
-	 * @param name name of the supplement
-	 * @param type association type of the supplement
-	 * @return absolute pathname of the supplement if found, or null otherwise
-	 */
-	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
-	
 	/**
 	 * Get the media file download URL for the given primaryfile ID.
 	 * Note that this method does not verify that the primaryfile for this ID exists in the system.
@@ -38,30 +28,23 @@ public interface MediaService {
 	 * @return the generated media URL
 	 */
 	public String getPrimaryfileMediaUrl(Primaryfile primaryfile);
-
+			
+	/**
+	 * Get the absolute pathname of the supplement, given its name, type, and parent to which the given primaryfile belongs. 
+	 * @param primaryfile the given primaryfile whose ancestor is the parent associated with the supplement 
+	 * @param name name of the supplement
+	 * @param type association type of the supplement
+	 * @return absolute pathname of the supplement if found, or null otherwise
+	 */
+	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
+	
 	/**
 	 * Get the media information JSON file path for the given asset.
 	 * @param asset the given asset
 	 * @return the absolute path of the media info JSON file
 	 */
 	public String getAssetMediaInfoPath(Asset asset);	
-	
-	/**
-	 * Get the media symlink URL for the given primaryfile:
-	 * create a new one if not existing yet; or reuse the existing symlink if already created.
-	 * @param id ID of the given primaryfile
-	 * @return the absolute path of the media symlink
-	 */
-	public String getPrimaryfileSymlinkUrl(Long id);
-	
-	/**
-	 * Create an obscure symlink for the given asset, if it hasn't been created,
-	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
-	 * @param the given asset
-	 * @return the created symlink.
-	 */
-	public String createSymlink(Asset asset);
-	
+
 	/**
 	 * Get the output file access URL for the given WorkflowResult.
 	 * @param WorkflowResultId ID of the given WorkflowResult
@@ -70,19 +53,35 @@ public interface MediaService {
 	public String getWorkflowResultOutputUrl(Long workflowResultId);
 
 	/**
+	 * Get the output file extension for the given WorkflowResult, based on its dataset type/extension.
+	 * @param the given WorkflowResult
+	 * @return the file extension of the output file
+	 */
+	public String getWorkflowResultOutputExtension(WorkflowResult workflowResult);
+
+	/**
+	 * Get the media symlink URL for the given primaryfile:
+	 * create a new one if not existing yet; or reuse the existing symlink if already created.
+	 * @param id ID of the given primaryfile
+	 * @return the absolute path of the media symlink
+	 */
+	public String getPrimaryfileSymlinkUrl(Long id);
+
+	/**
 	 * Get the output symlink URL for the given WorkflowResult:
 	 * create a new one if not existing yet; or reuse the existing symlink if already created.
 	 * @param id ID of the given WorkflowResult
 	 * @return the absolute path of the output symlink
 	 */
 	public String getWorkflowResultOutputSymlinkUrl(Long id);
-
+	
 	/**
-	 * Get the output file extension for the given WorkflowResult, based on its dataset type/extension.
-	 * @param the given WorkflowResult
-	 * @return the file extension of the output file
+	 * Create an obscure symlink for the given asset, if it hasn't been created,
+	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
+	 * @param the given asset
+	 * @return the created symlink.
 	 */
-	public String getWorkflowResultOutputExtension(WorkflowResult workflowResult);
+	public String createSymlink(Asset asset);
 	
 	/**
 	 * Create an obscure symlink for the output of the given WorkflowResult, if it hasn't been created,

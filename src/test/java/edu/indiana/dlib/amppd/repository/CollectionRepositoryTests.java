@@ -36,13 +36,15 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class CollectionRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
+	
+	@Autowired 
+	private TestHelper testHelper;
 
-	private ObjectMapper mapper = new ObjectMapper();
-	private Collection obj;
-	// private ObjectFactory objFactory = new ObjectFactory();
-
-	@Autowired private TestHelper testHelper;
-	String token = "";
+	@Autowired 
+	private ObjectMapper mapper;
+	
+	private Collection collection;
+	private String token = "";
 	
 	@BeforeClass
 	public static void setupTest() {
@@ -84,26 +86,24 @@ public class CollectionRepositoryTests {
 
 	@Test
 	public void shouldRetrieveCollection() throws Exception {
-
 		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
 	}
 
 	@Test
 	public void shouldQueryCollection() throws Exception {
-		obj = Fixture.from(Collection.class).gimme("valid");
+		collection = Fixture.from(Collection.class).gimme("valid");
 
-		String json = mapper.writeValueAsString(obj);
+		String json = mapper.writeValueAsString(collection);
 		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(json)).andExpect(status().isCreated());
 
-		mockMvc.perform(get("/collections/search/findByName?name={name}", obj.getName()).header("Authorization", "Bearer " + token))
+		mockMvc.perform(get("/collections/search/findByName?name={name}", collection.getName()).header("Authorization", "Bearer " + token))
 				.andDo(MockMvcResultHandlers.print()).andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.collections[0].name").value(obj.getName()));
+				.andExpect(jsonPath("$._embedded.collections[0].name").value(collection.getName()));
 	}
 
 	@Test
 	public void shouldUpdateCollection() throws Exception {
-
 		MvcResult mvcResult = mockMvc
 				.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
@@ -119,7 +119,6 @@ public class CollectionRepositoryTests {
 
 	@Test
 	public void shouldPartiallyUpdateCollection() throws Exception {
-
 		MvcResult mvcResult = mockMvc
 				.perform(post("/collections").header("Authorization", "Bearer " + token).content("{\"name\": \"Collection 1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();
@@ -135,7 +134,6 @@ public class CollectionRepositoryTests {
 
 	@Test
 	public void shouldDeleteCollection() throws Exception {
-
 		MvcResult mvcResult = mockMvc
 				.perform(post("/collections").header("Authorization", "Bearer " + token).content("{ \"name\": \"Collection 1.1\", \"description\":\"For test\"}"))
 				.andExpect(status().isCreated()).andReturn();

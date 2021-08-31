@@ -39,20 +39,17 @@ public class PrimaryfileRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 
-//	@Autowired
-//	AmpUserService ampUserservice;
-	
-	@Autowired 
-	private ObjectMapper mapper;
-	private Primaryfile primaryfile ;
-
 	@Autowired
     private TestHelper testHelper;
-	String token = "";
+
+	@Autowired 
+	private ObjectMapper mapper;
+	
+	private Primaryfile primaryfile ;
+	private String token = "";
 	
 	@BeforeClass
-	public static void setupTest() 
-	{
+	public static void setupTest() {
 	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.data");
 	}
 	
@@ -67,7 +64,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-
 		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.primaryfiles").exists());
 	}
@@ -82,7 +78,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldRetrievePrimaryfile() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -96,7 +91,6 @@ public class PrimaryfileRepositoryTests {
 	
 	@Test
 	public void shouldQueryPrimaryfileDescription() throws Exception {
-		
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(primaryfile);
@@ -130,7 +124,6 @@ public class PrimaryfileRepositoryTests {
 	
 	@Test
 	public void shouldQueryPrimaryfileCreatedBy() throws Exception {
-		
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(primaryfile);
@@ -138,7 +131,6 @@ public class PrimaryfileRepositoryTests {
 				  .content(json)).andExpect(
 						  status().isCreated());
 		
-//		String username = ampUserservice.getCurrentUsername();
 		mockMvc.perform(
 				get("/primaryfiles/search/findByCreatedBy?createdBy={createdBy}", TestHelper.TEST_USER).header("Authorization", "Bearer " + token)).andDo(
 						MockMvcResultHandlers.print()).andExpect(
@@ -150,7 +142,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldQueryPrimaryfileName() throws Exception {
-
 		mockMvc.perform(post("/primaryfiles").content(
 				"{ \"name\": \"Primaryfile 1\", \"description\":\"For test\"}").header("Authorization", "Bearer " + token)).andExpect(
 						status().isCreated());
@@ -164,7 +155,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldQueryPrimaryfileNameKeyword() throws Exception {
-		
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		String[] words = StringUtils.split(primaryfile.getName());
 		String keyword = words[words.length-1];
@@ -183,7 +173,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldQueryPrimaryfileNameKeywordCaseInsensitive() throws Exception {
-		
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		String[] words = StringUtils.split(primaryfile.getName());
 		String keyword = words[words.length-1].toUpperCase();
@@ -209,7 +198,6 @@ public class PrimaryfileRepositoryTests {
 	}
 	@Test
 	public void shouldQueryPrimaryfileDescriptionKeyword() throws Exception {
-		
 		primaryfile = Fixture.from(Primaryfile.class).gimme("valid");
 		String[] words = StringUtils.split(primaryfile.getDescription());
 		String keyword = words[words.length-1];
@@ -228,7 +216,6 @@ public class PrimaryfileRepositoryTests {
 	
 	@Test
 	public void shouldUpdatePrimaryfile() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -246,7 +233,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldPartiallyUpdatePrimaryfile() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Primaryfile 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -264,7 +250,6 @@ public class PrimaryfileRepositoryTests {
 
 	@Test
 	public void shouldDeletePrimaryfile() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/primaryfiles").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Primaryfile 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();

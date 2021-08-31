@@ -39,20 +39,17 @@ public class ItemRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
 	
-//	@Autowired
-//	AmpUserService ampUserservice;
-	
-	@Autowired 
-	private ObjectMapper mapper = new ObjectMapper();
-	private Item item ;
-	
 	@Autowired
     private TestHelper testHelper;
-	String token = "";
+		
+	@Autowired 
+	private ObjectMapper mapper;
+	
+	private Item item ;	
+	private String token = "";
 	
 	@BeforeClass
-	public static void setupTest() 
-	{
+	public static void setupTest() {
 	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.data");
 	}
 	
@@ -67,14 +64,12 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
-
 		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.items").exists());
 	}
 
 	@Test
 	public void shouldCreateItem() throws Exception {
-
 		mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
@@ -83,7 +78,6 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldRetrieveItem() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -96,7 +90,6 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldQueryItemDescription() throws Exception {
-		
 		item = Fixture.from(Item.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(item);
@@ -115,7 +108,6 @@ public class ItemRepositoryTests {
 	
 	@Test
 	public void shouldQueryItemCreatedBy() throws Exception {
-		
 		item = Fixture.from(Item.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(item);
@@ -134,7 +126,6 @@ public class ItemRepositoryTests {
 	
 	@Test
 	public void shouldQueryItemNameKeyword() throws Exception {
-		
 		item = Fixture.from(Item.class).gimme("valid");
 		String[] words = StringUtils.split(item.getName());
 		String keyword = words[words.length-1];
@@ -153,7 +144,6 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldQueryItemNameKeywordCaseInsensitive() throws Exception {
-		
 		item = Fixture.from(Item.class).gimme("valid");
 		String[] words = StringUtils.split(item.getName());
 		String keyword = words[words.length-1].toUpperCase();
@@ -180,7 +170,6 @@ public class ItemRepositoryTests {
 	
 	@Test
 	public void shouldQueryItemDescriptionKeyword() throws Exception {
-		
 		item = Fixture.from(Item.class).gimme("valid");
 		String[] words = StringUtils.split(item.getDescription());
 		String keyword = words[words.length-1];
@@ -199,7 +188,6 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldUpdateItem() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -217,7 +205,6 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldPartiallyUpdateItem() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{\"name\": \"Item 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
@@ -235,7 +222,6 @@ public class ItemRepositoryTests {
 
 	@Test
 	public void shouldDeleteItem() throws Exception {
-
 		MvcResult mvcResult = mockMvc.perform(post("/items").header("Authorization", "Bearer " + token).content(
 				"{ \"name\": \"Item 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();

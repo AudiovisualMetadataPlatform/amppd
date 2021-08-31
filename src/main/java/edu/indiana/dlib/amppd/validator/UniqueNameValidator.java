@@ -57,39 +57,39 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 	}
 
 	@Override
-	public boolean isValid(Dataentity de,  ConstraintValidatorContext cxt) {
+	public boolean isValid(Dataentity dataentity,  ConstraintValidatorContext cxt) {
 		List<? extends Dataentity> desFound = null;
 		
-		if (de instanceof Unit) {
-			desFound = unitRepository.findByName(de.getName());
+		if (dataentity instanceof Unit) {
+			desFound = unitRepository.findByName(dataentity.getName());
 		}
-		else if (de instanceof Collection) {
-			desFound = collectionRepository.findByUnitIdAndName(((Collection)de).getUnit().getId(), de.getName());
+		else if (dataentity instanceof Collection) {
+			desFound = collectionRepository.findByUnitIdAndName(((Collection)dataentity).getUnit().getId(), dataentity.getName());
 		}
-		else if (de instanceof Item) {
-			desFound = itemRepository.findByCollectionIdAndName(((Item)de).getCollection().getId(), de.getName());
+		else if (dataentity instanceof Item) {
+			desFound = itemRepository.findByCollectionIdAndName(((Item)dataentity).getCollection().getId(), dataentity.getName());
 		}
-		else if (de instanceof Primaryfile) {
-			desFound = primaryfileRepository.findByItemIdAndName(((Primaryfile)de).getItem().getId(), de.getName());
+		else if (dataentity instanceof Primaryfile) {
+			desFound = primaryfileRepository.findByItemIdAndName(((Primaryfile)dataentity).getItem().getId(), dataentity.getName());
 		}
-		else if (de instanceof CollectionSupplement) {
-			desFound = collectionSupplementRepository.findByCollectionIdAndName(((CollectionSupplement)de).getCollection().getId(), de.getName());
+		else if (dataentity instanceof CollectionSupplement) {
+			desFound = collectionSupplementRepository.findByCollectionIdAndName(((CollectionSupplement)dataentity).getCollection().getId(), dataentity.getName());
 		}
-		else if (de instanceof ItemSupplement) {
-			desFound = itemSupplementRepository.findByItemIdAndName(((ItemSupplement)de).getItem().getId(), de.getName());
+		else if (dataentity instanceof ItemSupplement) {
+			desFound = itemSupplementRepository.findByItemIdAndName(((ItemSupplement)dataentity).getItem().getId(), dataentity.getName());
 		}
-		else if (de instanceof PrimaryfileSupplement) {
-			desFound = primaryfileSupplementRepository.findByPrimaryfileIdAndName(((PrimaryfileSupplement)de).getPrimaryfile().getId(), de.getName());
+		else if (dataentity instanceof PrimaryfileSupplement) {
+			desFound = primaryfileSupplementRepository.findByPrimaryfileIdAndName(((PrimaryfileSupplement)dataentity).getPrimaryfile().getId(), dataentity.getName());
 		}
 		
-		// de must be one of the Dataentity type
+		// dataentity must be one of the Dataentity type
 		if (desFound == null) return false;
 		
-		// de is valid if no existing dataentity has the same name
+		// dataentity is valid if no existing dataentity has the same name
 		if (desFound != null && desFound.size() == 0) return true;
 		
 		// otherwise, if one existing dataentity has the same name, it must be itself
-		if (desFound.size() == 1 && de.getId() == desFound.get(0).getId()) return true;
+		if (desFound.size() == 1 && dataentity.getId() == desFound.get(0).getId()) return true;
 		
 		// otherwise, it's invalid
 		return false;

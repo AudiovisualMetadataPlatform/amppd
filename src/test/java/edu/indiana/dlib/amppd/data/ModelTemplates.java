@@ -1,11 +1,13 @@
 package edu.indiana.dlib.amppd.data;
 
-import java.util.HashSet;
+import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.Rule;
 import br.com.six2six.fixturefactory.loader.TemplateLoader;
-import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
@@ -13,133 +15,138 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.util.TestHelper;
 
-//import edu.indiana.dlib.amppd.model.fixtures.TemplateLoader;
 
+@Component
 public class ModelTemplates implements TemplateLoader {
+	
+	@Autowired
+    private DataentityService dataentityService;	
+	
+	@Autowired
+    private TestHelper testHelper;
+	
+	private Random rand = new Random();
+	private Long id = 0L;
+	private String[] taskManagers = dataentityService.getAllowedExternalSources();
+	private String[] externalSources = dataentityService.getAllowedExternalSources();
+	
+	private Unit unit = testHelper.ensureUnit("Test Unit");
+	private Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
+	private Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Test Item");
+	private Primaryfile primaryfile = testHelper.ensurePrimaryfile("Test Unit", "Test Collection", "Test Item", "Test Primaryfile");
+	private String unitUrl = dataentityService.getDataentityUrl(unit);
+	private String collectionUrl = dataentityService.getDataentityUrl(collection);
+	private String itemUrl = dataentityService.getDataentityUrl(item);
+	private String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);
 
 	@Override
 	public void load() {
-		// TODO Auto-generated method stub
-				
-		    Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
-			//add("externalId", new String());
-		    add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", "Collection ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-	    	add("items", new HashSet<Item>());
-	    	add("supplements",new HashSet<CollectionSupplement>()); 
-	    	}}); 
-	    	
-		
-		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
-			add("id", random(Long.class, range(1L, 200L)));
-			add("name", "CollectionSupplement ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-			//add("collection", new Collection());
-			add("originalFilename", firstName());
-		  	add("pathname", "C:/New Folder/${name}");
-		  	add("mediaInfo", "{}");
-		  	//add("externalId", new String());
-		  	}});
-		 
-		 
-	    Fixture.of(Item.class).addTemplate("valid", new Rule() {{			
-	    	add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", "Item ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-	    	//add("collection", one(Collection.class, "valid"));
-			add("primaryfiles", new HashSet<Primaryfile>()); 
-			add("supplements", new HashSet<ItemSupplement>()); 
-		  	add("externalId", new String());
-			}});
+		id = rand.nextLong();
+		Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
+//			add("id", rand.nextLong());
+			add("name", "Test Unit ${id}");
+			add("description", "Description for ${name}");	
+		}});
+
+		Fixture.of(Unit.class).addTemplate("invalid", new Rule() {{ 
+			add("name", "");
+		}});
+
+		id = rand.nextLong();		
+		Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
+//			add("id", rand.nextLong());
+			add("name", "Test Collection ${id}");
+			add("description", "Description for ${name}");	
+			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
+			add("externalId", "ext-" + rand.nextInt());
+			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
+			add("unit", unitUrl);
+		}}); 
 			
-	    Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
-	    	add("id", random(Long.class, range(1L, 200L)));
-	    	add("name", "Primaryfile ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-	    	add("supplements", new HashSet<PrimaryfileSupplement>());
-//			add("jobs", new HashSet<Job>());
-			add("originalFilename", firstName());
-			add("pathname", "C:/New Folder/${name}");
-		  	add("mediaInfo", "{}");
-		  	//add("externalId", new String());
-			}});
-	    
+		Fixture.of(Collection.class).addTemplate("invalid", new Rule() {{
+			add("name", "");
+			add("externalSource", "Fake");
+			add("taskManager", "Fake");
+		}}); 
+
+		id = rand.nextLong();
+		Fixture.of(Item.class).addTemplate("valid", new Rule() {{			
+//			add("id", rand.nextLong());
+			add("name", "Test Item ${id}");
+			add("description", "Description for ${name}");	
+			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
+			add("externalId", "ext-" + rand.nextInt());
+			add("collection", collectionUrl);
+		}});
+
+		Fixture.of(Item.class).addTemplate("invalid", new Rule() {{			
+			add("name", "");
+			add("externalSource", "Fake");
+		}});
+
+		id = rand.nextLong();
+		Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
+//			add("id", rand.nextLong());
+			add("name", "Test Primaryfile ${id}");
+			add("description", "Description for ${name}");	
+			add("item", itemUrl);
+//			add("originalFilename", firstName());
+//			add("pathname", "C:/New Folder/${name}");
+//			add("mediaInfo", "{}");
+		}});
+
+		id = rand.nextLong();
+		Fixture.of(Primaryfile.class).addTemplate("invalid", new Rule() {{ 
+			add("name", "");
+		}});
 		
-		  Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
-			//add("item", has(1).of(Item.class, "valid")); 
-			add("id", random(Long.class, range(1L, 200L)));
-			add("name", "ItemSupplement ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-			add("originalFilename", firstName());
-		  	add("pathname", "C:/New Folder/${name}");
-		  	add("mediaInfo", "{}");
-		  	//add("externalId", new String());
-			}});
-		 
-	    
-	    Fixture.of(Bundle.class).addTemplate("valid", new Rule() {{
-	    	//add("items", has(2).of(Item.class, "valid"));	
-	    	add("id", random(Long.class, range(1L, 200L)));
-			add("name", "Bundle ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-	    	}});
-	    
+		id = rand.nextLong();
+		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
+//			add("id", rand.nextLong());
+			add("name", "Test CollectionSupplement ${id}");
+			add("description", "Description for ${name}");	
+			add("collection", collectionUrl);
+//			add("originalFilename", firstName());
+//			add("pathname", "C:/New Folder/${name}");
+//			add("mediaInfo", "{}");
+		}});
+
+		Fixture.of(CollectionSupplement.class).addTemplate("invalid", new Rule() {{
+			add("name", "");
+		}}); 
 		
-		  Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
-			  //add("primaryfile", new Primaryfile());
-			add("id", random(Long.class, range(1L, 200L)));
+		id = rand.nextLong();
+		Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
+//			add("id", rand.nextLong());
+			add("name", "Test ItemSupplement ${id}");
+			add("description", "Description for ${name}");	
+			add("item", itemUrl);
+//			add("originalFilename", firstName());
+//			add("pathname", "C:/New Folder/${name}");
+//			add("mediaInfo", "{}");
+		}});
+
+		Fixture.of(ItemSupplement.class).addTemplate("invalid", new Rule() {{
+			add("name", "");
+		}}); 
+				
+		id = rand.nextLong();
+		Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
+//			add("id", rand.nextLong());
 			add("name", "PrimaryfileSupplement ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-			//add("collection", new Collection());
-			add("originalFilename", firstName());
-		  	add("pathname", "C:/New Folder/${name}");
-		  	add("mediaInfo", "{}");
-		  	//add("externalId", new String());
-		  }});
-		 
-	  
-	    Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
-	    	//add("collections", has(3).of(Collection.class, "valid"));
-		  	add("externalId", new String());
-	    	add("id", random(Long.class, range(1L, 200L)));
-			add("name", "Unit ${id}");
-	    	add("description", "Description for ${name}");	
-//			add("createdDate", new Date()); 
-//			add("modifiedDate", new Date()); 
-//			add("createdBy", firstName());
-//			add("modifiedBy", firstName());
-	    	}});
-	
-	    	}
+			add("description", "Description for ${name}");	
+			add("primaryfile", primaryfileUrl);
+//			add("originalFilename", firstName());
+//			add("pathname", "C:/New Folder/${name}");
+//			add("mediaInfo", "{}");
+		}});
+		
+		Fixture.of(PrimaryfileSupplement.class).addTemplate("invalid", new Rule() {{
+			add("name", "");
+		}}); 				
+	}
 
 }

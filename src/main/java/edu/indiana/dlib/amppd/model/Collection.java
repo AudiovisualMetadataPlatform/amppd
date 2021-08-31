@@ -36,7 +36,7 @@ import lombok.ToString;
 public class Collection extends Content {
     
 //	// the set of task management platforms AMPPD currently supports
-//	public enum TaskManager {JIRA, OPENPROJECT, REDMINE}
+//	public enum TaskManager {JIRA, TRELLO, OPENPROJECT, REDMINE}
 //	
 //	// task platform can be chosen upon collection creation (or edit) by collection managers
 //    private TaskManager taskManager;
