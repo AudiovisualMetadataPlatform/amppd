@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.data;
+package edu.indiana.dlib.amppd.fixture;
 
 import java.util.Random;
 
@@ -19,35 +19,33 @@ import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
-@Component
-public class ModelTemplates implements TemplateLoader {
+//@Component
+public class DataEntityTemplate implements TemplateLoader {
 	
-	@Autowired
-    private DataentityService dataentityService;	
-	
-	@Autowired
-    private TestHelper testHelper;
-	
-	private Random rand = new Random();
-	private Long id = 0L;
-	private String[] taskManagers = dataentityService.getAllowedExternalSources();
-	private String[] externalSources = dataentityService.getAllowedExternalSources();
-	
-	private Unit unit = testHelper.ensureUnit("Test Unit");
-	private Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
-	private Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Test Item");
-	private Primaryfile primaryfile = testHelper.ensurePrimaryfile("Test Unit", "Test Collection", "Test Item", "Test Primaryfile");
-	private String unitUrl = dataentityService.getDataentityUrl(unit);
-	private String collectionUrl = dataentityService.getDataentityUrl(collection);
-	private String itemUrl = dataentityService.getDataentityUrl(item);
-	private String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);
-
+//	@Autowired
+//    private DataentityService dataentityService;	
+//	
+//	@Autowired
+//    private TestHelper testHelper;
+	    
 	@Override
 	public void load() {
-		id = rand.nextLong();
+		Random rand = new Random();
+//		Long id = 0L;
+//		String[] taskManagers = dataentityService.getAllowedExternalSources();
+//		String[] externalSources = dataentityService.getAllowedExternalSources();
+//		
+//		Unit unit = testHelper.ensureUnit("Test Unit");
+//		Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
+//		Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Test Item");
+//		Primaryfile primaryfile = testHelper.ensurePrimaryfile("Test Unit", "Test Collection", "Test Item", "Test Primaryfile");
+//		String unitUrl = dataentityService.getDataentityUrl(unit);
+//		String collectionUrl = dataentityService.getDataentityUrl(collection);
+//		String itemUrl = dataentityService.getDataentityUrl(item);
+//		String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);		
+		
 		Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
-//			add("id", rand.nextLong());
-			add("name", "Test Unit ${id}");
+			add("name", "Test Unit " + rand.nextLong());
 			add("description", "Description for ${name}");	
 		}});
 
@@ -55,15 +53,13 @@ public class ModelTemplates implements TemplateLoader {
 			add("name", "");
 		}});
 
-		id = rand.nextLong();		
 		Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
-//			add("id", rand.nextLong());
-			add("name", "Test Collection ${id}");
+			add("name", "Test Collection " + rand.nextLong());
 			add("description", "Description for ${name}");	
 			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
 			add("externalId", "ext-" + rand.nextInt());
 			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
-			add("unit", unitUrl);
+//			add("unit", unitUrl);
 		}}); 
 			
 		Fixture.of(Collection.class).addTemplate("invalid", new Rule() {{

@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.Collection;
@@ -12,11 +13,14 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.DataentityService;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of DataentityService.
  * @author yingfeng
  */
+@Service
+@Slf4j
 public class DataentityServiceImpl implements DataentityService {
 	
 	@Autowired

@@ -9,7 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,7 +57,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author yingfeng
  *
  */
-@Service
+@Component
 @Slf4j
 public class TestHelper {
 	

@@ -48,7 +48,7 @@ public class ItemSupplementRepositoryTests {
 	@BeforeClass
 	public static void setupTest() 
 	{
-	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.data");
+	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.fixture");
 	}
 	
 	@Before
@@ -63,7 +63,7 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldReturnItemSupplementRepositoryIndex() throws Exception {
 
-		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/").header("Authorization", token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.itemSupplements").exists());
 
 	}
@@ -71,7 +71,7 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldCreateItemSupplement() throws Exception {
 
-		mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("itemSupplements/")));
@@ -80,12 +80,12 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldRetrieveItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("ItemSupplement 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -96,12 +96,12 @@ public class ItemSupplementRepositoryTests {
 		obj = Fixture.from(ItemSupplement.class).gimme("valid");
 		
 		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token)
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token)
 				  .content(json)).andExpect(
 						  status().isCreated());
 
 		mockMvc.perform(
-				get("/itemSupplements/search/findByName?name={name}", obj.getName()).header("Authorization", "Bearer " + token)).andExpect(
+				get("/itemSupplements/search/findByName?name={name}", obj.getName()).header("Authorization", token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.itemSupplements[0].name").value(
 										obj.getName()));
@@ -110,17 +110,17 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldUpdateItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(put(location).header("Authorization", "Bearer " + token).content(
+		mockMvc.perform(put(location).header("Authorization", token).content(
 				"{\"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("ItemSupplement 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -128,17 +128,17 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldPartiallyUpdateItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
 				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"ItemSupplement 1.1.1\"}")).andExpect(
+				patch(location).header("Authorization", token).content("{\"name\": \"ItemSupplement 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("ItemSupplement 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -146,13 +146,13 @@ public class ItemSupplementRepositoryTests {
 	@Test
 	public void shouldDeleteItemSupplement() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
 				"{ \"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isNotFound());
 	}
 }
