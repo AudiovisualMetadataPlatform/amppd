@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import edu.indiana.dlib.amppd.fixture.DataentityProcessor;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
@@ -38,6 +39,9 @@ public class UnitRepositoryTests {
 
 	@Autowired
     private TestHelper testHelper;
+
+	@Autowired 
+	private DataentityProcessor dataentityProcessor;
 
 	@Autowired 
 	private ObjectMapper mapper;
@@ -67,7 +71,7 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldCreateUnit() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		
 		mockMvc.perform(post("/units").header("Authorization", token).content(json))
@@ -83,7 +87,7 @@ public class UnitRepositoryTests {
 	
 	@Test
 	public void shouldListUnits() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();		
 		String location = mvcResult.getResponse().getHeader("Location");
@@ -96,7 +100,7 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldRetrieveUnit() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();		
 		String location = mvcResult.getResponse().getHeader("Location");
@@ -113,7 +117,7 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldQueryUnits() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();
 
@@ -130,7 +134,7 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldUpdateUnit() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
 		
@@ -150,7 +154,7 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldPartiallyUpdateUnit() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
 		
@@ -168,7 +172,7 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldDeleteUnit() throws Exception {
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();			
 		String location = mvcResult.getResponse().getHeader("Location");

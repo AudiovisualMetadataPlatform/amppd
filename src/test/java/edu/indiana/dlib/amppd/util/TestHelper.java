@@ -92,13 +92,13 @@ public class TestHelper {
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
-	PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
 	@Autowired
-	ItemSupplementRepository itemSupplementRepository;
+	private ItemSupplementRepository itemSupplementRepository;
 
 	@Autowired
-	CollectionSupplementRepository collectionSupplementRepository;
+	private CollectionSupplementRepository collectionSupplementRepository;
 	
 	@Autowired
     private FileStorageService fileStorageService; 
