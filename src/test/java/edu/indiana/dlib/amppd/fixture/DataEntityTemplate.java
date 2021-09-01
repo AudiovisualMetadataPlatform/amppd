@@ -25,8 +25,6 @@ public class DataEntityTemplate implements TemplateLoader {
 	    
 	@Override
 	public void load() {
-//		Random rand = new Random();
-//		Long id = 0L;
 //		String[] taskManagers = dataentityService.getAllowedExternalSources();
 //		String[] externalSources = dataentityService.getAllowedExternalSources();
 //		

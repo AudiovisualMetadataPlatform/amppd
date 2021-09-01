@@ -14,26 +14,18 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
+/**
+ * Processor for post-processing fixtures created by DataEntityTemplate. 
+ * @author yingfeng
+ */
 @Component
 public class DataentityProcessor implements Processor {	
 	@Autowired
-    private TestHelper testHelper;
-	
-//	private Unit unit;
-//	private Collection collection;
-//	private Item item;
-//	private Primaryfile primaryfile;
-//	private String unitUrl = dataentityService.getDataentityUrl(unit);
-//	private String collectionUrl = dataentityService.getDataentityUrl(collection);
-//	private String itemUrl = dataentityService.getDataentityUrl(item);
-//	private String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);		
-
-//    @Autowired
-//    public DataentityProcessor(TestHelper testHelper) {
-//        this.testHelper = testHelper;
-//    }
+    private TestHelper testHelper;	
     
+	@Override
 	public void execute(Object dataentity) {
+		// ensure and populate parent entity post fixture creation, as a workaround for the @Autowire issue in DataEntityTemplate
 		if (dataentity instanceof Unit) {
 			// don't need to do anything;
 		}
