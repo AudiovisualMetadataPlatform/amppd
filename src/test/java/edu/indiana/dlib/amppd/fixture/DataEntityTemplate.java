@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.fixture;
 
-import java.util.Random;
-
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.Rule;
 import br.com.six2six.fixturefactory.loader.TemplateLoader;
@@ -27,7 +25,7 @@ public class DataEntityTemplate implements TemplateLoader {
 	    
 	@Override
 	public void load() {
-		Random rand = new Random();
+//		Random rand = new Random();
 //		Long id = 0L;
 //		String[] taskManagers = dataentityService.getAllowedExternalSources();
 //		String[] externalSources = dataentityService.getAllowedExternalSources();
@@ -42,7 +40,8 @@ public class DataEntityTemplate implements TemplateLoader {
 //		String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);		
 		
 		Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
-			add("name", "Test Unit " + rand.nextLong());
+			add("id", random(Long.class));
+			add("name", "Test Unit ${id}");
 			add("description", "Description for ${name}");	
 		}});
 
@@ -51,11 +50,12 @@ public class DataEntityTemplate implements TemplateLoader {
 		}});
 
 		Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
-			add("name", "Test Collection " + rand.nextLong());
+			add("id", random(Long.class));
+			add("name", "Test Collection ${id}");
 			add("description", "Description for ${name}");	
-			add("externalSource", regex(TASK_MANAGER));
-			add("externalId", "ext-" + rand.nextInt());
-			add("taskManager", regex(EXTERNAL_SOURCE));
+			add("externalSource", regex(EXTERNAL_SOURCE));
+			add("externalId", random(Integer.class));
+			add("taskManager", regex(TASK_MANAGER));
 //			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
 //			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
 //			add("unit", unitUrl);
@@ -63,24 +63,26 @@ public class DataEntityTemplate implements TemplateLoader {
 			
 		Fixture.of(Collection.class).addTemplate("invalid", new Rule() {{
 			add("name", "");
-			add("externalSource", "Fake");
-			add("taskManager", "Fake");
+			add("externalSource", "FakeExternalSource");
+			add("taskManager", "FakeTaskManager");
 		}}); 
 
 		Fixture.of(Item.class).addTemplate("valid", new Rule() {{			
+			add("id", random(Long.class));
 			add("name", "Test Item ${id}");
 			add("description", "Description for ${name}");	
 			add("externalSource", regex(EXTERNAL_SOURCE));
-			add("externalId", "ext-" + rand.nextInt());
+			add("externalId", random(Integer.class));
 //			add("collection", collectionUrl);
 		}});
 
 		Fixture.of(Item.class).addTemplate("invalid", new Rule() {{			
 			add("name", "");
-			add("externalSource", "Fake");
+			add("externalSource", "FakeExternalSource");
 		}});
 
 		Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
+			add("id", random(Long.class));
 			add("name", "Test Primaryfile ${id}");
 			add("description", "Description for ${name}");	
 //			add("item", itemUrl);
@@ -94,6 +96,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		}});
 		
 		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
+			add("id", random(Long.class));
 			add("name", "Test CollectionSupplement ${id}");
 			add("description", "Description for ${name}");	
 //			add("collection", collectionUrl);
@@ -107,6 +110,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		}}); 
 		
 		Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
+			add("id", random(Long.class));
 			add("name", "Test ItemSupplement ${id}");
 			add("description", "Description for ${name}");	
 //			add("item", itemUrl);
@@ -120,6 +124,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		}}); 
 				
 		Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
+			add("id", random(Long.class));
 			add("name", "PrimaryfileSupplement ${id}");
 			add("description", "Description for ${name}");	
 //			add("primaryfile", primaryfileUrl);

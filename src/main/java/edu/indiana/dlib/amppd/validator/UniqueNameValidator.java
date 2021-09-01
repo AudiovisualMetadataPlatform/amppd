@@ -6,7 +6,6 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -29,7 +28,6 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
  * Validator for uniqueness of the name field within its parent's scope for all Dataentities.
  * @author yingfeng
  */
-@Component
 public class UniqueNameValidator implements ConstraintValidator<UniqueName, Dataentity> {  
 	
 	@Autowired

@@ -40,13 +40,13 @@ public class ItemHandler {
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Item item){
-        log.info("Before deleting item " + item.getId() + " ...");
+        log.info("Handling process before deleting item " + item.getId() + " ...");
 
     }
 
 //    @HandleAfterDelete
 //    public void handleAfterDelete(Item item){
-//        log.info("After deleting item " + item.getId() + " ...");
+//        log.info("Handling process after deleting item " + item.getId() + " ...");
 //    }
     
 }

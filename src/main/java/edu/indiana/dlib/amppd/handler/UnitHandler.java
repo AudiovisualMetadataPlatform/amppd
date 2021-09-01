@@ -38,7 +38,7 @@ public class UnitHandler {
 
     @HandleBeforeSave
     public void handleBeforeUpdate(@Valid Unit unit){
-        log.info("Before updating unit " + unit.getId() + " ...");
+        log.info("Handling process before updating unit " + unit.getId() + " ...");
         
         // rename dropbox subdir for the unit to be updated, assume unit name has been validated
         dropboxService.renameUnitSubdir(unit);
@@ -46,7 +46,7 @@ public class UnitHandler {
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Unit unit){
-        log.info("Before deleting unit " + unit.getId() + " ...");
+        log.info("Handling process before deleting unit " + unit.getId() + " ...");
 
         // delete dropbox subdir for the unit to be deleted
         dropboxService.deleteUnitSubdir(unit);
@@ -54,7 +54,7 @@ public class UnitHandler {
 
 //    @HandleAfterDelete
 //    public void handleAfterDelete(Unit unit){
-//        log.info("After deleting unit " + unit.getId() + " ...");
+//        log.info("Handling process after deleting unit " + unit.getId() + " ...");
 //    }
     
 }

@@ -19,7 +19,7 @@ import javax.validation.Payload;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UniqueName {  
-	String message() default "Dataentity name must be unique within its parent's scope.";
+	String message() default "dataentity name must be unique within its parent's scope";
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {};
 }
