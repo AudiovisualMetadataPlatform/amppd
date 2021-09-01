@@ -2,9 +2,6 @@ package edu.indiana.dlib.amppd.fixture;
 
 import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.Rule;
 import br.com.six2six.fixturefactory.loader.TemplateLoader;
@@ -15,12 +12,12 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.service.DataentityService;
-import edu.indiana.dlib.amppd.util.TestHelper;
 
 
 //@Component
 public class DataEntityTemplate implements TemplateLoader {
+	public static String TASK_MANAGER = "Jira|Trello|OpenProject|Redmine";
+	public static String EXTERNAL_SOURCE = "Jira|Trello|OpenProject|Redmine";	
 	
 //	@Autowired
 //    private DataentityService dataentityService;	
@@ -56,9 +53,11 @@ public class DataEntityTemplate implements TemplateLoader {
 		Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
 			add("name", "Test Collection " + rand.nextLong());
 			add("description", "Description for ${name}");	
-			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
+			add("externalSource", regex(TASK_MANAGER));
 			add("externalId", "ext-" + rand.nextInt());
-			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
+			add("taskManager", regex(EXTERNAL_SOURCE));
+//			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
+//			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
 //			add("unit", unitUrl);
 		}}); 
 			
@@ -68,14 +67,12 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("taskManager", "Fake");
 		}}); 
 
-		id = rand.nextLong();
 		Fixture.of(Item.class).addTemplate("valid", new Rule() {{			
-//			add("id", rand.nextLong());
 			add("name", "Test Item ${id}");
 			add("description", "Description for ${name}");	
-			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
+			add("externalSource", regex(EXTERNAL_SOURCE));
 			add("externalId", "ext-" + rand.nextInt());
-			add("collection", collectionUrl);
+//			add("collection", collectionUrl);
 		}});
 
 		Fixture.of(Item.class).addTemplate("invalid", new Rule() {{			
@@ -83,28 +80,23 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("externalSource", "Fake");
 		}});
 
-		id = rand.nextLong();
 		Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
-//			add("id", rand.nextLong());
 			add("name", "Test Primaryfile ${id}");
 			add("description", "Description for ${name}");	
-			add("item", itemUrl);
+//			add("item", itemUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");
 //			add("mediaInfo", "{}");
 		}});
 
-		id = rand.nextLong();
 		Fixture.of(Primaryfile.class).addTemplate("invalid", new Rule() {{ 
 			add("name", "");
 		}});
 		
-		id = rand.nextLong();
 		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
-//			add("id", rand.nextLong());
 			add("name", "Test CollectionSupplement ${id}");
 			add("description", "Description for ${name}");	
-			add("collection", collectionUrl);
+//			add("collection", collectionUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");
 //			add("mediaInfo", "{}");
@@ -114,12 +106,10 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("name", "");
 		}}); 
 		
-		id = rand.nextLong();
 		Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
-//			add("id", rand.nextLong());
 			add("name", "Test ItemSupplement ${id}");
 			add("description", "Description for ${name}");	
-			add("item", itemUrl);
+//			add("item", itemUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");
 //			add("mediaInfo", "{}");
@@ -129,12 +119,10 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("name", "");
 		}}); 
 				
-		id = rand.nextLong();
 		Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
-//			add("id", rand.nextLong());
 			add("name", "PrimaryfileSupplement ${id}");
 			add("description", "Description for ${name}");	
-			add("primaryfile", primaryfileUrl);
+//			add("primaryfile", primaryfileUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");
 //			add("mediaInfo", "{}");

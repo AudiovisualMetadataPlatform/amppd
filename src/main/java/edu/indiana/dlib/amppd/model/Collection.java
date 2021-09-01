@@ -34,7 +34,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
-    
+ 	
 //	// the set of task management platforms AMPPD currently supports
 //	public enum TaskManager {JIRA, TRELLO, OPENPROJECT, REDMINE}
 //	
