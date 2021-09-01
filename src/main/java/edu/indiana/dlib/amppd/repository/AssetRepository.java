@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import edu.indiana.dlib.amppd.model.Asset;
 
+
 @NoRepositoryBean
 public interface AssetRepository<S extends Asset> extends DataentityRepository<S> {
 	

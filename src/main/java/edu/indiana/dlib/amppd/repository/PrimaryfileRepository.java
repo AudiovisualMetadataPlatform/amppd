@@ -4,14 +4,15 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
 
-@CrossOrigin(origins = "*")
-@RepositoryRestResource(collectionResourceRel = "primaryfiles", path = "primaryfiles")
+
+//@RepositoryRestResource(collectionResourceRel = "primaryfiles", path = "primaryfiles")
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
+	
+	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
+	List<Primaryfile> findByItemIdAndName(Long itemId, String name);
 	
 	List<Primaryfile> findByHistoryIdNotNull();	
 	List<Primaryfile> findByHistoryId(String historyId); 

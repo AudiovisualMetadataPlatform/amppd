@@ -7,13 +7,17 @@ import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.binary.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class DropboxServiceImpl implements DropboxService {
+	
+	@Autowired
+	private UnitRepository unitRepository;
 	
 	@Autowired
 	private CollectionRepository collectionRepository;
@@ -66,6 +73,14 @@ public class DropboxServiceImpl implements DropboxService {
 	}
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DropboxService.getDropboxPath(Unit)
+	 */
+	@Override
+	public Path getDropboxPath(Unit unit) {
+		return getDropboxPath(unit.getName());
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DropboxService.getDropboxPath(String, String)
 	 */
 	@Override
@@ -74,7 +89,7 @@ public class DropboxServiceImpl implements DropboxService {
 		String encodedCollectionName = encodeUri(collectionName);
 		return Paths.get(unitPath.toString(), encodedCollectionName);
 	}
-	
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DropboxService.getDropboxPath(Collection)
 	 */
@@ -84,23 +99,109 @@ public class DropboxServiceImpl implements DropboxService {
 		log.trace("collection.getUnit() = "  + collection.getUnit());
 		return getDropboxPath(collection.getUnit().getName(), collection.getName());
 	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DropboxService.renameUnitSubdir(Unit)
+	 */
+	@Override
+	public Path renameUnitSubdir(Unit unit) {
+		Long id = unit.getId();
+		Unit oldUnit = unitRepository.findById(id).orElseThrow(() -> new StorageException("unit <" + id + "> does not exist!"));    
+		Path oldPath = getDropboxPath(oldUnit);
+		Path path = getDropboxPath(unit);
+		
+		try {
+			// only rename subdir if the name changed and the previous subdir exists 
+			if (!StringUtils.equals(oldUnit.getName(), unit.getName()) && Files.exists(oldPath)) {
+				Files.move(oldPath,  path);
+				log.info("Successfully renamed dropbox sub-directory " + oldPath + " to " + path + " for unit " + id);
+			}
+			return path;
+		}
+		catch (IOException e) {
+			throw new StorageException("Failed to rename dropbox sub-directory " + oldPath + " to " + path + " for unit " + id, e);
+		}		
+	}	
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DropboxService.deleteUnitSubdir(Unit)
+	 */
+	@Override
+	public Path deleteUnitSubdir(Unit unit) {
+		Path path = getDropboxPath(unit);
+		
+		try {
+			FileSystemUtils.deleteRecursively(path);
+			log.info("Dropbox sub-directory " + path + " has been deleted for unit " + unit.getId());
+			return path;
+		}
+		catch (IOException e) {
+			throw new StorageException("Failed to delete dropbox sub-directory "  + path + " for unit " + unit.getId(), e);
+		}		
+	}	
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DropboxService.createCollectionSubdir(Collection)
 	 */
 	@Override
 	public Path createCollectionSubdir(Collection collection) {
 		Path path = getDropboxPath(collection);
+		
 		try {
-			// directory is only created if not existing
+			// directory is only created if not pre-existing
 			Files.createDirectories(path); 
-			log.info("Dropbox sub-directory " + path + " has been created." );
+			log.info("Dropbox sub-directory " + path + " for collection " + collection.getName() + " has been created." );
 			return path;
 		}
 		catch (IOException e) {
-			throw new StorageException("Could not create dropbox sub-directory " + path, e);
+			throw new StorageException("Failed to create dropbox sub-directory " + path + " for collection " + collection.getName(), e);
 		}		
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DropboxService.renameCollectionSubdir(Collection)
+	 */
+	@Override
+	public Path renameCollectionSubdir(Collection collection) {
+		Long id = collection.getId();
+		Collection oldCol = collectionRepository.findById(id).orElseThrow(() -> new StorageException("collection <" + id + "> does not exist!"));    
+		Path oldPath = getDropboxPath(oldCol);
+		Path path = getDropboxPath(collection);
+		
+		try {
+			// if previous subdir doesn't exist, create a new one with warning
+			if (!Files.exists(oldPath)) {
+				Files.createDirectories(path); 
+				log.warn("Dropbox sub-directory " + oldPath + " doesn't exit, created a new one " + path + " for collection " + id);
+			}
+			// only rename subdir if the name changed
+			else if (!StringUtils.equals(oldCol.getName(), collection.getName())) {
+				Files.move(oldPath,  path);
+				log.info("Successfully renamed dropbox sub-directory " + oldPath + " to " + path + " for collection " + id);
+			}
+			return path;
+		}
+		catch (IOException e) {
+			throw new StorageException("Failed to rename dropbox sub-directory " + oldPath + " to " + path + " for collection " + id, e);
+		}		
+	}	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DropboxService.deleteCollectionSubdir(Collection)
+	 */
+	@Override
+	public Path deleteCollectionSubdir(Collection collection) {
+		Path path = getDropboxPath(collection);
+		
+		try {
+			FileSystemUtils.deleteRecursively(path);
+			log.info("Dropbox sub-directory " + path + " has been deleted for collection " + collection.getId());
+			return path;
+		}
+		catch (IOException e) {
+			throw new StorageException("Failed to delete dropbox sub-directory "  + path + " for collection " + collection.getId(), e);
+		}		
+	}	
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DropboxService.createCollectionSubdirs()
@@ -120,4 +221,6 @@ public class DropboxServiceImpl implements DropboxService {
 		}
 	}
 
+	// TODO add cleanupCollectionSubdirs() do remove all unused subdirs due to inconsistent manual operations
+	
 }

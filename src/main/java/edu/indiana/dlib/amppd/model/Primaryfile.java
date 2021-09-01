@@ -8,6 +8,8 @@ import javax.persistence.EntityListeners;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -25,11 +27,12 @@ import lombok.ToString;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"item_id", "name"})})
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
-// Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Primaryfile extends Asset {
+	// Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 
 	/* Note:
 	 * - The below history is not necessarily the same as where the primaryfile itself is uploaded in Galaxy
@@ -46,7 +49,7 @@ public class Primaryfile extends Asset {
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
-	//@NotNull
+	@NotNull
 	@Index
 	@ManyToOne
 	private Item item;

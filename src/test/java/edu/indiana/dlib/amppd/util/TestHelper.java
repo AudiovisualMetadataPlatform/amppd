@@ -9,7 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,10 +20,10 @@ import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import edu.indiana.dlib.amppd.authentication.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -42,6 +42,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.JobService;
@@ -56,7 +57,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author yingfeng
  *
  */
-@Service
+@Component
 @Slf4j
 public class TestHelper {
 	
@@ -91,13 +92,13 @@ public class TestHelper {
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
-	PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
 	@Autowired
-	ItemSupplementRepository itemSupplementRepository;
+	private ItemSupplementRepository itemSupplementRepository;
 
 	@Autowired
-	CollectionSupplementRepository collectionSupplementRepository;
+	private CollectionSupplementRepository collectionSupplementRepository;
 	
 	@Autowired
     private FileStorageService fileStorageService; 
@@ -140,7 +141,7 @@ public class TestHelper {
 	}
 	
 	/**
-	 * Check whether the collectionSupplement named TestImaegs with zip file extension is associated with the given primaryfile in Amppd; 
+	 * Check whether the collectionSupplement named TestImages with zip file extension is associated with the given primaryfile in Amppd; 
 	 * if not, upload it from its resource file.
 	 * @param primaryfile the given primaryfile
 	 * @return the prepared collectionSupplement as existing in Amppd 
@@ -192,6 +193,112 @@ public class TestHelper {
 	}
 	
 	/**
+	 * Check whether the specified unit exists in Amppd; if not, create one with the given name. 
+	 * @param name name of the specified unit
+	 * @return the prepared unit
+	 */
+	public Unit ensureUnit(String name) {
+		// retrieve unit from DB by name
+		List<Unit> units = unitRepository.findByName(name);
+		Unit unit = units.size() > 0 ? units.get(0): null;
+
+		// if the unit already exists in DB, just return it 
+		if (unit != null) {
+			return unit;
+		}
+
+		// otherwise, create a unit with the given name	
+		unit = new Unit();
+    	unit.setName(name);
+    	unit.setDescription("unit for tests");	  
+    	unit = unitRepository.save(unit);
+		return unit;
+	}
+	
+	/**
+	 * Check whether the specified collection exists in Amppd; if not, create one with the given unit name and name. 
+	 * @param unitName name of the specified unit
+	 * @param name name of the specified collection
+	 * @return the prepared collection
+	 */
+	public Collection ensureCollection(String unitName, String name) {
+		// retrieve collection from DB by unit name and name
+		List<Collection> collections = collectionRepository.findByUnitNameAndName(unitName, name);
+		Collection collection = collections.size() > 0 ? collections.get(0): null;
+		
+		// if the collection already exists in DB, just return it 
+		if (collection != null) {
+			return collection;
+		}
+
+		// otherwise, create a collection with the given name	
+		collection = new Collection();
+		Unit unit = ensureUnit(unitName);
+    	collection.setUnit(unit);
+    	collection.setName(name);
+    	collection.setDescription("collection for tests");
+    	collection.setTaskManager("Jira");
+    	collection = collectionRepository.save(collection);
+		return collection;
+	}
+		
+	/**
+	 * Check whether the specified item exists in Amppd; if not, create one with the given unit name, collection name, and name. 
+	 * @param unitName name of the specified unit
+	 * @param collectionName name of the specified collection
+	 * @param name name of the specified item
+	 * @return the prepared item
+	 */
+	public Item ensureItem(String unitName, String collectionName, String name) {
+		// retrieve item from DB by unit name, collection name, and name
+		List<Item> items = itemRepository.findByCollectionUnitNameAndCollectionNameAndName(unitName, collectionName, name);
+		Item item = items.size() > 0 ? items.get(0): null;
+		
+		// if the item already exists in DB, just return it 
+		if (item != null) {
+			return item;
+		}
+
+		// otherwise, create an item with the given name	
+		item = new Item();
+		Collection collection = ensureCollection(unitName, collectionName);
+    	item.setCollection(collection);
+    	item.setName(name);
+    	item.setDescription("item for tests");
+    	item = itemRepository.save(item);
+		return item;
+	}
+		
+	/**
+	 * Check whether the specified primaryfile exists in Amppd; if not, create one with the given unit name, collection name, item name, and name.
+	 * Note: this primaryfile doesn't have media file uploaded; so it can't be used for workflows but only serves as a container.  
+	 * @param unitName name of the specified unit
+	 * @param collectionName name of the specified collection
+	 * @param itemName name of the specified item
+	 * @param name name of the specified primaryfile
+	 * @return the prepared primaryfile
+	 */
+	public Primaryfile ensurePrimaryfile(String unitName, String collectionName, String itemName, String name) {
+		// retrieve primaryfile from DB by unit name, collection name, item name, and name
+		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(unitName, collectionName, itemName, name);
+		Primaryfile primaryfile = primaryfiles.size() > 0 ? primaryfiles.get(0): null;
+		
+		// if the primaryfile already exists in DB, just return it 
+		if (primaryfile != null) {
+			return primaryfile;
+		}
+
+		// otherwise, create a unit with the given name	
+		primaryfile = new Primaryfile();
+		Item item = ensureItem(unitName, collectionName, itemName);
+    	primaryfile.setItem(item);
+    	primaryfile.setName(name);
+    	primaryfile.setDescription("primaryfile for tests");
+    	primaryfile = primaryfileRepository.save(primaryfile);
+		return primaryfile;
+	}
+	
+	/**
 	 * Check whether the specified primaryfile exists in Amppd; if not, upload it from the resource file with a filename same as the primaryfile name, 
 	 * and with the specified extension. 
 	 * @param name name of the specified primaryfile
@@ -212,32 +319,12 @@ public class TestHelper {
 
 		// otherwise, create a primaryfile with the given name	
 		// and set up the parent hierarchy as needed by file upload file path calculation
-
-		Unit unit = new Unit();
-    	unit.setName("Unit for " + name);
-    	unit.setDescription("unit for tests");	  
-    	unit = unitRepository.save(unit);
-    	
-		Collection collection = new Collection();
-		collection.setName("Collection for " + name);
-		collection.setDescription("collection for tests");  	
-		collection.setTaskManager(TASK_MANAGER);  	
-    	collection.setUnit(unit);
-    	collection = collectionRepository.save(collection);
-    	
-    	Item item = new Item();
-    	item.setName("Item for " + name);
-    	item.setDescription("item for tests");  
-    	item.setExternalSource(TEST_EXTERNAL_SOURCE);
-    	item.setExternalSource(TEST_EXTERNAL_ID);
-    	item.setCollection(collection);
-    	item = itemRepository.save(item);
-
 		primaryfile = new Primaryfile();
+		Item item = ensureItem("Unit for " + name, "Collection for " + name, "Item for " + name);
+		primaryfile.setItem(item);
 		primaryfile.setName("Primaryfile for " + name);
 		primaryfile.setDescription("primaryfile for tests");			
-    	primaryfile.setItem(item);
-		primaryfile = primaryfileRepository.save(primaryfile);
+    	primaryfile = primaryfileRepository.save(primaryfile);
 
 		// and upload to it the resource file with the same name
 		try {
@@ -251,6 +338,64 @@ public class TestHelper {
 		// return the persisted primaryfile with ID populated 
 		log.info("Successfully created primaryfile " + primaryfile.getId() + " and uploaded media for it from resoruce " + filename);
 		return primaryfile;
+	}
+
+	/**
+	 * Check whether the specified supplement exists in Amppd; if not, create one associated with the specified dataentity and name. 
+	 * Note: this supplement doesn't have media file uploaded; so it can't be used for workflows but only serves as a container.  
+	 * @param dataentity the dataentity associated with the specified supplement
+	 * @param name name of the specified supplement
+	 * @return the prepared supplement
+	 */
+	public Supplement ensureSupplement(Dataentity dataentity, String name) {
+		List<? extends Supplement> supplements = null;		
+		if (dataentity instanceof Collection) {
+			supplements = collectionSupplementRepository.findByCollectionIdAndName(dataentity.getId(), name);
+		}
+		else if (dataentity instanceof Item) {
+			supplements = itemSupplementRepository.findByItemIdAndName(dataentity.getId(), name);
+		}
+		else if (dataentity instanceof Primaryfile) {
+			supplements = primaryfileSupplementRepository.findByPrimaryfileIdAndName(dataentity.getId(), name);
+		}
+		else {
+			// if Dataentity is not one of the above types, throw exception
+			throw new RuntimeException("Can't create supplement for Dataentity " + dataentity.getId() + " of invalid type.");
+		}
+		
+		// if the supplement already exists in DB, just return it 
+		Supplement supplement = supplements.size() > 0 ? supplements.get(0): null;		
+		if (supplement != null) {
+			return supplement;
+		}
+
+		// otherwise, create an supplement with the given name	
+		if (dataentity instanceof Collection) {
+			CollectionSupplement newSup = new CollectionSupplement();
+			newSup.setCollection((Collection)dataentity);
+			newSup.setName(name);
+			newSup.setDescription("supplement for tests");
+			newSup = collectionSupplementRepository.save(newSup);
+			return newSup;
+		}
+		else if (dataentity instanceof Item) {
+			ItemSupplement newSup = new ItemSupplement();
+			newSup.setItem((Item)dataentity);
+			newSup.setName(name);
+			newSup.setDescription("supplement for tests");
+			newSup = itemSupplementRepository.save(newSup);
+			return newSup;
+		}
+		else if (dataentity instanceof Primaryfile) {
+			PrimaryfileSupplement newSup = new PrimaryfileSupplement();
+			newSup.setPrimaryfile((Primaryfile)dataentity);
+			newSup.setName(name);
+			newSup.setDescription("supplement for tests");
+			newSup = primaryfileSupplementRepository.save(newSup);
+			return newSup;
+		}
+		
+		return null;
 	}
 
 	/**
@@ -327,7 +472,7 @@ public class TestHelper {
 		// return the persisted supplement with ID populated 
 		log.info("Successfully created " + type + " Supplement " + supplement.getId() + " for primaryfile " + primaryfile.getId() + ", and uploaded media for it from resoruce " + filename);		
 		return supplement;
-	}
+	}	
 	
 	/**
 	 * Check whether the specified supplement exists in Amppd; if not, upload it from the resource file with the filename name_type.extension. 
