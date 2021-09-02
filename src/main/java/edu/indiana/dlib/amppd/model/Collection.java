@@ -47,7 +47,7 @@ public class Collection extends Content {
 	 * It would be better to use a string representation and give the referring code flexibility on how to process (and validate) the values.
 	 */
 	@NotBlank
-	@Pattern(regexp = "Jira|Trello|OpenProject|Redmine") // TODO read values from properties
+	@Pattern(regexp = "Jira") // TODO read values from properties
 	private String taskManager;
 	
 	@OneToMany(mappedBy="collection")

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.github.jmchilton.blend4j.galaxy.beans.History;
@@ -53,9 +52,8 @@ import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Class for helper methods facilitating various tests in Amppd.
+ * Class containing helper methods facilitating test data management for various tests.
  * @author yingfeng
- *
  */
 @Component
 @Slf4j
@@ -76,9 +74,6 @@ public class TestHelper {
 	public static final String TASK_MANAGER = "Jira";	
 	public static final String TEST_USER = "pilotuser@iu.edu";	
 
-	@Autowired
-    private JwtTokenUtil tokenUtil;
-	
 	@Autowired
     private UnitRepository unitRepository;
 	
@@ -123,6 +118,12 @@ public class TestHelper {
 	
 	@Autowired
 	private TimedTokenRepository timedTokenRepository;
+	
+	@Autowired
+    private JwtTokenUtil tokenUtil;
+
+	@Autowired
+    private TestUtil testUtil;	
 	
 	/**
 	 * Check whether the primaryfile named TestAudio exists in Amppd; if not, upload it from its resource file.
@@ -328,7 +329,7 @@ public class TestHelper {
 
 		// and upload to it the resource file with the same name
 		try {
-			MultipartFile file = new MockMultipartFile(filename, filename, getContentType(extension), new ClassPathResource(filename).getInputStream());
+			MultipartFile file = new MockMultipartFile(filename, filename, testUtil.getContentType(extension), new ClassPathResource(filename).getInputStream());
 			primaryfile = fileStorageService.uploadPrimaryfile(primaryfile, file);
 		}
 		catch (IOException e) {
@@ -435,7 +436,7 @@ public class TestHelper {
 		String filename = name + "." + extension;
     	MultipartFile file = null;
 		try {
-			file = new MockMultipartFile(filename, filename, getContentType(extension), new ClassPathResource(filename).getInputStream());
+			file = new MockMultipartFile(filename, filename, testUtil.getContentType(extension), new ClassPathResource(filename).getInputStream());
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Unable to create MultipartFile for uploading " + filename + " to supplement.", e);
@@ -547,7 +548,7 @@ public class TestHelper {
 		// and prepare the resource file with the above filename 
     	MultipartFile file = null;
 		try {
-			file = new MockMultipartFile(filename, filename, getContentType(extension), new ClassPathResource(filename).getInputStream());
+			file = new MockMultipartFile(filename, filename, testUtil.getContentType(extension), new ClassPathResource(filename).getInputStream());
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Unable to create MultipartFile for uploading " + filename + " to supplement.", e);
@@ -660,20 +661,6 @@ public class TestHelper {
 		
 		return results;
 	}	
-	
-	/**
-	 * Return the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.
-	 * @param extention
-	 * @return
-	 */
-	public String getContentType(String extension) {
-		if (StringUtils.isEmpty(extension)) {
-			return null;
-		}		
-		String extlow =  extension.toLowerCase();
-		String contentType = VIDEO_TYPES.contains(extlow) ? "video" : AUDIO_TYPES.contains(extlow) ? "audio" : null;
-		return contentType == null ? null : contentType + "/" + extension;	
-	}
 	
 	/**
 	 * Delete all collections. 

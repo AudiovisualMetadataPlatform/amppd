@@ -14,8 +14,8 @@ import edu.indiana.dlib.amppd.model.Unit;
 
 //@Component
 public class DataEntityTemplate implements TemplateLoader {
-	public static String TASK_MANAGER = "Jira|Trello|OpenProject|Redmine";
-	public static String EXTERNAL_SOURCE = "Jira|Trello|OpenProject|Redmine";	
+	public static String TASK_MANAGER = "Jira";
+	public static String EXTERNAL_SOURCE = "^S|MCO|DarkAvalon|NYPL";	
 	
 //	@Autowired
 //    private DataentityService dataentityService;	
@@ -37,6 +37,8 @@ public class DataEntityTemplate implements TemplateLoader {
 //		String itemUrl = dataentityService.getDataentityUrl(item);
 //		String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);		
 		
+		// Note: id is set only for the purpose of including some random number as part of the name value
+		
 		Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
 			add("id", random(Long.class));
 			add("name", "Test Unit ${id}");
@@ -52,7 +54,7 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("name", "Test Collection ${id}");
 			add("description", "Description for ${name}");	
 			add("externalSource", regex(EXTERNAL_SOURCE));
-			add("externalId", random(Integer.class));
+			add("externalId", regex("external-\\d+"));
 			add("taskManager", regex(TASK_MANAGER));
 //			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
 //			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
@@ -70,7 +72,7 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("name", "Test Item ${id}");
 			add("description", "Description for ${name}");	
 			add("externalSource", regex(EXTERNAL_SOURCE));
-			add("externalId", random(Integer.class));
+			add("externalId", regex("external-\\d+"));
 //			add("collection", collectionUrl);
 		}});
 

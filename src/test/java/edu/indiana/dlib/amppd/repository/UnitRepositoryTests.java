@@ -73,7 +73,7 @@ public class UnitRepositoryTests {
 	@Test
 	public void shouldCreateUnit() throws Exception {
 		// get a valid random unit fixture
-		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).uses(dataentityProcessor).gimme("valid");
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		
 		// create the unit, should succeed with the unit's URL as the location header
@@ -130,9 +130,9 @@ public class UnitRepositoryTests {
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
+		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// update user-changeable fields
-		String location = mvcResult.getResponse().getHeader("Location");
 		unit.setName(unit.getName() + " Updated");
 		unit.setDescription(unit.getDescription() + " updated");
 		json = mapper.writeValueAsString(unit);
@@ -150,17 +150,17 @@ public class UnitRepositoryTests {
 
 	@Test
 	public void shouldPartiallyUpdateUnit() throws Exception {
-		// create a unit for partial update
+		// create a unit for partial-update
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
 		String json = mapper.writeValueAsString(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
+		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// update only the name field
-		String location = mvcResult.getResponse().getHeader("Location");
 		String name = unit.getName() + " Updated"; 
 		json = "{\"name\": \"" + name + "\"}";
 
-		// update just the name field of the unit
+		// partialupdate the unit
 		mockMvc.perform(patch(location).header("Authorization", token).content(json))
 			.andExpect(status().isNoContent());
 
@@ -186,7 +186,7 @@ public class UnitRepositoryTests {
 	@Test
 	public void shouldErrorOnInvalidCreate() throws Exception {
 		// get an invalid random unit fixture
-		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).uses(dataentityProcessor).gimme("invalid");
+		Unit unit = Fixture.from(Unit.class).gimme("invalid");
 		String json = mapper.writeValueAsString(unit);
 		
 		// create the invalid unit, should fail with all validation errors
@@ -210,6 +210,26 @@ public class UnitRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.unit"))
 			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
+	}
+		
+	@Test
+	public void shouldErrorOnInvalidUpdate() throws Exception {
+		// create a valid unit for update
+		Unit unit = Fixture.from(Unit.class).gimme("valid");
+		String json = mapper.writeValueAsString(unit);
+		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
+		String location = mvcResult.getResponse().getHeader("Location");		
+		
+		// update user-changeable fields to invalid values
+		unit.setName("");
+		json = mapper.writeValueAsString(unit);
+		
+		// update the unit with invalid fields, should fail with all validation errors
+		mockMvc.perform(put(location).header("Authorization", token).content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
+			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeUpdate.unit.name"))
+			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
 	}
 		
 }
