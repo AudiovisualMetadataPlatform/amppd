@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DropboxServiceTests {
@@ -64,6 +66,7 @@ public class DropboxServiceTests {
     	return true;
     }
 
+    @Ignore
     @Test
     public void shouldRenameSubdirForUnit() {
     	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
