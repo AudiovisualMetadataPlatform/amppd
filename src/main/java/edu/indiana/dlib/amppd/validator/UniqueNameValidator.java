@@ -60,9 +60,10 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 	public boolean isValid(Dataentity dataentity, ConstraintValidatorContext cxt) {
 		List<? extends Dataentity> desFound = null;
 		
-		// bypass validation if dataentity or its parent is null
+		// bypass validation (return true) if dataentity's parent is null
 		if (dataentity == null) {
-			return true;
+			// dataentity must not be null
+			throw new RuntimeException("Exception while validating UniqueName for dataentity: it's null.");
 		}
 		else if (dataentity instanceof Unit) {
 			desFound = unitRepository.findByName(dataentity.getName());
@@ -97,9 +98,10 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 			if (primaryfile == null) return true;		
 			desFound = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), dataentity.getName());
 		}
-		
-		// dataentity must be one of the Dataentity type
-		if (desFound == null) return false;
+		else {
+			// dataentity must be one of the above types applicable for UniqueName validation
+			throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId() + ": it's of invalid type.");
+		}
 		
 		// dataentity is valid if no existing dataentity has the same name
 		if (desFound != null && desFound.size() == 0) return true;

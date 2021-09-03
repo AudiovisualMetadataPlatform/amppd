@@ -9,41 +9,39 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * Event handler for Item related requests.
- * @item yingfeng
+ * Event handler for Primaryfile related requests.
+ * @Primaryfile yingfeng
  */
-@RepositoryEventHandler(Item.class)
+@RepositoryEventHandler(Primaryfile.class)
 @Component
 @Validated
 @Slf4j
-public class ItemHandler {    
+public class PrimaryfileHandler {    
     
     @HandleBeforeCreate
-    public void handleBeforeCreate(@Valid Item item){
+    public void handleBeforeCreate(@Valid Primaryfile primaryfile){
     	// The purpose of this method is to invoke validation before DB persistence.   	        
     }
 
     @HandleBeforeSave
-    public void handleBeforeUpdate(@Valid Item item){
+    public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
     	// The purpose of this method is to invoke validation before DB persistence.   	                
     }
     
     @HandleBeforeDelete
-    public void handleBeforeDelete(Item item){
-        log.info("Handling process before deleting item " + item.getId() + " ...");
+    public void handleBeforeDelete(Primaryfile primaryfile){
+        log.info("Handling process before deleting primaryfile " + primaryfile.getId() + " ...");
 
     }
 
 //    @HandleAfterDelete
-//    public void handleAfterDelete(Item item){
-//        log.info("Handling process after deleting item " + item.getId() + " ...");
+//    public void handleAfterDelete(Primaryfile Primaryfile){
+//        log.info("Handling process after deleting Primaryfile " + Primaryfile.getId() + " ...");
 //    }
     
 }
-
-

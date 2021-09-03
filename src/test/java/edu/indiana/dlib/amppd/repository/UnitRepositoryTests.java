@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -29,6 +30,7 @@ import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.fixture.DataentityProcessor;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.util.TestUtil;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -40,6 +42,9 @@ public class UnitRepositoryTests {
 	@Autowired
     private TestHelper testHelper;
 
+	@Autowired
+    private TestUtil testUtil;	
+	
 	@Autowired 
 	private DataentityProcessor dataentityProcessor;
 
@@ -74,7 +79,7 @@ public class UnitRepositoryTests {
 	public void shouldCreateUnit() throws Exception {
 		// get a valid random unit fixture
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		
 		// create the unit, should succeed with the unit's URL as the location header
 		mockMvc.perform(post("/units").header("Authorization", token).content(json))
@@ -86,7 +91,7 @@ public class UnitRepositoryTests {
 	public void shouldListUnits() throws Exception {
 		// create a unit to ensure some units exist for listing 
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();		
 
 		// list all units, should include at least one unit
@@ -100,7 +105,7 @@ public class UnitRepositoryTests {
 	public void shouldRetrieveUnit() throws Exception {
 		// create a unit for retrieval
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();		
 		String location = mvcResult.getResponse().getHeader("Location");
 		
@@ -115,7 +120,7 @@ public class UnitRepositoryTests {
 	public void shouldQueryUnits() throws Exception {
 		// create a unit to ensure some units exist for querying 
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();
 
 		// query units by name, should return at least one unit
@@ -128,14 +133,14 @@ public class UnitRepositoryTests {
 	public void shouldUpdateUnit() throws Exception {
 		// create a unit for update
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
 		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// update user-changeable fields
 		unit.setName(unit.getName() + " Updated");
 		unit.setDescription(unit.getDescription() + " updated");
-		json = mapper.writeValueAsString(unit);
+		json = testUtil.toJson(unit);
 
 		// update the whole unit
 		mockMvc.perform(put(location).header("Authorization", token).content(json))
@@ -149,10 +154,10 @@ public class UnitRepositoryTests {
 	}
 
 	@Test
-	public void shouldPartiallyUpdateUnit() throws Exception {
+	public void shouldPartialUpdateUnit() throws Exception {
 		// create a unit for partial-update
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
 		String location = mvcResult.getResponse().getHeader("Location");
 		
@@ -174,7 +179,7 @@ public class UnitRepositoryTests {
 	public void shouldDeleteUnit() throws Exception {
 		// create a unit for delete
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();			
 		String location = mvcResult.getResponse().getHeader("Location");
 		
@@ -187,12 +192,13 @@ public class UnitRepositoryTests {
 	public void shouldErrorOnInvalidCreate() throws Exception {
 		// get an invalid random unit fixture
 		Unit unit = Fixture.from(Unit.class).gimme("invalid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		
 		// create the invalid unit, should fail with all validation errors
 		mockMvc.perform(post("/units").header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.unit.name"))
 			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
 	}
@@ -201,13 +207,14 @@ public class UnitRepositoryTests {
 	public void shouldErrorOnDuplicateCreate() throws Exception {
 		// create a valid unit 1st time
 		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		String json = testUtil.toJson(unit);
 		mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();		
 		
 		// create the above unit 2nd time, should fail with non-unique name validation error
 		mockMvc.perform(post("/units").header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.unit"))
 			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
 	}
@@ -215,19 +222,20 @@ public class UnitRepositoryTests {
 	@Test
 	public void shouldErrorOnInvalidUpdate() throws Exception {
 		// create a valid unit for update
-		Unit unit = Fixture.from(Unit.class).gimme("valid");
-		String json = mapper.writeValueAsString(unit);
+		Unit unit = Fixture.from(Unit.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(unit);
 		MvcResult mvcResult = mockMvc.perform(post("/units").header("Authorization", token).content(json)).andReturn();	
 		String location = mvcResult.getResponse().getHeader("Location");		
 		
 		// update user-changeable fields to invalid values
 		unit.setName("");
-		json = mapper.writeValueAsString(unit);
+		json = testUtil.toJson(unit);
 		
 		// update the unit with invalid fields, should fail with all validation errors
 		mockMvc.perform(put(location).header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeUpdate.unit.name"))
 			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
 	}

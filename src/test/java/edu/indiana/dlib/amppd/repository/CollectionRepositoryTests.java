@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -11,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,10 +32,12 @@ import edu.indiana.dlib.amppd.fixture.DataentityProcessor;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.util.TestUtil;
+import lombok.extern.slf4j.Slf4j;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@Slf4j
 public class CollectionRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
@@ -108,9 +112,10 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldListCollections() throws Exception {
 		// create a collection to ensure some collections exist for listing 
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();		
+		createValidCollection();		
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();		
 		
 		// list all collections, should include at least one collection
 		mockMvc.perform(get("/collections").header("Authorization", token))
@@ -122,10 +127,13 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldRetrieveCollection() throws Exception {
 		// create a collection for retrieval
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();		
-		String location = mvcResult.getResponse().getHeader("Location");
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		Collection collection = tripple.getLeft();
+		String location = tripple.getRight();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();		
+//		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// retrieve the created collection by accessing the returned location, fields should match
 		mockMvc.perform(get(location).header("Authorization", token))
@@ -137,9 +145,11 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldQueryCollections() throws Exception {
 		// create a collection to ensure some collections exist for querying 
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		Collection collection = tripple.getLeft();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();
 
 		// query collections by name, should return at least one collection
 		mockMvc.perform(get("/collections/search/findByName?name={name}", collection.getName()).header("Authorization", token))
@@ -150,15 +160,18 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldUpdateCollection() throws Exception {
 		// create a collection for update
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();			
-		String location = mvcResult.getResponse().getHeader("Location");
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		Collection collection = tripple.getLeft();
+		String location = tripple.getRight();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();			
+//		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// update user-changeable fields
 		collection.setName(collection.getName() + " Updated");
 		collection.setDescription(collection.getDescription() + " updated");
-		json = testUtil.toJson(collection);
+		String json = testUtil.toJson(collection);
 
 		// update the whole collection
 		mockMvc.perform(put(location).header("Authorization", token).content(json))
@@ -172,16 +185,19 @@ public class CollectionRepositoryTests {
 	}
 
 	@Test
-	public void shouldPartiallyUpdateCollection() throws Exception {
+	public void shouldPartialUpdateCollection() throws Exception {
 		// create a collection for partial-update
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();			
-		String location = mvcResult.getResponse().getHeader("Location");
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		Collection collection = tripple.getLeft();
+		String location = tripple.getRight();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();			
+//		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// update only the name field
 		String name = collection.getName() + " Updated";
-		json = "{\"name\": \"" + name + "\"}";
+		String json = "{\"name\": \"" + name + "\"}";
 
 		// partial-update the collection
 		mockMvc.perform(patch(location).header("Authorization", token).content(json))
@@ -196,10 +212,13 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldDeleteCollection() throws Exception {
 		// create a collection for delete
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();			
-		String location = mvcResult.getResponse().getHeader("Location");
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		Collection collection = tripple.getLeft();
+		String location = tripple.getRight();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();			
+//		String location = mvcResult.getResponse().getHeader("Location");
 		
 		// delete the created collection, then retrieve the same collection, should return nothing
 		mockMvc.perform(delete(location).header("Authorization", token)).andExpect(status().isNoContent());
@@ -215,22 +234,32 @@ public class CollectionRepositoryTests {
 		// create the invalid collection, should fail with all validation errors
 		mockMvc.perform(post("/collections").header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
-			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.collection.name"))
-			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(4)));
+//			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.collection.name"))
+//			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
+//			.andExpect(jsonPath("$.validationErrors[1].field").value("handleBeforeCreate.collection.taskManager"))
+//			.andExpect(jsonPath("$.validationErrors[1].message").value("must match \"Jira\""));
+//			.andExpect(jsonPath("$.validationErrors[2].field").value("handleBeforeCreate.collection.externalSource"))
+//			.andExpect(jsonPath("$.validationErrors[2].message").value("must match \"^\\s*$|MCO|DarkAvalon|NYPL\""));
+//			.andExpect(jsonPath("$.validationErrors[3].field").value("handleBeforeCreate.collection.unit"))
+//			.andExpect(jsonPath("$.validationErrors[3].message").value("must not be null"));
 	}
 	
 	@Test
 	public void shouldErrorOnDuplicateCreate() throws Exception {
 		// create a valid collection 1st time
-		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
-		String json = testUtil.toJson(collection);
-		mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();		
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		String json = tripple.getMiddle();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();		
 		
 		// create the above collection 2nd time, should fail with non-unique name validation error
 		mockMvc.perform(post("/collections").header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.collection"))
 			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
 	}
@@ -238,21 +267,39 @@ public class CollectionRepositoryTests {
 	@Test
 	public void shouldErrorOnInvalidUpdate() throws Exception {
 		// create a valid collection for update
-		Collection collection = Fixture.from(Collection.class).gimme("valid");
-		String json = testUtil.toJson(collection);
-		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();	
-		String location = mvcResult.getResponse().getHeader("Location");		
+		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
+		Collection collection = tripple.getLeft();
+		String location = tripple.getRight();
+//		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+//		String json = testUtil.toJson(collection);
+//		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();	
+//		String location = mvcResult.getResponse().getHeader("Location");		
 		
 		// update user-changeable fields to invalid values
 		collection.setName("");
-		json = testUtil.toJson(collection);
+		String json = testUtil.toJson(collection);
 		
 		// update the collection with invalid fields, should fail with all validation errors
 		mockMvc.perform(put(location).header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.validationErrors").isNotEmpty())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeUpdate.collection.name"))
 			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
 	}	
 
+	/**
+	 * Create a valid collection for tests.
+	 */
+	protected ImmutableTriple<Collection, String, String> createValidCollection() throws Exception {
+		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(collection);
+		MvcResult mvcResult = mockMvc.perform(post("/collections").header("Authorization", token).content(json)).andReturn();	
+		String location = mvcResult.getResponse().getHeader("Location");
+		
+		log.trace("Created valid collection " + location + " with request body " + json);
+		log.trace("Collection creation response: " + mvcResult.getResponse().getContentAsString());		
+		return ImmutableTriple.of(collection, json, location);
+	}
+	
 }

@@ -23,7 +23,7 @@ import lombok.ToString;
 public abstract class Content extends Dataentity {
 	// TODO at the moment we do not require externalSource/Id on every collection/item, but this could change later
 	
-	@Pattern(regexp = "^S|MCO|DarkAvalon|NYPL") // TODO read values from properties
+	@Pattern(regexp = "^\\s*$|MCO|DarkAvalon|NYPL") // TODO read values from properties
     @Type(type="text")
     private String externalSource;	// external source/target system
 

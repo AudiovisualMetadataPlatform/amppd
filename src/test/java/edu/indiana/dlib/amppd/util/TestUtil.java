@@ -26,6 +26,9 @@ public class TestUtil {
 	@Autowired
 	private DataentityService dataentityService;	
 	
+	@Autowired 
+	private ObjectMapper mapper;
+	
 	/**
 	 * Return the standard media content type representation based on the given file extension, or null if the extension is not one of the common video/audio formats.
 	 * @param extention the given file extension
@@ -46,7 +49,6 @@ public class TestUtil {
 	 * @return the corresponding JSON string
 	 */
 	public String toJson(Dataentity dataentity) throws Exception {		
-		ObjectMapper mapper = new ObjectMapper();
 		String json = "";
 		
 		/* TODO:
