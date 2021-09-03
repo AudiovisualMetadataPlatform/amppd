@@ -2,11 +2,6 @@ package edu.indiana.dlib.amppd.service;
 
 
 
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,6 +43,7 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -107,45 +103,39 @@ public class BatchServiceTests {
 		itemRepository.deleteAll();
 		batchSupplementFileRepository.deleteAll();
 		batchFileRepository.deleteAll();
-		batchRepository.deleteAll();
-		
-		collectionRepository.deleteAll();
-		
-		unitRepository.deleteAll();
-		
+		batchRepository.deleteAll();		
+		collectionRepository.deleteAll();		
+		unitRepository.deleteAll();		
 		testHelper.deleteAllUsers();
 	}
 	
 	@Before
-	public void createTestData() throws Exception {
-		
-		deleteAllData();
-		
-		String collectionName = "Music Library";
-		String unitName = "Test Unit";
+	public void createTestData() throws Exception {		
+		deleteAllData();		
 
-	 	AmpUser user = testHelper.createTestUser();
-	 	
-	 	ampUsername = user.getUsername();
-	 	
-	 	String token = testHelper.getToken();
+		// set up user
+	 	AmpUser user = testHelper.createTestUser();	 	
+	 	ampUsername = user.getUsername();	 	
 	 	
 		// Make sure a test unit and collection are created
-		mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
-				"{\"name\": \"" + unitName + "\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andExpect(
-								header().string("Location", containsString("units/")));
-
-		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(
-				"{ \"name\": \"" + collectionName + "\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
+		String unitName = "Test Unit";
+		String collectionName = "Music Library";
+		testHelper.ensureCollection(unitName, collectionName);
 		
+//	 	String token = testHelper.getToken();
+//		mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
+//				"{\"name\": \"" + unitName + "\", \"description\":\"For test\"}")).andExpect(
+//						status().isCreated()).andExpect(
+//								header().string("Location", containsString("units/")));
+//
+//		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(
+//				"{ \"name\": \"" + collectionName + "\", \"description\":\"For test\"}")).andExpect(
+//						status().isCreated()).andReturn();
 		
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 		
 		// Copy zip file and extract the files
-        File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	
-        
+        File srcFile = new File(classLoader.getResource("testfiles.zip").getFile());	        
         Assert.assertTrue(srcFile.exists());
         
         // Create necessary directories
@@ -156,7 +146,6 @@ public class BatchServiceTests {
         Files.createDirectories(collectionPath);
         
         Path destPath = Paths.get(collectionPath.toString(), "test_files.zip");	
-
 		Files.copy(srcFile.toPath(), destPath);
 		
         unzip(destPath.toString(), collectionPath.toString());
@@ -164,7 +153,8 @@ public class BatchServiceTests {
         Files.delete(destPath);
         
 	}
-	boolean deleteDirectory(File directoryToBeDeleted, boolean deleteOriginal) {
+	
+	private boolean deleteDirectory(File directoryToBeDeleted, boolean deleteOriginal) {
 	    File[] allContents = directoryToBeDeleted.listFiles();
 	    if (allContents != null) {
 	        for (File file : allContents) {
@@ -426,6 +416,7 @@ public class BatchServiceTests {
         }
         zipIn.close();
     }
+	
 	/*
 	 * Extracts individual file from zip
 	 */
@@ -438,10 +429,11 @@ public class BatchServiceTests {
         }
         bos.close();
     }
-	@Test
-	public void createTestUnit() {
-		testHelper.createTestUnit();
-	}
+	
+//	@Test
+//	public void createTestUnit() {
+//		testHelper.createTestUnit("AMP Pilot Unit");
+//	}
 }
 
 
