@@ -6,7 +6,6 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
@@ -29,7 +28,6 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
  * Validator for uniqueness of the name field within its parent's scope for all Dataentities.
  * @author yingfeng
  */
-@Component
 public class UniqueNameValidator implements ConstraintValidator<UniqueName, Dataentity> {  
 	
 	@Autowired
@@ -59,33 +57,51 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 	}
 
 	@Override
-	public boolean isValid(Dataentity dataentity,  ConstraintValidatorContext cxt) {
+	public boolean isValid(Dataentity dataentity, ConstraintValidatorContext cxt) {
 		List<? extends Dataentity> desFound = null;
 		
-		if (dataentity instanceof Unit) {
+		// bypass validation (return true) if dataentity's parent is null
+		if (dataentity == null) {
+			// dataentity must not be null
+			throw new RuntimeException("Exception while validating UniqueName for dataentity: it's null.");
+		}
+		else if (dataentity instanceof Unit) {
 			desFound = unitRepository.findByName(dataentity.getName());
 		}
 		else if (dataentity instanceof Collection) {
-			desFound = collectionRepository.findByUnitIdAndName(((Collection)dataentity).getUnit().getId(), dataentity.getName());
+			Unit unit = ((Collection)dataentity).getUnit();
+			if (unit == null) return true;	
+			desFound = collectionRepository.findByUnitIdAndName(unit.getId(), dataentity.getName());
 		}
 		else if (dataentity instanceof Item) {
-			desFound = itemRepository.findByCollectionIdAndName(((Item)dataentity).getCollection().getId(), dataentity.getName());
+			Collection collection = ((Item)dataentity).getCollection();
+			if (collection == null) return true;		
+			desFound = itemRepository.findByCollectionIdAndName(collection.getId(), dataentity.getName());
 		}
 		else if (dataentity instanceof Primaryfile) {
-			desFound = primaryfileRepository.findByItemIdAndName(((Primaryfile)dataentity).getItem().getId(), dataentity.getName());
+			Item item = ((Primaryfile)dataentity).getItem();			
+			if (item == null) return true;		
+			desFound = primaryfileRepository.findByItemIdAndName(item.getId(), dataentity.getName());
 		}
 		else if (dataentity instanceof CollectionSupplement) {
-			desFound = collectionSupplementRepository.findByCollectionIdAndName(((CollectionSupplement)dataentity).getCollection().getId(), dataentity.getName());
+			Collection collection = ((CollectionSupplement)dataentity).getCollection();
+			if (collection == null) return true;		
+			desFound = collectionSupplementRepository.findByCollectionIdAndName(collection.getId(), dataentity.getName());
 		}
 		else if (dataentity instanceof ItemSupplement) {
-			desFound = itemSupplementRepository.findByItemIdAndName(((ItemSupplement)dataentity).getItem().getId(), dataentity.getName());
+			Item item = ((ItemSupplement)dataentity).getItem();
+			if (item == null) return true;		
+			desFound = itemSupplementRepository.findByItemIdAndName(item.getId(), dataentity.getName());
 		}
 		else if (dataentity instanceof PrimaryfileSupplement) {
-			desFound = primaryfileSupplementRepository.findByPrimaryfileIdAndName(((PrimaryfileSupplement)dataentity).getPrimaryfile().getId(), dataentity.getName());
+			Primaryfile primaryfile = ((PrimaryfileSupplement)dataentity).getPrimaryfile();
+			if (primaryfile == null) return true;		
+			desFound = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), dataentity.getName());
 		}
-		
-		// dataentity must be one of the Dataentity type
-		if (desFound == null) return false;
+		else {
+			// dataentity must be one of the above types applicable for UniqueName validation
+			throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId() + ": it's of invalid type.");
+		}
 		
 		// dataentity is valid if no existing dataentity has the same name
 		if (desFound != null && desFound.size() == 0) return true;

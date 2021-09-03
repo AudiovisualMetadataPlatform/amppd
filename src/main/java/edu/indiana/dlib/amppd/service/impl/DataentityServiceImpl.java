@@ -30,14 +30,14 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getAllowedTaskManagers()
 	 */
 	public String[] getAllowedTaskManagers() {
-		return new String[] {"Jira", "Trello", "OpenProject", "Redmine"};
+		return new String[] {"Jira"};
 	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getAllowedExternalSources()
 	 */
 	public String[] getAllowedExternalSources() {
-		return new String[] {"Avalon", "MDPI", "MusicSchool", "NYCL", "AVL"};		
+		return new String[] {"MCO", "DarkAvalon", "NYPL"};		
 	}
 	
 	/**
@@ -45,9 +45,13 @@ public class DataentityServiceImpl implements DataentityService {
 	 */
 	@Override
 	public String getDataentityUrl(Dataentity dataentity) {
+		String url = "";
 		String destr = "";
-
-		if (dataentity instanceof Unit) {
+		
+		if (dataentity == null) {
+			return url;
+		}		
+		else if (dataentity instanceof Unit) {
 			destr = "units";
 		}
 		else if (dataentity instanceof Collection) {
@@ -69,7 +73,7 @@ public class DataentityServiceImpl implements DataentityService {
 			destr = "primaryfileSupplements";
 		}
 
-		String url = amppdPropertyConfig.getUrl() + "/" + destr + "/" + dataentity.getId();
+		url = amppdPropertyConfig.getUrl() + "/" + destr + "/" + dataentity.getId();
 		return url;
 	}
 	

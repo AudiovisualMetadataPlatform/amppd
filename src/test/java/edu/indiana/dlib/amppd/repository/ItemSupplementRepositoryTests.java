@@ -1,12 +1,12 @@
 package edu.indiana.dlib.amppd.repository;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,12 +22,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
+import edu.indiana.dlib.amppd.fixture.DataentityProcessor;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.util.TestUtil;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -35,19 +35,20 @@ import edu.indiana.dlib.amppd.util.TestHelper;
 public class ItemSupplementRepositoryTests {
 	@Autowired
 	private MockMvc mockMvc;
+	
+	@Autowired 
+	private TestHelper testHelper;
+	
+	@Autowired
+    private TestUtil testUtil;	
 
 	@Autowired 
-	private ObjectMapper mapper = new ObjectMapper();
-	private ItemSupplement obj ;
-	//private ObjectFactory objFactory = new ObjectFactory();
-
-	@Autowired
-    private TestHelper testHelper;
-	String token = "";
+	private DataentityProcessor dataentityProcessor;
+	
+	private String token;
 	
 	@BeforeClass
-	public static void setupTest() 
-	{
+	public static void setupTest() 	{
 	    FixtureFactoryLoader.loadTemplates("edu.indiana.dlib.amppd.fixture");
 	}
 	
@@ -61,98 +62,170 @@ public class ItemSupplementRepositoryTests {
 	}
 
 	@Test
-	public void shouldReturnItemSupplementRepositoryIndex() throws Exception {
-
-		mockMvc.perform(get("/").header("Authorization", token)).andDo(print()).andExpect(status().isOk()).andExpect(
-				jsonPath("$._links.itemSupplements").exists());
-
+	public void shouldCreateItemSupplement() throws Exception {
+		// get a valid random itemSupplement fixture
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		
+		// create the itemSupplement, should succeed with the itemSupplement's URL as the location header
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json))
+			.andExpect(status().isCreated())
+			.andExpect(header().string("Location", containsString("itemSupplements/")));
 	}
 	
 	@Test
-	public void shouldCreateItemSupplement() throws Exception {
+	public void shouldListItemSupplements() throws Exception {
+		// create an itemSupplement to ensure some itemSupplements exist for listing 
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();		
 
-		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
-				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andExpect(
-								header().string("Location", containsString("itemSupplements/")));
-	}
-	
+		// list all itemSupplements, should include at least one itemSupplement
+		mockMvc.perform(get("/itemSupplements").header("Authorization", token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$._embedded.itemSupplements").exists())
+			.andExpect(jsonPath("$._embedded.itemSupplements").isNotEmpty());	
+	}	
+
 	@Test
 	public void shouldRetrieveItemSupplement() throws Exception {
-
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
-				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
-
+		// create an itemSupplement for retrieval
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();		
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("ItemSupplement 1")).andExpect(
-						jsonPath("$.description").value("For test"));
+		
+		// retrieve the created itemSupplement by accessing the returned location, fields should match
+		mockMvc.perform(get(location).header("Authorization", token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name").value(itemSupplement.getName()))
+			.andExpect(jsonPath("$.description").value(itemSupplement.getDescription()));	
 	}
 
 	@Test
-	public void shouldQueryItemSupplement() throws Exception {
+	public void shouldQueryItemSupplements() throws Exception {
+		// create an itemSupplement to ensure some itemSupplements exist for querying 
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();
 
-		obj = Fixture.from(ItemSupplement.class).gimme("valid");
-		
-		String json = mapper.writeValueAsString(obj);
-		mockMvc.perform(post("/itemSupplements").header("Authorization", token)
-				  .content(json)).andExpect(
-						  status().isCreated());
-
-		mockMvc.perform(
-				get("/itemSupplements/search/findByName?name={name}", obj.getName()).header("Authorization", token)).andExpect(
-						status().isOk()).andExpect(
-								jsonPath("$._embedded.itemSupplements[0].name").value(
-										obj.getName()));
+		// query itemSupplements by name, should return at least one itemSupplement
+		mockMvc.perform(get("/itemSupplements/search/findByName?name={name}", itemSupplement.getName()).header("Authorization", token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$._embedded.itemSupplements[0].name").value(itemSupplement.getName()));
 	}
 
 	@Test
 	public void shouldUpdateItemSupplement() throws Exception {
-
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
-				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
-
+		// create an itemSupplement for update
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();	
 		String location = mvcResult.getResponse().getHeader("Location");
+		
+		// update user-changeable fields
+		itemSupplement.setName(itemSupplement.getName() + " Updated");
+		itemSupplement.setDescription(itemSupplement.getDescription() + " updated");
+		json = testUtil.toJson(itemSupplement);
 
-		mockMvc.perform(put(location).header("Authorization", token).content(
-				"{\"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
-						status().isNoContent());
+		// update the whole itemSupplement
+		mockMvc.perform(put(location).header("Authorization", token).content(json))
+			.andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("ItemSupplement 1.1")).andExpect(
-						jsonPath("$.description").value("For test"));
+		// retrieve the updated itemSupplement, updated fields should match
+		mockMvc.perform(get(location).header("Authorization", token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name").value(itemSupplement.getName()))
+			.andExpect(jsonPath("$.description").value(itemSupplement.getDescription()));
 	}
 
 	@Test
-	public void shouldPartiallyUpdateItemSupplement() throws Exception {
-
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
-				"{\"name\": \"ItemSupplement 1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
-
+	public void shouldPartialUpdateItemSupplement() throws Exception {
+		// create an itemSupplement for partial-update
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();	
 		String location = mvcResult.getResponse().getHeader("Location");
+		
+		// update only the name field
+		String name = itemSupplement.getName() + " Updated"; 
+		json = "{\"name\": \"" + name + "\"}";
 
-		mockMvc.perform(
-				patch(location).header("Authorization", token).content("{\"name\": \"ItemSupplement 1.1.1\"}")).andExpect(
-						status().isNoContent());
+		// partial-update the itemSupplement
+		mockMvc.perform(patch(location).header("Authorization", token).content(json))
+			.andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
-				jsonPath("$.name").value("ItemSupplement 1.1.1")).andExpect(
-						jsonPath("$.description").value("For test"));
+		// retrieve the updated itemSupplement, updated name should match
+		mockMvc.perform(get(location).header("Authorization", token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name").value(name));
 	}
 
 	@Test
 	public void shouldDeleteItemSupplement() throws Exception {
-
-		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(
-				"{ \"name\": \"ItemSupplement 1.1\", \"description\":\"For test\"}")).andExpect(
-						status().isCreated()).andReturn();
-
+		// create an itemSupplement for delete
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();			
 		String location = mvcResult.getResponse().getHeader("Location");
+		
+		// delete the created itemSupplement, then retrieve the same itemSupplement, should return nothing
 		mockMvc.perform(delete(location).header("Authorization", token)).andExpect(status().isNoContent());
-
 		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isNotFound());
 	}
+	
+	@Test
+	public void shouldErrorOnInvalidCreate() throws Exception {
+		// get an invalid random itemSupplement fixture
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).gimme("invalid");
+		String json = testUtil.toJson(itemSupplement);
+		
+		// create the invalid itemSupplement, should fail with all validation errors
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(2)));
+//			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.itemSupplement.name"))
+//			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
+//			.andExpect(jsonPath("$.validationErrors[3].field").value("handleBeforeCreate.itemSupplement.item"))
+//			.andExpect(jsonPath("$.validationErrors[3].message").value("must not be null"));
+	}
+	
+	@Test
+	public void shouldErrorOnDuplicateCreate() throws Exception {
+		// create a valid itemSupplement 1st time
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();		
+		
+		// create the above itemSupplement 2nd time, should fail with non-unique name validation error
+		mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
+			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.supplement"))
+			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
+	}
+		
+	@Test
+	public void shouldErrorOnInvalidUpdate() throws Exception {
+		// create a valid itemSupplement for update
+		ItemSupplement itemSupplement = Fixture.from(ItemSupplement.class).uses(dataentityProcessor).gimme("valid");
+		String json = testUtil.toJson(itemSupplement);
+		MvcResult mvcResult = mockMvc.perform(post("/itemSupplements").header("Authorization", token).content(json)).andReturn();	
+		String location = mvcResult.getResponse().getHeader("Location");		
+		
+		// update user-changeable fields to invalid values
+		itemSupplement.setName("");
+		json = testUtil.toJson(itemSupplement);
+		
+		// update the itemSupplement with invalid fields, should fail with all validation errors
+		mockMvc.perform(put(location).header("Authorization", token).content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.validationErrors").isArray())
+			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
+			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeUpdate.supplement.name"))
+			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
+	}
+
 }

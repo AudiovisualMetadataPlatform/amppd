@@ -31,7 +31,7 @@ public class CollectionHandler {
 
     @HandleBeforeCreate
     public void handleBeforeCreate(@Valid Collection collection) {
-        log.info("Before creating collection " + collection.getName() + " ...");
+        log.info("Handling process before creating collection " + collection.getName() + " ...");
 
         // create dropbox subdir for the collection to be created, assume collection name has been validated
         dropboxService.createCollectionSubdir(collection);
@@ -39,12 +39,12 @@ public class CollectionHandler {
 
 //    @HandleAfterCreate
 //    public void handleAfterCreate(Collection collection){
-//        log.info("After creating collection " + collection.getName() + " ...");
+//        log.info("Handling process after creating collection " + collection.getName() + " ...");
 //    }
     
     @HandleBeforeSave
     public void handleBeforeUpdate(@Valid Collection collection) {
-        log.info("Before updating collection " + collection.getId() + " ...");
+        log.info("Handling process before updating collection " + collection.getId() + " ...");
         
         // rename dropbox subdir for the collection to be updated, assume collection name has been validated
         dropboxService.renameCollectionSubdir(collection);
@@ -52,12 +52,12 @@ public class CollectionHandler {
 
 //    @HandleAfterSave
 //    public void handleAfterUpdate(Collection collection){
-//        log.info("After updating collection " + collection.getId() + " ...");
+//        log.info("Handling process after updating collection " + collection.getId() + " ...");
 //    }
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Collection collection) {
-        log.info("Before deleting collection " + collection.getId() + " ...");
+        log.info("Handling process before deleting collection " + collection.getId() + " ...");
 
         // delete dropbox subdir for the collection to be deleted
         dropboxService.deleteCollectionSubdir(collection);
@@ -65,7 +65,7 @@ public class CollectionHandler {
 
 //    @HandleAfterDelete
 //    public void handleAfterDelete(Collection collection){
-//        log.info("After deleting collection " + collection.getId() + " ...");
+//        log.info("Handling process after deleting collection " + collection.getId() + " ...");
 //    }
     
 }

@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.fixture;
 
-import java.util.Random;
-
 import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.Rule;
 import br.com.six2six.fixturefactory.loader.TemplateLoader;
@@ -16,8 +14,8 @@ import edu.indiana.dlib.amppd.model.Unit;
 
 //@Component
 public class DataEntityTemplate implements TemplateLoader {
-	public static String TASK_MANAGER = "Jira|Trello|OpenProject|Redmine";
-	public static String EXTERNAL_SOURCE = "Jira|Trello|OpenProject|Redmine";	
+	public static String TASK_MANAGER = "Jira";
+	public static String EXTERNAL_SOURCE = "MCO|DarkAvalon|NYPL";	
 	
 //	@Autowired
 //    private DataentityService dataentityService;	
@@ -27,8 +25,6 @@ public class DataEntityTemplate implements TemplateLoader {
 	    
 	@Override
 	public void load() {
-		Random rand = new Random();
-//		Long id = 0L;
 //		String[] taskManagers = dataentityService.getAllowedExternalSources();
 //		String[] externalSources = dataentityService.getAllowedExternalSources();
 //		
@@ -41,8 +37,12 @@ public class DataEntityTemplate implements TemplateLoader {
 //		String itemUrl = dataentityService.getDataentityUrl(item);
 //		String primaryfileUrl = dataentityService.getDataentityUrl(primaryfile);		
 		
+		String nameRegex = "[a-zA-Z]{20}";
+		String idRegex = "[0-9]{10}";
+		
 		Fixture.of(Unit.class).addTemplate("valid", new Rule() {{ 
-			add("name", "Test Unit " + rand.nextLong());
+			add("id", random(Long.class));
+			add("name", regex("Test Unit - [0-9]{10}"));
 			add("description", "Description for ${name}");	
 		}});
 
@@ -51,11 +51,11 @@ public class DataEntityTemplate implements TemplateLoader {
 		}});
 
 		Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
-			add("name", "Test Collection " + rand.nextLong());
+			add("name", regex("Test Collection - " + nameRegex));
 			add("description", "Description for ${name}");	
-			add("externalSource", regex(TASK_MANAGER));
-			add("externalId", "ext-" + rand.nextInt());
-			add("taskManager", regex(EXTERNAL_SOURCE));
+			add("externalSource", regex(EXTERNAL_SOURCE));
+			add("externalId", regex("external-" + idRegex));
+			add("taskManager", regex(TASK_MANAGER));
 //			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
 //			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
 //			add("unit", unitUrl);
@@ -63,25 +63,25 @@ public class DataEntityTemplate implements TemplateLoader {
 			
 		Fixture.of(Collection.class).addTemplate("invalid", new Rule() {{
 			add("name", "");
-			add("externalSource", "Fake");
-			add("taskManager", "Fake");
+			add("externalSource", "FakeExternalSource");
+			add("taskManager", "FakeTaskManager");
 		}}); 
 
 		Fixture.of(Item.class).addTemplate("valid", new Rule() {{			
-			add("name", "Test Item ${id}");
+			add("name", regex("Test Item - " + nameRegex));
 			add("description", "Description for ${name}");	
 			add("externalSource", regex(EXTERNAL_SOURCE));
-			add("externalId", "ext-" + rand.nextInt());
+			add("externalId", regex("external-" + idRegex));
 //			add("collection", collectionUrl);
 		}});
 
 		Fixture.of(Item.class).addTemplate("invalid", new Rule() {{			
 			add("name", "");
-			add("externalSource", "Fake");
+			add("externalSource", "FakeExternalSource");
 		}});
 
 		Fixture.of(Primaryfile.class).addTemplate("valid", new Rule() {{
-			add("name", "Test Primaryfile ${id}");
+			add("name", regex("Test Primaryfile - " + nameRegex));
 			add("description", "Description for ${name}");	
 //			add("item", itemUrl);
 //			add("originalFilename", firstName());
@@ -94,7 +94,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		}});
 		
 		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
-			add("name", "Test CollectionSupplement ${id}");
+			add("name", regex("Test CollectionSupplement - " + nameRegex));
 			add("description", "Description for ${name}");	
 //			add("collection", collectionUrl);
 //			add("originalFilename", firstName());
@@ -107,7 +107,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		}}); 
 		
 		Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
-			add("name", "Test ItemSupplement ${id}");
+			add("name", regex("Test ItemSupplement - " + nameRegex));
 			add("description", "Description for ${name}");	
 //			add("item", itemUrl);
 //			add("originalFilename", firstName());
@@ -120,7 +120,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		}}); 
 				
 		Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
-			add("name", "PrimaryfileSupplement ${id}");
+			add("name", regex("Test PrimaryfileSupplement - " + nameRegex));
 			add("description", "Description for ${name}");	
 //			add("primaryfile", primaryfileUrl);
 //			add("originalFilename", firstName());
