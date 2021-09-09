@@ -216,7 +216,7 @@ public class UnitRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors").isArray())
 			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.unit"))
-			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
+			.andExpect(jsonPath("$.validationErrors[0].message").value("unit name must be unique"));
 	}
 		
 	@Test
