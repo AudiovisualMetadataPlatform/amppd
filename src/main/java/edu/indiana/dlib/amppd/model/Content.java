@@ -2,10 +2,10 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.jdo.annotations.Index;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.Type;
 
+import edu.indiana.dlib.amppd.validator.EnumConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -23,7 +23,8 @@ import lombok.ToString;
 public abstract class Content extends Dataentity {
 	// TODO at the moment we do not require externalSource/Id on every collection/item, but this could change later
 	
-	@Pattern(regexp = "^\\s*$|MCO|DarkAvalon|NYPL") // TODO read values from properties
+//	@Pattern(regexp = "^\\s*$|MCO|DarkAvalon|NYPL")
+	@EnumConfig(property = "externalSources")
     @Type(type="text")
     private String externalSource;	// external source/target system
 

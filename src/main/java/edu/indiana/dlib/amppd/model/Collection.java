@@ -12,12 +12,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.validator.EnumConfig;
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -30,6 +31,7 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueCollectionNamePerUnit", columnNames = { "unit_id", "name" })})
+@UniqueName(message="collection name must be unique within its parent unit")
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
@@ -47,7 +49,8 @@ public class Collection extends Content {
 	 * It would be better to use a string representation and give the referring code flexibility on how to process (and validate) the values.
 	 */
 	@NotBlank
-	@Pattern(regexp = "Jira") // TODO read values from properties
+	@EnumConfig(property = "taskManagers")
+//	@Pattern(regexp = "Jira") 
 	private String taskManager;
 	
 	@OneToMany(mappedBy="collection")

@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,16 +32,18 @@ public class DataentityServiceImpl implements DataentityService {
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
-	@Value("${amppd.externalSources}")
-	private String[] externalSources;
+//	@Value("${amppd.externalSources}")
+	@Value("#{'${amppd.externalSources}'.split(',')}")
+	private List<String> externalSources;
 	
-	@Value("${amppd.taskManagers}")
-	private String[] taskManagers;
+//	@Value("${amppd.taskManagers}")
+	@Value("#{'${amppd.taskManagers}'.split(',')}")
+	private List<String> taskManagers;
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getExternalSources()
 	 */
-	public String[] getExternalSources() {
+	public List<String> getExternalSources() {
 		return externalSources;
 //		return new String[] {"MCO", "DarkAvalon", "NYPL"};		
 	}
@@ -47,7 +51,7 @@ public class DataentityServiceImpl implements DataentityService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getTaskManagers()
 	 */
-	public String[] getTaskManagers() {
+	public List<String> getTaskManagers() {
 		return taskManagers;
 //		return new String[] {"Jira"};
 	}

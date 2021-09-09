@@ -30,8 +30,8 @@ public class DataentityController {
 	 * @return a map of property name-value pairs
 	 */
 	@GetMapping("/config")
-	public Map<String,String[]> getConfigProperties(@RequestParam(required = false) List<String> properties) {
-		Map<String,String[]> map = new HashMap<String,String[]>();
+	public Map<String,List<String>> getConfigProperties(@RequestParam(required = false) List<String> properties) {
+		Map<String,List<String>> map = new HashMap<String,List<String>>();
 		
 		// Currently, client visible config properties include only externalSources and taskManagers;
 		// all other ones requested are ignored.
