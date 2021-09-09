@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -23,21 +24,32 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
 	
+	public static String EXTERNAL_SOURCES = "externalSources";
+	public static String TASK_MANAGERS = "taskManagers";
+
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
+	@Value("${amppd.externalSources}")
+	private String[] externalSources;
+	
+	@Value("${amppd.taskManagers}")
+	private String[] taskManagers;
+	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getAllowedTaskManagers()
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getExternalSources()
 	 */
-	public String[] getAllowedTaskManagers() {
-		return new String[] {"Jira"};
+	public String[] getExternalSources() {
+		return externalSources;
+//		return new String[] {"MCO", "DarkAvalon", "NYPL"};		
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getAllowedExternalSources()
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getTaskManagers()
 	 */
-	public String[] getAllowedExternalSources() {
-		return new String[] {"MCO", "DarkAvalon", "NYPL"};		
+	public String[] getTaskManagers() {
+		return taskManagers;
+//		return new String[] {"Jira"};
 	}
 	
 	/**

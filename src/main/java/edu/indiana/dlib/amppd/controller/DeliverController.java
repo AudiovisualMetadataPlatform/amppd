@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
  * Controller to deliver AMP deliverables to target systems.
  * @author yingfeng
  */
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 public class DeliverController {

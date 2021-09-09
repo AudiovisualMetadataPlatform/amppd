@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.service;
 
-import java.util.List;
-
 import edu.indiana.dlib.amppd.model.Dataentity;
 
 /**
@@ -11,16 +9,16 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 public interface DataentityService {
 
 	/**
-	 * Return all task managers supported by AMP defined in application configuration.
-	 * @return the array of allowed task managers
-	 */
-	public String[] getAllowedTaskManagers();
-	
-	/**
 	 * Return all external sources supported by AMP defined in application configuration.
 	 * @return the array of allowed external sources 
 	 */
-	public String[] getAllowedExternalSources();
+	public String[] getExternalSources();
+	
+	/**
+	 * Return all task managers supported by AMP defined in application configuration.
+	 * @return the array of allowed task managers
+	 */
+	public String[] getTaskManagers();
 	
 	/**
 	 * Get the URL for the given dataentity.

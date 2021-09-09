@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +26,7 @@ import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.slf4j.Slf4j;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+//@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @Slf4j
 public class BatchController {

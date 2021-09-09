@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,9 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Controller to handle requests related to OutputBag at various levels.
  * @author yingfeng
- *
  */
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 public class BagController {
