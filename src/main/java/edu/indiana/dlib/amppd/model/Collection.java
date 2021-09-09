@@ -36,12 +36,6 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
- 	
-//	// the set of task management platforms AMPPD currently supports
-//	public enum TaskManager {JIRA, TRELLO, OPENPROJECT, REDMINE}
-//	
-//	// task platform can be chosen upon collection creation (or edit) by collection managers
-//    private TaskManager taskManager;
     
 	/* Note:
 	 * Originally TaskManager was defined as enum type, for the sake of ensuring only a predefined set of options are allowed.
@@ -50,7 +44,6 @@ public class Collection extends Content {
 	 */
 	@NotBlank
 	@EnumConfig(property = "taskManagers")
-//	@Pattern(regexp = "Jira") 
 	private String taskManager;
 	
 	@OneToMany(mappedBy="collection")

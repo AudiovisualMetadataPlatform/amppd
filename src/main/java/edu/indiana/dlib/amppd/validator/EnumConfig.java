@@ -10,7 +10,7 @@ import javax.validation.Constraint;
 import javax.validation.Payload;
 
 /**
- * Constraint for uniqueness of the name field within its parent's scope for all Dataentities.
+ * Constraint for field value that must be one of the enumerated ones defined in its corresponding configuration property.
  * @author yingfeng
  */
 @Documented

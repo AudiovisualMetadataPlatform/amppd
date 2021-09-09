@@ -32,11 +32,9 @@ public class DataentityServiceImpl implements DataentityService {
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
-//	@Value("${amppd.externalSources}")
 	@Value("#{'${amppd.externalSources}'.split(',')}")
 	private List<String> externalSources;
 	
-//	@Value("${amppd.taskManagers}")
 	@Value("#{'${amppd.taskManagers}'.split(',')}")
 	private List<String> taskManagers;
 	
@@ -45,7 +43,6 @@ public class DataentityServiceImpl implements DataentityService {
 	 */
 	public List<String> getExternalSources() {
 		return externalSources;
-//		return new String[] {"MCO", "DarkAvalon", "NYPL"};		
 	}
 	
 	/**
@@ -53,7 +50,6 @@ public class DataentityServiceImpl implements DataentityService {
 	 */
 	public List<String> getTaskManagers() {
 		return taskManagers;
-//		return new String[] {"Jira"};
 	}
 	
 	/**
