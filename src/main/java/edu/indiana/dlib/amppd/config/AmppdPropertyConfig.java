@@ -19,6 +19,7 @@ import lombok.Setter;
 @Setter
 public class AmppdPropertyConfig {
 
+    @NotNull private String environment;
     @NotNull private String fileStorageRoot;
     @NotNull private String dropboxRoot;
     @NotNull private String pythonPath;
@@ -31,5 +32,5 @@ public class AmppdPropertyConfig {
     @NotNull private int passwordResetTokenExpiration;
     @NotNull private int accountActivationTokenExpiration;
     @NotNull private Boolean auth;
-    @NotNull private String environment;
+    
 }

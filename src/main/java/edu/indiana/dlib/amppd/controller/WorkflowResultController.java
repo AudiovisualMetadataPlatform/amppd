@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +22,7 @@ import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+//@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @Slf4j
 public class WorkflowResultController {

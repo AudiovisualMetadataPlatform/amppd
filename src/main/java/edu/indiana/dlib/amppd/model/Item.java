@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -30,6 +31,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
 @Transactional(readOnly=true, noRollbackFor=Exception.class)
+@UniqueName(message="item name must be unique within its parent collection")
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)

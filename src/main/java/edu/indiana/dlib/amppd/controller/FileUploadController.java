@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,9 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Controller to handle file upload for primaryfiles and supplements.
  * @author yingfeng
- *
  */
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 public class FileUploadController {

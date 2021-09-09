@@ -206,7 +206,7 @@ public class ItemRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors").isArray())
 			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.item"))
-			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
+			.andExpect(jsonPath("$.validationErrors[0].message").value("item name must be unique within its parent collection"));
 	}
 		
 	@Test

@@ -21,9 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Controller to handle requests for serving media files for primaryfiles and supplements.
  * @author yingfeng
- *
  */
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 public class MediaController {

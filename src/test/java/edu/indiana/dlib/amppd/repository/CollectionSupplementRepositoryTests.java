@@ -204,7 +204,7 @@ public class CollectionSupplementRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors").isArray())
 			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.supplement"))
-			.andExpect(jsonPath("$.validationErrors[0].message").value("dataentity name must be unique within its parent's scope"));
+			.andExpect(jsonPath("$.validationErrors[0].message").value("collectionSupplement name must be unique within its parent collection"));
 	}
 		
 	@Test

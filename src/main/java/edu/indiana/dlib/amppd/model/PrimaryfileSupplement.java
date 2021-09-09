@@ -20,13 +20,13 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"primaryfile_id", "name"})})
-@UniqueName
+@UniqueName(message="primaryfileSupplement name must be unique within its parent primaryfile")
+@Data
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class PrimaryfileSupplement extends Supplement {
 
 	@NotNull

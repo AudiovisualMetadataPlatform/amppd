@@ -15,7 +15,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 //@Component
 public class DataEntityTemplate implements TemplateLoader {
 	public static String TASK_MANAGER = "Jira";
-	public static String EXTERNAL_SOURCE = "MCO|DarkAvalon|NYPL";	
+	public static String EXTERNAL_SOURCE = "MCO|DarkAvalon|NYPL";	// "^\\s*$|MCO|DarkAvalon|NYPL"
 	
 //	@Autowired
 //    private DataentityService dataentityService;	
