@@ -49,7 +49,10 @@ public interface WorkflowResultService {
 	 * Refreshes WorkflowResults table by retrieving and processing all workflow invocations at once.
 	 * Use this method only if invocations in Galaxy are within a limited volume that can be retrieved in a lump sum manner.
 	 * @return the list of WorkflowResults refreshed
+	 * @deprecated This method does not exclude workflow results from inactive primaryfiles. 
+	 * Use refreshWorkflowResultsIterative instead for better consistency and performance.
 	 */
+	@Deprecated
 	public List<WorkflowResult> refreshWorkflowResultsLumpsum();
 
 	/**
