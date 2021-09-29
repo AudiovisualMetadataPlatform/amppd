@@ -37,6 +37,10 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
     
+	@NotNull
+	@Index
+	private Boolean active = true;	// newly created collection is active by default
+	
 	/* Note:
 	 * Originally TaskManager was defined as enum type, for the sake of ensuring only a predefined set of options are allowed.
 	 * However, enum might be serialized into integer values which need to be interpreted by external apps such as amppd-ui and HMGM tools, which would cause extra dependency. 

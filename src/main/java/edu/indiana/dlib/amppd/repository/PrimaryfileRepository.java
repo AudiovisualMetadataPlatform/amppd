@@ -14,6 +14,7 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
 	List<Primaryfile> findByItemIdAndName(Long itemId, String name);
 	
+	List<Primaryfile> findByItemCollectionActiveTrueAndHistoryIdNotNull();	
 	List<Primaryfile> findByHistoryIdNotNull();	
 	List<Primaryfile> findByHistoryId(String historyId); 
 
@@ -25,5 +26,8 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByCollectionOrItemOrFileName(@Param("keyword") String keyword);
+
+	@Query(value = "select p from Primaryfile p where ( p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%')))) order by p.item.id")
+	List<Primaryfile> findActiveByCollectionOrItemOrFileName(@Param("keyword") String keyword);
 
 }
