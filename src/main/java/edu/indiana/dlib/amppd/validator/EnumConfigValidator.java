@@ -7,6 +7,8 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.nimbusds.oauth2.sdk.util.StringUtils;
+
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
 
@@ -30,15 +32,17 @@ public class EnumConfigValidator implements ConstraintValidator<EnumConfig, Stri
 	public boolean isValid(String value, ConstraintValidatorContext cxt) {
 		// validation for externalSource
 		if (DataentityServiceImpl.EXTERNAL_SOURCES.equals(property)) {
-				List<String> externalSources = dataentityService.getExternalSources();
-				// if externalSource values enum is not configured, then no constraint on it
-				return externalSources == null || externalSources.isEmpty() || externalSources.contains(value);
+			// externalSource can be blank
+			if (StringUtils.isBlank(value)) return true;
+			// if externalSources property is not configured, then no constraint on externalSource
+			List<String> externalSources = dataentityService.getExternalSources();
+			return externalSources == null || externalSources.isEmpty() || externalSources.contains(value);
 		}
 		// validation for taskManager
 		else if (DataentityServiceImpl.TASK_MANAGERS.equals(property)) {
-				List<String> taskManagers = dataentityService.getTaskManagers();
-				// if taskManager values enum is not configured, then no constraint on it
-				return taskManagers == null || taskManagers.isEmpty() || taskManagers.contains(value);
+			// if taskManagers property is not configured, then no constraint on taskManager
+			List<String> taskManagers = dataentityService.getTaskManagers();
+			return taskManagers == null || taskManagers.isEmpty() || taskManagers.contains(value);
 		}
 
 		// otherwise, it's invalid

@@ -37,7 +37,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
     
-	@NotBlank
+	@NotNull
 	@Index
 	private Boolean active = true;	// newly created collection is active by default
 	
