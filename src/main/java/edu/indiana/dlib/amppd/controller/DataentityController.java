@@ -23,6 +23,10 @@ public class DataentityController {
 	
 	@Autowired
 	private DataentityService dataentityService;
+	
+//	@Autowired
+//	private CollectionRepository collectionRepository;
+	
 
 	/**
 	 * Return the requested configuration properties.
@@ -47,7 +51,14 @@ public class DataentityController {
 		return map;
 	}
 	
+//	@PostMapping(path = "/collections/{id}/activate")
+//	public Collection activateCollection(@PathVariable Long id, @RequestParam Boolean active){
+//		log.info("Activating collection "  + id + ": " + active);		
+//		Collection collection = collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));
+//		collection.setActive(active);
+//		collectionRepository.save(collection);
+//		log.info("Successfully activated collection " + id + ": " + active);	
+//		return collection;
+//	}
 	
-	
-
 }
