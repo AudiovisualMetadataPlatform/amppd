@@ -27,7 +27,6 @@ public class DataentityController {
 //	@Autowired
 //	private CollectionRepository collectionRepository;
 	
-
 	/**
 	 * Return the requested configuration properties.
 	 * @param properties name of the properties requested; null means all client visible properties.

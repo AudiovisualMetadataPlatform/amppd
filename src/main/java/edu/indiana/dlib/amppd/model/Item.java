@@ -30,7 +30,6 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
-@Transactional(readOnly=true, noRollbackFor=Exception.class)
 @UniqueName(message="item name must be unique within its parent collection")
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
