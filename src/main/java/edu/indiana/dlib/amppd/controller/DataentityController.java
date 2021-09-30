@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +24,8 @@ public class DataentityController {
 	@Autowired
 	private DataentityService dataentityService;
 	
-	@Autowired
-	private CollectionRepository collectionRepository;
+//	@Autowired
+//	private CollectionRepository collectionRepository;
 	
 
 	/**
