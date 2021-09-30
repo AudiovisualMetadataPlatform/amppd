@@ -6,9 +6,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +28,10 @@ public class DataentityController {
 	
 	@Autowired
 	private DataentityService dataentityService;
+	
+	@Autowired
+	private CollectionRepository collectionRepository;
+	
 
 	/**
 	 * Return the requested configuration properties.
@@ -47,7 +56,14 @@ public class DataentityController {
 		return map;
 	}
 	
+//	@PostMapping(path = "/collections/{id}/activate")
+//	public Collection activateCollection(@PathVariable Long id, @RequestParam Boolean active){
+//		log.info("Activating collection "  + id + ": " + active);		
+//		Collection collection = collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));
+//		collection.setActive(active);
+//		collectionRepository.save(collection);
+//		log.info("Successfully activated collection " + id + ": " + active);	
+//		return collection;
+//	}
 	
-	
-
 }

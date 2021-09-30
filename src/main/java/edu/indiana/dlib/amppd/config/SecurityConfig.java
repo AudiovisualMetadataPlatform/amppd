@@ -25,6 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 }
 */
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -63,6 +64,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
 	
+//	@Value( "${amppdui.url}" )
+//	private String amppduiUrl;
+	
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
@@ -80,12 +84,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 	@Bean
-	CorsConfigurationSource corsConfigurationSource() {
-	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration config = new CorsConfiguration();
-	    source.registerCorsConfiguration("/**", config.applyPermitDefaultValues());
+
+//	    // only allow AMP UI as origin, can add target systems as needed
+//	    config.setAllowedOrigins(Arrays.asList(amppduiUrl));
+	    
+	    // use PATCH and not PUT
+	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE"));
+
 	    // 'location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
-	    config.setExposedHeaders(Arrays.asList("Authorization", "Location")); 
+	    config.setExposedHeaders(Arrays.asList("Authorization", "Location"));
+	    
+	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/**", config.applyPermitDefaultValues());
 	    return source;
 	}
 	

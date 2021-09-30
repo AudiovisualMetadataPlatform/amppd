@@ -6,6 +6,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 
 
 //@RepositoryRestResource(collectionResourceRel = "collections", path = "collections")
+//@CrossOrigin(origins = "*", methods = {"GET", "POST", "PATCH", "DELETE"})
 public interface CollectionRepository extends ContentRepository<Collection> {
 	
 	List<Collection> findByUnitNameAndName(String unitName, String name);
