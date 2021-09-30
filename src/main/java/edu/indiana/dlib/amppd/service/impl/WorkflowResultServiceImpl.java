@@ -17,6 +17,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
@@ -363,6 +364,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
+    @Transactional
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
@@ -699,24 +701,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
-		List<WorkflowResult> deleteResults = workflowResultRepository.findByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);	
-//		List<WorkflowResult> deleteResults = workflowResultRepository.findObsolete(dateObsolete);	
 
-		if (deleteResults != null && !deleteResults.isEmpty()) {
-			try {
-				workflowResultRepository.deleteAll(deleteResults);
+		try {
+			List<WorkflowResult> deleteResults = workflowResultRepository.deleteByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);	
+			if (deleteResults != null && !deleteResults.isEmpty()) {
 				log.info("Successfully deleted " + deleteResults.size() + " obsolete WorkflowResults");
 				log.info("A sample of deleted WorkflowResults: " + deleteResults.get(0));
 			}
-			catch (Exception e) {
-				log.error("Failed to delete " + deleteResults.size() + " obsolete WorkflowResults.", e);
+			else {
+				log.info("No obsolete WorkflowResult is found after refreshing the whole table.");				
 			}
+			return deleteResults;
 		}
-		else {
-			log.info("No obsolete WorkflowResult is found after refreshing the whole table.");				
-		}
-		
-		return deleteResults;
+		catch (Exception e) {
+			log.error("Failed to delete obsolete WorkflowResults if any:", e);
+			return null;
+		}		
 	}
 		
 	/**

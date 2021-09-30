@@ -1,17 +1,23 @@
 package edu.indiana.dlib.amppd.handler;
 
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 @Slf4j
 public class CollectionHandler {    
+
+	@Autowired
+	private WorkflowResultRepository workflowResultRepository;
 
 	@Autowired
 	private DropboxService dropboxService;
@@ -50,10 +59,24 @@ public class CollectionHandler {
         dropboxService.renameCollectionSubdir(collection);
     }
 
-//    @HandleAfterSave
-//    public void handleAfterUpdate(Collection collection){
-//        log.info("Handling process after updating collection " + collection.getId() + " ...");
-//    }
+    @HandleAfterSave
+    @Transactional
+    public void handleAfterUpdate(Collection collection) {
+    	log.info("Handling process after updating collection " + collection.getId() + " ...");
+
+    	// remove all workflow results associated with the collection if it is deactivated
+    	if (!collection.getActive()) {
+    		try {
+    			List<WorkflowResult> deleteResults = workflowResultRepository.deleteByCollectionId(collection.getId());
+    			if (deleteResults != null && !deleteResults.isEmpty()) {
+    				log.info("Successfully deleted " + deleteResults.size() + " WorkflowResults assoicated with the deactivated collection " + collection.getId());
+    			}
+    		}
+    		catch (Exception e) {
+    			log.error("Failed to delete inactive WorkflowResults if any.", e);
+    		}
+    	}
+    }
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Collection collection) {

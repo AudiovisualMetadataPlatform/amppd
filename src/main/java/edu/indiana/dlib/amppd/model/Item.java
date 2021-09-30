@@ -13,7 +13,6 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -30,7 +29,6 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
-@Transactional(readOnly=true, noRollbackFor=Exception.class)
 @UniqueName(message="item name must be unique within its parent collection")
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
