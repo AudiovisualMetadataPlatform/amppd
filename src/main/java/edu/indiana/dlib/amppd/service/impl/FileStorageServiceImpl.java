@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,6 +91,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfile(Long, MultipartFile)
 	 */
 	@Override
+	@Transactional
 	public Primaryfile uploadPrimaryfile(Long id, MultipartFile file) {		
     	Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
     	return (Primaryfile)preprocessService.preprocess(uploadPrimaryfile(primaryfile, file));
@@ -125,6 +127,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadCollectionSupplement(Long, MultipartFile)
 	 */
 	@Override
+	@Transactional
 	public CollectionSupplement uploadCollectionSupplement(Long id, MultipartFile file) {		
     	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));        	
     	return (CollectionSupplement)preprocessService.preprocess(uploadCollectionSupplement(collectionSupplement, file));
@@ -154,6 +157,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadItemSupplement(Long, MultipartFile)
 	 */
 	@Override
+	@Transactional
 	public ItemSupplement uploadItemSupplement(Long id, MultipartFile file) {		
     	ItemSupplement itemSupplement = itemSupplementRepository.findById(id).orElseThrow(() -> new StorageException("ItemSupplement <" + id + "> does not exist!"));        	
     	return (ItemSupplement)preprocessService.preprocess(uploadItemSupplement(itemSupplement, file));
@@ -183,6 +187,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfileSupplement(Long, MultipartFile)
 	 */
 	@Override
+	@Transactional
 	public PrimaryfileSupplement uploadPrimaryfileSupplement(Long id, MultipartFile file) {		
     	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(id).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + id + "> does not exist!"));        	
     	return (PrimaryfileSupplement)preprocessService.preprocess(uploadPrimaryfileSupplement(primaryfileSupplement, file));

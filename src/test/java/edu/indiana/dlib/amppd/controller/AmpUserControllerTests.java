@@ -88,15 +88,16 @@ public class AmpUserControllerTests {
     public void shouldRejectShortPassword() throws Exception {
     	AmpUser user = getAmpUser();
     	user.setPassword("123456");
-    	postRegister(user, false);
-   
+    	postRegister(user, false);   
     }
+    
     @Test
     public void shouldRejectShortUsername() throws Exception {
     	AmpUser user = getAmpUser();
     	user.setUsername(user.getUsername().substring(0,2));
     	postRegister(user, false);
     }
+    
     @Test
     public void shouldRejectEmptyPassword() throws Exception {
     	AmpUser user = getAmpUser();
@@ -159,6 +160,7 @@ public class AmpUserControllerTests {
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("token").isString());
     	
     }
+    
     //Test if registeration sends an email for approval
     @Test
 	public void shouldTestApproveUser() throws Exception {

@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
@@ -213,7 +212,6 @@ public class JobServiceTests {
     }
     
     @Test
-    @Transactional
     public void shouldCreateJobBundle() {    	               	
     	// create a dummy bundle 
     	Bundle bundle = new Bundle();

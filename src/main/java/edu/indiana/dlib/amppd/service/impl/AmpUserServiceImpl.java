@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
@@ -174,6 +175,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	@Override
+	@Transactional
 	public AuthResponse resetPassword(String emailid, String new_password, String token) {
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
@@ -202,6 +204,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	@Override 
+	@Transactional
 	public AuthResponse accountAction(Long userId, String action){
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
@@ -288,6 +291,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	@Override
+	@Transactional
 	public AuthResponse activateAccount(String token)
 	{
 		AuthResponse response = new AuthResponse();
@@ -395,6 +399,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
+	@Transactional
 	public String createTimedToken(AmpUser user, int expirationDuration) {
 		int res = 0;
 		String token = UUID.randomUUID().toString();
@@ -453,6 +458,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return null;
 	}
 	  
+	@Transactional
 	public boolean activateUser(String username) {
 		try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
