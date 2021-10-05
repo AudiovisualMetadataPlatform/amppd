@@ -45,7 +45,6 @@ import edu.indiana.dlib.amppd.web.BatchValidationResponse;
  * Implementation of BatchValidationService.
  */ 
 @Service
-@Transactional
 public class BatchValidationServiceImpl implements BatchValidationService {
 	
 	@Autowired
@@ -66,7 +65,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	@Autowired
 	private DropboxService dropboxService;
 
-	
+	@Transactional	
 	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
 		BatchValidationResponse response;
 		StringBuilder textBuilder = new StringBuilder();

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
@@ -70,6 +71,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.addPrimaryfile(Bundle, Long)
 	 */
 	@Override
+	@Transactional
 	public Bundle addPrimaryfile(Bundle bundle, Long primaryfileId) {
 		if (bundle == null) {
 			log.error("The given bundle is null!");
@@ -97,6 +99,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.deletePrimaryfile(Bundle, Long)
 	 */
 	@Override
+	@Transactional
 	public Bundle deletePrimaryfile(Bundle bundle, Long primaryfileId) {		
 		if (bundle == null) {
 			log.error("The given bundle is null!");
@@ -124,6 +127,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.addPrimaryfile(Long, Long)
 	 */
 	@Override
+	@Transactional
 	public Bundle addPrimaryfile(Long bundleId, Long primaryfileId) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    
 		return addPrimaryfile(bundle, primaryfileId);
@@ -133,6 +137,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.deletePrimaryfile(Long, Long)
 	 */
 	@Override
+	@Transactional
 	public Bundle deletePrimaryfile(Long bundleId, Long primaryfileId) {		
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    
 		return deletePrimaryfile(bundle, primaryfileId);
@@ -142,6 +147,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.addPrimaryfiles(Long, Long[])
 	 */
 	@Override
+	@Transactional
 	public Bundle addPrimaryfiles(Long bundleId, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		if (primaryfileIds == null) {
@@ -158,6 +164,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.deletePrimaryfiles(Long, Long[])
 	 */
 	@Override
+	@Transactional
 	public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		if (primaryfileIds == null) {
@@ -174,6 +181,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.updatePrimaryfiles(Long, String, Long[])
 	 */
 	@Override
+	@Transactional
 	public Bundle updateBundle(Long bundleId, String description, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		if (primaryfileIds == null) {
@@ -204,6 +212,7 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.createBundle(String, String, Long[])
 	 */	
 	@Override
+	@Transactional
 	public Bundle createBundle(String name, String description, Long[] primaryfileIds) {
 		if (name == null) {
 			throw new RuntimeException("The given bundle name is null.");

@@ -241,8 +241,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 
 	/**
 	 * Refresh the status of the specified WorkflowResult from job status in galaxy, and also update output file path.
+	 * Note: This method is declared public instead of protected because @Transactional only applies to public methods.
 	 */
-	protected WorkflowResult refreshResultStatus(WorkflowResult result) {
+	@Transactional	
+	public WorkflowResult refreshResultStatus(WorkflowResult result) {
 		Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 		
 		if (shouldExcludeDataset(dataset)) {
@@ -364,7 +366,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
-    @Transactional
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
@@ -467,8 +468,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Refresh WorkflowResults for the given invocation;
 	 * if the workflow for the invocation is provided, use the workflow ID and name from that;
 	 * if the primaryfile for the invocation is provided, use the associated entity names from that.
+	 * Note: This method is declared public instead of protected because @Transactional only applies to public methods.
 	 */
-	protected List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
+	@Transactional	
+	public List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 		
 		// if the passed-in primaryfile is null, get primaryfile info by its ID from the passed-in invocation
@@ -695,9 +698,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	
 	/**
 	 * Delete obsolete WorkflowResults, i.e. those that didn't get refreshed (except those for the specified failedPrimaryfileIds 
-	 * due to exception) during the most recent whole table refresh, and return a list of the deleted WorkflowResults. 
+	 * due to exception) during the most recent whole table refresh, and return a list of the deleted WorkflowResults.
+	 * Note: This method is declared public instead of protected because @Transactional only applies to public methods.
 	 */
-	protected List<WorkflowResult> deleteObsoleteWorkflowResults(List<Long> failedPrimaryfileIds) {
+	@Transactional	
+	public List<WorkflowResult> deleteObsoleteWorkflowResults(List<Long> failedPrimaryfileIds) {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
@@ -722,6 +727,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.fixWorkflowResultsOutputType()
 	 */
+	@Transactional
 	public Set<WorkflowResult> fixWorkflowResultsOutputType() {
 		Set<WorkflowResult> updateResults = new HashSet<WorkflowResult>();
 
@@ -765,6 +771,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
 	 */	
 	@Deprecated
+	@Transactional	
 	public Set<WorkflowResult> hideIrrelevantWorkflowResults() {		
 		// get all irrelevant results from WorkflowResult table
 		Set<WorkflowResult> results = new HashSet<WorkflowResult>();
@@ -807,6 +814,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultsRelevant(List<Map<String, String>>, Boolean)
 	 */	
+	@Transactional	
 	public Set<WorkflowResult> setWorkflowResultsRelevant(List<Map<String, String>> workflowStepOutputs, Boolean relevant) {
 		// the Set of results to be updated 
 		Set<WorkflowResult> updateResults = new HashSet<WorkflowResult>();
@@ -885,6 +893,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultFinal(Long, Boolean)
 	 */
+	@Transactional	
 	public WorkflowResult setWorkflowResultFinal(Long workflowResultId, Boolean isFinal) {		
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
 		

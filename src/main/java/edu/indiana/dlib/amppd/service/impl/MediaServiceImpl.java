@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -257,6 +258,7 @@ public class MediaServiceImpl implements MediaService {
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(Asset)
 	 */
 	@Override
+	@Transactional
 	public String createSymlink(Asset asset) {
 		// make sure the asset exists and its pathname populated
 		if (asset == null) {
@@ -308,6 +310,7 @@ public class MediaServiceImpl implements MediaService {
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(workflowResult)
 	 */
 	@Override
+	@Transactional
 	public String createSymlink(WorkflowResult workflowResult) {
 		// make sure the workflowResult exists and its outputPath populated
 		if (workflowResult == null) {

@@ -21,7 +21,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
@@ -93,7 +92,6 @@ public class JobControllerTests {
     }
     
     @Test
-    @Transactional
     public void shouldCreateJobBundle() throws Exception {    	              
     	// create a dummy bundle 
     	Bundle bundle = new Bundle();

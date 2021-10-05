@@ -10,6 +10,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.MediaConversionException;
@@ -193,6 +194,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.preprocess(Asset)
 	 */
 	@Override	
+	@Transactional	
 	public Asset preprocess(Asset asset) {
 		log.info("Preprocessing asset: " + asset.getId());
 		return retrieveMediaInfo(convertFlac(asset));
