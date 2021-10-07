@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -108,6 +109,23 @@ public class MediaServiceImpl implements MediaService {
 	}	
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Long)
+	 */
+	@Override
+	public String getPrimaryfileMediaUrl(Long primaryfileId) {		
+		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfileId + "/media";
+		return url;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Primaryfile)
+	 */
+	@Override
+	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
+		return getPrimaryfileMediaUrl(primaryfile.getId());
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String, SupplementType)
 	 */
 	@Override
@@ -145,20 +163,13 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Long)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getAssetMediaInfoPath(Asset)
 	 */
 	@Override
-	public String getPrimaryfileMediaUrl(Long primaryfileId) {		
-		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfileId + "/media";
-		return url;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Primaryfile)
-	 */
-	@Override
-	public String getPrimaryfileMediaUrl(Primaryfile primaryfile) {
-		return getPrimaryfileMediaUrl(primaryfile.getId());
+	public String getAssetMediaInfoPath(Asset asset) {
+		String jsonpath = FilenameUtils.getFullPath(asset.getPathname()) + FilenameUtils.getBaseName(asset.getPathname()) + ".json";
+		jsonpath = fileStorageService.absolutePathName(jsonpath);
+		return jsonpath;
 	}
 	
 	/**
@@ -170,16 +181,35 @@ public class MediaServiceImpl implements MediaService {
 		return url;
 	}
 	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getAssetMediaInfoPath(Asset)
+	/*
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputExtension(WorkflowResult)
 	 */
-	@Override
-	public String getAssetMediaInfoPath(Asset asset) {
-		String jsonpath = FilenameUtils.getFullPath(asset.getPathname()) + FilenameUtils.getBaseName(asset.getPathname()) + ".json";
-		jsonpath = fileStorageService.absolutePathName(jsonpath);
-		return jsonpath;
-	}
+	public String getWorkflowResultOutputExtension(WorkflowResult workflowResult) {
+		String extension = workflowResult.getOutputType();
 		
+		// We make the following assumptions based on current Galaxy tool output data types and file types:
+		// all audio/music/speech outputs are of wav format
+		// all video outputs are of mp4 format
+//		if (TYPE_TXT.contains(extension)) {
+//			return FILE_EXT_TXT;				
+//		}
+		if (TYPE_JSON.contains(extension)) {
+			return FILE_EXT_JSON;				
+		}
+		if (TYPE_AUDIO.contains(extension)) {
+			return FILE_EXT_AUDIO;				
+		}
+		if (TYPE_VIDEO.contains(extension)) {
+			return FILE_EXT_VIDEO;				
+		}
+		
+		// TODO if more data types are added with extensions that need standardization, 
+		// logic should be added here to handle those
+		
+		// for data types already with standard extension (such as csv, pdf, png), just return as is
+		return extension;				
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileSymlink(Long)
 	 */
@@ -193,9 +223,42 @@ public class MediaServiceImpl implements MediaService {
 	}
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputSymlinkUrl(Long)
+	 */
+	@Override
+	public String getWorkflowResultOutputSymlinkUrl(Long id) {
+		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
+		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
+		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
+		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
+		return url;
+	}
+	
+	/**
+	 * Saves the given asset to DB.
+	 * @param asset the given asset
+	 */
+	protected Asset saveAsset(Asset asset) {
+		if (asset instanceof Primaryfile) {
+			return primaryfileRepository.save((Primaryfile)asset);
+		}
+		else if (asset instanceof PrimaryfileSupplement) {
+			return primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
+		}
+		else if (asset instanceof ItemSupplement) {
+			return itemSupplementRepository.save((ItemSupplement)asset);
+		}
+		else if (asset instanceof CollectionSupplement) {
+			return collectionSupplementRepository.save((CollectionSupplement)asset);
+		}
+		return asset;
+	}
+		
+	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(Asset)
 	 */
 	@Override
+	@Transactional
 	public String createSymlink(Asset asset) {
 		// make sure the asset exists and its pathname populated
 		if (asset == null) {
@@ -244,51 +307,10 @@ public class MediaServiceImpl implements MediaService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputSymlinkUrl(Long)
-	 */
-	@Override
-	public String getWorkflowResultOutputSymlinkUrl(Long id) {
-		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
-		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
-		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
-		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
-		return url;
-	}
-
-	/*
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputExtension(WorkflowResult)
-	 */
-	public String getWorkflowResultOutputExtension(WorkflowResult workflowResult) {
-		String extension = workflowResult.getOutputType();
-		
-		// We make the following assumptions based on current Galaxy tool output data types and file types:
-		// all audio/music/speech outputs are of wav format
-		// all video outputs are of mp4 format
-//		if (TYPE_TXT.contains(extension)) {
-//			return FILE_EXT_TXT;				
-//		}
-		if (TYPE_JSON.contains(extension)) {
-			return FILE_EXT_JSON;				
-		}
-		if (TYPE_AUDIO.contains(extension)) {
-			return FILE_EXT_AUDIO;				
-		}
-		if (TYPE_VIDEO.contains(extension)) {
-			return FILE_EXT_VIDEO;				
-		}
-		
-		// TODO if more data types are added with extensions that need standardization, 
-		// logic should be added here to handle those
-		
-		// for data types already with standard extension (such as csv, pdf, png), just return as is
-		return extension;				
-	}
-	
-
-	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(workflowResult)
 	 */
 	@Override
+	@Transactional
 	public String createSymlink(WorkflowResult workflowResult) {
 		// make sure the workflowResult exists and its outputPath populated
 		if (workflowResult == null) {
@@ -373,26 +395,6 @@ public class MediaServiceImpl implements MediaService {
     }
 	
 	/**
-	 * Saves the given asset to DB.
-	 * @param asset the given asset
-	 */
-	private Asset saveAsset(Asset asset) {
-		if (asset instanceof Primaryfile) {
-			return primaryfileRepository.save((Primaryfile)asset);
-		}
-		else if (asset instanceof PrimaryfileSupplement) {
-			return primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
-		}
-		else if (asset instanceof ItemSupplement) {
-			return itemSupplementRepository.save((ItemSupplement)asset);
-		}
-		else if (asset instanceof CollectionSupplement) {
-			return collectionSupplementRepository.save((CollectionSupplement)asset);
-		}
-		return asset;
-	}
-	
-	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.findItemOrFile(String, String)
 	 */
 	@Override
@@ -401,7 +403,7 @@ public class MediaServiceImpl implements MediaService {
 		ArrayList<ItemSearchResult> rows = new ArrayList<ItemSearchResult>();
 		
 		try {
-			List<Primaryfile> matchedFiles = primaryfileRepository.findByCollectionOrItemOrFileName(keyword);
+			List<Primaryfile> matchedFiles = primaryfileRepository.findActiveByCollectionOrItemOrFileName(keyword);
 			ItemSearchResult result = new ItemSearchResult();;
 			Map <String, Object>primaryfileinfo;
 			ArrayList<Map> primaryfilerows = new ArrayList<Map>();

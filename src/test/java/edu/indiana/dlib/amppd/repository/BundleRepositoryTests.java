@@ -34,7 +34,8 @@ public class BundleRepositoryTests {
 
 	@Autowired
     private TestHelper testHelper;
-	String token = "";
+	
+	String token;
 	
 	@Before
 	public void deleteAllBeforeTests() throws Exception {
@@ -42,20 +43,20 @@ public class BundleRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		bundleRepository.deleteAll();
-		token = testHelper.getToken();
+		token = "Bearer " + testHelper.getToken();
 	}
 
 	@Test
 	public void shouldReturnRepositoryIndex() throws Exception {
 
-		mockMvc.perform(get("/").header("Authorization", "Bearer " + token)).andDo(print()).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get("/").header("Authorization", token)).andDo(print()).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.bundles").exists());
 	}
 
 	@Test
 	public void shouldCreateBundle() throws Exception {
 
-		mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andExpect(
 								header().string("Location", containsString("bundles/")));
@@ -64,12 +65,12 @@ public class BundleRepositoryTests {
 	@Test
 	public void shouldRetrieveBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Bundle 1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -77,12 +78,12 @@ public class BundleRepositoryTests {
 	@Test
 	public void shouldQueryBundleByName() throws Exception {
 
-		mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{ \"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/bundles/search/findByName?name={name}", "Bundle 1").header("Authorization", "Bearer " + token)).andExpect(
+				get("/bundles/search/findByName?name={name}", "Bundle 1").header("Authorization", token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.bundles[0].name").value(
 										"Bundle 1"));
@@ -92,12 +93,12 @@ public class BundleRepositoryTests {
 	public void shouldQueryBundleByNameAndCreatedBy() throws Exception {
 //		String username = userService.getCurrentUsername();
 		
-		mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{ \"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated());
 
 		mockMvc.perform(
-				get("/bundles/search/findByName?name={name}&createdBy={createdBy}", "Bundle 1", TestHelper.TEST_USER).header("Authorization", "Bearer " + token)).andExpect(
+				get("/bundles/search/findByName?name={name}&createdBy={createdBy}", "Bundle 1", TestHelper.TEST_USER).header("Authorization", token)).andExpect(
 						status().isOk()).andExpect(
 								jsonPath("$._embedded.bundles[0].name").value(
 										"Bundle 1"));
@@ -106,17 +107,17 @@ public class BundleRepositoryTests {
 	@Test
 	public void shouldUpdateBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
-		mockMvc.perform(put(location).header("Authorization", "Bearer " + token).content(
+		mockMvc.perform(put(location).header("Authorization", token).content(
 				"{\"name\": \"Bundle 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Bundle 1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -124,17 +125,17 @@ public class BundleRepositoryTests {
 	@Test
 	public void shouldPartiallyUpdateBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{\"name\": \"Bundle 1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
 
 		mockMvc.perform(
-				patch(location).header("Authorization", "Bearer " + token).content("{\"name\": \"Bundle 1.1.1\"}")).andExpect(
+				patch(location).header("Authorization", token).content("{\"name\": \"Bundle 1.1.1\"}")).andExpect(
 						status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isOk()).andExpect(
 				jsonPath("$.name").value("Bundle 1.1.1")).andExpect(
 						jsonPath("$.description").value("For test"));
 	}
@@ -142,13 +143,13 @@ public class BundleRepositoryTests {
 	@Test
 	public void shouldDeleteBundle() throws Exception {
 
-		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", "Bearer " + token).content(
+		MvcResult mvcResult = mockMvc.perform(post("/bundles").header("Authorization", token).content(
 				"{ \"name\": \"Bundle 1.1\", \"description\":\"For test\"}")).andExpect(
 						status().isCreated()).andReturn();
 
 		String location = mvcResult.getResponse().getHeader("Location");
-		mockMvc.perform(delete(location).header("Authorization", "Bearer " + token)).andExpect(status().isNoContent());
+		mockMvc.perform(delete(location).header("Authorization", token)).andExpect(status().isNoContent());
 
-		mockMvc.perform(get(location).header("Authorization", "Bearer " + token)).andExpect(status().isNotFound());
+		mockMvc.perform(get(location).header("Authorization", token)).andExpect(status().isNotFound());
 	}
 }

@@ -7,12 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 
-@CrossOrigin(origins = "*")
+
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 	
@@ -28,12 +26,10 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	Optional<AmpUser> findByUsername(String username);
 	Optional<AmpUser> findByEmail(String email);			
 	
-	@Transactional
 	@Modifying
 	@Query(value = "update AmpUser set password = :pswd where username = :username and id = :id")
 	int updatePassword(@Param("username") String username, @Param("pswd") String pswd, @Param("id") Long id);
 	
-	@Transactional
 	@Modifying
 	@Query(value = "update AmpUser set status = :status where id = :id")
 	int updateStatus(@Param("id") Long id, @Param("status") AmpUser.State status);

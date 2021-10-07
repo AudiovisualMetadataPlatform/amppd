@@ -3,7 +3,6 @@ package edu.indiana.dlib.amppd.controller;
   import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.config.JwtTokenUtil;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.security.JwtRequest;
+import edu.indiana.dlib.amppd.security.JwtResponse;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
-import edu.indiana.dlib.amppd.web.JwtRequest;
-import edu.indiana.dlib.amppd.web.JwtResponse;
 import lombok.extern.slf4j.Slf4j;
   
  /**
@@ -28,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 	 * @author vinitab
 	 *
 	 */
-  @CrossOrigin(origins = "*", allowedHeaders = "*")
+//  @CrossOrigin(origins = "*", allowedHeaders = "*")
   @RestController
   @Slf4j
   public class AmpUserController{

@@ -8,7 +8,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -16,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 /**
  * This class contains information about the underlying MGM models used by MGM adapter tools in Galaxy.
@@ -25,8 +23,8 @@ import lombok.NonNull;
  * @author yingfeng
  *
  */
-@EntityListeners(AuditingEntityListener.class)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Index(members={"toolId","upgradeDate"}, unique="true")
 @Data
 @NoArgsConstructor

@@ -43,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
  * Implementation of BatchService.
  */ 
 @Service
-@Transactional
 @Slf4j
 public class BatchServiceImpl implements BatchService {
 	@Autowired
@@ -70,7 +69,7 @@ public class BatchServiceImpl implements BatchService {
 	
 	int currRow;
 	
-	
+	@Transactional	
 	public BatchValidationResponse processBatch(BatchValidationResponse batchValidation, String username) {
 		List<String> errors = new ArrayList<String>();
 		Batch batch = batchValidation.getBatch();

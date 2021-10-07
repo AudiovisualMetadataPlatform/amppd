@@ -7,7 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.annotation.CreatedBy;
@@ -17,7 +17,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 /**
  * Super class for most data entities created in AMP. 
@@ -25,6 +24,7 @@ import lombok.NonNull;
  *
  */
 @MappedSuperclass
+//@UniqueName
 @Data
 @NoArgsConstructor
 public abstract class Dataentity {
@@ -33,7 +33,7 @@ public abstract class Dataentity {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-	//@NotNull
+	@NotBlank
 	@Index
     @Type(type="text")
     private String name;

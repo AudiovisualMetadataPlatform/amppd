@@ -8,13 +8,17 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.validator.EnumConfig;
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -26,28 +30,24 @@ import lombok.ToString;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueCollectionNamePerUnit", columnNames = { "unit_id", "name" })})
+@UniqueName(message="collection name must be unique within its parent unit")
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Collection extends Content {
     
-//	// the set of task management platforms AMPPD currently supports
-//	public enum TaskManager {JIRA, OPENPROJECT, REDMINE}
-//	
-//	// task platform can be chosen upon collection creation (or edit) by collection managers
-//    private TaskManager taskManager;
-    
-    @Type(type="text")
-    private String externalSource;	// external source/target system
-
-    @Type(type="text")
-    private String externalId;		// ID in the external system
-    
+	@NotNull
+	@Index
+	private Boolean active = true;	// newly created collection is active by default
+	
 	/* Note:
 	 * Originally TaskManager was defined as enum type, for the sake of ensuring only a predefined set of options are allowed.
-	 * However, enum might be serialized into integer values which need to be interpretated by external apps such as amppd-ui and HMGM tools, which would cause extra dependency. 
+	 * However, enum might be serialized into integer values which need to be interpreted by external apps such as amppd-ui and HMGM tools, which would cause extra dependency. 
 	 * It would be better to use a string representation and give the referring code flexibility on how to process (and validate) the values.
 	 */
+	@NotBlank
+	@EnumConfig(property = "taskManagers")
 	private String taskManager;
 	
 	@OneToMany(mappedBy="collection")
@@ -58,7 +58,7 @@ public class Collection extends Content {
 	@JsonBackReference(value="supplements")
     private Set<CollectionSupplement> supplements;
 
-	//@NotNull
+	@NotNull
 	@Index
 	@ManyToOne
 	private Unit unit;

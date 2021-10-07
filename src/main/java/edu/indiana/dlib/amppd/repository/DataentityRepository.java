@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import edu.indiana.dlib.amppd.model.Dataentity;
 
 @NoRepositoryBean
+//@RepositoryRestResource(excerptProjection = DataentityBrief.class)
 public interface DataentityRepository<S extends Dataentity> extends PagingAndSortingRepository<S, Long> {
 	
 	List<S> findByName(@Param("name") String name);

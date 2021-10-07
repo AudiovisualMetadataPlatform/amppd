@@ -30,7 +30,10 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	Set<WorkflowResult> findByWorkflowIdAndWorkflowStepAndOutputNameAndRelevant(String workflowId, String workflowStep, String outputName, Boolean relevant);
 
 	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
+	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 
+	List<WorkflowResult> deleteByCollectionId(Long id);
+	
 	@Query(value = "select case when count(*)>0 then true else false end from WorkflowResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);
 	
