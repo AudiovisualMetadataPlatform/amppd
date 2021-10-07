@@ -61,23 +61,21 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
-public class JobServiceImpl implements JobService {
-	
-	public static final String PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX = "Output History for Primaryfile-";
+public class JobServiceImpl implements JobService {		
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
-	
+	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
+	public static final String SUPPLEMENT_TOOL_ID = "supplement";
+	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
+	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
+	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
+
 	public static final List<String> MGM_TOOL_IDS = new ArrayList<String>() {
         {
             add("applause_detection_to_avalon_xml");
             add("collection_contact_sheets");
         }
     };
-	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
-	public static final String SUPPLEMENT_TOOL_ID = "supplement";
-	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
-	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
-	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
-	
+
 	@Autowired
     private BundleRepository bundleRepository;
 
@@ -158,7 +156,7 @@ public class JobServiceImpl implements JobService {
 		if (primaryfile.getHistoryId() == null) {   
 			// since we use primaryfile ID in the output history name, we can assume that the name is unique, 
 			// thus, if the historyId is null, it means the output history for this primaryfile doesn't exist in Galaxy yet, and vice versa
-			History history = new History(PRIMARYFILE_OUTPUT_HISTORY_NAME_PREFIX + primaryfile.getId());
+			History history = new History(primaryfile.getId() + ": " + primaryfile.getName());
 			try {
 				history = galaxyDataService.getHistoriesClient().create(history);
 		    	primaryfile.setHistoryId(history.getId());		
