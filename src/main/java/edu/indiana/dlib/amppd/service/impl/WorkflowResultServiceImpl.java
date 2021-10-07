@@ -369,7 +369,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
-		log.info("Found " + primaryfiles.size() + " primaryfiles with Galaxy history ...");
+		log.info("Found " + primaryfiles.size() + " active primaryfiles with Galaxy history ...");
 
 //		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
 //		workflowService.clearWorkflowNamesCache();		
