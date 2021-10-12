@@ -31,6 +31,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 
 	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
+	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
 
 	List<WorkflowResult> deleteByCollectionId(Long id);
 	
