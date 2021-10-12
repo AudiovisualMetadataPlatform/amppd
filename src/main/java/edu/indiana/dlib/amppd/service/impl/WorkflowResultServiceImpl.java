@@ -706,9 +706,16 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
-
+		List<WorkflowResult> deleteResults = null;
+		
 		try {
-			List<WorkflowResult> deleteResults = workflowResultRepository.deleteByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);	
+			// if failedPrimaryfileIds is empty, delete without "PrimaryfileIdNotIn" phrase, as SQL doesn't work with "not in ()"  
+			if (failedPrimaryfileIds == null || failedPrimaryfileIds.isEmpty()) {
+				deleteResults = workflowResultRepository.deleteByDateRefreshedBefore(dateObsolete);					
+			}
+			else {
+				deleteResults = workflowResultRepository.deleteByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);
+			}
 			if (deleteResults != null && !deleteResults.isEmpty()) {
 				log.info("Successfully deleted " + deleteResults.size() + " obsolete WorkflowResults");
 				log.info("A sample of deleted WorkflowResults: " + deleteResults.get(0));
