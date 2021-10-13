@@ -93,6 +93,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  }
 
 	  @Override
+	  @Transactional	
 	  public AuthResponse registerAmpUser(AmpUser user) { 
 		  
 		  AuthResponse response = new AuthResponse();
