@@ -301,6 +301,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
 	 */
+	@Transactional	
 	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
 		// for now we exclude ERROR, PAUSED and UNKNOWN, 
 		// as these jobs will need manual rerun for their status to be changed;
@@ -337,6 +338,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.addWorkflowResults(Invocation, Workflow, Primaryfile)
 	 */
+	@Transactional	
 	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 
@@ -366,9 +368,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
+	@Transactional	
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
-		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
+		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();
+//		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " active primaryfiles with Galaxy history ...");
 
 //		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 
