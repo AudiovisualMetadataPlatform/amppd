@@ -5,6 +5,8 @@ import javax.persistence.MappedSuperclass;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.springframework.data.annotation.Transient;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
@@ -35,5 +37,8 @@ public abstract class Asset extends Dataentity {
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private String mediaInfo;			// technical media information extracted from the asset file, to be stored as a JSON blob 
+     
+    @Transient
+    MultipartFile mediaFile;
     
 }
