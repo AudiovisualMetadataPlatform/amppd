@@ -15,6 +15,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 
+import edu.indiana.dlib.amppd.validator.OnNonRefFields;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -33,7 +34,7 @@ public abstract class Dataentity {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-	@NotBlank
+	@NotBlank(groups = {OnNonRefFields.class})
 	@Index
     @Type(type="text")
     private String name;

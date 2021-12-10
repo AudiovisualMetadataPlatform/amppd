@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +26,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
+import edu.indiana.dlib.amppd.validator.OnNonRefFields;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -92,7 +92,7 @@ public class DataentityController {
 	 * @return the added primaryfile
 	 */
 	@PostMapping(path = "/items/{itemId}/addPrimaryfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Valid @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
+	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Validated(OnNonRefFields.class) @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfile " + primaryfile.getName() + " under item " + itemId);
     	
     	// populate primaryfile.item in case it's not specified
