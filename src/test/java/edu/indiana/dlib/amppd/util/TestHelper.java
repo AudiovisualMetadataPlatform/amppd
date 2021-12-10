@@ -237,6 +237,7 @@ public class TestHelper {
 		Unit unit = ensureUnit(unitName);
     	collection.setUnit(unit);
     	collection.setName(name);
+		collection.setActive(false);
     	collection.setDescription("collection for tests");
     	collection.setTaskManager("Jira");
     	collection = collectionRepository.save(collection);

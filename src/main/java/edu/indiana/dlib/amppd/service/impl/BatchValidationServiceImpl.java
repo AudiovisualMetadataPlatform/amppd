@@ -96,7 +96,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		batch.setSubmitTime(new Date());
 		// Get and set the unit
 		List<Unit> units = unitRepository.findByName(unitName);
-		
+
 		if(units!=null && units.size()>0) {
 			batch.setUnit(units.get(0));
 		}
@@ -467,16 +467,19 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		}
 		else if((collectionName==null || collectionName.isBlank()) ) {
 			errors.add(String.format("Row %s: Collection does not exist", lineNum));
-		}
+ 		}
 		else if(!collectionExists(collectionName)) {
 			errors.add(String.format("Row %s: Invalid collection name supplied %s", lineNum, collectionNameFromManifest));
 		}
 		else if(!dropBoxExists(unit.getName(), collectionName)) {
 			errors.add(String.format("Row %s: Invalid drop box %s", lineNum, collection.getName()));
 		}
+		else if(collection.getActive().equals(false)) {
+			errors.add(String.format("Row %s: Cannot ingest into a deactivated collection %s", lineNum, collectionName));
+		}
 		return errors;
 	}
-	
+
 	/*
 	 * Verify the drop box exists fot this collection
 	 */

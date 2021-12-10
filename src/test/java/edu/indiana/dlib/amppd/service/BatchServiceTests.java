@@ -264,6 +264,26 @@ public class BatchServiceTests {
         Assert.assertTrue(response.hasErrors());
 	}
 
+	/*
+	 * Deactivated collection.  Should fail validation
+	 */
+	@Test
+	public void shouldBeDeactivatedCollection() throws Exception {
+		String fileName = "batch_manifest_for_testing.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
+		File file = new File(classLoader.getResource(fileName).getFile());
+		String content = new String(Files.readAllBytes(file.toPath()));
+
+		System.out.println(content);
+
+		Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
+
+		BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+
+		Assert.assertTrue(response.hasErrors());
+	}
+
 	
 	/*
 	 * File name doesn't exist.  Should fail validation
