@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -18,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -67,8 +69,15 @@ public class PrimaryfileRepositoryTests {
 		Primaryfile primaryfile = Fixture.from(Primaryfile.class).uses(dataentityProcessor).gimme("valid");
 		String json = testUtil.toJson(primaryfile);
 		
+//		// mock mediaFile		
+//		MockMultipartFile jsonfile = new MockMultipartFile("primaryfile", null, "application/json", json.getBytes());		
+//        MockMultipartFile mediaFile = new MockMultipartFile("mediaFile", "testprimaryfile.mp4", "text/plain", "Fake content for test primaryfile".getBytes());
+//        primaryfile.setMediaFile(mediaFile);
+
 		// create the primaryfile, should succeed with the primaryfile's URL as the location header
 		mockMvc.perform(post("/primaryfiles").header("Authorization", token).content(json))
+//		mockMvc.perform(multipart("/primaryfiles")
+//			.file(jsonfile).file(mediaFile).header("Authorization", token))
 			.andExpect(status().isCreated())
 			.andExpect(header().string("Location", containsString("primaryfiles/")));
 	}

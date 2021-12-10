@@ -50,9 +50,10 @@ public class PrimaryfileHandler {
     @HandleAfterCreate
     public void handleAfterCreate(@Valid Primaryfile primaryfile){
     	log.info("Handling process after creating primaryfile " + primaryfile.getId() + " ...");
-    	if (primaryfile.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfile(primaryfile.getId(), primaryfile.getMediaFile());
+    	if (primaryfile.getMediaFile() == null) {
+    		throw new RuntimeException("No media file is provided for the primaryfile to be created.");
     	}
+		fileStorageService.uploadPrimaryfile(primaryfile.getId(), primaryfile.getMediaFile());
     }
 
     @HandleAfterSave
