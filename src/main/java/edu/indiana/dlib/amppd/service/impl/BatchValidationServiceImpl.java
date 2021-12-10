@@ -474,7 +474,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		else if(!dropBoxExists(unit.getName(), collectionName)) {
 			errors.add(String.format("Row %s: Invalid drop box %s", lineNum, collection.getName()));
 		}
-		else if(collection.getActive().equals(false)) {
+		else if(!collection.getActive()) {
 			errors.add(String.format("Row %s: Cannot ingest into a deactivated collection %s", lineNum, collectionName));
 		}
 		return errors;

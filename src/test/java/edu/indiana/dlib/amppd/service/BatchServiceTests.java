@@ -272,6 +272,11 @@ public class BatchServiceTests {
 		String fileName = "batch_manifest_for_testing.csv";
 		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
 
+		// Make sure a test unit and collection are created for Inactive Collection
+		String unitName = "Test Unit";
+		String collectionName = "Music Library";
+		testHelper.ensureInactiveCollection(unitName, collectionName);
+
 		File file = new File(classLoader.getResource(fileName).getFile());
 		String content = new String(Files.readAllBytes(file.toPath()));
 
@@ -284,7 +289,6 @@ public class BatchServiceTests {
 		Assert.assertTrue(response.hasErrors());
 	}
 
-	
 	/*
 	 * File name doesn't exist.  Should fail validation
 	 */
