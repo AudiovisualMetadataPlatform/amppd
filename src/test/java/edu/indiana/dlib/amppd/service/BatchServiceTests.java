@@ -280,13 +280,20 @@ public class BatchServiceTests {
 		File file = new File(classLoader.getResource(fileName).getFile());
 		String content = new String(Files.readAllBytes(file.toPath()));
 
-		System.out.println(content);
-
 		Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
 
 		BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
 
 		Assert.assertTrue(response.hasErrors());
+
+		if(response.getValidationErrors()!=null) {
+			Boolean deactivatedErrorMessage = false;
+			for(String s : response.getValidationErrors()) {
+				if(s.contains("Cannot ingest into a deactivated collection"))
+					deactivatedErrorMessage = true;
+			}
+			Assert.assertTrue(deactivatedErrorMessage);
+		}
 	}
 
 	/*
