@@ -242,6 +242,34 @@ public class TestHelper {
     	collection = collectionRepository.save(collection);
 		return collection;
 	}
+
+	/**
+	 * Check whether the specified collection exists in Amppd; if not, create one with the given unit name and name. 
+	 * @param unitName name of the specified unit
+	 * @param name name of the specified collection
+	 * @return the prepared inactive collection
+	 */
+	public Collection ensureInactiveCollection(String unitName, String name) {
+		// retrieve collection from DB by unit name and name
+		List<Collection> collections = collectionRepository.findByUnitNameAndName(unitName, name);
+		Collection collection = collections.size() > 0 ? collections.get(0): null;
+		
+		// if the collection already exists in DB, just return it 
+		if (collection != null) {
+			return collection;
+		}
+
+		// otherwise, create a collection with the given name	
+		collection = new Collection();
+		Unit unit = ensureUnit(unitName);
+    	collection.setUnit(unit);
+    	collection.setName(name);
+		collection.setActive(false);
+    	collection.setDescription("collection for tests");
+    	collection.setTaskManager("Jira");
+    	collection = collectionRepository.save(collection);
+		return collection;
+	}
 		
 	/**
 	 * Check whether the specified item exists in Amppd; if not, create one with the given unit name, collection name, and name. 
