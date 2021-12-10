@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.service.DropboxService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -26,12 +27,15 @@ import lombok.extern.slf4j.Slf4j;
 public class UnitHandler {    
 
 	@Autowired
+	private FileStorageService fileStorageService;
+
+	@Autowired
 	private DropboxService dropboxService;
-    
-    @HandleBeforeCreate
+	
+	@HandleBeforeCreate
     public void handleBeforeCreate(@Valid Unit unit){        
     	/* Note:
-    	 * The purpose of this method is to invoke validation before DB persistence.
+    	 * This method is needed to invoke validation before DB persistence.
     	 * We don't need to create dropbox sub-directory when creating a unit, as that can be handled when a collection is created.
     	 */    	
     }
@@ -48,8 +52,17 @@ public class UnitHandler {
     public void handleBeforeDelete(Unit unit){
         log.info("Handling process before deleting unit " + unit.getId() + " ...");
 
+        /* Note: 
+         * Below file system deletions should be done before the data entity is deleted, so that 
+         * in case of exception, the process can be repeated instead of manual operations.
+         */
+
+        // delete media directory tree of the unit
+        String pathname = fileStorageService.getDirPathname(unit);
+        fileStorageService.delete(pathname);
+        
         // delete dropbox subdir for the unit to be deleted
-        dropboxService.deleteUnitSubdir(unit);
+        dropboxService.deleteUnitSubdir(unit);        
     }
 
 //    @HandleAfterDelete

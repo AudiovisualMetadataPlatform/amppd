@@ -36,17 +36,6 @@ public class PrimaryfileHandler {
     	// The purpose of this method is to invoke validation before DB persistence.   	        
     }
 
-    @HandleBeforeSave
-    public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
-    	// The purpose of this method is to invoke validation before DB persistence.   	                
-    }
-    
-    @HandleBeforeDelete
-    public void handleBeforeDelete(Primaryfile primaryfile){
-        log.info("Handling process before deleting primaryfile " + primaryfile.getId() + " ...");
-
-    }
-
     @HandleAfterCreate
     public void handleAfterCreate(@Valid Primaryfile primaryfile){
     	log.info("Handling process after creating primaryfile " + primaryfile.getId() + " ...");
@@ -59,6 +48,11 @@ public class PrimaryfileHandler {
     	}
     }
 
+    @HandleBeforeSave
+    public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
+    	// The purpose of this method is to invoke validation before DB persistence.   	                
+    }
+
     @HandleAfterSave
     public void handleAfterUpdate(@Valid Primaryfile primaryfile){
     	log.info("Handling process after updating primaryfile " + primaryfile.getId() + " ...");
@@ -67,12 +61,21 @@ public class PrimaryfileHandler {
     	}
     }
     
-    @HandleAfterDelete
-    public void handleAfterDelete(Primaryfile primaryfile){
-        log.info("Handling process after deleting primaryfile " + primaryfile.getId() + " ...");
+    @HandleBeforeDelete
+    public void handleBeforeDelete(Primaryfile primaryfile){
+        log.info("Handling process before deleting primaryfile " + primaryfile.getId() + " ...");
 
+        /* Note: 
+         * Below file system deletions should be done before the data entity is deleted, so that 
+         * in case of exception, the process can be repeated instead of manual operations.
+         */
+
+        // delete media file and directory tree (if exists) of the primaryfile 
+        String filePath = fileStorageService.getFilePathname(primaryfile);
+        fileStorageService.delete(filePath);  
+        String dirPath = fileStorageService.getDirPathname(primaryfile);
+        fileStorageService.delete(dirPath);               
     }
-
     
 //    @HandleAfterDelete
 //    public void handleAfterDelete(Primaryfile Primaryfile){

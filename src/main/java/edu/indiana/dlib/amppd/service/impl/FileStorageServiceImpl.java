@@ -290,7 +290,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     		log.info("Successfully deleted directory/file " + pathname);
     	}
     	catch (IOException e) {
-    		throw new StorageException("Could not delete file " + pathname, e);
+    		throw new StorageException("Could not delete directory/file " + pathname, e);
     	}
     }
     

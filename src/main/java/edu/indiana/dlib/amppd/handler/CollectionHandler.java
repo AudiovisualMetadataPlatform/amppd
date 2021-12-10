@@ -19,6 +19,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -34,6 +35,9 @@ public class CollectionHandler {
 
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
+
+	@Autowired
+	private FileStorageService fileStorageService;
 
 	@Autowired
 	private DropboxService dropboxService;
@@ -81,6 +85,15 @@ public class CollectionHandler {
     @HandleBeforeDelete
     public void handleBeforeDelete(Collection collection) {
         log.info("Handling process before deleting collection " + collection.getId() + " ...");
+
+        /* Note: 
+         * Below file system deletions should be done before the data entity is deleted, so that 
+         * in case of exception, the process can be repeated instead of manual operations.
+         */
+
+        // delete media directory tree of the collection
+        String pathname = fileStorageService.getDirPathname(collection);
+        fileStorageService.delete(pathname);
 
         // delete dropbox subdir for the collection to be deleted
         dropboxService.deleteCollectionSubdir(collection);

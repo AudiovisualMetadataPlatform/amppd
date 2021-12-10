@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,8 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
@@ -26,7 +32,6 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
-import edu.indiana.dlib.amppd.validator.OnNonRefFields;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -42,6 +47,9 @@ public class DataentityController {
 	
 	@Autowired
 	private FileStorageService fileStorageService;
+	
+	@Autowired
+	private CollectionRepository collectionRepository;
 	
 	@Autowired
 	private ItemRepository itemRepository;
@@ -88,11 +96,11 @@ public class DataentityController {
 	 * Create the given primaryfile with the given media file and add it to the given parent item.
 	 * @param itemId ID of the given item
 	 * @param primaryfile the given primaryfile
-	 * @param file the media file content to be uploaded for the primaryfile
+	 * @param mediaFile the media file content to be uploaded for the primaryfile
 	 * @return the added primaryfile
 	 */
 	@PostMapping(path = "/items/{itemId}/addPrimaryfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Validated(OnNonRefFields.class) @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
+	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Valid @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfile " + primaryfile.getName() + " under item " + itemId);
     	
     	// populate primaryfile.item in case it's not specified
@@ -112,6 +120,95 @@ public class DataentityController {
 		
     	return primaryfile;
     }
+	
+	/**
+	 * Create the given collection supplement with the given media file and add it to the given parent collection.
+	 * @param collectionId ID of the given collection
+	 * @param collectionSupplement the given collection supplement
+	 * @param mediaFile the media file content to be uploaded for the collection supplement
+	 * @return the added collection supplement
+	 */
+	@PostMapping(path = "/collections/{collectionId}/addCollectionSuuplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public CollectionSupplement addCollectionSuuplement(@PathVariable Long collectionId, @Valid @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
+    	log.info("Adding collectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
+    	
+    	// populate collectionSupplement.collection in case it's not specified
+    	if (collectionSupplement.getCollection() == null) {
+    		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));
+    		collectionSupplement.setCollection(collection);
+    	}
+    	
+		// save collectionSupplement to DB 
+    	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);
+		
+		// ingest media file after collection is saved
+		if (mediaFile == null) {
+			throw new RuntimeException("No media file is provided for the collectionSupplement to be added.");
+		}
+		collectionSupplement = fileStorageService.uploadCollectionSupplement(collectionSupplement.getId(), mediaFile);
+		
+    	return collectionSupplement;
+    }
+	
+	/**
+	 * Create the given item supplement with the given media file and add it to the given parent item.
+	 * @param itemId ID of the given item
+	 * @param itemSupplement the given item supplement
+	 * @param mediaFile the media file content to be uploaded for the item supplement
+	 * @return the added item supplement
+	 */
+	@PostMapping(path = "/items/{itemId}/addItemSuuplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ItemSupplement addItemSuuplement(@PathVariable Long itemId, @Valid @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
+    	log.info("Adding itemSupplement " + itemSupplement.getName() + " under item " + itemId);
+    	
+    	// populate itemSupplement.item in case it's not specified
+    	if (itemSupplement.getItem() == null) {
+    		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
+    		itemSupplement.setItem(item);
+    	}
+    	
+		// save itemSupplement to DB 
+    	itemSupplement = itemSupplementRepository.save(itemSupplement);
+		
+		// ingest media file after item is saved
+		if (mediaFile == null) {
+			throw new RuntimeException("No media file is provided for the itemSupplement to be added.");
+		}
+		itemSupplement = fileStorageService.uploadItemSupplement(itemSupplement.getId(), mediaFile);
+		
+    	return itemSupplement;
+    }
+	
+	/**
+	 * Create the given primaryfile supplement with the given media file and add it to the given parent primaryfile.
+	 * @param primaryfileId ID of the given primaryfile
+	 * @param primaryfileSupplement the given primaryfile supplement
+	 * @param mediaFile the media file content to be uploaded for the primaryfile supplement
+	 * @return the added primaryfile supplement
+	 */
+	@PostMapping(path = "/primaryfiles/{primaryfileId}/addPrimaryfileSuuplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public PrimaryfileSupplement addPrimaryfileSuuplement(@PathVariable Long primaryfileId, @Valid @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
+    	log.info("Adding primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
+    	
+    	// populate primaryfileSupplement.primaryfile in case it's not specified
+    	if (primaryfileSupplement.getPrimaryfile() == null) {
+    		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));
+    		primaryfileSupplement.setPrimaryfile(primaryfile);
+    	}
+    	
+		// save primaryfileSupplement to DB 
+    	primaryfileSupplement = primaryfileSupplementRepository.save(primaryfileSupplement);
+		
+		// ingest media file after primaryfile is saved
+		if (mediaFile == null) {
+			throw new RuntimeException("No media file is provided for the primaryfileSupplement to be added.");
+		}
+		primaryfileSupplement = fileStorageService.uploadPrimaryfileSupplement(primaryfileSupplement.getId(), mediaFile);
+		
+    	return primaryfileSupplement;
+    }
+	
+	
 	
 	
 //	@PostMapping(path = "/collections/{id}/activate")
