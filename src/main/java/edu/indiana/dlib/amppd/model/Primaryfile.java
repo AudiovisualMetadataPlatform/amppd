@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 import java.util.Set;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToMany;
@@ -48,7 +49,7 @@ public class Primaryfile extends Asset {
 	@Index(unique="true")	// historyId could be null, but it should be unique among all primaryfiles
     private String historyId;			
 
-	@OneToMany(mappedBy="primaryfile")
+	@OneToMany(mappedBy="primaryfile", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 

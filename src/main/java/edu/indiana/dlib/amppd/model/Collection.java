@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
@@ -50,11 +51,11 @@ public class Collection extends Content {
 	@EnumConfig(property = "taskManagers")
 	private String taskManager;
 	
-	@OneToMany(mappedBy="collection")
+	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="items")
     private Set<Item> items; 
 	
-	@OneToMany(mappedBy="collection")
+	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
     private Set<CollectionSupplement> supplements;
 

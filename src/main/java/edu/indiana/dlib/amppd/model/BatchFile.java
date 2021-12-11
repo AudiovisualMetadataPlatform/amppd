@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -77,7 +78,7 @@ public class BatchFile {
 	@Index
 	private SupplementType supplementType; 
 	
-	@OneToMany(mappedBy="batchFile")
+	@OneToMany(mappedBy="batchFile", cascade = CascadeType.REMOVE)
 	private List<BatchSupplementFile> batchSupplementFiles;	
 	
 	//@NotNull
