@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.handler;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleAfterSave;
@@ -12,7 +14,6 @@ import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.validator.OnRefObj;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -30,7 +31,8 @@ public class PrimaryfileHandler {
 	private FileStorageService fileStorageService;	
 	
     @HandleBeforeCreate
-    public void handleBeforeCreate(@Validated(OnRefObj.class) Primaryfile primaryfile){
+//    public void handleBeforeCreate(@Validated(OnRefObj.class) Primaryfile primaryfile){
+    public void handleBeforeCreate(@Valid Primaryfile primaryfile){
     	// The purpose of this method is to invoke validation before DB persistence.   	        
     }
 
@@ -47,7 +49,8 @@ public class PrimaryfileHandler {
     }
 
     @HandleBeforeSave
-    public void handleBeforeUpdate(@Validated(OnRefObj.class) Primaryfile primaryfile){
+//    public void handleBeforeUpdate(@Validated(OnRefObj.class) Primaryfile primaryfile){
+    public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
     	// The purpose of this method is to invoke validation before DB persistence.   	                
     }
 

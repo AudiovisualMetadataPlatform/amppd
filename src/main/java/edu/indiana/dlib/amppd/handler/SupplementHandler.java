@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.handler;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleAfterSave;
@@ -15,7 +17,6 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.validator.OnRefObj;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -33,7 +34,8 @@ public class SupplementHandler {
 	private FileStorageService fileStorageService;
 
     @HandleBeforeCreate
-    public void handleBeforeCreate(@Validated(OnRefObj.class) Supplement supplement){
+//    public void handleBeforeCreate(@Validated(OnRefObj.class) Supplement supplement){
+    public void handleBeforeCreate(@Valid Supplement supplement){
     	// The purpose of this method is to invoke validation before DB persistence.   	        
     }
 
@@ -74,7 +76,8 @@ public class SupplementHandler {
     }
     
     @HandleBeforeSave
-    public void handleBeforeUpdate(@Validated(OnRefObj.class) Supplement supplement){
+//    public void handleBeforeUpdate(@Validated(OnRefObj.class) Supplement supplement){
+    public void handleBeforeUpdate(@Valid Supplement supplement){
     	// The purpose of this method is to invoke validation before DB persistence.   	                
     }
     
