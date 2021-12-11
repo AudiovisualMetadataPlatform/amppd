@@ -11,13 +11,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import edu.indiana.dlib.amppd.validator.OnRefObj;
+import edu.indiana.dlib.amppd.validator.WithReference;
+import edu.indiana.dlib.amppd.validator.WithoutReference;
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,7 +33,7 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"item_id", "name"})})
-@UniqueName(message="primaryfile name must be unique within its parent item")
+@UniqueName(message="primaryfile name must be unique within its parent item", groups = {WithReference.class})
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
@@ -53,7 +55,7 @@ public class Primaryfile extends Asset {
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
-	@NotNull(groups = {OnRefObj.class})
+	@NotNull(groups = {WithReference.class})
 	@Index
 	@ManyToOne
 	private Item item;
@@ -67,5 +69,5 @@ public class Primaryfile extends Asset {
     	    
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<InputBag> bags;        
-
+    
 }

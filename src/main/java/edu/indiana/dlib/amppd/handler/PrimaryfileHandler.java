@@ -12,8 +12,12 @@ import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.validator.WithReference;
+import edu.indiana.dlib.amppd.validator.WithoutReference;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -30,10 +34,13 @@ public class PrimaryfileHandler {
 	@Autowired
 	private FileStorageService fileStorageService;	
 	
+	@Autowired
+	private ItemRepository itemRepository;	
+	
     @HandleBeforeCreate
-//    public void handleBeforeCreate(@Validated(OnRefObj.class) Primaryfile primaryfile){
+    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeCreate(@Valid Primaryfile primaryfile){
-    	// The purpose of this method is to invoke validation before DB persistence.   	        
+    	// The purpose of this method is to invoke validation before DB persistence.
     }
 
     @HandleAfterCreate
@@ -49,9 +56,9 @@ public class PrimaryfileHandler {
     }
 
     @HandleBeforeSave
-//    public void handleBeforeUpdate(@Validated(OnRefObj.class) Primaryfile primaryfile){
+    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
-    	// The purpose of this method is to invoke validation before DB persistence.   	                
+    	// The purpose of this method is to invoke validation before DB persistence.  
     }
 
     @HandleAfterSave

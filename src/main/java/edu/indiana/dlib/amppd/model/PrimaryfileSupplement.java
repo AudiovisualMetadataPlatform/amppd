@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import edu.indiana.dlib.amppd.validator.OnRefObj;
+import edu.indiana.dlib.amppd.validator.WithReference;
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,13 +24,13 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"primaryfile_id", "name"})})
-@UniqueName(message="primaryfileSupplement name must be unique within its parent primaryfile")
+@UniqueName(message="primaryfileSupplement name must be unique within its parent primaryfile", groups = {WithReference.class})
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class PrimaryfileSupplement extends Supplement {
 
-	@NotNull(groups = {OnRefObj.class})
+	@NotNull(groups = {WithReference.class})
 	@Index
 	@ManyToOne
     private Primaryfile primaryfile;
