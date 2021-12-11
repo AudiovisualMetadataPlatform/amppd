@@ -45,13 +45,13 @@ public abstract class Asset extends Dataentity {
     @Transient
     MultipartFile mediaFile;
     
-    /**
-     * Override just to change the groups for name validations.
-     */
-    @Override
-	@NotBlank(groups = {WithReference.class, WithoutReference.class})
-    public String getName() {
-    	return super.getName();
-    }
+//    /**
+//     * Override just to change the groups for name validations.
+//     */
+//    @Override
+//	@NotBlank(groups = {WithReference.class, WithoutReference.class})
+//    public String getName() {
+//    	return super.getName();
+//    }
     
 }

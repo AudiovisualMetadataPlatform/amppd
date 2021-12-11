@@ -17,8 +17,6 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.validator.WithReference;
-import edu.indiana.dlib.amppd.validator.WithoutReference;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -36,7 +34,7 @@ public class SupplementHandler {
 	private FileStorageService fileStorageService;
 
     @HandleBeforeCreate
-    @Validated({WithReference.class, WithoutReference.class})
+//    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeCreate(@Valid Supplement supplement){
     	// The purpose of this method is to invoke validation before DB persistence.   	        
     }
@@ -78,7 +76,7 @@ public class SupplementHandler {
     }
     
     @HandleBeforeSave
-    @Validated({WithReference.class, WithoutReference.class})
+//    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeUpdate(@Valid Supplement supplement){
     	// The purpose of this method is to invoke validation before DB persistence.   	 	    	
     }

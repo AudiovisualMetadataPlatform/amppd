@@ -11,7 +11,6 @@ import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,8 +34,6 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
-import edu.indiana.dlib.amppd.validator.WithReference;
-import edu.indiana.dlib.amppd.validator.WithoutReference;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -105,21 +102,21 @@ public class DataentityController {
 	 * @return the added primaryfile
 	 */
 	@PostMapping(path = "/items/{itemId}/addPrimaryfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Valid @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
 //	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
 	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfile " + primaryfile.getName() + " under item " + itemId);
     	
-    	// populate primaryfile.item in case it's not specified
+    	// populate primaryfile.item in case it's not specified in RequestPart
     	if (primaryfile.getItem() == null) {
-//			Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
-//    		primaryfile.setItem(item);
     		primaryfile.setItem(itemRepository.findById(itemId).orElse(null));
     	}
     	
-    	// validate with WithReference constraints, which were not invoked on primaryfile from RequestPart
-    	Set<ConstraintViolation<Primaryfile>> violations = validator.validate(primaryfile, WithReference.class, WithoutReference.class);
-        if (!violations.isEmpty()) {
+//    	// validate with WithReference constraints, which were not invoked on primaryfile from RequestPart
+//    	Set<ConstraintViolation<Primaryfile>> violations = validator.validate(primaryfile, WithReference.class);
+        
+    	// validate primaryfile after parent population and before persistence
+    	Set<ConstraintViolation<Primaryfile>> violations = validator.validate(primaryfile);
+    	if (!violations.isEmpty()) {
           throw new ConstraintViolationException(violations);
         }
 
@@ -143,18 +140,20 @@ public class DataentityController {
 	 * @return the added collection supplement
 	 */
 	@PostMapping(path = "/collections/{collectionId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @Valid @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
-	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @Validated(WithoutReference.class) @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
+//	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @Validated(WithoutReference.class) @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
+	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding collectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
     	
-    	// populate collectionSupplement.collection in case it's not specified
+    	// populate collectionSupplement.collection in case it's not specified in RequestPart
     	if (collectionSupplement.getCollection() == null) {
-//    		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));
-//    		collectionSupplement.setCollection(collection);
-    		collectionSupplement.setCollection(collectionRepository.findById(collectionId).get());
+    		collectionSupplement.setCollection(collectionRepository.findById(collectionId).orElse(null));
     	}
     	
-    	// validate on WithReference constraints which were not validated on request  
+    	// validate collectionSupplement after parent population and before persistence
+    	Set<ConstraintViolation<CollectionSupplement>> violations = validator.validate(collectionSupplement);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
     	
 		// save collectionSupplement to DB 
     	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);
@@ -176,16 +175,22 @@ public class DataentityController {
 	 * @return the added item supplement
 	 */
 	@PostMapping(path = "/items/{itemId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @Valid @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
-	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
+//	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
+	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding itemSupplement " + itemSupplement.getName() + " under item " + itemId);
     	
-    	// populate itemSupplement.item in case it's not specified
+    	// populate itemSupplement.item in case it's not specified in RequestPart
     	if (itemSupplement.getItem() == null) {
     		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
     		itemSupplement.setItem(item);
     	}
     	
+    	// validate itemSupplement after parent population and before persistence
+    	Set<ConstraintViolation<ItemSupplement>> violations = validator.validate(itemSupplement);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	    	
 		// save itemSupplement to DB 
     	itemSupplement = itemSupplementRepository.save(itemSupplement);
 		
@@ -206,16 +211,22 @@ public class DataentityController {
 	 * @return the added primaryfile supplement
 	 */
 	@PostMapping(path = "/primaryfiles/{primaryfileId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @Valid @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
-	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @Validated(WithoutReference.class) @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
+//	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @Validated(WithoutReference.class) @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
+	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
     	
-    	// populate primaryfileSupplement.primaryfile in case it's not specified
+    	// populate primaryfileSupplement.primaryfile in case it's not specified in RequestPart
     	if (primaryfileSupplement.getPrimaryfile() == null) {
     		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));
     		primaryfileSupplement.setPrimaryfile(primaryfile);
     	}
     	
+    	// validate primaryfileSupplement after parent population and before persistence
+    	Set<ConstraintViolation<PrimaryfileSupplement>> violations = validator.validate(primaryfileSupplement);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	    	
 		// save primaryfileSupplement to DB 
     	primaryfileSupplement = primaryfileSupplementRepository.save(primaryfileSupplement);
 		
