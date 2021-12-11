@@ -1,10 +1,7 @@
 package edu.indiana.dlib.amppd.handler;
 
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
-import org.springframework.data.rest.core.annotation.HandleAfterDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
@@ -15,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.validator.OnRefObj;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -29,18 +27,18 @@ import lombok.extern.slf4j.Slf4j;
 public class PrimaryfileHandler {    
     
 	@Autowired
-	private FileStorageService fileStorageService;
+	private FileStorageService fileStorageService;	
 	
     @HandleBeforeCreate
-    public void handleBeforeCreate(@Valid Primaryfile primaryfile){
+    public void handleBeforeCreate(@Validated(OnRefObj.class) Primaryfile primaryfile){
     	// The purpose of this method is to invoke validation before DB persistence.   	        
     }
 
     @HandleAfterCreate
-    public void handleAfterCreate(@Valid Primaryfile primaryfile){
+    public void handleAfterCreate(Primaryfile primaryfile){
     	log.info("Handling process after creating primaryfile " + primaryfile.getId() + " ...");
     	if (primaryfile.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfile(primaryfile.getId(), primaryfile.getMediaFile());
+    		fileStorageService.uploadPrimaryfile(primaryfile, primaryfile.getMediaFile());
     	}
     	else {
 //    		throw new RuntimeException("No media file is provided for the primaryfile to be created.");
@@ -49,15 +47,15 @@ public class PrimaryfileHandler {
     }
 
     @HandleBeforeSave
-    public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
+    public void handleBeforeUpdate(@Validated(OnRefObj.class) Primaryfile primaryfile){
     	// The purpose of this method is to invoke validation before DB persistence.   	                
     }
 
     @HandleAfterSave
-    public void handleAfterUpdate(@Valid Primaryfile primaryfile){
+    public void handleAfterUpdate(Primaryfile primaryfile){
     	log.info("Handling process after updating primaryfile " + primaryfile.getId() + " ...");
     	if (primaryfile.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfile(primaryfile.getId(), primaryfile.getMediaFile());
+    		fileStorageService.uploadPrimaryfile(primaryfile, primaryfile.getMediaFile());
     	}
     }
     
@@ -70,16 +68,9 @@ public class PrimaryfileHandler {
          * in case of exception, the process can be repeated instead of manual operations.
          */
 
-        // delete media file and directory tree (if exists) of the primaryfile 
-        String filePath = fileStorageService.getFilePathname(primaryfile);
-        fileStorageService.delete(filePath);  
-        String dirPath = fileStorageService.getDirPathname(primaryfile);
-        fileStorageService.delete(dirPath);               
+        // delete media/info file and directory tree (if exists) of the primaryfile 
+        fileStorageService.unloadPrimaryfile(primaryfile);
+        fileStorageService.delete(fileStorageService.getDirPathname(primaryfile));               
     }
-    
-//    @HandleAfterDelete
-//    public void handleAfterDelete(Primaryfile Primaryfile){
-//        log.info("Handling process after deleting Primaryfile " + Primaryfile.getId() + " ...");
-//    }
     
 }

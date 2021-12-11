@@ -48,14 +48,8 @@ public class ItemHandler {
          */
 
         // delete media directory tree of the item
-        String pathname = fileStorageService.getDirPathname(item);
-        fileStorageService.delete(pathname);        
+        fileStorageService.delete(fileStorageService.getDirPathname(item));        
     }
-
-//    @HandleAfterDelete
-//    public void handleAfterDelete(Item item){
-//        log.info("Handling process after deleting item " + item.getId() + " ...");
-//    }
     
 }
 

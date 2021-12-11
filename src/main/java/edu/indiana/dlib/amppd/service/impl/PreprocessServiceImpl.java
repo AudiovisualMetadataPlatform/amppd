@@ -114,10 +114,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		log.info("No conversion is needed for asset: " + asset.getId());
 		return asset;
 	}
-	@Override
-	public String getMediaInfoJsonPath(String filepath) {
-		return FilenameUtils.getFullPath(filepath) + FilenameUtils.getBaseName(filepath) + ".json";
-	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.retrieveMediaInfo(String)
 	 */
@@ -200,6 +197,14 @@ public class PreprocessServiceImpl implements PreprocessService {
 		return retrieveMediaInfo(convertFlac(asset));
 	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PreprocessService.getMediaInfoJsonPath(String)
+	 */
+	@Override
+	public String getMediaInfoJsonPath(String mediaPathname) {
+		return FilenameUtils.getFullPath(mediaPathname) + FilenameUtils.getBaseName(mediaPathname) + ".json";
+	}
+		
 	/**
 	 * Saves the given asset to DB.
 	 * @param asset the given asset

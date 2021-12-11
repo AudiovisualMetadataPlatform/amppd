@@ -58,16 +58,10 @@ public class UnitHandler {
          */
 
         // delete media directory tree of the unit
-        String pathname = fileStorageService.getDirPathname(unit);
-        fileStorageService.delete(pathname);
+        fileStorageService.delete(fileStorageService.getDirPathname(unit));
         
         // delete dropbox subdir for the unit to be deleted
         dropboxService.deleteUnitSubdir(unit);        
     }
-
-//    @HandleAfterDelete
-//    public void handleAfterDelete(Unit unit){
-//        log.info("Handling process after deleting unit " + unit.getId() + " ...");
-//    }
     
 }

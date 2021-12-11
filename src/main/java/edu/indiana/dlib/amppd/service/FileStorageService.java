@@ -86,6 +86,20 @@ public interface FileStorageService {
 	public PrimaryfileSupplement uploadPrimaryfileSupplement(PrimaryfileSupplement primaryfileSupplement, MultipartFile file);
 
 	/**
+	 * Remove the media file and the associated media info JSON file for the given primaryfile.
+	 * @param primaryfile the given primaryfile
+	 * @return the pathname of the media file 
+	 */
+	public String unloadPrimaryfile(Primaryfile primaryfile);
+	
+	/**
+	 * Remove the media file and the associated media info JSON file for the given supplement.
+	 * @param primaryfile the given supplement
+	 * @return the pathname of the media file 
+	 */
+	public String unloadSupplement(Supplement supplement);
+	
+	/**
 	 * Stores the specified sourceFile to the specified targetPathname on the file system.
 	 * @param sourceFile the specified source File
 	 * @param targetPathname the specified target file path name relative to the storage root

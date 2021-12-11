@@ -49,11 +49,6 @@ public class CollectionHandler {
         // create dropbox subdir for the collection to be created, assume collection name has been validated
         dropboxService.createCollectionSubdir(collection);
     }
-
-//    @HandleAfterCreate
-//    public void handleAfterCreate(Collection collection){
-//        log.info("Handling process after creating collection " + collection.getName() + " ...");
-//    }
     
     @HandleBeforeSave
     public void handleBeforeUpdate(@Valid Collection collection) {
@@ -92,16 +87,10 @@ public class CollectionHandler {
          */
 
         // delete media directory tree of the collection
-        String pathname = fileStorageService.getDirPathname(collection);
-        fileStorageService.delete(pathname);
+        fileStorageService.delete(fileStorageService.getDirPathname(collection));
 
         // delete dropbox subdir for the collection to be deleted
         dropboxService.deleteCollectionSubdir(collection);
     }
-
-//    @HandleAfterDelete
-//    public void handleAfterDelete(Collection collection){
-//        log.info("Handling process after deleting collection " + collection.getId() + " ...");
-//    }
     
 }
