@@ -128,7 +128,7 @@ public class DataentityController {
 	 * @param mediaFile the media file content to be uploaded for the collection supplement
 	 * @return the added collection supplement
 	 */
-	@PostMapping(path = "/collections/{collectionId}/addCollectionSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/collections/{collectionId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @Valid @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding collectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
     	
@@ -157,7 +157,7 @@ public class DataentityController {
 	 * @param mediaFile the media file content to be uploaded for the item supplement
 	 * @return the added item supplement
 	 */
-	@PostMapping(path = "/items/{itemId}/addItemSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/items/{itemId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @Valid @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding itemSupplement " + itemSupplement.getName() + " under item " + itemId);
     	
@@ -186,7 +186,7 @@ public class DataentityController {
 	 * @param mediaFile the media file content to be uploaded for the primaryfile supplement
 	 * @return the added primaryfile supplement
 	 */
-	@PostMapping(path = "/primaryfiles/{primaryfileId}/addPrimaryfileSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(path = "/primaryfiles/{primaryfileId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @Valid @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
     	
