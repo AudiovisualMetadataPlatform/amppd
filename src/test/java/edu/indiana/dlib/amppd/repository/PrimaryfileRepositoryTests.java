@@ -67,7 +67,14 @@ public class PrimaryfileRepositoryTests {
 		Primaryfile primaryfile = Fixture.from(Primaryfile.class).uses(dataentityProcessor).gimme("valid");
 		String json = testUtil.toJson(primaryfile);
 		
+//		// mock primaryfile json and mediaFilebinary as MultipartFiles	
+//		MockMultipartFile jsonfile = new MockMultipartFile("primaryfile", null, "application/json", json.getBytes());		
+//      MockMultipartFile mediaFile = new MockMultipartFile("mediaFile", "testprimaryfile.mp4", "text/plain", "Fake content for test primaryfile".getBytes());
+//      primaryfile.setMediaFile(mediaFile);
+
 		// create the primaryfile, should succeed with the primaryfile's URL as the location header
+//		mockMvc.perform(multipart("/primaryfiles")
+//			.file(jsonfile).file(mediaFile).header("Authorization", token))
 		mockMvc.perform(post("/primaryfiles").header("Authorization", token).content(json))
 			.andExpect(status().isCreated())
 			.andExpect(header().string("Location", containsString("primaryfiles/")));

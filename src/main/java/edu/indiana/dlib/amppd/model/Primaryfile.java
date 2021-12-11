@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 import java.util.Set;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToMany;
@@ -30,6 +31,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"item_id", "name"})})
 @UniqueName(message="primaryfile name must be unique within its parent item")
+//@UniqueName(message="primaryfile name must be unique within its parent item", groups = {WithReference.class})
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
@@ -47,10 +49,11 @@ public class Primaryfile extends Asset {
 	@Index(unique="true")	// historyId could be null, but it should be unique among all primaryfiles
     private String historyId;			
 
-	@OneToMany(mappedBy="primaryfile")
+	@OneToMany(mappedBy="primaryfile", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
 
+//	@NotNull(groups = {WithReference.class})
 	@NotNull
 	@Index
 	@ManyToOne
@@ -65,5 +68,5 @@ public class Primaryfile extends Asset {
     	    
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<InputBag> bags;        
-
+    
 }

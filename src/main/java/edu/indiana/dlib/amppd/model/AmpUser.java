@@ -31,7 +31,7 @@ public class AmpUser {
 	 * Supervisor and Student are for Human MGM use only, and we assume they don't overlap with AMPPD Content User such as Collection Manager.
 	 */	
     public enum Role {ADMIN, MANAGER, SUPERVISOR, STUDENT}
-    public enum State {REQUESTED, ACCEPTED, ACTIVATED,  REJECTED}
+    public enum State {REQUESTED, ACCEPTED, ACTIVATED, REJECTED}
 	
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)

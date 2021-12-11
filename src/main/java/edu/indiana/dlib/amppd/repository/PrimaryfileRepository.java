@@ -30,4 +30,14 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	@Query(value = "select p from Primaryfile p where ( p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%')))) order by p.item.id")
 	List<Primaryfile> findActiveByCollectionOrItemOrFileName(@Param("keyword") String keyword);
 
+	/* TODO 
+	 *  The API for primaryfile creation can be disabled by setting @RepositoryRestResource export = false for saveOnCreation.
+	 *  Currently the saveOnCreation API doesn't require media file when creating a primaryfile; 
+	 *  rather, media ingestion can be done with the file upload API after the primaryfile is created;
+	 *  this could break integrity of primaryfile data and workflow related operations.
+	 *  To achieve both in one step, the saveOnCreation API might need customization (if possible with Spring Data Rest) 
+	 *  to allow input Content-Type application/stream, because MultipartFile may not be serializable to JSON.
+	 *  Alternatively, primaryfile creation/ingestion can be achieved in one step by the "/items/{itemId}/addPrimaryfile" API.
+	 */ 
+	
 }
