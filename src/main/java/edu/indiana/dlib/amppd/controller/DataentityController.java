@@ -3,8 +3,11 @@ package edu.indiana.dlib.amppd.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import javax.validation.Valid;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -18,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
@@ -33,6 +35,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
+import edu.indiana.dlib.amppd.validator.WithReference;
 import edu.indiana.dlib.amppd.validator.WithoutReference;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,6 +46,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 public class DataentityController {
+	
+	@Autowired
+	private Validator validator;
 	
 	@Autowired
 	private DataentityService dataentityService;
@@ -67,9 +73,6 @@ public class DataentityController {
 	
 	@Autowired
 	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
-
-//	@Autowired
-//	private CollectionRepository collectionRepository;
 	
 	/**
 	 * Return the requested configuration properties.
@@ -103,16 +106,24 @@ public class DataentityController {
 	 */
 	@PostMapping(path = "/items/{itemId}/addPrimaryfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 //	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Valid @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
-	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
+//	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
+	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfile " + primaryfile.getName() + " under item " + itemId);
     	
     	// populate primaryfile.item in case it's not specified
     	if (primaryfile.getItem() == null) {
-			Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
-			primaryfile.setItem(item);
+//			Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
+//    		primaryfile.setItem(item);
+    		primaryfile.setItem(itemRepository.findById(itemId).orElse(null));
     	}
     	
-		// save primaryfile to DB 
+    	// validate with WithReference constraints, which were not invoked on primaryfile from RequestPart
+    	Set<ConstraintViolation<Primaryfile>> violations = validator.validate(primaryfile, WithReference.class, WithoutReference.class);
+        if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+
+    	// save primaryfile to DB 
 		primaryfile = primaryfileRepository.save(primaryfile);
 		
 		// ingest media file after primaryfile is saved
@@ -138,9 +149,12 @@ public class DataentityController {
     	
     	// populate collectionSupplement.collection in case it's not specified
     	if (collectionSupplement.getCollection() == null) {
-    		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));
-    		collectionSupplement.setCollection(collection);
+//    		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));
+//    		collectionSupplement.setCollection(collection);
+    		collectionSupplement.setCollection(collectionRepository.findById(collectionId).get());
     	}
+    	
+    	// validate on WithReference constraints which were not validated on request  
     	
 		// save collectionSupplement to DB 
     	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);
