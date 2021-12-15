@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.OneToMany;
@@ -31,7 +32,7 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Unit extends Dataentity {
 
-	@OneToMany(mappedBy="unit")
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="collections")
     private Set<Collection> collections;
 

@@ -82,17 +82,19 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  }
 		  String encryptedPswd = MD5Encryption.getMd5(pswd);
 		  String userFound = ampUserRepository.findByApprovedUser(username, encryptedPswd, AmpUser.State.ACTIVATED);  
-		  if(userFound != null)
-		  {
-			  if(userFound.equals("1")) {
-				  response.setSuccess(true);
-			  }
-			  log.info("User validated Successfully");
+		  if (userFound != null) {
+			  response.setSuccess(true);
+			  log.info("User " + username + " validated Successfully");
+		  }
+		  else {
+			  response.setSuccess(false);
+			  log.error("User " + username + " validation failed");
 		  }
 		  return response;
 	  }
 
 	  @Override
+	  @Transactional	
 	  public AuthResponse registerAmpUser(AmpUser user) { 
 		  
 		  AuthResponse response = new AuthResponse();

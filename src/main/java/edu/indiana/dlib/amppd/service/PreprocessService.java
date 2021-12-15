@@ -44,6 +44,11 @@ public interface PreprocessService {
 	 */
 	public Asset preprocess(Asset asset);
 
-	String getMediaInfoJsonPath(String filepath);	
+	/**
+	 * Gets the media info json file pathname for the given media file
+	 * @param mediaPathname pathname of the given media file
+	 * @return the media info json file pathname
+	 */
+	public String getMediaInfoJsonPath(String mediaPathname);	
 
 }

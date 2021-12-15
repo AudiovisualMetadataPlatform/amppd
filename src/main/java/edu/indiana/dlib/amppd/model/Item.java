@@ -4,6 +4,7 @@ package edu.indiana.dlib.amppd.model;
 import java.util.Set;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
@@ -35,11 +36,11 @@ import lombok.ToString;
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class Item extends Content {
     
-	@OneToMany(mappedBy="item")
+	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="primaryfiles")
     private Set<Primaryfile> primaryfiles;
 
-	@OneToMany(mappedBy="item")
+	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
     private Set<ItemSupplement> supplements;
 

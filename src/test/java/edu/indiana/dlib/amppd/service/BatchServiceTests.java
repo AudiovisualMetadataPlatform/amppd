@@ -264,7 +264,38 @@ public class BatchServiceTests {
         Assert.assertTrue(response.hasErrors());
 	}
 
-	
+	/*
+	 * Deactivated collection.  Should fail validation
+	 */
+	@Test
+	public void shouldBeDeactivatedCollection() throws Exception {
+		String fileName = "batch_manifest_for_testing.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+
+		// Make sure a test unit and collection are created for Inactive Collection
+		String unitName = "Test Unit";
+		String collectionName = "Music Library";
+		testHelper.ensureInactiveCollection(unitName, collectionName);
+
+		File file = new File(classLoader.getResource(fileName).getFile());
+		String content = new String(Files.readAllBytes(file.toPath()));
+
+		Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
+
+		BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+
+		Assert.assertTrue(response.hasErrors());
+
+		if(response.getValidationErrors()!=null) {
+			Boolean deactivatedErrorMessage = false;
+			for(String s : response.getValidationErrors()) {
+				if(s.contains("Cannot ingest into a deactivated collection"))
+					deactivatedErrorMessage = true;
+			}
+			Assert.assertTrue(deactivatedErrorMessage);
+		}
+	}
+
 	/*
 	 * File name doesn't exist.  Should fail validation
 	 */

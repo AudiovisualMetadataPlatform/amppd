@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -54,7 +55,7 @@ public class Batch {
 	private Unit unit;
 	
 	// the following info come from batch manifest
-	@OneToMany(mappedBy="batch")
+	@OneToMany(mappedBy="batch", cascade = CascadeType.REMOVE)
 	private List<BatchFile> batchFiles;
 
 	public void addBatchFile(BatchFile batchFile) {

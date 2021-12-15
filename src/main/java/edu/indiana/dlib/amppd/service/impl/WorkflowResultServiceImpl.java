@@ -301,6 +301,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
 	 */
+	@Transactional	
 	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
 		// for now we exclude ERROR, PAUSED and UNKNOWN, 
 		// as these jobs will need manual rerun for their status to be changed;
@@ -337,6 +338,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.addWorkflowResults(Invocation, Workflow, Primaryfile)
 	 */
+	@Transactional	
 	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 
@@ -366,6 +368,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
+	@Transactional	
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
@@ -706,9 +709,16 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
-
+		List<WorkflowResult> deleteResults = null;
+		
 		try {
-			List<WorkflowResult> deleteResults = workflowResultRepository.deleteByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);	
+			// if failedPrimaryfileIds is empty, delete without "PrimaryfileIdNotIn" phrase, as SQL doesn't work with "not in ()"  
+			if (failedPrimaryfileIds == null || failedPrimaryfileIds.isEmpty()) {
+				deleteResults = workflowResultRepository.deleteByDateRefreshedBefore(dateObsolete);					
+			}
+			else {
+				deleteResults = workflowResultRepository.deleteByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);
+			}
 			if (deleteResults != null && !deleteResults.isEmpty()) {
 				log.info("Successfully deleted " + deleteResults.size() + " obsolete WorkflowResults");
 				log.info("A sample of deleted WorkflowResults: " + deleteResults.get(0));

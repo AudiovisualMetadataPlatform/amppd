@@ -9,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -214,6 +212,30 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}	
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadPrimaryfile(Primaryfile)
+	 */
+	@Override
+	public String unloadPrimaryfile(Primaryfile primaryfile) {
+        String mediaPathname = getFilePathname(primaryfile);
+        delete(mediaPathname);  
+        String jsonPathname = preprocessService.getMediaInfoJsonPath(mediaPathname);
+        delete(jsonPathname);
+        return mediaPathname;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadSupplement(Supplement)
+	 */
+	@Override
+	public String unloadSupplement(Supplement supplement) {
+        String mediaPathname = getFilePathname(supplement);
+        delete(mediaPathname);  
+        String jsonPathname = preprocessService.getMediaInfoJsonPath(mediaPathname);
+        delete(jsonPathname);
+        return mediaPathname;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.store(MultipartFile, String)
 	 */
 	@Override
@@ -290,7 +312,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     		log.info("Successfully deleted directory/file " + pathname);
     	}
     	catch (IOException e) {
-    		throw new StorageException("Could not delete file " + pathname, e);
+    		throw new StorageException("Could not delete directory/file " + pathname, e);
     	}
     }
     
