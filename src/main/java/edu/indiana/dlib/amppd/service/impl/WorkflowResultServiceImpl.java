@@ -204,6 +204,86 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Autowired
 	private MediaService mediaService;
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowResults(WorkflowResultSearchQuery)
+	 */
+	@Override
+	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
+		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
+		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search  query.");
+		return response;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getFinalWorkflowResults(Long)
+	 */
+	@Override
+	public List<WorkflowResult> getFinalWorkflowResults(Long primaryfileId) {
+		List<WorkflowResult> results = refreshResultsStatus(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
+		log.info("Successfully retrieved " + results.size() + " final WorkflowResults for primaryfile " + primaryfileId);
+		return results;
+	}
+		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.addWorkflowResults(Invocation, Workflow, Primaryfile)
+	 */
+	@Override
+	@Transactional	
+	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
+		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
+
+		try {
+			// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs 
+			// instance, and we need to retrieve invocation details for the workflowOutputs, because even though 
+			// workflowOutputs contains most info we need including steps, it doesn't include details of the steps
+			InvocationDetails invocationDetails = invocation instanceof InvocationDetails ?
+				(InvocationDetails)invocation : 
+				(InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
+
+			// add results to the table using info from the invocation
+			results = refreshWorkflowResults(invocationDetails, workflow, primaryfile);
+			log.info("Successfully added " + results.size() + " WorkflowResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());				
+		}
+		catch (Exception e) {
+			// TODO should we rethrow exception or not 
+			// if we don't rethrow the exception, results aren't added but there is no notification
+			// if we do, users will see error even though jobs are submitted in success
+			log.error("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId(), e);
+//			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());
+		}
+
+		return results;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.deleteInactiveWorkflowResults(Collection)
+	 */
+	@Override
+    @Transactional
+	public List<WorkflowResult> deleteInactiveWorkflowResults(Collection collection) {
+    	List<WorkflowResult> deleteResults = new ArrayList<WorkflowResult>();
+    	
+    	// do nothing if collection is active
+    	if (collection.getActive()) {
+    		return deleteResults;
+    	}
+
+    	// otherwise delete its associated results
+    	try {
+    		deleteResults = workflowResultRepository.deleteByCollectionId(collection.getId());
+    		if (deleteResults != null && !deleteResults.isEmpty()) {
+    			log.info("Successfully deleted " + deleteResults.size() + " WorkflowResults assoicated with the inactive collection " + collection.getId());
+    		}
+    		else {
+    			log.info("No WorkflowResults assoicated with the inactive collection " + collection.getId());
+    		}
+    	}	
+    	catch (Exception e) {
+    		new RuntimeException("Failed to delete WorkflowResults assoicated with the inactive collection " + collection.getId(), e);
+    	}
+
+    	return deleteResults;
+	}		
 	
 	/**
 	 * Return true if the specified dateRefreshed is recent, i.e. within the given refreshMinutes; false otherwise.
@@ -244,7 +324,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Note: This method is declared public instead of protected because @Transactional only applies to public methods.
 	 */
 	@Transactional	
-	public WorkflowResult refreshResultStatus(WorkflowResult result) {
+	protected WorkflowResult refreshResultStatus(WorkflowResult result) {
 		Dataset dataset = jobService.showJobStepOutput(result.getWorkflowId(), result.getInvocationId(), result.getStepId(), result.getOutputId());
 		
 		if (shouldExcludeDataset(dataset)) {
@@ -299,8 +379,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshIncompleteWorkflowResults()
 	 */
+	@Override
 	@Transactional	
 	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
 		// for now we exclude ERROR, PAUSED and UNKNOWN, 
@@ -318,56 +399,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowResults(WorkflowResultSearchQuery)
-	 */
-	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
-		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
-		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search  query.");
-		return response;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getFinalWorkflowResults(Long)
-	 */
-	public List<WorkflowResult> getFinalWorkflowResults(Long primaryfileId) {
-		List<WorkflowResult> results = refreshResultsStatus(workflowResultRepository.findByPrimaryfileIdAndIsFinalTrue(primaryfileId));
-		log.info("Successfully retrieved " + results.size() + " final WorkflowResults for primaryfile " + primaryfileId);
-		return results;
-	}
-		
-	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.addWorkflowResults(Invocation, Workflow, Primaryfile)
-	 */
-	@Transactional	
-	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile) {
-		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
-
-		try {
-			// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs 
-			// instance, and we need to retrieve invocation details for the workflowOutputs, because even though 
-			// workflowOutputs contains most info we need including steps, it doesn't include details of the steps
-			InvocationDetails invocationDetails = invocation instanceof InvocationDetails ?
-				(InvocationDetails)invocation : 
-				(InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
-
-			// add results to the table using info from the invocation
-			results = refreshWorkflowResults(invocationDetails, workflow, primaryfile);
-			log.info("Successfully added " + results.size() + " WorkflowResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());				
-		}
-		catch (Exception e) {
-			// TODO should we rethrow exception or not 
-			// if we don't rethrow the exception, results aren't added but there is no notification
-			// if we do, users will see error even though jobs are submitted in success
-			log.error("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId(), e);
-//			throw new RuntimeException("Failed to add results for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());
-		}
-
-		return results;
-	}
-	
-	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsIterative()
 	 */
+	@Override
 	@Transactional	
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
@@ -436,6 +470,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.refreshWorkflowResultsLumpsum()
 	 */
+	@Override
 	@Deprecated
 	public List<WorkflowResult> refreshWorkflowResultsLumpsum(){
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
@@ -474,7 +509,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Note: This method is declared public instead of protected because @Transactional only applies to public methods.
 	 */
 	@Transactional	
-	public List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
+	protected List<WorkflowResult> refreshWorkflowResults(InvocationDetails invocation, Workflow workflow, Primaryfile primaryfile) {
 		List<WorkflowResult> results = new ArrayList<WorkflowResult>();
 		
 		// if the passed-in primaryfile is null, get primaryfile info by its ID from the passed-in invocation
@@ -705,7 +740,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * Note: This method is declared public instead of protected because @Transactional only applies to public methods.
 	 */
 	@Transactional	
-	public List<WorkflowResult> deleteObsoleteWorkflowResults(List<Long> failedPrimaryfileIds) {
+	protected List<WorkflowResult> deleteObsoleteWorkflowResults(List<Long> failedPrimaryfileIds) {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
@@ -737,6 +772,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.fixWorkflowResultsOutputType()
 	 */
+	@Override
 	@Transactional
 	public Set<WorkflowResult> fixWorkflowResultsOutputType() {
 		Set<WorkflowResult> updateResults = new HashSet<WorkflowResult>();
@@ -780,6 +816,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.hideIrrelevantWorkflowResults()
 	 */	
+	@Override
 	@Deprecated
 	@Transactional	
 	public Set<WorkflowResult> hideIrrelevantWorkflowResults() {		
@@ -822,10 +859,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultsRelevant(List<Map<String, String>>, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setRelevantWorkflowResults(List<Map<String, String>>, Boolean)
 	 */	
+	@Override
 	@Transactional	
-	public Set<WorkflowResult> setWorkflowResultsRelevant(List<Map<String, String>> workflowStepOutputs, Boolean relevant) {
+	public Set<WorkflowResult> setRelevantWorkflowResults(List<Map<String, String>> workflowStepOutputs, Boolean relevant) {
 		// the Set of results to be updated 
 		Set<WorkflowResult> updateResults = new HashSet<WorkflowResult>();
 		
@@ -901,10 +939,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setWorkflowResultFinal(Long, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setFinalWorkflowResult(Long, Boolean)
 	 */
+	@Override
 	@Transactional	
-	public WorkflowResult setWorkflowResultFinal(Long workflowResultId, Boolean isFinal) {		
+	public WorkflowResult setFinalWorkflowResult(Long workflowResultId, Boolean isFinal) {		
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
 		
 		// no need to update if the current isFinal value is the same as the one to be set
@@ -956,6 +995,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		return info;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.exportWorkflowResults(HttpServletResponse, WorkflowResultSearchQuery)
+	 */
 	@Override
 	public List<WorkflowResult> exportWorkflowResults(HttpServletResponse response, WorkflowResultSearchQuery query) {
 		log.info("Exporting current dashboard to CSV file ...");

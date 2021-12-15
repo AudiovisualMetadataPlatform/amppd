@@ -4,6 +4,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
+import org.springframework.data.rest.core.annotation.HandleAfterDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
@@ -36,48 +37,63 @@ public class PrimaryfileHandler {
 	
     @HandleBeforeCreate
 //    @Validated({WithReference.class, WithoutReference.class})
-    public void handleBeforeCreate(@Valid Primaryfile primaryfile){
-    	// The purpose of this method is to invoke validation before DB persistence.
+    public void handleBeforeCreate(@Valid Primaryfile primaryfile) {
+    	// This method is needed to invoke validation before DB persistence.
+    	log.info("Creating primaryfile " + primaryfile.getName() + "...");
     }
 
     @HandleAfterCreate
     public void handleAfterCreate(Primaryfile primaryfile){
-    	log.info("Handling process after creating primaryfile " + primaryfile.getId() + " ...");
+		// ingest media file after primaryfile is saved
     	if (primaryfile.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfile(primaryfile, primaryfile.getMediaFile());
+    		fileStorageService.uploadAsset(primaryfile, primaryfile.getMediaFile());
     	}
     	else {
 //    		throw new RuntimeException("No media file is provided for the primaryfile to be created.");
     		log.warn("No media file is provided for the primaryfile to be created.");
     	}
+    	
+    	log.info("Successfully created primaryfile " + primaryfile.getId());
     }
 
     @HandleBeforeSave
 //    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
-    	// The purpose of this method is to invoke validation before DB persistence.  
+    	log.info("Updating primaryfile " + primaryfile.getId() + " ...");
+
+        // Below file system deletions should be done before the data entity is deleted, so that 
+        // in case of exception, the process can be repeated instead of manual operations.
+
+    	// move media/info files and subdir (if exists) of the primaryfile in case its parent is changed 
+        fileStorageService.moveAsset(primaryfile);
+    	fileStorageService.moveEntityDir(primaryfile);
     }
 
     @HandleAfterSave
     public void handleAfterUpdate(Primaryfile primaryfile){
-    	log.info("Handling process after updating primaryfile " + primaryfile.getId() + " ...");
+		// ingest media file after primaryfile is saved
     	if (primaryfile.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfile(primaryfile, primaryfile.getMediaFile());
+    		fileStorageService.uploadAsset(primaryfile, primaryfile.getMediaFile());
     	}
+    	
+    	log.info("Successfully updated primaryfile " + primaryfile.getId());
     }
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Primaryfile primaryfile){
-        log.info("Handling process before deleting primaryfile " + primaryfile.getId() + " ...");
+        log.info("Deleting primaryfile " + primaryfile.getId() + " ...");
 
-        /* Note: 
-         * Below file system deletions should be done before the data entity is deleted, so that 
-         * in case of exception, the process can be repeated instead of manual operations.
-         */
-
-        // delete media/info file and directory tree (if exists) of the primaryfile 
-        fileStorageService.unloadPrimaryfile(primaryfile);
-        fileStorageService.delete(fileStorageService.getDirPathname(primaryfile));               
+        // Below file system operations should be done before the data entity is deleted, so that 
+        // in case of exception, the process can be repeated instead of manual operations.
+         
+        // delete media/info files and subdir (if exists) of the primaryfile 
+        fileStorageService.unloadAsset(primaryfile);
+        fileStorageService.deleteEntityDir(primaryfile);    	
+    }
+    
+    @HandleAfterDelete
+    public void handleAfterDelete(Primaryfile primaryfile){
+    	log.info("Successfully deleted primaryfile " + primaryfile.getId());           
     }
     
 }

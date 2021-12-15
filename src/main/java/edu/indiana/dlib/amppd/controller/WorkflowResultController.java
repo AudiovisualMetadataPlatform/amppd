@@ -87,7 +87,7 @@ public class WorkflowResultController {
 	}
 
 	/**
-	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
+	 * This method is deprecated, please use setRelevantWorkflowResults instead.
 	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table. This process only needs to be done once manually (preferably 
 	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
@@ -109,9 +109,9 @@ public class WorkflowResultController {
 	 * @return the number of WorkflowResults updated
 	 */
 	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public int setWorkflowResultsRelevant(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
+	public int setRelevantWorkflowResults(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
 		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
-		return workflowResultService.setWorkflowResultsRelevant(workflowStepOutputs, relevant).size();
+		return workflowResultService.setRelevantWorkflowResults(workflowStepOutputs, relevant).size();
 	}
 	
 	/**
@@ -121,9 +121,9 @@ public class WorkflowResultController {
 	 * @return true if request is successful; false otherwise
 	 */
 	@PostMapping(path = "/workflow-results/{id}")
-	public boolean setWorkflowResultFinal(@PathVariable Long id, @RequestParam Boolean isFinal){
+	public boolean setFinalWorkflowResult(@PathVariable Long id, @RequestParam Boolean isFinal){
 		log.info("Setting workflow result "  + id + " final to " + isFinal);
-		return workflowResultService.setWorkflowResultFinal(id, isFinal) != null;
+		return workflowResultService.setFinalWorkflowResult(id, isFinal) != null;
 	}
 
 	/**

@@ -500,9 +500,9 @@ public class BatchServiceImpl implements BatchService {
 		String existingJson = preprocessService.getMediaInfoJsonPath(existingFile.toString());
 		String newJson = preprocessService.getMediaInfoJsonPath(newLink.toString());
 		
-		// Move the file
-		fileStorageService.moveFile(existingFile, newLink);
-		fileStorageService.moveFile(Paths.get(existingJson), Paths.get(newJson));
+		// Move/link the file
+		fileStorageService.linkFile(existingFile, newLink);
+		fileStorageService.linkFile(Paths.get(existingJson), Paths.get(newJson));
 		
 		return newLink;
 	}

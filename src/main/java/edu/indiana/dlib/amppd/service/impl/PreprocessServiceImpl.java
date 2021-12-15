@@ -17,14 +17,7 @@ import edu.indiana.dlib.amppd.exception.MediaConversionException;
 import edu.indiana.dlib.amppd.exception.PreprocessException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.ItemSupplement;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
-import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,19 +35,10 @@ public class PreprocessServiceImpl implements PreprocessService {
 	
 	@Autowired
     private FileStorageService fileStorageService;
+		
+	@Autowired
+	private DataentityService dataentityService;
 
-	@Autowired
-	PrimaryfileRepository primaryfileRepository;
-
-	@Autowired
-	PrimaryfileSupplementRepository primaryfileSupplementRepository;
-	
-	@Autowired
-	ItemSupplementRepository itemSupplementRepository;
-	
-	@Autowired
-	CollectionSupplementRepository collectionSupplementRepository;
-	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.convertFlacToWav(String)
 	 */
@@ -106,7 +90,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		// note that we do not remove the original flac file just in case of future use
 		if (targetFilePath != null) {
 			asset.setPathname(targetFilePath);
-			Asset updatedAsset = saveAsset(asset); 
+			Asset updatedAsset = dataentityService.saveAsset(asset); 
 			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
 			return updatedAsset;		
 		}
@@ -182,7 +166,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		}
 
 		asset.setMediaInfo(mediaInfo);
-		Asset updatedAsset = saveAsset(asset);
+		Asset updatedAsset = dataentityService.saveAsset(asset);
 		log.info("Retrieved media info for asset: " + asset.getId());
 		return updatedAsset;
 	}
@@ -203,26 +187,6 @@ public class PreprocessServiceImpl implements PreprocessService {
 	@Override
 	public String getMediaInfoJsonPath(String mediaPathname) {
 		return FilenameUtils.getFullPath(mediaPathname) + FilenameUtils.getBaseName(mediaPathname) + ".json";
-	}
-		
-	/**
-	 * Saves the given asset to DB.
-	 * @param asset the given asset
-	 */
-	private Asset saveAsset(Asset asset) {
-		if (asset instanceof Primaryfile) {
-			return primaryfileRepository.save((Primaryfile)asset);
-		}
-		else if (asset instanceof PrimaryfileSupplement) {
-			return primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
-		}
-		else if (asset instanceof ItemSupplement) {
-			return itemSupplementRepository.save((ItemSupplement)asset);
-		}
-		else if (asset instanceof CollectionSupplement) {
-			return collectionSupplementRepository.save((CollectionSupplement)asset);
-		}
-		return asset;
 	}
 	
 }

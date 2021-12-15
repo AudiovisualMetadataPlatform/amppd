@@ -107,8 +107,12 @@ public class DataentityController {
     	log.info("Adding primaryfile " + primaryfile.getName() + " under item " + itemId);
     	
     	// populate primaryfile.item in case it's not specified in RequestPart
+    	Long pid; // parent's ID
     	if (primaryfile.getItem() == null) {
     		primaryfile.setItem(itemRepository.findById(itemId).orElse(null));
+    	}
+    	else if ((pid = primaryfile.getItem().getId()) != itemId) {
+    		log.warn("Primaryfile's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
     	}
     	
 //    	// validate with WithReference constraints, which were not invoked on primaryfile from RequestPart
@@ -127,7 +131,7 @@ public class DataentityController {
 		if (mediaFile == null) {
 			throw new RuntimeException("No media file is provided for the primaryfile to be added.");
 		}
-		primaryfile = fileStorageService.uploadPrimaryfile(primaryfile, mediaFile);
+		primaryfile = (Primaryfile)fileStorageService.uploadAsset(primaryfile, mediaFile);
 		
     	return primaryfile;
     }
@@ -145,8 +149,12 @@ public class DataentityController {
     	log.info("Adding collectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
     	
     	// populate collectionSupplement.collection in case it's not specified in RequestPart
+    	Long pid; // parent's ID
     	if (collectionSupplement.getCollection() == null) {
     		collectionSupplement.setCollection(collectionRepository.findById(collectionId).orElse(null));
+    	}
+    	else if ((pid = collectionSupplement.getCollection().getId()) != collectionId) {
+    		log.warn("collectionSupplement's collection ID " + pid + " is different from the specified collection ID " + collectionId + ", will use the former.");    		
     	}
     	
     	// validate collectionSupplement after parent population and before persistence
@@ -158,11 +166,11 @@ public class DataentityController {
 		// save collectionSupplement to DB 
     	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);
 		
-		// ingest media file after collection is saved
+		// ingest media file after collectionSupplement is saved
 		if (mediaFile == null) {
 			throw new RuntimeException("No media file is provided for the collectionSupplement to be added.");
 		}
-		collectionSupplement = fileStorageService.uploadCollectionSupplement(collectionSupplement, mediaFile);
+		collectionSupplement = (CollectionSupplement)fileStorageService.uploadAsset(collectionSupplement, mediaFile);
 		
     	return collectionSupplement;
     }
@@ -180,9 +188,13 @@ public class DataentityController {
     	log.info("Adding itemSupplement " + itemSupplement.getName() + " under item " + itemId);
     	
     	// populate itemSupplement.item in case it's not specified in RequestPart
+    	Long pid; // parent's ID
     	if (itemSupplement.getItem() == null) {
     		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
     		itemSupplement.setItem(item);
+    	}
+    	else if ((pid = itemSupplement.getItem().getId()) != itemId) {
+    		log.warn("itemSupplement's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
     	}
     	
     	// validate itemSupplement after parent population and before persistence
@@ -194,11 +206,11 @@ public class DataentityController {
 		// save itemSupplement to DB 
     	itemSupplement = itemSupplementRepository.save(itemSupplement);
 		
-		// ingest media file after item is saved
+		// ingest media file after itemSupplement is saved
 		if (mediaFile == null) {
 			throw new RuntimeException("No media file is provided for the itemSupplement to be added.");
 		}
-		itemSupplement = fileStorageService.uploadItemSupplement(itemSupplement, mediaFile);
+		itemSupplement = (ItemSupplement)fileStorageService.uploadAsset(itemSupplement, mediaFile);
 		
     	return itemSupplement;
     }
@@ -216,9 +228,13 @@ public class DataentityController {
     	log.info("Adding primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
     	
     	// populate primaryfileSupplement.primaryfile in case it's not specified in RequestPart
+    	Long pid; // parent's ID
     	if (primaryfileSupplement.getPrimaryfile() == null) {
     		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));
     		primaryfileSupplement.setPrimaryfile(primaryfile);
+    	}
+    	else if ((pid = primaryfileSupplement.getPrimaryfile().getId()) != primaryfileId) {
+    		log.warn("primaryfileSupplement's primaryfile ID " + pid + " is different from the specified primaryfile ID " + primaryfileId + ", will use the former.");    		
     	}
     	
     	// validate primaryfileSupplement after parent population and before persistence
@@ -230,11 +246,11 @@ public class DataentityController {
 		// save primaryfileSupplement to DB 
     	primaryfileSupplement = primaryfileSupplementRepository.save(primaryfileSupplement);
 		
-		// ingest media file after primaryfile is saved
+		// ingest media file after primaryfileSupplement is saved
 		if (mediaFile == null) {
 			throw new RuntimeException("No media file is provided for the primaryfileSupplement to be added.");
 		}
-		primaryfileSupplement = fileStorageService.uploadPrimaryfileSupplement(primaryfileSupplement, mediaFile);
+		primaryfileSupplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(primaryfileSupplement, mediaFile);
 		
     	return primaryfileSupplement;
     }	

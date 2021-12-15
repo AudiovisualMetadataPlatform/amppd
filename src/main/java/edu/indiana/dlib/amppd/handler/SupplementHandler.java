@@ -36,64 +36,74 @@ public class SupplementHandler {
     @HandleBeforeCreate
 //    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeCreate(@Valid Supplement supplement){
-    	// The purpose of this method is to invoke validation before DB persistence.   	        
+    	// This method is needed to invoke validation before DB persistence.   	        
+    	log.info("Creating supplement " + supplement.getName() + "...");
     }
 
     @HandleAfterCreate
     public void handleAfterCreate(CollectionSupplement collectionSupplement){
-    	log.info("Handling process after creating collectionSupplement " + collectionSupplement.getId() + " ...");
+		// ingest media file after collectionSupplement is saved
     	if (collectionSupplement.getMediaFile() != null) {
-    		fileStorageService.uploadCollectionSupplement(collectionSupplement, collectionSupplement.getMediaFile());
+    		fileStorageService.uploadAsset(collectionSupplement, collectionSupplement.getMediaFile());
     	}
     	else {
 //    		throw new RuntimeException("No media file is provided for the collectionSupplement to be created.");
     		log.warn("No media file is provided for the collectionSupplement to be created.");
     	}
+    	
+    	log.info("Successfully created collectionSupplement " + collectionSupplement.getId());
     }
     
     @HandleAfterCreate
     public void handleAfterCreate(ItemSupplement itemSupplement){
-    	log.info("Handling process after creating itemSupplement " + itemSupplement.getId() + " ...");
+		// ingest media file after itemSupplement is saved
     	if (itemSupplement.getMediaFile() != null) {
-    		fileStorageService.uploadItemSupplement(itemSupplement, itemSupplement.getMediaFile());
+    		fileStorageService.uploadAsset(itemSupplement, itemSupplement.getMediaFile());
     	}
     	else {
 //    		throw new RuntimeException("No media file is provided for the itemSupplement to be created.");
     		log.warn("No media file is provided for the itemSupplement to be created.");
     	}
+    	
+    	log.info("Successfully created itemSupplement " + itemSupplement.getId());
     }
     
     @HandleAfterCreate
     public void handleAfterCreate(PrimaryfileSupplement primaryfileSupplement){
-    	log.info("Handling process after creating primaryfileSupplement " + primaryfileSupplement.getId() + " ...");
+		// ingest media file after primaryfileSupplement is saved
     	if (primaryfileSupplement.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfileSupplement(primaryfileSupplement, primaryfileSupplement.getMediaFile());
+    		fileStorageService.uploadAsset(primaryfileSupplement, primaryfileSupplement.getMediaFile());
     	}
     	else {
 //    		throw new RuntimeException("No media file is provided for the primaryfileSupplement to be created.");
     		log.warn("No media file is provided for the primaryfileSupplement to be created.");
     	}
+    	
+    	log.info("Successfully created primaryfileSupplement " + primaryfileSupplement.getId());
     }
     
     @HandleBeforeSave
 //    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeUpdate(@Valid Supplement supplement){
-    	// The purpose of this method is to invoke validation before DB persistence.   	 	    	
+    	// This method is needed to invoke validation before DB persistence.   	 	    	
+    	log.info("Updating supplement " + supplement.getId() + "...");
     }
     
     @HandleAfterSave
     public void handleAfterUpdate(CollectionSupplement collectionSupplement){
     	log.info("Handling process after udpating collectionSupplement " + collectionSupplement.getId() + " ...");
     	if (collectionSupplement.getMediaFile() != null) {
-    		fileStorageService.uploadCollectionSupplement(collectionSupplement, collectionSupplement.getMediaFile());
+    		fileStorageService.uploadAsset(collectionSupplement, collectionSupplement.getMediaFile());
     	}
+
+   	log.info("Successfully created primaryfileSupplement " + collectionSupplement.getId());
     }
         
     @HandleAfterSave
     public void handleAfterUpdate(ItemSupplement itemSupplement){
     	log.info("Handling process after udpating itemSupplement " + itemSupplement.getId() + " ...");
     	if (itemSupplement.getMediaFile() != null) {
-    		fileStorageService.uploadItemSupplement(itemSupplement, itemSupplement.getMediaFile());
+    		fileStorageService.uploadAsset(itemSupplement, itemSupplement.getMediaFile());
     	}
     }
     
@@ -101,7 +111,7 @@ public class SupplementHandler {
     public void handleAfterUpdate(PrimaryfileSupplement primaryfileSupplement){
     	log.info("Handling process after udpating primaryfileSupplement " + primaryfileSupplement.getId() + " ...");
     	if (primaryfileSupplement.getMediaFile() != null) {
-    		fileStorageService.uploadPrimaryfileSupplement(primaryfileSupplement, primaryfileSupplement.getMediaFile());
+    		fileStorageService.uploadAsset(primaryfileSupplement, primaryfileSupplement.getMediaFile());
     	}
     }
     
@@ -115,7 +125,7 @@ public class SupplementHandler {
          */
 
         // delete media/info file of the supplement
-        String pathname = fileStorageService.unloadSupplement(supplement);           
+        String pathname = fileStorageService.unloadAsset(supplement);           
     }
     
 }

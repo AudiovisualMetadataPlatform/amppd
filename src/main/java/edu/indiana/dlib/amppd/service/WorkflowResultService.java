@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
+import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -39,6 +40,18 @@ public interface WorkflowResultService {
 	public List<WorkflowResult> addWorkflowResults(Invocation invocation, Workflow workflow, Primaryfile primaryfile);	
 	
 	/**
+	 * Delete workflow results associated with the specified collection if inactive; otherwise no action.
+	 * @collection the specified collection
+	 * @return the list of deleted workflow results
+	 */
+	public List<WorkflowResult> deleteInactiveWorkflowResults(Collection collection);
+	
+	/**
+	 * Refresh status for all WorkflowResults whose output status might still change by job runners in Galaxy.
+	 */
+	public List<WorkflowResult> refreshIncompleteWorkflowResults();
+
+	/**
 	 * Refreshes WorkflowResults table iteratively by retrieving and processing workflow invocations per primaryfile.
 	 * Use this method instead of refreshWorkflowResultsLumpsum if request to Galaxy tends to timeout due to large amount of records.
 	 * @return the list of WorkflowResults refreshed
@@ -54,11 +67,6 @@ public interface WorkflowResultService {
 	 */
 	@Deprecated
 	public List<WorkflowResult> refreshWorkflowResultsLumpsum();
-
-	/**
-	 * Refreshes incomplete workflow results status values.
-	 */
-	public List<WorkflowResult> refreshIncompleteWorkflowResults();
 		
 	/**
 	 * Fix workflow results with obsolete output types with correct data types and update the corresponding datasets in Galaxy.
@@ -67,7 +75,7 @@ public interface WorkflowResultService {
 	public Set<WorkflowResult> fixWorkflowResultsOutputType();
 	
 	/**
-	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
+	 * This method is deprecated, please use setRelevantWorkflowResults instead.
 	 * Hide all irrelevant workflow results by setting their corresponding output datasets in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table.
 	 * @return the list of WorkflowResults updated
@@ -83,7 +91,7 @@ public interface WorkflowResultService {
 	 * @param relevant indicator on whether or not to set WorkflowResults as relevant
 	 * @return the list of WorkflowResults updated
 	 */
-	public Set<WorkflowResult> setWorkflowResultsRelevant(List<Map<String, String>> workflowStepOutputs, Boolean relevant);
+	public Set<WorkflowResult> setRelevantWorkflowResults(List<Map<String, String>> workflowStepOutputs, Boolean relevant);
 	
 	/**
 	 * Sets the specified WorkflowResult according to the specified final status.
@@ -91,7 +99,7 @@ public interface WorkflowResultService {
 	 * @param isFinal the specified final status
 	 * @return the WorkflowResult updated
 	 */
-	public WorkflowResult setWorkflowResultFinal(Long workflowResultId, Boolean isFinal);
+	public WorkflowResult setFinalWorkflowResult(Long workflowResultId, Boolean isFinal);
 
 	/**
 	 * Set and export workflow result csv file as part of reponse
