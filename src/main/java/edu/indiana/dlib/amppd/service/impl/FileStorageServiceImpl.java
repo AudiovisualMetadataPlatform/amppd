@@ -145,8 +145,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	public Asset uploadAsset(Long id, MultipartFile file, SupplementType type) {		
     	Asset asset = dataentityService.findAsset(id, type);        	
     	asset = uploadAsset(asset, file);
-    	asset = preprocessService.preprocess(asset);
-    	return (Primaryfile)asset;
+    	return asset;
 	}
 		
 	/**
@@ -173,6 +172,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     	asset.setPathname(targetPathname);
     	store(file, targetPathname);    	    	    	
     	asset = dataentityService.saveAsset(asset);
+    	asset = preprocessService.preprocess(asset);
     	
     	String msg = "Successfully uploaded asset " + asset.getId() + " media file " + file.getOriginalFilename() + " to " + targetPathname;
     	log.info(msg);
