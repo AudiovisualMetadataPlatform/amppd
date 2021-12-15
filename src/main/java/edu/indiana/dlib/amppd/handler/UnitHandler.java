@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 @Slf4j
 public class UnitHandler {    
-
-	@Autowired
-	private UnitRepository unitRepository;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -61,7 +57,7 @@ public class UnitHandler {
     	// no need to move media subdir as unit doesn't have parent
     	
     	// rename dropbox subdir (if exists) of the unit in case its name is changed
-        dropboxService.renameUnitSubdir(unit);        
+        dropboxService.renameSubdir(unit);        
     }
     
     @HandleAfterSave
@@ -76,11 +72,11 @@ public class UnitHandler {
         // Below file system operations should be done before the data entity is deleted, so that
         // in case of exception, the process can be repeated instead of manual operations.
 
-        // delete media directory tree (if exists) of the unit
-        fileStorageService.delete(fileStorageService.getDirPathname(unit));
+        // delete media subdir (if exists) of the unit
+        fileStorageService.deleteEntityDir(unit);
         
         // delete dropbox subdir (if exists) of the unit 
-        dropboxService.deleteUnitSubdir(unit);        
+        dropboxService.deleteSubdir(unit);        
     }
     
     @HandleAfterDelete

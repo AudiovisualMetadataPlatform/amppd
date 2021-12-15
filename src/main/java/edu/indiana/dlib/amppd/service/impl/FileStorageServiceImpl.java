@@ -33,10 +33,6 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
@@ -53,18 +49,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class FileStorageServiceImpl implements FileStorageService {	
-
-	@Autowired
-    private PrimaryfileRepository primaryfileRepository;
-		
-	@Autowired
-    private CollectionSupplementRepository collectionSupplementRepository;
-
-	@Autowired
-    private ItemSupplementRepository itemSupplementRepository;
-
-	@Autowired
-    private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 	
 	@Autowired
     private PreprocessService preprocessService;
@@ -117,6 +101,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 			pdir = getDirPathname(((Primaryfile)dataentity).getItem());		
 			key = "P";		
 		}
+		else {
+			throw new IllegalArgumentException("The given dataentity " + dataentity.getId() + " is of invalid type.");
+		}
 		
 		return pdir + File.separator + key + "-" + dataentity.getId();
 	}
@@ -128,41 +115,42 @@ public class FileStorageServiceImpl implements FileStorageService {
 	public String getFilePathname(Asset asset) {
 		if (asset instanceof Primaryfile) {
 			// file path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>.<primaryExtension>
-			return getDirPathname((Primaryfile)asset) + "." + FilenameUtils.getExtension(asset.getOriginalFilename());
+			return getDirPathname(asset) + "." + FilenameUtils.getExtension(asset.getOriginalFilename());
 		}
-		else {
-			// file name for supplement: S-<supplementId>
-			String filename = "S-" + asset.getId() + "." + FilenameUtils.getExtension(asset.getOriginalFilename());
-			
-			// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
-			String dirname = "";
-			
-			if (asset instanceof CollectionSupplement) {
-				dirname = getDirPathname(((CollectionSupplement)asset).getCollection());
-			}
-			else if (asset instanceof ItemSupplement) {
-				dirname = getDirPathname(((ItemSupplement)asset).getItem());
-			}
-			else if (asset instanceof PrimaryfileSupplement) {
-				dirname = getDirPathname(((PrimaryfileSupplement)asset).getPrimaryfile());
-			}
-			
-			return dirname + File.separator  + filename;
+
+		// file name for supplement: S-<supplementId>
+		String filename = "S-" + asset.getId() + "." + FilenameUtils.getExtension(asset.getOriginalFilename());
+
+		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
+		String dirname = "";
+
+		if (asset instanceof CollectionSupplement) {
+			dirname = getDirPathname(((CollectionSupplement)asset).getCollection());
 		}
+		else if (asset instanceof ItemSupplement) {
+			dirname = getDirPathname(((ItemSupplement)asset).getItem());
+		}
+		else if (asset instanceof PrimaryfileSupplement) {
+			dirname = getDirPathname(((PrimaryfileSupplement)asset).getPrimaryfile());
+		}
+
+		return dirname + File.separator  + filename;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfile(Long, MultipartFile)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadAsset(Long, MultipartFile, SupplementType)
 	 */
 	@Override
 	@Transactional
 	public Asset uploadAsset(Long id, MultipartFile file, SupplementType type) {		
     	Asset asset = dataentityService.findAsset(id, type);        	
-    	return (Primaryfile)preprocessService.preprocess(uploadAsset(asset, file));
+    	asset = uploadAsset(asset, file);
+    	asset = preprocessService.preprocess(asset);
+    	return (Primaryfile)asset;
 	}
 		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadPrimaryfile(Primaryfile, MultipartFile)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadAsset(Asset, MultipartFile)
 	 */
 	@Override
 	public Asset uploadAsset(Asset asset, MultipartFile file) {		
@@ -196,7 +184,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */
 	public String moveEntityDir(Dataentity dataentity) {
 		// get the media subdir pathname for the original and current dataentity
-		// note that pathname will change if dataentity's parent change
+		// note that pathname will change if dataentity's parent is changed
 		Dataentity oldentity = dataentityService.findOriginalDataentity(dataentity);
 		String olddir = getDirPathname(oldentity);
 		String newdir = getDirPathname(dataentity);
@@ -267,7 +255,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			log.info("Successfully deleted dataentity " + dataentity.getId() + " media sub-directory " + pathname);
 		}
 		else {
-			log.info("No need to delete non-existing media sub-directory " + pathname);
+			log.info("No need to delete non-existing dataentity " + dataentity.getId() + " media sub-directory " + pathname);
     	}
 		
 		return pathname;
@@ -287,14 +275,14 @@ public class FileStorageServiceImpl implements FileStorageService {
         	log.info("Successfully unloaded asset " + asset.getId() + " media file " + mediaPathname);
         }
         else {
-        	log.error("Did not unload non-existing asset " + asset.getId() + " media file " + mediaPathname);
+        	log.error("No need to unload non-existing asset " + asset.getId() + " media file " + mediaPathname);
         }
         
         if (jsonPath != null) {
         	log.info("Successfully unloaded asset " + asset.getId() + " media info file " + jsonPathname);
         }
         else {
-        	log.error("Did not unload non-existing asset " + asset.getId() + " media info file " + jsonPathname);
+        	log.error("No need to unload non-existing asset " + asset.getId() + " media info file " + jsonPathname);
         }
         
         return mediaPathname;
@@ -314,6 +302,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			// This is a security check
 			throw new StorageException("Cannot store file " + originalFilename + " with relative path outside current directory to " + targetPathname);
 		}
+		
 		try (InputStream inputStream = file.getInputStream()) {
 			// TODO: consider FileAttributes for access control
 			Path path = resolve(targetPathname);
@@ -344,7 +333,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     			return null;
     		}    		
     		if (Files.exists(tgtpath)) {
-    	    	log.warn("Target directory/file " + targetPathname + " already exists and will be overwritten.");    			
+    	    	log.warn("Target directory/file " + targetPathname + " already exists and will be replaced.");    			
     		}    		
 	    	return Files.move(srcpath, tgtpath, StandardCopyOption.REPLACE_EXISTING);  		
     	}

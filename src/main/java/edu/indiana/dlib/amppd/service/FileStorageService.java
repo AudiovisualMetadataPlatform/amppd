@@ -47,30 +47,28 @@ public interface FileStorageService {
 	public Asset uploadAsset(Asset asset, MultipartFile file);
 	
 	/**
-	 * Move the media sub-directory associated with the given dataentity, as needed,
-	 * from its old parent's media sub-directory to its new parent's media sub-directory.
+	 * Move the media sub-directory (if exists) of the given dataentity, in case its parent is changed.
 	 * @param dataentity the given dataentity
-	 * @return the new pathname of the media sub-directory 
+	 * @return the updated pathname of the media sub-directory 
 	 */
 	public String moveEntityDir(Dataentity dataentity);
 			
 	/**
-	 * Move the media file and the associated media info JSON file for the given asset, as needed,
-	 * from its old parent's media sub-directory to its new parent's media sub-directory.
+	 * Move the media and the info files of the given asset, in case its parent is changed.
 	 * @param asset the given asset
-	 * @return the new pathname of the media file 
+	 * @return the updated pathname of the media file 
 	 */
 	public String moveAsset(Asset asset);
 		
 	/**
-	 * Delete the media sub-directory associated with the given data entity, if exists.
+	 * Delete the media sub-directory (if exists) of the given data entity.
 	 * @param dataentity the given dataentity
 	 * @return the pathname of the media sub-directory 
 	 */
 	public String deleteEntityDir(Dataentity dataentity);
 
 	/**
-	 * Unload (remove) the media file and the associated media info JSON file for the given asset.
+	 * Unload (delete) the media and the info files of the given asset.
 	 * @param asset the given asset
 	 * @return the pathname of the media file 
 	 */
@@ -86,17 +84,17 @@ public interface FileStorageService {
 
 	/**
 	 * Move a file or directory from the specified source pathname to the specified target pathname.
-	 * If source doesn't exist, no active will be taken; if the target already exists, it will be replaced.
+	 * If the source doesn't exist, no action will be taken; if the target already exists, it will be replaced.
 	 * @param sourcePathname the specified source pathname
 	 * @param targetPathname the specified target pathname
-	 * @return the path of the target pathname
+	 * @return the path of the target pathname if moved, null otherwise
 	 */
 	public Path move(String sourcePathname, String targetPathname);
 
 	/**
-	 * Delete the file/directory recursively with the specified pathname if exists; otherwise no action.
+	 * Delete the file/directory recursively with the specified pathname if exists, no action otherwise.
 	 * @param pathname the specified pathname
-	 * @return the path of the file/directory to delete
+	 * @return the path of the file/directory if deleted, null otherwise
 	 */
 	public Path delete(String pathname);
 	

@@ -154,7 +154,7 @@ public class DataentityController {
     		collectionSupplement.setCollection(collectionRepository.findById(collectionId).orElse(null));
     	}
     	else if ((pid = collectionSupplement.getCollection().getId()) != collectionId) {
-    		log.warn("collectionSupplement's collection ID " + pid + " is different from the specified collection ID " + collectionId + ", will use the former.");    		
+    		log.warn("CollectionSupplement's collection ID " + pid + " is different from the specified collection ID " + collectionId + ", will use the former.");    		
     	}
     	
     	// validate collectionSupplement after parent population and before persistence
@@ -194,7 +194,7 @@ public class DataentityController {
     		itemSupplement.setItem(item);
     	}
     	else if ((pid = itemSupplement.getItem().getId()) != itemId) {
-    		log.warn("itemSupplement's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
+    		log.warn("ItemSupplement's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
     	}
     	
     	// validate itemSupplement after parent population and before persistence
@@ -234,7 +234,7 @@ public class DataentityController {
     		primaryfileSupplement.setPrimaryfile(primaryfile);
     	}
     	else if ((pid = primaryfileSupplement.getPrimaryfile().getId()) != primaryfileId) {
-    		log.warn("primaryfileSupplement's primaryfile ID " + pid + " is different from the specified primaryfile ID " + primaryfileId + ", will use the former.");    		
+    		log.warn("PrimaryfileSupplement's primaryfile ID " + pid + " is different from the specified primaryfile ID " + primaryfileId + ", will use the former.");    		
     	}
     	
     	// validate primaryfileSupplement after parent population and before persistence

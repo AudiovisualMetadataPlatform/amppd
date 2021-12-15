@@ -137,16 +137,16 @@ public class DataentityServiceImpl implements DataentityService {
 		
 		// only handle non-supplement types
 		if (dataentity instanceof Unit) {
-			return unitRepository.findById(id).orElse(null);
+			return unitRepository.findById(id).orElseThrow(() -> new StorageException("Unit <" + id + "> does not exist!"));
 		}
 		else if (dataentity instanceof Collection) {
-			return collectionRepository.findById(id).orElse(null);
+			return collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));
 		}
 		else if (dataentity instanceof Item) {
-			return itemRepository.findById(id).orElse(null);
+			return itemRepository.findById(id).orElseThrow(() -> new StorageException("Item <" + id + "> does not exist!"));
 		}
 		else if (dataentity instanceof Primaryfile) {
-			return primaryfileRepository.findById(id).orElse(null);
+			return primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
 		}
 		
 		// ignore supplement types

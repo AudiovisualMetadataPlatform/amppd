@@ -34,12 +34,12 @@ public interface DataentityService {
 	/**
 	 * Find the original dataentity with the same ID as the given dataentity from DB.
 	 * @param dataentity the given dataentity
-	 * @return the dataentity found, or null if not found
+	 * @return the dataentity found
 	 */
 	public Dataentity findOriginalDataentity(Dataentity dataentity);
 
 	/**
-	 * Find the duplicate dataentities, i.e. those with the same parent (if exists) and name as the given dataentity from DB.
+	 * Find the duplicate dataentities, i.e. those with the same parent (if exists) and name as the given dataentity, from DB.
 	 * @param dataentity the given dataentity
 	 * @return the list of duplicate dataentities found
 	 */

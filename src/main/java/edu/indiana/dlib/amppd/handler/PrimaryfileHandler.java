@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,9 +30,6 @@ public class PrimaryfileHandler {
     
 	@Autowired
 	private FileStorageService fileStorageService;	
-	
-	@Autowired
-	private ItemRepository itemRepository;	
 	
     @HandleBeforeCreate
 //    @Validated({WithReference.class, WithoutReference.class})
@@ -61,8 +57,8 @@ public class PrimaryfileHandler {
     public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
     	log.info("Updating primaryfile " + primaryfile.getId() + " ...");
 
-        // Below file system deletions should be done before the data entity is deleted, so that 
-        // in case of exception, the process can be repeated instead of manual operations.
+        // Below file system operations should be done before the data entity is updated, 
+    	// as we need the values stored in the old entity
 
     	// move media/info files and subdir (if exists) of the primaryfile in case its parent is changed 
         fileStorageService.moveAsset(primaryfile);

@@ -54,7 +54,7 @@ public class DropboxControllerTests {
     @Test
     public void shouldCreateSubdirsForAllCollections() throws Exception {
     	mvc.perform(post("/dropbox/create").header("Authorization", "Bearer " + token)).andExpect(status().isOk());   
-    	assertTrue(Files.exists(dropboxService.getDropboxPath(collection)));
+    	assertTrue(Files.exists(dropboxService.getSubDirPath(collection)));
     }
     
 }

@@ -46,7 +46,7 @@ public class CollectionHandler {
         log.info("Creating collection " + collection.getName() + " ...");
 
         // create dropbox subdir for the collection to be created, assume collection name has been validated
-        dropboxService.createCollectionSubdir(collection);
+        dropboxService.createSubdir(collection);
     }
     
     @HandleAfterCreate
@@ -65,7 +65,7 @@ public class CollectionHandler {
     	fileStorageService.moveEntityDir(collection);
     	
         // rename dropbox subdir (if exists) of the collection in case its name is changed
-        dropboxService.renameCollectionSubdir(collection); 
+        dropboxService.renameSubdir(collection); 
     }
 
     @HandleAfterSave
@@ -88,7 +88,7 @@ public class CollectionHandler {
         fileStorageService.deleteEntityDir(collection);
 
         // delete dropbox subdir (if exists) of the collection
-        dropboxService.deleteCollectionSubdir(collection);
+        dropboxService.deleteSubdir(collection);
     }
         
     @HandleAfterDelete

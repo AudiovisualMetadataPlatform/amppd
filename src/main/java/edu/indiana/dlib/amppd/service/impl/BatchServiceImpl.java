@@ -531,7 +531,7 @@ public class BatchServiceImpl implements BatchService {
 	}
 
 	private String getSourceDir(Unit unit, Collection collection) {
-		return dropboxService.getDropboxPath(unit.getName(), collection.getName()).toString();
+		return dropboxService.getSubDirPath(unit.getName(), collection.getName()).toString();
 	}
 	
 	// TODO 
