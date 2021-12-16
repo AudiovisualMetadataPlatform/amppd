@@ -170,7 +170,6 @@ public class PreprocessServiceImpl implements PreprocessService {
 		}
 
 		asset.setMediaInfo(mediaInfo);
-//		Asset updatedAsset = dataentityService.saveAsset(asset);
 		log.info("Retrieved media info for asset: " + asset.getId());
 		return asset;
 	}
