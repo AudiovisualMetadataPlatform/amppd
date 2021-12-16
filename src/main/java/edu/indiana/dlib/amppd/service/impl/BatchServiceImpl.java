@@ -166,15 +166,23 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchFile.getPrimaryfileFilename());	
 				primaryfile.setPathname(existingFile.toString());
 				
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(primaryfile);
-
-		    	primaryfile.setPathname(fileStorageService.getFilePathname(primaryfile));		    	
-		    	primaryfile = primaryfileRepository.save(primaryfile);
+				// preprocess the primaryfile before moving files, i.e. while it's still in dropbox
+				// so that in case preprocess fails, no primaryfile will be created with empty media info
+				preprocessService.preprocess(primaryfile, false);
 				
-				log.info("BATCH PROCESSING : Move the primaryfile from the dropbox to amppd file storage");
-				String targetDir = fileStorageService.getDirPathname(item);				
-				Path targetPath = moveFile(sourceDir, targetDir, batchFile.getPrimaryfileFilename(), fileStorageService.getFilePathname(primaryfile));
+				log.debug("BATCH PROCESSING : Move the primaryfile from the dropbox to amppd file storage");
+				String targetDir = fileStorageService.getDirPathname(item);	
+		    	primaryfile.setPathname(fileStorageService.getFilePathname(primaryfile));		    	
+				
+				// Move the file from the dropbox to amppd file storage:
+				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
+				// as the latter might have been converted from flac to wav during preprocess,
+				// while the former would have been updated to the generated wav file in this case
+				Path targetPath = moveFile(sourceDir, targetDir, primaryfile.getOriginalFilename(), primaryfile.getPathname());
+				
+				// save primaryfile after files are moved
+		    	primaryfile = primaryfileRepository.save(primaryfile);
+		    	
 		    	logFileCreated(primaryfile, targetPath);	    					
 			}
 			
@@ -196,13 +204,18 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
-			
-				// Move the file from the dropbox to amppd file storage
-				Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
-				supplement.setPathname(fileStorageService.getFilePathname(supplement));
+				// preprocess the supplement before moving files, i.e. while it's still in dropbox
+				// so that in case preprocess fails, no supplement will be created with empty media info
+				preprocessService.preprocess(supplement, false);
+				
+				// Move the file from the dropbox to amppd file storage:
+				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
+				// as the latter might have been converted from flac to wav during preprocess,
+				// while the former would have been updated to the generated wav file in this case
+				supplement.setPathname(fileStorageService.getFilePathname(supplement));				
+				Path targetSuppPath = moveFile(sourceDir, targetDir, supplement.getOriginalFilename(), supplement.getPathname());
 
+				// save supplement after files are moved
 				primaryfileSupplementRepository.save(supplement);
 				
 				// Log that the file was created
@@ -227,13 +240,18 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
+				// preprocess the supplement before moving files, i.e. while it's still in dropbox
+				// so that in case preprocess fails, no supplement will be created with empty media info
+				preprocessService.preprocess(supplement, false);
 				
-				// Move the file from the dropbox to amppd file storage
-				Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
-				supplement.setPathname(fileStorageService.getFilePathname(supplement));
+				// Move the file from the dropbox to amppd file storage:
+				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
+				// as the latter might have been converted from flac to wav during preprocess,
+				// while the former would have been updated to the generated wav file in this case
+				supplement.setPathname(fileStorageService.getFilePathname(supplement));				
+				Path targetSuppPath = moveFile(sourceDir, targetDir, supplement.getOriginalFilename(), supplement.getPathname());
 
+				// save supplement after files are moved
 				collectionSupplementRepository.save(supplement);
 				
 				// Log that the file was created
@@ -257,13 +275,18 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
-				// preprocess the supplement after ingest
-				preprocessService.preprocess(supplement);
+				// preprocess the supplement before moving files, i.e. while it's still in dropbox
+				// so that in case preprocess fails, no supplement will be created with empty media info
+				preprocessService.preprocess(supplement, false);
 				
-				// Move the file from the dropbox to amppd file storage
-				Path targetSuppPath = moveFile(sourceDir, targetDir, batchSupplementFile.getSupplementFilename(), fileStorageService.getFilePathname(supplement));
-				supplement.setPathname(fileStorageService.getFilePathname(supplement));
-				
+				// Move the file from the dropbox to amppd file storage:
+				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
+				// as the latter might have been converted from flac to wav during preprocess,
+				// while the former would have been updated to the generated wav file in this case
+				supplement.setPathname(fileStorageService.getFilePathname(supplement));				
+				Path targetSuppPath = moveFile(sourceDir, targetDir, supplement.getOriginalFilename(), supplement.getPathname());
+
+				// save supplement after files are moved
 				itemSupplementRepository.save(supplement);
 				
 				// Log that the file was created
@@ -500,7 +523,8 @@ public class BatchServiceImpl implements BatchService {
 		String existingJson = preprocessService.getMediaInfoJsonPath(existingFile.toString());
 		String newJson = preprocessService.getMediaInfoJsonPath(newLink.toString());
 		
-		// Move/link the file
+		// Move/link the files
+		// Note: if the original file is .flac, the converted .wav file will be moved instead
 		fileStorageService.linkFile(existingFile, newLink);
 		fileStorageService.linkFile(Paths.get(existingJson), Paths.get(newJson));
 		

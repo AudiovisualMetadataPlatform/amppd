@@ -39,7 +39,7 @@ public interface FileStorageService {
 	public Asset uploadAsset(Long id, MultipartFile file, SupplementType type);
 	
 	/**
-	 * Upload the given media file for the given asset.
+	 * Upload the given media file for the given asset, and persist the updated asset to DB.
 	 * @param asset the given asset
 	 * @param file the media file to be uploaded
 	 * @return the asset with media file uploaded
@@ -54,11 +54,12 @@ public interface FileStorageService {
 	public String moveEntityDir(Dataentity dataentity);
 			
 	/**
-	 * Move the media and the info files of the given asset, in case its parent is changed.
+	 * Move the media and the info files of the given asset, in case its parent is changed and persist the updated asset if indicated.
 	 * @param asset the given asset
+	 * @param persist if true, save the updated asset to DB; otherwise, do not save yet
 	 * @return the updated pathname of the media file 
 	 */
-	public String moveAsset(Asset asset);
+	public String moveAsset(Asset asset, boolean persist);
 		
 	/**
 	 * Delete the media sub-directory (if exists) of the given data entity.

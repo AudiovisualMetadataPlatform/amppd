@@ -94,7 +94,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 		else if (dataentity instanceof Item) {
 			// directory path for item: U-<unitID/C-<collectionId>/I-<itemId>
 			pdir = getDirPathname(((Item)dataentity).getCollection());				
-			key = "C";		
+			key = "I";		
 		}
 		else if (dataentity instanceof Primaryfile) {
 			// directory path for primaryfile: U-<unitID/C-<collectionId>/I-<itemId>/P-<primaryfileId>
@@ -105,7 +105,8 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new IllegalArgumentException("The given dataentity " + dataentity.getId() + " is of invalid type.");
 		}
 		
-		return pdir + File.separator + key + "-" + dataentity.getId();
+		String pathname = pdir.isEmpty() ? key + "-" + dataentity.getId() : pdir + File.separator + key + "-" + dataentity.getId();
+		return pathname;
 	}
 	
 	/**
@@ -134,7 +135,8 @@ public class FileStorageServiceImpl implements FileStorageService {
 			dirname = getDirPathname(((PrimaryfileSupplement)asset).getPrimaryfile());
 		}
 
-		return dirname + File.separator  + filename;
+		String pathname = dirname + File.separator  + filename;
+		return pathname;
 	}
 	
 	/**
@@ -166,13 +168,14 @@ public class FileStorageServiceImpl implements FileStorageService {
 	    	}
     	}
     		
-    	// store the media file and update asset
+    	// store the media file and update asset path
     	asset.setOriginalFilename(StringUtils.cleanPath(file.getOriginalFilename()));	
     	String targetPathname = getFilePathname(asset);    	    	
     	asset.setPathname(targetPathname);
-    	store(file, targetPathname);    	    	    	
-    	asset = dataentityService.saveAsset(asset);
-    	asset = preprocessService.preprocess(asset);
+    	store(file, targetPathname);  
+    	
+    	// preprocess asset
+    	asset = preprocessService.preprocess(asset, true);
     	
     	String msg = "Successfully uploaded asset " + asset.getId() + " media file " + file.getOriginalFilename() + " to " + targetPathname;
     	log.info(msg);
@@ -207,10 +210,10 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadAsset(Asset)
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadAsset(Asset, boolean)
 	 */
 	@Override
-	public String moveAsset(Asset asset) {
+	public String moveAsset(Asset asset, boolean persist) {
 		// get the un-updated media/info file pathnames 
 		String oldmedia = asset.getPathname();
         String oldJson = preprocessService.getMediaInfoJsonPath(oldmedia);        
@@ -238,7 +241,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 		
 		// otherwise, update asset pathname
 		asset.setPathname(newMedia);
-		dataentityService.saveAsset(asset);	   
+		
+		// save asset if indicated
+		if (persist) {
+			dataentityService.saveAsset(asset); 
+		} 
 		
 		log.info("Successfully moved asset " + asset.getId() + " media/info file : " + oldmedia + " -> " + newMedia + ", " + oldJson + " -> " + newJson);	
         return newMedia;
@@ -313,7 +320,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 			// save file content 
 			Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
 			
-			log.debug("Successfully stored file " + originalFilename + " to " + targetPathname);
+			log.debug("Stored file " + originalFilename + " to " + targetPathname);
 			return path;
 		}
 		catch (IOException e) {
@@ -335,6 +342,10 @@ public class FileStorageServiceImpl implements FileStorageService {
     		if (Files.exists(tgtpath)) {
     	    	log.warn("Target directory/file " + targetPathname + " already exists and will be replaced.");    			
     		}    		
+    		else {
+    			// make sure targat path's parent dir exists
+    			Files.createDirectories(tgtpath.getParent());
+    		}
 	    	return Files.move(srcpath, tgtpath, StandardCopyOption.REPLACE_EXISTING);  		
     	}
     	catch (IOException e) {

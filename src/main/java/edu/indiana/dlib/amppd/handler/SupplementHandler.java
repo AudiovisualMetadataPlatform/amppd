@@ -61,7 +61,8 @@ public class SupplementHandler {
     	// as we need the values stored in the old entity
 
     	// move media/info files of the supplement in case its parent is changed 
-        fileStorageService.moveAsset(supplement);    	
+    	// no need to save primaryfile here as it will be saved by RepositoryRestResource after this
+        fileStorageService.moveAsset(supplement, false);    	
     }
     
     @HandleAfterSave

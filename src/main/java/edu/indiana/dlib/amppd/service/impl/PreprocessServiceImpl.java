@@ -34,8 +34,8 @@ public class PreprocessServiceImpl implements PreprocessService {
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
 	@Autowired
-    private FileStorageService fileStorageService;
-		
+    private FileStorageService fileStorageService;		
+
 	@Autowired
 	private DataentityService dataentityService;
 
@@ -87,15 +87,19 @@ public class PreprocessServiceImpl implements PreprocessService {
 	public Asset convertFlac(Asset asset) {
 		String targetFilePath = convertFlacToWav(asset.getPathname());
 				
+		// if conversion happened, update the extension of originalFilename and pathname,
+		// the originalFilename's extension is used when computing asset file pathname,
 		// note that we do not remove the original flac file just in case of future use
 		if (targetFilePath != null) {
+			String originalFilename = FilenameUtils.getBaseName(asset.getOriginalFilename()) + ".wav";
+			asset.setOriginalFilename(originalFilename);
 			asset.setPathname(targetFilePath);
-			Asset updatedAsset = dataentityService.saveAsset(asset); 
-			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
-			return updatedAsset;		
+			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());		
 		}
-
-		log.info("No conversion is needed for asset: " + asset.getId());
+		else {
+			log.info("No conversion is needed for asset: " + asset.getId());
+		}
+		
 		return asset;
 	}
 	
@@ -147,7 +151,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		try {
 			mediaInfo = fileStorageService.readTextFile(jsonpath);
 		}
-		catch(StorageFileNotFoundException e) {
+		catch (StorageFileNotFoundException e) {
 			throw new PreprocessException("Error while reading media info from " + jsonpath + ": the json file does not exist");
 		}
 		
@@ -166,19 +170,24 @@ public class PreprocessServiceImpl implements PreprocessService {
 		}
 
 		asset.setMediaInfo(mediaInfo);
-		Asset updatedAsset = dataentityService.saveAsset(asset);
+//		Asset updatedAsset = dataentityService.saveAsset(asset);
 		log.info("Retrieved media info for asset: " + asset.getId());
-		return updatedAsset;
+		return asset;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.preprocess(Asset)
+	 * @see edu.indiana.dlib.amppd.service.PreprocessService.preprocess(Asset, boolean)
 	 */
 	@Override	
 	@Transactional	
-	public Asset preprocess(Asset asset) {
-		log.info("Preprocessing asset: " + asset.getId());
-		return retrieveMediaInfo(convertFlac(asset));
+	public Asset preprocess(Asset asset, boolean persist) {
+		convertFlac(asset);
+		retrieveMediaInfo(asset); 
+		if (persist) {
+			asset = dataentityService.saveAsset(asset); 
+		}
+		log.info("Successfully preprocessed asset: " + asset.getId());
+		return asset;
 	}
 	
 	/**
