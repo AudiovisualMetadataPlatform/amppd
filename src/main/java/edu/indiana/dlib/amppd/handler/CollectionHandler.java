@@ -64,7 +64,8 @@ public class CollectionHandler {
     	// move media subdir (if exists) of the collection in case its parent is changed 
     	fileStorageService.moveEntityDir(collection);
     	
-        // rename dropbox subdir (if exists) of the collection in case its name is changed
+        // rename (if previously exists) or create (if previously doesn't exist) the dropbox subdir of the collection
+    	// in case its name is changed, and/or move the subdir if its parent unit changed
         dropboxService.renameSubdir(collection); 
     }
 

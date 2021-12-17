@@ -3,6 +3,8 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -70,6 +72,9 @@ public class DataentityServiceImpl implements DataentityService {
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
 	
+	@Autowired
+	private EntityManager entityManager;
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getExternalSources()
 	 */
@@ -126,12 +131,6 @@ public class DataentityServiceImpl implements DataentityService {
 	 */
 	@Override
 	public Dataentity findOriginalDataentity(Dataentity dataentity) {
-		/* TODO
-		 * It appears that when this method is called within the same transaction for the dataentity update,
-		 * repository.findById will not retrieve the original entity from the DB, 
-		 * rather, it returns the same dataentity retrieved previously.
-		 */
-		
 		if (dataentity == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
 		}
@@ -140,7 +139,15 @@ public class DataentityServiceImpl implements DataentityService {
 		if (id == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity ID is null.");				
 		}
-		
+
+		/* TODO Note:
+		 * Repository.find*** will return a cached object if previously retrieved within the same session;
+		 * a new object will be retrieved from DB only after a commit (save) on the object happens.
+		 * This means that once the retrieved object has fields updated, it's impossible to get the original values from DB. 
+		 * The only way to get around this is to call entityManager.clear() or session.refresh(object), 
+		 */		
+		entityManager.refresh(dataentity);
+
 		// only handle non-supplement types
 		if (dataentity instanceof Unit) {
 			return unitRepository.findById(id).orElseThrow(() -> new StorageException("Unit <" + id + "> does not exist!"));

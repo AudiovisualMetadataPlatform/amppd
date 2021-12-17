@@ -20,18 +20,22 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -48,10 +52,7 @@ public class DataentityController {
 	private Validator validator;
 	
 	@Autowired
-	private DataentityService dataentityService;
-	
-	@Autowired
-	private FileStorageService fileStorageService;
+	private UnitRepository unitRepository;
 	
 	@Autowired
 	private CollectionRepository collectionRepository;
@@ -71,6 +72,15 @@ public class DataentityController {
 	@Autowired
 	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 	
+	@Autowired
+	private DataentityService dataentityService;
+	
+	@Autowired
+	private FileStorageService fileStorageService;
+	
+	@Autowired
+	private DropboxService dropboxService;
+
 	/**
 	 * Return the requested configuration properties.
 	 * @param properties name of the properties requested; null means all client visible properties.
@@ -133,6 +143,7 @@ public class DataentityController {
 		}
 		primaryfile = (Primaryfile)fileStorageService.uploadAsset(primaryfile, mediaFile);
 		
+    	log.info("Successfully added primaryfile " + primaryfile.getName() + " under item " + itemId);
     	return primaryfile;
     }
 		
@@ -172,6 +183,7 @@ public class DataentityController {
 		}
 		collectionSupplement = (CollectionSupplement)fileStorageService.uploadAsset(collectionSupplement, mediaFile);
 		
+    	log.info("Successfully addedcollectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
     	return collectionSupplement;
     }
 	
@@ -212,6 +224,7 @@ public class DataentityController {
 		}
 		itemSupplement = (ItemSupplement)fileStorageService.uploadAsset(itemSupplement, mediaFile);
 		
+    	log.info("Successfully addeditemSupplement " + itemSupplement.getName() + " under item " + itemId);
     	return itemSupplement;
     }
 	
@@ -252,15 +265,72 @@ public class DataentityController {
 		}
 		primaryfileSupplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(primaryfileSupplement, mediaFile);
 		
+    	log.info("Successfully addedprimaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
     	return primaryfileSupplement;
     }	
 	
 	/**
-	 * Create the given primaryfile with the given media file and add it to the given parent item.
+	 * Move the given collection to the given parent unit if different from its original parent.
+	 * @param collectionId ID of the given collection
+	 * @param unitId ID of the given parent unit
+	 * @return the updated collection
+	 */
+	@PostMapping(path = "/collections/{collectionId}/move")
+	public Collection moveCollection(@PathVariable Long collectionId, @RequestParam Long unitId) {		
+    	log.info("Moving collection " + collectionId + " to new unit " + unitId);
+    	
+    	// retrieve collection and unit from DB
+    	Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("Collection <" + collectionId + "> does not exist!"));
+    	Unit unit =	unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit <" + unitId + "> does not exist!"));
+
+    	// if parent unit is the same, no action
+    	if (collection.getUnit().getId().equals(unit.getId())) {
+    		log.warn("No need to move collection " + collectionId + " to the same parent unit " + unitId);
+    		return collection;
+    	}    	
+
+    	// otherwise, move collection dropbox/media subdir (if exist) to new subdir and update its parent unit
+    	fileStorageService.moveEntityDir(collection, unit);
+
+        // move the dropbox subdir if its parent unit changed
+        dropboxService.moveSubdir(collection, unit); 
+
+        log.info("Successfully moved collection " + collectionId + " to new unit " + unitId);
+        return collection;
+    }	
+	
+	/**
+	 * Move the given item to the given parent collection if different from its original parent.
 	 * @param itemId ID of the given item
-	 * @param primaryfile the given primaryfile
-	 * @param mediaFile the media file content to be uploaded for the primaryfile
-	 * @return the added primaryfile
+	 * @param collectionId ID of the given parent collection
+	 * @return the updated item
+	 */
+	@PostMapping(path = "/items/{itemId}/move")
+	public Item moveItem(@PathVariable Long itemId, @RequestParam Long collectionId) {		
+    	log.info("Moving item " + itemId + " to new collection " + collectionId);
+    	
+    	// retrieve item and collection from DB
+    	Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("Item <" + itemId + "> does not exist!"));
+    	Collection collection =	collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("Collection <" + collectionId + "> does not exist!"));
+
+    	// if parent collection is the same, no action
+    	if (item.getCollection().getId().equals(collection.getId())) {
+    		log.warn("No need to move item " + itemId + " to the same parent collection " + collectionId);
+    		return item;
+    	}    	
+
+    	// otherwise, move item media subdir (if exists) to new subdir and update its parent collection
+    	fileStorageService.moveEntityDir(item, collection);
+
+    	log.info("Successfully moved item " + itemId + " to new collection " + collectionId);
+        return item;
+    }	
+	
+	/**
+	 * Move the given primaryfile to the given parent item if different from its original parent.
+	 * @param primaryfileId ID of the given primaryfile
+	 * @param itemId ID of the given parent item
+	 * @return the updated primaryfile
 	 */
 	@PostMapping(path = "/primaryfiles/{primaryfileId}/move")
 	public Primaryfile movePrimaryfile(@PathVariable Long primaryfileId, @RequestParam Long itemId) {		
@@ -281,10 +351,93 @@ public class DataentityController {
     	// as the original parent would have been lost after primaryfile is saved by the latter
     	fileStorageService.moveEntityDir(primaryfile, item);
         fileStorageService.moveAsset(primaryfile, true);
-    	return primaryfile;
+
+    	log.info("Successfully moved primaryfile " + primaryfileId + " to new item " + itemId);
+        return primaryfile;
     }
 	
+	/**
+	 * Move the given collectionSupplement to the given parent collection if different from its original parent.
+	 * @param collectionSupplementId ID of the given collectionSupplement
+	 * @param collectionId ID of the given parent collection
+	 * @return the updated collectionSupplement
+	 */
+	@PostMapping(path = "/collectionSupplements/{collectionSupplementId}/move")
+	public CollectionSupplement moveCollectionSupplement(@PathVariable Long collectionSupplementId, @RequestParam Long collectionId) {		
+    	log.info("Moving collectionSupplement " + collectionSupplementId + " to new collection " + collectionId);
+    	
+    	// retrieve collectionSupplement and collection from DB
+    	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(collectionSupplementId).orElseThrow(() -> new StorageException("CollectionSupplement <" + collectionSupplementId + "> does not exist!"));
+    	Collection collection =	collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("Collection <" + collectionId + "> does not exist!"));
+
+    	// if parent collection is the same, no action
+    	if (collectionSupplement.getCollection().getId().equals(collection.getId())) {
+    		log.warn("No need to move collectionSupplement " + collectionSupplementId + " to the same parent collection " + collectionId);
+    		return collectionSupplement;
+    	}    	
+
+    	// otherwise, move collectionSupplement media/info files to new subdir and update its parent collection
+        fileStorageService.moveAsset(collectionSupplement, true);
+
+    	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new collection " + collectionId);
+        return collectionSupplement;
+    }
+		
+	/**
+	 * Move the given itemSupplement to the given parent item if different from its original parent.
+	 * @param itemSupplementId ID of the given itemSupplement
+	 * @param itemId ID of the given parent item
+	 * @return the updated itemSupplement
+	 */
+	@PostMapping(path = "/itemSupplements/{itemSupplementId}/move")
+	public ItemSupplement moveItemSupplement(@PathVariable Long itemSupplementId, @RequestParam Long itemId) {		
+    	log.info("Moving itemSupplement " + itemSupplementId + " to new item " + itemId);
+    	
+    	// retrieve itemSupplement and item from DB
+    	ItemSupplement itemSupplement = itemSupplementRepository.findById(itemSupplementId).orElseThrow(() -> new StorageException("ItemSupplement <" + itemSupplementId + "> does not exist!"));
+    	Item item =	itemRepository.findById(itemId).orElseThrow(() -> new StorageException("Item <" + itemId + "> does not exist!"));
+
+    	// if parent item is the same, no action
+    	if (itemSupplement.getItem().getId().equals(item.getId())) {
+    		log.warn("No need to move itemSupplement " + itemSupplementId + " to the same parent item " + itemId);
+    		return itemSupplement;
+    	}    	
+
+    	// otherwise, move itemSupplement media/info files to new subdir and update its parent item
+        fileStorageService.moveAsset(itemSupplement, true);
+
+    	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new item " + itemId);
+        return itemSupplement;
+    }
+		
+	/**
+	 * Move the given primaryfileSupplement to the given parent primaryfile if different from its original parent.
+	 * @param primaryfileSupplementId ID of the given primaryfileSupplement
+	 * @param primaryfileId ID of the given parent primaryfile
+	 * @return the updated primaryfileSupplement
+	 */
+	@PostMapping(path = "/primaryfileSupplements/{primaryfileSupplementId}/move")
+	public PrimaryfileSupplement movePrimaryfileSupplement(@PathVariable Long primaryfileSupplementId, @RequestParam Long primaryfileId) {		
+    	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
+    	
+    	// retrieve primaryfileSupplement and primaryfile from DB
+    	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(primaryfileSupplementId).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + primaryfileSupplementId + "> does not exist!"));
+    	Primaryfile primaryfile =	primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+
+    	// if parent primaryfile is the same, no action
+    	if (primaryfileSupplement.getPrimaryfile().getId().equals(primaryfile.getId())) {
+    		log.warn("No need to move primaryfileSupplement " + primaryfileSupplementId + " to the same parent primaryfile " + primaryfileId);
+    		return primaryfileSupplement;
+    	}    	
+
+    	// otherwise, move primaryfileSupplement media/info files to new subdir and update its parent primaryfile
+        fileStorageService.moveAsset(primaryfileSupplement, true);
+    	
+    	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
+        return primaryfileSupplement;
+    }
 	
+
 	
 //	@PostMapping(path = "/collections/{id}/activate")
 //	public Collection activateCollection(@PathVariable Long id, @RequestParam Boolean active){

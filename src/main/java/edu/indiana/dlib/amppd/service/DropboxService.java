@@ -48,20 +48,29 @@ public interface DropboxService {
 	public Path getSubDirPath(Collection collection);
 
 	/**
-	 * Rename the dropbox sub-directory for the given unit; if the previous directory doesn't exists or unit name didn't change, do nothing.
+	 * Rename the dropbox sub-directory for the given unit in case its name changed; 
+	 * if the previous sub-directory doesn't exists or unit name didn't change, do nothing.
 	 * @param unit the given unit
 	 * @return the path of the dropbox sub-directory renamed
 	 */
 	public Path renameSubdir(Unit unit);
 	
 	/**
-	 * Rename the dropbox sub-directory for the given collection; 
-	 * if the previous directory doesn't exists, create a new one;
-	 * otherwise, if the collection name didn't change, do nothing.
+	 * Rename/move the dropbox sub-directory for the given collection, in case its name or parent unit changed.
+	 * If the previous sub-directory doesn't exists, create a new one.
 	 * @param collection the given collection
 	 * @return the path of the dropbox sub-directory renamed
 	 */
 	public Path renameSubdir(Collection collection);
+	
+	/**
+	 * Move the dropbox sub-directory for the given collection, in case its parent unit is different from the given unit.
+	 * If the previous sub-directory doesn't exists, create a new one.
+	 * @param collection the given collection
+	 * @param unit the given unit
+	 * @return the path of the dropbox sub-directory renamed
+	 */
+	public Path moveSubdir(Collection collection, Unit unit);
 	
 	/**
 	 * Delete the dropbox sub-directory for the given unit; if the directory doesn't exists, do nothing.
