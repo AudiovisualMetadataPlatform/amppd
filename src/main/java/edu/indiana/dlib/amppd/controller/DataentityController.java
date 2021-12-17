@@ -289,12 +289,22 @@ public class DataentityController {
     		return collection;
     	}    	
 
-    	// otherwise, move collection dropbox/media subdir (if exist) to new subdir and update its parent unit
+    	// otherwise, keep the collection's current parent unit with another reference
+    	Unit oldUnit = collection.getUnit();
+    	
+    	// move collection dropbox/media subdir (if exist) to new subdir
+    	// note that this operation updates collection's parent unit
     	fileStorageService.moveEntityDir(collection, unit);
+    	
+    	// reset collection's parent unit back to old value, so that we can repeat similar procedure for dropbox
+    	collection.setUnit(oldUnit);
 
-        // move the dropbox subdir if its parent unit changed
+        // move the dropbox subdir and update its parent unit if changed
         dropboxService.moveSubdir(collection, unit); 
 
+        // persist updated collection
+        collectionRepository.save(collection);
+        
         log.info("Successfully moved collection " + collectionId + " to new unit " + unitId);
         return collection;
     }	
@@ -319,8 +329,9 @@ public class DataentityController {
     		return item;
     	}    	
 
-    	// otherwise, move item media subdir (if exists) to new subdir and update its parent collection
+    	// otherwise, move item media subdir (if exists) to new subdir and update/save its parent collection
     	fileStorageService.moveEntityDir(item, collection);
+    	itemRepository.save(item);
 
     	log.info("Successfully moved item " + itemId + " to new collection " + collectionId);
         return item;
@@ -346,7 +357,7 @@ public class DataentityController {
     		return primaryfile;
     	}    	
 
-    	// otherwise, move primaryfile media subdir (if exists) and media/info files to new subdir and update its parent item
+    	// otherwise, move primaryfile media subdir (if exists) and media/info files to new subdir and update/save its parent item
     	// note that moveEntityDir should be done before moveAsset; otherwise the former won't work properly 
     	// as the original parent would have been lost after primaryfile is saved by the latter
     	fileStorageService.moveEntityDir(primaryfile, item);
@@ -436,7 +447,6 @@ public class DataentityController {
     	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
         return primaryfileSupplement;
     }
-	
 
 	
 //	@PostMapping(path = "/collections/{id}/activate")

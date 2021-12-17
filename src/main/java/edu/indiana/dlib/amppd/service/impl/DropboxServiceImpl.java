@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -164,16 +165,30 @@ public class DropboxServiceImpl implements DropboxService {
 	 */
 	protected Path move(Path oldPath, Path path, Long id) {
 		try {
-			// if previous subdir doesn't exist, create the new one with warning
+			// if previous subdir doesn't exist, create the new one with warning  		
 			if (!Files.exists(oldPath)) {
 				Files.createDirectories(path); 
 				log.warn("Dropbox sub-directory " + oldPath + " doesn't exit, created the new one " + path + " for collection " + id);
+				return path;
 			}
-			// only move subdir if the parent changed
-			else if (!oldPath.equals(path)) {
-				Files.move(oldPath,  path);
-				log.info("Successfully moved dropbox sub-directory " + oldPath + " to " + path + " for collection " + id);
+
+			// otherwise, no action if the source and target subdirs are the same
+			if (oldPath.equals(path)) {
+				log.warn("Dropbox source and target sub-directories are the same: " + path + ", no need to move for collection " + id);
+				return path;
 			}
+
+			// otherwise move subdir
+			if (Files.exists(path)) {
+				log.warn("Dropbox target sub-directory " + path + " already exists and will be replaced.");    			
+			}    		
+			else {
+				// make sure targat path's parent dir exists
+				Files.createDirectories(path.getParent());
+			}				
+			Files.move(oldPath,  path, StandardCopyOption.REPLACE_EXISTING);  	
+			
+			log.info("Successfully moved dropbox sub-directory " + oldPath + " to " + path + " for collection " + id);
 			return path;
 		}
 		catch (IOException e) {
