@@ -17,7 +17,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
-@Ignore
+//@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class DropboxServiceTests {
@@ -66,7 +66,7 @@ public class DropboxServiceTests {
     	return true;
     }
 
-    @Ignore
+//    @Ignore
     @Test
     public void shouldRenameSubdirForUnit() {
     	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");

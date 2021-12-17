@@ -110,22 +110,13 @@ public class DropboxServiceImpl implements DropboxService {
 	 */
 	@Override
 	public Path renameSubdir(Unit unit) {
-		Long id = unit.getId();
+		// get the dropbox subdir pathnames for the original and current unit
 		Unit oldUnit = (Unit)dataentityService.findOriginalDataentity(unit);    
 		Path oldPath = getSubDirPath(oldUnit);
 		Path path = getSubDirPath(unit);
 		
-		try {
-			// only rename subdir if the name changed and the previous subdir exists 
-			if (!StringUtils.equals(oldUnit.getName(), unit.getName()) && Files.exists(oldPath)) {
-				Files.move(oldPath,  path);
-				log.info("Successfully renamed dropbox sub-directory " + oldPath + " to " + path + " for unit " + id);
-			}
-			return path;
-		}
-		catch (IOException e) {
-			throw new StorageException("Failed to rename dropbox sub-directory " + oldPath + " to " + path + " for unit " + id, e);
-		}		
+		// only rename subdir if the name changed and the previous subdir exists 
+		return move(oldPath, path, unit.getId(), false);	
 	}	
 	
 	/**
@@ -138,8 +129,8 @@ public class DropboxServiceImpl implements DropboxService {
 		Path oldPath = getSubDirPath(oldCol);
 		Path path = getSubDirPath(collection);
 		
-		// move subdir from oldPath to current path as needed
-		return move(oldPath, path, collection.getId());		
+		// rename/move subdir from oldPath to current path as needed
+		return move(oldPath, path, collection.getId(), true);		
 	}	
 	
 	/**
@@ -156,25 +147,27 @@ public class DropboxServiceImpl implements DropboxService {
 		Path path = getSubDirPath(collection);
 		
 		// move subdir from oldPath to current path as needed
-		return move(oldPath, path, collection.getId());	
+		return move(oldPath, path, collection.getId(), true);	
 	}
 	
 	/**
-	 * Move dropbox sub-directory of the collection with the give ID from the given oldPath to the given new path;
+	 * Move dropbox sub-directory of the collection/unit with the give ID from the given oldPath to the given new path;
 	 * if old sub-directory doesn't exist, create the new one.
 	 */
-	protected Path move(Path oldPath, Path path, Long id) {
+	protected Path move(Path oldPath, Path path, Long id, boolean forCollection) {
+		String entity = forCollection ? "collection " : "unit ";
+	
 		try {
-			// if previous subdir doesn't exist, create the new one with warning  		
-			if (!Files.exists(oldPath)) {
+			// if previous subdir doesn't exist for collection, create the new one with warning	
+			if (!Files.exists(oldPath) && forCollection) {
 				Files.createDirectories(path); 
-				log.warn("Dropbox sub-directory " + oldPath + " doesn't exit, created the new one " + path + " for collection " + id);
+				log.warn("Dropbox sub-directory " + oldPath + " doesn't exit, created the new one " + path + " for " + entity + id);
 				return path;
 			}
 
 			// otherwise, no action if the source and target subdirs are the same
 			if (oldPath.equals(path)) {
-				log.warn("Dropbox source and target sub-directories are the same: " + path + ", no need to move for collection " + id);
+				log.warn("Dropbox source and target sub-directories are the same: " + path + ", no need to move for " + entity + id);
 				return path;
 			}
 
@@ -182,17 +175,17 @@ public class DropboxServiceImpl implements DropboxService {
 			if (Files.exists(path)) {
 				log.warn("Dropbox target sub-directory " + path + " already exists and will be replaced.");    			
 			}    		
-			else {
-				// make sure targat path's parent dir exists
+			else if (forCollection) {
+				// make sure target path's parent unit subdir exists
 				Files.createDirectories(path.getParent());
 			}				
 			Files.move(oldPath,  path, StandardCopyOption.REPLACE_EXISTING);  	
 			
-			log.info("Successfully moved dropbox sub-directory " + oldPath + " to " + path + " for collection " + id);
+			log.info("Successfully moved dropbox sub-directory " + oldPath + " to " + path + " for " + entity + id);
 			return path;
 		}
 		catch (IOException e) {
-			throw new StorageException("Failed to move dropbox sub-directory " + oldPath + " to " + path + " for collection " + id, e);
+			throw new StorageException("Failed to move dropbox sub-directory " + oldPath + " to " + path + " for " + entity + id, e);
 		}		
 	}
 	

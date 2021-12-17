@@ -146,7 +146,7 @@ public class DataentityServiceImpl implements DataentityService {
 		 * This means that once the retrieved object has fields updated, it's impossible to get the original values from DB. 
 		 * The only way to get around this is to call entityManager.clear() or session.refresh(object), 
 		 */		
-		entityManager.refresh(dataentity);
+//		entityManager.refresh(dataentity);
 
 		// only handle non-supplement types
 		if (dataentity instanceof Unit) {

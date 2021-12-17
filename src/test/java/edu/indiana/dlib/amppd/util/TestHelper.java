@@ -220,7 +220,7 @@ public class TestHelper {
 	 * Check whether the specified active collection exists in Amppd; if not, create/update one with the given unit name and name. 
 	 * @param unitName name of the specified unit
 	 * @param name name of the specified collection
-	 * @return the prepared collection
+	 * @return the prepared active collection
 	 */
 	public Collection ensureCollection(String unitName, String name) {
 		// retrieve collection from DB by unit name and name
