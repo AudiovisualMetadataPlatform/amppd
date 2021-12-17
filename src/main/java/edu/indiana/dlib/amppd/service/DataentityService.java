@@ -46,6 +46,20 @@ public interface DataentityService {
 	public List<? extends Dataentity> findDuplicateDataentities(Dataentity dataentity);
 
 	/**
+	 * Get the given dataentity's parent dataentity.
+	 * @param dataentity the given dataentity
+	 * @return the parent dataentity
+	 */
+	public Dataentity getParentDataentity(Dataentity dataentit);	
+
+	/**
+	 * Set the given dataentity's parent to the given parent dataentity.
+	 * @param dataentity the given dataentity
+	 * @param parent the given parent dataentity
+	 */
+	public void setParentDataentity(Dataentity dataentity, Dataentity parent);	
+
+	/**
 	 * Find the asset with the given ID and type from DB.
 	 * @param id ID of the given asset
 	 * @param type SupplementType of the given asset

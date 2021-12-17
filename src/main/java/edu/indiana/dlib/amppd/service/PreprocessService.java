@@ -11,7 +11,7 @@ public interface PreprocessService {
 
 	/**
 	 * If the given file is of flac format then convert it to wav format.
-	 * @param sourceFilepath path of the given source file relative to the root
+	 * @param sourceFilepath path of the given source file relative to its root
 	 * @return relative path of the generated wav file, if conversion happened; otherwise null
 	 */
 	public String convertFlacToWav(String sourceFilepath);

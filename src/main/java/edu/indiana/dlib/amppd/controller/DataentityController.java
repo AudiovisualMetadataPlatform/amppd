@@ -95,7 +95,7 @@ public class DataentityController {
 	}
 	
 	/**
-	 * Create the given primaryfile with the given media file and add it to the given parent item.
+	 * Move the given primaryfile to the given parent item.
 	 * @param itemId ID of the given item
 	 * @param primaryfile the given primaryfile
 	 * @param mediaFile the media file content to be uploaded for the primaryfile
@@ -135,7 +135,7 @@ public class DataentityController {
 		
     	return primaryfile;
     }
-	
+		
 	/**
 	 * Create the given collection supplement with the given media file and add it to the given parent collection.
 	 * @param collectionId ID of the given collection
@@ -254,6 +254,37 @@ public class DataentityController {
 		
     	return primaryfileSupplement;
     }	
+	
+	/**
+	 * Create the given primaryfile with the given media file and add it to the given parent item.
+	 * @param itemId ID of the given item
+	 * @param primaryfile the given primaryfile
+	 * @param mediaFile the media file content to be uploaded for the primaryfile
+	 * @return the added primaryfile
+	 */
+	@PostMapping(path = "/primaryfiles/{primaryfileId}/move")
+	public Primaryfile movePrimaryfile(@PathVariable Long primaryfileId, @RequestParam Long itemId) {		
+    	log.info("Moving primaryfile " + primaryfileId + " to new item " + itemId);
+    	
+    	// retrieve primaryfile and item from DB
+    	Primaryfile	primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+    	Item item =	itemRepository.findById(itemId).orElseThrow(() -> new StorageException("Item <" + itemId + "> does not exist!"));
+
+    	// if parent item is the same, no action
+    	if (primaryfile.getItem().getId().equals(item.getId())) {
+    		log.warn("No need to move primaryfile " + primaryfileId + " to the same parent item " + itemId);
+    		return primaryfile;
+    	}    	
+
+    	// otherwise, move primaryfile media subdir (if exists) and media/info files to new subdir and update its parent item
+    	// note that moveEntityDir should be done before moveAsset; otherwise the former won't work properly 
+    	// as the original parent would have been lost after primaryfile is saved by the latter
+    	fileStorageService.moveEntityDir(primaryfile, item);
+        fileStorageService.moveAsset(primaryfile, true);
+    	return primaryfile;
+    }
+	
+	
 	
 //	@PostMapping(path = "/collections/{id}/activate")
 //	public Collection activateCollection(@PathVariable Long id, @RequestParam Boolean active){

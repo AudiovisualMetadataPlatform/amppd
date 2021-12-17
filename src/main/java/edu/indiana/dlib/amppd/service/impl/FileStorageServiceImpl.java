@@ -183,8 +183,39 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}	
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.moveEntityDir(Dataentity, Dataentity)
+	 */
+	@Override
+	public String moveEntityDir(Dataentity dataentity, Dataentity parent) {	
+		// get the media subdir pathname for the dataentity before updating its parent
+		String olddir = getDirPathname(dataentity);
+
+		// if the parents are the same, no need to move subdir
+		if (dataentityService.getParentDataentity(dataentity).getId().equals(parent.getId())) {
+			return olddir;
+		}
+		
+		// otherwise, get the media subdir pathname for the dataentity after updating its parent
+		// note that pathname will change as dataentity's parent is changed
+		dataentityService.setParentDataentity(dataentity, parent);
+		String newdir = getDirPathname(dataentity);
+		
+		// otherwise move the subdir
+		Path path = move(olddir, newdir);
+		if (path != null) {
+	        log.info("Successfully moved dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);
+		}
+		else {
+	        log.info("No need to move non-existing dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);			
+		}
+
+		return newdir;
+	}
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.moveEntityDir(Dataentity)
 	 */
+	@Override
 	public String moveEntityDir(Dataentity dataentity) {
 		// get the media subdir pathname for the original and current dataentity
 		// note that pathname will change if dataentity's parent is changed
@@ -194,7 +225,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 		
 		// if the pathname isn't changed, do nothing
 		if (StringUtils.pathEquals(olddir, newdir)) {
-			return newdir;
+			return olddir;
 		}
 		
 		// otherwise move the subdir
@@ -254,6 +285,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.deleteEntityDir(Dataentity)
 	 */
+	@Override
 	public String deleteEntityDir(Dataentity dataentity) {
 		String pathname = getDirPathname(dataentity);
 		Path path = delete(pathname);

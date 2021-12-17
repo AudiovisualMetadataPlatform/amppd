@@ -126,11 +126,17 @@ public class DataentityServiceImpl implements DataentityService {
 	 */
 	@Override
 	public Dataentity findOriginalDataentity(Dataentity dataentity) {
+		/* TODO
+		 * It appears that when this method is called within the same transaction for the dataentity update,
+		 * repository.findById will not retrieve the original entity from the DB, 
+		 * rather, it returns the same dataentity retrieved previously.
+		 */
+		
 		if (dataentity == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
 		}
 		
-		Long id = dataentity.getId();
+		Long id = dataentity.getId();		
 		if (id == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity ID is null.");				
 		}
@@ -148,9 +154,9 @@ public class DataentityServiceImpl implements DataentityService {
 		else if (dataentity instanceof Primaryfile) {
 			return primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
 		}
-		
-		// ignore supplement types
-		return null;
+		else {
+			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is of invalid type.");			
+		}
 	}
 	
 	/**
@@ -200,10 +206,66 @@ public class DataentityServiceImpl implements DataentityService {
 		}
 		else {
 			// dataentity must be one of the above types applicable for UniqueName validation
-			throw new RuntimeException("Failed to find dataentity: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity " + dataentity.getId() + " is of invalid type.");
 		}
 		
 		return desFound;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getParentDataentity(Dataentity)
+	 */
+	@Override
+	public Dataentity getParentDataentity(Dataentity dataentity) {		
+		if (dataentity == null) {
+			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity is null.");
+		}
+
+		// only handle non-supplement types allowing parent
+		if (dataentity instanceof Collection) {
+			return ((Collection)dataentity).getUnit();
+		}
+		else if (dataentity instanceof Item) {
+			return ((Item)dataentity).getCollection();
+		}
+		else if (dataentity instanceof Primaryfile) {
+			return ((Primaryfile)dataentity).getItem();
+		}
+		else {
+			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+		}
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.setParentDataentity(Dataentity, Dataentity)
+	 */
+	@Override
+	public void setParentDataentity(Dataentity dataentity, Dataentity parent) {		
+		if (dataentity == null) {
+			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity is null.");
+		}
+		if (parent == null) {
+			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent is null.");
+		}
+
+		// only handle non-supplement types allowing parent
+		try {
+			if (dataentity instanceof Collection) {
+				((Collection)dataentity).setUnit((Unit)parent);
+			}
+			else if (dataentity instanceof Item) {
+				((Item)dataentity).setCollection((Collection)parent);
+			}
+			else if (dataentity instanceof Primaryfile) {
+				((Primaryfile)dataentity).setItem((Item)parent);
+			}
+			else {
+				throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+			}
+		}
+		catch(ClassCastException e) {
+			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent " + parent.getId() + " is of invalid type.");			
+		}
 	}
 	
 	/**

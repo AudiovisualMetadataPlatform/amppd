@@ -28,6 +28,7 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 	public boolean isValid(Dataentity dataentity, ConstraintValidatorContext cxt) {
 		List<? extends Dataentity> desFound = null;
 
+		// look for duplicate dataentities sharing the same parent and name as the dataentity
 		try {
 			desFound = dataentityService.findDuplicateDataentities(dataentity);
 		}
@@ -35,11 +36,11 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 			throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId(), e);
 		}
 		
-		// dataentity is valid if no existing dataentity has the same name
+		// f none is found, it's valid
 		if (desFound.size() == 0) return true;
 		
-		// otherwise, if one existing dataentity has the same name, it must be itself
-		if (desFound.size() == 1 && dataentity.getId() == desFound.get(0).getId()) return true;
+		// otherwise, if only itself is found (during update), it's also valid
+		if (desFound.size() == 1 &&  dataentity.getId() != null && dataentity.getId().equals(desFound.get(0).getId())) return true;
 		
 		// otherwise, it's invalid
 		return false;

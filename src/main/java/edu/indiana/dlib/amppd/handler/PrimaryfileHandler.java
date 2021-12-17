@@ -60,7 +60,7 @@ public class PrimaryfileHandler {
         // Below file system operations should be done before the data entity is updated, 
     	// as we need the values stored in the old entity
 
-    	// move subdir (if exists) and media/info files of the primaryfile in case its parent is changed
+    	// move media subdir (if exists) and media/info files of the primaryfile in case its parent is changed
     	// no need to save primaryfile here as it will be saved by RepositoryRestResource after this
     	// plus, if primaryfile is saved by moveAsset before moveEntityDir, 
     	// the latter won't work properly as the original parent would have been lost 

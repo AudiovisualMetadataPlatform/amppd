@@ -163,6 +163,8 @@ public class BatchServiceImpl implements BatchService {
 				primaryfilesSet.add(primaryfile);
 				item.setPrimaryfiles(primaryfilesSet);
 				
+				// set primaryfile pathname to the absolute pathname of the file to be ingested,
+				// so that pre-process can resolve the path correctly without using media's root dir 
 				Path existingFile = Paths.get(sourceDir, batchFile.getPrimaryfileFilename());	
 				primaryfile.setPathname(existingFile.toString());
 				
@@ -200,7 +202,10 @@ public class BatchServiceImpl implements BatchService {
 		try {
 			String targetDir = fileStorageService.getDirPathname(primaryfile);
 			PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryfile, batchSupplementFile, username, errors);
+			
 			if(errors.size()==0 && supplement != null) {
+				// set supplement pathname to the absolute pathname of the file to be ingested,
+				// so that pre-process can resolve the path correctly without using media's root dir 
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
@@ -233,10 +238,12 @@ public class BatchServiceImpl implements BatchService {
 	private void createCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username, String sourceDir, List<String> errors) throws Exception {
 		try {
 			// For collection supplements, create supplements and then move the files to their destination
-			String targetDir = fileStorageService.getDirPathname(collection);
-			
+			String targetDir = fileStorageService.getDirPathname(collection);			
 			CollectionSupplement supplement = getCollectionSupplement(collection, batchSupplementFile, username, errors);
+			
 			if(supplement != null && errors.size()==0) {
+				// set supplement pathname to the absolute pathname of the file to be ingested,
+				// so that pre-process can resolve the path correctly without using media's root dir 
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
@@ -268,10 +275,12 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private void createItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username, String sourceDir, List<String> errors) throws Exception {
 		try {
-			log.info("check if the supplement exists already or create a new one");
 			String targetDir = fileStorageService.getDirPathname(item);
 			ItemSupplement supplement = getItemSupplement(item, batchSupplementFile, username, errors);
+			
 			if(supplement != null && errors.size()==0) {
+				// set supplement pathname to the absolute pathname of the file to be ingested,
+				// so that pre-process can resolve the path correctly without using media's root dir 
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				

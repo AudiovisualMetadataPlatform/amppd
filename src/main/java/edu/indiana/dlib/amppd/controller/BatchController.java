@@ -82,7 +82,7 @@ public class BatchController {
 		} 
 		// otherwise find all primaryfiles missing mediaInfo
 		else { 
-			primaryfiles = primaryfileRepository.findByMediaInfoEmpty();
+			primaryfiles = primaryfileRepository.findByMediaInfoNull();
 			log.info("Preprocessing " + primaryfiles.size() + " primaryfiles missing media info ...");
 		}
 

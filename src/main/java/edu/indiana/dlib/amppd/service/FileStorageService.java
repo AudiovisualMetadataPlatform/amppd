@@ -47,6 +47,14 @@ public interface FileStorageService {
 	public Asset uploadAsset(Asset asset, MultipartFile file);
 	
 	/**
+	 * Move the media sub-directory (if exists) of the given dataentity, and update its parent to the given parent, in case they are different.
+	 * @param dataentity the given dataentity
+	 * @param parent the given parent
+	 * @return the updated pathname of the media sub-directory 
+	 */
+	public String moveEntityDir(Dataentity dataentity, Dataentity parent);	
+	
+	/**
 	 * Move the media sub-directory (if exists) of the given dataentity, in case its parent is changed.
 	 * @param dataentity the given dataentity
 	 * @return the updated pathname of the media sub-directory 

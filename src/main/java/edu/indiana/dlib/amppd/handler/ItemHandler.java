@@ -51,6 +51,10 @@ public class ItemHandler {
 
     	// move media subdir (if exists) of the item in case its parent is changed 
     	fileStorageService.moveEntityDir(item);
+    	
+    	// TODO 
+    	// above moveEntityDir doesn't work, because Repository won't retrieve the old entity from DB;
+    	// rather 
     }
  
     @HandleAfterSave

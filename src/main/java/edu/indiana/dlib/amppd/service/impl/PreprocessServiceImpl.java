@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -57,20 +58,24 @@ public class PreprocessServiceImpl implements PreprocessService {
 		String command = "ffmpeg -y -i " + fileStorageService.absolutePathName(sourceFilepath) + " " + fileStorageService.absolutePathName(targetFilePath);
 		
 		try {
-			Process process = Runtime.getRuntime().exec(command);
-		    final int status = process.waitFor();
-		    if (status != 0) {		    	
-				// capture the error outputs into log
-		    	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-		    	StringBuilder builder = new StringBuilder();
-		    	String line = null;
-		    	while ( (line = reader.readLine()) != null) {
-		    		builder.append(line);
-		    		builder.append(System.getProperty("line.separator"));
-		    	}
-				log.error(builder.toString());
-		    	throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath + ": ffmpeg exited with status " + status);
-		    }
+//			Process process = Runtime.getRuntime().exec(command);
+//		    final int status = process.waitFor();
+//		    if (status != 0) {		    	
+//				// capture the error outputs into log
+//		    	BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+//		    	StringBuilder builder = new StringBuilder();
+//		    	String line = null;
+//		    	while ( (line = reader.readLine()) != null) {
+//		    		builder.append(line);
+//		    		builder.append(System.getProperty("line.separator"));
+//		    	}
+//				log.error(builder.toString());
+//		    	throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath + ": ffmpeg exited with status " + status);
+//		    }
+		    
+			// workaround for local debugging in case ffmpeg/ffprobe is not available
+			// fake a the wav file by copying the original flac file
+			Files.copy(fileStorageService.resolve(sourceFilepath), fileStorageService.resolve(targetFilePath));
 		}
 		catch (Exception e) {
 			throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath, e);
@@ -131,20 +136,24 @@ public class PreprocessServiceImpl implements PreprocessService {
 		pb.redirectOutput(new File(fileStorageService.absolutePathName(jsonpath)));				
 		
 		try {
-			Process process = pb.start();
-		    final int status = process.waitFor();
-		    if (status != 0) {		    	
-				// capture the error outputs into log
-				log.error(fileStorageService.readTextFile(jsonpath));
-		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
-		    }
+//			Process process = pb.start();
+//		    final int status = process.waitFor();
+//		    if (status != 0) {		    	
+//				// capture the error outputs into log
+//				log.error(fileStorageService.readTextFile(jsonpath));
+//		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
+//		    }
+
+			// workaround for local debugging in case ffmpeg/ffprobe is not available
+			// fake a the json file by writing some string to it
+			Files.write(fileStorageService.resolve(jsonpath), "{\"tags\": \"fake media info\"}".getBytes());
 		}
 		catch (IOException e) {
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
 		}
-		catch (InterruptedException e) {
-			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
-		}	
+//		catch (InterruptedException e) {
+//			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
+//		}	
 		
 		// read the json file content into a string
 		String mediaInfo = null;
