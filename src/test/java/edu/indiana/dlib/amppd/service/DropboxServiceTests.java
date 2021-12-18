@@ -66,7 +66,7 @@ public class DropboxServiceTests {
     	return true;
     }
 
-//    @Ignore
+    @Ignore
     @Test
     public void shouldRenameSubdirForUnit() {
     	Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
