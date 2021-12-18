@@ -75,7 +75,7 @@ public class FileUploadControllerTests {
     	Mockito.when(primaryfileRepository.save(primaryfile)).thenReturn(primaryfile); 
     	
         MockMultipartFile multipartFile = new MockMultipartFile("file", "primaryfiletest.mp4", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/primaryfiles/0/file").file(multipartFile))
+        mvc.perform(fileUpload("/primaryfiles/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("primaryfiletest.mp4")).andExpect(
         						jsonPath("$.pathname").value("U-0/C-0/I-0/P-0.mp4"));
@@ -98,7 +98,7 @@ public class FileUploadControllerTests {
     	Mockito.when(collectionSupplementRepository.save(collectionSupplement)).thenReturn(collectionSupplement); 
 
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "collectionsupplementtest.pdf", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/collections/supplements/0/file").file(multipartFile))
+        mvc.perform(fileUpload("/collections/supplements/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("collectionsupplementtest.pdf")).andExpect(
         						jsonPath("$.pathname").value("U-0/C-0/S-0.pdf"));
@@ -125,7 +125,7 @@ public class FileUploadControllerTests {
     	Mockito.when(itemSupplementRepository.save(itemSupplement)).thenReturn(itemSupplement);
     	
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "itemsupplementtest.pdf", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/items/supplements/0/file").file(multipartFile))
+        mvc.perform(fileUpload("/items/supplements/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("itemsupplementtest.pdf")).andExpect(
         						jsonPath("$.pathname").value("U-0/C-0/I-0/S-0.pdf"));
@@ -156,7 +156,7 @@ public class FileUploadControllerTests {
     	Mockito.when(primaryfileSupplementRepository.save(primaryfileSupplement)).thenReturn(primaryfileSupplement);
 
     	MockMultipartFile multipartFile = new MockMultipartFile("file", "primaryfilesupplementtest.pdf", "text/plain", "Test file upload".getBytes());
-        this.mvc.perform(fileUpload("/primaryfiles/supplements/0/file").file(multipartFile))
+        mvc.perform(fileUpload("/primaryfiles/supplements/0/file").file(multipartFile))
                 .andExpect(status().isOk()).andExpect(
         				jsonPath("$.originalFilename").value("primaryfilesupplementtest.pdf")).andExpect(
         						jsonPath("$.pathname").value("U-0/C-0/I-0/P-0/S-0.pdf"));

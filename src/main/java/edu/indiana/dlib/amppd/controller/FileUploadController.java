@@ -11,6 +11,7 @@ import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +38,7 @@ public class FileUploadController {
 	@PostMapping("/primaryfiles/{id}/upload")
 	public Primaryfile uploadPrimaryfile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for primaryfile ID " + id);
-    	return fileStorageService.uploadPrimaryfile(id, file);
+    	return (Primaryfile)fileStorageService.uploadAsset(id, file, SupplementType.PFILE);
     }
 
 	/**
@@ -49,7 +50,7 @@ public class FileUploadController {
     @PostMapping("/collections/supplements/{id}/upload")
     public CollectionSupplement uploadCollectionSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for collectionSupplement ID " + id);
-    	return fileStorageService.uploadCollectionSupplement(id, file);
+    	return (CollectionSupplement)fileStorageService.uploadAsset(id, file, SupplementType.COLLECTION);
     }
     
 	/**
@@ -61,7 +62,7 @@ public class FileUploadController {
     @PostMapping("/items/supplements/{id}/upload")
     public ItemSupplement uploadItemSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for itemSupplement ID " + id);
-    	return fileStorageService.uploadItemSupplement(id, file);
+    	return (ItemSupplement)fileStorageService.uploadAsset(id, file, SupplementType.ITEM);
     }
     
 	/**
@@ -73,7 +74,7 @@ public class FileUploadController {
     @PostMapping("/primaryfiles/supplements/{id}/upload")
     public PrimaryfileSupplement uploadPrimaryfileSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for primaryfileSupplement ID " + id);
-    	return fileStorageService.uploadPrimaryfileSupplement(id, file);
+    	return (PrimaryfileSupplement)fileStorageService.uploadAsset(id, file, SupplementType.PRIMARYFILE);
     }
 
 }

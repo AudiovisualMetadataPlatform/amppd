@@ -499,7 +499,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	 * Get the collection path in the drop box
 	 */
 	private Path getCollectionPath(String unit, String collection) {
-		return dropboxService.getDropboxPath(unit, collection);
+		return dropboxService.getSubDirPath(unit, collection);
 	}
 	/*
 	 * Verify the unit exists in the database 

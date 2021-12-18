@@ -140,8 +140,8 @@ public class BatchServiceTests {
         
         // Create necessary directories
         Files.createDirectories(Paths.get(propertyConfig.getDropboxRoot()));
-        Path unitPath = dropboxService.getDropboxPath(unitName);
-        Path collectionPath = dropboxService.getDropboxPath(unitName, collectionName);
+        Path unitPath = dropboxService.getSubDirPath(unitName);
+        Path collectionPath = dropboxService.getSubDirPath(unitName, collectionName);
         Files.createDirectories(unitPath);
         Files.createDirectories(collectionPath);
         

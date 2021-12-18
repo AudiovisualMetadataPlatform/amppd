@@ -25,7 +25,8 @@ import lombok.ToString;
 public abstract class Supplement extends Asset {
 	// Currently, we don't have UNIT type Supplement, it might be added later as needed.
 	// In batch manifest the types are indicated as C or "Collection", I or "Item", P or "Primaryfile"
-	public enum SupplementType { UNIT, COLLECTION, ITEM, PRIMARYFILE }
+	// Note: PFILE is not a Supplement type per se, but refers to Primaryfile as one special Asset type 
+	public enum SupplementType { PFILE, UNIT, COLLECTION, ITEM, PRIMARYFILE }
 	
 	// TODO double check the relationship
 //	@ManyToMany
@@ -46,6 +47,9 @@ public abstract class Supplement extends Asset {
 			case "c":
 			case "collection":
 				return SupplementType.COLLECTION;
+			case "u":
+			case "unit":
+				return SupplementType.UNIT;
 			default:
 				return null;
 		}

@@ -2,7 +2,9 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.Supplement;
 
 /**
  * Service for common Dataentitiy operations. 
@@ -29,4 +31,47 @@ public interface DataentityService {
 	 */
 	public String getDataentityUrl(Dataentity dataentity);
 
+	/**
+	 * Find the original dataentity with the same ID as the given dataentity from DB.
+	 * @param dataentity the given dataentity
+	 * @return the dataentity found
+	 */
+	public Dataentity findOriginalDataentity(Dataentity dataentity);
+
+	/**
+	 * Find the duplicate dataentities, i.e. those with the same parent (if exists) and name as the given dataentity, from DB.
+	 * @param dataentity the given dataentity
+	 * @return the list of duplicate dataentities found
+	 */
+	public List<? extends Dataentity> findDuplicateDataentities(Dataentity dataentity);
+
+	/**
+	 * Get the given dataentity's parent dataentity.
+	 * @param dataentity the given dataentity
+	 * @return the parent dataentity
+	 */
+	public Dataentity getParentDataentity(Dataentity dataentit);	
+
+	/**
+	 * Set the given dataentity's parent to the given parent dataentity.
+	 * @param dataentity the given dataentity
+	 * @param parent the given parent dataentity
+	 */
+	public void setParentDataentity(Dataentity dataentity, Dataentity parent);	
+
+	/**
+	 * Find the asset with the given ID and type from DB.
+	 * @param id ID of the given asset
+	 * @param type SupplementType of the given asset
+	 * @return the found asset
+	 */
+	public Asset findAsset(Long id, Supplement.SupplementType type);
+
+	/**
+	 * Save the given asset to DB.
+	 * @param asset the given asset
+	 * @return the saved asset
+	 */
+	public Asset saveAsset(Asset asset);
+	
 }
