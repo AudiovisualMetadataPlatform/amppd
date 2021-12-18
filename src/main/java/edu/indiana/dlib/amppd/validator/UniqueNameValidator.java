@@ -36,7 +36,7 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 			throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId(), e);
 		}
 		
-		// f none is found, it's valid
+		// if none is found, it's valid
 		if (desFound.size() == 0) return true;
 		
 		// otherwise, if only itself is found (during update), it's also valid
