@@ -168,9 +168,9 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchFile.getPrimaryfileFilename());	
 				primaryfile.setPathname(existingFile.toString());
 				
-				// preprocess the primaryfile before moving files, i.e. while it's still in dropbox
+				// preprocess (and save if success) the primaryfile before moving files, i.e. while it's still in dropbox, 
 				// so that in case preprocess fails, no primaryfile will be created with empty media info
-				preprocessService.preprocess(primaryfile, false);
+				preprocessService.preprocess(primaryfile, true);
 				
 				log.debug("BATCH PROCESSING : Move the primaryfile from the dropbox to amppd file storage");
 				String targetDir = fileStorageService.getDirPathname(item);	
@@ -209,9 +209,9 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
-				// preprocess the supplement before moving files, i.e. while it's still in dropbox
+				// preprocess (and save if success) the supplement before moving files, i.e. while it's still in dropbox
 				// so that in case preprocess fails, no supplement will be created with empty media info
-				preprocessService.preprocess(supplement, false);
+				preprocessService.preprocess(supplement, true);
 				
 				// Move the file from the dropbox to amppd file storage:
 				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
@@ -247,9 +247,9 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
-				// preprocess the supplement before moving files, i.e. while it's still in dropbox
+				// preprocess (and save if success) the supplement before moving files, i.e. while it's still in dropbox
 				// so that in case preprocess fails, no supplement will be created with empty media info
-				preprocessService.preprocess(supplement, false);
+				preprocessService.preprocess(supplement, true);
 				
 				// Move the file from the dropbox to amppd file storage:
 				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
@@ -284,9 +284,9 @@ public class BatchServiceImpl implements BatchService {
 				Path existingFile = Paths.get(sourceDir, batchSupplementFile.getSupplementFilename());	
 				supplement.setPathname(existingFile.toString());
 				
-				// preprocess the supplement before moving files, i.e. while it's still in dropbox
+				// preprocess (and save if success) the supplement before moving files, i.e. while it's still in dropbox
 				// so that in case preprocess fails, no supplement will be created with empty media info
-				preprocessService.preprocess(supplement, false);
+				preprocessService.preprocess(supplement, true);
 				
 				// Move the file from the dropbox to amppd file storage:
 				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
