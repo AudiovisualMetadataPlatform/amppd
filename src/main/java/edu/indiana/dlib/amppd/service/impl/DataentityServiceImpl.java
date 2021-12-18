@@ -143,8 +143,10 @@ public class DataentityServiceImpl implements DataentityService {
 		/* TODO Note:
 		 * Repository.find*** will return a cached object if previously retrieved within the same session;
 		 * a new object will be retrieved from DB only after a commit (save) on the object happens.
-		 * This means that once the retrieved object has fields updated, it's impossible to get the original values from DB. 
-		 * The only way to get around this is to call entityManager.clear() or session.refresh(object), 
+		 * This means that once the retrieved object has fields updated, it's impossible to get the original values from DB.
+		 * The only way to get around this is to call entityManager.clear() or session.refresh(object) with customized repositories.
+		 * This method currently doesn't work as expected, thus the callers which rely on it doesn't fully work either
+		 * (for ex, methods called by entity repository handlers to move dropbox/media subdirs). 
 		 */		
 //		entityManager.refresh(dataentity);
 
