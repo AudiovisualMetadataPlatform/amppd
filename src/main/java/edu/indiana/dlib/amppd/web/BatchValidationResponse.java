@@ -23,7 +23,7 @@ public class BatchValidationResponse {
 	}
 	public void addErrors(List<String> errors) {
 		if(validationErrors!=null && !errors.isEmpty()) {
-			this.validationErrors.addAll(errors);
+			validationErrors.addAll(errors);
 		}
 	}
 	
@@ -32,7 +32,7 @@ public class BatchValidationResponse {
 	}
 	public void addProcessingErrors(List<String> errors) {
 		if(processingErrors!=null && !errors.isEmpty()) {
-			this.processingErrors.addAll(errors);
+			processingErrors.addAll(errors);
 		}
 	}
 	

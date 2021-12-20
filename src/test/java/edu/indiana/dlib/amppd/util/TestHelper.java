@@ -217,22 +217,26 @@ public class TestHelper {
 	}
 	
 	/**
-	 * Check whether the specified collection exists in Amppd; if not, create one with the given unit name and name. 
+	 * Check whether the specified active collection exists in Amppd; if not, create/update one with the given unit name and name. 
 	 * @param unitName name of the specified unit
 	 * @param name name of the specified collection
-	 * @return the prepared collection
+	 * @return the prepared active collection
 	 */
 	public Collection ensureCollection(String unitName, String name) {
 		// retrieve collection from DB by unit name and name
 		List<Collection> collections = collectionRepository.findByUnitNameAndName(unitName, name);
 		Collection collection = collections.size() > 0 ? collections.get(0): null;
 		
-		// if the collection already exists in DB, just return it 
+		// if the collection already exists in DB, make sure it's saved as active and return it 
 		if (collection != null) {
+			if (!collection.getActive()) {
+				collection.setActive(true);
+				collection = collectionRepository.save(collection);
+			}
 			return collection;
-		}
+		}		
 
-		// otherwise, create a collection with the given name	
+		// otherwise, create an active collection with the given unit/name	
 		collection = new Collection();
 		Unit unit = ensureUnit(unitName);
     	collection.setUnit(unit);
@@ -244,7 +248,7 @@ public class TestHelper {
 	}
 
 	/**
-	 * Check whether the specified collection exists in Amppd; if not, create one with the given unit name and name. 
+	 * Check whether the specified inactive collection exists in Amppd; if not, create/update one with the given unit name and name. 
 	 * @param unitName name of the specified unit
 	 * @param name name of the specified collection
 	 * @return the prepared inactive collection
@@ -254,12 +258,16 @@ public class TestHelper {
 		List<Collection> collections = collectionRepository.findByUnitNameAndName(unitName, name);
 		Collection collection = collections.size() > 0 ? collections.get(0): null;
 		
-		// if the collection already exists in DB, just return it 
+		// if the collection already exists in DB, make sure it's saved as inactive and return it 
 		if (collection != null) {
+			if (collection.getActive()) {
+				collection.setActive(false);
+				collection = collectionRepository.save(collection);
+			}
 			return collection;
-		}
+		}		
 
-		// otherwise, create a collection with the given name	
+		// otherwise, create an inactive collection with the given unit/name	
 		collection = new Collection();
 		Unit unit = ensureUnit(unitName);
     	collection.setUnit(unit);
@@ -358,7 +366,7 @@ public class TestHelper {
 		// and upload to it the resource file with the same name
 		try {
 			MultipartFile file = new MockMultipartFile(filename, filename, testUtil.getContentType(extension), new ClassPathResource(filename).getInputStream());
-			primaryfile = fileStorageService.uploadPrimaryfile(primaryfile, file);
+			primaryfile = (Primaryfile)fileStorageService.uploadAsset(primaryfile, file);
 		}
 		catch (IOException e) {
 			throw new RuntimeException("Unable to create MultipartFile for uploading " + filename + " to primaryfile.", e);
@@ -478,7 +486,7 @@ public class TestHelper {
 			supplement.setName(name);
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = collectionSupplementRepository.save((CollectionSupplement)supplement);
-			supplement = fileStorageService.uploadCollectionSupplement((CollectionSupplement)supplement, file);
+			supplement = (CollectionSupplement)fileStorageService.uploadAsset(supplement, file);
 			break;
 		case ITEM:
 	    	supplement = new ItemSupplement();
@@ -486,7 +494,7 @@ public class TestHelper {
 			supplement.setName(name);
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = itemSupplementRepository.save((ItemSupplement)supplement);
-			supplement = fileStorageService.uploadItemSupplement((ItemSupplement)supplement, file);
+			supplement = (ItemSupplement)fileStorageService.uploadAsset(supplement, file);
 			break;
 		case PRIMARYFILE:
 	    	supplement = new PrimaryfileSupplement();
@@ -494,7 +502,7 @@ public class TestHelper {
 			supplement.setName(name);
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = primaryfileSupplementRepository.save((PrimaryfileSupplement)supplement);
-			supplement = fileStorageService.uploadPrimaryfileSupplement((PrimaryfileSupplement)supplement, file);
+			supplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(supplement, file);
 			break;
 		}			
 
@@ -590,21 +598,21 @@ public class TestHelper {
 			supplement.setName(type + " Supplement for " + name);
 			supplement.setDescription(type + " Supplement for tests");						
 			supplement = collectionSupplementRepository.save((CollectionSupplement)supplement);
-			supplement = fileStorageService.uploadCollectionSupplement((CollectionSupplement)supplement, file);
+			supplement = (CollectionSupplement)fileStorageService.uploadAsset(supplement, file);
 		case ITEM:
 	    	supplement = new ItemSupplement();
 	    	((ItemSupplement)supplement).setItem(item);
 			supplement.setName(type + " Supplement for " + name);
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = itemSupplementRepository.save((ItemSupplement)supplement);
-			supplement = fileStorageService.uploadItemSupplement((ItemSupplement)supplement, file);
+			supplement = (ItemSupplement)fileStorageService.uploadAsset(supplement, file);
 		case PRIMARYFILE:
 	    	supplement = new PrimaryfileSupplement();
 	    	((PrimaryfileSupplement)supplement).setPrimaryfile(primaryfile);
 			supplement.setName(type + " Supplement for " + name);
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = primaryfileSupplementRepository.save((PrimaryfileSupplement)supplement);
-			supplement = fileStorageService.uploadPrimaryfileSupplement((PrimaryfileSupplement)supplement, file);
+			supplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(supplement, file);
 		}			
 
 		// return the persisted supplement with ID populated 

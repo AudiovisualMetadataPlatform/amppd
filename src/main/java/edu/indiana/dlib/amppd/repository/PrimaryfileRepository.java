@@ -17,6 +17,8 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	List<Primaryfile> findByItemCollectionActiveTrueAndHistoryIdNotNull();	
 	List<Primaryfile> findByHistoryIdNotNull();	
 	List<Primaryfile> findByHistoryId(String historyId); 
+	
+	List<Primaryfile> findByMediaInfoNull(); 
 
 	@Query(value = "select p from Primaryfile p where lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.description) like lower(concat('%', :keyword,'%'))")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 

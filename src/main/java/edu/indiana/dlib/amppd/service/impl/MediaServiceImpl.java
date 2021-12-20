@@ -26,10 +26,7 @@ import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
@@ -38,6 +35,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
@@ -72,19 +70,22 @@ public class MediaServiceImpl implements MediaService {
 	private PrimaryfileRepository primaryfileRepository;
 
 	@Autowired
-	PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
 
 	@Autowired
-	ItemSupplementRepository itemSupplementRepository;
+	private ItemSupplementRepository itemSupplementRepository;
 
 	@Autowired
-	CollectionSupplementRepository collectionSupplementRepository;
+	private CollectionSupplementRepository collectionSupplementRepository;
 
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
 
 	@Autowired
 	private FileStorageService fileStorageService;
+	
+	@Autowired
+	private DataentityService dataentityService;
 	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
@@ -233,26 +234,6 @@ public class MediaServiceImpl implements MediaService {
 		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
 		return url;
 	}
-	
-	/**
-	 * Saves the given asset to DB.
-	 * @param asset the given asset
-	 */
-	protected Asset saveAsset(Asset asset) {
-		if (asset instanceof Primaryfile) {
-			return primaryfileRepository.save((Primaryfile)asset);
-		}
-		else if (asset instanceof PrimaryfileSupplement) {
-			return primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
-		}
-		else if (asset instanceof ItemSupplement) {
-			return itemSupplementRepository.save((ItemSupplement)asset);
-		}
-		else if (asset instanceof CollectionSupplement) {
-			return collectionSupplementRepository.save((CollectionSupplement)asset);
-		}
-		return asset;
-	}
 		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(Asset)
@@ -300,7 +281,7 @@ public class MediaServiceImpl implements MediaService {
 
 		// save the symlink into asset
 		asset.setSymlink(symlink);
-		saveAsset(asset);
+		dataentityService.saveAsset(asset);
 
 		log.info("Successfully created symlink " + symlink + " for asset " + asset.getId());
 		return symlink;
