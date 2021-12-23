@@ -12,6 +12,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
@@ -22,6 +23,12 @@ public interface WorkflowResultService {
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query);
+
+	/**
+	 * Get a list of all workflow results satisfying the given query.
+	 * @return the WorkflowResultFilterValues containing the list of queried workflow filters
+	 */
+	public WorkflowResultFilterValues getWorkflowFilters();
 	
 	/***
 	 * Get all final results for the specified primaryfile.

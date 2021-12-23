@@ -34,15 +34,19 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	public WorkflowResultResponse findByQuery(WorkflowResultSearchQuery searchQuery) {		
         int count = getTotalCount(searchQuery);        
         List<WorkflowResult> rows = getWorkflowResultRows(searchQuery);       
-        WorkflowResultFilterValues filters = getFilterValues();
+//        WorkflowResultFilterValues filters = getFilterValues();
         
         // Format the response
         WorkflowResultResponse response = new WorkflowResultResponse();
         response.setRows(rows);
         response.setTotalResults(count);
         // TODO we don't need to update filters with each query; we should update filters each time the WorkflowResult table gets updated
-        response.setFilters(filters);
+//        response.setFilters(filters);
         return response;
+    }
+
+    public WorkflowResultFilterValues getWorkflowFilters() {
+        return getFilterValues();
     }
 
 	private List<WorkflowResult> getWorkflowResultRows(WorkflowResultSearchQuery searchQuery){
@@ -215,20 +219,20 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         Root<WorkflowResult> rootDateCriteria = queryDate.from(WorkflowResult.class);
         CriteriaQuery<GalaxyJobState> queryGjs = cb.createQuery(GalaxyJobState.class);
         Root<WorkflowResult> rootGjs = queryGjs.from(WorkflowResult.class);
-        
+
         // We treat each filter independently, i.e. its possible value set is not dependent on current selected values in other filters;
         // rather, we populate each filter with distinct values existing in the current Workflow table.
         // Making filter value set context-dependent will result in deadlock queries. 
 
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
-        List<String> collections = em.createQuery(query.select(root.get("collectionName")).distinct(true)).getResultList();
+        List<Object> collections = em.createQuery("FROM WorkflowResult WHERE id IN (SELECT MIN(id) FROM WorkflowResult GROUP BY collectionName)").getResultList();
         List<String> externalIds = em.createQuery(query.select(root.get("externalId")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
         List<String> files = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
-        List<String> workflows = em.createQuery(query.select(root.get("workflowName")).distinct(true)).getResultList();
+        List<Object> workflows = em.createQuery("FROM WorkflowResult WHERE id IN (SELECT MIN(id) FROM WorkflowResult GROUP BY workflowName)").getResultList();
         List<String> steps = em.createQuery(query.select(root.get("workflowStep")).distinct(true)).getResultList();
-        List<String> outputs = em.createQuery(query.select(root.get("outputName")).distinct(true)).getResultList();
+        List<Object> outputs = em.createQuery("FROM WorkflowResult WHERE id IN (SELECT MIN(id) FROM WorkflowResult GROUP BY outputName)").getResultList();
         List<GalaxyJobState> statuses = em.createQuery(queryGjs.select(rootGjs.get("status")).distinct(true)).getResultList();
         List<String> searchTerms = union(files, items);
         
