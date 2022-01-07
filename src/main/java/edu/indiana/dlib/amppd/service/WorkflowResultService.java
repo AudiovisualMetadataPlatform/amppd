@@ -103,7 +103,7 @@ public interface WorkflowResultService {
 	/**
 	 * Update the specified WorkflowResult according to the specified output label and final status;
 	 * if outputLabel or isFinal is not provided, then no update on the corresponding field. 
-	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * @param workflowResultId id of the specified WorkflowResult
 	 * @param outputLabel the specified output label
 	 * @param isFinal the specified final status
 	 * @return WorkflowResult updated

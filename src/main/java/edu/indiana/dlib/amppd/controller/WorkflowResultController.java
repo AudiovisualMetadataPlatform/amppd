@@ -44,6 +44,10 @@ public class WorkflowResultController {
 		return workflowResultService.getWorkflowResults(query);
 	}
 
+	/**
+	 * Get a list of all workflow results satisfying the given query.
+	 * @return the WorkflowResultFilterValues containing the list of queried workflow filters
+	 */
 	@GetMapping(path = "/workflow-filters", produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultFilterValues getWorkflowFilters(){
 		log.info("Retrieving WorkflowFilters");
@@ -126,15 +130,15 @@ public class WorkflowResultController {
 	/**
 	 * Update the specified WorkflowResult according to the specified output label and final status;
 	 * if outputLabel or isFinal is not provided, then no update on the corresponding field.
-	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * @param workflowResultId id of the specified WorkflowResult
 	 * @param outputLabel the specified output label
 	 * @param isFinal the specified final status
 	 * @return WorkflowResult updated
 	 */
-	@PostMapping(path = "/workflow-results/{id}")
-	public WorkflowResult updateWorkflowResult(@PathVariable Long id, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
-		log.info("Updating workflow result "  + id + ": outputLabel + " + outputLabel + "  isfinal = " + isFinal);
-		return workflowResultService.updateWorkflowResult(id, outputLabel, isFinal);
+	@PostMapping(path = "/workflow-results/{workflowResultId}")
+	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
+		log.info("Updating workflow result "  + workflowResultId + ": outputLabel + " + outputLabel + "  isfinal = " + isFinal);
+		return workflowResultService.updateWorkflowResult(workflowResultId, outputLabel, isFinal);
 	}
 
 	/**

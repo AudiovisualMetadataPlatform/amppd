@@ -952,7 +952,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setFinalWorkflowResult(Long, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.updateWorkflowResult(Long, String, Boolean)
 	 */
 	@Override
 	@Transactional	
