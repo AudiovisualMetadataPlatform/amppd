@@ -577,7 +577,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// to be consistent, we will use dataset status in both methods.
 			// Similarly, for dateCreated and dateUpdated, we will use the timestamps from dataset instead of job.
 			
-			// For each output, create a result record.
+			// For each output, update the current corresponding result if exists, otherwise create a new one
 			Map<String, JobInputOutput> outputs = step.getOutputs();
 			for (String outputName : outputs.keySet()) {
 				JobInputOutput output = outputs.get(outputName);
@@ -597,7 +597,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 					continue;
 				}
 				
-				// otherwise, initialize result as not final
+				// otherwise, initialize result as not final, and output label left as null
 				WorkflowResult result = new WorkflowResult(); 
 				result.setIsFinal(false);
 				
@@ -972,13 +972,13 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			updated = true;
 		}
 		
-		// only save to DB if the result has been udpated
+		// only need to save to DB if the result has been updated
 		if (updated) {
 			workflowResultRepository.save(result);	
 			log.info("Successfully updated output label and/or final status for workflow result: " + workflowResultId);
 		}
 		else {
-			log.info("No update is made on output label and/or final status for workflow result: " + workflowResultId);
+			log.info("No update needs to be made on output label and/or final status for workflow result: " + workflowResultId);
 		}
 		
 		return result;
