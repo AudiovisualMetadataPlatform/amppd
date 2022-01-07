@@ -9,17 +9,18 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
 
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -123,15 +124,17 @@ public class WorkflowResultController {
 	}
 	
 	/**
-	 * Sets the specified WorkflowResult according to the specified final status
+	 * Update the specified WorkflowResult according to the specified output outputLabel and final status;
+	 * if outputLabel or isFinal is not provided, then no update on the corresponding field.
 	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * @param outputLabel the specified output outputLabel
 	 * @param isFinal the specified final status
-	 * @return true if request is successful; false otherwise
+	 * @return WorkflowResult updated
 	 */
 	@PostMapping(path = "/workflow-results/{id}")
-	public boolean setFinalWorkflowResult(@PathVariable Long id, @RequestParam Boolean isFinal){
-		log.info("Setting workflow result "  + id + " final to " + isFinal);
-		return workflowResultService.setFinalWorkflowResult(id, isFinal) != null;
+	public WorkflowResult updateWorkflowResult(@PathVariable Long id, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
+		log.info("Updating workflow result "  + id + ": outputLabel + " + outputLabel + "  isfinal = " + isFinal);
+		return workflowResultService.updateWorkflowResult(id, outputLabel, isFinal);
 	}
 
 	/**

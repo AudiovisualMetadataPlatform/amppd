@@ -956,17 +956,31 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	@Override
 	@Transactional	
-	public WorkflowResult setFinalWorkflowResult(Long workflowResultId, Boolean isFinal) {		
-		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
+	public WorkflowResult updateWorkflowResult(Long workflowResultId, String outputLabel, Boolean isFinal) {		
+		boolean updated = false;
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
-		// no need to update if the current isFinal value is the same as the one to be set
-		if (result.getIsFinal() != null && result.getIsFinal().equals(isFinal)) { 
-			return result;
+		// update outputLabel if provided and different from current value
+		if (outputLabel != null && !outputLabel.equals(result.getOutputLabel())) {
+			result.setOutputLabel(outputLabel);		
+			updated = true;
 		}
 		
-		result.setIsFinal(isFinal);
-		workflowResultRepository.save(result);	
-		log.info("Successfully set workflow result " + workflowResultId + " isFinal to " + isFinal);	
+		// update isFinal if provided and different from current value
+		if (isFinal != null && !isFinal.equals(result.getIsFinal())) { 
+			result.setIsFinal(isFinal);
+			updated = true;
+		}
+		
+		// only save to DB if the result has been udpated
+		if (updated) {
+			workflowResultRepository.save(result);	
+			log.info("Successfully updated output label and/or final status for workflow result: " + workflowResultId);
+		}
+		else {
+			log.info("No update is made on output label and/or final status for workflow result: " + workflowResultId);
+		}
+		
 		return result;
 	}
 		
