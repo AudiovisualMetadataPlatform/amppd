@@ -54,6 +54,11 @@ public class WorkflowResult {
 
 	//@NotNull
 	@Index
+	@Type(type="text")
+	private String unitName;
+
+	//@NotNull
+	@Index
 	private String externalSource;
 
 	//@NotNull
@@ -91,6 +96,10 @@ public class WorkflowResult {
 	//@NotNull
 	@Index
 	private String outputName;	// name of the output
+	
+	//@NotNull
+	@Index
+	private String outputLabel;	// label of the output given by user
 	
 	//@NotNull
 	@Index

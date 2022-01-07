@@ -12,7 +12,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -49,6 +49,7 @@ import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -630,6 +631,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				
 				Item item = primaryfile.getItem();
 				Collection collection = item.getCollection();
+				Unit unit = collection.getUnit();
 				
 				result.setPrimaryfileId(primaryfile.getId());
 				result.setPrimaryfileName(primaryfile.getName());
@@ -639,6 +641,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setExternalId(item.getExternalId());
 				result.setCollectionId(collection.getId());
 				result.setCollectionName(collection.getName());
+				result.setUnitName(unit.getName());
 				
 				result.setWorkflowId(workflowId);
 				result.setInvocationId(invocation.getId());
