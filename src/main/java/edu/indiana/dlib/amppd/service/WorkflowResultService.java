@@ -101,12 +101,14 @@ public interface WorkflowResultService {
 	public Set<WorkflowResult> setRelevantWorkflowResults(List<Map<String, String>> workflowStepOutputs, Boolean relevant);
 	
 	/**
-	 * Sets the specified WorkflowResult according to the specified final status.
-	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * Update the specified WorkflowResult according to the specified output label and final status;
+	 * if outputLabel or isFinal is not provided, then no update on the corresponding field. 
+	 * @param workflowResultId id of the specified WorkflowResult
+	 * @param outputLabel the specified output label
 	 * @param isFinal the specified final status
-	 * @return the WorkflowResult updated
+	 * @return WorkflowResult updated
 	 */
-	public WorkflowResult setFinalWorkflowResult(Long workflowResultId, Boolean isFinal);
+	public WorkflowResult updateWorkflowResult(Long workflowResultId, String outputLabel, Boolean isFinal);
 
 	/**
 	 * Set and export workflow result csv file as part of reponse

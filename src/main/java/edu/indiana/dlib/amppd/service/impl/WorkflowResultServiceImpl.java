@@ -12,7 +12,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -49,6 +49,7 @@ import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -576,7 +577,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// to be consistent, we will use dataset status in both methods.
 			// Similarly, for dateCreated and dateUpdated, we will use the timestamps from dataset instead of job.
 			
-			// For each output, create a result record.
+			// For each output, update the current corresponding result if exists, otherwise create a new one
 			Map<String, JobInputOutput> outputs = step.getOutputs();
 			for (String outputName : outputs.keySet()) {
 				JobInputOutput output = outputs.get(outputName);
@@ -596,7 +597,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 					continue;
 				}
 				
-				// otherwise, initialize result as not final
+				// otherwise, initialize result as not final, and output label left as null
 				WorkflowResult result = new WorkflowResult(); 
 				result.setIsFinal(false);
 				
@@ -630,6 +631,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				
 				Item item = primaryfile.getItem();
 				Collection collection = item.getCollection();
+				Unit unit = collection.getUnit();
 				
 				result.setPrimaryfileId(primaryfile.getId());
 				result.setPrimaryfileName(primaryfile.getName());
@@ -639,6 +641,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setExternalId(item.getExternalId());
 				result.setCollectionId(collection.getId());
 				result.setCollectionName(collection.getName());
+				result.setUnitId(unit.getId());
+				result.setUnitName(unit.getName());
 				
 				result.setWorkflowId(workflowId);
 				result.setInvocationId(invocation.getId());
@@ -949,21 +953,35 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.setFinalWorkflowResult(Long, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.updateWorkflowResult(Long, String, Boolean)
 	 */
 	@Override
 	@Transactional	
-	public WorkflowResult setFinalWorkflowResult(Long workflowResultId, Boolean isFinal) {		
-		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));
+	public WorkflowResult updateWorkflowResult(Long workflowResultId, String outputLabel, Boolean isFinal) {		
+		boolean updated = false;
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
-		// no need to update if the current isFinal value is the same as the one to be set
-		if (result.getIsFinal() != null && result.getIsFinal().equals(isFinal)) { 
-			return result;
+		// update outputLabel if provided and different from current value
+		if (outputLabel != null && !outputLabel.equals(result.getOutputLabel())) {
+			result.setOutputLabel(outputLabel);		
+			updated = true;
 		}
 		
-		result.setIsFinal(isFinal);
-		workflowResultRepository.save(result);	
-		log.info("Successfully set workflow result " + workflowResultId + " isFinal to " + isFinal);	
+		// update isFinal if provided and different from current value
+		if (isFinal != null && !isFinal.equals(result.getIsFinal())) { 
+			result.setIsFinal(isFinal);
+			updated = true;
+		}
+		
+		// only need to save to DB if the result has been updated
+		if (updated) {
+			workflowResultRepository.save(result);	
+			log.info("Successfully updated output label and/or final status for workflow result: " + workflowResultId);
+		}
+		else {
+			log.info("No update needs to be made on output label and/or final status for workflow result: " + workflowResultId);
+		}
+		
 		return result;
 	}
 		
