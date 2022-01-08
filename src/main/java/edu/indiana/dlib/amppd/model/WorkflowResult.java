@@ -39,6 +39,10 @@ public class WorkflowResult {
 	
 	//@NotNull
 	@Index
+	private Long unitId;
+	
+	//@NotNull
+	@Index
 	@Type(type="text")
 	private String primaryfileName;
 

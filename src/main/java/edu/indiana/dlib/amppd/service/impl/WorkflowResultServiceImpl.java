@@ -641,6 +641,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setExternalId(item.getExternalId());
 				result.setCollectionId(collection.getId());
 				result.setCollectionName(collection.getName());
+				result.setUnitId(unit.getId());
 				result.setUnitName(unit.getName());
 				
 				result.setWorkflowId(workflowId);
