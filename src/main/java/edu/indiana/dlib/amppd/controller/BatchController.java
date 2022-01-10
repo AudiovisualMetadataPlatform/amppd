@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -64,7 +63,7 @@ public class BatchController {
 	 * @param (optional) primaryfileId, if provispecifiedded, preprocess only this primaryfile, otherwise preprocess all as needed
 	 * @return the list of primaryfiles failed to be preprocessed
 	 */
-	@GetMapping(path = "/batch/preprocess")
+	@PostMapping(path = "/batch/preprocess")
 	public List<Primaryfile> preprocessPrimaryfilesMissingMediaInfo(@RequestParam(required = false) Long primaryfileId) {
 		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();
 		List<Primaryfile> failedPfiles = new ArrayList<Primaryfile>();

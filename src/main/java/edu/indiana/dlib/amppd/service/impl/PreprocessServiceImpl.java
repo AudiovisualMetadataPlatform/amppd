@@ -93,7 +93,8 @@ public class PreprocessServiceImpl implements PreprocessService {
 				
 		// if conversion happened, update the extension of originalFilename and pathname,
 		// the originalFilename's extension is used when computing asset file pathname,
-		// note that we do not remove the original flac file just in case of future use
+		// note that we do not remove the original flac file just in case of future use;
+		// TODO if desired we can remove flac file after conversion, if there is no need to keep for audit/troubleshooting purpose
 		if (targetFilePath != null) {
 			String originalFilename = FilenameUtils.getBaseName(asset.getOriginalFilename()) + ".wav";
 			asset.setOriginalFilename(originalFilename);
