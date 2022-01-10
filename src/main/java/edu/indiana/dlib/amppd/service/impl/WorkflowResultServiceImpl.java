@@ -12,7 +12,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -212,15 +211,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
 		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
 		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search  query.");
-		return response;
-	}
-
-	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowFilters()
-	 */
-	public WorkflowResultFilterValues getWorkflowFilters(){
-		WorkflowResultFilterValues response = workflowResultRepository.getWorkflowFilters();
-		log.info("Successfully retrieved workflowFilter");
 		return response;
 	}
 	

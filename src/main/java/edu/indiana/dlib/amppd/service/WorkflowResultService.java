@@ -23,12 +23,6 @@ public interface WorkflowResultService {
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query);
-
-	/**
-	 * Get a list of all workflow results satisfying the given query.
-	 * @return the WorkflowResultFilterValues containing the list of queried workflow filters
-	 */
-	public WorkflowResultFilterValues getWorkflowFilters();
 	
 	/***
 	 * Get all final results for the specified primaryfile.

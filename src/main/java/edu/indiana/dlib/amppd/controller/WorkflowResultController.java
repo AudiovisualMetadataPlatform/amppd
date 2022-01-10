@@ -9,7 +9,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -43,12 +41,6 @@ public class WorkflowResultController {
 		return workflowResultService.getWorkflowResults(query);
 	}
 
-	@GetMapping(path = "/workflow-filters", produces = MediaType.APPLICATION_JSON_VALUE)
-	public WorkflowResultFilterValues getWorkflowFilters(){
-		log.info("Retrieving WorkflowFilters");
-		return workflowResultService.getWorkflowFilters();
-	}
-	
 	/* TODO
 	 * More request params can be added to allow various scope of partial refresh. 
 	 * For ex, the scope of records to be refreshed can be defined by the following criteria:
