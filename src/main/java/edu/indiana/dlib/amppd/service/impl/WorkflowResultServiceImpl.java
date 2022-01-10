@@ -215,15 +215,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search  query.");
 		return response;
 	}
-
-	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowFilters()
-	 */
-	public WorkflowResultFilterValues getWorkflowFilters(){
-		WorkflowResultFilterValues response = workflowResultRepository.getWorkflowFilters();
-		log.info("Successfully retrieved workflowFilter");
-		return response;
-	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getFinalWorkflowResults(Long)

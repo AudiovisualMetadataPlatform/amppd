@@ -44,16 +44,6 @@ public class WorkflowResultController {
 		return workflowResultService.getWorkflowResults(query);
 	}
 
-	/**
-	 * Get a list of all workflow results satisfying the given query.
-	 * @return the WorkflowResultFilterValues containing the list of queried workflow filters
-	 */
-	@GetMapping(path = "/workflow-filters", produces = MediaType.APPLICATION_JSON_VALUE)
-	public WorkflowResultFilterValues getWorkflowFilters(){
-		log.info("Retrieving WorkflowFilters");
-		return workflowResultService.getWorkflowFilters();
-	}
-	
 	/* TODO
 	 * More request params can be added to allow various scope of partial refresh. 
 	 * For ex, the scope of records to be refreshed can be defined by the following criteria:
