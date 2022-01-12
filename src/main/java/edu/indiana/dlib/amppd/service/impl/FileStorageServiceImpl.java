@@ -33,6 +33,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
@@ -49,6 +50,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class FileStorageServiceImpl implements FileStorageService {	
+	
+	@Autowired
+	WorkflowResultRepository workflowResultRepository;
 	
 	@Autowired
     private PreprocessService preprocessService;
@@ -163,7 +167,12 @@ public class FileStorageServiceImpl implements FileStorageService {
     	// as this will cause discrepancy with existing workflow outputs, which are linked to existing media 	
     	if (asset instanceof Primaryfile ) {
     		Primaryfile primaryfile = (Primaryfile)asset;
-	    	if (primaryfile.getDatasetId() != null || primaryfile.getHistoryId() != null) {
+    		// check if there is any workflow results associated with the primayfile
+    		// this is more accurate than checking whether the historyId/datasetId is not null,
+    		// as the primayfile could have been submitted to workflows but never succeeded with any result,
+    		// in which case it's fine (and might be desirable if due to corrupt media file) to replace the file
+//	    	if (primaryfile.getDatasetId() != null || primaryfile.getHistoryId() != null) {
+    		if (workflowResultRepository.findByPrimaryfileId(primaryfile.getId()).size() > 0) {
 	    		throw new StorageException("Uploading new media file to primaryfile " + primaryfile.getId() + " is not allowed as it has been run against a workflow." );
 	    	}
     	}
