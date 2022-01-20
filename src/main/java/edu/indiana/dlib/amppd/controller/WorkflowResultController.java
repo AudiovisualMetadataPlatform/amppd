@@ -11,13 +11,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +43,7 @@ public class WorkflowResultController {
 		log.info("Retrieving WorkflowResults for query ...");
 		return workflowResultService.getWorkflowResults(query);
 	}
-	
+
 	/* TODO
 	 * More request params can be added to allow various scope of partial refresh. 
 	 * For ex, the scope of records to be refreshed can be defined by the following criteria:
@@ -87,7 +90,7 @@ public class WorkflowResultController {
 	}
 
 	/**
-	 * This method is deprecated, please use setWorkflowResultsRelevant instead.
+	 * This method is deprecated, please use setRelevantWorkflowResults instead.
 	 * Hide all irrelevant workflow results by setting its corresponding output dataset in Galaxy to invisible,
 	 * and remove the row from the WorkflowResult table. This process only needs to be done once manually (preferably 
 	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
@@ -109,21 +112,23 @@ public class WorkflowResultController {
 	 * @return the number of WorkflowResults updated
 	 */
 	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public int setWorkflowResultsRelevant(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
+	public int setRelevantWorkflowResults(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
 		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
-		return workflowResultService.setWorkflowResultsRelevant(workflowStepOutputs, relevant).size();
+		return workflowResultService.setRelevantWorkflowResults(workflowStepOutputs, relevant).size();
 	}
 	
 	/**
-	 * Sets the specified WorkflowResult according to the specified final status
-	 * @param WorkflowResultId id of the specified WorkflowResult
+	 * Update the specified WorkflowResult according to the specified output label and final status;
+	 * if outputLabel or isFinal is not provided, then no update on the corresponding field.
+	 * @param workflowResultId id of the specified WorkflowResult
+	 * @param outputLabel the specified output label
 	 * @param isFinal the specified final status
-	 * @return true if request is successful; false otherwise
+	 * @return WorkflowResult updated
 	 */
-	@PostMapping(path = "/workflow-results/{id}")
-	public boolean setWorkflowResultFinal(@PathVariable Long id, @RequestParam Boolean isFinal){
-		log.info("Setting workflow result "  + id + " final to " + isFinal);
-		return workflowResultService.setWorkflowResultFinal(id, isFinal) != null;
+	@PostMapping(path = "/workflow-results/{workflowResultId}")
+	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
+		log.info("Updating workflow result "  + workflowResultId + ": outputLabel + " + outputLabel + "  isfinal = " + isFinal);
+		return workflowResultService.updateWorkflowResult(workflowResultId, outputLabel, isFinal);
 	}
 
 	/**

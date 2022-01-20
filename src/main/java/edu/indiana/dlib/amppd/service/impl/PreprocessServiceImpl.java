@@ -17,14 +17,7 @@ import edu.indiana.dlib.amppd.exception.MediaConversionException;
 import edu.indiana.dlib.amppd.exception.PreprocessException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.ItemSupplement;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
-import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,20 +34,11 @@ public class PreprocessServiceImpl implements PreprocessService {
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
 	@Autowired
-    private FileStorageService fileStorageService;
+    private FileStorageService fileStorageService;		
 
 	@Autowired
-	PrimaryfileRepository primaryfileRepository;
+	private DataentityService dataentityService;
 
-	@Autowired
-	PrimaryfileSupplementRepository primaryfileSupplementRepository;
-	
-	@Autowired
-	ItemSupplementRepository itemSupplementRepository;
-	
-	@Autowired
-	CollectionSupplementRepository collectionSupplementRepository;
-	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.convertFlacToWav(String)
 	 */
@@ -87,6 +71,10 @@ public class PreprocessServiceImpl implements PreprocessService {
 				log.error(builder.toString());
 		    	throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath + ": ffmpeg exited with status " + status);
 		    }
+		    
+//			// workaround for local debugging in case ffmpeg/ffprobe is not available
+//			// fake a the wav file by copying the original flac file
+//			Files.copy(fileStorageService.resolve(sourceFilepath), fileStorageService.resolve(targetFilePath));
 		}
 		catch (Exception e) {
 			throw new MediaConversionException("Exception while converting " + sourceFilepath + " to " + targetFilePath, e);
@@ -103,15 +91,20 @@ public class PreprocessServiceImpl implements PreprocessService {
 	public Asset convertFlac(Asset asset) {
 		String targetFilePath = convertFlacToWav(asset.getPathname());
 				
-		// note that we do not remove the original flac file just in case of future use
+		// if conversion happened, update the extension of originalFilename and pathname,
+		// the originalFilename's extension is used when computing asset file pathname,
+		// note that we do not remove the original flac file just in case of future use;
+		// TODO if desired we can remove flac file after conversion, if there is no need to keep for audit/troubleshooting purpose
 		if (targetFilePath != null) {
+			String originalFilename = FilenameUtils.getBaseName(asset.getOriginalFilename()) + ".wav";
+			asset.setOriginalFilename(originalFilename);
 			asset.setPathname(targetFilePath);
-			Asset updatedAsset = saveAsset(asset); 
-			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());
-			return updatedAsset;		
+			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());		
 		}
-
-		log.info("No conversion is needed for asset: " + asset.getId());
+		else {
+			log.info("No conversion is needed for asset: " + asset.getId());
+		}
+		
 		return asset;
 	}
 	
@@ -150,6 +143,10 @@ public class PreprocessServiceImpl implements PreprocessService {
 				log.error(fileStorageService.readTextFile(jsonpath));
 		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
 		    }
+
+//			// workaround for local debugging in case ffmpeg/ffprobe is not available
+//			// fake a the json file by writing some string to it
+//			Files.write(fileStorageService.resolve(jsonpath), "{\"tags\": \"fake media info\"}".getBytes());
 		}
 		catch (IOException e) {
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
@@ -163,7 +160,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		try {
 			mediaInfo = fileStorageService.readTextFile(jsonpath);
 		}
-		catch(StorageFileNotFoundException e) {
+		catch (StorageFileNotFoundException e) {
 			throw new PreprocessException("Error while reading media info from " + jsonpath + ": the json file does not exist");
 		}
 		
@@ -182,19 +179,23 @@ public class PreprocessServiceImpl implements PreprocessService {
 		}
 
 		asset.setMediaInfo(mediaInfo);
-		Asset updatedAsset = saveAsset(asset);
 		log.info("Retrieved media info for asset: " + asset.getId());
-		return updatedAsset;
+		return asset;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.preprocess(Asset)
+	 * @see edu.indiana.dlib.amppd.service.PreprocessService.preprocess(Asset, boolean)
 	 */
 	@Override	
 	@Transactional	
-	public Asset preprocess(Asset asset) {
-		log.info("Preprocessing asset: " + asset.getId());
-		return retrieveMediaInfo(convertFlac(asset));
+	public Asset preprocess(Asset asset, boolean persist) {
+		convertFlac(asset);
+		retrieveMediaInfo(asset); 
+		if (persist) {
+			asset = dataentityService.saveAsset(asset); 
+		}
+		log.info("Successfully preprocessed asset: " + asset.getId());
+		return asset;
 	}
 	
 	/**
@@ -203,26 +204,6 @@ public class PreprocessServiceImpl implements PreprocessService {
 	@Override
 	public String getMediaInfoJsonPath(String mediaPathname) {
 		return FilenameUtils.getFullPath(mediaPathname) + FilenameUtils.getBaseName(mediaPathname) + ".json";
-	}
-		
-	/**
-	 * Saves the given asset to DB.
-	 * @param asset the given asset
-	 */
-	private Asset saveAsset(Asset asset) {
-		if (asset instanceof Primaryfile) {
-			return primaryfileRepository.save((Primaryfile)asset);
-		}
-		else if (asset instanceof PrimaryfileSupplement) {
-			return primaryfileSupplementRepository.save((PrimaryfileSupplement)asset);
-		}
-		else if (asset instanceof ItemSupplement) {
-			return itemSupplementRepository.save((ItemSupplement)asset);
-		}
-		else if (asset instanceof CollectionSupplement) {
-			return collectionSupplementRepository.save((CollectionSupplement)asset);
-		}
-		return asset;
 	}
 	
 }

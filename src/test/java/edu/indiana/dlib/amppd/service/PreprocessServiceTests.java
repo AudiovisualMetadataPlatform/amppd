@@ -81,7 +81,7 @@ public class PreprocessServiceTests {
 		Asset primaryfile = testHelper.ensurePrimaryfile(TestHelper.TEST_AUDIO, "flac");
 
 		// the media info should have been retrieved
-		Asset updatedPrimaryfile = preprocessService.preprocess(primaryfile);
+		Asset updatedPrimaryfile = preprocessService.preprocess(primaryfile, true);
 		Assert.assertEquals(primaryfile.getId(), updatedPrimaryfile.getId());
 		String mediaInfo = updatedPrimaryfile.getMediaInfo();
 		Assert.assertTrue(StringUtils.isNotEmpty(mediaInfo));

@@ -534,7 +534,7 @@ public class JobServiceImpl implements JobService {
     		// update response with success job creation status
     		response.setStatus(true, "", woutputs);
     		log.info("Successfully created " + msg + msg_param);
-        	log.info("Galaxy workflow outputs: " + woutputs);
+        	log.info("Galaxy workflow outputs: " + woutputs.getOutputIds());
     	}
     	catch (Exception e) {  
     		String error = "";

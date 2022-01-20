@@ -19,73 +19,82 @@ public interface DropboxService {
 	public String encodeUri(String path);
 
 	/**
-	 * Gets the URI encoded dropbox path given the unit name.
+	 * Gets the URI encoded dropbox sub-directory path given the unit name.
 	 * @param unitName name of the unit
 	 * @return the dropbox sub-directory path for the unit
 	 */
-	public Path getDropboxPath(String unitName);
+	public Path getSubDirPath(String unitName);
 
 	/**
-	 * Gets the URI encoded dropbox path given the unit and collection names. 
+	 * Gets the URI encoded dropbox sub-directory path given the unit and collection names. 
 	 * @param unitName name of the unit
 	 * @param collectionName name of the collection
 	 * @return the dropbox sub-directory path for the collection
 	 */
-	public Path getDropboxPath(String unitName, String collectionName);
+	public Path getSubDirPath(String unitName, String collectionName);
 
 	/**
-	 * Gets the URI encoded dropbox path for a given unit.
+	 * Gets the URI encoded dropbox sub-directory path for a given unit.
 	 * @param unit the given unit
 	 * @return the dropbox sub-directory path for the unit
 	 */
-	public Path getDropboxPath(Unit unit);
+	public Path getSubDirPath(Unit unit);
 
 	/**
-	 * Gets the URI encoded dropbox path for a given collection.
+	 * Gets the URI encoded dropbox sub-directory path for a given collection.
 	 * @param collection the given collection
 	 * @return the dropbox sub-directory path for the collection
 	 */
-	public Path getDropboxPath(Collection collection);
+	public Path getSubDirPath(Collection collection);
 
 	/**
-	 * Rename the sub-directory for the given unit; if the previous directory doesn't exists or unit name didn't change, do nothing.
+	 * Rename the dropbox sub-directory for the given unit in case its name changed; 
+	 * if the previous sub-directory doesn't exists or unit name didn't change, do nothing.
 	 * @param unit the given unit
 	 * @return the path of the dropbox sub-directory renamed
 	 */
-	public Path renameUnitSubdir(Unit unit);
+	public Path renameSubdir(Unit unit);
 	
 	/**
-	 * Delete the sub-directory for the given unit; if the directory doesn't exists, do nothing.
+	 * Rename/move the dropbox sub-directory for the given collection, in case its name or parent unit changed.
+	 * If the previous sub-directory doesn't exists, create a new one.
+	 * @param collection the given collection
+	 * @return the path of the dropbox sub-directory renamed
+	 */
+	public Path renameSubdir(Collection collection);
+	
+	/**
+	 * Move the dropbox sub-directory for the given collection, in case its parent unit is different from the given unit.
+	 * If the previous sub-directory doesn't exists, create a new one.
+	 * @param collection the given collection
+	 * @param unit the given unit
+	 * @return the path of the dropbox sub-directory renamed
+	 */
+	public Path moveSubdir(Collection collection, Unit unit);
+	
+	/**
+	 * Delete the dropbox sub-directory for the given unit; if the directory doesn't exists, do nothing.
 	 * @param unit the given unit
 	 * @return the path of the dropbox sub-directory deleted
 	 */
-	public Path deleteUnitSubdir(Unit unit);
+	public Path deleteSubdir(Unit unit);
 	
 	/**
-	 * Create a sub-directory for the given collection; if the directory already exists, do nothing.
+	 * Delete the dropbox sub-directory for the given collection; if the directory doesn't exists, do nothing.
+	 * @param collection the given collection
+	 * @return the path of the dropbox sub-directory deleted
+	 */
+	public Path deleteSubdir(Collection collection);
+	
+	/**
+	 * Create a dropbox sub-directory for the given collection; if the directory already exists, do nothing.
 	 * @param collection the given collection
 	 * @return the path of the dropbox sub-directory created
 	 */
-	public Path createCollectionSubdir(Collection collection);
+	public Path createSubdir(Collection collection);
 	
 	/**
-	 * Rename the sub-directory for the given collection; 
-	 * if the previous directory doesn't exists, create a new one;
-	 * otherwise, if the collection name didn't change, do nothing.
-	 * @param collection the given collection
-	 * @return the path of the dropbox sub-directory renamed
-	 */
-	public Path renameCollectionSubdir(Collection collection);
-	
-	/**
-	 * Delete the sub-directory for the given collection; if the directory doesn't exists, do nothing.
-	 * @param collection the given collection
-	 * @return the path of the dropbox sub-directory deleted
-	 */
-	public Path deleteCollectionSubdir(Collection collection);
-	
-	/**
-	 * Create sub-directories as needed for all existing collections.
+	 * Create dropbox sub-directories as needed for all existing collections.
 	 */
 	public void createCollectionSubdirs();
 	

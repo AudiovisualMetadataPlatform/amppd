@@ -215,7 +215,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         Root<WorkflowResult> rootDateCriteria = queryDate.from(WorkflowResult.class);
         CriteriaQuery<GalaxyJobState> queryGjs = cb.createQuery(GalaxyJobState.class);
         Root<WorkflowResult> rootGjs = queryGjs.from(WorkflowResult.class);
-        
+
         // We treat each filter independently, i.e. its possible value set is not dependent on current selected values in other filters;
         // rather, we populate each filter with distinct values existing in the current Workflow table.
         // Making filter value set context-dependent will result in deadlock queries. 

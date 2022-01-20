@@ -39,6 +39,10 @@ public class WorkflowResult {
 	
 	//@NotNull
 	@Index
+	private Long unitId;
+	
+	//@NotNull
+	@Index
 	@Type(type="text")
 	private String primaryfileName;
 
@@ -51,6 +55,11 @@ public class WorkflowResult {
 	@Index
 	@Type(type="text")
 	private String collectionName;
+
+	//@NotNull
+	@Index
+	@Type(type="text")
+	private String unitName;
 
 	//@NotNull
 	@Index
@@ -91,6 +100,10 @@ public class WorkflowResult {
 	//@NotNull
 	@Index
 	private String outputName;	// name of the output
+	
+	//@NotNull
+	@Index
+	private String outputLabel;	// label of the output given by user
 	
 	//@NotNull
 	@Index

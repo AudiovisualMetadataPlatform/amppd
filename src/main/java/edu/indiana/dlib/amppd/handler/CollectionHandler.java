@@ -1,11 +1,11 @@
 package edu.indiana.dlib.amppd.handler;
 
 
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.core.annotation.HandleAfterCreate;
+import org.springframework.data.rest.core.annotation.HandleAfterDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
@@ -16,10 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -34,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CollectionHandler {    
 
 	@Autowired
-	private WorkflowResultRepository workflowResultRepository;
+	private WorkflowResultService workflowResultService;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -44,53 +43,58 @@ public class CollectionHandler {
 
     @HandleBeforeCreate
     public void handleBeforeCreate(@Valid Collection collection) {
-        log.info("Handling process before creating collection " + collection.getName() + " ...");
+        log.info("Creating collection " + collection.getName() + " ...");
 
         // create dropbox subdir for the collection to be created, assume collection name has been validated
-        dropboxService.createCollectionSubdir(collection);
+        dropboxService.createSubdir(collection);
+    }
+    
+    @HandleAfterCreate
+    public void handleAfterCreate(Collection collection) {
+    	log.info("Successfully created collection " + collection.getId());
     }
     
     @HandleBeforeSave
     public void handleBeforeUpdate(@Valid Collection collection) {
-        log.info("Handling process before updating collection " + collection.getId() + " ...");
-        
-        // rename dropbox subdir for the collection to be updated, assume collection name has been validated
-        dropboxService.renameCollectionSubdir(collection);
+    	log.info("Updating collection " + collection.getId() + " ...");
+ 
+        // Below file system operations should be done before the data entity is updated, 
+    	// as we need the values stored in the old entity
+
+    	// move media subdir (if exists) of the collection in case its parent is changed 
+    	fileStorageService.moveEntityDir(collection);
+    	
+        // rename (if previously exists) or create (if previously doesn't exist) the dropbox subdir of the collection
+    	// in case its name is changed, and/or move the subdir if its parent unit changed
+        dropboxService.renameSubdir(collection); 
     }
 
     @HandleAfterSave
     @Transactional
     public void handleAfterUpdate(Collection collection) {
-    	log.info("Handling process after updating collection " + collection.getId() + " ...");
-
     	// remove all workflow results associated with the collection if it is deactivated
-    	if (!collection.getActive()) {
-    		try {
-    			List<WorkflowResult> deleteResults = workflowResultRepository.deleteByCollectionId(collection.getId());
-    			if (deleteResults != null && !deleteResults.isEmpty()) {
-    				log.info("Successfully deleted " + deleteResults.size() + " WorkflowResults assoicated with the deactivated collection " + collection.getId());
-    			}
-    		}
-    		catch (Exception e) {
-    			log.error("Failed to delete inactive WorkflowResults if any.", e);
-    		}
-    	}
+    	workflowResultService.deleteInactiveWorkflowResults(collection);    	
+    	
+    	log.info("Successfully updated collection " + collection.getId());
     }
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Collection collection) {
-        log.info("Handling process before deleting collection " + collection.getId() + " ...");
+        log.info("Deleting collection " + collection.getId() + " ...");
 
-        /* Note: 
-         * Below file system deletions should be done before the data entity is deleted, so that 
-         * in case of exception, the process can be repeated instead of manual operations.
-         */
+        // Below file system operations should be done before the data entity is deleted, so that 
+        // in case of exception, the process can be repeated instead of manual operations.
+         
+        // delete media subdir (if exists) of the collection
+        fileStorageService.deleteEntityDir(collection);
 
-        // delete media directory tree of the collection
-        fileStorageService.delete(fileStorageService.getDirPathname(collection));
-
-        // delete dropbox subdir for the collection to be deleted
-        dropboxService.deleteCollectionSubdir(collection);
+        // delete dropbox subdir (if exists) of the collection
+        dropboxService.deleteSubdir(collection);
     }
-    
+        
+    @HandleAfterDelete
+    public void handleAfterDelete(Collection collection) {
+    	log.info("Successfully deleted collection " + collection.getId());           
+    }
+        
 }

@@ -3,10 +3,8 @@ package edu.indiana.dlib.amppd.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -16,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
@@ -24,6 +21,7 @@ import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 //@CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -61,43 +59,48 @@ public class BatchController {
 	}
 
 	/**
-	 * Note: This is temporary and can be removed/disabled when batch ingest is fixed
-	 *
-	 * Run preprocessing on existing primary files to create and set media info
-	 * @param (optional) primaryfileId, if included, will preprocess specified file,
-	 * 	if not included will preprocess all files that are missing mediainfo
-	 * @return string reporting initial file count, success count, and failure count
+	 * Run preprocessing on existing primaryfiles missing media info due to previous failures.
+	 * @param (optional) primaryfileId, if provispecifiedded, preprocess only this primaryfile, otherwise preprocess all as needed
+	 * @return the list of primaryfiles failed to be preprocessed
 	 */
-	@GetMapping(path = "/batch/preprocess")
-	public String runPreprocessingOnFilesWithoutMediaInfo(@RequestParam(value = "primaryfileId", required = false) Long primaryfileId) {
-		List<Primaryfile> primaryfileList = new ArrayList<Primaryfile>();
+	@PostMapping(path = "/batch/preprocess")
+	public List<Primaryfile> preprocessPrimaryfilesMissingMediaInfo(@RequestParam(required = false) Long primaryfileId) {
+		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();
+		List<Primaryfile> failedPfiles = new ArrayList<Primaryfile>();
 
-		if (primaryfileId != null) { // if primaryfileId is provided get primary file record
-			log.info("Re-runnning preprocessing on primaryfileId: " + primaryfileId + " ... " );
+		// if primaryfileId is specified, add the primaryfile for processing if it's missing mediaInfo
+		if (primaryfileId != null) { 
 			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-			primaryfileList.add(primaryfile);
-		} else { // if no primaryfileId is provided, get all primary files
-			log.info("Re-runnning preprocessing on all primary files without media info...");
-			List<Primaryfile> primaryfiles = (List<Primaryfile>)primaryfileRepository.findAll();
-			primaryfileList.addAll(primaryfiles);
+			if (StringUtils.isEmpty(primaryfile.getMediaInfo())) {
+				primaryfiles.add(primaryfile);
+				log.info("Preprocessing primaryfile " + primaryfileId + " missing mediaInfo ... " );
+			}
+			else {
+				log.warn("The specified primaryfile " + primaryfileId + " has already been proprocessed, no need to re-process");
+			}
+		} 
+		// otherwise find all primaryfiles missing mediaInfo
+		else { 
+			primaryfiles = primaryfileRepository.findByMediaInfoNull();
+			log.info("Preprocessing " + primaryfiles.size() + " primaryfiles missing media info ...");
 		}
 
-		// create counters for total initial files missing media info and media info creation successes
-		int missingMediaInfo = 0;
-		int success = 0;
-
-		for (Primaryfile pf : primaryfileList) {
-			if (pf.getMediaInfo() != null) continue; // skip files that already contain media info
-
-			missingMediaInfo += 1;
-
-			Asset updatedPrimaryfile = preprocessService.retrieveMediaInfo(pf);
-			String mediaInfo = updatedPrimaryfile.getMediaInfo();
-
-			if (StringUtils.isNotEmpty(mediaInfo)) success += 1;
+		// preprocess above found primaryfiles
+		for (Primaryfile primaryfile : primaryfiles) {
+			try {
+				preprocessService.preprocess(primaryfile, true);
+				if (StringUtils.isEmpty(primaryfile.getMediaInfo())) {
+					failedPfiles.add(primaryfile);
+				}
+			}
+			catch (Exception e) {
+				failedPfiles.add(primaryfile);
+			}
 		}
 
-		return String.format("Files initially missing media info: %s\nFiles with media info successfully added: %s\nFiles still missing media info: %s", missingMediaInfo, success, (missingMediaInfo - success));
+		int success = primaryfiles.size() - failedPfiles.size();		
+		log.info("Successfully preprocessed " +  success + " primaryfiles missing media info, " + failedPfiles.size() + " primaryfiles still failed.");
+		return failedPfiles;
 	}
 	
 }
