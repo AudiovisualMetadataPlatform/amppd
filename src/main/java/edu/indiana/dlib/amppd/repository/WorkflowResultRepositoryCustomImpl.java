@@ -150,6 +150,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             Predicate predicate = path.in((Object[])searchQuery.getFilterByCollections());
             predicates.add(predicate);
         }
+
+        if(searchQuery.getFilterByUnits().length>0) {
+            Path<String> path = root.get("unitName");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByUnits());
+            predicates.add(predicate);
+        }
         
         if(searchQuery.getFilterByExternalIds().length>0) {
         	Path<String> path = root.get("externalId");

@@ -14,6 +14,7 @@ public class WorkflowResultSearchQuery {
 		filterByDates = new ArrayList<Date>();
 		filterBySubmitters = new String[0];
 		filterByCollections = new String[0];
+		filterByUnits = new String[0];
 		filterByExternalIds = new String[0];
 		filterByItems = new String[0];
 		filterByFiles = new String[0];
@@ -33,6 +34,7 @@ public class WorkflowResultSearchQuery {
 	private List <Date> filterByDates;
 	private String[] filterBySubmitters;
 	private String[] filterByCollections;
+	private String[] filterByUnits;
 	private String[] filterByExternalIds;
 	private String[] filterByItems;
 	private String[] filterByFiles;
