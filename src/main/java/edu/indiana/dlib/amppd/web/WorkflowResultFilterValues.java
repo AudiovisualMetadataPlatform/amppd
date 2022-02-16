@@ -10,6 +10,7 @@ public class WorkflowResultFilterValues {
 	private List<String> submitters;
 	private List<String> workflows;
 	private List<String> collections;
+	private List<String> units;
 	private List<String> externalIds;
 	private List<String> items;
 	private List<String> files;

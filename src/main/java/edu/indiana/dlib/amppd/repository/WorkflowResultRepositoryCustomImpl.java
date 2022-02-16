@@ -150,6 +150,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             Predicate predicate = path.in((Object[])searchQuery.getFilterByCollections());
             predicates.add(predicate);
         }
+
+        if(searchQuery.getFilterByUnits().length>0) {
+            Path<String> path = root.get("unitName");
+            Predicate predicate = path.in((Object[])searchQuery.getFilterByUnits());
+            predicates.add(predicate);
+        }
         
         if(searchQuery.getFilterByExternalIds().length>0) {
         	Path<String> path = root.get("externalId");
@@ -223,6 +229,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         List<Date> dateFilters = em.createQuery(queryDate.select(rootDateCriteria.get(DATE_PROPERTY).as(java.sql.Date.class))).getResultList();
         List<String> submitters = em.createQuery(query.select(root.get("submitter")).distinct(true)).getResultList();
         List<String> collections = em.createQuery(query.select(root.get("collectionName")).distinct(true)).getResultList();
+        List<String> units = em.createQuery(query.select(root.get("unitName")).distinct(true)).getResultList();
         List<String> externalIds = em.createQuery(query.select(root.get("externalId")).distinct(true)).getResultList();
         List<String> items = em.createQuery(query.select(root.get("itemName")).distinct(true)).getResultList();
         List<String> files = em.createQuery(query.select(root.get("primaryfileName")).distinct(true)).getResultList();
@@ -235,6 +242,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         filters.setDateFilter(dateFilters);
         filters.setSubmitters(submitters);
         filters.setCollections(collections);
+        filters.setUnits(units);
         filters.setExternalIds(externalIds);
         filters.setItems(items);
         filters.setFiles(files);
