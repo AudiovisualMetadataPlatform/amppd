@@ -61,8 +61,8 @@ public class WorkflowEditController {
     	headers.setContentType(MediaType.APPLICATION_JSON);
     	String urlRedirect = "/"; //"/workflow/editor?id=" + workflowId;
     	GalaxyLoginRequest glr = new GalaxyLoginRequest(
-    			galaxyPropertyConfig.getUsername(),
-    			galaxyPropertyConfig.getPassword(),
+    			galaxyPropertyConfig.getUsernameWorkflowEdit(),
+    			galaxyPropertyConfig.getPasswordWorkflowEdit(),
     			null,
     			urlRedirect,
     			csrfToken,
