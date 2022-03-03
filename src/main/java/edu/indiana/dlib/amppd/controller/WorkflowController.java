@@ -59,26 +59,22 @@ public class WorkflowController {
 	 * Note: Set instance to true if the workflow ID is returned from invocation listing, in which case it's likely not a StoredWorkflow ID.
 	 * @param workflowId ID of the queried workflow
 	 * @param instance true if fetch by Workflow ID instead of StoredWorkflow id, false by default
+	 * @param includeToolName include tool name in the workflow details if true, true by default
 	 * @return all the details information of the queried workflow
 	 */
 	@GetMapping("/workflows/{workflowId}")
-	public WorkflowDetails showWorkflow(@PathVariable("workflowId") String workflowId, @RequestParam(required = false) Boolean instance) {	
+	public WorkflowDetails showWorkflow(
+			@PathVariable("workflowId") String workflowId, 
+			@RequestParam(required = false) Boolean instance,
+			@RequestParam(required = false) Boolean includeToolName) {	
 		WorkflowDetails workflow = null;
 	
 		try {
-			if (instance == null || !instance) {
-				workflow = workflowService.getWorkflowsClient().showWorkflow(workflowId);
-				log.info("Showing workflow detail with ID: " +  workflowId);
-			}
-			else {
-				workflow = workflowService.getWorkflowsClient().showWorkflowInstance(workflowId);
-				log.info("Showing workflow detail with stored ID: " +  workflowId);				
-			}
+			log.info("Retrieving workflow details with ID: " +  workflowId + ", instance: " + instance + ", includeToolName: " + includeToolName);
+			workflow = workflowService.showWorkflow(workflowId, instance, includeToolName);
 		}
 		catch (Exception e) {
-			String msg = "Unable to retrieve workflow detail for ID " + workflowId + " from Galaxy.";
-			log.error(msg);
-			throw new GalaxyWorkflowException(msg, e);
+			throw new GalaxyWorkflowException("Unable to retrieve workflow details with ID " + workflowId + " from Galaxy.", e);
 		}
 
 		return workflow;

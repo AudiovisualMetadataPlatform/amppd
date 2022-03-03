@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 /**
  * Service for workflow related functionalities.
@@ -40,6 +41,16 @@ public interface WorkflowService {
 	 * @return workflows satisfying the given criteria
 	 */
 	public List<Workflow> listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted);
+	
+	/**
+	 * Show details of a workflow based on information retrieved from Galaxy.
+	 * Note: Set instance to true if the workflow ID is returned from invocation listing, in which case it's likely not a StoredWorkflow ID.
+	 * @param workflowId ID of the queried workflow
+	 * @param instance true if fetch by Workflow ID instead of StoredWorkflow id; false by default
+	 * @param includeToolName include tool name in the workflow details if true; true by default
+	 * @return all the details information of the queried workflow
+	 */
+	public WorkflowDetails showWorkflow(String workflowName, Boolean instance, Boolean includeToolName);
 	
 	/**
 	 * Get the workflow with the specified name.
