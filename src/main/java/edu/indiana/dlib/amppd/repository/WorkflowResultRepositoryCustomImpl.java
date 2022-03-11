@@ -45,6 +45,16 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         return response;
     }
 
+    private Predicate getPartialSearchTermPredicate(String s, Root<WorkflowResult> root, CriteriaBuilder cb) {
+        String searchTerm = "%"+s.toLowerCase()+"%";
+        Predicate collectionPredicate = cb.like(cb.lower(root.get("collectionName")), searchTerm);
+        Predicate itemPredicate = cb.like(cb.lower(root.get("itemName")), searchTerm);
+        Predicate fileName = cb.like(cb.lower(root.get("primaryfileName")), searchTerm);
+        Predicate externalSource = cb.like(cb.lower(root.get("externalSource")), searchTerm);
+        Predicate finalPredicate = cb.or(collectionPredicate, itemPredicate, fileName, externalSource);
+        return finalPredicate;
+    }
+
 	private List<WorkflowResult> getWorkflowResultRows(WorkflowResultSearchQuery searchQuery){
 		int firstResult = ((searchQuery.getPageNum() - 1) * searchQuery.getResultsPerPage());
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -53,7 +63,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 
         // Setup predicates (where statements)
         List<Predicate> predicates = getPredicates(searchQuery, root, cb);
-                
+
         if(!predicates.isEmpty()) {
         	Predicate[] preds = predicates.toArray(new Predicate[0]);
             cq.where(preds);
@@ -120,15 +130,15 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 		if(searchQuery.getFilterBySearchTerms().length>0) {        	
         	In<String> inClause = cb.in(root.get("itemName"));
         	In<String> inClause2 = cb.in(root.get("primaryfileName"));
-        	
-        	for (String term : searchQuery.getFilterBySearchTerms()) {
-        	    inClause.value(term);
-        		inClause2.value(term);
-        	}            
 
+            Predicate finalPredicate = null;
+            for (String term : searchQuery.getFilterBySearchTerms()) {
+                finalPredicate = getPartialSearchTermPredicate(term, root, cb);
+                predicates.add(finalPredicate);
+            }
             // Combine the two predicates to get an "OR"
-            Predicate sourcePredicate = cb.or(inClause2, inClause);
-            predicates.add(sourcePredicate);
+//            Predicate sourcePredicate = cb.or(inClause2, inClause);
+
         }
 		
         // Build the predicate for Date filter
