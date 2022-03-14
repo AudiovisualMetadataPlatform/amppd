@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.model;
 
-
 import java.util.Date;
 
 import javax.jdo.annotations.Index;
@@ -15,11 +14,11 @@ import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
+
 /**
- * PasswordRestToken generates token that can be used for resetting the login password.
+ * A time-limited token used for password reset or account activation for a particular user.
  * @author vinitab yingfeng
  */
-
 @Entity
 @Data
 public class TimedToken {  
@@ -37,8 +36,5 @@ public class TimedToken {
 	@Index(unique="true")
     private String token;  
 
-	private Date expiryDate;
-	
-	private String galaxySession;
-	
+	private Date expiryDate;	
 }    
