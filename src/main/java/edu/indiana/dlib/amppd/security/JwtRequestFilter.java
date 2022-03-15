@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.nimbusds.oauth2.sdk.util.StringUtils;
+
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.service.AmpUserService;
@@ -38,7 +40,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private AuthService authService;
 	
 	
-	private void CreateAnonymousAuth(HttpServletRequest request) {
+	private void createAnonymousAuth(HttpServletRequest request) {
 		AmpUser userDetails = new AmpUser();
 		userDetails.setEmail("none");
 		userDetails.setUsername("");
@@ -47,12 +49,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				userDetails, null, null);
 
 		usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
+	
 	// Determine whether referrer and url match "whitelisted" values.  This is likely temporary until the 
 	// NER editor uses it's own auth.  
-	private boolean ValidRefUrl(String referer, String uri) {
+	private boolean validRefUrl(String referer, String uri) {
 		if(referer==null) return false;
 		// Only continue if it's the NER editor
 		if(!uri.equals("/rest/hmgm/ner-editor")) {
@@ -65,6 +67,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		
 		return cleanedRef.startsWith(cleanedUiUrl);
 	}
+	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
@@ -78,11 +81,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		// Get the referrer and URI
 		String referer = request.getHeader("referer");
 		String uri = request.getRequestURI();
-		// If it is the NER-editor and a valid referrer, create anonymous 
-		if(ValidRefUrl(referer, uri)) {
+		// If it is for the HMGM editor with a valid referrer, create anonymous auth
+		if (validRefUrl(referer, uri)) {
 			logger.trace("Valid referer:  " + referer  + ". Creating anonymous auth");
-			CreateAnonymousAuth(request);
+			createAnonymousAuth(request);
 		}
+		// otherwise, for AMP account registration related requests
 		else if (requestTokenHeader != null && requestTokenHeader.startsWith("AMPPD ")) {
 			logger.trace("Request token starts with amppd");
 			authToken = requestTokenHeader.substring(6);
@@ -92,45 +96,44 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			String authString = parts[2];
 			
 			if(authService.compareAuthStrings(authString, userToken, editorInput)){
-				CreateAnonymousAuth(request);
+				createAnonymousAuth(request);
 				logger.trace("Auth string is valid. Creating anonymous auth");
 			}
 			else {
 				logger.warn("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " editor input: " + editorInput);
-			}
-			
+			}			
 		}
+		// otherwise, for AMP user authentication with JWT token
 		else {
-			if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-				jwtToken = requestTokenHeader.substring(7);
+			jwtToken = jwtTokenUtil.getToken(requestTokenHeader);			
+			if (StringUtils.isNotBlank(jwtToken)) {
 				try {
 					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+					
+					if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+						AmpUser userDetails = ampUserService.getUser(username);
+					
+						if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+							UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = 
+									new UsernamePasswordAuthenticationToken(userDetails, null, null);	
+							SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+							logger.debug("Authentication succeeded with valid token for user " + username);
+						}
+						else {
+							logger.warn("Authentication failed with invalid token for user " + username);
+						}		
+					}
+					else {
+						logger.warn("Invalid JWT token: username is blank.");
+					}
 				} catch (IllegalArgumentException e) {
-					logger.warn("Unable to get JWT Token");
+					logger.warn("Invalid JWT token: unable to get username from JWT Token");
 				} catch (ExpiredJwtException e) {
-					logger.warn("JWT Token has expired");
+					logger.warn("Invalid JWT token: token has expired");
 				}
 			} else {
-				logger.warn("JWT Token does not begin with Bearer String");
-			}
-		
-			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				AmpUser userDetails = ampUserService.getUser(username);
-			
-				if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-							userDetails, null, null);/*userDetails.getAuthorities()*/
-			
-					usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-			
-					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-					logger.debug("Authentication succeeded with valid token for user " + username);
-				}
-				else {
-					logger.warn("Authentication failed with invalid token for user " + username);
-				}
-		
-			}
+				logger.warn("Request has no valid Authorization header with JWT Token beginning with Bearer, possibly auth is turned off.");
+			}		
 		}
 	
 		chain.doFilter(request, response);

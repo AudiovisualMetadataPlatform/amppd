@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
@@ -65,8 +67,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private static int activateAccountDays;
 	  private static String uiUrl ;	  
 	  
-	  @Autowired 
-	  public AmpUserServiceImpl() { 
+	  @PostConstruct
+	  public void init() {
 		  ampAdmin = amppdPropertyConfig.getAdmin();
 		  log.trace("Fetched AMP admin email id from property file:"+ampAdmin);
 		  uiUrl = amppdUiPropertyConfig.getUrl();

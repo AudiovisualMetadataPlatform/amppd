@@ -64,4 +64,17 @@ public class JwtTokenUtil {
 		final String username = getUsernameFromToken(token);
 		return (userDetails != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
+	
+	/**
+	 * Retrieve token from the given Authorization header, or null if header is invalid.
+	 */
+	public String getToken(String authHeader) {
+		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+			return authHeader.substring(7);
+		}
+		else {
+			return null;
+		}
+	}
+
 }

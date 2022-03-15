@@ -112,7 +112,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
-			// bypass /galaxy/* requests, which will be handled by the galaxy proxy
+			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/*").permitAll()
 			// TODO 
 			// Below two lines are for access media or output files;
