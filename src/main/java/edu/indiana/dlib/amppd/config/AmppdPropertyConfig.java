@@ -1,6 +1,8 @@
 package edu.indiana.dlib.amppd.config;
 
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -29,8 +31,17 @@ public class AmppdPropertyConfig {
     @NotNull private String username; 
     @NotNull private String password; 
     @NotNull private String url;
-    @NotNull private int passwordResetTokenExpiration;
-    @NotNull private int accountActivationTokenExpiration;
     @NotNull private Boolean auth;
+    @NotNull private String jwtSecret;
+    @NotNull private String jwtExpireMinutes;
+    @NotNull private String workflowEditMinutes;
+    @NotNull private int resetPasswordMinutes;
+    @NotNull private int activateAccountDays;
+    @NotNull private int refreshResultsStatusMinutes;
+    @NotNull private int refreshResultsTableMinutes;
+    @NotNull private String refreshResultsStatusCron;
+    @NotNull private String refreshResultsTableCron;
+    @NotNull private List<String> externalSources;
+    @NotNull private List<String> taskManagers;
     
 }

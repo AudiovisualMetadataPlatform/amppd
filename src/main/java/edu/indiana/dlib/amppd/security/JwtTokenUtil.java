@@ -16,15 +16,15 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class JwtTokenUtil {
 
-	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	@Value("${amppd.jwtSecret}")
+	private String jwtSecret;
 
-	@Value("${jwt.secret}")
-	private String secret;
+	@Value("${amppd.jwtExpireMinutes}")
+	private int jwtExpireMinutes;
 
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
-
 
 	public Date getExpirationDateFromToken(String token) {
 		return getClaimFromToken(token, Claims::getExpiration);
@@ -37,7 +37,7 @@ public class JwtTokenUtil {
 
 
 	private Claims getAllClaimsFromToken(String token) {
-		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+		return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
 	}
 
 	private Boolean isTokenExpired(String token) {
@@ -56,12 +56,12 @@ public class JwtTokenUtil {
 				.setClaims(claims)
 				.setSubject(subject)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-				.signWith(SignatureAlgorithm.HS512, secret).compact();
+				.setExpiration(new Date(System.currentTimeMillis() + jwtExpireMinutes * 60 * 1000))
+				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
 	
 	}
 	public Boolean validateToken(String token, AmpUser userDetails) {
 		final String username = getUsernameFromToken(token);
-		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+		return (userDetails != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token));
 	}
 }

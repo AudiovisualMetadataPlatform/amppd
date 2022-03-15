@@ -24,7 +24,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
 	@Autowired
-	private AmpUserService jwtUserDetailsService;
+	private AmpUserService ampUserService;
 	
 	
 	@Autowired
@@ -115,7 +115,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			}
 		
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				AmpUser userDetails = jwtUserDetailsService.getUser(username);
+				AmpUser userDetails = ampUserService.getUser(username);
 			
 				if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
