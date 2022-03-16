@@ -115,7 +115,7 @@ public class WorkflowEditController {
 	 * logout from galaxy as AMP workflow edit user destroy galaxy session for workflow edit.
 	 */
 	@PreDestroy
-	public ResponseEntity<String> logouGalaxy() {
+	public ResponseEntity<String> logoutGalaxy() {
 		// TODO get logout csrf token and send logout request to galaxy
 
 		// request Galaxy server logout with CSRF token
@@ -169,6 +169,7 @@ public class WorkflowEditController {
 		
 		// send the cookie to AMP client to authenticate future workflow edit requests
 		response.addCookie(cookie);
+		log.info("Successfully started the edit session for workflow " + workflowId);
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}	
 	
@@ -180,30 +181,19 @@ public class WorkflowEditController {
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editEnd")
-	public ResponseEntity<String> editEnd(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
-		/* Note:
-		 * We use AMP authorization token instead of username to identify workflow edit session, as the former corresponds to
-		 * an AMP user session, and there could be multiple sessions from multiple clients for the same user.
-		 * Also, with current implementation, AMP server does allow user to edit multiple workflows in the same session;
-		 * however, AMP client can only take one workflow edit cookie at a time, so it should be disallowed by AMP client.
-		 */
-
-		// since the request is through AMP user authentication, the authorization token must be valid at this point
-		String authToken = jwtTokenUtil.retrieveToken(authHeader);
-		
-		// generate a workflow edit token corresponding to the authorization token and workflow ID
-		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
-		
-    	// wrap the workflow edit token in a cookie 
-		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
+	public ResponseEntity<String> editEnd(@PathVariable("workflowId") String workflowId, HttpServletResponse response) {		
+    	// unset the workflow edit cookie 
+		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, null);
 	    cookie.setSecure(true);
 	    cookie.setHttpOnly(true);
 	    cookie.setPath(GALAXY_PATH);
-	    cookie.setMaxAge(expiry););
+	    cookie.setMaxAge(0);
 		
-		// send the cookie to AMP client to authenticate future workflow edit requests
+		// send the unset cookie to AMP client to delete it
 		response.addCookie(cookie);
+		log.info("Successfully ended the edit session for workflow " + workflowId);
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}	
+	
 	
 }
