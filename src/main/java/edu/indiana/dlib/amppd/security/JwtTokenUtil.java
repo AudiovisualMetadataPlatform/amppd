@@ -45,13 +45,12 @@ public class JwtTokenUtil {
 		return expiration.before(new Date());	
 	}
 	
-	public String generateToken(AmpUser userDetails) {
+	public String generateToken(String username) {
 		Map<String, Object> claims = new HashMap<>();	
-		return doGenerateToken(claims, userDetails.getUsername());
+		return doGenerateToken(claims, username);
 	}
 	
-	private String doGenerateToken(Map<String, Object> claims, String subject) {
-	
+	private String doGenerateToken(Map<String, Object> claims, String subject) {	
 		return Jwts.builder()
 				.setClaims(claims)
 				.setSubject(subject)
@@ -67,8 +66,9 @@ public class JwtTokenUtil {
 	
 	/**
 	 * Retrieve token from the given Authorization header, or null if header is invalid.
+	 * @param authHeader 
 	 */
-	public String getToken(String authHeader) {
+	public String retrieveToken(String authHeader) {
 		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			return authHeader.substring(7);
 		}

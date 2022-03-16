@@ -26,8 +26,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
 	@Autowired
-	private AmpUserService ampUserService;
-	
+	private AmpUserService ampUserService;	
 	
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -45,8 +44,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		userDetails.setEmail("none");
 		userDetails.setUsername("");
 	
-		UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-				userDetails, null, null);
+		UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = 
+				new UsernamePasswordAuthenticationToken(userDetails, null, null);
 
 		usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
@@ -105,7 +104,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		}
 		// otherwise, for AMP user authentication with JWT token
 		else {
-			jwtToken = jwtTokenUtil.getToken(requestTokenHeader);			
+			jwtToken = jwtTokenUtil.retrieveToken(requestTokenHeader);			
 			if (StringUtils.isNotBlank(jwtToken)) {
 				try {
 					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
