@@ -764,7 +764,7 @@ public class TestHelper {
 	
 	public String getToken() {
 		AmpUser user = createTestUser();
-		return tokenUtil.generateToken(user.getUsername());
+		return tokenUtil.generateAmpAuthToken(user.getUsername());
 	}
 	
 	/*

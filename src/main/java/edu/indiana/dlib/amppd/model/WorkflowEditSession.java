@@ -2,14 +2,10 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
-import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 
 import lombok.Data;
 
@@ -25,19 +21,22 @@ public class WorkflowEditSession {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-	//@NotNull
-	@Index(unique="true")
-    @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
-    @JoinColumn(nullable = false, name = "user_id")
-    private AmpUser user;
+//	//@NotNull
+//	@Index(unique="true")
+//    @OneToOne(targetEntity = AmpUser.class, fetch = FetchType.EAGER)
+//    @JoinColumn(nullable = false, name = "user_id")
+//    private AmpUser user;
   
-	//@NotNull	
+    //@NotNull	
+    private String jwtToken;	// JWT token for the current authenticated user session
+
+    //@NotNull	
     private String workflowId;  
 
     //@NotNull	
-    private String galaxySession;  
+    private String galaxySession;  // galaxySession cookie value for workflow edit
 
     //@NotNull	
-    private Date galaxyExpires;
+    private Date galaxyExpirationTime;  // galaxySession cookie expiration time
         
 }

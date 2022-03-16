@@ -43,9 +43,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
-	  private int MIN_PASSWORD_LENGTH = 8;
-	  private int MIN_USERNAME_LENGTH = 3;
-	  private int MIN_NAME_LENGTH = 1;
+	  public static final int MIN_PASSWORD_LENGTH = 8;
+	  public static final int MIN_USERNAME_LENGTH = 3;
+	  public static final int MIN_NAME_LENGTH = 1;
 
 	  @Autowired
 	  private AmppdPropertyConfig amppdPropertyConfig;		
@@ -62,10 +62,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  @Autowired
 	  private JavaMailSender mailSender;
 
-	  private static String ampAdmin ;
-	  private static int resetPasswordMinutes;
-	  private static int activateAccountDays;
-	  private static String uiUrl ;	  
+	  private String ampAdmin ;
+	  private int resetPasswordMinutes;
+	  private int activateAccountDays;
+	  private String uiUrl ;	  
 	  
 	  @PostConstruct
 	  public void init() {

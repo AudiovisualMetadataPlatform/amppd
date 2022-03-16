@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
 	
-	public static String EXTERNAL_SOURCES = "externalSources";
-	public static String TASK_MANAGERS = "taskManagers";
+	public static final String EXTERNAL_SOURCES = "externalSources";
+	public static final String TASK_MANAGERS = "taskManagers";
 
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;

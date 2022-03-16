@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 		  }	
 
 		  // otherwise generate JWT token and respond with status 200
-		  final String token = jwtTokenUtil.generateToken(username);
+		  final String token = jwtTokenUtil.generateAmpAuthToken(username);
 		  return ResponseEntity.ok(new JwtResponse(token));
 	  }
 		

@@ -3,18 +3,27 @@ package edu.indiana.dlib.amppd.controller;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,22 +35,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkflowEditController {
 
+	// workflow edit cookie name
+	public static final String GALAXY_PATH = "/galaxy";
+	
+	// workflow edit cookie name
+	public static final String WORKFLOW_EDIT_COOKIE = "workflowEditT";
+	
 	@Autowired
 	private GalaxyPropertyConfig galaxyPropertyConfig;
+		
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
 	
 //	@Autowired
 	private RestTemplate restTemplate = new RestTemplate();
+	
 	private String csrfToken = null;
 	private String galaxySession = null;
 
 	/**
-	 * 
+	 *  Upon initialization of the controller, 
+	 *  login to galaxy as AMP workflow edit user and set up galaxy session for workflow edit.
 	 */
-//	@PostMapping("/workflows/{workflowId}")
-//	public ResponseEntity<String> loginToGalaxy(@PathVariable("workflowId") String workflowId) {
-	@PostMapping("/workflows/editStart")
+	@PostConstruct
 	public ResponseEntity<String> loginGalaxy() {
-		// request Galaxy server for login page with CSRF token in response
+		// request Galaxy server for login page
 		String urlRootLogin = galaxyPropertyConfig.getBaseUrl() + "/root/login";
 		ResponseEntity<String> responseRootLogin = restTemplate.getForEntity(urlRootLogin, String.class);
 		galaxySession = responseRootLogin.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
@@ -55,10 +73,12 @@ public class WorkflowEditController {
 	    }
     	csrfToken = matcher.group(1);
 
-    	// send Galaxy login request with workflow editor user credentials and CSRF token
+    	// populate login request header with previously returned galaxySession cookie
     	HttpHeaders headers = new HttpHeaders();
     	headers.add(HttpHeaders.COOKIE, galaxySession);
     	headers.setContentType(MediaType.APPLICATION_JSON);
+    	
+    	// populate login request payload with workflow editor user credentials and CSRF token
     	String urlRedirect = "/"; //"/workflow/editor?id=" + workflowId;
     	GalaxyLoginRequest glr = new GalaxyLoginRequest(
     			galaxyPropertyConfig.getUsernameWorkflowEdit(),
@@ -71,16 +91,33 @@ public class WorkflowEditController {
     			false,
     			false
     	);
+    	
+    	// send Galaxy login request 
     	String urlUserLogin = galaxyPropertyConfig.getBaseUrl() + "/user/login";
     	HttpEntity<GalaxyLoginRequest> requestUserLogin = new HttpEntity<GalaxyLoginRequest>(glr, headers);
     	ResponseEntity<String> responseUserLogin = restTemplate.postForEntity(urlUserLogin, requestUserLogin, String.class);
+    	
+    	// retrieve the galaxySession cookie and update the stored value
     	galaxySession = responseUserLogin.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
     	
-		return responseUserLogin;
-	}	
+    	// check response status
+    	if (responseUserLogin.getStatusCode().isError() || galaxySession == null) {
+    		new RuntimeException("Failed to login to Galaxy for workflow edit.");
+    	}		
+    	else {
+    		log.info("Successfully logged in to Galaxy for workflow edit.");
+    	}    	
+    	return responseUserLogin;
+	}
 	
-	@PostMapping("/workflows/editEnd")
-	public ResponseEntity<String> logoutGalaxy() {
+	/**
+	 * Upon destruction of the controller,
+	 * logout from galaxy as AMP workflow edit user destroy galaxy session for workflow edit.
+	 */
+	@PreDestroy
+	public ResponseEntity<String> logouGalaxy() {
+		// TODO get logout csrf token and send logout request to galaxy
+
 		// request Galaxy server logout with CSRF token
 		String urlUserLogout = galaxyPropertyConfig.getBaseUrl() + "/user/logout";
 		urlUserLogout += "?session_csrf_token=" + csrfToken + "&logout_all=false";
@@ -88,8 +125,85 @@ public class WorkflowEditController {
     	headers.add(HttpHeaders.COOKIE, galaxySession);
     	HttpEntity<String> requestUserLogout = new HttpEntity<String>(null, headers);
     	ResponseEntity<String> responseUserLogout = restTemplate.exchange(urlUserLogout, HttpMethod.GET, requestUserLogout, String.class);
-    	galaxySession = responseUserLogout.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-    	return responseUserLogout;
+    	
+    	// retrieve the galaxySession cookie and update the stored value
+    	galaxySession = responseUserLogout.getHeaders().getFirst(HttpHeaders.SET_COOKIE);	
+    	
+    	// check response status
+    	if (responseUserLogout.getStatusCode().isError() || galaxySession == null) {
+    		new RuntimeException("Failed to logout from Galaxy for workflow edit.");
+    	}		
+    	else {
+    		log.info("Successfully logged out from Galaxy for workflow edit.");
+    	}    	
+		return responseUserLogout;
 	}
+	
+	/**
+	 * Start a workflow edit session within an authenticated AMP user session.
+	 * @param authHeader Authorization header from the request
+	 * @param workflowId ID of the workflow for edit
+	 * @param response HTTP response to send
+	 * @return empty body response upon success
+	 */
+	@PostMapping("/workflows/{workflowId}/editStart")
+	public ResponseEntity<String> editStart(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
+		/* Note:
+		 * We use AMP authorization token instead of username to identify workflow edit session, as the former corresponds to
+		 * an AMP user session, and there could be multiple sessions from multiple clients for the same user.
+		 * Also, with current implementation, AMP server does allow user to edit multiple workflows in the same session;
+		 * however, AMP client can only take one workflow edit cookie at a time, so it should be disallowed by AMP client.
+		 */
+
+		// since the request is through AMP user authentication, the authorization token must be valid at this point
+		String authToken = jwtTokenUtil.retrieveToken(authHeader);
+		
+		// generate a workflow edit token corresponding to the authorization token and workflow ID
+		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
+		
+    	// wrap the workflow edit token in a cookie 
+		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
+	    cookie.setSecure(true);
+	    cookie.setHttpOnly(true);
+	    cookie.setPath(GALAXY_PATH);
+		
+		// send the cookie to AMP client to authenticate future workflow edit requests
+		response.addCookie(cookie);
+		return ResponseEntity.status(HttpStatus.OK).body(null);
+	}	
+	
+	/**
+	 * Start a workflow edit session within an authenticated AMP user session.
+	 * @param authHeader Authorization header from the request
+	 * @param workflowId ID of the workflow for edit
+	 * @param response HTTP response to send
+	 * @return empty body response upon success
+	 */
+	@PostMapping("/workflows/{workflowId}/editEnd")
+	public ResponseEntity<String> editEnd(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
+		/* Note:
+		 * We use AMP authorization token instead of username to identify workflow edit session, as the former corresponds to
+		 * an AMP user session, and there could be multiple sessions from multiple clients for the same user.
+		 * Also, with current implementation, AMP server does allow user to edit multiple workflows in the same session;
+		 * however, AMP client can only take one workflow edit cookie at a time, so it should be disallowed by AMP client.
+		 */
+
+		// since the request is through AMP user authentication, the authorization token must be valid at this point
+		String authToken = jwtTokenUtil.retrieveToken(authHeader);
+		
+		// generate a workflow edit token corresponding to the authorization token and workflow ID
+		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
+		
+    	// wrap the workflow edit token in a cookie 
+		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
+	    cookie.setSecure(true);
+	    cookie.setHttpOnly(true);
+	    cookie.setPath(GALAXY_PATH);
+	    cookie.setMaxAge(expiry););
+		
+		// send the cookie to AMP client to authenticate future workflow edit requests
+		response.addCookie(cookie);
+		return ResponseEntity.status(HttpStatus.OK).body(null);
+	}	
 	
 }

@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -15,55 +17,44 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtTokenUtil {
+	
+	// issuer for AMP user authentication token and workflow edit token
+	public static final String ISSUER_AMP_AUTH = "amppd";
+	public static final String ISSUER_WORKFLOW_EDIT = "ampwf";	
 
-	@Value("${amppd.jwtSecret}")
-	private String jwtSecret;
-
-	@Value("${amppd.jwtExpireMinutes}")
-	private int jwtExpireMinutes;
+	// claim fields for workflow edit token
+	public static final String CLAIM_JWT = "jwt";
+	public static final String CLAIM_WORKFLOW = "workflow";	
+	
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;	
 
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
+	}
+
+	public String getIssuerFromToken(String token) {
+		return getClaimFromToken(token, Claims::getIssuer);
 	}
 
 	public Date getExpirationDateFromToken(String token) {
 		return getClaimFromToken(token, Claims::getExpiration);
 	}
 
-	public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-		final Claims claims = getAllClaimsFromToken(token);
-		return claimsResolver.apply(claims);
-	}
-
-
-	private Claims getAllClaimsFromToken(String token) {
-		return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-	}
-
-	private Boolean isTokenExpired(String token) {
+	public Boolean isTokenExpired(String token) {
 		final Date expiration = getExpirationDateFromToken(token);
 		return expiration.before(new Date());	
 	}
 	
-	public String generateToken(String username) {
-		Map<String, Object> claims = new HashMap<>();	
-		return doGenerateToken(claims, username);
+	public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver, String secret) {
+		final Claims claims = getAllClaimsFromToken(token, secret);
+		return claimsResolver.apply(claims);
 	}
-	
-	private String doGenerateToken(Map<String, Object> claims, String subject) {	
-		return Jwts.builder()
-				.setClaims(claims)
-				.setSubject(subject)
-				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + jwtExpireMinutes * 60 * 1000))
-				.signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
-	
+
+	public Claims getAllClaimsFromToken(String token, String secret) {
+		return Jwts.parser().setSigningKey(amppdPropertyConfig.getJwtSecret()).parseClaimsJws(token).getBody();
 	}
-	public Boolean validateToken(String token, AmpUser userDetails) {
-		final String username = getUsernameFromToken(token);
-		return (userDetails != null && username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-	}
-	
+
 	/**
 	 * Retrieve token from the given Authorization header, or null if header is invalid.
 	 * @param authHeader 
@@ -77,4 +68,37 @@ public class JwtTokenUtil {
 		}
 	}
 
+	public String generateToken(Map<String, Object> claims, String subject, String issuer, int expireMinutes, String secret) {	
+		return Jwts.builder()
+				.setClaims(claims)
+				.setSubject(subject)
+				.setIssuer(issuer)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + expireMinutes * 60 * 1000))
+				.signWith(SignatureAlgorithm.HS512, secret).compact();
+	
+	}
+	
+	public String generateAmpAuthToken(String username) {
+		Map<String, Object> claims = new HashMap<>();	
+		return generateToken(claims, username, ISSUER_AMP_AUTH, amppdPropertyConfig.getJwtExpireMinutes(), amppdPropertyConfig.getJwtSecret());
+	}
+		
+	public Boolean validateAmpAuthToken(String token, AmpUser userDetails) {
+		final String username = getUsernameFromToken(token);
+		final String issuer = this.getIssuerFromToken(token);
+		boolean valid = userDetails != null && username.equals(userDetails.getUsername()) && 
+				ISSUER_AMP_AUTH.equals(issuer) &&
+				!isTokenExpired(token);
+		return valid;
+	}
+		
+	public String generateWorkflowEditToken(String jwtToken, String workflowId) {
+		Map<String, Object> claims = new HashMap<>();	
+		claims.put("jwt", jwtToken);
+		claims.put("workflow", workflowId);
+		String username = getUsernameFromToken(jwtToken);
+		return generateToken(claims, username, ISSUER_WORKFLOW_EDIT, amppdPropertyConfig.getWorkflowEditMinutes(), amppdPropertyConfig.getWorkflowEditSecret());
+	}
+	
 }
