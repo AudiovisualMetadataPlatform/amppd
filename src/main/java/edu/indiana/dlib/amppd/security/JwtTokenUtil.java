@@ -72,6 +72,9 @@ public class JwtTokenUtil {
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + expireMinutes * 60 * 1000))
 				.signWith(SignatureAlgorithm.HS512, amppdPropertyConfig.getJwtSecret()).compact();	
+		// Note: 
+		// For simplicity, both JWT for AMP authentication and workflow edit use the same secret,
+		// amppd.workflowEditSecret is currently not in use.
 	}
 	
 	/**
