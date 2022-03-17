@@ -33,12 +33,12 @@ public class AmppdPropertyConfig {
     @NotNull private String url;
     @NotNull private Boolean auth;
     @NotNull private String jwtSecret;
-    @NotNull private String workflowEditSecret;
+//    @NotNull private String workflowEditSecret;
     @NotNull private int jwtExpireMinutes;
     @NotNull private int workflowEditMinutes;
     @NotNull private int resetPasswordMinutes;
     @NotNull private int activateAccountDays;
-    @NotNull private int refreshResultsStatusMinutes;
+//    @NotNull private int refreshResultsStatusMinutes;
     @NotNull private int refreshResultsTableMinutes;
     @NotNull private String refreshResultsStatusCron;
     @NotNull private String refreshResultsTableCron;
