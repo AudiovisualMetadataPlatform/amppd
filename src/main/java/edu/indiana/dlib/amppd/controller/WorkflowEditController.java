@@ -5,7 +5,9 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +20,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.security.JwtTokenUtil;
@@ -39,13 +43,19 @@ public class WorkflowEditController {
 	public static final String GALAXY_PATH = "/galaxy";
 	
 	// workflow edit cookie name
-	public static final String WORKFLOW_EDIT_COOKIE = "workflowEditT";
+	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
+	
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;	
 	
 	@Autowired
 	private GalaxyPropertyConfig galaxyPropertyConfig;
 		
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
+	
+	@Autowired
+	private ServletContext context;
 	
 //	@Autowired
 	private RestTemplate restTemplate = new RestTemplate();
@@ -147,7 +157,7 @@ public class WorkflowEditController {
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editStart")
-	public ResponseEntity<String> editStart(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
+	public ResponseEntity<String> startEdit(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
 		/* Note:
 		 * We use AMP authorization token instead of username to identify workflow edit session, as the former corresponds to
 		 * an AMP user session, and there could be multiple sessions from multiple clients for the same user.
@@ -165,7 +175,8 @@ public class WorkflowEditController {
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
 	    cookie.setSecure(true);
 	    cookie.setHttpOnly(true);
-	    cookie.setPath(GALAXY_PATH);
+	    cookie.setPath(context.getContextPath() + GALAXY_PATH);
+	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
 		
 		// send the cookie to AMP client to authenticate future workflow edit requests
 		response.addCookie(cookie);
@@ -181,7 +192,7 @@ public class WorkflowEditController {
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editEnd")
-	public ResponseEntity<String> editEnd(@PathVariable("workflowId") String workflowId, HttpServletResponse response) {		
+	public ResponseEntity<String> endEdit(@PathVariable("workflowId") String workflowId, HttpServletResponse response) {		
     	// unset the workflow edit cookie 
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, null);
 	    cookie.setSecure(true);
@@ -195,5 +206,12 @@ public class WorkflowEditController {
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}	
 	
+	/**
+	 * 
+	 */
+	@RequestMapping(value = GALAXY_PATH)
+	public ResponseEntity<String> proxyEdit(HttpServletRequest request, HttpServletResponse response) {
+		return null;
+	}
 	
 }
