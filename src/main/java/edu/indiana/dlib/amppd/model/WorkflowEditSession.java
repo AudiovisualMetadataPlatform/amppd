@@ -16,7 +16,7 @@ import lombok.Data;
 @Entity
 @Data
 public class WorkflowEditSession {
-	// TODO This class currently not in use, move to unsed package
+	// TODO This class currently not in use, move to unused package
 	
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
