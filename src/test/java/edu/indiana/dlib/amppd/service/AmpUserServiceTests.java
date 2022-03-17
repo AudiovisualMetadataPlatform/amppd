@@ -73,7 +73,7 @@ public class AmpUserServiceTests {
 	 	myToken.setUser(user);
 		myToken.setToken(token);
 		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.SECOND,amppdconfig.getPasswordResetTokenExpiration());
+		calendar.add(Calendar.MINUTE, amppdconfig.getResetPasswordMinutes());
 		myToken.setExpiryDate(calendar.getTime());
 		timedTokenRepository.save(myToken);
 	 	
@@ -112,7 +112,7 @@ public class AmpUserServiceTests {
 	 	myToken.setUser(user);
 		myToken.setToken(token);
 		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.SECOND,amppdconfig.getAccountActivationTokenExpiration());
+		calendar.add(Calendar.HOUR, amppdconfig.getActivateAccountDays() * 24);
 		myToken.setExpiryDate(calendar.getTime());
 		timedTokenRepository.save(myToken);
 		Assert.assertFalse(user.getStatus()==AmpUser.State.ACTIVATED);

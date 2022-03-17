@@ -19,7 +19,7 @@ public class WorkflowResultsScheduler {
 	private WorkflowResultService workflowResultService;
 
 	// Runs every 10 minutes on the 10th minute from 6:00am through 23:59pm
-	@Scheduled(cron = "${amppd.refreshWorkflowResultsStatusCron}")
+	@Scheduled(cron = "${amppd.refreshResultsStatusCron}")
 	public void refreshStatus() {
 		log.info("Starting refresh status at " + sdf.format(new Date()));
 		workflowResultService.refreshIncompleteWorkflowResults();
@@ -27,7 +27,7 @@ public class WorkflowResultsScheduler {
 	}
 
 	// Runs every night at 1 am
-	@Scheduled(cron = "${amppd.refreshWorkflowResultsAllCron}")
+	@Scheduled(cron = "${amppd.refreshResultsTableCron}")
 	public void refreshAllResults() {
 		log.info("Starting refreshWorkflowResultsIterative at " + sdf.format(new Date()));
 		workflowResultService.refreshWorkflowResultsIterative();

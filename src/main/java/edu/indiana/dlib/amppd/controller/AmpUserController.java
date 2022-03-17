@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
   
   import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 //  @CrossOrigin(origins = "*", allowedHeaders = "*")
   @RestController
   @Slf4j
-  public class AmpUserController{
+  public class AmpUserController {
 	  @Autowired
 	  private AmpUserServiceImpl ampService;
 
@@ -39,14 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 	  
 	  @RequestMapping(value = "/account/authenticate", method = RequestMethod.POST)
 	  public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
-		  AuthResponse response = ampService.authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
-			
+		  String username = authenticationRequest.getUsername();
+		  AuthResponse response = ampService.authenticate(username, authenticationRequest.getPassword());
+
+		  // authentication failed, respond with status 401
 		  if(!response.isSuccess()) {
-			  return ResponseEntity.status(400).body(null);
-		  }
-			
-		  final AmpUser userDetails = ampService.getUser(authenticationRequest.getUsername());
-		  final String token = jwtTokenUtil.generateToken(userDetails);
+			  return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+		  }	
+
+		  // otherwise generate JWT token and respond with status 200
+		  final String token = jwtTokenUtil.generateToken(username);
 		  return ResponseEntity.ok(new JwtResponse(token));
 	  }
 		
