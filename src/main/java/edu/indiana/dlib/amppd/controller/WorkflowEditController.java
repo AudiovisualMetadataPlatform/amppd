@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,10 +20,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.WebUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
@@ -210,8 +213,46 @@ public class WorkflowEditController {
 	 * 
 	 */
 	@RequestMapping(value = GALAXY_PATH)
-	public ResponseEntity<String> proxyEdit(HttpServletRequest request, HttpServletResponse response) {
+	public ResponseEntity<String> proxyEdit(
+			@RequestHeader Map<String, String> headers,
+			@RequestBody String body,
+			HttpServletRequest request, HttpServletResponse response) {
+	    
+		// retrieve workflow edit cookie and validate it
+		Cookie wfeCookie = WebUtils.getCookie(request, WORKFLOW_EDIT_COOKIE);
+		if (!validateWorkflowEditCookie(wfeCookie)) {
+			
+		}
+		
+		// process all headers
+    	HttpHeaders gheaders = new HttpHeaders();
+    	boolean valid = false;
+		headers.forEach((headerName, headerValue) -> {
+	        // add all headers to galaxy request except workflow edit cookie
+			if (!isHeaderWorkflowEditCookie(headerName, headerValue)) {
+	        	gheaders.add(headerName,  headerValue);
+	        }
+	    });
+		
 		return null;
 	}
+	
+	private boolean isHeaderWorkflowEditCookie(String key, String value) {
+		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.startsWith(WORKFLOW_EDIT_COOKIE);
+	}
+	
+	public boolean validateWorkflowEditCookie(Cookie wfeCookie) {
+		if (wfeCookie == null) {
+			log.error("Workflow Edit Cookie is not provided in the request.");
+			return false;
+		}
+			
+		String wfeToken = wfeCookie.getValue();
+		
+		boolean valid = false;
+		return valid;
+	}
+	
+	
 	
 }
