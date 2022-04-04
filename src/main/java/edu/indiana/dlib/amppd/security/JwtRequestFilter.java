@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,19 +15,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.nimbusds.oauth2.sdk.util.StringUtils;
-
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.AuthService;
-import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-
-	@Autowired
-	private AmpUserService ampUserService;	
 	
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -71,11 +65,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
 		final String requestTokenHeader = request.getHeader("authorization");
-			
-		String username = null;
-		String jwtToken = null;
-
-		String authToken = null;
 		
 		// Get the referrer and URI
 		String referer = request.getHeader("referer");
@@ -88,7 +77,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		// otherwise, for AMP account registration related requests
 		else if (requestTokenHeader != null && requestTokenHeader.startsWith("AMPPD ")) {
 			logger.trace("Request token starts with amppd");
-			authToken = requestTokenHeader.substring(6);
+			String authToken = requestTokenHeader.substring(6);
 			String[] parts = authToken.split(";;;;");
 			String editorInput = parts[0];
 			String userToken = parts[1];
@@ -103,38 +92,53 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			}			
 		}
 		// otherwise, for AMP user authentication with JWT token
-		else {
-			jwtToken = jwtTokenUtil.retrieveToken(requestTokenHeader);			
-			if (StringUtils.isNotBlank(jwtToken)) {
-				try {
-					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-					
-					if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-						AmpUser userDetails = ampUserService.getUser(username);
-					
-						if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-							UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = 
-									new UsernamePasswordAuthenticationToken(userDetails, null, null);	
-							SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-							logger.debug("Authentication succeeded with valid token for user " + username);
-						}
-						else {
-							logger.warn("Authentication failed with invalid token for user " + username);
-						}		
-					}
-					else {
-						logger.warn("Invalid JWT token: username is blank.");
-					}
-				} catch (IllegalArgumentException e) {
-					logger.warn("Invalid JWT token: unable to get username from JWT Token");
-				} catch (ExpiredJwtException e) {
-					logger.warn("Invalid JWT token: token has expired");
-				}
-			} else {
-				logger.warn("Request has no valid Authorization header with JWT Token beginning with Bearer, possibly auth is turned off.");
+		else if (!StringUtils.isEmpty(requestTokenHeader) && SecurityContextHolder.getContext().getAuthentication() == null) {
+			// validate JWT token if auth is turned on 
+			String jwtToken = jwtTokenUtil.retrieveToken(requestTokenHeader);			
+			AmpUser user = jwtTokenUtil.validateToken(jwtToken);					
+			if (user != null) {
+				UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = 
+						new UsernamePasswordAuthenticationToken(user, null, null);	
+				SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+				logger.debug("Authentication succeeded with valid JWT for user " + user.getUsername());
+			}
+			else {
+				logger.error("Authentication failed with invalid JWT for user " + user.getUsername());
 			}		
-		}
-	
+		}	
+//		else {
+//			if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
+//				jwtToken = requestTokenHeader.substring(7);
+//				try {
+//					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+//				} catch (IllegalArgumentException e) {
+//					logger.warn("Unable to get JWT Token");
+//				} catch (ExpiredJwtException e) {
+//					logger.warn("JWT Token has expired");
+//				}
+//			} else {
+//				logger.warn("JWT Token does not begin with Bearer String");
+//			}
+//
+//			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//				AmpUser userDetails = jwtUserDetailsService.getUser(username);
+//
+//				if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+//					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+//							userDetails, null, null);/*userDetails.getAuthorities()*/
+//
+//					usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//
+//					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+//					logger.debug("Authentication succeeded with valid token for user " + username);
+//				}
+//				else {
+//					logger.warn("Authentication failed with invalid token for user " + username);
+//				}		
+//
+//			}	
+//		}
+
 		chain.doFilter(request, response);
 	}
 

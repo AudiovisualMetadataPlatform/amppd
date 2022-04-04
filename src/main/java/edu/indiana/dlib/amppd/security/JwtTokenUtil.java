@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,31 +33,68 @@ public class JwtTokenUtil {
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;	
 
-	public Claims getAllClaimsFromToken(String token) {
+	@Autowired
+	private AmpUserService ampUserService;	
+	
+	private Claims getAllClaimsFromToken(String token) {
 		return Jwts.parser().setSigningKey(amppdPropertyConfig.getJwtSecret()).parseClaimsJws(token).getBody();
 	}
 
-	public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+	private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
 		final Claims claims = getAllClaimsFromToken(token);
 		return claimsResolver.apply(claims);
 	}
 
+	private <T> T getClaimFromClaims(Claims claims, Function<Claims, T> claimsResolver) {
+		return claimsResolver.apply(claims);
+	}
+
+	private String getUsernameFromClaims(Claims claims) {
+		return getClaimFromClaims(claims, Claims::getSubject);
+	}
+
+	private String getIssuerFromClaims(Claims claims) {
+		return getClaimFromClaims(claims, Claims::getIssuer);
+	}
+
+	private Date getExpirationDateFromClaims(Claims claims) {
+		return getClaimFromClaims(claims, Claims::getExpiration);
+	}
+
+	private Boolean isClaimsIssuedBy(Claims claims, String issuedBy) {
+		final String issuer = getIssuerFromClaims(claims);
+		return StringUtils.equals(issuer, issuedBy);
+	}
+
+	private String getJwtFromClaims(Claims claims) {
+		return (String)claims.get(CLAIM_JWT);
+	}
+
+	private String getWorkflowtFromClaims(Claims claims) {
+		return (String)claims.get(CLAIM_WORKFLOW);
+	}
+	
 	public String getUsernameFromToken(String token) {
 		return getClaimFromToken(token, Claims::getSubject);
 	}
 
-	public String getIssuerFromToken(String token) {
-		return getClaimFromToken(token, Claims::getIssuer);
-	}
-
-	public Date getExpirationDateFromToken(String token) {
-		return getClaimFromToken(token, Claims::getExpiration);
-	}
-
-	public Boolean isTokenExpired(String token) {
-		final Date expiration = getExpirationDateFromToken(token);
-		return expiration.before(new Date());	
-	}
+//	public String getIssuerFromToken(String token) {
+//		return getClaimFromToken(token, Claims::getIssuer);
+//	}
+//
+//	public Date getExpirationDateFromToken(String token) {
+//		return getClaimFromToken(token, Claims::getExpiration);
+//	}
+//
+//	public Boolean isTokenIssuedBy(String token, String issuedBy) {
+//		final String issuer = getIssuerFromToken(token);
+//		return StringUtils.equals(issuer, issuedBy);
+//	}
+//		
+//	public Boolean isTokenExpired(String token) {
+//		final Date expiration = getExpirationDateFromToken(token);
+//		return expiration.before(new Date());	
+//	}
 	
 	/**
 	 * Generate a JWT with the given claims, subject, issuer, expiration period, and the predefined encryption secret.
@@ -102,17 +142,48 @@ public class JwtTokenUtil {
 
 	/**
 	 * Validate the given JWT token for AMP user authentication. 
-	 * @param token
-	 * @param userDetails
-	 * @return
+	 * @param token the given AMP authentication token
+	 * @return AMP user for the JWT if token is valid; null otherwise
 	 */
-	public Boolean validateToken(String token, AmpUser userDetails) {
-		final String username = getUsernameFromToken(token);
-		final String issuer = this.getIssuerFromToken(token);
-		boolean valid = userDetails != null && username.equals(userDetails.getUsername()) && 
-				ISSUER_AMP_AUTH.equals(issuer) &&
-				!isTokenExpired(token);
-		return valid;
+	public AmpUser validateToken(String token) {
+		// get all claims to avoid parsing the token for each claim, and also ensure token is a valid JWT
+		Claims claims = null;
+		try {
+			claims = getAllClaimsFromToken(token);
+		}
+		catch (Exception e) {
+			// catch all possible exceptions during JWS parsing, including ExpiredJwtException
+			log.error("AMP authentication JWT validation failed: invalid JWT");
+			return null;
+		}
+		
+		// username shall not be empty
+		String username = this.getUsernameFromClaims(claims);
+		if (StringUtils.isEmpty(username)) {
+			log.error("AMP authentication JWT validation failed: empty username");
+			return null;
+		}
+
+		// user by username shall exist in AMP
+		AmpUser user = ampUserService.getUser(username);
+		if (user == null) {
+			log.error("AMP authentication JWT validation failed: non-existing user");
+			return null;
+		}		
+
+		// issuer shall be AMP Auth
+		if (!isClaimsIssuedBy(claims, ISSUER_AMP_AUTH)) {
+			log.error("AMP authentication JWT validation failed: invalid issuer");
+			return null;
+		}
+
+		// no need to check expiration as that would have been caught with ExpiredJwtException
+//		if (isTokenExpired(token)) {
+//			log.error("AMP authentication JWT validation failed: token has expired.");
+//			return null;
+//		}
+
+		return user;
 	}
 		
 	/**
@@ -123,11 +194,59 @@ public class JwtTokenUtil {
 	 */
 	public String generateWorkflowEditToken(String jwtToken, String workflowId) {
 		Map<String, Object> claims = new HashMap<>();	
-		claims.put("jwt", jwtToken);
-		claims.put("workflow", workflowId);
+		claims.put(CLAIM_JWT, jwtToken);
+		claims.put(CLAIM_WORKFLOW, workflowId);
 		String username = getUsernameFromToken(jwtToken);
 		log.info("Created workflow edit token: username = " + username + ", workflowId = " + workflowId);
 		return generateToken(claims, username, ISSUER_WORKFLOW_EDIT, amppdPropertyConfig.getWorkflowEditMinutes());
+	}
+	
+	/**
+	 * Validate the given JWT token for workflow edit session. 
+	 * @param wfeToken the given workflow edit token
+	 * @return an ImmutablePair of AMP user and workflow ID included in the token if valid; null otherwise.
+	 */
+	public ImmutablePair<AmpUser, String> validateWorkflowEditToken(String wfeToken) {		
+		// get all claims to avoid parsing the token for each claim, and also ensure token is a valid JWT
+		Claims claims = null;
+		try {
+			claims = getAllClaimsFromToken(wfeToken);
+		}
+		catch (Exception e) {
+			// catch all possible exceptions during JWS parsing, including ExpiredJwtException
+			log.error("Workflow edit JWT validation failed: invalid JWT");
+			return null;
+		}		
+				
+		// AMP authentication JWT shall be valid
+		String jwt = getJwtFromClaims(claims);
+		AmpUser user = validateToken(jwt);
+		if (user == null) {
+			log.error("Workflow edit JWT validation failed: invalid AMP authentication JWT");
+			return null;
+		}
+		
+		// username from the workflow edit JWT shall be the same as that from the AMP authentication JWT
+		String username = getUsernameFromClaims(claims);
+		if (!user.getUsername().equals(username)) {
+			log.error("Workflow edit JWT validation failed: username from the workflow edit JWT is not the same as that from the AMP authentication JWT");
+			return null;
+		}
+		
+		// workflow ID shall not be empty
+		String workflowId = getWorkflowtFromClaims(claims);
+		if (StringUtils.isEmpty(workflowId)) {
+			log.error("Workflow edit JWT validation failed: workflow ID is empty");
+			return null;
+		}
+		
+		// issuer shall be Workflow Edit
+		if (!isClaimsIssuedBy(claims, ISSUER_WORKFLOW_EDIT)) {
+			log.error("Workflow edit JWT validation failed: invalid issuer");
+			return null;
+		}
+		
+		return ImmutablePair.of(user,  workflowId);
 	}
 	
 }
