@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.util.Map;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,13 +11,18 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,11 +30,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.WebUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -42,11 +47,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkflowEditController {
 
-	// workflow edit cookie name
+	// Galaxy root path relative to AMP root path
 	public static final String GALAXY_PATH = "/galaxy";
 	
+	// galaxySession cookie name
+	public static final String WORKFLOW_EDIT_COOKIE = "galaxySession";
+
 	// workflow edit cookie name
-	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
+	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
 	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;	
@@ -71,7 +79,7 @@ public class WorkflowEditController {
 	 *  login to galaxy as AMP workflow edit user and set up galaxy session for workflow edit.
 	 */
 	@PostConstruct
-	public ResponseEntity<String> loginGalaxy() {
+	private ResponseEntity<String> loginGalaxy() {
 		// request Galaxy server for login page
 		String urlRootLogin = galaxyPropertyConfig.getBaseUrl() + "/root/login";
 		ResponseEntity<String> responseRootLogin = restTemplate.getForEntity(urlRootLogin, String.class);
@@ -128,7 +136,7 @@ public class WorkflowEditController {
 	 * logout from galaxy as AMP workflow edit user destroy galaxy session for workflow edit.
 	 */
 	@PreDestroy
-	public ResponseEntity<String> logoutGalaxy() {
+	private ResponseEntity<String> logoutGalaxy() {
 		// TODO get logout csrf token and send logout request to galaxy
 
 		// request Galaxy server logout with CSRF token
@@ -151,6 +159,11 @@ public class WorkflowEditController {
     	}    	
 		return responseUserLogout;
 	}
+	
+	private void refreshGalaxySession() {
+		
+	}
+	
 	
 	/**
 	 * Start a workflow edit session within an authenticated AMP user session.
@@ -214,45 +227,66 @@ public class WorkflowEditController {
 	 */
 	@RequestMapping(value = GALAXY_PATH)
 	public ResponseEntity<String> proxyEdit(
-			@RequestHeader Map<String, String> headers,
+			HttpMethod method,
+			@CookieValue(name = WORKFLOW_EDIT_COOKIE, defaultValue = "") String wfeCookie,
+			@RequestHeader HttpHeaders headers,
 			@RequestBody String body,
-			HttpServletRequest request, HttpServletResponse response) {
+			RequestEntity<String> reqentity,
+			HttpServletRequest request) {
 	    
-		// retrieve workflow edit cookie and validate it
-		Cookie wfeCookie = WebUtils.getCookie(request, WORKFLOW_EDIT_COOKIE);
-		if (!validateWorkflowEditCookie(wfeCookie)) {
-			
+		// retrieve workflow edit cookie and validate it 
+		ImmutablePair<AmpUser, String> pair = validateWorkflowEditCookie(wfeCookie);
+		
+		// respond with unauthorized status if fails
+		if (pair == null) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}
 		
-		// process all headers
-    	HttpHeaders gheaders = new HttpHeaders();
-    	boolean valid = false;
+		// validate request URL, parameters, payload etc
+		String workflowId = pair.getRight();
+		if (!validateRequest(request, workflowId)) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+		}
+		
+		// replace the workflowEdit cookie with galaxySession cookie
+		List<String> cookie = headers.get(HttpHeaders.COOKIE)
 		headers.forEach((headerName, headerValue) -> {
-	        // add all headers to galaxy request except workflow edit cookie
-			if (!isHeaderWorkflowEditCookie(headerName, headerValue)) {
-	        	gheaders.add(headerName,  headerValue);
+			// TODO 
+			// below code assumes Galaxy doesn't send any other cookies during workflow edit;
+			// otherwise, we need to retain other cookies
+			if (isHeaderWorkflowEditCookie(headerName, headerValue)) {
+				HttpCookie gsCookie = new HttpCookie(GALAXY_SESSION_COOKIE, galaxySession);	
+	        	headers.set(headerName, gsCookie.toString());
 	        }
-	    });
+	    });		
 		
-		return null;
+    	// forward the request to Galaxy 
+    	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + request.getQueryString();
+    	RequestEntity<String> grequest = RequestEntity    
+    		     .method(method, url)
+    		     .headers(headers)
+    		     .body(body);
+    	ResponseEntity<String> response = restTemplate.exchange(url, method, grequest, String.class);
+
+    	log.info("Successfully processed workflow edit request " + url + " with response " + response.getStatusCodeValue());
+		return response;
 	}
 	
-	private boolean isHeaderWorkflowEditCookie(String key, String value) {
-		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.startsWith(WORKFLOW_EDIT_COOKIE);
+	private boolean isHeaderWorkflowEditCookie(String key, List<String> value) {
+		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.size() == 1 && value.get(0).contains(WORKFLOW_EDIT_COOKIE);
 	}
 	
-	public boolean validateWorkflowEditCookie(Cookie wfeCookie) {
-		if (wfeCookie == null) {
+	public ImmutablePair<AmpUser, String> validateWorkflowEditCookie(String wfeCookie) {
+		if (StringUtils.isEmpty(wfeCookie)) {
 			log.error("Workflow Edit Cookie is not provided in the request.");
-			return false;
-		}
-			
-		String wfeToken = wfeCookie.getValue();
-		
-		boolean valid = false;
-		return valid;
+			return null;
+		}			
+		return jwtTokenUtil.validateWorkflowEditToken(wfeCookie);
 	}
 	
-	
+	public boolean validateRequest(HttpServletRequest request, String workflowId) {
+
+		return true;
+	}
 	
 }
