@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -15,13 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -51,11 +51,11 @@ public class WorkflowEditController {
 	// Galaxy root path relative to AMP root path
 	public static final String GALAXY_PATH = "/galaxy";
 	
-	// galaxySession cookie name
-	public static final String WORKFLOW_EDIT_COOKIE = "galaxySession";
-
 	// workflow edit cookie name
-	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
+	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
+
+//	// galaxySession cookie name
+//	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
 	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;	
@@ -74,7 +74,7 @@ public class WorkflowEditController {
 	
 	private String csrfToken = null;
 	private String galaxySession = null;
-	private java.net.HttpCookie galaxySessionCookie = null;
+	private HttpCookie galaxySessionCookie = null;
 
 	/**
 	 *  Upon initialization of the controller, 
@@ -86,7 +86,7 @@ public class WorkflowEditController {
 		String urlRootLogin = galaxyPropertyConfig.getBaseUrl() + "/root/login";
 		ResponseEntity<String> responseRootLogin = restTemplate.getForEntity(urlRootLogin, String.class);
 		galaxySession = responseRootLogin.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-		galaxySessionCookie = java.net.HttpCookie.parse(galaxySession).get(0);
+		galaxySessionCookie = HttpCookie.parse(galaxySession).get(0);
 		
 		// retrieve CSRF token from the response body using regex
 		// TODO do we need to enforce utf-8
@@ -123,7 +123,7 @@ public class WorkflowEditController {
     	
     	// retrieve the galaxySession cookie and update the stored value
     	galaxySession = responseUserLogin.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-    	galaxySessionCookie = java.net.HttpCookie.parse(galaxySession).get(0);
+    	galaxySessionCookie = HttpCookie.parse(galaxySession).get(0);
     	
     	// check response status
     	if (responseUserLogin.getStatusCode().isError() || galaxySession == null) {
@@ -164,8 +164,11 @@ public class WorkflowEditController {
 		return responseUserLogout;
 	}
 	
+	/**
+	 * If galaxySession cookie doesn't exists or expired, relogin to Galaxy to get a new one. 
+	 */
 	private void refreshGalaxySession() {
-		
+		// TODO
 	}
 	
 	
@@ -193,7 +196,7 @@ public class WorkflowEditController {
 		
     	// wrap the workflow edit token in a cookie 
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
-	    cookie.setSecure(true);
+//	    cookie.setSecure(true);	// TODO setting secure to true doesn't work on localhost, which uses http instead of https
 	    cookie.setHttpOnly(true);
 	    cookie.setPath(context.getContextPath() + GALAXY_PATH);
 	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
@@ -215,7 +218,7 @@ public class WorkflowEditController {
 	public ResponseEntity<String> endEdit(@PathVariable("workflowId") String workflowId, HttpServletResponse response) {		
     	// unset the workflow edit cookie 
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, null);
-	    cookie.setSecure(true);
+//	    cookie.setSecure(true);
 	    cookie.setHttpOnly(true);
 	    cookie.setPath(context.getContextPath() + GALAXY_PATH);
 	    cookie.setMaxAge(0);
@@ -227,15 +230,21 @@ public class WorkflowEditController {
 	}	
 	
 	/**
-	 * 
+	 * Proxy all requests sent to /rest/galaxy/**, presumably for workflow edit:
+	 * authenticate requests with valid workflow edit cookie, and validate requests parameters and payload;
+	 * send valid request to Galaxy with valid galaxy session cookie, and return response from Galaxy. 
+	 * @param method HTTP method of the workflow edit request
+	 * @param wfeCookie workflow edit cookie attached to the request
+	 * @param body body of the request
+	 * @param request the HttpServletRequest
+	 * @return response from Galaxy, including error response
 	 */
-	@RequestMapping(value = GALAXY_PATH + "/*")
+	@RequestMapping(value = GALAXY_PATH + "/**")
 	public ResponseEntity<String> proxyEdit(
 			HttpMethod method,
-			@CookieValue(name = WORKFLOW_EDIT_COOKIE) String wfeCookie,
+			@CookieValue(name = WORKFLOW_EDIT_COOKIE, required = false) String wfeCookie,
 			@RequestHeader HttpHeaders headers,
-			@RequestBody String body,
-			RequestEntity<String> reqentity,
+			@RequestBody(required = false) String body,
 			HttpServletRequest request) {
 	    
 		// retrieve workflow edit cookie and validate it 
@@ -243,13 +252,15 @@ public class WorkflowEditController {
 		
 		// respond with unauthorized status if fails
 		if (pair == null) {
+			log.error("Unauthorized workflow edit request: " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}
 		
 		// validate request URL, parameters, payload etc
 		String workflowId = pair.getRight();
 		if (!validateRequest(request, workflowId)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+			log.error("Invalid workflow edit request: " + request.getRequestURL());
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
 		}
 		
 		// replace the workflowEdit cookie with galaxySession cookie:
@@ -259,8 +270,7 @@ public class WorkflowEditController {
 		List<String> gcookies = new ArrayList<String>();
 		cookies.forEach((cookie) -> {
 			if (isWorkflowEditCookie(cookie)) {
-				HttpCookie gsCookie = new HttpCookie(galaxySessionCookie.getName(), galaxySessionCookie.getValue());	
-				gcookies.add(gsCookie.toString());
+				gcookies.add(galaxySessionCookie.toString());
 	        }
 			else {
 				gcookies.add(cookie);
@@ -268,16 +278,21 @@ public class WorkflowEditController {
 	    });		
 		headers.put(HttpHeaders.COOKIE, gcookies);
 		
-    	// forward the request to Galaxy 
-    	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + request.getQueryString();
-    	RequestEntity<String> grequest = RequestEntity    
-    		     .method(method, url)
-    		     .headers(headers)
-    		     .body(body);
-    	ResponseEntity<String> response = restTemplate.exchange(grequest, String.class);
-
-    	log.info("Successfully processed workflow edit request " + url + " with response " + response.getStatusCodeValue());
-		return response;
+    	// forward valid request to Galaxy and return response from Galaxy
+    	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + "?" + request.getQueryString();
+    	HttpEntity<String> grequest = new HttpEntity<String>(body, headers);
+    	
+    	ResponseEntity<String> response;
+    	try {
+    		response = restTemplate.exchange(url, method, grequest, String.class);
+	    	log.info("Successfully processed workflow edit request " + url + " with response " + response.getStatusCodeValue());
+    	}
+    	// in case of any Galaxy client/server error return the error response as well
+    	catch (HttpStatusCodeException ex) {
+    		response = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
+	    	log.info("Failed to process workflow edit request " + url + " with error " + ex.getStatusCode());
+    	}
+    	return response;
 	}
 	
 	private boolean isWorkflowEditCookie(String cookie) {
@@ -297,7 +312,7 @@ public class WorkflowEditController {
 	}
 	
 	public boolean validateRequest(HttpServletRequest request, String workflowId) {
-
+		// TODO
 		return true;
 	}
 	

@@ -7,6 +7,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -91,7 +92,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			}			
 		}
 		// otherwise, for AMP user authentication with JWT token
-		else if (SecurityContextHolder.getContext().getAuthentication() == null) {
+		else if (!StringUtils.isEmpty(requestTokenHeader) && SecurityContextHolder.getContext().getAuthentication() == null) {
 			// validate JWT token if auth is turned on 
 			String jwtToken = jwtTokenUtil.retrieveToken(requestTokenHeader);			
 			AmpUser user = jwtTokenUtil.validateToken(jwtToken);					
