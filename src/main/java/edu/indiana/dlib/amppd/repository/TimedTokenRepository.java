@@ -13,7 +13,7 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.TimedToken;
 
 @RepositoryRestResource(exported = false)
-public interface TimedTokenRepository extends CrudRepository<TimedToken, Long>{		
+public interface TimedTokenRepository extends CrudRepository<TimedToken, Long> {		
 	Optional<TimedToken> findByToken(String token);		
 	Optional<TimedToken> findByUser(AmpUser user);
 

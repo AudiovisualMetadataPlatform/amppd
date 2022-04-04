@@ -176,11 +176,11 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 //	public static final List<String> HIDE_OUTPUTS = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");	
 //	public static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
 
-	@Value("${amppd.refreshResultsStatusMinutes}")
-	private int REFRESH_STATUS_MINUTES;
+//	@Value("${amppd.refreshResultsStatusMinutes}")
+//	private int REFRESH_STATUS_MINUTES;
 	
-	@Value("${amppd.refreshResultsTableMinutes}")
-	private int REFRESH_TABLE_MINUTES;
+//	@Value("${amppd.refreshResultsTableMinutes}")
+//	private int REFRESH_TABLE_MINUTES;
 		
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
@@ -425,7 +425,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				// skip the primaryfile if all of its results have been recently refreshed;
 				// this allows rerun of the refresh to continue with unfinished primaryfiles in case of a failure
 				Date oldestDateRefreshed = workflowResultRepository.findOldestDateRefreshedByPrimaryfileId(primaryfile.getId());
-				if (isDateRefreshedRecent(oldestDateRefreshed, REFRESH_TABLE_MINUTES)) {
+				if (isDateRefreshedRecent(oldestDateRefreshed, amppdPropertyConfig.getRefreshResultsTableMinutes())) {
 					log.info("Skipping primaryfile " + primaryfile.getId() + " as its results are recently refreshed.");
 					continue;
 				}
@@ -748,7 +748,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	protected List<WorkflowResult> deleteObsoleteWorkflowResults(List<Long> failedPrimaryfileIds) {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
-		Date dateObsolete = DateUtils.addMinutes(new Date(), -REFRESH_TABLE_MINUTES);		
+		Date dateObsolete = DateUtils.addMinutes(new Date(), -amppdPropertyConfig.getRefreshResultsTableMinutes());		
 		List<WorkflowResult> deleteResults = null;
 		
 		try {

@@ -7,6 +7,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
@@ -41,11 +43,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
-	  private int MIN_PASSWORD_LENGTH = 8;
-	  private int MIN_USERNAME_LENGTH = 3;
-	  private int MIN_NAME_LENGTH = 1;
+	  public static final int MIN_PASSWORD_LENGTH = 8;
+	  public static final int MIN_USERNAME_LENGTH = 3;
+	  public static final int MIN_NAME_LENGTH = 1;
 
+	  @Autowired
 	  private AmppdPropertyConfig amppdPropertyConfig;		
+
+	  @Autowired
 	  private AmppdUiPropertyConfig amppdUiPropertyConfig;
 		
 	  @Autowired
@@ -57,20 +62,18 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  @Autowired
 	  private JavaMailSender mailSender;
 
-	  private static String ampAdmin ;
-	  private static int passwordResetTokenExpiration;
-	  private static int accountActivationTokenExpiration;
-	  private static String uiUrl ;	  
+	  private String ampAdmin ;
+	  private int resetPasswordMinutes;
+	  private int activateAccountDays;
+	  private String uiUrl ;	  
 	  
-	  @Autowired 
-	  public AmpUserServiceImpl(AmppdPropertyConfig amppdPropertyConfig, AmppdUiPropertyConfig amppdUiPropertyConfig) { 
-		  this.amppdPropertyConfig = amppdPropertyConfig;
-		  this.amppdUiPropertyConfig = amppdUiPropertyConfig;
+	  @PostConstruct
+	  public void init() {
 		  ampAdmin = amppdPropertyConfig.getAdmin();
 		  log.trace("Fetched AMP admin email id from property file:"+ampAdmin);
 		  uiUrl = amppdUiPropertyConfig.getUrl();
-		  passwordResetTokenExpiration = amppdPropertyConfig.getPasswordResetTokenExpiration();
-		  accountActivationTokenExpiration = amppdPropertyConfig.getAccountActivationTokenExpiration();
+		  resetPasswordMinutes = amppdPropertyConfig.getResetPasswordMinutes();
+		  activateAccountDays = amppdPropertyConfig.getActivateAccountDays();
 	  } 
 
 	  @Override
@@ -350,12 +353,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String url = new String();
     	log.info("Password reset token created successfully");
     	if (type.equalsIgnoreCase("reset password")) {
-    		String token = createTimedToken(user, passwordResetTokenExpiration);
+    		String token = createTimedToken(user, resetPasswordMinutes);
     		url = contextPath + "/account/reset-password/" + token;
     		log.info("Constructed reset token url, constructing email attributes");
     	}
     	else if (type.equalsIgnoreCase("account approval")) {
-    		String token = createTimedToken(user, accountActivationTokenExpiration);
+    		String token = createTimedToken(user, activateAccountDays * 24);
     		url = contextPath + "/account/activate/" + token;
     		log.info("Constructed activation token url, constructing email attributes");
     	}	
@@ -402,12 +405,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 	
 	@Transactional
-	public String createTimedToken(AmpUser user, int expirationDuration) {
+	public String createTimedToken(AmpUser user, int expireMinutes) {
 		int res = 0;
 		String token = UUID.randomUUID().toString();
 		TimedToken myToken=new TimedToken();
 		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.SECOND, expirationDuration);
+		calendar.add(Calendar.MINUTE, expireMinutes);
 		int userTokenExists = timedTokenRepository.ifExists(user.getId());
 		log.info("User token exists status is:"+userTokenExists+" for user id:"+user.getId());
 		if(userTokenExists >= 1){

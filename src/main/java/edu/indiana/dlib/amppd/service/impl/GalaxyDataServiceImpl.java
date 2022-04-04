@@ -53,7 +53,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	private History sharedHistory;
 	
 	/**
-	 *  initialize GalaxyDataService bean.
+	 *  Initialize galaxy API clients for GalaxyDataService bean.
 	 */
 	@PostConstruct
 	public void init() {

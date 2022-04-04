@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.jmchilton.blend4j.galaxy.ToolsClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
+import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
@@ -38,6 +42,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@Getter
 	private WorkflowsClient workflowsClient;
 	
+	@Getter
+	private ToolsClient toolsClient;
+	
 	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
 			
@@ -47,6 +54,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@PostConstruct
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
+		toolsClient = galaxyApiService.getGalaxyInstance().getToolsClient();
 	}	
 	
 	/**
@@ -107,6 +115,57 @@ public class WorkflowServiceImpl implements WorkflowService {
 		return filterWorkflows;			
 		
 //		return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.showWorkflow(String, Boolean, Boolean)
+	 */	
+	@Override
+	public WorkflowDetails showWorkflow(String workflowId, Boolean instance, Boolean includeToolName) {
+		// by default, not for instance
+		if (instance == null) {
+			instance = false;
+		}
+		
+		// retrieve workflow details by workflow ID from galaxy
+		WorkflowDetails workflowDetails = null;
+		if (instance) {
+			workflowDetails = workflowsClient.showWorkflowInstance(workflowId);
+		}
+		else {
+			workflowDetails = workflowsClient.showWorkflow(workflowId);
+		}
+		
+		// by default, include tool name
+		if (includeToolName == null) {
+			includeToolName = true;
+		}		
+
+		// retrieve tool name by tool ID for each tool in the workflow steps
+		if (includeToolName && workflowDetails != null) {
+			Collection<WorkflowStepDefinition> steps = workflowDetails.getSteps().values();
+			for (WorkflowStepDefinition step : steps) {
+				String toolId = step.getToolId();
+				if (!StringUtils.isEmpty(toolId)) {
+					Tool tool = toolsClient.showTool(toolId);					
+					if (tool != null) {
+						String toolName = tool.getName();
+						// use tool name if not empty, otherwise use tool ID as name
+						if (!StringUtils.isEmpty(toolName)) {
+							step.setToolName(toolName);
+						}
+						else {
+							step.setToolName(toolId);
+						}					
+					}
+				}
+			}
+		}
+		
+		String store = instance ? "" : "stored ";
+		String include = includeToolName ? " with" : " without";
+		log.info("Successfully retrieved workflow with " + store + "ID " + workflowId + include + " tool name.");
+		return workflowDetails;
 	}
 	
 	/**
