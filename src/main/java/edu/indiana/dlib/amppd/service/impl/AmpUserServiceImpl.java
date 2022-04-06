@@ -536,8 +536,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			// The alternative is to override DB info with config info, but we chose not to do so for now.			
 			if (!StringUtils.equals(encryppw, admin.getPassword()) ||
 					!StringUtils.equals(adminEmail, admin.getEmail()) ||
-					StringUtils.equals(ADMIN_FIRST_NAME, admin.getFirstName()) ||
-					StringUtils.equals(ADMIN_LAST_NAME, admin.getLastName())) {
+					!StringUtils.equals(ADMIN_FIRST_NAME, admin.getFirstName()) ||
+					!StringUtils.equals(ADMIN_LAST_NAME, admin.getLastName())) {
 				log.warn("The AMP admin user account already exists, but its password, email, or name is different from the configuration. Please verify/update your configuration to be consistent with the database.");			
 			}			
 		}
@@ -548,7 +548,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			ampUserRepository.save(admin);
 			log.info("Activated the new or existing AMP admin account to be ready for use.");
 		}
-		
+		else {
+			log.info("AMP admin alaredy exists and has been activated.");
+		}
 		return admin;
 	}
 	
