@@ -102,11 +102,15 @@ public class WorkflowEditController {
     	headers.add(HttpHeaders.COOKIE, galaxySession);
     	headers.setContentType(MediaType.APPLICATION_JSON);
     	
-    	// populate login request payload with workflow editor user credentials and CSRF token
+    	// populate login request payload with galaxy workflow editor super user credentials and CSRF token
     	String urlRedirect = "/"; //"/workflow/editor?id=" + workflowId;
     	GalaxyLoginRequest glr = new GalaxyLoginRequest(
-    			galaxyPropertyConfig.getUsernameWorkflowEdit(),
-    			galaxyPropertyConfig.getPasswordWorkflowEdit(),
+    			// Below AMP WorkflowEditUser is currently not used, instead, the AMP super Galaxy user above is used for workflow edit,
+    			// to avoid complexity of access control in Galaxy. We can revert to use the below user as needed in the future.
+//    			galaxyPropertyConfig.getUsernameWorkflowEdit(),
+//    			galaxyPropertyConfig.getPasswordWorkflowEdit(),
+    			galaxyPropertyConfig.getUsername(),
+    			galaxyPropertyConfig.getPassword(),
     			null,
     			urlRedirect,
     			csrfToken,
