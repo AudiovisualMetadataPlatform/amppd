@@ -297,10 +297,7 @@ public class WorkflowEditController {
 	    	log.info("Failed to process workflow edit request " + url + " with error " + ex.getStatusCode());
     	}
     	
-    	HttpHeaders gheaders = new HttpHeaders();
-    	gheaders.addAll(response.getHeaders());
-		gheaders.add("X-Frame-Options", "SAMEORIGIN");
-    	gheaders.forEach((key, value) -> {
+    	response.getHeaders().forEach((key, value) -> {
 			log.debug("Galaxy response header " + key + ": " + value);
 	    });    	
 		log.debug("Galaxy response body length: " + response.getBody().length());
