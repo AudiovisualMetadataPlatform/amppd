@@ -289,13 +289,22 @@ public class WorkflowEditController {
     	ResponseEntity<String> response;
     	try {
     		response = restTemplate.exchange(url, method, grequest, String.class);
-	    	log.info("Successfully processed workflow edit request " + url + " with response " + response.getStatusCodeValue());
+        	log.info("Successfully processed workflow edit request " + url + " with response " + response.getStatusCodeValue());
     	}
     	// in case of any Galaxy client/server error return the error response as well
     	catch (HttpStatusCodeException ex) {
     		response = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
 	    	log.info("Failed to process workflow edit request " + url + " with error " + ex.getStatusCode());
     	}
+    	
+    	response.getHeaders().forEach((key, value) -> {
+			log.debug("Galaxy response header " + key + ": " + value);
+	    });    	
+    	String gbody = response.getBody();
+		log.debug("Galaxy response body length: " + gbody.length());
+		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
+//		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
+		
     	return response;
 	}
 	
