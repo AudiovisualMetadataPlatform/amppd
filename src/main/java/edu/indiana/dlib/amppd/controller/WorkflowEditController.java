@@ -300,7 +300,9 @@ public class WorkflowEditController {
     	response.getHeaders().forEach((key, value) -> {
 			log.debug("Galaxy response header " + key + ": " + value);
 	    });    	
-		log.debug("Galaxy response body length: " + response.getBody().length());
+    	String gbody = response.getBody();
+		log.debug("Galaxy response body length: " + gbody.length());
+		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
 		
     	return response;
