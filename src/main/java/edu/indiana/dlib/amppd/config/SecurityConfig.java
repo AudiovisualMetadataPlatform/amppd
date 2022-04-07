@@ -104,7 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		// if authentication is turned on (either auth property is not defined or is true), add JWT token filter
 		if (amppdPropertyConfig.getAuth() == null || amppdPropertyConfig.getAuth()) {
-			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			httpSecurity.cors().and().csrf().disable().headers().frameOptions().sameOrigin().and().authorizeRequests()
 			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/forgot-password").permitAll()
@@ -128,7 +128,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 		// otherwise permit all requests
 		else {
-			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			httpSecurity.cors().and().csrf().disable().headers().frameOptions().sameOrigin().and().authorizeRequests()
 			.antMatchers("/**").permitAll()
 			.anyRequest().authenticated().and().
 			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
