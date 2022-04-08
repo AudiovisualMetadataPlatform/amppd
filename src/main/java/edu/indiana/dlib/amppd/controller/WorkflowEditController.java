@@ -286,26 +286,39 @@ public class WorkflowEditController {
     	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + "?" + request.getQueryString();
     	HttpEntity<String> grequest = new HttpEntity<String>(body, headers);
     	
-    	ResponseEntity<String> response;
+    	String gbody;
+    	HttpHeaders gheaders;
+    	HttpStatus gstatus;    	
     	try {
-    		response = restTemplate.exchange(url, method, grequest, String.class);
-        	log.info("Successfully processed workflow edit request " + url + " with response " + response.getStatusCodeValue());
+    		ResponseEntity<String> gresponse = restTemplate.exchange(url, method, grequest, String.class);
+    		gbody = gresponse.getBody();
+    		gheaders = gresponse.getHeaders();
+    		gstatus = gresponse.getStatusCode();
+        	log.info("Successfully processed workflow edit request " + url + " with response status " + gstatus);
     	}
     	// in case of any Galaxy client/server error return the error response as well
     	catch (HttpStatusCodeException ex) {
-    		response = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
-	    	log.info("Failed to process workflow edit request " + url + " with error " + ex.getStatusCode());
+    		gbody = ex.getResponseBodyAsString();
+    		gheaders = ex.getResponseHeaders();
+    		gstatus = ex.getStatusCode();
+//    		gresponse = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
+	    	log.info("Failed to process workflow edit request " + url + " with error " + gstatus);
     	}
     	
-    	response.getHeaders().forEach((key, value) -> {
+    	gheaders.forEach((key, value) -> {
 			log.debug("Galaxy response header " + key + ": " + value);
 	    });    	
-    	String gbody = response.getBody();
 		log.debug("Galaxy response body length: " + gbody.length());
 		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
 		
-    	return response;
+		// remove CONTENT_LENGTH header as it could cause truncation of response body
+		// note that we can't directly modify gheaders as it's readonly
+    	HttpHeaders rheaders = new HttpHeaders();
+    	rheaders.addAll(gheaders);
+    	rheaders.remove(HttpHeaders.CONTENT_LENGTH);
+    	ResponseEntity<String> response = new ResponseEntity<String>(gbody, rheaders, gstatus);    	
+		return response;
 	}
 	
 	private boolean isWorkflowEditCookie(String cookie) {
