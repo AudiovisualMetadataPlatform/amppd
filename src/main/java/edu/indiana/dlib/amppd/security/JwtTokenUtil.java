@@ -246,6 +246,7 @@ public class JwtTokenUtil {
 			return null;
 		}
 		
+		log.debug("Workflow edit token validation suceeded for user " + username + " and workflow " + workflowId);
 		return ImmutablePair.of(user,  workflowId);
 	}
 	

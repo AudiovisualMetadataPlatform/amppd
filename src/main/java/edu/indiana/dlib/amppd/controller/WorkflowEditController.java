@@ -250,6 +250,7 @@ public class WorkflowEditController {
 			@RequestHeader HttpHeaders headers,
 			@RequestBody(required = false) byte[] body,
 			HttpServletRequest request) {
+	    log.debug("Proxying workflow edit request " + method + " " + request.getRequestURL() + "...");
 	    
 		// retrieve workflow edit cookie and validate it 
 		ImmutablePair<AmpUser, String> pair = validateWorkflowEditCookie(wfeCookie);
