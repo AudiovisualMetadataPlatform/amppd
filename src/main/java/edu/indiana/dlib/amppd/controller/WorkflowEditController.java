@@ -287,6 +287,10 @@ public class WorkflowEditController {
 		headers.remove(HttpHeaders.ORIGIN);
 		headers.remove(HttpHeaders.REFERER);		
 		
+    	headers.forEach((key, value) -> {
+			log.debug("Galaxy request header " + key + ": " + value);
+	    });    	
+		
     	// forward valid request to Galaxy and return response from Galaxy
 		String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
     	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + query;
