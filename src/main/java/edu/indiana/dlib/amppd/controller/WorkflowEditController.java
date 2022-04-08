@@ -285,20 +285,22 @@ public class WorkflowEditController {
 		// remove the Origin and Referer header to avoid cors request failure 
 		// due to strict-origin-when-cross-origin Referrer Policy on Galaxy side
 		headers.remove(HttpHeaders.ORIGIN);
-		headers.remove(HttpHeaders.REFERER);		
+		headers.remove(HttpHeaders.REFERER);
 		
-    	headers.forEach((key, value) -> {
-			log.debug("Galaxy request header " + key + ": " + value);
-	    });    	
+		log.debug("Galaxy request header " + headers);			
+//    	headers.forEach((key, value) -> {
+//			log.debug("Galaxy request header " + headers);
+//	    });    	
 		
-    	// forward valid request to Galaxy and return response from Galaxy
+		// set up request to Galaxy
 		String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
     	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + query;
-    	HttpEntity<byte[]> grequest = new HttpEntity<byte[]>(body, headers);
-    	
+    	HttpEntity<byte[]> grequest = new HttpEntity<byte[]>(body, headers);    	
     	byte[] gbody;
     	HttpHeaders gheaders;
-    	HttpStatus gstatus;    	
+    	HttpStatus gstatus;    
+    	    	
+    	// forward request to Galaxy and receive response from Galaxy
     	try {
     		ResponseEntity<byte[]> gresponse = restTemplate.exchange(url, method, grequest, byte[].class);
     		gbody = gresponse.getBody();
@@ -321,12 +323,15 @@ public class WorkflowEditController {
 //		log.debug("Galaxy response body length: " + gbody.length);
 //		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
+		log.debug("Galaxy response header " + gheaders);	
 		
 		// remove CONTENT_LENGTH header as it could cause truncation of response body
 		// note that we can't directly modify gheaders as it's readonly
     	HttpHeaders rheaders = new HttpHeaders();
     	rheaders.addAll(gheaders);
     	rheaders.remove(HttpHeaders.CONTENT_LENGTH);
+
+    	// return workflow edit response
     	ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(gbody, rheaders, gstatus);    	
 		return response;
 	}
