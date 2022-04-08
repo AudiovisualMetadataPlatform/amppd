@@ -244,11 +244,11 @@ public class WorkflowEditController {
 	 * @return response from Galaxy, including error response
 	 */
 	@RequestMapping(value = GALAXY_PATH + "/**")
-	public ResponseEntity<String> proxyEdit(
+	public ResponseEntity<byte[]> proxyEdit(
 			HttpMethod method,
 			@CookieValue(name = WORKFLOW_EDIT_COOKIE, required = false) String wfeCookie,
 			@RequestHeader HttpHeaders headers,
-			@RequestBody(required = false) String body,
+			@RequestBody(required = false) byte[] body,
 			HttpServletRequest request) {
 	    
 		// retrieve workflow edit cookie and validate it 
@@ -284,13 +284,13 @@ public class WorkflowEditController {
 		
     	// forward valid request to Galaxy and return response from Galaxy
     	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + "?" + request.getQueryString();
-    	HttpEntity<String> grequest = new HttpEntity<String>(body, headers);
+    	HttpEntity<byte[]> grequest = new HttpEntity<byte[]>(body, headers);
     	
-    	String gbody;
+    	byte[] gbody;
     	HttpHeaders gheaders;
     	HttpStatus gstatus;    	
     	try {
-    		ResponseEntity<String> gresponse = restTemplate.exchange(url, method, grequest, String.class);
+    		ResponseEntity<byte[]> gresponse = restTemplate.exchange(url, method, grequest, byte[].class);
     		gbody = gresponse.getBody();
     		gheaders = gresponse.getHeaders();
     		gstatus = gresponse.getStatusCode();
@@ -298,7 +298,7 @@ public class WorkflowEditController {
     	}
     	// in case of any Galaxy client/server error return the error response as well
     	catch (HttpStatusCodeException ex) {
-    		gbody = ex.getResponseBodyAsString();
+    		gbody = ex.getResponseBodyAsByteArray();
     		gheaders = ex.getResponseHeaders();
     		gstatus = ex.getStatusCode();
 //    		gresponse = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
@@ -308,7 +308,7 @@ public class WorkflowEditController {
     	gheaders.forEach((key, value) -> {
 			log.debug("Galaxy response header " + key + ": " + value);
 	    });    	
-		log.debug("Galaxy response body length: " + gbody.length());
+		log.debug("Galaxy response body length: " + gbody.length);
 //		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
 		
@@ -317,7 +317,7 @@ public class WorkflowEditController {
     	HttpHeaders rheaders = new HttpHeaders();
     	rheaders.addAll(gheaders);
     	rheaders.remove(HttpHeaders.CONTENT_LENGTH);
-    	ResponseEntity<String> response = new ResponseEntity<String>(gbody, rheaders, gstatus);    	
+    	ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(gbody, rheaders, gstatus);    	
 		return response;
 	}
 	
