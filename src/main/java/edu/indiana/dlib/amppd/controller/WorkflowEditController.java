@@ -288,7 +288,8 @@ public class WorkflowEditController {
 		headers.remove(HttpHeaders.REFERER);		
 		
     	// forward valid request to Galaxy and return response from Galaxy
-    	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + "?" + request.getQueryString();
+		String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
+    	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + query;
     	HttpEntity<byte[]> grequest = new HttpEntity<byte[]>(body, headers);
     	
     	byte[] gbody;
@@ -307,12 +308,12 @@ public class WorkflowEditController {
     		gheaders = ex.getResponseHeaders();
     		gstatus = ex.getStatusCode();
 //    		gresponse = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
-	    	log.info("Failed to process workflow edit request " + url + " with error " + gstatus);
+	    	log.error("Failed to process workflow edit request " + method + " " + url + " with error " + gstatus);
     	}
     	
-    	gheaders.forEach((key, value) -> {
-			log.debug("Galaxy response header " + key + ": " + value);
-	    });    	
+//    	gheaders.forEach((key, value) -> {
+//			log.debug("Galaxy response header " + key + ": " + value);
+//	    });    	
 //		log.debug("Galaxy response body length: " + gbody.length);
 //		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
