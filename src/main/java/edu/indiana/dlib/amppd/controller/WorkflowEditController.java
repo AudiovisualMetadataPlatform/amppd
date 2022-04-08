@@ -268,8 +268,8 @@ public class WorkflowEditController {
 		}
 		
 		// replace the workflowEdit cookie with galaxySession cookie:
-		// most likely Galaxy doesn't send any other cookies during workflow edit;
-		// but just in case, we need to retain other cookies
+		// most likely Galaxy doesn't send any other cookies during workflow edit, 
+		// but just in case, we need to retain other cookies;
 		List<String> cookies = headers.get(HttpHeaders.COOKIE);
 		List<String> gcookies = new ArrayList<String>();
 		cookies.forEach((cookie) -> {
@@ -281,6 +281,11 @@ public class WorkflowEditController {
 			}
 	    });		
 		headers.put(HttpHeaders.COOKIE, gcookies);
+		
+		// remove the Origin and Referer header to avoid cors request failure 
+		// due to strict-origin-when-cross-origin Referrer Policy on Galaxy side
+		headers.remove(HttpHeaders.ORIGIN);
+		headers.remove(HttpHeaders.REFERER);		
 		
     	// forward valid request to Galaxy and return response from Galaxy
     	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + "?" + request.getQueryString();
@@ -294,7 +299,7 @@ public class WorkflowEditController {
     		gbody = gresponse.getBody();
     		gheaders = gresponse.getHeaders();
     		gstatus = gresponse.getStatusCode();
-        	log.info("Successfully processed workflow edit request " + url + " with response status " + gstatus);
+        	log.info("Successfully processed workflow edit request " + method + " " + url + " with response status " + gstatus + " and body length " + gbody.length);
     	}
     	// in case of any Galaxy client/server error return the error response as well
     	catch (HttpStatusCodeException ex) {
@@ -308,7 +313,7 @@ public class WorkflowEditController {
     	gheaders.forEach((key, value) -> {
 			log.debug("Galaxy response header " + key + ": " + value);
 	    });    	
-		log.debug("Galaxy response body length: " + gbody.length);
+//		log.debug("Galaxy response body length: " + gbody.length);
 //		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
 		
