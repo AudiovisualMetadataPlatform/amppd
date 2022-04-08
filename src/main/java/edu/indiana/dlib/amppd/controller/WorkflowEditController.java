@@ -309,7 +309,7 @@ public class WorkflowEditController {
 			log.debug("Galaxy response header " + key + ": " + value);
 	    });    	
 		log.debug("Galaxy response body length: " + gbody.length());
-		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
+//		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
 		
 		// remove CONTENT_LENGTH header as it could cause truncation of response body
