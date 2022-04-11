@@ -289,10 +289,10 @@ public class WorkflowEditController {
 	    });		
 		headers.put(HttpHeaders.COOKIE, gcookies);
 		
-		// remove the Origin and Referer header to avoid cors request failure 
-		// due to strict-origin-when-cross-origin Referrer Policy on Galaxy side
-		headers.remove(HttpHeaders.ORIGIN);
-		headers.remove(HttpHeaders.REFERER);
+//		// remove the Origin and Referer header to avoid cors request failure 
+//		// due to strict-origin-when-cross-origin Referrer Policy on Galaxy side
+//		headers.remove(HttpHeaders.ORIGIN);
+//		headers.remove(HttpHeaders.REFERER);
 		
 		log.debug("Galaxy request header " + headers);			
 //    	headers.forEach((key, value) -> {
