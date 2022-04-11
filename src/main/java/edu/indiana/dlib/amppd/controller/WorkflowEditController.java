@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.model.AmpUser;
@@ -56,6 +58,9 @@ public class WorkflowEditController {
 
 //	// galaxySession cookie name
 //	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
+	
+	@Autowired
+	private AmppdUiPropertyConfig amppduiPropertyConfig;	
 	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;	
@@ -243,6 +248,7 @@ public class WorkflowEditController {
 	 * @param request the HttpServletRequest
 	 * @return response from Galaxy, including error response
 	 */
+	@CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "*", allowCredentials = "true" )
 	@RequestMapping(value = GALAXY_PATH + "/**")
 	public ResponseEntity<byte[]> proxyEdit(
 			HttpMethod method,
