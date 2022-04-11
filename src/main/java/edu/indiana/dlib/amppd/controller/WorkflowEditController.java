@@ -248,7 +248,7 @@ public class WorkflowEditController {
 	 * @param request the HttpServletRequest
 	 * @return response from Galaxy, including error response
 	 */
-	@CrossOrigin(origins = "*", allowedHeaders = "*", exposedHeaders = "*", allowCredentials = "true" )
+	@CrossOrigin(origins = "https://amp-test.dlib.indiana.edu", allowedHeaders = "*", exposedHeaders = "*", allowCredentials = "true" )
 	@RequestMapping(value = GALAXY_PATH + "/**")
 	public ResponseEntity<byte[]> proxyEdit(
 			HttpMethod method,
