@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.config;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 /*
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,6 +44,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.google.common.net.HttpHeaders;
+
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
 
@@ -51,6 +54,9 @@ import edu.indiana.dlib.amppd.security.JwtRequestFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	private AmppdUiPropertyConfig amppduiPropertyConfig;	
+	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
@@ -86,14 +92,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration config = new CorsConfiguration();
 
-//	    // only allow AMP UI as origin, can add target systems as needed
-//	    config.setAllowedOrigins(Arrays.asList(amppduiUrl));
+	    // only allow AMP UI as origin, can add target systems as needed
+	    String origin = StringUtils.substringBeforeLast(amppduiPropertyConfig.getUrl(), "/");
+	    config.setAllowedOrigins(Arrays.asList(origin));
 	    
-	    // use PATCH and not PUT
-	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE"));
+	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
+	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
 
-	    // 'location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
-	    config.setExposedHeaders(Arrays.asList("Authorization", "Location"));
+	    // 'Location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
+	    // "Authorization" header is needed by most AMP UI requests;
+	    // for Galaxy workflow editor requests, Set-Cookie header is needed
+	    config.setExposedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION, HttpHeaders.LOCATION, HttpHeaders.SET_COOKIE));
+	    
+	    config.setAllowedHeaders(Arrays.asList(CorsConfiguration.ALL));
+	    config.setAllowCredentials(true);
 	    
 	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 	    source.registerCorsConfiguration("/**", config.applyPermitDefaultValues());
