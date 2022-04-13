@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
-public class Category {
+public class MgmCategory {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;

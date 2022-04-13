@@ -45,7 +45,7 @@ public class MgmScoringTool {
 	//@NotNull
 	@Index
 	@ManyToOne
-    private Category category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
+    private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
     
 	//@NotNull
 	@Index
