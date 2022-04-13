@@ -96,6 +96,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	    String origin = StringUtils.substringBeforeLast(amppduiPropertyConfig.getUrl(), "/");
 	    config.setAllowedOrigins(Arrays.asList(origin));
 	    
+	    // Note:
+	    // Below code is a tmp tweak to allow AMP UI dev instance to point to AMP Rest Test instance,
+	    // for the convenience of AMP frontend development. 
+	    // TODO The tmp code below should be removed in delivered AMP package.
+	    if (StringUtils.equalsIgnoreCase(amppdPropertyConfig.getEnvironment(), "tst")) {
+	    	config.addAllowedOrigin("(http://localhost:8500/");
+	    }	   
+	    
 	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
 	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
 
