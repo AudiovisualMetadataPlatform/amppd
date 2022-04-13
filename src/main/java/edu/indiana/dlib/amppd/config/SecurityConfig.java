@@ -46,7 +46,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.google.common.net.HttpHeaders;
 
-import edu.indiana.dlib.amppd.controller.WorkflowEditController;
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
 import lombok.extern.slf4j.Slf4j;
