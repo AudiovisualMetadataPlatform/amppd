@@ -46,12 +46,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.google.common.net.HttpHeaders;
 
+import edu.indiana.dlib.amppd.controller.WorkflowEditController;
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
@@ -101,7 +104,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	    // for the convenience of AMP frontend development. 
 	    // TODO The tmp code below should be removed in delivered AMP package.
 	    if (StringUtils.equalsIgnoreCase(amppdPropertyConfig.getEnvironment(), "tst")) {
-	    	config.addAllowedOrigin("(http://localhost:8500/");
+	    	config.addAllowedOrigin("http://localhost:8500");
+	    	log.warn("Temporarily adding http://localhost:8500 to allowed origins for AMP UI dev work");
 	    }	   
 	    
 	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
