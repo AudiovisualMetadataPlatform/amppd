@@ -103,7 +103,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				logger.debug("Authentication succeeded with valid JWT for user " + user.getUsername());
 			}
 			else {
-				logger.error("Authentication failed with invalid JWT for user " + user.getUsername());
+				logger.error("Authentication failed with invalid JWT.");
 			}		
 		}	
 //		else {
