@@ -31,6 +31,7 @@ public class AmppdPropertyConfig {
     @NotNull private String username; 
     @NotNull private String password; 
     @NotNull private String url;
+    @NotNull private String corsOriginPattern;
     @NotNull private Boolean auth;
     @NotNull private String jwtSecret;
 //    @NotNull private String workflowEditSecret;
