@@ -41,27 +41,25 @@ public class MgmScoringTool {
     private Long id;
        
 	//@NotNull
+	@Index
     private String name;
         
 	//@NotNull
     private String description;
         
 	//@NotNull
-	@Index
-	@ManyToOne
-    private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
-    
-	//@NotNull
-	@Index
-    private String mgmToolId;	// ID of the associated MGM in galaxy
-        
-	//@NotNull
     private String version;	
     
-	//@NotNull
+    //@NotNull
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+    private Date upgradeDate; // date when this version of the MST is installed 
+
+    //@NotNull
+	@Index
     private String workflowResultDataType; // Galaxy data type of the workflow result to be scored by the MST
     
 	//@NotNull
+	@Index
     private String groundTruthFormat; // format of the groundtruth file used by the MST
     
 	//@NotNull
@@ -73,9 +71,13 @@ public class MgmScoringTool {
 	//@NotNull
     private String scriptPath; // path of the executable script of the MST, relative to the script root directory
     
-    //@NotNull
+	//@NotNull
 	@Index
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date upgradeDate; // date when this version of the MST is installed 
-
+	@ManyToOne
+    private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
+    
+	//@NotNull
+	@Index
+    private String mgmToolId;	// ID of the associated MGM in galaxy
+        
 }
