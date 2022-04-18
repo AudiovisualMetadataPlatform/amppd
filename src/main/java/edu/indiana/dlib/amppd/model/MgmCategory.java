@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * This class contains information of the category an MGM belongs to, corresponding to a section in Galaxy tool panel.
- * Note that the table for this class is manually maintained, 
+ * Note that the desription part of this table is manually maintained, but the section info should be populated from Galaxy Tool API calls.
  * @author yingfeng
  *
  */

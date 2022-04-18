@@ -1,9 +1,9 @@
 package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
-import java.util.Map;
 
 import javax.jdo.annotations.Index;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -11,9 +11,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +31,7 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Data
 @NoArgsConstructor
 public class MgmScoringTool {
@@ -61,7 +65,10 @@ public class MgmScoringTool {
     private String groundTruthFormat; // format of the groundtruth file used by the MST
     
 	//@NotNull
-    private Map<String, String> parameters; // <name, format> map of the parameters of the MST
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private String parameters; // JSON representation of the MST parameters map as <name, format> pairs
+//  private Map<String, String> parameters; // <name, format> map of the parameters of the MST
     
 	//@NotNull
     private String scriptPath; // path of the executable script of the MST, relative to the script root directory

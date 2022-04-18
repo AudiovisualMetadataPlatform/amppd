@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.Map;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -45,13 +43,16 @@ public class MgmEvaluationTest {
     private WorkflowResult workflowResult; // the workflow result evaluated by this test
     
 	//@NotNull
-    private Map<String, Object> parameters; // <name, value> map of the parameters of the MET
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private String parameters; // JSON representation of the MET parameters map as <name, value> pairs 
+//    private Map<String, Object> parameters; // <name, value> map of the parameters of the MET
 
     private String scorePath;   // path of the output JSON score file, relative to the score root directory
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
-    private String scores;   // json representation of the output scores
+    private String scores;   // JSON representation of the output scores
     
     // Note: The scores can also be stored in formats other than JSON, (ex. CSV or binary array of float numbers), depending on the need of visualization tools
 
