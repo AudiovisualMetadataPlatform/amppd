@@ -1,11 +1,14 @@
 package edu.indiana.dlib.amppd.model;
 
+import javax.jdo.annotations.Index;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -32,16 +35,7 @@ public class MgmEvaluationTest {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-       
-	//@NotNull
-    private MgmScoringTool mst; // MGM scoring tool used by this test
-    
-	//@NotNull
-    private PrimaryfileSupplement groundTruth;	// the groundtruth used by this test, uploaded as a PrimaryfileSupplement
-    
-    //@NotNull
-    private WorkflowResult workflowResult; // the workflow result evaluated by this test
-    
+           
 	//@NotNull
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -50,10 +44,24 @@ public class MgmEvaluationTest {
 
     private String scorePath;   // path of the output JSON score file, relative to the score root directory
 
+    // Note: The scores can also be stored in formats other than JSON, (ex. CSV or binary array of float numbers), depending on the need of visualization tools
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private String scores;   // JSON representation of the output scores
     
-    // Note: The scores can also be stored in formats other than JSON, (ex. CSV or binary array of float numbers), depending on the need of visualization tools
+	@NotNull
+	@Index
+	@ManyToOne
+	private MgmScoringTool mst; // MGM scoring tool used by this test
+    
+	@NotNull
+	@Index
+	@ManyToOne
+    private PrimaryfileSupplement groundTruth;	// the groundtruth used by this test, uploaded as a PrimaryfileSupplement
+    
+	@NotNull
+	@Index
+	@ManyToOne
+    private WorkflowResult workflowResult; // the workflow result evaluated by this test
 
 }

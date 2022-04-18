@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -40,28 +41,26 @@ public class MgmScoringTool {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
        
-	//@NotNull
+	@NotNull
+	@Index
     private String name;
         
 	//@NotNull
     private String description;
         
 	//@NotNull
-	@Index
-	@ManyToOne
-    private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
-    
-	//@NotNull
-	@Index
-    private String mgmToolId;	// ID of the associated MGM in galaxy
-        
-	//@NotNull
     private String version;	
     
-	//@NotNull
+    //@NotNull
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+    private Date upgradeDate; // date when this version of the MST is installed 
+
+    //@NotNull
+	@Index
     private String workflowResultDataType; // Galaxy data type of the workflow result to be scored by the MST
     
 	//@NotNull
+	@Index
     private String groundTruthFormat; // format of the groundtruth file used by the MST
     
 	//@NotNull
@@ -70,12 +69,16 @@ public class MgmScoringTool {
     private String parameters; // JSON representation of the MST parameters map as <name, format> pairs
 //  private Map<String, String> parameters; // <name, format> map of the parameters of the MST
     
-	//@NotNull
+	@NotNull
     private String scriptPath; // path of the executable script of the MST, relative to the script root directory
     
-    //@NotNull
+	@NotNull
 	@Index
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date upgradeDate; // date when this version of the MST is installed 
-
+	@ManyToOne
+    private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
+    
+	@NotNull
+	@Index
+    private String mgmToolId;	// ID of the associated MGM in galaxy
+        
 }
