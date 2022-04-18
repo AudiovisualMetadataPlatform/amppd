@@ -49,8 +49,10 @@ public class MgmEvaluationTest {
     @Column(columnDefinition = "jsonb")
     private String scores;   // JSON representation of the output scores
     
-	//@NotNull
-    private MgmScoringTool mst; // MGM scoring tool used by this test
+	@NotNull
+	@Index
+	@ManyToOne
+	private MgmScoringTool mst; // MGM scoring tool used by this test
     
 	@NotNull
 	@Index

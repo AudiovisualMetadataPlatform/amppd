@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -32,10 +33,10 @@ public class MgmCategory {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
         
-	//@NotNull
+	@NotNull
     private String sectionId;	// ID of the corresponding Galaxy section
     
-	//@NotNull
+	@NotNull
     private String sectionName;	// name of the corresponding Galaxy section
     
 	//@NotNull

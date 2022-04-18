@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -40,7 +41,7 @@ public class MgmScoringTool {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
        
-	//@NotNull
+	@NotNull
 	@Index
     private String name;
         
@@ -68,15 +69,15 @@ public class MgmScoringTool {
     private String parameters; // JSON representation of the MST parameters map as <name, format> pairs
 //  private Map<String, String> parameters; // <name, format> map of the parameters of the MST
     
-	//@NotNull
+	@NotNull
     private String scriptPath; // path of the executable script of the MST, relative to the script root directory
     
-	//@NotNull
+	@NotNull
 	@Index
 	@ManyToOne
     private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
     
-	//@NotNull
+	@NotNull
 	@Index
     private String mgmToolId;	// ID of the associated MGM in galaxy
         
