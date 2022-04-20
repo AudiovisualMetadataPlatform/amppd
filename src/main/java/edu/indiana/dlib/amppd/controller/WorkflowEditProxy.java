@@ -1,7 +1,9 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.net.HttpCookie;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,22 +45,34 @@ import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Controller to proxy requests related to workflow edit between AMP UI and Galaxy workflow editor.
+ * Proxy between AMP client and AMP servr for requests related to workflow edit between AMP UI and Galaxy workflow editor.
  * @author yingfeng
  */
 @RestController
 @Slf4j
-public class WorkflowEditController {
-
-	// Galaxy root path relative to AMP root path
-	public static final String GALAXY_PATH = "/galaxy";
-	
-	// workflow edit cookie name
-	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
+public class WorkflowEditProxy {
 
 //	// galaxySession cookie name
 //	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
+
+	// Galaxy workflow editor API request paths
+	private static final List<String> GALAXY_API_PATHS = Arrays.asList("/webhooks", "/licenses", "/datatypes/types_and_mapping");
 	
+	// Galaxy workflow editor other request paths
+	private static final List<String> GALAXY_PATHS = Arrays.asList("/favicon.ico");
+
+	// Galaxy root path relative to AMP root path
+	public static final String GALAXY_ROOT = "/galaxy";
+	
+	// Galaxy api path relative to galaxy root path
+	public static final String GALAXY_API = "/api";
+	
+	// Galaxy static path relative to galaxy root path
+	public static final String GALAXY_STATIC = "/static";
+			
+	// workflow edit cookie name
+	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
+
 	@Autowired
 	private AmppdUiPropertyConfig amppduiPropertyConfig;	
 	
@@ -207,7 +221,7 @@ public class WorkflowEditController {
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
 //	    cookie.setSecure(true);	// TODO setting secure to true doesn't work on localhost, which uses http instead of https
 	    cookie.setHttpOnly(true);
-	    cookie.setPath(context.getContextPath() + GALAXY_PATH);
+	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
 	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
 		
 		// send the cookie to AMP client to authenticate future workflow edit requests
@@ -229,7 +243,7 @@ public class WorkflowEditController {
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, null);
 //	    cookie.setSecure(true);
 	    cookie.setHttpOnly(true);
-	    cookie.setPath(context.getContextPath() + GALAXY_PATH);
+	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
 	    cookie.setMaxAge(0);
 		
 		// send the unset cookie to AMP client to delete it
@@ -249,7 +263,7 @@ public class WorkflowEditController {
 	 * @return response from Galaxy, including error response
 	 */
 	@CrossOrigin(origins = "https://amp-test.dlib.indiana.edu", allowedHeaders = "*", exposedHeaders = "*", allowCredentials = "true" )
-	@RequestMapping(value = GALAXY_PATH + "/**")
+	@RequestMapping(value = GALAXY_ROOT + "/**")
 	public ResponseEntity<byte[]> proxyEdit(
 			HttpMethod method,
 			@CookieValue(name = WORKFLOW_EDIT_COOKIE, required = false) String wfeCookie,
@@ -263,14 +277,14 @@ public class WorkflowEditController {
 		
 		// respond with unauthorized status if fails
 		if (pair == null) {
-			log.error("Unauthorized workflow edit request: " + request.getRequestURL());
+			log.error("Unauthorized workflow edit request: " + method + " " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}
 		
-		// validate request URL, parameters, payload etc
+		// filter request on its URL, parameters, payload etc
 		String workflowId = pair.getRight();
-		if (!validateRequest(request, workflowId)) {
-			log.error("Invalid workflow edit request: " + request.getRequestURL());
+		if (!filterRequest(request, body, workflowId)) {
+			log.error("Invalid workflow edit request: " + method + " " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
 		}
 		
@@ -343,6 +357,9 @@ public class WorkflowEditController {
 		return response;
 	}
 	
+	/**
+	 * Returns true if the give cookie is a WFE cookie; false otherwise
+	 */
 	private boolean isWorkflowEditCookie(String cookie) {
 		return cookie.startsWith(WORKFLOW_EDIT_COOKIE);
 	}
@@ -351,7 +368,10 @@ public class WorkflowEditController {
 //		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.size() == 1 && value.get(0).contains(WORKFLOW_EDIT_COOKIE);
 //	}
 	
-	public ImmutablePair<AmpUser, String> validateWorkflowEditCookie(String wfeCookie) {
+	/**
+	 * Return true if the given WFE cookie contains valid JWT token for AMP user workflow edit session; false otherwise.
+	 */
+	private ImmutablePair<AmpUser, String> validateWorkflowEditCookie(String wfeCookie) {
 		if (StringUtils.isEmpty(wfeCookie)) {
 			log.error("Workflow Edit Cookie is not provided in the request.");
 			return null;
@@ -359,9 +379,96 @@ public class WorkflowEditController {
 		return jwtTokenUtil.validateWorkflowEditToken(wfeCookie);
 	}
 	
-	public boolean validateRequest(HttpServletRequest request, String workflowId) {
-		// TODO
-		return true;
+	/**
+	 * Return true if the given HTTP request with the given body is a legitimate one initiated during the workflow edit
+	 * session for the given workflow; false otherwise.
+	 */
+	private boolean filterRequest(HttpServletRequest request, byte[] body, String workflowId) {
+		String method = request.getMethod();		
+		String path = StringUtils.substringAfter(request.getPathInfo(), GALAXY_ROOT);
+		String payload = new String(body, StandardCharsets.UTF_8);
+		String wfid;
+				
+		// filter POST requests:
+		// the only POST request occurs when adding a tool to the workflow,
+		// and the payload contains the tool JSON
+		if (method.equals(HttpMethod.POST.toString())) {
+			// URL path must be /api/workflows/build_module
+			if (!path.equals(GALAXY_API + "/workflows/build_module")) {
+				log.error("Invalid POST request path: " + path);
+				return false;
+			}
+			// payload must be valid tool JSON: this will be handled by Galaxy
+			return true;
+		}
+		
+		// filter PUT requests:
+		// the only PUT request occurs when saving the workflow,
+		// and the payload contains the workflow  JSON
+		if (method.equals(HttpMethod.PUT.toString())) {
+			// URL path must be /api/workflows/build_module
+			if (!path.startsWith(GALAXY_API + "/workflows/")) {
+				log.error("Invalid Galaxy API path " + path + " for POST request to add an MGM to the workflow");
+				return false;
+			}
+			// workflow ID on the request path must match the ID of the workflow currently being edited
+			wfid = StringUtils.substringAfterLast(path, "/");
+			if (!StringUtils.equals(wfid,  workflowId)) {
+				log.error("Invalid workflow ID " + wfid + " in Galaxy API path for PUT request to save the workflow " + workflowId);
+				return false;
+			}
+			// payload must be valid tool info: this will be handled by Galaxy		
+			return true;
+		}		
+		
+		// filter GET requests
+		if (method.equals(HttpMethod.GET.toString())) {
+			// filter GET request for loading the workflow
+			if (path.equals("/workflow/load_workflow")) {
+				// workflow ID in the request parameter must match the ID of the workflow currently being edited
+				wfid = request.getParameter("id");
+				if (!StringUtils.equals(wfid,  workflowId)) {
+					log.error("Invalid workflow ID parameter " + wfid + " in GET Galaxy request to load the workflow " + workflowId);
+					return false;
+				}	
+				return true;
+			}
+			
+			// filter GET request for get the workflow versions
+			if (path.startsWith(GALAXY_API + "/workflows/") && path.endsWith("/versions")) {
+				// workflow ID on the request path must match the ID of the workflow currently being edited
+				wfid = StringUtils.substringBetween(path, "/workflows/", "/versions");
+				if (!StringUtils.equals(wfid,  workflowId)) {
+					log.error("Invalid workflow ID " + wfid + " in Galaxy API path for GET request for the versions of workflow " + workflowId);
+					return false;
+				}		
+				return true;
+			}
+
+			// filter GET requests on static info:
+			// various requests for static info are triggered during workflow loading and saving;
+			// since Galaxy client could change between releases, it's more flexible and robust 
+			// not to assume specific URLs, but check against a more generic URL patterns instead 
+			if (path.startsWith(GALAXY_STATIC)) {
+				return true;
+			}
+			
+			// filter GET API requests during workflow loading/saving 
+			if (path.startsWith(GALAXY_API)) {
+				String apipath = StringUtils.substringAfter(path, GALAXY_API);
+				if (GALAXY_API_PATHS.contains(apipath)) {
+					return true;
+				}
+			}
+
+			// filter other GET requests during workflow loading/saving 			
+			if (GALAXY_PATHS.contains(path)) {
+				return true;
+			}		
+		}
+		
+		// all other requests are invalid 
+		return false;
 	}
 	
 }
