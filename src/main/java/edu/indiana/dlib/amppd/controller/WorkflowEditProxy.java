@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.net.HttpCookie;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +35,6 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.model.AmpUser;
@@ -55,26 +53,23 @@ public class WorkflowEditProxy {
 //	// galaxySession cookie name
 //	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
 
-	// Galaxy workflow editor API request paths
-	private static final List<String> GALAXY_API_PATHS = Arrays.asList("/webhooks", "/licenses", "/datatypes/types_and_mapping");
-	
-	// Galaxy workflow editor other request paths
-	private static final List<String> GALAXY_PATHS = Arrays.asList("/favicon.ico");
-
-	// Galaxy root path relative to AMP root path
+	// Galaxy root path relative to AMP context path
 	public static final String GALAXY_ROOT = "/galaxy";
 	
-	// Galaxy api path relative to galaxy root path
-	public static final String GALAXY_API = "/api";
-	
+	// Galaxy workflow editor generic request paths relative to Galaxy root
+	private static final List<String> GALAXY_PATHS = Arrays.asList("/favicon.ico");
+
 	// Galaxy static path relative to galaxy root path
 	public static final String GALAXY_STATIC = "/static";
 			
+	// Galaxy API path relative to galaxy root path
+	public static final String GALAXY_API = "/api";
+	
+	// Galaxy workflow editor API request paths relative to Galaxy API path
+	private static final List<String> GALAXY_API_PATHS = Arrays.asList("/webhooks", "/licenses", "/datatypes/types_and_mapping");
+	
 	// workflow edit cookie name
 	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
-
-	@Autowired
-	private AmppdUiPropertyConfig amppduiPropertyConfig;	
 	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;	
@@ -283,7 +278,8 @@ public class WorkflowEditProxy {
 		
 		// filter request on its URL, parameters, payload etc
 		String workflowId = pair.getRight();
-		if (!filterRequest(request, body, workflowId)) {
+//		if (!filterRequest(request, body, workflowId)) {
+		if (!filterRequest(request, workflowId)) {
 			log.error("Invalid workflow edit request: " + method + " " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
 		}
@@ -380,13 +376,14 @@ public class WorkflowEditProxy {
 	}
 	
 	/**
-	 * Return true if the given HTTP request with the given body is a legitimate one initiated during the workflow edit
-	 * session for the given workflow; false otherwise.
+	 * Return true if the given HTTP request is a legitimate one initiated during the workflow edit session
+	 * for the given workflow; false otherwise.
 	 */
-	private boolean filterRequest(HttpServletRequest request, byte[] body, String workflowId) {
+//	private boolean filterRequest(HttpServletRequest request, byte[] body, String workflowId) {
+	private boolean filterRequest(HttpServletRequest request, String workflowId) {
 		String method = request.getMethod();		
 		String path = StringUtils.substringAfter(request.getPathInfo(), GALAXY_ROOT);
-		String payload = new String(body, StandardCharsets.UTF_8);
+//		String payload = new String(body, StandardCharsets.UTF_8);
 		String wfid;
 				
 		// filter POST requests:
@@ -395,7 +392,7 @@ public class WorkflowEditProxy {
 		if (method.equals(HttpMethod.POST.toString())) {
 			// URL path must be /api/workflows/build_module
 			if (!path.equals(GALAXY_API + "/workflows/build_module")) {
-				log.error("Invalid POST request path: " + path);
+				log.error("Invalid path " + path + " for POST request to add an MGM to the workflow.");
 				return false;
 			}
 			// payload must be valid tool JSON: this will be handled by Galaxy
@@ -406,15 +403,15 @@ public class WorkflowEditProxy {
 		// the only PUT request occurs when saving the workflow,
 		// and the payload contains the workflow  JSON
 		if (method.equals(HttpMethod.PUT.toString())) {
-			// URL path must be /api/workflows/build_module
+			// URL path must be /api/workflows/workflowId
 			if (!path.startsWith(GALAXY_API + "/workflows/")) {
-				log.error("Invalid Galaxy API path " + path + " for POST request to add an MGM to the workflow");
+				log.error("Invalid path " + path + " for PUT request to save the workflow.");
 				return false;
 			}
 			// workflow ID on the request path must match the ID of the workflow currently being edited
-			wfid = StringUtils.substringAfterLast(path, "/");
+			wfid = StringUtils.substringAfter(path, "/workflows/");
 			if (!StringUtils.equals(wfid,  workflowId)) {
-				log.error("Invalid workflow ID " + wfid + " in Galaxy API path for PUT request to save the workflow " + workflowId);
+				log.error("Invalid workflow ID " + wfid + " in the path for PUT request to save the workflow " + workflowId);
 				return false;
 			}
 			// payload must be valid tool info: this will be handled by Galaxy		
@@ -434,12 +431,12 @@ public class WorkflowEditProxy {
 				return true;
 			}
 			
-			// filter GET request for get the workflow versions
+			// filter GET request for retrieving the workflow versions
 			if (path.startsWith(GALAXY_API + "/workflows/") && path.endsWith("/versions")) {
 				// workflow ID on the request path must match the ID of the workflow currently being edited
 				wfid = StringUtils.substringBetween(path, "/workflows/", "/versions");
 				if (!StringUtils.equals(wfid,  workflowId)) {
-					log.error("Invalid workflow ID " + wfid + " in Galaxy API path for GET request for the versions of workflow " + workflowId);
+					log.error("Invalid workflow ID " + wfid + " in the path for GET request to retrieve the versions of the workflow " + workflowId);
 					return false;
 				}		
 				return true;
@@ -448,12 +445,14 @@ public class WorkflowEditProxy {
 			// filter GET requests on static info:
 			// various requests for static info are triggered during workflow loading and saving;
 			// since Galaxy client could change between releases, it's more flexible and robust 
-			// not to assume specific URLs, but check against a more generic URL patterns instead 
+			// not to assume specific URLs, but allow a more generic URL patterns instead;
+			// for now, all GET static requests are allowed as they are public info 
 			if (path.startsWith(GALAXY_STATIC)) {
 				return true;
 			}
 			
 			// filter GET API requests during workflow loading/saving 
+			// check against the list of all allowed API requests (other than the workflow versions)
 			if (path.startsWith(GALAXY_API)) {
 				String apipath = StringUtils.substringAfter(path, GALAXY_API);
 				if (GALAXY_API_PATHS.contains(apipath)) {
