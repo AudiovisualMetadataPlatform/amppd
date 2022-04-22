@@ -382,9 +382,8 @@ public class WorkflowEditProxy {
 //	private boolean filterRequest(HttpServletRequest request, byte[] body, String workflowId) {
 	private boolean filterRequest(HttpServletRequest request, String workflowId) {
 		String method = request.getMethod();		
-		String path = StringUtils.substringAfter(request.getPathInfo(), GALAXY_ROOT);
+		String path = StringUtils.substringAfter(request.getServletPath(), GALAXY_ROOT);
 //		String payload = new String(body, StandardCharsets.UTF_8);
-		String wfid;
 				
 		// filter POST requests:
 		// the only POST request occurs when adding a tool to the workflow,
@@ -409,37 +408,28 @@ public class WorkflowEditProxy {
 				return false;
 			}
 			// workflow ID on the request path must match the ID of the workflow currently being edited
-			wfid = StringUtils.substringAfter(path, "/workflows/");
-			if (!StringUtils.equals(wfid,  workflowId)) {
-				log.error("Invalid workflow ID " + wfid + " in the path for PUT request to save the workflow " + workflowId);
-				return false;
-			}
+			return checkWorkflowId(path, "/workflows/", null, workflowId, "PUT", "save");
 			// payload must be valid tool info: this will be handled by Galaxy		
-			return true;
 		}		
 		
 		// filter GET requests
 		if (method.equals(HttpMethod.GET.toString())) {
+			// filter the request initiated by the workflow edit session to load the editor
+			if (path.equals("/workflow/editor")) {
+				// workflow ID in the request parameter must match the ID of the workflow currently being edited
+				return checkWorkflowId(request, workflowId, "load the editor for");
+			}
+			
 			// filter GET request for loading the workflow
 			if (path.equals("/workflow/load_workflow")) {
 				// workflow ID in the request parameter must match the ID of the workflow currently being edited
-				wfid = request.getParameter("id");
-				if (!StringUtils.equals(wfid,  workflowId)) {
-					log.error("Invalid workflow ID parameter " + wfid + " in GET Galaxy request to load the workflow " + workflowId);
-					return false;
-				}	
-				return true;
+				return checkWorkflowId(request, workflowId, "load");
 			}
 			
 			// filter GET request for retrieving the workflow versions
 			if (path.startsWith(GALAXY_API + "/workflows/") && path.endsWith("/versions")) {
 				// workflow ID on the request path must match the ID of the workflow currently being edited
-				wfid = StringUtils.substringBetween(path, "/workflows/", "/versions");
-				if (!StringUtils.equals(wfid,  workflowId)) {
-					log.error("Invalid workflow ID " + wfid + " in the path for GET request to retrieve the versions of the workflow " + workflowId);
-					return false;
-				}		
-				return true;
+				return checkWorkflowId(path, "/workflows/", "/versions", workflowId, "GET", "fetch the versios of");
 			}
 
 			// filter GET requests on static info:
@@ -470,4 +460,30 @@ public class WorkflowEditProxy {
 		return false;
 	}
 	
+	/**
+	 * Return true if the workflow ID parameter in the given GET request for the given action matches the given workflow ID; 
+	 * false otherwise.
+	 */
+	private boolean checkWorkflowId(HttpServletRequest request, String workflowId, String action) {
+		String wfid = request.getParameter("id");
+		if (StringUtils.equals(wfid,  workflowId)) {
+			return true;
+		}
+		log.error("Invalid workflow ID parameter " + wfid + " in GET request to " + action + " the workflow " + workflowId);
+		return false;
+	}
+
+	/**
+	 * Retrieve the workflow ID between the given start/end string in the given request path of the given method
+	 * for the given action, return true if it matches the given workflow ID; false otherwise.
+	 */
+	private boolean checkWorkflowId(String path, String start, String end, String workflowId, String method, String action) {
+		String wfid = end == null ? StringUtils.substringAfter(path, start) : StringUtils.substringBetween(path, start, end);
+		if (StringUtils.equals(wfid,  workflowId)) {
+			return true;
+		}
+		log.error("Invalid workflow ID " + wfid + " in the path for " + method + " request to " + action + " the workflow " + workflowId);
+		return false;	
+	}
+		
 }
