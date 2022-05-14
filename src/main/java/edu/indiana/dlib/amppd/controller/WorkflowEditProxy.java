@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -213,14 +214,23 @@ public class WorkflowEditProxy {
 		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
 		
     	// wrap the workflow edit token in a cookie 
-		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
+		ResponseCookie rc = ResponseCookie.from(WORKFLOW_EDIT_COOKIE, wfeToken) // key & value
+		        .httpOnly(true)
+		        .secure(true)
+		        .sameSite("None")  // TODO change this to LAX once done with workflow editor UI dev
+		        .path(context.getContextPath() + GALAXY_ROOT)
+		        .maxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60)
+		        .build();
+		        
+//		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
 //	    cookie.setSecure(true);	// TODO setting secure to true doesn't work on localhost, which uses http instead of https
-	    cookie.setHttpOnly(true);
-	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
-	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
+//	    cookie.setHttpOnly(true);
+//	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
+//	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
 		
 		// send the cookie to AMP client to authenticate future workflow edit requests
-		response.addCookie(cookie);
+//		response.addCookie(cookie);
+	    response.setHeader(HttpHeaders.SET_COOKIE, rc.toString());
 		log.info("Successfully started the edit session for workflow " + workflowId);
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}	
@@ -236,7 +246,7 @@ public class WorkflowEditProxy {
 	public ResponseEntity<String> endEdit(@PathVariable("workflowId") String workflowId, HttpServletResponse response) {		
     	// unset the workflow edit cookie 
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, null);
-//	    cookie.setSecure(true);
+	    cookie.setSecure(true);
 	    cookie.setHttpOnly(true);
 	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
 	    cookie.setMaxAge(0);
