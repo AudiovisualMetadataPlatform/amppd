@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.config;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 /*
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,14 +44,21 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.google.common.net.HttpHeaders;
+
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+	@Autowired
+	private AmppdUiPropertyConfig amppduiPropertyConfig;	
+	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
@@ -86,14 +94,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration config = new CorsConfiguration();
 
-//	    // only allow AMP UI as origin, can add target systems as needed
-//	    config.setAllowedOrigins(Arrays.asList(amppduiUrl));
+	    // only allow AMP UI as origin, can add target systems as needed
+	    String origin = StringUtils.substringBeforeLast(amppduiPropertyConfig.getUrl(), "/");
+	    config.setAllowedOrigins(Arrays.asList(origin));
 	    
-	    // use PATCH and not PUT
-	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE"));
+	    // allow clients other than the AMP UI for CORS requests;
+	    // one use case is for AMP frontend development, we allow AMP local UI to point to AMP Rest Test.
+	    String origins = amppdPropertyConfig.getCorsOriginPattern();
+	    if (StringUtils.isNotBlank(origins)) {
+	    	config.addAllowedOriginPattern(origins);
+		    log.info("Added " + origins + " to allowed origins for CORS requests");
+	    }
+	    
+	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
+	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
 
-	    // 'location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
-	    config.setExposedHeaders(Arrays.asList("Authorization", "Location"));
+	    // 'Location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
+	    // "Authorization" header is needed by most AMP UI requests;
+	    // for Galaxy workflow editor requests, Set-Cookie header is needed
+	    config.setExposedHeaders(Arrays.asList(HttpHeaders.AUTHORIZATION, HttpHeaders.LOCATION, HttpHeaders.SET_COOKIE));
+	    
+	    config.setAllowedHeaders(Arrays.asList(CorsConfiguration.ALL));
+	    config.setAllowCredentials(true);
 	    
 	    final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 	    source.registerCorsConfiguration("/**", config.applyPermitDefaultValues());
@@ -104,7 +126,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		// if authentication is turned on (either auth property is not defined or is true), add JWT token filter
 		if (amppdPropertyConfig.getAuth() == null || amppdPropertyConfig.getAuth()) {
-			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			// TODO recover X-Frame-Options to sameOrigin
+			// below is a temp tweak to remove X-Frame-Options to allow local AMP UI to connect to AMP Test Workflow Editor
+//			httpSecurity.cors().and().csrf().disable().headers().frameOptions().sameOrigin().and().authorizeRequests()
+			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/forgot-password").permitAll()
@@ -113,7 +138,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
-			.antMatchers("/galaxy/*").permitAll()
+			.antMatchers("/galaxy/**").permitAll()
 			// TODO 
 			// Below two lines are for access media or output files;
 			// auth is bypassed possibly due to the need to allow users to access these links without login;
@@ -128,7 +153,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 		// otherwise permit all requests
 		else {
-			httpSecurity.cors().and().csrf().disable().authorizeRequests()
+			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers("/**").permitAll()
 			.anyRequest().authenticated().and().
 			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()

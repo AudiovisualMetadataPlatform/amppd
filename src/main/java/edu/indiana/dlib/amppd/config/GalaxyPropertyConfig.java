@@ -27,8 +27,10 @@ public class GalaxyPropertyConfig {
     @NotNull private String userId;
     @NotNull private String username;
     @NotNull private String password;
-    @NotNull private String usernameWorkflowEdit;
-    @NotNull private String passwordWorkflowEdit;
+    // Below AMP WorkflowEditUser is currently not used, instead, the AMP super Galaxy user above is used for workflow edit,
+    // to avoid complexity of access control in Galaxy. We can revert to use the below user as needed in the future.
+//    @NotNull private String usernameWorkflowEdit;
+//    @NotNull private String passwordWorkflowEdit;
     
     /**
      * Get the base URL of Galaxy application at the original root ("/")
