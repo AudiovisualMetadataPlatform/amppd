@@ -15,8 +15,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -397,10 +395,9 @@ public class MediaServiceImpl implements MediaService {
 					result.setPrimaryfiles(primaryfilerows);
 					rows.add(result);
 					result = new ItemSearchResult();
-					primaryfilerows = new ArrayList<Map>();
-					
+					primaryfilerows = new ArrayList<Map>();					
 				}
-				String mime_type = getMediaTypeFromJson(p);
+				String mime_type = p.getMimeType();
 				if(mime_type!=null && !mediaType.contentEquals("000"))
 				{
 					if((mime_type.contains("audio") && mediaType.substring(0, 1).contentEquals("1")) 
@@ -450,27 +447,6 @@ public class MediaServiceImpl implements MediaService {
 			log.error("Error searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType, e);			
 		}
 		return response;
-	}
-	
-	protected String getMediaTypeFromJson(Primaryfile p) {
-		String mime_type = new String();
-		String media_type = p.getMediaInfo();
-		try {
-			if(media_type!=null) {
-				JSONObject jsonObject = new JSONObject(media_type);
-				JSONObject jsonObject_container = new JSONObject(jsonObject.getString("container"));
-				JSONObject jsonObject_streams = new JSONObject(jsonObject.getString("streams"));
-				mime_type = jsonObject_container.getString("mime_type");
-				if("video/mp4".equals(mime_type) && !jsonObject_streams.has("video") && jsonObject_streams.has("audio")) {
-					mime_type="audio/mp4";
-				}
-				log.trace("====>>>>>MIME TYPE IS:"+mime_type);
-			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return mime_type;
-	}
+	}	
 
 }

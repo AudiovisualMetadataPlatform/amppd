@@ -22,5 +22,6 @@ public interface AssetDetail extends DataentityDetail {
 	public String getDatasetId();
     public String getSymlink();
     public String getMediaInfo();	
+    public String getMimeType();	
 
 }
