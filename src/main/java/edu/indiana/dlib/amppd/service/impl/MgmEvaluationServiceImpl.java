@@ -1,18 +1,17 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 
 import edu.indiana.dlib.amppd.model.MgmCategory;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
@@ -21,8 +20,6 @@ import edu.indiana.dlib.amppd.repository.MgmCategoryRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringRepository;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
-import edu.indiana.dlib.amppd.web.MgmEvaluationCategory;
-import edu.indiana.dlib.amppd.web.MgmEvaluationResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -38,101 +35,147 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 	@Autowired
 	MgmToolRepository mgmToolRepository;
 
-	@Override
-	@Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE, propagation = Propagation.REQUIRES_NEW)
-	public boolean saveMgmEvaluation(MultipartFile file) {
-
-		try {
-			XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
-			XSSFSheet categorySheet = workbook.getSheetAt(0);
-			inserDataToCategory(categorySheet);
-			XSSFSheet toolSheet = workbook.getSheetAt(2);
-			inserDataToTool(toolSheet);
-			XSSFSheet scoringSheet = workbook.getSheetAt(1);
-			inserDataToScoringTool(scoringSheet);
-			
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
-
-		return true;
-	}
+	
+	/*
+	 * @Override public MgmEvaluationResponse getAllMgmEvaluationDetails() {
+	 * 
+	 * List<MgmCategory> categoryList = (List<MgmCategory>)
+	 * mgmEvaluationCategory.findAll();
+	 * 
+	 * return null; }
+	 */
 	
 	@Override
-	public MgmEvaluationResponse getAllMgmEvaluationDetails() {
+	public boolean saveMgmEvaluation(MultipartFile category, MultipartFile scoring, MultipartFile tool) {
 		
-		List<MgmCategory> categoryList = (List<MgmCategory>) mgmEvaluationCategory.findAll();
+		String errmsg = "Failed to parse the input CSV file " + category.getOriginalFilename() + " for workflow submission!";
 		
-		return null;
+		parseCsv(category,scoring,tool);
+		
+		
+		return false;
 	}
-
-	private void inserDataToCategory(XSSFSheet datatypeSheet) {
-		for (int i = 1; i < 8; i++) {
-			try {
-				XSSFRow row = datatypeSheet.getRow(i);
-
-				MgmCategory category = new MgmCategory();
-
-				category.setSectionId(row.getCell(1) != null ? row.getCell(1).getStringCellValue() : " ");
-
-				category.setSectionName(row.getCell(2) != null ? row.getCell(2).getStringCellValue() : " ");
-				category.setDescription(row.getCell(3) != null ? row.getCell(3).getStringCellValue() : " ");
-
-				mgmEvaluationCategory.save(category);
-			} catch (Exception e) {
-				log.error("Error whie inserting mgmEvaluationCategory excel data into database table" + e);
+	
+	private void parseCsv(MultipartFile category,MultipartFile scoring,MultipartFile tool) {
+		
+		List<String[]> categoryRows = null;
+		List<String[]> scoringRows = null;
+		List<String[]> toolRows = null;
+		int nrow = 0;
+		int ncol = 0;
+		try {
+		CSVReader categorRreader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(category.getInputStream()))).build();
+		categoryRows = categorRreader.readAll();
+		
+		CSVReader scoringRreader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(scoring.getInputStream()))).build();
+		scoringRows = scoringRreader.readAll();
+		
+		CSVReader toolRreader = new CSVReaderBuilder(new BufferedReader(new InputStreamReader(tool.getInputStream()))).build();
+		toolRows = toolRreader.readAll();
+		
+			
+			for (int i=1; i < categoryRows.size(); i++) {
+				String[] columns = categoryRows.get(i);
+				inserDataToCategory(columns);				
 			}
-
+			
+			for (int i=1; i < scoringRows.size(); i++) {
+				String[] columns = scoringRows.get(i);
+				inserDataToScoringTool(columns);				
+			}
+			for (int i=1; i < toolRows.size(); i++) {
+				String[] columns = toolRows.get(i);
+				inserDataToTool(columns);				
+			}
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+		
 	}
 
-	private void inserDataToScoringTool(XSSFSheet datatypeSheet) {
-		for (int i = 1; i < 15; i++) {
-			try {
-				XSSFRow row = datatypeSheet.getRow(i);
+	private void inserDataToCategory(String[] columns) {
+		int count = 1;
+		MgmCategory category = new MgmCategory();
+		for (int j=1; j < columns.length; j++) {
+			
+			 if(count == 1) {
+				 category.setSectionId(columns[j]);
+			 }
+			 if(count == 2) {
+				 category.setSectionName(columns[j]);
+			 }
+			 if(count == 3) {
+				 category.setDescription(columns[j]);
+			 }
+			 count++;
+		}
+		
+		mgmEvaluationCategory.save(category);
+		
+	}
 
-				MgmScoringTool scoringTool = new MgmScoringTool();
-
-				scoringTool.setName(row.getCell(1) != null ? row.getCell(1).getStringCellValue() : " ");
-				scoringTool.setDescription(row.getCell(2) != null ? row.getCell(2).getStringCellValue() : " ");
-				scoringTool.setVersion(row.getCell(3) != null ? row.getCell(3).getStringCellValue() : " ");
-				scoringTool.setUpgradeDate(row.getCell(4) != null ? row.getCell(4).getDateCellValue() : new Date());
-				scoringTool
-						.setWorkflowResultDataType(row.getCell(5) != null ? row.getCell(5).getStringCellValue() : " ");
-				scoringTool.setGroundTruthFormat(row.getCell(6) != null ? row.getCell(6).getStringCellValue() : " ");
-				scoringTool.setParameters(row.getCell(7) != null ? row.getCell(7).getStringCellValue() : "{}");
-				scoringTool.setScriptPath(row.getCell(8) != null ? row.getCell(8).getStringCellValue() : " ");
-				//scoringTool.setCategory(row.getCell(9) != null ? row.getCell(9).getStringCellValue() : " ");
-				scoringTool.setMgmToolId(row.getCell(10) != null ? row.getCell(10).getStringCellValue() : " ");
+	private void inserDataToScoringTool(String[] columns) {
+		
+		int count = 1;
+		MgmScoringTool scoringTool = new MgmScoringTool();
+		for (int j=1; j < columns.length; j++) {
+			
+			 if(count == 1) {
+				 scoringTool.setName(columns[j]);
+			 }
+			 if(count == 2) {
+				 scoringTool.setDescription(columns[j]);
+			 }
+			 if(count == 3) {
+				 scoringTool.setVersion(columns[j]);
+			 }
+			 if(count == 4) {
+				 scoringTool.setWorkflowResultDataType(columns[j]);
+			 }
+			 if(count == 5) {
+				 scoringTool.setGroundTruthFormat(columns[j]);
+			 }
+			 if(count == 6) {
+				 scoringTool.setParameters(columns[j] != null ? columns[j] : "{}");
+			 }
+			 if(count == 7) {
+				 scoringTool.setScriptPath(columns[j]);
+			 }
+			 if(count == 9) {
+				 scoringTool.setMgmToolId(columns[j]);
+			 }
+			 count++;
+		}
 				mgmScoringRepository.save(scoringTool);
-			} catch (Exception e) {
-				log.error("Error whie inserting mgmEvaluationScoringTool excel data into database table" + e);
-			}
-		}
+			
 
 	}
 
-	private void inserDataToTool(XSSFSheet datatypeSheet) {
-		for (int i = 1; i < 12; i++) {
-			try {
-				XSSFRow row = datatypeSheet.getRow(i);
-
-				MgmTool tool = new MgmTool();
-
-				tool.setToolId(row.getCell(0) != null ? row.getCell(0).getStringCellValue() : " ");
-				tool.setMgmName(row.getCell(1) != null ? row.getCell(1).getStringCellValue() : " ");
-				tool.setUpgradeDate(new Date());
-				tool.setVersion("1.0");
-
-				mgmToolRepository.save(tool);
-
-			} catch (Exception e) {
-				log.error("Error whie inserting mgmEvaluationTool excel data into database table" + e);
-			}
+	private void inserDataToTool(String[] columns) {
+		
+		int count = 1;
+		MgmTool tool = new MgmTool();
+		for (int j=1; j < columns.length; j++) {
+			
+			 if(count == 1) {
+				 tool.setToolId(columns[j]);
+			 }
+			 if(count == 2) {
+				 tool.setMgmName(columns[j]);
+			 }
+			 tool.setUpgradeDate(new Date());
+			 tool.setVersion("1.0");
+			 count++;
 		}
+		mgmToolRepository.save(tool);
+
 	}
+
+
+
+	
 
 	
 }
