@@ -7,7 +7,12 @@ import lombok.Data;
 @Data
 public class WorkflowResultSearchQuery {
 	public WorkflowResultSearchQuery(){
+		filterOnly = false;
 		pageNum = 1;
+		sortRule = new WorkflowResultSortRule();
+		sortRule.setColumnName("id");
+		sortRule.setOrderByDescending(false);
+
 		resultsPerPage = Integer.MAX_VALUE;
 		filterByDates = new Date[0];
 		filterBySubmitters = new String[0];
@@ -23,12 +28,13 @@ public class WorkflowResultSearchQuery {
 		filterBySearchTerms = new String[0];
 		filterByRelevant = false;
 		filterByFinal = false;
-		sortRule = new WorkflowResultSortRule();
-		sortRule.setColumnName("id");
-		sortRule.setOrderByDescending(false);
 	}
+	
+	private boolean filterOnly;		
 	private int pageNum;
 	private int resultsPerPage;
+	private WorkflowResultSortRule sortRule;
+	
 	private Date[] filterByDates;
 	private String[] filterBySubmitters;
 	private Long[] filterByUnits;
@@ -43,14 +49,13 @@ public class WorkflowResultSearchQuery {
 	private String[] filterBySearchTerms;	
 	private boolean filterByRelevant;
 	private boolean filterByFinal;
-	private WorkflowResultSortRule sortRule;
 	
 	/**
 	 * Get the filter value for the specified WorkflowResult field of String type.
 	 * @param field the specified WorkflowResult field
 	 * @return the filter value for the field
 	 */
-	public String[] getFilterBy(String field) {
+	public String[] getFilterByField(String field) {
 		switch (field) {
 		case "submitter":
 			return filterBySubmitters;
@@ -63,6 +68,7 @@ public class WorkflowResultSearchQuery {
 		case "outputName":
 			return filterByOutputs;
 		default:
+			// return null for other fields
 			return null;
 		}
 	}
@@ -72,18 +78,26 @@ public class WorkflowResultSearchQuery {
 	 * @param field the specified WorkflowResult field
 	 * @param values the filter values to set
 	 */
-	public void setFilterBy(String field, String[] values) {
+	public void setFilterByField(String field, String[] values) {
 		switch (field) {
 		case "submitter":
 			setFilterBySubmitters(values);
+			break;
 		case "externalId":
 			setFilterByExternalIds(values);
+			break;
 		case "workflowName":
 			setFilterByWorkflows(values);
+			break;
 		case "workflowStep":
 			setFilterBySteps(values);
+			break;
 		case "outputName":
 			setFilterByOutputs(values);
+			break;
+		default:
+			// do nothing for other fields
+			break;
 		}
 	}
 	

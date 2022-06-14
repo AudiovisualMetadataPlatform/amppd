@@ -7,7 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkflowResultFilterCollection extends WorkflowResultFilterUnit {
+//not using superclass because lombok @AllArgsConstructor doesn't handle super fields
+public class WorkflowResultFilterCollection { // extends WorkflowResultFilterUnit {
+	Long unitId;
+	String unitName;		
 	Long collectionId;
-	String collectionName;	
+	String collectionName;		
 }

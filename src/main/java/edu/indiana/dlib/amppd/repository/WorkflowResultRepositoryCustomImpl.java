@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -35,21 +36,28 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	@PersistenceContext
     EntityManager em;
 	
-	public WorkflowResultResponse findByQuery(WorkflowResultSearchQuery wrsq) {		
-        int count = getTotalCount(wrsq);        
-        List<WorkflowResult> rows = getWorkflowResultRows(wrsq);       
-        WorkflowResultFilterValues filters = getFilterValues(wrsq);
-        
+	public WorkflowResultResponse findByQuery(WorkflowResultSearchQuery wrsq) {		        
         // Format the response
         WorkflowResultResponse response = new WorkflowResultResponse();
-        response.setRows(rows);
-        response.setTotalResults(count);
+        
+        // retrieve filter value sets
+        WorkflowResultFilterValues filters = getFilterValues(wrsq);
         response.setFilters(filters);
         
         // TODO: 
         // To reduce query overhead, instead of updating all value sets for all filters with each query, we can 
         // add separate API to return value set for a particular filter, so frontend can call the API upon accessing a filter.
 
+        // When filterOnly is true, do not retrieve results, also,
+    	// pageNum, resultsPerPage and sortRule will be ignored, and rows won't be populated.  
+        // This is useful when frontend only is searching on possible filter values.
+        if (! wrsq.isFilterOnly()) {
+            int count = getTotalCount(wrsq);        
+            List<WorkflowResult> rows = getWorkflowResultRows(wrsq);       
+	        response.setTotalResults(count);
+	        response.setRows(rows);
+        }
+        
         return response;
     }
 
@@ -119,7 +127,10 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // we need to exclude all of its own current search values from the query predicates.
         // TODO: Avoid calling addPredicates for each filter, If there is an easy way to remove predicates for that filter. 
 
-        // unit filtter
+        // orderBy list for entity filters
+		List<Order> orders = new ArrayList<Order>();
+
+        // unit filter
         CriteriaQuery<WorkflowResultFilterUnit> cqUnit = cb.createQuery(WorkflowResultFilterUnit.class);
         Root<WorkflowResult> rtUnit = cqUnit.from(WorkflowResult.class);
         Long[] fbUnits = wrsq.getFilterByUnits();
@@ -131,12 +142,14 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         else {
         	addPredicates(wrsq, cb, cqUnit, rtUnit); 
         }
+		orders.add(cb.asc(rtUnit.get("unitName")));
+        cqUnit.orderBy(orders);
         List<WorkflowResultFilterUnit> units = em.createQuery(cqUnit.multiselect(
         		rtUnit.get("unitId"),
         		rtUnit.get("unitName")
         		).distinct(true)).getResultList();
         
-        // collection filtter
+        // collection filter
         CriteriaQuery<WorkflowResultFilterCollection> cqCollection = cb.createQuery(WorkflowResultFilterCollection.class);
         Root<WorkflowResult> rtCollection = cqCollection.from(WorkflowResult.class);
         Long[] fbCollections = wrsq.getFilterByCollections();
@@ -148,6 +161,8 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         else {
         	addPredicates(wrsq, cb, cqCollection, rtCollection); 
         }
+		orders.add(cb.asc(rtCollection.get("collectionName")));
+        cqCollection.orderBy(orders);
         List<WorkflowResultFilterCollection> collections = em.createQuery(cqCollection.multiselect(
         		rtCollection.get("unitId"),
         		rtCollection.get("unitName"),
@@ -155,7 +170,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         		rtCollection.get("collectionName")
         		).distinct(true)).getResultList();        
 
-        // item filtter
+        // item filter
         CriteriaQuery<WorkflowResultFilterItem> cqItem = cb.createQuery(WorkflowResultFilterItem.class);
         Root<WorkflowResult> rtItem = cqItem.from(WorkflowResult.class);
         Long[] fbItems = wrsq.getFilterByItems();
@@ -167,6 +182,8 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         else {
         	addPredicates(wrsq, cb, cqItem, rtItem); 
         }
+		orders.add(cb.asc(rtItem.get("itemName")));
+        cqItem.orderBy(orders);
         List<WorkflowResultFilterItem> items = em.createQuery(cqItem.multiselect(
         		rtItem.get("unitId"),
         		rtItem.get("unitName"),
@@ -178,7 +195,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         		rtItem.get("externalSource")
         		).distinct(true)).getResultList();
         
-        // primaryfile filtter
+        // primaryfile filter
         CriteriaQuery<WorkflowResultFilterFile> cqFile = cb.createQuery(WorkflowResultFilterFile.class);
         Root<WorkflowResult> rtFile = cqFile.from(WorkflowResult.class);
         Long[] fbFiles = wrsq.getFilterByFiles();
@@ -190,6 +207,8 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         else {
         	addPredicates(wrsq, cb, cqFile, rtFile); 
         }
+		orders.add(cb.asc(rtFile.get("primaryfileName")));
+		cqFile.orderBy(orders);
         List<WorkflowResultFilterFile> files = em.createQuery(cqFile.multiselect(
         		rtFile.get("unitId"),
         		rtFile.get("unitName"),
@@ -204,7 +223,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         		).distinct(true)).getResultList();
         
         // create-date filter
-        CriteriaQuery<Date> cqDate = cb.createQuery(Date.class);
+        CriteriaQuery<Date[]> cqDate = cb.createQuery(Date[].class);
         Root<WorkflowResult> rtDate = cqDate.from(WorkflowResult.class);
         Date[] fbDates = wrsq.getFilterByDates();
         if (fbDates.length > 0) {
@@ -215,10 +234,16 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         else {
         	addPredicates(wrsq, cb, cqDate, rtDate); 
         }
-        List<Date> dates = em.createQuery(cqDate.select(rtDate.get(DATE_PROPERTY))).getResultList();
-        // TODO: 
-        // It would be more useful to return the min/max dates.
-        // so the frontend can use the date range to allow selection. 
+        // retrieve min/max dates based on current other filters, which is more useful than distinct dates,
+        // as frontend can use the date range to allow selection for further filtering;
+        // also, this can avoid returning many individual dates when the result row size is big, 
+        // as each result is likely to have different timestamps.
+        Date[] minmaxDates = em.createQuery(cqDate.multiselect(
+        		cb.least(rtDate.get(DATE_PROPERTY)), 
+        		cb.greatest(rtDate.get(DATE_PROPERTY))
+        		)).getSingleResult();
+        List<Date> dates = Arrays.asList(minmaxDates);
+//        List<Date> dates = em.createQuery(cqDate.select(rtDate.get(DATE_PROPERTY))).getResultList();
     	
         // job status filter
         CriteriaQuery<GalaxyJobState> cqStatus = cb.createQuery(GalaxyJobState.class);
@@ -266,17 +291,18 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	private List<String> getFilterValues(String field, WorkflowResultSearchQuery wrsq, CriteriaBuilder cb) {
         CriteriaQuery<String> cq = cb.createQuery(String.class);
         Root<WorkflowResult> rt = cq.from(WorkflowResult.class);
-        String[] fbs = wrsq.getFilterBy(field);
+        String[] fbs = wrsq.getFilterByField(field);
         
         if (fbs.length > 0) {
-            wrsq.setFilterBy(field, new String[0]);
+            wrsq.setFilterByField(field, new String[0]);
             addPredicates(wrsq, cb, cq, rt); 
-        	wrsq.setFilterBy(field, fbs);
+        	wrsq.setFilterByField(field, fbs);
         }
         else {
         	addPredicates(wrsq, cb, cq, rt); 
         }
         
+        cq.orderBy(cb.asc(rt.get(field)));
         List<String> values = em.createQuery(cq.select(rt.get(field)).distinct(true)).getResultList();
         return values;		
 	}
