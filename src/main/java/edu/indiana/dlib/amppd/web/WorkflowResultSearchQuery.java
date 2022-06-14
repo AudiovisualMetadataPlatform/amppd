@@ -13,11 +13,11 @@ public class WorkflowResultSearchQuery {
 		resultsPerPage = Integer.MAX_VALUE;
 		filterByDates = new ArrayList<Date>();
 		filterBySubmitters = new String[0];
-		filterByCollections = new String[0];
-		filterByUnits = new String[0];
+		filterByUnits = new Long[0];
+		filterByCollections = new Long[0];
+		filterByItems = new Long[0];
+		filterByFiles = new Long[0];
 		filterByExternalIds = new String[0];
-		filterByItems = new String[0];
-		filterByFiles = new String[0];
 		filterByWorkflows = new String[0];
 		filterBySteps = new String[0];
 		filterByOutputs = new String[0];
@@ -33,11 +33,11 @@ public class WorkflowResultSearchQuery {
 	private int resultsPerPage;
 	private List <Date> filterByDates;
 	private String[] filterBySubmitters;
-	private String[] filterByCollections;
-	private String[] filterByUnits;
+	private Long[] filterByUnits;
+	private Long[] filterByCollections;
+	private Long[] filterByItems;
+	private Long[] filterByFiles;
 	private String[] filterByExternalIds;
-	private String[] filterByItems;
-	private String[] filterByFiles;
 	private String[] filterByWorkflows;
 	private String[] filterBySteps;
 	private String[] filterByOutputs;
@@ -46,4 +46,47 @@ public class WorkflowResultSearchQuery {
 	private boolean filterByRelevant;
 	private boolean filterByFinal;
 	private WorkflowResultSortRule sortRule;
+	
+	/**
+	 * Get the filter value for the specified WorkflowResult field of String type.
+	 * @param field
+	 * @return the filter value for the field
+	 */
+	public String[] getFilterBy(String field) {
+		switch (field) {
+		case "submitter":
+			return filterBySubmitters;
+		case "externalId":
+			return filterByExternalIds;
+		case "workflowName":
+			return filterByWorkflows;
+		case "workflowStep":
+			return filterBySteps;
+		case "outputName":
+			return filterByOutputs;
+		default:
+			return null;
+		}
+	}
+	
+	/**
+	 * Set the specified filter values for the specified WorkflowResult field of String type.
+	 * @param field the specified WorkflowResult field
+	 * @param values the filter values to set
+	 */
+	public void setFilterBy(String field, String[] values) {
+		switch (field) {
+		case "submitter":
+			setFilterBySubmitters(values);
+		case "externalId":
+			setFilterByExternalIds(values);
+		case "workflowName":
+			setFilterByWorkflows(values);
+		case "workflowStep":
+			setFilterBySteps(values);
+		case "outputName":
+			setFilterByOutputs(values);
+		}
+	}
+	
 }
