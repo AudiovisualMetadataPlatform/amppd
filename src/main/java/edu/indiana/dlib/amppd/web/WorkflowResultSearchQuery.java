@@ -49,7 +49,7 @@ public class WorkflowResultSearchQuery {
 	
 	/**
 	 * Get the filter value for the specified WorkflowResult field of String type.
-	 * @param field
+	 * @param field the specified WorkflowResult field
 	 * @return the filter value for the field
 	 */
 	public String[] getFilterBy(String field) {

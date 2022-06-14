@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkflowResultFilterCollection extends WorkflowResultFilterUnit {
-	Long collectioinId;
-	String collectioinName;	
+	Long collectionId;
+	String collectionName;	
 }

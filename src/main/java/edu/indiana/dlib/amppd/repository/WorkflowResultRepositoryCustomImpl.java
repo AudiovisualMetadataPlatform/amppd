@@ -34,6 +34,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	
 	@PersistenceContext
     EntityManager em;
+	
 	public WorkflowResultResponse findByQuery(WorkflowResultSearchQuery wrsq) {		
         int count = getTotalCount(wrsq);        
         List<WorkflowResult> rows = getWorkflowResultRows(wrsq);       
@@ -43,8 +44,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         WorkflowResultResponse response = new WorkflowResultResponse();
         response.setRows(rows);
         response.setTotalResults(count);
-        // TODO we don't need to update filters with each query; we should update filters each time the WorkflowResult table gets updated
         response.setFilters(filters);
+        
+        // TODO: 
+        // To reduce query overhead, instead of updating all value sets for all filters with each query, we can 
+        // add separate API to return value set for a particular filter, so frontend can call the API upon accessing a filter.
+
         return response;
     }
 
@@ -113,31 +118,15 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // Thus, when querying possible value set for a particular filter, 
         // we need to exclude all of its own current search values from the query predicates.
         // TODO: Avoid calling addPredicates for each filter, If there is an easy way to remove predicates for that filter. 
-//        CriteriaQuery<String> cq = cb.createQuery(String.class);
-//        Root<WorkflowResult> root = cq.from(WorkflowResult.class);
-//        Predicate[] predsDate = addPredicates(wrsq, cb, cq, root); 
-        
-//        CriteriaQuery<String> cqSubmitter = cb.createQuery(String.class);
-//        Root<WorkflowResult> rtSubmitter = cqSubmitter.from(WorkflowResult.class);
-//        String[] filterBySubmitters = wrsq.getFilterBySubmitters();
-//        if (filterBySubmitters.length > 0) {
-//            wrsq.setFilterBySubmitters(new String[0]);
-//            addPredicates(wrsq, cb, cqSubmitter, rtSubmitter); 
-//        	wrsq.setFilterBySubmitters(filterBySubmitters);
-//        }
-//        else {
-//        	addPredicates(wrsq, cb, cqSubmitter, rtSubmitter); 
-//        }
-//        List<String> submitters = em.createQuery(cqSubmitter.select(rtSubmitter.get("submitter")).distinct(true)).getResultList();
-                
+
         // unit filtter
         CriteriaQuery<WorkflowResultFilterUnit> cqUnit = cb.createQuery(WorkflowResultFilterUnit.class);
         Root<WorkflowResult> rtUnit = cqUnit.from(WorkflowResult.class);
-        Long[] filterUnits = wrsq.getFilterByUnits();
-        if (filterUnits.length > 0) {
+        Long[] fbUnits = wrsq.getFilterByUnits();
+        if (fbUnits.length > 0) {
             wrsq.setFilterByUnits(new Long[0]);
             addPredicates(wrsq, cb, cqUnit, rtUnit); 
-        	wrsq.setFilterByUnits(filterUnits);
+        	wrsq.setFilterByUnits(fbUnits);
         }
         else {
         	addPredicates(wrsq, cb, cqUnit, rtUnit); 
@@ -150,11 +139,11 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // collection filtter
         CriteriaQuery<WorkflowResultFilterCollection> cqCollection = cb.createQuery(WorkflowResultFilterCollection.class);
         Root<WorkflowResult> rtCollection = cqCollection.from(WorkflowResult.class);
-        Long[] filterCollections = wrsq.getFilterByCollections();
-        if (filterCollections.length > 0) {
+        Long[] fbCollections = wrsq.getFilterByCollections();
+        if (fbCollections.length > 0) {
             wrsq.setFilterByCollections(new Long[0]);
             addPredicates(wrsq, cb, cqCollection, rtCollection); 
-        	wrsq.setFilterByCollections(filterCollections);
+        	wrsq.setFilterByCollections(fbCollections);
         }
         else {
         	addPredicates(wrsq, cb, cqCollection, rtCollection); 
@@ -169,11 +158,11 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // item filtter
         CriteriaQuery<WorkflowResultFilterItem> cqItem = cb.createQuery(WorkflowResultFilterItem.class);
         Root<WorkflowResult> rtItem = cqItem.from(WorkflowResult.class);
-        Long[] filterItems = wrsq.getFilterByItems();
-        if (filterItems.length > 0) {
+        Long[] fbItems = wrsq.getFilterByItems();
+        if (fbItems.length > 0) {
             wrsq.setFilterByItems(new Long[0]);
             addPredicates(wrsq, cb, cqItem, rtItem); 
-        	wrsq.setFilterByItems(filterItems);
+        	wrsq.setFilterByItems(fbItems);
         }
         else {
         	addPredicates(wrsq, cb, cqItem, rtItem); 
@@ -192,11 +181,11 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // primaryfile filtter
         CriteriaQuery<WorkflowResultFilterFile> cqFile = cb.createQuery(WorkflowResultFilterFile.class);
         Root<WorkflowResult> rtFile = cqFile.from(WorkflowResult.class);
-        Long[] filterFiles = wrsq.getFilterByFiles();
-        if (filterFiles.length > 0) {
+        Long[] fbFiles = wrsq.getFilterByFiles();
+        if (fbFiles.length > 0) {
             wrsq.setFilterByFiles(new Long[0]);
             addPredicates(wrsq, cb, cqFile, rtFile); 
-        	wrsq.setFilterByFiles(filterFiles);
+        	wrsq.setFilterByFiles(fbFiles);
         }
         else {
         	addPredicates(wrsq, cb, cqFile, rtFile); 
@@ -253,7 +242,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         List<String> outputs = getFilterValues("outputName", wrsq, cb);
         
         // search terms
-        List<String> searchTerms = unionTerms(items, files);
+        List<String> searchTerms = unionTerms(collections, items, files);
 
 		WorkflowResultFilterValues filters = new WorkflowResultFilterValues();		
         filters.setDateFilter(dates);
@@ -272,7 +261,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
 	}
 	
 	/**
-	 * Get the allowed filter value set for the specified field (the value must be of String type).
+	 * Get the allowed filter value set for the specified field of String type.
 	 */
 	private List<String> getFilterValues(String field, WorkflowResultSearchQuery wrsq, CriteriaBuilder cb) {
         CriteriaQuery<String> cq = cb.createQuery(String.class);
@@ -321,33 +310,33 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         }
         
         if(wrsq.getFilterByUnits().length>0) {
-            Path<String> path = root.get("unitName");
+            Path<String> path = root.get("unitId");
             Predicate predicate = path.in((Object[])wrsq.getFilterByUnits());
             predicates.add(predicate);
         }
         
         if(wrsq.getFilterByCollections().length>0) {
-        	Path<String> path = root.get("collectionName");
+        	Path<String> path = root.get("collectionId");
             Predicate predicate = path.in((Object[])wrsq.getFilterByCollections());
             predicates.add(predicate);
         }
 
-        if(wrsq.getFilterByExternalIds().length>0) {
-        	Path<String> path = root.get("externalId");
-        	Predicate predicate = path.in((Object[])wrsq.getFilterByExternalIds());
-        	predicates.add(predicate);
-        }
-        
         if(wrsq.getFilterByItems().length>0) {
-        	Path<String> path = root.get("itemName");
+        	Path<String> path = root.get("itemId");
             Predicate predicate = path.in((Object[])wrsq.getFilterByItems());
             predicates.add(predicate);
         }
         
         if(wrsq.getFilterByFiles().length>0) {
-        	Path<String> path = root.get("primaryfileName");
+        	Path<String> path = root.get("primaryfileId");
             Predicate predicate = path.in((Object[])wrsq.getFilterByFiles());
             predicates.add(predicate);
+        }
+        
+        if(wrsq.getFilterByExternalIds().length>0) {
+        	Path<String> path = root.get("externalId");
+        	Predicate predicate = path.in((Object[])wrsq.getFilterByExternalIds());
+        	predicates.add(predicate);
         }
         
         if(wrsq.getFilterByWorkflows().length>0) {
@@ -402,8 +391,11 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         return finalPredicate;
     }
 	
-	private List<String> unionTerms(List<WorkflowResultFilterItem> items, List<WorkflowResultFilterFile> files) {
+	private List<String> unionTerms(List<WorkflowResultFilterCollection> collections, List<WorkflowResultFilterItem> items, List<WorkflowResultFilterFile> files) {
         Set<String> terms = new HashSet<String>();
+        for (WorkflowResultFilterCollection collection : collections) {
+        	terms.add(collection.getCollectionName());
+        }
         for (WorkflowResultFilterItem item : items) {
         	terms.add(item.getItemName());
         }
