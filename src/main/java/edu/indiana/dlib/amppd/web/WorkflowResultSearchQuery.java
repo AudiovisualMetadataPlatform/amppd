@@ -1,8 +1,6 @@
 package edu.indiana.dlib.amppd.web;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import lombok.Data;
 
@@ -11,7 +9,7 @@ public class WorkflowResultSearchQuery {
 	public WorkflowResultSearchQuery(){
 		pageNum = 1;
 		resultsPerPage = Integer.MAX_VALUE;
-		filterByDates = new ArrayList<Date>();
+		filterByDates = new Date[0];
 		filterBySubmitters = new String[0];
 		filterByUnits = new Long[0];
 		filterByCollections = new Long[0];
@@ -31,7 +29,7 @@ public class WorkflowResultSearchQuery {
 	}
 	private int pageNum;
 	private int resultsPerPage;
-	private List <Date> filterByDates;
+	private Date[] filterByDates;
 	private String[] filterBySubmitters;
 	private Long[] filterByUnits;
 	private Long[] filterByCollections;

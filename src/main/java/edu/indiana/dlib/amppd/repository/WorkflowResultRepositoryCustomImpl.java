@@ -206,9 +206,9 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // create-date filter
         CriteriaQuery<Date> cqDate = cb.createQuery(Date.class);
         Root<WorkflowResult> rtDate = cqDate.from(WorkflowResult.class);
-        List <Date> fbDates = wrsq.getFilterByDates();
-        if (!fbDates.isEmpty()) {
-            wrsq.setFilterByDates(new ArrayList<Date>());
+        Date[] fbDates = wrsq.getFilterByDates();
+        if (fbDates.length > 0) {
+            wrsq.setFilterByDates(new Date[0]);
             addPredicates(wrsq, cb, cqDate, rtDate); 
         	wrsq.setFilterByDates(fbDates);
         }
@@ -296,11 +296,11 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
             }
         }
 		
-		if(wrsq.getFilterByDates().size()>0) { 
-			Predicate fromDate = cb.greaterThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class),wrsq.getFilterByDates().get(0)); 
-			Predicate toDate = cb.lessThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class), wrsq.getFilterByDates().get(1)); 
-			Predicate datePredicate = cb.and(fromDate, toDate);
-            predicates.add(datePredicate);
+		if(wrsq.getFilterByDates().length>0) { 
+			Predicate fromDate = cb.greaterThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class),wrsq.getFilterByDates()[0]); 
+			Predicate toDate = cb.lessThanOrEqualTo(root.get(DATE_PROPERTY).as(java.util.Date.class), wrsq.getFilterByDates()[1]); 
+			Predicate predicate = cb.and(fromDate, toDate);
+            predicates.add(predicate);
 		}
         
         if(wrsq.getFilterBySubmitters().length>0) {
