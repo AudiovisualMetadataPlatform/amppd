@@ -223,7 +223,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         		).distinct(true)).getResultList();
         
         // create-date filter
-        CriteriaQuery<Date[]> cqDate = cb.createQuery(Date[].class);
+        CriteriaQuery<Object[]> cqDate = cb.createQuery(Object[].class);
         Root<WorkflowResult> rtDate = cqDate.from(WorkflowResult.class);
         Date[] fbDates = wrsq.getFilterByDates();
         if (fbDates.length > 0) {
@@ -238,12 +238,13 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         // as frontend can use the date range to allow selection for further filtering;
         // also, this can avoid returning many individual dates when the result row size is big, 
         // as each result is likely to have different timestamps.
-        Date[] minmaxDates = em.createQuery(cqDate.multiselect(
-        		cb.least(rtDate.get(DATE_PROPERTY)), 
-        		cb.greatest(rtDate.get(DATE_PROPERTY))
+        Object[] minmaxdts = em.createQuery(cqDate.multiselect(
+        		cb.least(rtDate.<Date>get(DATE_PROPERTY)), 
+        		cb.greatest(rtDate.<Date>get(DATE_PROPERTY))
         		)).getSingleResult();
-        List<Date> dates = Arrays.asList(minmaxDates);
-//        List<Date> dates = em.createQuery(cqDate.select(rtDate.get(DATE_PROPERTY))).getResultList();
+        List<Date> dates = new ArrayList<Date>();
+        dates.add((Date)minmaxdts[0]);
+        dates.add((Date)minmaxdts[1]);        
     	
         // job status filter
         CriteriaQuery<GalaxyJobState> cqStatus = cb.createQuery(GalaxyJobState.class);
