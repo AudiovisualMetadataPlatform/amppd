@@ -32,3 +32,10 @@ HELP.md
 
 ### application-env.properties shall not be included in VCS as it contains sensitive info
 application-*.properties
+
+
+### Visual Studio Code files
+.vscode
+
+### Singularity stuff
+*.sif

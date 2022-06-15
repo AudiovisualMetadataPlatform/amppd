@@ -54,6 +54,7 @@ def main():
     try:
         if args.clean:
             subprocess.run(['mvn', 'clean'], check=True)
+        build_mediaprobe()
         subprocess.run(['mvn', 'install', '-DskipTests'], check=True)
     except Exception as e:
         logging.error(f"Maven build failed: {e}")
@@ -105,6 +106,20 @@ def main():
         tfile.add(warfile, f"{basedir}/data/rest.war")        
         logging.info(f"Build complete.  Package is in: {pkgfile}")
     
+
+
+def build_mediaprobe():
+    """Build the singularity container for MediaProbe"""
+    # first, check to see if it's already built
+    root = Path(sys.path[0])    
+    sif_path = root / "src/main/resources/MediaProbe.sif"
+    if not sif_path.exists():
+        # build it.
+        logging.info("Building MediaProbe singularity container")
+        subprocess.run(['singularity', 'build', '--fakeroot', str(sif_path), str(root / "mediaprobe.recipe")], check=True)
+
+
+
 
 if __name__ == "__main__":
     main()

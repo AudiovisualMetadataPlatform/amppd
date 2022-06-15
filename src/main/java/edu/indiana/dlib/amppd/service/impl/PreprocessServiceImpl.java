@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public class PreprocessServiceImpl implements PreprocessService {
 
 	@Autowired
 	private DataentityService dataentityService;
+
+	@Autowired
+	private ServletContext servletContext;
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PreprocessServiceImpl.convertFlacToWav(String)
@@ -114,6 +119,11 @@ public class PreprocessServiceImpl implements PreprocessService {
 	@Override
 	public String retrieveMediaInfo(String filepath) {
 		String jsonpath = getMediaInfoJsonPath(filepath);
+		// MediaProbe.sif is in WEB-INF/classes/MediaProbe.sif, get the absolute path
+		String mediaProbe = servletContext.getRealPath("WEB-INF/classes/MediaProbe.sif");
+		ProcessBuilder pb = new ProcessBuilder("singularity", "run", mediaProbe, "--json", fileStorageService.absolutePathName(filepath));
+		
+		/* 
 		ProcessBuilder pb = new ProcessBuilder(
 				amppdPropertyConfig.getPythonPath(), 
 				amppdPropertyConfig.getMediaprobeDir() + "media_probe.py", 
@@ -127,7 +137,8 @@ public class PreprocessServiceImpl implements PreprocessService {
 			path = path.concat(":/usr/local/bin");
 			env.put("PATH", path);
 		}
-		
+		*/
+
 		// merges the standard error to standard output
 		pb.redirectErrorStream(true);
 		
