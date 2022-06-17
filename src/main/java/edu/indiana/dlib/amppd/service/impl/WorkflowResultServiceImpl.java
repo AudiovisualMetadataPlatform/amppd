@@ -1074,7 +1074,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 		// otherwise it's relevant if its step/output is not in the irrelevant step/output list/map
 		else {
-			return SHOW_OUTPUTS.contains(output) || SHOW_OUTPUTS_STEPS.get(output).contains(step);
+			List<String> steps = SHOW_OUTPUTS_STEPS.get(output);
+			return SHOW_OUTPUTS.contains(output) || steps != null && steps.contains(step);
 		}			
 	}
 
