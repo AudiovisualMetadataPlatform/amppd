@@ -37,8 +37,12 @@ public class WorkflowResultController {
 	 * @param query the search query for workflow results
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
-	@GetMapping(path = "/workflow-results", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/workflow-results/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
+		// Note:
+		// This should better be a GET request instead of POST, according to REST API standards.
+		// However, Axios doesn't support GET with body, while sending the request with the query as a param  
+		// could result in a very long URL, which might exceeds the URL length limit.
 		log.info("Retrieving WorkflowResults for query ...");
 		return workflowResultService.getWorkflowResults(query);
 	}
