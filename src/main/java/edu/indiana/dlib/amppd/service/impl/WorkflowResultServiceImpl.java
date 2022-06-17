@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.supercsv.io.CsvMapWriter;
@@ -49,7 +48,6 @@ import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -154,9 +152,34 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		put("a2c40ea0bdc9743b", "9dabcf180e389f58");
 		put("e00f87158d92e09b", "ac20b62acfe2a9f1");
 		put("d1c24e4a7a8d75be", "1da25ad227cd932c");
-		put("e00f87158d92e09b", "c1cdcaa4ca03df29");
-		
+		put("e00f87158d92e09b", "c1cdcaa4ca03df29");		
 	}};
+
+	/*
+	 * Note: 
+	 * The lists/map below are used by the refresh process as a workaround to deal with the issue of irrelevant results 
+	 * being identified as relevant upon job submission, due to the fact that Galaxy treats all outputs of waiting/running jobs 
+	 * as visible, and only set the visibility according to workflow node definitions upon job completion.
+	 * The steps/outputs values below are based on current MGMs and how visibilities are generally set in most workflows,
+	 * thus is subject to update upon future changes. 
+	 */
+	// outputs within the following outputName list are relevant, disregarding its workflow step
+	private static final List<String> SHOW_OUTPUTS = Arrays.asList(
+			"web_vtt",
+			"amp_csv_entities",
+			"tagged_words",
+			"amp_faces",
+			"amp_shots",
+			"amp_vocr",
+			"amp_vocr_dedupe",
+			"amp_vocr_csv", 
+			"contact_sheet"
+			);
+	// outputs within the following outputName-workflowStepList map are relevant
+	private static final HashMap<String, List<String>> SHOW_OUTPUTS_STEPS =  new HashMap<String, List<String>>() {{
+//		put ("web_vtt", Arrays.asList("transcript_to_webvtt"));
+//		put ("amp_csv_entities", Arrays.asList("ner_to_csv"));
+	}};	
 
 	/* Note: 
 	 * The three lists below are used by the hideIrrelevantWorkflowResults process.
@@ -165,16 +188,30 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * If we need to run the hideIrrelevantWorkflowResults process and change these lists frequently, 
 	 * we can consider using a DB table instead of hard-coded constants.
 	 * Also, only standard step/output names need to be included, thanks to the standardize method.
-	 */
+	 */	
 	// all outputs of the following workflow steps are irrelevant, disregarding its output name
-	private static final List<String> HIDE_STEPS = Arrays.asList("ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "pyscenedetect_shot_detection");	
+	private static final List<String> HIDE_STEPS = Arrays.asList(
+			"ina_speech_segmenter", 
+			"ina_speech_segmenter_hpc", 
+			"remove_silence_music", 
+			"remove_silence_speech", 
+			"pyscenedetect_shot_detection");	
 	// all outputs with the following names are irrelevant, disregarding its workflow step
-	private static final List<String> HIDE_OUTPUTS = Arrays.asList("draftjs_corrected", "draftjs_uncorrected", "task_info", "iiif_corrected", "iiif_uncorrected");	
-	// all outputs with the following workflowStep-outputFile tuples are irrelevant
-	private static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
+	private static final List<String> HIDE_OUTPUTS = Arrays.asList(
+			"draftjs_corrected", 
+			"draftjs_uncorrected", 
+			"task_info", 
+			"iiif_corrected", 
+			"iiif_uncorrected");	
+	// all outputs within the following workflowStep-outputNames map are irrelevant
+	private static final HashMap<String, List<String>> HIDE_STEPS_OUTPUTS =  new HashMap<String, List<String>>() {{
+		put ("aws_transcribe", Arrays.asList("amp_diarization", "amp_transcript"));
+	}};	
+	
 //	public static final List<String> HIDE_STEPS = Arrays.asList("speech_segmenter", "ina_speech_segmenter", "ina_speech_segmenter_hpc", "remove_silence_music", "remove_silence_speech", "adjust_timestamps", "adjust_transcript_timestamps", "adjust_diarization_timestamps", "pyscenedetect_shot_detection");	
 //	public static final List<String> HIDE_OUTPUTS = Arrays.asList("corrected_draftjs", "draftjs_corrected", "draftjs_uncorrected", "original_draftjs", "task_info", "corrected_iiif", "iiif_corrected", "iiif_uncorrected", "original_iiif");	
 //	public static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe",	"amp_transcript"} };
+//	private static final String[][] HIDE_STEPS_OUTPUTS = { {"aws_transcribe", "amp_diarization"}, {"aws_transcribe", "amp_transcript"} };
 
 //	@Value("${amppd.refreshResultsStatusMinutes}")
 //	private int REFRESH_STATUS_MINUTES;
@@ -342,7 +379,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// when Galaxy first schedule a workflow, there appears to be a short period when all outputs visibility are set to
 			// to true by default; only later when the job gets to run when the visibility gets updated according to the workflow;
 			// thus upon workflow submission, the result might have the default value, so we should update it during status update
-			result.setRelevant(dataset.getVisible());
+			result.setRelevant(isRelevant(result, dataset));
+//			result.setRelevant(dataset.getVisible());
 			
 			// beside, we need to update the output path, as it might have been changed from null (when the job is scheduled
 			// but not running yet) to the output dateset file path (only when the job starts running does output dataset get created)
@@ -661,7 +699,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				// no need to populate/overwrite outputLink here, as it is set when output is first accessed on WorkflowResult
 
 				result.setSubmitter(galaxyPropertyConfig.getUsername());
-				result.setRelevant(dataset.getVisible()); // result is relevant if and only if its Galaxy dataset is visible
+				result.setRelevant(isRelevant(result, dataset));
+//				result.setRelevant(dataset.getVisible()); // result is relevant if and only if its Galaxy dataset is visible
 				result.setStatus(getJobStatus(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
@@ -829,9 +868,14 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		Set<WorkflowResult> results = new HashSet<WorkflowResult>();
 		results.addAll(workflowResultRepository.findByWorkflowStepIn(HIDE_STEPS));
 		results.addAll(workflowResultRepository.findByOutputNameIn(HIDE_OUTPUTS));		
-		for (String[] stepOutput : HIDE_STEPS_OUTPUTS ) {
-			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
-		}		
+		for (Map.Entry<String, List<String>> stepOutputs : HIDE_STEPS_OUTPUTS.entrySet()) {			
+			for (String output : stepOutputs.getValue()) {
+				results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutputs.getKey(), output));
+			}
+		}
+//		for (String[] stepOutput : HIDE_STEPS_OUTPUTS ) {
+//			results.addAll(workflowResultRepository.findByWorkflowStepAndOutputName(stepOutput[0], stepOutput[1]));
+//		}		
 		log.info("Found " + results.size() + " irrelevant workflowResults in AMP table to hide");
 		
 		// set datasets of the irrelevant results to invisible in Galaxy
@@ -953,6 +997,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
 		// update outputLabel if provided and different from current value
+		// Note that this is the label defined by AMP users via AMP UI, not to be confused with dataset tags or annotation
 		if (outputLabel != null && !outputLabel.equals(result.getOutputLabel())) {
 			result.setOutputLabel(outputLabel);		
 			updated = true;
@@ -976,7 +1021,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		return result;
 	}
 		
-	// Map the status in Galaxy to what we want on the front end.
+	/**
+	 *  Map the status in Galaxy to what we want on the front end.
+	 */
 	protected GalaxyJobState getJobStatus(String jobStatus) {
 		GalaxyJobState status = GalaxyJobState.UNKNOWN;
 		if(jobStatus.equals("ok")) {
@@ -1000,7 +1047,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		return status;
 	}
 	
-	/*
+	/**
 	 * Get the latest model/version of the specified MGM tool at the point when the Galaxy job was run.
 	 * @param toolId Galaxy tool ID for the MGM tool
 	 * @param invocationTime the invocation time of the Galaxy job
@@ -1012,6 +1059,23 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			return null;
 		String info = tools.get(0).getMgmName() + " " + tools.get(0).getVersion();
 		return info;
+	}
+	
+	/**
+	 * Check if the specified result is relevant based on its current status and the visibility of its corresponding dataset in Galaxy.
+	 */
+	protected boolean isRelevant(WorkflowResult result, Dataset dataeet) {
+		String step = result.getWorkflowStep();
+		String output = result.getOutputName();		
+		
+		// if the job status is COMPLETE or ERROR, it's relevant if its dataset is visible in Galaxy	
+		if (result.getStatus() == GalaxyJobState.COMPLETE || result.getStatus() == GalaxyJobState.ERROR) {
+			return dataeet.getVisible();
+		}
+		// otherwise it's relevant if its step/output is not in the irrelevant step/output list/map
+		else {
+			return SHOW_OUTPUTS.contains(output) || SHOW_OUTPUTS_STEPS.get(output).contains(step);
+		}			
 	}
 
 	/**
