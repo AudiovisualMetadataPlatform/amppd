@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -193,35 +194,60 @@ public class WorkflowEditProxy {
 	}
 	
 	/**
-	 * Create a new workflow with default info and start its edit session within an authenticated AMP user session.
+	 * Create a new workflow for edit with default info within an authenticated AMP user session.
 	 * @param authHeader Authorization header from the request
-	 * @param response HTTP response to send
-	 * @return empty body response upon success
+	 * @return ID of the newly created workflow
 	 */
 	@PostMapping("/workflows/create")
-	public ResponseEntity<GalaxyWorkflowResponse> create(@RequestHeader("Authorization") String authHeader, HttpServletResponse response) {
-		// call Galaxy API to create a new workflow
-		ResponseEntity<GalaxyWorkflowResponse> gresponse = createWorkflow();
+	public ResponseEntity<String> create(@RequestHeader("Authorization") String authHeader) {
+		String workflowId = null;
 		
-		// retrieve workflowId from galaxy response
-		GalaxyWorkflowResponse gwr = gresponse.getBody();
-		String workflowId = gwr.getId();
+		// create workflow in Galaxy
+		try {
+			// populate Galaxy request header with galaxySession cookie
+	    	HttpHeaders headers = new HttpHeaders();
+	    	headers.add(HttpHeaders.COOKIE, galaxySession);
+	    	headers.setContentType(MediaType.APPLICATION_JSON);
+	
+	    	// populate Galaxy request body with default GalaxyWorkflowRequest, i.e. with default name and empty annotation
+	    	GalaxyWorkflowRequest gwreq = new GalaxyWorkflowRequest();
+			
+			// send PUT request with headers and body to Galaxy 
+			String url = galaxyPropertyConfig.getBaseUrl() + "/workflow/create";
+			HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwreq, headers);
+			ResponseEntity<GalaxyWorkflowResponse> response = restTemplate.exchange(url, HttpMethod.PUT, request, GalaxyWorkflowResponse.class);
+			GalaxyWorkflowResponse gwres = response.getBody();
+			
+			// check Galaxy response status
+			if (response.getStatusCode() != HttpStatus.OK) {
+				throw new GalaxyWorkflowException("Error while creating workflow in Galaxy: " + gwres.getMessage());
+			}
+			
+			// retrieve workflowId from galaxy response
+			workflowId = gwres.getId();			
+			if (StringUtils.isEmpty(workflowId)) {
+				throw new GalaxyWorkflowException("Failed to create workflow in Galaxy: empty workflow ID returned.");
+			}
+		}
+		catch(RestClientException e) {
+			throw new GalaxyWorkflowException("Exception while creating workflow in Galaxy", e);
+		}
 		
 		// generate the workflow edit cookie, provided the current AMP request authHeader and workflowId
 		ResponseCookie rc = generateWorkflowEditCookie(authHeader, workflowId);
 
 		// send the cookie to AMP client to authenticate future workflow edit requests
-	    response.setHeader(HttpHeaders.SET_COOKIE, rc.toString());
+		ResponseEntity<String> res = ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, rc.toString()).body(workflowId);
 	    	    
 		log.info("Successfully created new workflow for edit: " + workflowId);
-		return ResponseEntity.status(HttpStatus.OK).body(gwr);
+		return res;
 	}	
 	
 	/**
 	 * Start a workflow edit session within an authenticated AMP user session.
 	 * @param authHeader Authorization header from the request
 	 * @param workflowId ID of the workflow for edit
-	 * @param response HTTP response to send
+	 * @param response HTTP response to send back
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editStart")
@@ -241,7 +267,7 @@ public class WorkflowEditProxy {
 	 * Start a workflow edit session within an authenticated AMP user session.
 	 * @param authHeader Authorization header from the request
 	 * @param workflowId ID of the workflow for edit
-	 * @param response HTTP response to send
+	 * @param response HTTP response to send back
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editEnd")
@@ -374,12 +400,12 @@ public class WorkflowEditProxy {
     	headers.add(HttpHeaders.COOKIE, galaxySession);
     	headers.setContentType(MediaType.APPLICATION_JSON);
 
-    	// populate request body with default GalaxyWorkflowRequest
+    	// populate request body with default GalaxyWorkflowRequest, i.e. with default name and empty annotation
     	GalaxyWorkflowRequest gwr = new GalaxyWorkflowRequest();
-		HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwr, headers);
 		
-		// send PUT request to Galaxy with default name and empty annotation
+		// send PUT request to Galaxy 
 		String url = galaxyPropertyConfig.getBaseUrl() + "/workflow/create";
+		HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwr, headers);
 		ResponseEntity<GalaxyWorkflowResponse> response = restTemplate.exchange(url, HttpMethod.PUT, request, GalaxyWorkflowResponse.class);
 		
 		return response;

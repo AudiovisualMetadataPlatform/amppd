@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GalaxyWorkflowRequest {
-	private String workflow_name = "Unknow Workflow";
+	private String workflow_name = "Unnamed Workflow";
 	private String workflow_annotation = "";	
 }
