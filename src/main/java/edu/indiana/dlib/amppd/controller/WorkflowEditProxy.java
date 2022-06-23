@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -41,6 +42,8 @@ import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
+import edu.indiana.dlib.amppd.web.GalaxyWorkflowRequest;
+import edu.indiana.dlib.amppd.web.GalaxyWorkflowResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -190,47 +193,72 @@ public class WorkflowEditProxy {
 		// TODO
 	}
 	
+	/**
+	 * Create a new workflow for edit with default info within an authenticated AMP user session.
+	 * @param authHeader Authorization header from the request
+	 * @return ID of the newly created workflow
+	 */
+	@PostMapping("/workflows/create")
+	public ResponseEntity<String> create(@RequestHeader("Authorization") String authHeader) {
+		String workflowId = null;
+		
+		// create workflow in Galaxy
+		try {
+			// populate Galaxy request header with galaxySession cookie
+	    	HttpHeaders headers = new HttpHeaders();
+	    	headers.add(HttpHeaders.COOKIE, galaxySession);
+	    	headers.setContentType(MediaType.APPLICATION_JSON);
+	
+	    	// populate Galaxy request body with default GalaxyWorkflowRequest, i.e. with default name and empty annotation
+	    	GalaxyWorkflowRequest gwreq = new GalaxyWorkflowRequest();
+			
+			// send PUT request with headers and body to Galaxy 
+			String url = galaxyPropertyConfig.getBaseUrl() + "/workflow/create";
+			HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwreq, headers);
+			ResponseEntity<GalaxyWorkflowResponse> response = restTemplate.exchange(url, HttpMethod.PUT, request, GalaxyWorkflowResponse.class);
+			GalaxyWorkflowResponse gwres = response.getBody();
+			
+			// check Galaxy response status
+			if (response.getStatusCode() != HttpStatus.OK) {
+				throw new GalaxyWorkflowException("Error while creating workflow in Galaxy: " + gwres.getMessage());
+			}
+			
+			// retrieve workflowId from galaxy response
+			workflowId = gwres.getId();			
+			if (StringUtils.isEmpty(workflowId)) {
+				throw new GalaxyWorkflowException("Failed to create workflow in Galaxy: empty workflow ID returned.");
+			}
+		}
+		catch(RestClientException e) {
+			throw new GalaxyWorkflowException("Exception while creating workflow in Galaxy", e);
+		}
+		
+		// generate the workflow edit cookie, provided the current AMP request authHeader and workflowId
+		ResponseCookie rc = generateWorkflowEditCookie(authHeader, workflowId);
+
+		// send the cookie to AMP client to authenticate future workflow edit requests
+		ResponseEntity<String> res = ResponseEntity.status(HttpStatus.OK).header(HttpHeaders.SET_COOKIE, rc.toString()).body(workflowId);
+	    	    
+		log.info("Successfully created new workflow for edit: " + workflowId);
+		return res;
+	}	
 	
 	/**
 	 * Start a workflow edit session within an authenticated AMP user session.
 	 * @param authHeader Authorization header from the request
 	 * @param workflowId ID of the workflow for edit
-	 * @param response HTTP response to send
+	 * @param response HTTP response to send back
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editStart")
 	public ResponseEntity<String> startEdit(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
-		/* Note:
-		 * We use AMP authorization token instead of username to identify workflow edit session, as the former corresponds to
-		 * an AMP user session, and there could be multiple sessions from multiple clients for the same user.
-		 * Also, with current implementation, AMP server does allow user to edit multiple workflows in the same session;
-		 * however, AMP client can only take one workflow edit cookie at a time, so it should be disallowed by AMP client.
-		 */
-
-		// since the request is through AMP user authentication, the authorization token must be valid at this point
-		String authToken = jwtTokenUtil.retrieveToken(authHeader);
-		
-		// generate a workflow edit token corresponding to the authorization token and workflow ID
-		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
-		
-    	// wrap the workflow edit token in a cookie 
-		ResponseCookie rc = ResponseCookie.from(WORKFLOW_EDIT_COOKIE, wfeToken) // key & value
-		        .httpOnly(true)
-		        .secure(true)
-		        .sameSite("None")  // TODO change this to LAX once done with workflow editor UI dev
-		        .path(context.getContextPath() + GALAXY_ROOT)
-		        .maxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60)
-		        .build();
-		        
-//		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
-//	    cookie.setSecure(true);	// TODO setting secure to true doesn't work on localhost, which uses http instead of https
-//	    cookie.setHttpOnly(true);
-//	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
-//	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
+		// generate the workflow edit cookie, provided the current AMP request authHeader and workflowId
+		ResponseCookie rc = generateWorkflowEditCookie(authHeader, workflowId);
 		
 		// send the cookie to AMP client to authenticate future workflow edit requests
-//		response.addCookie(cookie);
+		// note that the response body is empty
 	    response.setHeader(HttpHeaders.SET_COOKIE, rc.toString());
+	    
 		log.info("Successfully started the edit session for workflow " + workflowId);
 		return ResponseEntity.status(HttpStatus.OK).body(null);
 	}	
@@ -239,7 +267,7 @@ public class WorkflowEditProxy {
 	 * Start a workflow edit session within an authenticated AMP user session.
 	 * @param authHeader Authorization header from the request
 	 * @param workflowId ID of the workflow for edit
-	 * @param response HTTP response to send
+	 * @param response HTTP response to send back
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editEnd")
@@ -364,25 +392,59 @@ public class WorkflowEditProxy {
 	}
 	
 	/**
-	 * Returns true if the give cookie is a WFE cookie; false otherwise
+	 * Send request to create a new workflow with default info in Galaxy and return the response.  
 	 */
-	private boolean isWorkflowEditCookie(String cookie) {
-		return cookie.startsWith(WORKFLOW_EDIT_COOKIE);
-	}
+	private ResponseEntity<GalaxyWorkflowResponse> createWorkflow() {
+    	// populate request header with galaxySession cookie
+    	HttpHeaders headers = new HttpHeaders();
+    	headers.add(HttpHeaders.COOKIE, galaxySession);
+    	headers.setContentType(MediaType.APPLICATION_JSON);
 
-//	private boolean isHeaderWorkflowEditCookie(String key, List<String> value) {
-//		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.size() == 1 && value.get(0).contains(WORKFLOW_EDIT_COOKIE);
-//	}
+    	// populate request body with default GalaxyWorkflowRequest, i.e. with default name and empty annotation
+    	GalaxyWorkflowRequest gwr = new GalaxyWorkflowRequest();
+		
+		// send PUT request to Galaxy 
+		String url = galaxyPropertyConfig.getBaseUrl() + "/workflow/create";
+		HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwr, headers);
+		ResponseEntity<GalaxyWorkflowResponse> response = restTemplate.exchange(url, HttpMethod.PUT, request, GalaxyWorkflowResponse.class);
+		
+		return response;
+	}
 	
 	/**
-	 * Return true if the given WFE cookie contains valid JWT token for AMP user workflow edit session; false otherwise.
+	 * Generates the workflow edit cookie for the the given AMP request authHeader and workflowId.
 	 */
-	private ImmutablePair<AmpUser, String> validateWorkflowEditCookie(String wfeCookie) {
-		if (StringUtils.isEmpty(wfeCookie)) {
-			log.error("Workflow Edit Cookie is not provided in the request.");
-			return null;
-		}			
-		return jwtTokenUtil.validateWorkflowEditToken(wfeCookie);
+	private ResponseCookie generateWorkflowEditCookie(String authHeader, String workflowId) {
+		/* Note:
+		 * We use AMP authorization token instead of username to identify workflow edit session, as the former corresponds to
+		 * an AMP user session, and there could be multiple sessions from multiple clients for the same user.
+		 * Also, with current implementation, AMP server does allow user to edit multiple workflows in the same session;
+		 * however, AMP client can only take one workflow edit cookie at a time, so it should be disallowed by AMP client.
+		 */
+
+		// since the request is through AMP user authentication, the authorization token must be valid at this point
+		String authToken = jwtTokenUtil.retrieveToken(authHeader);
+		
+		// generate a workflow edit token corresponding to the authorization token and workflow ID
+		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
+		
+    	// wrap the workflow edit token in a cookie 
+		ResponseCookie rc = ResponseCookie.from(WORKFLOW_EDIT_COOKIE, wfeToken) // key & value
+		        .httpOnly(true)
+		        .secure(true)
+		        .sameSite("None")  // TODO change this to LAX once done with workflow editor UI dev
+		        .path(context.getContextPath() + GALAXY_ROOT)
+		        .maxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60)
+		        .build();
+		        
+//		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
+//	    cookie.setSecure(true);	// TODO setting secure to true doesn't work on localhost, which uses http instead of https
+//	    cookie.setHttpOnly(true);
+//	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
+//	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
+//		response.addCookie(cookie);
+
+		return rc;
 	}
 	
 	/**
@@ -470,6 +532,28 @@ public class WorkflowEditProxy {
 		return false;
 	}
 	
+	/**
+	 * Returns true if the give cookie is a WFE cookie; false otherwise
+	 */
+	private boolean isWorkflowEditCookie(String cookie) {
+		return cookie.startsWith(WORKFLOW_EDIT_COOKIE);
+	}
+
+//	private boolean isHeaderWorkflowEditCookie(String key, List<String> value) {
+//		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.size() == 1 && value.get(0).contains(WORKFLOW_EDIT_COOKIE);
+//	}
+	
+	/**
+	 * Return true if the given WFE cookie contains valid JWT token for AMP user workflow edit session; false otherwise.
+	 */
+	private ImmutablePair<AmpUser, String> validateWorkflowEditCookie(String wfeCookie) {
+		if (StringUtils.isEmpty(wfeCookie)) {
+			log.error("Workflow Edit Cookie is not provided in the request.");
+			return null;
+		}			
+		return jwtTokenUtil.validateWorkflowEditToken(wfeCookie);
+	}
+		
 	/**
 	 * Return true if the workflow ID parameter in the given GET request for the given action matches the given workflow ID; 
 	 * false otherwise.

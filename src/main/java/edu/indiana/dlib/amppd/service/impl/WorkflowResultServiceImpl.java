@@ -376,9 +376,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			GalaxyJobState status = getJobStatus(state);			
 			result.setStatus(status);
 
-			// when Galaxy first schedule a workflow, there appears to be a short period when all outputs visibility are set to
-			// to true by default; only later when the job gets to run when the visibility gets updated according to the workflow;
-			// thus upon workflow submission, the result might have the default value, so we should update it during status update
+			// when a job is in unfinished status, Galaxy sets all of its outputs as visible;
+			// upon job completion, Galaxy updates the visibility according to the definition in workflow;
+			// thus we need to also update relevant field during status refresh
 			result.setRelevant(isRelevant(result, dataset));
 //			result.setRelevant(dataset.getVisible());
 			
@@ -424,13 +424,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Override
 	@Transactional	
 	public List<WorkflowResult> refreshIncompleteWorkflowResults() {	
-		// for now we exclude ERROR, PAUSED and UNKNOWN, 
-		// as these jobs will need manual rerun for their status to be changed;
-		// in most cases we likely will need to delete these outputs and resubmit whole workflow;
-		// besides, all status will be updated during the nightly refresh whole table job.
-		// TODO we might want to add ERROR and PAUSED to the status list for update in the future
+		// only jobs with incomplete status need status update; 
+		// for jobs that are finished (COMPLETE, ERROR), their status won't change, so no need to refresh; in particular, 
+		// when an ERROR job is rerun in Galaxy, a new job will be created and only picked up when result table is refreshed;
+		// PAUSED jobs should have status refreshed, as the status can change to running when the workflow is resumed in Galaxy.
 		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
-		GalaxyJobState[] filterByStatuses = {GalaxyJobState.IN_PROGRESS, GalaxyJobState.SCHEDULED};
+		GalaxyJobState[] filterByStatuses = {GalaxyJobState.SCHEDULED, GalaxyJobState.IN_PROGRESS, GalaxyJobState.PAUSED};
 		query.setFilterByStatuses(filterByStatuses);
 		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
 		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
