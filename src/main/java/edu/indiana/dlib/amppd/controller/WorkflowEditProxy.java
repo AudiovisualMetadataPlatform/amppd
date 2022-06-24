@@ -389,27 +389,7 @@ public class WorkflowEditProxy {
     	// return workflow edit response
     	ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(gbody, rheaders, gstatus);    	
 		return response;
-	}
-	
-	/**
-	 * Send request to create a new workflow with default info in Galaxy and return the response.  
-	 */
-	private ResponseEntity<GalaxyWorkflowResponse> createWorkflow() {
-    	// populate request header with galaxySession cookie
-    	HttpHeaders headers = new HttpHeaders();
-    	headers.add(HttpHeaders.COOKIE, galaxySession);
-    	headers.setContentType(MediaType.APPLICATION_JSON);
-
-    	// populate request body with default GalaxyWorkflowRequest, i.e. with default name and empty annotation
-    	GalaxyWorkflowRequest gwr = new GalaxyWorkflowRequest();
-		
-		// send PUT request to Galaxy 
-		String url = galaxyPropertyConfig.getBaseUrl() + "/workflow/create";
-		HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwr, headers);
-		ResponseEntity<GalaxyWorkflowResponse> response = restTemplate.exchange(url, HttpMethod.PUT, request, GalaxyWorkflowResponse.class);
-		
-		return response;
-	}
+	}	
 	
 	/**
 	 * Generates the workflow edit cookie for the the given AMP request authHeader and workflowId.
