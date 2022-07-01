@@ -4,9 +4,11 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
+import javax.validation.constraints.NotBlank;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import edu.indiana.dlib.amppd.validator.EnumConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -23,8 +25,12 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 public abstract class Supplement extends Asset {
-	// Currently, we don't have UNIT type Supplement, it might be added later as needed.
-	// In batch manifest the types are indicated as C or "Collection", I or "Item", P or "Primaryfile"
+
+	@NotBlank
+	@EnumConfig(property = "supplementCategories")	
+	private String category;
+	
+	// In batch manifest the types are indicated as U or "Unit", C or "Collection", I or "Item", P or "Primaryfile"
 	// Note: PFILE is not a Supplement type per se, but refers to Primaryfile as one special Asset type 
 	public enum SupplementType { PFILE, UNIT, COLLECTION, ITEM, PRIMARYFILE }
 	

@@ -13,6 +13,12 @@ import edu.indiana.dlib.amppd.model.Supplement;
 public interface DataentityService {
 
 	/**
+	 * Return all supplement categories handled by AMP defined in application configuration.
+	 * @return the array of allowed supplement categories
+	 */
+	public List<String> getSupplementCategories();
+	
+	/**
 	 * Return all external sources supported by AMP defined in application configuration.
 	 * @return the array of allowed external sources 
 	 */

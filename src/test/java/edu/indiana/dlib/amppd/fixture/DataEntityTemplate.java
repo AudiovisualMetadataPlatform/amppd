@@ -14,7 +14,8 @@ import edu.indiana.dlib.amppd.model.Unit;
 
 //@Component
 public class DataEntityTemplate implements TemplateLoader {
-	public static String TASK_MANAGER = "Jira";
+	public static String CATEGORY = "FacePhoto|Groundtruth|RecitalProgram|Other";
+	public static String TASK_MANAGER = "Jira|Trello";
 	public static String EXTERNAL_SOURCE = "MCO|DarkAvalon|NYPL";	// "^\\s*$|MCO|DarkAvalon|NYPL"
 	
 //	@Autowired
@@ -25,8 +26,9 @@ public class DataEntityTemplate implements TemplateLoader {
 	    
 	@Override
 	public void load() {
-//		String[] taskManagers = dataentityService.getAllowedExternalSources();
-//		String[] externalSources = dataentityService.getAllowedExternalSources();
+//		String[] supplementCategories = dataentityService.getSupplementCategories();
+//		String[] taskManagers = dataentityService.getExternalSources();
+//		String[] externalSources = dataentityService.getExternalSources();
 //		
 //		Unit unit = testHelper.ensureUnit("Test Unit");
 //		Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");
@@ -96,6 +98,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
 			add("name", regex("Test CollectionSupplement - " + nameRegex));
 			add("description", "Description for ${name}");	
+			add("category", regex(CATEGORY));	
 //			add("collection", collectionUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");
@@ -109,6 +112,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		Fixture.of(ItemSupplement.class).addTemplate("valid", new Rule() {{
 			add("name", regex("Test ItemSupplement - " + nameRegex));
 			add("description", "Description for ${name}");	
+			add("category", regex(CATEGORY));	
 //			add("item", itemUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");
@@ -122,6 +126,7 @@ public class DataEntityTemplate implements TemplateLoader {
 		Fixture.of(PrimaryfileSupplement.class).addTemplate("valid", new Rule() {{
 			add("name", regex("Test PrimaryfileSupplement - " + nameRegex));
 			add("description", "Description for ${name}");	
+			add("category", regex(CATEGORY));	
 //			add("primaryfile", primaryfileUrl);
 //			add("originalFilename", firstName());
 //			add("pathname", "C:/New Folder/${name}");

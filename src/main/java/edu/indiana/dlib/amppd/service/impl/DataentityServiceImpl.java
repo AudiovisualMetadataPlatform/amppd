@@ -39,11 +39,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
 	
+	public static final String SUPPLEMENT_CATEGORIES = "supplementCategories";
 	public static final String EXTERNAL_SOURCES = "externalSources";
 	public static final String TASK_MANAGERS = "taskManagers";
 
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
+	
+	@Value("#{'${amppd.supplementCategories}'.split(',')}")
+	private List<String> supplementCategories;
 	
 	@Value("#{'${amppd.externalSources}'.split(',')}")
 	private List<String> externalSources;
@@ -74,6 +78,13 @@ public class DataentityServiceImpl implements DataentityService {
 	
 	@Autowired
 	private EntityManager entityManager;
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementCategories()
+	 */
+	public List<String> getSupplementCategories() {
+		return externalSources;
+	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getExternalSources()

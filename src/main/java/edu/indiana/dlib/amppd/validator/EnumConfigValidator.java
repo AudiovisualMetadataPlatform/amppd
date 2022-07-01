@@ -30,6 +30,12 @@ public class EnumConfigValidator implements ConstraintValidator<EnumConfig, Stri
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext cxt) {
+		// validation for supplement category
+		if (DataentityServiceImpl.SUPPLEMENT_CATEGORIES.equals(property)) {
+			// if supplementCategories property is not configured, then no constraint on supplement category
+			List<String> supplementCategories = dataentityService.getSupplementCategories();
+			return supplementCategories == null || supplementCategories.isEmpty() || supplementCategories.contains(value);
+		}
 		// validation for externalSource
 		if (DataentityServiceImpl.EXTERNAL_SOURCES.equals(property)) {
 			// externalSource can be blank

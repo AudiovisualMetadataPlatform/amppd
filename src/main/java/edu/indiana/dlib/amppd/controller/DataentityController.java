@@ -90,8 +90,12 @@ public class DataentityController {
 	public Map<String,List<String>> getConfigProperties(@RequestParam(required = false) List<String> properties) {
 		Map<String,List<String>> map = new HashMap<String,List<String>>();
 		
-		// Currently, client visible config properties include only externalSources and taskManagers;
+		// Currently, client visible config properties include supplementCategories, externalSources and taskManagers;
 		// all other ones requested are ignored.
+		if (properties == null || properties.contains(DataentityServiceImpl.SUPPLEMENT_CATEGORIES)) {
+			log.info("Getting configuration property " + DataentityServiceImpl.SUPPLEMENT_CATEGORIES);
+			map.put(DataentityServiceImpl.SUPPLEMENT_CATEGORIES, dataentityService.getSupplementCategories());
+		}
 		if (properties == null || properties.contains(DataentityServiceImpl.EXTERNAL_SOURCES)) {
 			log.info("Getting configuration property " + DataentityServiceImpl.EXTERNAL_SOURCES);
 			map.put(DataentityServiceImpl.EXTERNAL_SOURCES, dataentityService.getExternalSources());
