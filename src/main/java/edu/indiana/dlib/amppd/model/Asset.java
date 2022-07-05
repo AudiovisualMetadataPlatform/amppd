@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.nio.file.Paths;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
@@ -9,6 +11,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -45,7 +48,18 @@ public abstract class Asset extends Dataentity {
      
     // only used for media file upload during asset creation/update, so it can be sent as part of RequestBody
     @Transient
-    MultipartFile mediaFile;
+    private MultipartFile mediaFile;
+    
+    @Transient
+    @Value("${amppd.fileStorageRoot}")
+    private String root;
+    
+    /**
+     * Get the absolute pathname of the asset.
+     */
+    public String getAbsolutePathname() {
+    	return Paths.get(root, pathname).toString();
+    }
     
     /**
      * Get the MIME type of the asset based on the MIME and streams from its media info.

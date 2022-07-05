@@ -9,5 +9,8 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 public interface ItemSupplementRepository extends SupplementRepository<ItemSupplement> {
 	
 	List<ItemSupplement> findByItemIdAndName(Long itemId, String name);
+	List<ItemSupplement> findByItemIdAndCategory(Long itemId, String category); 
+	List<ItemSupplement> findByItemIdAndCategoryAndOriginalFilenameLike(Long itemId, String category, String fileExtension); 
+	List<ItemSupplement> findByItemIdAndNameAndCategoryAndOriginalFilenameLike(Long itemId, String name, String category, String fileExtension); 
 
 }
