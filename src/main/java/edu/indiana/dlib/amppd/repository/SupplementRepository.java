@@ -10,8 +10,8 @@ import edu.indiana.dlib.amppd.model.Supplement;
 public interface SupplementRepository<S extends Supplement> extends AssetRepository<S> {
 	
 	List<Supplement> findByCategory(String category); 
-	List<Supplement> findByCategoryAndOriginalFilenameLike(String category, String fileExtension); 
-	List<Supplement> findByNameAndCategoryAndOriginalFilenameLike(String name, String category, String fileExtension); 
+	List<Supplement> findByCategoryAndOriginalFilenameLike(String category, String format); 
+	List<Supplement> findByNameAndCategoryAndOriginalFilenameLike(String name, String category, String format); 
 	
 	/* TODO 
 	 *  The API for supplement creation can be disabled by setting @RepositoryRestResource export = false for saveOnCreation.

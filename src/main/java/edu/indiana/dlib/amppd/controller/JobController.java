@@ -23,6 +23,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
 import edu.indiana.dlib.amppd.service.JobService;
+import edu.indiana.dlib.amppd.web.CreateJobParameters;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,12 +54,12 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(			
 			@RequestParam String workflowId, 
 			@RequestParam Long[] primaryfileIds, 
-			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestBody(required = false) CreateJobParameters parameters) {	
 		if (parameters == null ) {
-			parameters = new HashMap<String, Map<String, String>>();
+			parameters = new CreateJobParameters(new HashMap<String, Map<String, String>>());
 		}
 		log.info("Processing request to submit a workflow against primaryfiles with parameters ... ");
-		return jobService.createJobs(workflowId, primaryfileIds, parameters);
+		return jobService.createJobs(workflowId, primaryfileIds, parameters.getMap());
 	}
 	
 	/**
@@ -72,13 +73,13 @@ public class JobController {
 	public List<CreateJobResponse> createJobBundle(
 			@RequestParam String workflowId, 
 			@RequestParam Long bundleId, 
-			@RequestBody(required = false) Map<String, Map<String, String>> parameters) {	
+			@RequestBody(required = false) CreateJobParameters parameters) {	
 		// if parameters is not specified in the request, use an empty map for it
 		if (parameters == null ) {
-			parameters = new HashMap<String, Map<String, String>>();
+			parameters = new CreateJobParameters(new HashMap<String, Map<String, String>>());
 		}
 		log.info("Processing request to submit a workflow against a bundle of primaryfiles with parameters ... ");
-		return jobService.createJobBundle(workflowId, bundleId, parameters);
+		return jobService.createJobBundle(workflowId, bundleId, parameters.getMap());
 	}
 
 	/**
@@ -94,7 +95,7 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam List<Long[]> resultIdss, 
-			@RequestBody(required = false) Map<String, Map<String, String>> parameters,
+			@RequestBody(required = false) CreateJobParameters parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		if (resultIdss == null ) {
 			resultIdss = new ArrayList<Long[]>();
@@ -106,13 +107,13 @@ public class JobController {
 			resultIdss.remove(resultIdss.size()-1);
 		}
 		if (parameters == null ) {
-			parameters = new HashMap<String, Map<String, String>>();
+			parameters = new CreateJobParameters(new HashMap<String, Map<String, String>>());
 		}
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
 		}		
 		log.info("Processing request to submit a workflow against a list of arrays of workflow result outputs with parameters ... ");
-		return jobService.createJobs(workflowId, resultIdss, parameters, includePrimaryfile);
+		return jobService.createJobs(workflowId, resultIdss, parameters.getMap(), includePrimaryfile);
 	}
 
 	/**
@@ -128,7 +129,7 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
-			@RequestParam(value = "parameters", required = false) Map<String, Map<String, String>> parameters,
+			@RequestParam(value = "parameters", required = false) CreateJobParameters parameters,
 			@RequestParam(required = false) Boolean includePrimaryfile) {
 		// TODO 
 		// parameters is supposed to use @RequestBody or @RequestPart in order to be parsed as JSON string properly;
@@ -136,13 +137,13 @@ public class JobController {
 		// as a workaround, @RequestParam is used for now, and it must specify the value to avoid conflict with
 		// the default request parameters
 		if (parameters == null ) {
-			parameters = new HashMap<String, Map<String, String>>();
+			parameters = new CreateJobParameters(new HashMap<String, Map<String, String>>());
 		}
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
 		}
 		log.info("Processing request to submit a workflow against an inputCsv file containing primaryfile IDs and workflow result IDs with parameters ... ");
-		return jobService.createJobs(workflowId, inputCsv, parameters, includePrimaryfile);
+		return jobService.createJobs(workflowId, inputCsv, parameters.getMap(), includePrimaryfile);
 	}
 	
 	/**

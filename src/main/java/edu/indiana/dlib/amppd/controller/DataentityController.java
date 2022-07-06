@@ -26,6 +26,7 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
@@ -452,7 +453,20 @@ public class DataentityController {
         return primaryfileSupplement;
     }
 
-	
+	/**
+	 * Get all supplements associated the primaryfiles at all parent levels, with the given supplement name, category and format.
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @param name name of the supplement
+	 * @param category category of the supplement
+	 * @param format format of the supplement
+	 * @return list of all supplements satisfying the criteria for each primaryfile
+	 */
+	@GetMapping(path = "/primaryfiles/supplements")
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(@RequestParam Long[] primaryfileIds, @RequestParam String name, @RequestParam String category, @RequestParam String format) {
+		log.info("Retrieving supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
+		return dataentityService.getSupplementsForPrimaryfiles(primaryfileIds, name, category, format);
+	}
+		
 //	@PostMapping(path = "/collections/{id}/activate")
 //	public Collection activateCollection(@PathVariable Long id, @RequestParam Boolean active){
 //		log.info("Activating collection "  + id + ": " + active);		

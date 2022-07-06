@@ -10,7 +10,7 @@ public interface ItemSupplementRepository extends SupplementRepository<ItemSuppl
 	
 	List<ItemSupplement> findByItemIdAndName(Long itemId, String name);
 	List<ItemSupplement> findByItemIdAndCategory(Long itemId, String category); 
-	List<ItemSupplement> findByItemIdAndCategoryAndOriginalFilenameLike(Long itemId, String category, String fileExtension); 
-	List<ItemSupplement> findByItemIdAndNameAndCategoryAndOriginalFilenameLike(Long itemId, String name, String category, String fileExtension); 
+	List<ItemSupplement> findByItemIdAndCategoryAndOriginalFilenameLike(Long itemId, String category, String format); 
+	List<ItemSupplement> findByItemIdAndNameAndCategoryAndOriginalFilenameLike(Long itemId, String name, String category, String format); 
 
 }

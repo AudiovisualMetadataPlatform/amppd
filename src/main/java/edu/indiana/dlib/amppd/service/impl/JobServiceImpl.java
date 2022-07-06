@@ -39,7 +39,6 @@ import edu.indiana.dlib.amppd.exception.ParserException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -340,52 +339,58 @@ public class JobServiceImpl implements JobService {
 				stepsChanged.add(stepId);
 				log.info("Added HMGM context for primaryfile: " + primaryfile.getId() + ", workflow: " + workflowDetails.getId() + ", step: " + stepId);
 			}
-			else if (StringUtils.equals(stepDef.getToolId(), SUPPLEMENT_TOOL_ID)) {
-				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();				
-
-				// the name/type parameters should have been populated for the supplement associated with the primaryfile or its parent entities,
-				// either in the passed-in dynamic parameters, i.e. parameters provided upon workflow submission,
-				// or in the static parameters, i.e. parameters defined in the steps of a workflow, which could be overwritten by the former.
-				Map<String, Object> stepParams = parameters.get(stepId);				
-				if (stepParams == null) {
-					stepParams = new HashMap<String, Object>();
-					parameters.put(stepId, stepParams);
-				}
-				
-				// first look for the parameter in the passed in dynamic parameters
-				String name = (String)stepParams.get(SUPPLEMENT_NAME_PARAMETER);				
-				String type = (String)stepParams.get(SUPPLEMENT_TYPE_PARAMETER);
-				
-				// if not found, look in the static parameters in workflow detail
-				if (StringUtils.isEmpty(name)) {
-					name = (String)stepDef.getToolInputs().get(SUPPLEMENT_NAME_PARAMETER);
-				}				
-				if (StringUtils.isEmpty(type)) {
-					type = (String)stepDef.getToolInputs().get(SUPPLEMENT_TYPE_PARAMETER);
-				}				
-
-				// if still not found, throw error
-				if (StringUtils.isEmpty(name)) {
-					throw new GalaxyWorkflowException("Parameter supplement_name is not defined" + msg);
-				}
-				if (StringUtils.isEmpty(type)) {
-					throw new GalaxyWorkflowException("Parameter supplement_type is not defined" + msg);
-				}
-				
-				// now the supplement name/type parameters are found, get the supplement's absolute pathname, 
-				// given its name/type and the parent associated with the primaryfile
-				String pathname = mediaService.getSupplementPathname(primaryfile, name, Supplement.getSupplementType(type));
-				if (StringUtils.isEmpty(pathname)) {
-					throw new GalaxyWorkflowException("Could not find the supplement with name: " + name + " and type: " + type + msg);
-				}
-				
-				// now the supplement pathname is found, update the path parameter
-				// Note that supplement_path is supposed to be system generated parameter, any pre-defined values, 
-				// either dynamic ones from submission, or static ones from workflow, will be ignored and overwritten
-				stepParams.put(SUPPLEMENT_PATH_PARAMETER, pathname);
-				stepsChanged.add(stepId);
-				log.info("Populated parameter " + SUPPLEMENT_PATH_PARAMETER + " from supplement name: " + name + ", type: " + type + ", to filepath: " + pathname + msg);				
-			}			
+			/* Note: 
+			 * Below code is commented out, as we will not use Supplement MGM type+name parameters in the workflow to identify the 
+			 * supplement for all primaryfiles submit to a workflow; rather, we will use category+format+name(optional) to identify the 
+			 * supplements for each primaryfile and let users to choose one upon submission. Thus the supplement absolute path will be 
+			 * passed in as dynamic parameter with client's workflow submission request, so there is no need to process Supplement here.
+			 */
+//			else if (StringUtils.equals(stepDef.getToolId(), SUPPLEMENT_TOOL_ID)) {
+//				String msg =  ", for MGM " + stepDef.getToolId() + ", in step " + stepId + ", of workflow " + workflowDetails.getId() + ", with primaryfile " + primaryfile.getId();				
+//
+//				// the name/type parameters should have been populated for the supplement associated with the primaryfile or its parent entities,
+//				// either in the passed-in dynamic parameters, i.e. parameters provided upon workflow submission,
+//				// or in the static parameters, i.e. parameters defined in the steps of a workflow, which could be overwritten by the former.
+//				Map<String, Object> stepParams = parameters.get(stepId);				
+//				if (stepParams == null) {
+//					stepParams = new HashMap<String, Object>();
+//					parameters.put(stepId, stepParams);
+//				}
+//				
+//				// first look for the parameter in the passed in dynamic parameters
+//				String name = (String)stepParams.get(SUPPLEMENT_NAME_PARAMETER);				
+//				String type = (String)stepParams.get(SUPPLEMENT_TYPE_PARAMETER);
+//				
+//				// if not found, look in the static parameters in workflow detail
+//				if (StringUtils.isEmpty(name)) {
+//					name = (String)stepDef.getToolInputs().get(SUPPLEMENT_NAME_PARAMETER);
+//				}				
+//				if (StringUtils.isEmpty(type)) {
+//					type = (String)stepDef.getToolInputs().get(SUPPLEMENT_TYPE_PARAMETER);
+//				}				
+//
+//				// if still not found, throw error
+//				if (StringUtils.isEmpty(name)) {
+//					throw new GalaxyWorkflowException("Parameter supplement_name is not defined" + msg);
+//				}
+//				if (StringUtils.isEmpty(type)) {
+//					throw new GalaxyWorkflowException("Parameter supplement_type is not defined" + msg);
+//				}
+//				
+//				// now the supplement name/type parameters are found, get the supplement's absolute pathname, 
+//				// given its name/type and the parent associated with the primaryfile
+//				String pathname = mediaService.getSupplementPathname(primaryfile, name, Supplement.getSupplementType(type));
+//				if (StringUtils.isEmpty(pathname)) {
+//					throw new GalaxyWorkflowException("Could not find the supplement with name: " + name + " and type: " + type + msg);
+//				}
+//				
+//				// now the supplement pathname is found, update the path parameter
+//				// Note that supplement_path is supposed to be system generated parameter, any pre-defined values, 
+//				// either dynamic ones from submission, or static ones from workflow, will be ignored and overwritten
+//				stepParams.put(SUPPLEMENT_PATH_PARAMETER, pathname);
+//				stepsChanged.add(stepId);
+//				log.info("Populated parameter " + SUPPLEMENT_PATH_PARAMETER + " from supplement name: " + name + ", type: " + type + ", to filepath: " + pathname + msg);				
+//			}			
 		});
 
 		log.info("Successfully updated parameters for " + stepsChanged.size() + " steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());

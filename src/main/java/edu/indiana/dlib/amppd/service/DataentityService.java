@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
 
 /**
@@ -80,4 +81,24 @@ public interface DataentityService {
 	 */
 	public Asset saveAsset(Asset asset);
 	
+	/**
+	 * Get all supplements associated with the given primaryfile at all parent levels, with the given supplement name, category and format.
+	 * @param primaryfile the given primaryfile
+	 * @param name name of the supplement
+	 * @param category category of the supplement
+	 * @param format format of the supplement
+	 * @return all supplements satisfying the criteria
+	 */
+	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format);
+
+	/**
+	 * Get all supplements associated the primaryfiles at all parent levels, with the given supplement name, category and format.
+	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @param name name of the supplement
+	 * @param category category of the supplement
+	 * @param format format of the supplement
+	 * @return list of all supplements satisfying the criteria for each primaryfile
+	 */
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format);
+
 }

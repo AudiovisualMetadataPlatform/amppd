@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.nimbusds.oauth2.sdk.util.StringUtils;
+
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
@@ -19,6 +21,7 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
@@ -328,5 +331,54 @@ public class DataentityServiceImpl implements DataentityService {
 		return asset;
 	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfile(Primaryfile, String, String, String)
+	 */
+	@Override
+	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format) {
+		List<Supplement> supplements = new ArrayList<Supplement>();
+		
+		// primaryfile must exist, category and format must not be blank
+		if (primaryfile == null || StringUtils.isBlank(category) || StringUtils.isBlank(format)) {
+			return supplements;
+		}
+			
+		// format corresponds to file extension, prefix it with "." to avoid potential conflict in original file name
+		String extension = "." + format;
+		
+		// find all supplements associated with the primaryfile at all parent levels
+		// by its name/category/format and associated parent's ID
+		if (StringUtils.isBlank(name)) {
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getCollection().getId(), category, extension));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getId(), category, extension));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameLike(primaryfile.getId(), category, extension));
+		}		
+		else {
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getCollection().getId(), name, category, extension));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getId(), name, category, extension));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getId(), name, category, extension));
+		}		
+		
+		log.debug("Found " + supplements.size() + " supplements for primaryfile " + primaryfile.getId());
+		return supplements;	
+	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Primaryfile, String, String, String)
+	 */
+	@Override
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format) {
+		List<List<Supplement>> supplementss = new ArrayList<List<Supplement>>();
+		
+		for (Long primaryfileId : primaryfileIds) {
+			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElse(null);
+			List<Supplement> supplements = getSupplementsForPrimaryfile(primaryfile, name, category, format);
+			supplementss.add(supplements);
+		}
+		
+		log.info("Successfully retrieved supplements for primaryfiles primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
+		return supplementss;
+	}
+	
+
 }
