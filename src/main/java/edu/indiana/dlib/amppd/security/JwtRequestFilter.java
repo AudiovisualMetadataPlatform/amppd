@@ -80,7 +80,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		}
 		// otherwise, for HMGM related requests
 		else if (requestTokenHeader != null && requestTokenHeader.startsWith("AMPPD ")) {
-			logger.debug("Request token starts with amppd");
+			logger.debug("Request token starts with AMPPD, authenticating via HMGM password token");
+			
 			String authToken = requestTokenHeader.substring(6);
 			String[] parts = authToken.split(";;;;");
 			String editorInput = parts[0];
@@ -92,7 +93,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				logger.debug("Auth string is valid. Creating anonymous auth for HMGM editors");
 			}
 			else {
-				logger.warn("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " editor input: " + editorInput);
+				logger.warn("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " HMGM editor input: " + editorInput);
 			}			
 		}
 		// otherwise, for AMP user authentication with JWT token
