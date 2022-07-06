@@ -28,7 +28,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Autowired
 	private AmppdUiPropertyConfig amppdUIConfig;
 	
-
 	@Autowired
 	private AuthService authService;
 	
