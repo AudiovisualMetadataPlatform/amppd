@@ -346,8 +346,7 @@ public class DataentityServiceImpl implements DataentityService {
 		// format corresponds to file extension, prefix it with "." to avoid potential conflict in original file name
 		String extension = "." + format;
 		
-		// find all supplements associated with the primaryfile at all parent levels
-		// by its name/category/format and associated parent's ID
+		// find all supplements associated with the primaryfile at all parent levels by its name/category/format and associated parent's ID
 		if (StringUtils.isBlank(name)) {
 			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getCollection().getId(), category, extension));
 			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getId(), category, extension));
@@ -359,12 +358,12 @@ public class DataentityServiceImpl implements DataentityService {
 			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getId(), name, category, extension));
 		}		
 		
-		log.debug("Found " + supplements.size() + " supplements for primaryfile " + primaryfile.getId());
+		log.info("Successfully retrieved " + supplements.size() + " supplements for primaryfile " + primaryfile.getId());
 		return supplements;	
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Primaryfile, String, String, String)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Long[], String, String, String)
 	 */
 	@Override
 	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format) {
@@ -376,7 +375,7 @@ public class DataentityServiceImpl implements DataentityService {
 			supplementss.add(supplements);
 		}
 		
-		log.info("Successfully retrieved supplements for primaryfiles primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
+		log.info("Successfully retrieved supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
 		return supplementss;
 	}
 	

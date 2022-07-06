@@ -462,7 +462,11 @@ public class DataentityController {
 	 * @return list of all supplements satisfying the criteria for each primaryfile
 	 */
 	@GetMapping(path = "/primaryfiles/supplements")
-	public List<List<Supplement>> getSupplementsForPrimaryfiles(@RequestParam Long[] primaryfileIds, @RequestParam String name, @RequestParam String category, @RequestParam String format) {
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(
+			@RequestParam Long[] primaryfileIds, 
+			@RequestParam(required = false) String name, 
+			@RequestParam String category, 
+			@RequestParam String format) {
 		log.info("Retrieving supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
 		return dataentityService.getSupplementsForPrimaryfiles(primaryfileIds, name, category, format);
 	}

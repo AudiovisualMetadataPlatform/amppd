@@ -44,7 +44,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 	}
 	
-	// Determine whether referrer and url match "whitelisted" values. This is a temporary solution until the NER editor uses its own auth.  
+	/*
+	 * Determine whether referrer and url in the given request match "whitelisted" values. 
+	 * This is a temporary solution until the NER editor uses its own auth.  
+	 */
 	private boolean validRefUrl(HttpServletRequest request) {
 		// Get the referrer and URI
 		String referer = request.getHeader("referer");
@@ -63,7 +66,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
 		
 		boolean valid = cleanedRef.startsWith(cleanedUiUrl);
-		logger.trace("cleanedRef: " + cleanedRef + ", cleanedUiUrl: " + cleanedUiUrl);		
+		logger.trace("cleanedRef: " + cleanedRef + ", cleanedUiUrl: " + cleanedUiUrl + ", validRefUrl: " + valid);		
 		return valid;
 	}
 	

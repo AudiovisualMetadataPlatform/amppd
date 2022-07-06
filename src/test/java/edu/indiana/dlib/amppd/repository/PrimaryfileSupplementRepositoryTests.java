@@ -189,10 +189,10 @@ public class PrimaryfileSupplementRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors", hasSize(3)));
 //			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.primaryfileSupplement.name"))
 //			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
-//			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.itemSupplement.category"))
-//			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
-//			.andExpect(jsonPath("$.validationErrors[3].field").value("handleBeforeCreate.primaryfileSupplement.primaryfile"))
-//			.andExpect(jsonPath("$.validationErrors[3].message").value("must not be null"));
+//			.andExpect(jsonPath("$.validationErrors[1].field").value("handleBeforeCreate.itemSupplement.category"))
+//			.andExpect(jsonPath("$.validationErrors[1].message").value("must not be blank"));
+//			.andExpect(jsonPath("$.validationErrors[2].field").value("handleBeforeCreate.primaryfileSupplement.primaryfile"))
+//			.andExpect(jsonPath("$.validationErrors[2].message").value("must not be null"));
 	}
 	
 	@Test
