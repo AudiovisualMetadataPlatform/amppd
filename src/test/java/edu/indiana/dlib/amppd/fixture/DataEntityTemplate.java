@@ -14,7 +14,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 
 //@Component
 public class DataEntityTemplate implements TemplateLoader {
-	public static String CATEGORY = "FacePhoto|Groundtruth|RecitalProgram|Other";
+	public static String CATEGORY = "Face|Transcript|Program|Groundtruth|Other";
 	public static String TASK_MANAGER = "Jira|Trello";
 	public static String EXTERNAL_SOURCE = "MCO|DarkAvalon|NYPL";	// "^\\s*$|MCO|DarkAvalon|NYPL"
 	

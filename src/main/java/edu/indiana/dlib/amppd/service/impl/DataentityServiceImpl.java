@@ -3,8 +3,6 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -79,14 +77,14 @@ public class DataentityServiceImpl implements DataentityService {
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
 	
-	@Autowired
-	private EntityManager entityManager;
+//	@Autowired
+//	private EntityManager entityManager;
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementCategories()
 	 */
 	public List<String> getSupplementCategories() {
-		return externalSources;
+		return supplementCategories;
 	}
 	
 	/**
