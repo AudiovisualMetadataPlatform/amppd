@@ -125,10 +125,10 @@ public class MediaServiceImpl implements MediaService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.getCollectionSupplementPathname(Primaryfile, String, SupplementType)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getSupplementPath(Primaryfile, String, SupplementType)
 	 */
 	@Override
-	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type) {
+	public String getSupplementPath(Primaryfile primaryfile, String name, SupplementType type) {
 		// validate passed in parameters
 		if (primaryfile == null || name == null || type == null) {
 			return null;
@@ -169,6 +169,16 @@ public class MediaServiceImpl implements MediaService {
 		String jsonpath = FilenameUtils.getFullPath(asset.getPathname()) + FilenameUtils.getBaseName(asset.getPathname()) + ".json";
 		jsonpath = fileStorageService.absolutePathName(jsonpath);
 		return jsonpath;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.setAssetAbsoluatePath(Asset)
+	 */
+	@Override
+	public String setAssetAbsoluatePath(Asset asset) {
+		String pathname = fileStorageService.resolve(asset.getPathname()).toString();
+		asset.setAbsolutePathname(pathname);
+		return pathname;
 	}
 	
 	/**

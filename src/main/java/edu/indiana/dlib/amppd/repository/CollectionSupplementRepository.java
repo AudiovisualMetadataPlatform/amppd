@@ -10,7 +10,7 @@ public interface CollectionSupplementRepository extends SupplementRepository<Col
 
 	List<CollectionSupplement> findByCollectionIdAndName(Long collectionId, String name);
 	List<CollectionSupplement> findByCollectionIdAndCategory(Long collectionId, String category); 
-	List<CollectionSupplement> findByCollectionIdAndCategoryAndOriginalFilenameLike(Long collectionId, String category, String format); 
-	List<CollectionSupplement> findByCollectionIdAndNameAndCategoryAndOriginalFilenameLike(Long collectionId, String name, String category, String format); 
+	List<CollectionSupplement> findByCollectionIdAndCategoryAndOriginalFilenameEndsWith(Long collectionId, String category, String format); 
+	List<CollectionSupplement> findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWith(Long collectionId, String name, String category, String format); 
 
 }

@@ -10,7 +10,7 @@ public interface PrimaryfileSupplementRepository extends SupplementRepository<Pr
 
 	List<PrimaryfileSupplement> findByPrimaryfileIdAndName(Long primaryfileId, String name);
 	List<PrimaryfileSupplement> findByPrimaryfileIdAndCategory(Long primaryfileId, String category); 
-	List<PrimaryfileSupplement> findByPrimaryfileIdAndCategoryAndOriginalFilenameLike(Long primaryfileId, String category, String format); 
-	List<PrimaryfileSupplement> findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameLike(Long primaryfileId, String name, String category, String format); 
+	List<PrimaryfileSupplement> findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWith(Long primaryfileId, String category, String format); 
+	List<PrimaryfileSupplement> findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWith(Long primaryfileId, String name, String category, String format); 
 	
 }

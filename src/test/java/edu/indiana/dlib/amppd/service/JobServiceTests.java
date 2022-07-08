@@ -33,6 +33,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.web.CreateJobParameters;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
 
 // TODO remove ignore once we have Galaxy Bootstrap working on Bamboo
@@ -208,11 +209,11 @@ public class JobServiceTests {
     public void shouldThrowGalaxyWorkflowExceptionExceptionCreateJobForNonExistingWorkflow() { 	
     	Long[] primaryfileIds = new Long[1];
     	primaryfileIds[0] = primaryfile.getId();
-    	jobService.createJobs("0", primaryfileIds, new HashMap<String, Map<String, String>>());
+    	jobService.createJobs("0", primaryfileIds, new CreateJobParameters[0]);
     }
     
     @Test
-    public void shouldCreateJobBundle() {    	               	
+    public void shouldcreateJobs() {    	               	
     	// create a dummy bundle 
     	Bundle bundle = new Bundle();
     	bundle.setId(BUNDLE_ID);
@@ -228,7 +229,7 @@ public class JobServiceTests {
     	bundle.getPrimaryfiles().add(pf);
     	
     	// use the dummy bundle we set up for this test
-    	List<CreateJobResponse> woutputsMap = jobService.createJobBundle(workflowDetails.getId(), bundle.getId(), new HashMap<String, Map<String, String>>());
+    	List<CreateJobResponse> woutputsMap = jobService.createJobs(workflowDetails.getId(), bundle.getId(), new CreateJobParameters[0]);
 
     	// only one primaryfile is valid, so only one workflow outputs shall exist in the list returned
     	Assert.assertNotNull(woutputsMap);

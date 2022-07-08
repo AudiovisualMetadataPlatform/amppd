@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.web;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.AllArgsConstructor;
@@ -16,6 +17,6 @@ import lombok.NoArgsConstructor;
 public class CreateJobParameters {
 	
 	// map of (step, (paramName, paramValue)) 
-	private Map<String, Map<String, String>> map;
+	private Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>();
 	
 }

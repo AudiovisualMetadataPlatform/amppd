@@ -30,6 +30,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -77,7 +78,10 @@ public class DataentityServiceImpl implements DataentityService {
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
 	
-//	@Autowired
+	@Autowired
+	private MediaService mediaService;
+
+	//	@Autowired
 //	private EntityManager entityManager;
 	
 	/**
@@ -340,21 +344,24 @@ public class DataentityServiceImpl implements DataentityService {
 		if (primaryfile == null || StringUtils.isBlank(category) || StringUtils.isBlank(format)) {
 			return supplements;
 		}
-			
-		// format corresponds to file extension, prefix it with "." to avoid potential conflict in original file name
-		String extension = "." + format;
-		
-		// find all supplements associated with the primaryfile at all parent levels by its name/category/format and associated parent's ID
+					
+		// find all supplements associated with the primaryfile at all parent levels by its category/format and optionally name,
+		// along with associated parent's ID, assuming the original filenames have extensions that can be matched against format 
 		if (StringUtils.isBlank(name)) {
-			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getCollection().getId(), category, extension));
-			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getId(), category, extension));
-			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameLike(primaryfile.getId(), category, extension));
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getCollection().getId(), category, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getId(), category, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWith(primaryfile.getId(), category, format));
 		}		
 		else {
-			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getCollection().getId(), name, category, extension));
-			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getItem().getId(), name, category, extension));
-			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameLike(primaryfile.getId(), name, category, extension));
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getCollection().getId(), name, category, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getId(), name, category, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWith(primaryfile.getId(), name, category, format));
 		}		
+		
+		// set absolute path for each supplement, to be used for Supplement MGM path parameter
+		for (Supplement supplement : supplements) {
+			mediaService.setAssetAbsoluatePath(supplement);
+		}
 		
 		log.info("Successfully retrieved " + supplements.size() + " supplements for primaryfile " + primaryfile.getId());
 		return supplements;	
@@ -376,6 +383,5 @@ public class DataentityServiceImpl implements DataentityService {
 		log.info("Successfully retrieved supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
 		return supplementss;
 	}
-	
 
 }

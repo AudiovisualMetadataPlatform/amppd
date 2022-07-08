@@ -50,6 +50,7 @@ import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.web.CreateJobParameters;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -63,10 +64,10 @@ import lombok.extern.slf4j.Slf4j;
 public class JobServiceImpl implements JobService {		
 	public static final String HMGM_TOOL_ID_PREFIX = "hmgm";
 	public static final String HMGM_CONTEXT_PARAMETER_NAME = "context_json";
-	public static final String SUPPLEMENT_TOOL_ID = "supplement";
-	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
-	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
-	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
+//	public static final String SUPPLEMENT_TOOL_ID = "supplement";
+//	public static final String SUPPLEMENT_NAME_PARAMETER = "supplement_name";
+//	public static final String SUPPLEMENT_TYPE_PARAMETER = "supplement_type";
+//	public static final String SUPPLEMENT_PATH_PARAMETER = "supplement_path";
 
 	public static final List<String> MGM_TOOL_IDS = new ArrayList<String>() {
         {
@@ -379,7 +380,7 @@ public class JobServiceImpl implements JobService {
 //				
 //				// now the supplement name/type parameters are found, get the supplement's absolute pathname, 
 //				// given its name/type and the parent associated with the primaryfile
-//				String pathname = mediaService.getSupplementPathname(primaryfile, name, Supplement.getSupplementType(type));
+//				String pathname = mediaService.getSupplementPath(primaryfile, name, Supplement.getSupplementType(type));
 //				if (StringUtils.isEmpty(pathname)) {
 //					throw new GalaxyWorkflowException("Could not find the supplement with name: " + name + " and type: " + type + msg);
 //				}
@@ -572,10 +573,38 @@ public class JobServiceImpl implements JobService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[], Map<String, Map<String, String>>)
+	 * Return the ith (assume i >= 0) element's map of the given CreateJobParameters array; 
+	 * or empty map if the array is null/empty or its ith element is null.
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters) {
-		log.info("Creating a list of AMP jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameters: " + parameters);		
+	protected Map<String, Map<String, String>> getParameters(CreateJobParameters[] parameterss, int i) {
+		Map<String, Map<String, String>> parameters = new HashMap<String, Map<String, String>>();
+		
+		// if parameterss array is null/empty, return empty map
+		if (parameterss == null) {
+			return parameters;
+		}		
+		int len = parameterss.length;		
+		if (len == 0) {
+			return parameters;
+		}
+		
+		// use the last CreateJobParameters if the index is out of bound; this is useful for the case 
+		// when all or the last few primaryfiles submit in a bundle share the same parameters for the workflow
+		CreateJobParameters cjp = i >= len ? parameterss[len-1] : parameterss[i];					
+		
+		// if parameterss contains null element, use empty map for that
+		if (cjp != null) {
+			parameters = cjp.getMap();
+		}		
+		return parameters;	
+	}
+
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long[], CreateJobParameters[])
+	 */
+	public List<CreateJobResponse> createJobs(String workflowId, Long[] primaryfileIds, CreateJobParameters[] parameterss) {
+		log.info("Creating a list of AMP jobs for: workflowId: " + workflowId + ", primaryfileIds: " + primaryfileIds + ", parameterss: " + parameterss);		
 
 		// initialize responses
 		List<CreateJobResponse> responses = new ArrayList<CreateJobResponse>();
@@ -593,16 +622,17 @@ public class JobServiceImpl implements JobService {
 		Long[] pids = pidset.toArray(primaryfileIds);		
 
 		// create AMP job for each primaryfile in the array
+		int i = 0;
 		for (Long primaryfileId : pids) {
 			// skip null primaryfileId, which could result from redundant IDs passed from request parameter being changed to null
 			if (primaryfileId == null) continue; 
-
 			// no need to catch exception as createJob catches all and always returns a response 
-			CreateJobResponse response = createJob(workflowDetails, primaryfileId, parameters);
+			CreateJobResponse response = createJob(workflowDetails, primaryfileId, getParameters(parameterss, i));
 			responses.add(response);
 			if (response.getSuccess()) {
 				nSuccess++;
-			}
+			}			
+			i++;
 		}  	
 
 		log.info("Number of AMP jobs successfully created for the primaryfiles: " + nSuccess);    	
@@ -611,11 +641,11 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobBundle(String, Long, Map<String, Map<String, String>>)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, Long, CreateJobParameters[])
 	 */	
 	@Override
-	public List<CreateJobResponse> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters) {
-		log.info("Creating a bundle of AMP jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameters: " + parameters);
+	public List<CreateJobResponse> createJobs(String workflowId, Long bundleId, CreateJobParameters[] parameterss) {
+		log.info("Creating a bundle of AMP jobs for: workflowId: " + workflowId + ", bundleId: " + bundleId + ", parameterss: " + parameterss);
 		
 		// initialize responses
 		List<CreateJobResponse> responses = new ArrayList<CreateJobResponse>();
@@ -637,13 +667,15 @@ public class JobServiceImpl implements JobService {
 
 		// create AMP job for each primaryfile in the bundle
 		Set<Primaryfile> primaryfiles = bundle.getPrimaryfiles();
+		int i = 0;
 		for (Primaryfile primaryfile : primaryfiles) {
 			// no need to catch exception as createJob catches all and always returns a response 
-			CreateJobResponse response = createJob(workflowDetails, primaryfile.getId(), parameters);
+			CreateJobResponse response = createJob(workflowDetails, primaryfile.getId(), getParameters(parameterss, i));
 			responses.add(response);
 			if (response.getSuccess()) {
 				nSuccess++;
 			}
+			i++;
 		}
 
 		log.info("Number of AMP jobs successfully created for the bundle: " + nSuccess);    	
@@ -652,10 +684,10 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, List<Long[]>, Map<String, Map<String, String>>, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, List<Long[]>, CreateJobParameters[], Boolean)
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
-		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", resultIdss: " + resultIdss + ", parameters: " + parameters + ", includePrimaryfile: " + includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, CreateJobParameters[] parameterss, Boolean includePrimaryfile) {
+		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", resultIdss: " + resultIdss + ", parameterss: " + parameterss + ", includePrimaryfile: " + includePrimaryfile);
 
 		// initialize responses
 		List<CreateJobResponse> responses = new ArrayList<CreateJobResponse>();
@@ -671,7 +703,7 @@ public class JobServiceImpl implements JobService {
 		// create job for each row in the csv
 		for (int i=0; i < resultIdss.size(); i++) {
 			// no need to catch exception as createJob catches all and always returns a response 
-			CreateJobResponse response = createJob(workflowDetails, null, resultIdss.get(i), parameters, includePrimaryfile);			
+			CreateJobResponse response = createJob(workflowDetails, null, resultIdss.get(i), getParameters(parameterss, i), includePrimaryfile);			
 			responses.add(response);						
 			if (response.getSuccess()) {
 				nSuccess++;
@@ -684,17 +716,17 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, Map<String, Map<String, String>>, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, CreateJobParameters[], Boolean)
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
-		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", inputCsv: " + inputCsv.getOriginalFilename() + ", parameters: " + parameters + ", includePrimaryfile: " + includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, CreateJobParameters[] parameterss, Boolean includePrimaryfile) {
+		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", inputCsv: " + inputCsv.getOriginalFilename() + ", parameterss: " + parameterss + ", includePrimaryfile: " + includePrimaryfile);
 
 		// parse the input CSV into list of arrays of WorkflowResults
 		List<Long[]> resultIdss = parseInputCsv(inputCsv);
 		// TODO find a good way to return error instead of exception from parseInputCsv
 
 		// create jobs for WorkflowResults list of arrays
-		return createJobs(workflowId, resultIdss, parameters, includePrimaryfile); 
+		return createJobs(workflowId, resultIdss, parameterss, includePrimaryfile); 
 	}
 
 	/**
