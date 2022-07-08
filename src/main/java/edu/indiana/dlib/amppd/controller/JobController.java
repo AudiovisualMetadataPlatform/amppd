@@ -122,8 +122,7 @@ public class JobController {
 		// TODO 
 		// parameterss is supposed to use @RequestBody or @RequestPart in order to be parsed as JSON string properly;
 		// but for some reason Spring Boot request handler throws exception on multipart request boundary;
-		// as a workaround, @RequestParam is used for now, and it must specify the value to avoid conflict with
-		// the default request parameterss
+		// as a workaround, @RequestParam is used for now
 		if (includePrimaryfile == null ) {
 			includePrimaryfile = false;
 		}
