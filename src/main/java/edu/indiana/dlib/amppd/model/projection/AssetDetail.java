@@ -1,10 +1,5 @@
 package edu.indiana.dlib.amppd.model.projection;
 
-import javax.persistence.Column;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.Asset;
@@ -22,6 +17,7 @@ public interface AssetDetail extends DataentityDetail {
 	public String getDatasetId();
     public String getSymlink();
     public String getMediaInfo();	
+    public String getAbsolutePathname();	
     public String getMimeType();	
 
 }

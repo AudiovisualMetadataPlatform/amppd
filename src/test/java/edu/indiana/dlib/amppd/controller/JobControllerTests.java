@@ -92,7 +92,7 @@ public class JobControllerTests {
     }
     
     @Test
-    public void shouldCreateJobBundle() throws Exception {    	              
+    public void shouldcreateJobs() throws Exception {    	              
     	// create a dummy bundle 
     	Bundle bundle = new Bundle();
     	bundle.setId(BUNDLE_ID);

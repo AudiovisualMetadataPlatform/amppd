@@ -59,7 +59,7 @@ public class MediaServiceTests {
 
 	@Test
     public void shouldReturnCollectionSupplementPathname() {    	      
-		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_IMAGES, SupplementType.COLLECTION);
+		String pathname = mediaService.getSupplementPath(primaryfileS, TestHelper.TEST_IMAGES, SupplementType.COLLECTION);
 		Assert.assertNotNull(pathname);
 		Assert.assertTrue(pathname.startsWith(File.separator));
 		Assert.assertTrue(pathname.contains(primaryfileS.getItem().getCollection().getId().toString()));
@@ -69,19 +69,19 @@ public class MediaServiceTests {
 
 	@Test
     public void shouldReturnNullForNonExistingCollectionSupplement() {    	      
-		String pathname = mediaService.getSupplementPathname(primaryfileS, "foo", SupplementType.COLLECTION);
+		String pathname = mediaService.getSupplementPath(primaryfileS, "foo", SupplementType.COLLECTION);
 		Assert.assertNull(pathname);
 	}
 	
 	@Test
     public void shouldReturnNullForNullPrimaryfileAssociatedSupplement() {    	      
-		String pathname = mediaService.getSupplementPathname(null, TestHelper.TEST_IMAGES,  SupplementType.COLLECTION);
+		String pathname = mediaService.getSupplementPath(null, TestHelper.TEST_IMAGES,  SupplementType.COLLECTION);
 		Assert.assertNull(pathname);
 	}
 	
 	@Test
     public void shouldReturnNullForNonPreparedItemSupplement() {    	      
-		String pathname = mediaService.getSupplementPathname(primaryfileS, TestHelper.TEST_IMAGES,  SupplementType.ITEM);
+		String pathname = mediaService.getSupplementPath(primaryfileS, TestHelper.TEST_IMAGES,  SupplementType.ITEM);
 		Assert.assertNull(pathname);
 	}
 	
