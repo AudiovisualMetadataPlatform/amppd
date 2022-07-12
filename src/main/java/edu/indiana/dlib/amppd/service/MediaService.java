@@ -36,14 +36,21 @@ public interface MediaService {
 	 * @param type association type of the supplement
 	 * @return absolute pathname of the supplement if found, or null otherwise
 	 */
-	public String getSupplementPathname(Primaryfile primaryfile, String name, SupplementType type);
+	public String getSupplementPath(Primaryfile primaryfile, String name, SupplementType type);
 	
 	/**
-	 * Get the media information JSON file path for the given asset.
+	 * Get the media information JSON file pathname for the given asset.
 	 * @param asset the given asset
-	 * @return the absolute path of the media info JSON file
+	 * @return the absolute pathname of the media info JSON file
 	 */
 	public String getAssetMediaInfoPath(Asset asset);	
+
+	/**
+	 * Set the absolute pathname for the given asset.
+	 * @param asset the given asset
+	 * @return the absolute pathname of the asset
+	 */
+	public String setAssetAbsoluatePath(Asset asset);	
 
 	/**
 	 * Get the output file access URL for the given WorkflowResult.

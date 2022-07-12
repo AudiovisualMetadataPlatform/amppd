@@ -12,7 +12,6 @@ import edu.indiana.dlib.amppd.model.Asset;
 public interface AssetRepository<S extends Asset> extends DataentityRepository<S> {
 	
 	List<S> findByOriginalFilename(@Param("originalFilename") String originalFilename);
-
 	List<S> findByPathname(@Param("pathname") String pathname); // TODO: use customized impl to do match with SQL LIKE instead of =
 	
 }

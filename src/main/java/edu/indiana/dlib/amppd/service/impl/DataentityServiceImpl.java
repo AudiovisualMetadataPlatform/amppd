@@ -3,11 +3,11 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -19,6 +19,7 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
@@ -29,6 +30,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -39,11 +41,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
 	
+	public static final String SUPPLEMENT_CATEGORIES = "supplementCategories";
 	public static final String EXTERNAL_SOURCES = "externalSources";
 	public static final String TASK_MANAGERS = "taskManagers";
 
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
+	
+	@Value("#{'${amppd.supplementCategories}'.split(',')}")
+	private List<String> supplementCategories;
 	
 	@Value("#{'${amppd.externalSources}'.split(',')}")
 	private List<String> externalSources;
@@ -73,7 +79,17 @@ public class DataentityServiceImpl implements DataentityService {
 	private CollectionSupplementRepository collectionSupplementRepository;
 	
 	@Autowired
-	private EntityManager entityManager;
+	private MediaService mediaService;
+
+	//	@Autowired
+//	private EntityManager entityManager;
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementCategories()
+	 */
+	public List<String> getSupplementCategories() {
+		return supplementCategories;
+	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getExternalSources()
@@ -317,5 +333,55 @@ public class DataentityServiceImpl implements DataentityService {
 		return asset;
 	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfile(Primaryfile, String, String, String)
+	 */
+	@Override
+	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format) {
+		List<Supplement> supplements = new ArrayList<Supplement>();
+		
+		// primaryfile must exist, category and format must not be blank
+		if (primaryfile == null || StringUtils.isBlank(category) || StringUtils.isBlank(format)) {
+			return supplements;
+		}
+					
+		// find all supplements associated with the primaryfile at all parent levels by its category/format and optionally name,
+		// along with associated parent's ID, assuming the original filenames have extensions that can be matched against format 
+		if (StringUtils.isBlank(name)) {
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getCollection().getId(), category, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getId(), category, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWith(primaryfile.getId(), category, format));
+		}		
+		else {
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getCollection().getId(), name, category, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWith(primaryfile.getItem().getId(), name, category, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWith(primaryfile.getId(), name, category, format));
+		}		
+		
+		// set absolute path for each supplement, to be used for Supplement MGM path parameter
+		for (Supplement supplement : supplements) {
+			mediaService.setAssetAbsoluatePath(supplement);
+		}
+		
+		log.info("Successfully retrieved " + supplements.size() + " supplements for primaryfile " + primaryfile.getId());
+		return supplements;	
+	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Long[], String, String, String)
+	 */
+	@Override
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format) {
+		List<List<Supplement>> supplementss = new ArrayList<List<Supplement>>();
+		
+		for (Long primaryfileId : primaryfileIds) {
+			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElse(null);
+			List<Supplement> supplements = getSupplementsForPrimaryfile(primaryfile, name, category, format);
+			supplementss.add(supplements);
+		}
+		
+		log.info("Successfully retrieved supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
+		return supplementss;
+	}
+
 }

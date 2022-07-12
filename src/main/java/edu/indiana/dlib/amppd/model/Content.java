@@ -24,7 +24,6 @@ public abstract class Content extends Dataentity {
 	// TODO at the moment we do not require externalSource/Id on every collection/item, but this could change later
 	
 	@EnumConfig(property = "externalSources")
-    @Type(type="text")
     private String externalSource;	// external source/target system
 
     @Type(type="text")

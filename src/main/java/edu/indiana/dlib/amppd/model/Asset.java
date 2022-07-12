@@ -35,6 +35,9 @@ public abstract class Asset extends Dataentity {
 	private String originalFilename;	// the file name of the original file uploaded by user or batch	
     private String pathname;			// path name relative to storage root for the file associated with the asset
 
+    // TODO move datesetId and symlink to Primaryfile
+    // supplement always input via Supplement MGM, no need to load into Galaxy library, thus no need for datasetId;
+    // currently we don't provide UI link to access supplement file, so no need for symlink so far.
 	private String datasetId;			// ID of the dataset as a result of upload to Galaxy
     private String symlink;				// the symlink under the static content directory used for serving large media file
     
@@ -45,7 +48,23 @@ public abstract class Asset extends Dataentity {
      
     // only used for media file upload during asset creation/update, so it can be sent as part of RequestBody
     @Transient
-    MultipartFile mediaFile;
+    private MultipartFile mediaFile;
+
+    // a workaround to allow absolute path being set by services outside of Asset 
+    // as below code using #Value amppd.fileStorageRoot doesn't work and root is always null
+    @Transient
+    private String absolutePathname;
+
+//    @Transient
+//    @Value("${amppd.fileStorageRoot}")
+//    private String root;
+    
+//    /**
+//     * Get the absolute pathname of the asset.
+//     */
+//    public String getAbsolutePathname() {
+//    	return Paths.get(root, pathname).toString();
+//    }
     
     /**
      * Get the MIME type of the asset based on the MIME and streams from its media info.

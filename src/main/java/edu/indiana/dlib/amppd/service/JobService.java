@@ -12,6 +12,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.web.CreateJobParameters;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
 
 
@@ -83,7 +84,7 @@ public interface JobService {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, Long[] primaryfileIds, Map<String, Map<String, String>> parameters);
+	public List<CreateJobResponse> createJobs(String workflowId, Long[] primaryfileIds, CreateJobParameters[] parameterss);
 	
 	/**
 	 * Create a bundle of multiple AMP jobs, one job for each primaryfile included in the given bundle, to invoke the given workflow in Galaxy, with the given step parameters.
@@ -92,7 +93,7 @@ public interface JobService {
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
-	public List<CreateJobResponse> createJobBundle(String workflowId, Long bundleId, Map<String, Map<String, String>> parameters);
+	public List<CreateJobResponse> createJobs(String workflowId, Long bundleId, CreateJobParameters[] parameterss);
 	
 	/**
 	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given list of arrays, to invoke the given workflow in
@@ -103,7 +104,7 @@ public interface JobService {
 	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, CreateJobParameters[] parameterss, Boolean includePrimaryfile);
 
 	/**
 	 * Create AMP jobs, one for each row of primaryfile and outputs specified in the given inputCsv, to invoke the given workflow in
@@ -114,7 +115,7 @@ public interface JobService {
 	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of WorkflowOutputResults containing detailed information for the job submitted
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, CreateJobParameters[] parameterss, Boolean includePrimaryfile);
 
 	/**
 	 * List all AMP jobs run on the specified workflow against the specified primaryfile.

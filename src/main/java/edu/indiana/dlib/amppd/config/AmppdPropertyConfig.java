@@ -43,6 +43,7 @@ public class AmppdPropertyConfig {
     @NotNull private int refreshResultsTableMinutes;
     @NotNull private String refreshResultsStatusCron;
     @NotNull private String refreshResultsTableCron;
+    @NotNull private List<String> supplementCategories;
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;
     
