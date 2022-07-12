@@ -16,6 +16,7 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 public interface PrimaryfileDetail extends AssetDetail {
 
 	public String getHistoryId();	
+	public String getDatasetId();
 	public Set<PrimaryfileSupplement> getSupplements();
 
 }
