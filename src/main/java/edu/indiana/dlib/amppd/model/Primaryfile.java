@@ -49,6 +49,11 @@ public class Primaryfile extends Asset {
 	@Index(unique="true")	// historyId could be null, but it should be unique among all primaryfiles
     private String historyId;			
 
+    // Note:
+	// datasetId is moved from Asset to Primaryfile, as Supplement always input 
+	// via Supplement MGM, no need to load into Galaxy library, thus no need for datasetId.
+	private String datasetId;			// ID of the dataset as a result of upload to Galaxy
+
 	@OneToMany(mappedBy="primaryfile", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
     private Set<PrimaryfileSupplement> supplements;
