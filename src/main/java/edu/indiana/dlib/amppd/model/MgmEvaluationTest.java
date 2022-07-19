@@ -40,6 +40,7 @@ import lombok.Data;
 })
 @Data
 public class MgmEvaluationTest {
+	
 	public enum TestStatus {
 		RUNNING,
 		SUCCESS,
@@ -74,21 +75,23 @@ public class MgmEvaluationTest {
     @Column(columnDefinition = "jsonb")
     private String scores;   
     
+    // MGM scoring tool used by this test
 	@NotNull
 	@ManyToOne
-	private MgmScoringTool mst; // MGM scoring tool used by this test
+	private MgmScoringTool mst; 
     
+	// primaryfileSupplement used by this test as the groundtruth 
 	@NotNull
 	@ManyToOne
-    private PrimaryfileSupplement supplement;	// primaryfileSupplement used by this test as the groundtruth 
+    private PrimaryfileSupplement supplement;	
     
+	// workflow result evaluated by this test
 	@NotNull
 	@ManyToOne
-    private WorkflowResult workflowResult; // workflow result evaluated by this test
+    private WorkflowResult workflowResult; 
 
 	// <name, value> map of the parameters of the MET parsed from the parameters JSON
 	@Transient
-	private Map<String, Object> parametersMap; 
-	
+	private Map<String, Object> parametersMap; 	
 	
 }
