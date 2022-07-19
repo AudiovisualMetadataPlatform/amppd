@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -122,6 +124,7 @@ public class WorkflowResult {
 
 	//@NotNull
 	@Index
+	@Enumerated(EnumType.STRING)
 	private GalaxyJobState status;
 
 	@Index
