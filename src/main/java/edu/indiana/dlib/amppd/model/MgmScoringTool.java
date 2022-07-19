@@ -12,6 +12,7 @@ import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -43,14 +44,14 @@ public class MgmScoringTool {
     private Long id;
        
     // must be uqniue within its parent category
-	@NotNull
+    @NotBlank
     private String name;
         
-	@NotNull
+    @NotBlank
     private String description;
         
 	// current version
-	@NotNull
+    @NotBlank
     private String version;	
     
 	// date when the current version is installed 
@@ -59,11 +60,11 @@ public class MgmScoringTool {
     private Date upgradeDate;
 
     // output data type of the workflow result to be scored by the MST
-    @NotNull
+    @NotBlank
     private String workflowResultType; 
     
     // format (extentions) of the groundtruth file used by the MST
-	@NotNull
+    @NotBlank
     private String groundtruthFormat; 
     
 	// static info of the parameters
@@ -72,7 +73,7 @@ public class MgmScoringTool {
     private MgmScoringParameter parameters; 
     
 	// path of the executable script of the MST, relative to the script root directory
-	@NotNull
+	@NotBlank
     private String scriptPath; 
     
 	// category of the applicable MGMs for evaluation, corresponding to the Galaxy tool section

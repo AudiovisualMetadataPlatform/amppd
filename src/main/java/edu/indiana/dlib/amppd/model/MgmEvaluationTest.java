@@ -40,7 +40,7 @@ import lombok.Data;
 })
 @Data
 public class MgmEvaluationTest {
-	public enum Status {
+	public enum TestStatus {
 		RUNNING,
 		SUCCESS,
 		INVALID_GROUNDTRUTH,
@@ -62,7 +62,7 @@ public class MgmEvaluationTest {
     // status of the test: running, success or failure with error code
 	@NotNull
 	@Enumerated(EnumType.STRING)
-    private Status status = Status.RUNNING; 
+    private TestStatus status = TestStatus.RUNNING; 
     
  	// path of the output JSON score file, relative to the score root directory
     private String scorePath;   

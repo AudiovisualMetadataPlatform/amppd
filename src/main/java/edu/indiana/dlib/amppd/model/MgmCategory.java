@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Set;
 
+import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -11,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
@@ -29,7 +31,7 @@ import lombok.Data;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "name"),
+		@Index(columnList = "name", unique = true),
 		@Index(columnList = "sectionId")
 })
 @Data
@@ -38,12 +40,14 @@ public class MgmCategory {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
         
-    // name of the category is the same as the name of the corresponding Galaxy section
-	@NotNull
+    // name of the category is the same as the name of the corresponding Galaxy section; must be unique
+    @NotBlank
+	@Unique
     private String name;	
     
-	// ID of the corresponding Galaxy section
-	@NotNull
+	// ID of the corresponding Galaxy section; must be unique
+    @NotBlank
+	@Unique
     private String sectionId;	
     
 	// Galaxy section doesn't include description property, so we need to add this on AMP side

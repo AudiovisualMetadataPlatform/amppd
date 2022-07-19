@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Set;
 
+import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -12,6 +13,7 @@ import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
@@ -40,8 +42,9 @@ public class MgmTool {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
 
-    // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy
-	@NotNull
+    // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy; must be unique
+    @NotBlank
+	@Unique
     private String toolId;	
 
 	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);

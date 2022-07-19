@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -27,19 +28,30 @@ import lombok.Data;
 })
 @Data
 public class MgmScoringParameter {
+	public enum ParamType {TEXT, ENUM, NUMBER};
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
        
     // must be unique within its parent mst
-	@NotNull
+    @NotBlank
     private String name; 
         
-	@NotNull
+    @NotBlank
     private String description;
 	
-	// category of the associated MGM, corresponding to the tool panel section in Galaxy
+    // value type
+    @NotBlank
+    private ParamType type;
+	
+    // value range for NUMBER parameter
+    private Float min, max;
+	    
+    // value range for ENUM parameter, a comma separated list of words/phrases
+    private String enums;
+
+    // category of the associated MGM, corresponding to the tool panel section in Galaxy
 	@NotNull
 	@ManyToOne
     private MgmScoringTool mst; 

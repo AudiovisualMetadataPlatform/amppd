@@ -11,9 +11,13 @@ import edu.indiana.dlib.amppd.model.MgmVersion;
 
 public interface MgmVersionRepository extends PagingAndSortingRepository<MgmVersion, Long> {
 	
+	// find all versions of the given MGM
 	List<MgmVersion> findByMgmId(Long mgmId);
-	List<MgmVersion> findByMgmIdAndUpgradeDateBeforeOrderByUpgradeDateDesc(Long mgmId, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") Date upgradeDate);
+	
+	// find the latest MGM version before the given date
+	MgmVersion findFirstByMgmIdAndUpgradeDateBeforeOrderByUpgradeDateDesc(Long mgmId, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") Date upgradeDate);
 
+	// find the latest MGM version before the given date
 	@Query(value = "select v from MgmVersion v where v.mgmId = :mgmId and v.upgradeDate < :invocationTime order by upgradeDate desc")
 	List<MgmVersion> findLatestByMgmId(Long mgmId, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") Date invocationTime);
 

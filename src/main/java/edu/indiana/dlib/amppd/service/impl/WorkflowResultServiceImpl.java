@@ -1059,26 +1059,31 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	protected String getMgmToolInfo(String toolId, Date invocationTime) {
 		// get the unique MGM with toolId
-		List<MgmTool> tools = mgmToolRepository.findByToolId(toolId);
+		MgmTool mgm = mgmToolRepository.findFirstByToolId(toolId);
 		
 		// since MGM tables are manually maintained and not in real time, let's be lenient:
-		// return null instead of throwing exception upon data issues
-		if (tools.size() == 0) {
+		// return null instead of throwing exception upon data errors
+		if (mgm == null) {
 			log.error("No MGM exists with toolId " + toolId);
-			return null;
-//			throw new StorageException("No MGM exists with toolId " + toolId);
+			return null;			
 		}
-		if (tools.size() > 1) {
-			log.error("More than one MGM exist with toolId " + toolId);
-			return null;
-//			throw new StorageException("Found more than one MGM with toolId " + toolId);
-		}		
+//		if (tools.size() == 0) {
+//			log.error("No MGM exists with toolId " + toolId);
+//			return null;
+////			throw new StorageException("No MGM exists with toolId " + toolId);
+//		}
+//		if (tools.size() > 1) {
+//			log.error("More than one MGM exist with toolId " + toolId);
+//			return null;
+////			throw new StorageException("Found more than one MGM with toolId " + toolId);
+//		}		
 		
 		// get MGM version info
-		MgmTool mgm = tools.get(0);
-		List<MgmVersion> versions = mgmVersionRepository.findByMgmIdAndUpgradeDateBeforeOrderByUpgradeDateDesc(mgm.getId(), invocationTime);
-		if (versions.size() == 0) return null;		
-		String info = mgm.getModule() + " " + versions.get(0).getVersion();
+//		MgmTool mgm = tools.get(0);
+		MgmVersion mversion = mgmVersionRepository.findFirstByMgmIdAndUpgradeDateBeforeOrderByUpgradeDateDesc(mgm.getId(), invocationTime);
+//		if (versions.size() == 0) return null;		
+//		String info = mgm.getModule() + " " + versions.get(0).getVersion();
+		String info = mversion == null ? null :  mgm.getModule() + " " + mversion.getVersion();
 		return info;
 	}
 	
