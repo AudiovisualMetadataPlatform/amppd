@@ -2,25 +2,24 @@ package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
 
-import javax.jdo.annotations.Index;
-import javax.persistence.Column;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * This class contains information about an MGM Scoring Tool (MST) associated with an executable script,
@@ -32,53 +31,53 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+@Table(indexes = {
+		@Index(columnList = "name"),
+		@Index(columnList = "category")
+})
 @Data
-@NoArgsConstructor
 public class MgmScoringTool {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
        
+    // must be uqniue within its parent category
 	@NotNull
-	@Index
     private String name;
         
-	//@NotNull
+	@NotNull
     private String description;
         
-	//@NotNull
+	// current version
+	@NotNull
     private String version;	
     
-    //@NotNull
+	// date when the current version is installed 
+    @NotNull
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date upgradeDate; // date when this version of the MST is installed 
+    private Date upgradeDate;
 
-    //@NotNull
-	@Index
-    private String workflowResultDataType; // Galaxy data type of the workflow result to be scored by the MST
+    // output data type of the workflow result to be scored by the MST
+    @NotNull
+    private String workflowResultType; 
     
-	//@NotNull
-	@Index
-    private String groundTruthFormat; // format of the groundtruth file used by the MST
-    
-	//@NotNull
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    private String parameters; // JSON representation of the MST parameters map as <name, format> pairs
-//  private Map<String, String> parameters; // <name, format> map of the parameters of the MST
-    
+    // format (extentions) of the groundtruth file used by the MST
 	@NotNull
-    private String scriptPath; // path of the executable script of the MST, relative to the script root directory
+    private String groundtruthFormat; 
     
+	// static info of the parameters
+	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE)
+	@JsonBackReference(value="parameters")
+    private MgmScoringParameter parameters; 
+    
+	// path of the executable script of the MST, relative to the script root directory
 	@NotNull
-	@Index
+    private String scriptPath; 
+    
+	// category of the applicable MGMs for evaluation, corresponding to the Galaxy tool section
+	@NotNull
 	@ManyToOne
-    private MgmCategory category; // category of the associated MGM, corresponding to the tool panel section in Galaxy
-    
-	@NotNull
-	@Index
-    private String mgmToolId;	// ID of the associated MGM in galaxy
+    private MgmCategory category;     
         
 }

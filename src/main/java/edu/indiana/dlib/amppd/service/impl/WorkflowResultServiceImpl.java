@@ -37,10 +37,12 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmTool;
+import edu.indiana.dlib.amppd.model.MgmVersion;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
+import edu.indiana.dlib.amppd.repository.MgmVersionRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.JobService;
@@ -230,6 +232,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	
 	@Autowired
 	private MgmToolRepository mgmToolRepository;
+	
+	@Autowired
+	private MgmVersionRepository mgmVersionRepository;
 	
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
@@ -1047,16 +1052,33 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * Get the latest model/version of the specified MGM tool at the point when the Galaxy job was run.
+	 * Get the latest module/version of the specified MGM tool at the point when the Galaxy job was run.
 	 * @param toolId Galaxy tool ID for the MGM tool
 	 * @param invocationTime the invocation time of the Galaxy job
 	 * @return the latest tool information found or null if not found
 	 */
 	protected String getMgmToolInfo(String toolId, Date invocationTime) {
-		List<MgmTool> tools = mgmToolRepository.findLatestByToolId(toolId, invocationTime);
-		if (tools == null || tools.size() == 0)
+		// get the unique MGM with toolId
+		List<MgmTool> tools = mgmToolRepository.findByToolId(toolId);
+		
+		// since MGM tables are manually maintained and not in real time, let's be lenient:
+		// return null instead of throwing exception upon data issues
+		if (tools.size() == 0) {
+			log.error("No MGM exists with toolId " + toolId);
 			return null;
-		String info = tools.get(0).getMgmName() + " " + tools.get(0).getVersion();
+//			throw new StorageException("No MGM exists with toolId " + toolId);
+		}
+		if (tools.size() > 1) {
+			log.error("More than one MGM exist with toolId " + toolId);
+			return null;
+//			throw new StorageException("Found more than one MGM with toolId " + toolId);
+		}		
+		
+		// get MGM version info
+		MgmTool mgm = tools.get(0);
+		List<MgmVersion> versions = mgmVersionRepository.findByMgmIdAndUpgradeDateBeforeOrderByUpgradeDateDesc(mgm.getId(), invocationTime);
+		if (versions.size() == 0) return null;		
+		String info = mgm.getModule() + " " + versions.get(0).getVersion();
 		return info;
 	}
 	
