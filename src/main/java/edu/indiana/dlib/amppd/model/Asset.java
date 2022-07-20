@@ -25,9 +25,9 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @MappedSuperclass
-@EqualsAndHashCode(callSuper=true)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Data
+@EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 @Slf4j
 public abstract class Asset extends Dataentity {
