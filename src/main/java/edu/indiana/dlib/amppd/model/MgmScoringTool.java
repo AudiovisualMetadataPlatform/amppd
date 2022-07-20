@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.model;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -33,7 +34,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
 		@Index(columnList = "name"),
-		@Index(columnList = "category")
+		@Index(columnList = "category_id")
 })
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
@@ -56,6 +57,10 @@ public class MgmScoringTool extends AmpObject {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
     private Date upgradeDate;
 
+	// path of the executable script of the MST, relative to the script root directory
+	@NotBlank
+    private String scriptPath; 
+    
     // output data type of the workflow result to be scored by the MST
     @NotBlank
     private String workflowResultType; 
@@ -67,11 +72,7 @@ public class MgmScoringTool extends AmpObject {
 	// static info of the parameters
 	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="parameters")
-    private MgmScoringParameter parameters; 
-    
-	// path of the executable script of the MST, relative to the script root directory
-	@NotBlank
-    private String scriptPath; 
+    private Set<MgmScoringParameter> parameters; 
     
 	// category of the applicable MGMs for evaluation, corresponding to the Galaxy tool section
 	@NotNull

@@ -34,9 +34,9 @@ import lombok.Data;
 @EntityListeners(AuditingEntityListener.class)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(indexes = {
-		@Index(columnList = "mst"),
-		@Index(columnList = "groundtruth"),
-		@Index(columnList = "workflowResult")
+		@Index(columnList = "mst_id"),
+		@Index(columnList = "supplement_id"),
+		@Index(columnList = "workflow_result_id")
 })
 @Data
 public class MgmEvaluationTest {

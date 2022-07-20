@@ -23,7 +23,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
 		@Index(columnList = "name"),
-		@Index(columnList = "mst")
+		@Index(columnList = "mst_id")
 })
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)

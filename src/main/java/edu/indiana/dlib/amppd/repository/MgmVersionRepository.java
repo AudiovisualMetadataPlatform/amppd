@@ -14,10 +14,11 @@ public interface MgmVersionRepository extends AmpObjectRepository<MgmVersion> {
 	List<MgmVersion> findByMgmId(Long mgmId);
 	
 	// find the latest MGM version before the given date
+	// this method is equivalent to findLatestByMgmId below
 	MgmVersion findFirstByMgmIdAndUpgradeDateBeforeOrderByUpgradeDateDesc(Long mgmId, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") Date upgradeDate);
 
 	// find the latest MGM version before the given date
-	@Query(value = "select v from MgmVersion v where v.mgmId = :mgmId and v.upgradeDate < :invocationTime order by upgradeDate desc")
+	@Query(value = "select v from MgmVersion v where v.mgm.id = :mgmId and v.upgradeDate < :invocationTime order by upgradeDate desc")
 	List<MgmVersion> findLatestByMgmId(Long mgmId, @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS") Date invocationTime);
 
 }
