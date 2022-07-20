@@ -4,9 +4,6 @@ import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -17,6 +14,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * This class contains version/upgrade information about the underlying MGM model used by an MGM adapter in Galaxy.
@@ -32,11 +31,9 @@ import lombok.Data;
 		@Index(columnList = "mgm, upgradeDate", unique = true)
 })
 @Data
-public class MgmVersion {
-	
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+public class MgmVersion extends AmpObject {	
         
     // version of the module/package/model (not MGM adapter version in Galaxy) 
 	@NotNull

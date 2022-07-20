@@ -2,9 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -14,6 +11,8 @@ import javax.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * This class contains information about a parameter of an MGM Scoring Tool (MST).
@@ -27,12 +26,11 @@ import lombok.Data;
 		@Index(columnList = "mst")
 })
 @Data
-public class MgmScoringParameter {
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+public class MgmScoringParameter extends AmpObject {
+	
 	public enum ParamType {TEXT, ENUM, NUMBER};
-
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
        
     // must be unique within its parent mst
     @NotBlank

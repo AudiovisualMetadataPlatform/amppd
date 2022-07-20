@@ -4,12 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import edu.indiana.dlib.amppd.model.MgmVersion;
 
-public interface MgmVersionRepository extends PagingAndSortingRepository<MgmVersion, Long> {
+public interface MgmVersionRepository extends AmpObjectRepository<MgmVersion> {
 	
 	// find all versions of the given MGM
 	List<MgmVersion> findByMgmId(Long mgmId);

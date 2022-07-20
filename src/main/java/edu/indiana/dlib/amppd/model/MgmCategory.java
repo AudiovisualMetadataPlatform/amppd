@@ -6,14 +6,10 @@ import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,6 +17,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * This class contains information of the category an MGM belongs to, corresponding to a section in Galaxy tool panel.
@@ -35,10 +33,9 @@ import lombok.Data;
 		@Index(columnList = "sectionId")
 })
 @Data
-public class MgmCategory {
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+public class MgmCategory extends AmpObject {
         
     // name of the category is the same as the name of the corresponding Galaxy section; must be unique
     @NotBlank

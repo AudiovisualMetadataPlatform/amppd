@@ -16,12 +16,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Data
-@NoArgsConstructor
 public class WorkflowResult {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)

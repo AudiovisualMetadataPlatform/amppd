@@ -6,15 +6,11 @@ import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * This class contains information about an MGM adapter, including properties stored in the corresponding AMP table, 
@@ -36,11 +34,9 @@ import lombok.Data;
 		@Index(columnList = "toolId", unique = true)
 })
 @Data
-public class MgmTool {
-
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
+@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+public class MgmTool extends AmpObject {
 
     // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy; must be unique
     @NotBlank

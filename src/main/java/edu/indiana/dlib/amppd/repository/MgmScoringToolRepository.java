@@ -2,11 +2,9 @@ package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
-
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 
-public interface MgmScoringToolRepository extends PagingAndSortingRepository<MgmScoringTool, Long> {
+public interface MgmScoringToolRepository extends AmpObjectRepository<MgmScoringTool> {
 	
 	// find all scoring tools within the given category
 	List<MgmScoringTool> findByCategoryId(Long categoryId);

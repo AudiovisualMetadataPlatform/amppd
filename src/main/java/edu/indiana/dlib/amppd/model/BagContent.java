@@ -13,8 +13,6 @@ import lombok.ToString;
  * @author yingfeng
  */
 @Data
-@EqualsAndHashCode
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class BagContent {	    
 	private Long resultId;		// the id in WorkflowResult
 	private String submitter;

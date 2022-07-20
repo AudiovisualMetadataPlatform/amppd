@@ -1,37 +1,26 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.Date;
-
 import javax.jdo.annotations.Index;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Super class for most data entities created in AMP. 
  * @author yingfeng
  *
  */
-@MappedSuperclass
 //@UniqueName
+@MappedSuperclass
 @Data
-@NoArgsConstructor
-public abstract class Dataentity {
-
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
+public abstract class Dataentity extends AmpObject {
     
 	@NotBlank
 	@Index
@@ -40,18 +29,6 @@ public abstract class Dataentity {
     
     @Type(type="text")
     private String description;
-
-    @CreatedDate
-    private Date createdDate;
- 
-    @LastModifiedDate
-    private Date modifiedDate;
-    
-    @CreatedBy
-    private String createdBy;
- 
-    @LastModifiedBy
-    private String modifiedBy;    
 
     // TODO:
     // Uncomment @NotNull in all model classes after we fix unit tests to populate all non-null fields when saving to DB.
