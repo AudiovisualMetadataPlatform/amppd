@@ -265,7 +265,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
             reader = new CSVReader(new StringReader(csvString));
             lines = reader.readAll();
             reader.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return lines;
