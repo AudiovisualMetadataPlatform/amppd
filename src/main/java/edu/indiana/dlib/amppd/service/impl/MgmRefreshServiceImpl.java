@@ -3,11 +3,13 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 
@@ -19,17 +21,17 @@ import edu.indiana.dlib.amppd.repository.MgmCategoryRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringParameterRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringToolRepository;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
-import edu.indiana.dlib.amppd.service.MgmInitService;
+import edu.indiana.dlib.amppd.service.MgmRefreshService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementation of MgmInitService
+ * Implementation of MgmRefreshService
  * @author yingfeng
  *
  */
 @Service
 @Slf4j
-public class MgmInitServiceImpl implements MgmInitService {
+public class MgmRefreshServiceImpl implements MgmRefreshService {
 
 	public static final String DIR = "db";
 	public static final String MGM_CATEGORY = "mgm_category";
@@ -51,10 +53,23 @@ public class MgmInitServiceImpl implements MgmInitService {
 	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MgmInitService.initMgmCategory()
+	 * @see edu.indiana.dlib.amppd.service.MgmRefreshService.refreshMgmTables()
 	 */
 	@Override
-	public List<MgmCategory> initMgmCategory() {
+    @Transactional
+	public void refreshMgmTables() {
+		refreshMgmCategory();
+//		refreshMgmTool();
+//		refreshMgmScoringTool();	
+//		refreshMgmScoringParameter();	
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MgmRefreshService.refreshMgmCategory()
+	 */
+	@Override
+    @Transactional
+	public List<MgmCategory> refreshMgmCategory() {
 		List<MgmCategory> categories = new ArrayList<MgmCategory>();
 		String filename = DIR + "/" + MGM_CATEGORY + ".csv"; 
 		BufferedReader breader = null;
@@ -64,7 +79,7 @@ public class MgmInitServiceImpl implements MgmInitService {
 			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmCategory table: unable to open " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmCategory table: unable to open " + filename, e);
 		}		
 		
 		// parse the csv into list of MgmCategory objects
@@ -72,21 +87,39 @@ public class MgmInitServiceImpl implements MgmInitService {
 			categories = new CsvToBeanBuilder<MgmCategory>(breader).withType(MgmCategory.class).build().parse();
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmCategory table: invalid CSV format with " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmCategory table: invalid CSV format with " + filename, e);
 		}
 		
-		// save the MgmCategory objects
-		mgmCategoryRepository.saveAll(categories);		
+		// record the refresh start time
+		Date refreshStart = new Date();
 		
-		log.info("Successfully initialized MgmCategory table from " + filename);
+		// save the MgmCategory objects
+		// note: we can just save all categories directly, as that would create new records in the table;
+		// instead, we need to find each existing record based on ID and update it
+		// TODO: check that category.sectionId exists in Galaxy and report error if not
+		for (MgmCategory category : categories) {
+			MgmCategory existCategory = mgmCategoryRepository.findFirstBySectionId(category.getSectionId());			
+			if (existCategory != null) {
+				category.setId(existCategory.getId());				
+			}
+			mgmCategoryRepository.save(category);	
+		}		
+		
+		// delete all obsolete categories, i.e. those not updated during this pass of refresh;
+		// based on the assumption that the csv file includes all the categories we want to keep 
+		List<MgmCategory> deletedCategories = mgmCategoryRepository.deleteByModifiedDateBefore(refreshStart);
+		log.info("Deleted " + deletedCategories.size() + " obsolete categories older than current refresh start time at " + refreshStart);			
+				
+		log.info("Successfully refreshed " + categories.size() + " categories from " + filename);
 		return categories;
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MgmInitService.initMgmTool()
+	 * @see edu.indiana.dlib.amppd.service.MgmRefreshService.refreshMgmTool()
 	 */
 	@Override
-	public List<MgmTool> initMgmTool() {
+    @Transactional
+	public List<MgmTool> refreshMgmTool() {
 		List<MgmTool> mgms = new ArrayList<MgmTool>();
 		String filename = DIR + "/" + MGM_TOOL + ".csv"; 
 		BufferedReader breader = null;
@@ -96,7 +129,7 @@ public class MgmInitServiceImpl implements MgmInitService {
 			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmTool table: unable to open " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmTool table: unable to open " + filename, e);
 		}		
 		
 		// parse the csv into list of MgmTool objects
@@ -104,21 +137,22 @@ public class MgmInitServiceImpl implements MgmInitService {
 			mgms = new CsvToBeanBuilder<MgmTool>(breader).withType(MgmTool.class).build().parse();
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmTool table: invalid CSV format with " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmTool table: invalid CSV format with " + filename, e);
 		}
 		
 		// save the MgmTool objects
 		mgmToolRepository.saveAll(mgms);		
 		
-		log.info("Successfully initialized MgmTool table from " + filename);
+		log.info("Successfully refreshed MgmTool table from " + filename);
 		return mgms;
 	}
 	
 	/**
-	 *  @see edu.indiana.dlib.amppd.service.MgmInitService.initMgmScoringTool()
+	 *  @see edu.indiana.dlib.amppd.service.MgmRefreshService.refreshMgmScoringTool()
 	 */
 	@Override
-	public List<MgmScoringTool> initMgmScoringTool() {
+    @Transactional
+	public List<MgmScoringTool> refreshMgmScoringTool() {
 		List<MgmScoringTool> msts = new ArrayList<MgmScoringTool>();
 		String filename = DIR + "/" + MGM_SCORING_TOOL + ".csv"; 
 		BufferedReader breader = null;
@@ -128,7 +162,7 @@ public class MgmInitServiceImpl implements MgmInitService {
 			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmScoringTool table: unable to open " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmScoringTool table: unable to open " + filename, e);
 		}		
 		
 		// parse the csv into list of MgmScoringTool objects
@@ -136,21 +170,22 @@ public class MgmInitServiceImpl implements MgmInitService {
 			msts = new CsvToBeanBuilder<MgmScoringTool>(breader).withType(MgmScoringTool.class).build().parse();
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmScoringTool table: invalid CSV format with " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmScoringTool table: invalid CSV format with " + filename, e);
 		}
 		
 		// save the MgmScoringTool objects
 		mgmScoringToolRepository.saveAll(msts);		
 		
-		log.info("Successfully initialized MgmScoringTool table from " + filename);
+		log.info("Successfully refreshed MgmScoringTool table from " + filename);
 		return msts;
 	}
 	
 	/**
-	 *  @see edu.indiana.dlib.amppd.service.MgmInitService.initMgmScoringParameter()
+	 *  @see edu.indiana.dlib.amppd.service.MgmRefreshService.refreshMgmScoringParameter()
 	 */
 	@Override
-	public List<MgmScoringParameter> initMgmScoringParameter() {
+    @Transactional
+	public List<MgmScoringParameter> refreshMgmScoringParameter() {
 		List<MgmScoringParameter> parameters = new ArrayList<MgmScoringParameter>();
 		String filename = DIR + "/" + MGM_SCORING_PARAMETER + ".csv"; 
 		BufferedReader breader = null;
@@ -160,7 +195,7 @@ public class MgmInitServiceImpl implements MgmInitService {
 			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmScoringParameter table: unable to open " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmScoringParameter table: unable to open " + filename, e);
 		}		
 		
 		// parse the csv into list of MgmScoringParameter objects
@@ -168,15 +203,14 @@ public class MgmInitServiceImpl implements MgmInitService {
 			parameters = new CsvToBeanBuilder<MgmScoringParameter>(breader).withType(MgmScoringParameter.class).build().parse();
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to initialize MgmScoringParameter table: invalid CSV format with " + filename, e);
+			throw new RuntimeException("Failed to refresh MgmScoringParameter table: invalid CSV format with " + filename, e);
 		}
 				
 		// save the MgmScoringParameter objects
 		mgmScoringParameterRepository.saveAll(parameters);		
 		
-		log.info("Successfully initialized MgmScoringParameter table from " + filename);
+		log.info("Successfully refreshed MgmScoringParameter table from " + filename);
 		return parameters;
 	}
-	
-	
+		
 }

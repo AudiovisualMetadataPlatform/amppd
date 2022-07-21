@@ -1,4 +1,4 @@
-﻿SectionId,Name,Description
+sectionId,name,description
 audio_segmentation,Audio Segmentation,"<p>Audio segmentation is the classification of audio stream samples into types of sound, such as speech or music, that when joined together, indicate distinct regions of homogeneous sound.</p>"
 applause_detection,Applause Detection,"<p>Applause detection classifies segments of sound as “applause” or “non-applause.” When used in combination with audio segmentation, this MGM can be useful for finding start and end times of musical works or other types of performances. </p>"
 "speech_to_text	",Speech to Text,"<p>Speech to text transcription (also known as automatic speech recognition, or ASR) is the recognition of spoken language in an audio stream and conversion to text.</p>"

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Index;
@@ -11,10 +12,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
-import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.opencsv.bean.CsvBindByName;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -40,15 +41,18 @@ public class MgmCategory extends AmpObject {
     // name of the category is the same as the name of the corresponding Galaxy section; must be unique
     @NotBlank
 	@Unique
+//	@CsvBindByName(column = "Name")
     private String name;	
     
 	// ID of the corresponding Galaxy section; must be unique
     @NotBlank
 	@Unique
+//	@CsvBindByName(column = "SectionId")
     private String sectionId;	
     
 	// Galaxy section doesn't include description property, so we need to add this on AMP side
-    @Type(type="text")
+    @Column(columnDefinition="TEXT")
+//	@CsvBindByName(column = "Description")
     private String description; 
     
 	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
