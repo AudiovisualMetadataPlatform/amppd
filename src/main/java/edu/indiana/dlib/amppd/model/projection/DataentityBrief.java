@@ -6,13 +6,12 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 
 
 /**
- * Projection for a brief view of all data entities, suitable for listing entities.
+ * Projection for a brief view of a data entity, suitable for listing entities.
  * @author yingfeng
  */
 @Projection(name = "brief", types = {Dataentity.class}) 
-public interface DataentityBrief {
+public interface DataentityBrief extends AmpObjectBrief {
 	
-	public Long getId();
 	public String getName();
 	public String getDescription();
 	

@@ -4,7 +4,6 @@ import java.util.Set;
 
 import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Index;
@@ -13,11 +12,11 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.github.jmchilton.blend4j.galaxy.beans.Tool;
-import com.opencsv.bean.CsvBindByName;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,18 +41,17 @@ public class MgmTool extends AmpObject {
     // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy; must be unique
     @NotBlank
 	@Unique
-	@CsvBindByName(column = "ToolId")
     private String toolId;	
 
 	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);
 	// since Galaxy API response does not include the help text from the MGM config, we need to store help info on AMP side 
-    @Column(columnDefinition="TEXT")
-	@CsvBindByName(column = "Help")
+    @NotBlank
+    @Type(type="text")
 	private String help; 
 	
 	// underlying main module/package/model dependency required by the MGM adapter, 
     // corresponding roughly to the main requirement (not tool name) in MGM config in Galaxy
-	@CsvBindByName(column = "Module")
+    @NotBlank
     private String module;	
 
     /* TODO
