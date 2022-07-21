@@ -23,6 +23,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * This class contains information about an MGM Evaluation Test (MET), i.e. an execution of the associated MGM Scoring Tool
@@ -92,6 +94,8 @@ public class MgmEvaluationTest {
 
 	// <name, value> map of the parameters of the MET parsed from the parameters JSON
 	@Transient
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private Map<String, Object> parametersMap; 	
 	
 }

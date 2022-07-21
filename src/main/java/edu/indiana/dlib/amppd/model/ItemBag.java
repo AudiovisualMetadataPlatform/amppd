@@ -11,12 +11,13 @@ import lombok.ToString;
  * @author yingfeng
  */
 @Data
-@EqualsAndHashCode
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class ItemBag {
 	private Long itemId;
 	private String itemName;
     private String externalSource;
     private String externalId;
+
+    @EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private List<PrimaryfileBag> primaryfileBags;
 }

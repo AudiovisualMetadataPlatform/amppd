@@ -33,8 +33,8 @@ import lombok.ToString;
 		@Index(columnList = "sectionId")
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmCategory extends AmpObject {
         
     // name of the category is the same as the name of the corresponding Galaxy section; must be unique
@@ -54,6 +54,8 @@ public class MgmCategory extends AmpObject {
     
 	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="msts")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<MgmScoringTool> msts;
 	
 }

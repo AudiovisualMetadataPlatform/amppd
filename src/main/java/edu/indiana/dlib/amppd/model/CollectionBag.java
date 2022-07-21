@@ -11,11 +11,12 @@ import lombok.ToString;
  * @author yingfeng
  */
 @Data
-@EqualsAndHashCode
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
 public class CollectionBag {
 	private Long collectionId;
 	private String collectionName;
 	private String unitName;
+	
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private List<ItemBag> itemBags;
 }

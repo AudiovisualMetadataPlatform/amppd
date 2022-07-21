@@ -27,8 +27,8 @@ import lombok.ToString;
 		@Index(columnList = "mst_id")
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmScoringParameter extends AmpObject {
 	
 	public enum ParamType {TEXT, ENUMERATION, NUMBER};

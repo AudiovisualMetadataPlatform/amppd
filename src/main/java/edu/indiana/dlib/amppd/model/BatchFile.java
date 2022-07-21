@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Class containing information of a batch file, which corresponds to a row in a batch manifest spreadsheet. 
@@ -79,6 +81,8 @@ public class BatchFile {
 	private SupplementType supplementType; 
 	
 	@OneToMany(mappedBy="batchFile", cascade = CascadeType.REMOVE)
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private List<BatchSupplementFile> batchSupplementFiles;	
 	
 	//@NotNull

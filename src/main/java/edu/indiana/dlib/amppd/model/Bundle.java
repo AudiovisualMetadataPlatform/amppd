@@ -10,8 +10,6 @@ import javax.persistence.ManyToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -24,8 +22,8 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 // Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 public class Bundle extends Dataentity {
 
@@ -33,6 +31,8 @@ public class Bundle extends Dataentity {
 	// and our use case is often updating bundle's primaryfiles instead of the other way around
 	@ManyToMany
     @JoinTable(name = "bundle_primaryfile", joinColumns = @JoinColumn(name = "bundle_id"), inverseJoinColumns = @JoinColumn(name = "primaryfile_id"))
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 //	@JsonManagedReference	
     private Set<Primaryfile> primaryfiles;
 

@@ -38,8 +38,8 @@ import lombok.ToString;
 		@Index(columnList = "category_id")
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmScoringTool extends AmpObject {
        
     // must be uqniue within its parent category
@@ -74,6 +74,8 @@ public class MgmScoringTool extends AmpObject {
 	// static info of the parameters
 	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="parameters")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<MgmScoringParameter> parameters; 
     
 	// category of the applicable MGMs for evaluation, corresponding to the Galaxy tool section

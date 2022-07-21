@@ -31,8 +31,8 @@ import lombok.ToString;
 		@Index(columnList = "mgm_id, upgradeDate", unique = true)
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmVersion extends AmpObject {	
         
     // version of the module/package/model (not MGM adapter version in Galaxy) 
