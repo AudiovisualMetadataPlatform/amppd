@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableConfigurationProperties({AmppdUiPropertyConfig.class, AmppdPropertyConfig.class, GalaxyPropertyConfig.class, AvalonPropertyConfig.class})
 @Slf4j
 public class AmppdApplication {
-	
+		
     private static ApplicationContext applicationContext;
 	
 	public static void main(String[] args) {

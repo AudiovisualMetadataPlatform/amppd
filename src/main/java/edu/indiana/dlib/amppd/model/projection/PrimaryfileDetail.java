@@ -9,7 +9,7 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 
 
 /**
- * Projection for a detailed view of an item.
+ * Projection for a detailed view of a primaryfile.
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Primaryfile.class}) 

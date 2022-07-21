@@ -700,7 +700,7 @@ public class JobServiceImpl implements JobService {
 			// TODO find a good way to return error instead of exception
 		}
 				
-		// create job for each row in the csv
+		// create job for each WorkflowResults array
 		for (int i=0; i < resultIdss.size(); i++) {
 			// no need to catch exception as createJob catches all and always returns a response 
 			CreateJobResponse response = createJob(workflowDetails, null, resultIdss.get(i), getParameters(parameterss, i), includePrimaryfile);			

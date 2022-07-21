@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.repository;
 
+import java.util.Date;
+import java.util.List;
+
 import edu.indiana.dlib.amppd.model.MgmCategory;
 
 public interface MgmCategoryRepository extends AmpObjectRepository<MgmCategory> {
@@ -8,6 +11,9 @@ public interface MgmCategoryRepository extends AmpObjectRepository<MgmCategory> 
 	MgmCategory findFirstByName(String name);
 	MgmCategory findFirstBySectionId(String sectionId);
 
+	// delete obsolete record
+	List<MgmCategory> deleteByModifiedDateBefore(Date dateObsolete);
+	
 }
 
 

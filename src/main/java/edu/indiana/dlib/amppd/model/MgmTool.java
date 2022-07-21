@@ -34,8 +34,8 @@ import lombok.ToString;
 		@Index(columnList = "toolId", unique = true)
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmTool extends AmpObject {
 
     // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy; must be unique
@@ -45,11 +45,13 @@ public class MgmTool extends AmpObject {
 
 	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);
 	// since Galaxy API response does not include the help text from the MGM config, we need to store help info on AMP side 
+    @NotBlank
     @Type(type="text")
 	private String help; 
 	
 	// underlying main module/package/model dependency required by the MGM adapter, 
     // corresponding roughly to the main requirement (not tool name) in MGM config in Galaxy
+    @NotBlank
     private String module;	
 
     /* TODO
@@ -60,11 +62,15 @@ public class MgmTool extends AmpObject {
     // version upgrade info for the main dependency module
 	@OneToMany(mappedBy="mgm", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="versions")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<MgmVersion> versions;
     
 	// reference to the corresponding MGM adapter tool in Galaxy,
 	// serving as a cache to store Tool instance retrieved from Galaxy API call
 	@Transient
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private Tool tool;	
 	
 }

@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Data;
@@ -26,17 +27,18 @@ import lombok.ToString;
 		@Index(columnList = "mst_id")
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmScoringParameter extends AmpObject {
 	
-	public enum ParamType {TEXT, ENUM, NUMBER};
+	public enum ParamType {TEXT, ENUMERATION, NUMBER};
        
     // must be unique within its parent mst
     @NotBlank
     private String name; 
         
     @NotBlank
+    @Type(type="text")
     private String description;
 	
     // value type

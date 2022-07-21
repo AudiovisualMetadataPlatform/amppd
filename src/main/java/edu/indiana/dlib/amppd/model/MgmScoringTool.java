@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -37,8 +38,8 @@ import lombok.ToString;
 		@Index(columnList = "category_id")
 })
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class MgmScoringTool extends AmpObject {
        
     // must be uqniue within its parent category
@@ -46,6 +47,7 @@ public class MgmScoringTool extends AmpObject {
     private String name;
         
     @NotBlank
+    @Type(type="text")
     private String description;
         
 	// current version
@@ -72,6 +74,8 @@ public class MgmScoringTool extends AmpObject {
 	// static info of the parameters
 	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="parameters")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<MgmScoringParameter> parameters; 
     
 	// category of the applicable MGMs for evaluation, corresponding to the Galaxy tool section
