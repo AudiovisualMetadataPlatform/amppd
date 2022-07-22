@@ -2,10 +2,13 @@ package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
 
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
 
 
-//@RepositoryRestResource(collectionResourceRel = "collectionSupplements", path = "collectionSupplements")
+@RepositoryRestResource(excerptProjection = CollectionSupplementBrief.class)
 public interface CollectionSupplementRepository extends SupplementRepository<CollectionSupplement> {
 
 	List<CollectionSupplement> findByCollectionIdAndName(Long collectionId, String name);

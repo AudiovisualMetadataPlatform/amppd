@@ -59,6 +59,6 @@ public abstract class Supplement extends Asset {
 			default:
 				return null;
 		}
-	}
+	}	
 	
 }
