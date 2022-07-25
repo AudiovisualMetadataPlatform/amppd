@@ -122,7 +122,7 @@ public class WorkflowResult {
 
 	//@NotNull
 	@Index
-	@Enumerated(EnumType.STRING)
+//	@Enumerated(EnumType.STRING)
 	private GalaxyJobState status;
 
 	@Index
