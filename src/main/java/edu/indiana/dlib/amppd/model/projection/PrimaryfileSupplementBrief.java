@@ -12,16 +12,16 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 @Projection(name = "brief", types = {PrimaryfileSupplement.class}) 
 public interface PrimaryfileSupplementBrief extends SupplementBrief {
 
-	@Value("{target.primaryfile.name}")
+	@Value("#{target.primaryfile.name}")
 	public String getPrimaryfileName();
 	
-	@Value("{target.primaryfile.item.name}")
+	@Value("#{target.primaryfile.item.name}")
 	public String getItemName();
 	
-	@Value("{target.primaryfile.item.collection.name}")
+	@Value("#{target.primaryfile.item.collection.name}")
 	public String getCollectionName();	
 	
-	@Value("{target.primaryfile.item.collection.unit.name}")
+	@Value("#{target.primaryfile.item.collection.unit.name}")
 	public String getUnitName();
 		
 }

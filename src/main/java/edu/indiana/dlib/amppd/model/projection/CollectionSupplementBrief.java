@@ -12,10 +12,10 @@ import edu.indiana.dlib.amppd.model.CollectionSupplement;
 @Projection(name = "brief", types = {CollectionSupplement.class}) 
 public interface CollectionSupplementBrief extends SupplementBrief {
 
-	@Value("{target.collection.name}")
+	@Value("#{target.collection.name}")
 	public String getCollectionName();
 	
-	@Value("{target.collection.unit.name}")
+	@Value("#{target.collection.unit.name}")
 	public String getUnitName();
 	
 }
