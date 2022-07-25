@@ -53,6 +53,8 @@ public class Collection extends Content {
 	
 	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="items")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<Item> items; 
 	
 	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE)
