@@ -11,6 +11,7 @@ import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
 @RepositoryRestResource(excerptProjection = CollectionSupplementBrief.class)
 public interface CollectionSupplementRepository extends SupplementRepository<CollectionSupplement> {
 
+	List<CollectionSupplement> findByCollectionId(Long collectionId);
 	List<CollectionSupplement> findByCollectionIdAndName(Long collectionId, String name);
 	List<CollectionSupplement> findByCollectionIdAndCategory(Long collectionId, String category); 
 	List<CollectionSupplement> findByCollectionIdAndCategoryAndOriginalFilenameEndsWith(Long collectionId, String category, String format); 

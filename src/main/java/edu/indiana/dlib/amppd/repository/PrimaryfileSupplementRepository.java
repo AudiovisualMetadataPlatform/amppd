@@ -11,6 +11,7 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
 @RepositoryRestResource(excerptProjection = PrimaryfileSupplementBrief.class)
 public interface PrimaryfileSupplementRepository extends SupplementRepository<PrimaryfileSupplement> {
 
+	List<PrimaryfileSupplement> findByPrimaryfileId(Long primaryfileId);
 	List<PrimaryfileSupplement> findByPrimaryfileIdAndName(Long primaryfileId, String name);
 	List<PrimaryfileSupplement> findByPrimaryfileIdAndCategory(Long primaryfileId, String category); 
 	List<PrimaryfileSupplement> findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWith(Long primaryfileId, String category, String format); 
