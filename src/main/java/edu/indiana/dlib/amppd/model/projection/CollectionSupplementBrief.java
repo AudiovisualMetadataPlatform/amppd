@@ -15,4 +15,7 @@ public interface CollectionSupplementBrief extends SupplementBrief {
 	@Value("{target.collection.name}")
 	public String getCollectionName();
 	
+	@Value("{target.collection.unit.name}")
+	public String getUnitName();
+	
 }
