@@ -9,7 +9,7 @@ import edu.indiana.dlib.amppd.model.Supplement;
  * @author yingfeng
  */
 @Projection(name = "brief", types = {Supplement.class}) 
-public interface SupplementBrief extends DataentityBrief {
+public interface SupplementBrief extends DataentityDetail {
 	
 	public String getCategory();	
 
