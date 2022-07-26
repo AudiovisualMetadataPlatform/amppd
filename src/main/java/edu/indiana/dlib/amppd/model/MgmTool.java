@@ -7,10 +7,12 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Index;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -66,11 +68,20 @@ public class MgmTool extends AmpObject {
 	@ToString.Exclude
     private Set<MgmVersion> versions;
     
-	// reference to the corresponding MGM adapter tool in Galaxy,
-	// serving as a cache to store Tool instance retrieved from Galaxy API call
+	// category of the MGM, corresponding to the section the tool belongs to in Galaxy
+    // note that this field is somewhat redundant, as it can be inferred from the section the tool belongs to;
+    // however, it's more efficient to have a reference to the category on AMP side for query purpose
+	@NotNull
+	@ManyToOne
+    private MgmCategory category;     
+
+	// temporary storage for CSV parsing purpose
 	@Transient
-	@EqualsAndHashCode.Exclude
-	@ToString.Exclude
-	private Tool tool;	
-	
+	private Long categoryId;		
+
+	// reference to the corresponding MGM adapter tool in Galaxy,
+	// serving as a cache to store the Tool instance retrieved from Galaxy API call
+	@Transient
+	private Tool tool;
+
 }

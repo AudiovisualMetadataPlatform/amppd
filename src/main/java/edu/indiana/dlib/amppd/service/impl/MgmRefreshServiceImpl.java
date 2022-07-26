@@ -93,8 +93,8 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		// record the refresh start time
 		Date refreshStart = new Date();
 		
-		// save the MgmCategory objects
-		// note: we can just save all categories directly, as that would create new records in the table;
+		// save each of the MgmCategory objects, either creating a new one or updating the existing one
+		// note: we can't just save all categories directly, as that would create new records in the table;
 		// instead, we need to find each existing record based on ID and update it
 		// TODO: check that category.sectionId exists in Galaxy and report error if not
 		for (MgmCategory category : categories) {
@@ -139,11 +139,32 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		catch(Exception e) {
 			throw new RuntimeException("Failed to refresh MgmTool table: invalid CSV format with " + filename, e);
 		}
+				
+		// record the refresh start time
+		Date refreshStart = new Date();
 		
-		// save the MgmTool objects
-		mgmToolRepository.saveAll(mgms);		
+		// save each of the MgmTool objects, either creating a new one or updating the existing one
+		// note: we can't just save all mgms directly, as that would create new records in the table;
+		// instead, we need to find each existing record based on ID and update it
+		// TODO: check that mgm.toolId exists in Galaxy and report error if not
+		for (MgmTool mgm : mgms) {
+			MgmTool existTool = mgmToolRepository.findFirstByToolId(mgm.getToolId());
+			if (existTool != null) {
+				// make sure that the categoryId is valid
+				if (!existTool.getCategory().getId().equals(mgm.getCategoryId())) {
+					throw new RuntimeException("Invalid MGM in CSV: " + mgm + ", invalid category ID " + mgm.getCategoryId() + ", should be " + )
+				}
+				mgm.setId(existTool.getId());				
+			}
+			mgmToolRepository.save(mgm);	
+		}		
 		
-		log.info("Successfully refreshed MgmTool table from " + filename);
+		// delete all obsolete mgms, i.e. those not updated during this pass of refresh;
+		// based on the assumption that the csv file includes all the mgms we want to keep 
+		List<MgmTool> deletedMgms = mgmToolRepository.deleteByModifiedDateBefore(refreshStart);
+		log.info("Deleted " + deletedMgms.size() + " obsolete mgms older than current refresh start time at " + refreshStart);				
+		
+		log.info("Successfully refreshed " + mgms.size() + " mgms from " + filename);
 		return mgms;
 	}
 	
@@ -173,10 +194,26 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 			throw new RuntimeException("Failed to refresh MgmScoringTool table: invalid CSV format with " + filename, e);
 		}
 		
-		// save the MgmScoringTool objects
-		mgmScoringToolRepository.saveAll(msts);		
+		// record the refresh start time
+		Date refreshStart = new Date();
 		
-		log.info("Successfully refreshed MgmScoringTool table from " + filename);
+		// save each of the MgmScoringTool objects, either creating a new one or updating the existing one
+		// note: we can't just save all msts directly, as that would create new records in the table;
+		// instead, we need to find each existing record based on ID and update it
+		for (MgmScoringTool mst : msts) {
+			MgmScoringTool existScoringTool = mgmScoringToolRepository.findFirstByCategoryIdAndName(mst.getCategoryId(), mst.getName());			
+			if (existScoringTool != null) {
+				mst.setId(existScoringTool.getId());				
+			}
+			mgmScoringToolRepository.save(mst);	
+		}		
+		
+		// delete all obsolete msts, i.e. those not updated during this pass of refresh;
+		// based on the assumption that the csv file includes all the msts we want to keep 
+		List<MgmScoringTool> deletedMsts = mgmScoringToolRepository.deleteByModifiedDateBefore(refreshStart);
+		log.info("Deleted " + deletedMsts.size() + " obsolete msts older than current refresh start time at " + refreshStart);				
+		
+		log.info("Successfully refreshed " + msts.size() + " msts from " + filename);
 		return msts;
 	}
 	
@@ -205,11 +242,27 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		catch(Exception e) {
 			throw new RuntimeException("Failed to refresh MgmScoringParameter table: invalid CSV format with " + filename, e);
 		}
-				
-		// save the MgmScoringParameter objects
-		mgmScoringParameterRepository.saveAll(parameters);		
 		
-		log.info("Successfully refreshed MgmScoringParameter table from " + filename);
+		// record the refresh start time
+		Date refreshStart = new Date();
+				
+		// save each of the MgmScoringParameter objects, either creating a new one or updating the existing one
+		// note: we can't just save all parameters directly, as that would create new records in the table;
+		// instead, we need to find each existing record based on ID and update it
+		for (MgmScoringParameter parameter : parameters) {
+			MgmScoringParameter existScoringParameter = mgmScoringParameterRepository.findFirstByMstIdAndName(parameter.getMst().getId(), parameter.getName());			
+			if (existScoringParameter != null) {
+				parameter.setId(existScoringParameter.getId());				
+			}
+			mgmScoringParameterRepository.save(parameter);	
+		}		
+		
+		// delete all obsolete mgms, i.e. those not updated during this pass of refresh;
+		// based on the assumption that the csv file includes all the mgms we want to keep 
+		List<MgmScoringParameter> deletedParams = mgmScoringParameterRepository.deleteByModifiedDateBefore(refreshStart);
+		log.info("Deleted " + deletedParams.size() + " obsolete parameters older than current refresh start time at " + refreshStart);				
+		
+		log.info("Successfully refreshed " + parameters.size() + " parameters from " + filename);
 		return parameters;
 	}
 		

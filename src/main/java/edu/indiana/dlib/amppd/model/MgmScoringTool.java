@@ -10,6 +10,7 @@ import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -67,7 +68,7 @@ public class MgmScoringTool extends AmpObject {
     @NotBlank
     private String workflowResultType; 
     
-    // format (extentions) of the groundtruth file used by the MST
+    // format (extensions) of the groundtruth file used by the MST
     @NotBlank
     private String groundtruthFormat; 
     
@@ -82,5 +83,9 @@ public class MgmScoringTool extends AmpObject {
 	@NotNull
 	@ManyToOne
     private MgmCategory category;     
-        
+       
+	// temporary storage for CSV parsing purpose
+	@Transient
+	private Long categoryId;		
+
 }
