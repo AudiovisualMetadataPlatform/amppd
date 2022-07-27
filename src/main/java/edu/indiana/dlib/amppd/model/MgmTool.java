@@ -75,9 +75,9 @@ public class MgmTool extends AmpObject {
 	@ManyToOne
     private MgmCategory category;     
 
-	// temporary storage for CSV parsing purpose
+	// temporary storage of section ID of the MGM for CSV parsing purpose
 	@Transient
-	private Long categoryId;		
+	private String sectionId;		
 
 	// reference to the corresponding MGM adapter tool in Galaxy,
 	// serving as a cache to store the Tool instance retrieved from Galaxy API call

@@ -1,4 +1,5 @@
 sectionId,name,description
+audio_extraction,Audio Extraction,"Audio Extraction is a process of extracting audio stream from audio/video file, with options to remove trailing silence."
 audio_segmentation,Audio Segmentation,"Audio segmentation is the classification of audio stream samples into types of sound, such as speech or music, that when joined together, indicate distinct regions of homogeneous sound."
 applause_detection,Applause Detection,Facial recognition is the detection and identification of human faces in a video based on a model trained with images of known individuals.
 speech_to_text,Speech to Text,"Speech to text transcription (also known as automatic speech recognition, or ASR) is the recognition of spoken language in an audio stream and conversion to text."

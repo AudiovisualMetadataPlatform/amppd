@@ -148,23 +148,28 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		// instead, we need to find each existing record based on ID and update it
 		// TODO: check that mgm.toolId exists in Galaxy and report error if not
 		for (MgmTool mgm : mgms) {
-			MgmTool existTool = mgmToolRepository.findFirstByToolId(mgm.getToolId());
-			if (existTool != null) {
-				// make sure that the categoryId is valid
-				if (!existTool.getCategory().getId().equals(mgm.getCategoryId())) {
-					throw new RuntimeException("Invalid MGM in CSV: " + mgm + ", invalid category ID " + mgm.getCategoryId() + ", should be " + )
-				}
-				mgm.setId(existTool.getId());				
+			// make sure the sectionId is valid for an existing category
+			MgmCategory category = mgmCategoryRepository.findFirstBySectionId(mgm.getSectionId());
+			if (category == null) {
+				throw new RuntimeException("Invalid MGM with non-existing section ID in CSV: " + mgm);
 			}
+			mgm.setCategory(category);
+
+			// update existing MGM if any
+			MgmTool existMgm = mgmToolRepository.findFirstByToolId(mgm.getToolId());
+			if (existMgm != null) {
+				mgm.setId(existMgm.getId());				
+			}
+			
 			mgmToolRepository.save(mgm);	
 		}		
 		
 		// delete all obsolete mgms, i.e. those not updated during this pass of refresh;
 		// based on the assumption that the csv file includes all the mgms we want to keep 
 		List<MgmTool> deletedMgms = mgmToolRepository.deleteByModifiedDateBefore(refreshStart);
-		log.info("Deleted " + deletedMgms.size() + " obsolete mgms older than current refresh start time at " + refreshStart);				
+		log.info("Deleted " + deletedMgms.size() + " obsolete MGMs older than current refresh start time at " + refreshStart);				
 		
-		log.info("Successfully refreshed " + mgms.size() + " mgms from " + filename);
+		log.info("Successfully refreshed " + mgms.size() + " MGMs from " + filename);
 		return mgms;
 	}
 	
@@ -201,19 +206,28 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		// note: we can't just save all msts directly, as that would create new records in the table;
 		// instead, we need to find each existing record based on ID and update it
 		for (MgmScoringTool mst : msts) {
-			MgmScoringTool existScoringTool = mgmScoringToolRepository.findFirstByCategoryIdAndName(mst.getCategoryId(), mst.getName());			
-			if (existScoringTool != null) {
-				mst.setId(existScoringTool.getId());				
+			// make sure the sectionId is valid for an existing category
+			MgmCategory category = mgmCategoryRepository.findFirstBySectionId(mst.getSectionId());
+			if (category == null) {
+				throw new RuntimeException("Invalid MST with non-existing section ID in CSV: " + mst);
 			}
+			mst.setCategory(category);
+
+			// update existing mst if any
+			MgmScoringTool existMst = mgmScoringToolRepository.findFirstByCategoryIdAndName(mst.getCategoryId(), mst.getName());			
+			if (existMst != null) {
+				mst.setId(existMst.getId());				
+			}
+			
 			mgmScoringToolRepository.save(mst);	
 		}		
 		
 		// delete all obsolete msts, i.e. those not updated during this pass of refresh;
 		// based on the assumption that the csv file includes all the msts we want to keep 
 		List<MgmScoringTool> deletedMsts = mgmScoringToolRepository.deleteByModifiedDateBefore(refreshStart);
-		log.info("Deleted " + deletedMsts.size() + " obsolete msts older than current refresh start time at " + refreshStart);				
+		log.info("Deleted " + deletedMsts.size() + " obsolete MSTs older than current refresh start time at " + refreshStart);				
 		
-		log.info("Successfully refreshed " + msts.size() + " msts from " + filename);
+		log.info("Successfully refreshed " + msts.size() + " MSTs from " + filename);
 		return msts;
 	}
 	
@@ -250,14 +264,20 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		// note: we can't just save all parameters directly, as that would create new records in the table;
 		// instead, we need to find each existing record based on ID and update it
 		for (MgmScoringParameter parameter : parameters) {
-			MgmScoringParameter existScoringParameter = mgmScoringParameterRepository.findFirstByMstIdAndName(parameter.getMst().getId(), parameter.getName());			
+			// make sure the categoryId is a valid existing one
+			MgmScoringTool mst = mgmScoringToolRepository.findById(parameter.getMstId()).orElseThrow(() -> new RuntimeException("Non-existing MST ID of parameter in CSV: " + parameter));
+			parameter.setMst(mst);
+
+			// update existing parameter if any
+			MgmScoringParameter existScoringParameter = mgmScoringParameterRepository.findFirstByMstIdAndName(parameter.getMstId(), parameter.getName());			
 			if (existScoringParameter != null) {
 				parameter.setId(existScoringParameter.getId());				
 			}
+			
 			mgmScoringParameterRepository.save(parameter);	
 		}		
 		
-		// delete all obsolete mgms, i.e. those not updated during this pass of refresh;
+		// delete all obsolete parameters, i.e. those not updated during this pass of refresh;
 		// based on the assumption that the csv file includes all the mgms we want to keep 
 		List<MgmScoringParameter> deletedParams = mgmScoringParameterRepository.deleteByModifiedDateBefore(refreshStart);
 		log.info("Deleted " + deletedParams.size() + " obsolete parameters older than current refresh start time at " + refreshStart);				

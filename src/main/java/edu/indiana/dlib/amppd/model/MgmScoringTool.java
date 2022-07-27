@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 import java.util.Date;
 import java.util.Set;
 
+import javax.jdo.annotations.Unique;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -43,22 +44,25 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class MgmScoringTool extends AmpObject {
        
-    // must be uqniue within its parent category
+    // must be unique among all MSTs
     @NotBlank
+    @Unique
     private String name;
         
     @NotBlank
     @Type(type="text")
     private String description;
         
-	// current version
-    @NotBlank
-    private String version;	
+    // TODO create separate data model class/table for MST versions
     
-	// date when the current version is installed 
-    @NotNull
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date upgradeDate;
+//	// current version
+//    @NotBlank
+//    private String version;	
+//    
+//	// date when the current version is installed 
+//    @NotNull
+//    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
+//    private Date upgradeDate;
 
 	// path of the executable script of the MST, relative to the script root directory
 	@NotBlank
@@ -84,8 +88,8 @@ public class MgmScoringTool extends AmpObject {
 	@ManyToOne
     private MgmCategory category;     
        
-	// temporary storage for CSV parsing purpose
+	// temporary storage of section ID of the MST for CSV parsing purpose
 	@Transient
-	private Long categoryId;		
+	private String sectionId;		
 
 }
