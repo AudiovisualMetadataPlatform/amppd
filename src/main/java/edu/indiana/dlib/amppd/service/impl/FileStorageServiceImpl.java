@@ -69,9 +69,14 @@ public class FileStorageServiceImpl implements FileStorageService {
 		config = amppdconfig;
 		try {
 			root = Paths.get(config.getFileStorageRoot());
-			Files.createDirectories(root);	// creates root directory if not already exists
-			Files.createDirectories(Paths.get(config.getDropboxRoot()));	// creates batch root directory if not already exists
-			log.info("File storage root directory " + config.getFileStorageRoot() + " has been created." );
+			if(!Files.exists(root)) {  // corner case where createDirectories() fails when it is a symlink
+				Files.createDirectories(root);	// creates root directory if not already exists
+			}
+			Path dropbox = Paths.get(config.getDropboxRoot());
+			if(!Files.exists(dropbox)) {  // corner case where createDirectories() fails when it is a symlink
+				Files.createDirectories(dropbox);	// creates batch root directory if not already exists
+			}
+			log.info("File storage root directory " + root + " has been created." );
 		}
 		catch (IOException e) {
 			throw new StorageException("Failed to initialize file storage root directory " + config.getFileStorageRoot(), e);
