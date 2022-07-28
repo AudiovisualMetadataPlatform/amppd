@@ -81,9 +81,9 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
     @Transactional
 	public void refreshMgmTables() {
 		refreshMgmCategory();
-//		refreshMgmTool();
-//		refreshMgmScoringTool();	
-//		refreshMgmScoringParameter();	
+		refreshMgmTool();
+		refreshMgmScoringTool();	
+		refreshMgmScoringParameter();	
 	}
 	
 	/**
