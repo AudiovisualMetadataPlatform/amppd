@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.jdo.annotations.Unique;
@@ -19,7 +18,6 @@ import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -44,9 +42,13 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class MgmScoringTool extends AmpObject {
        
-    // must be unique among all MSTs
+    // human-readable tool ID of the scoring tool, must be unique
     @NotBlank
-    @Unique
+	@Unique
+    private String toolId;	
+    
+    // name of the scoring tool must be unique within its parent category
+    @NotBlank
     private String name;
         
     @NotBlank

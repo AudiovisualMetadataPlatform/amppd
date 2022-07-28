@@ -44,6 +44,10 @@ public class MgmTool extends AmpObject {
     @NotBlank
 	@Unique
     private String toolId;	
+    
+    // name of the MGM, populated from the tool name of the corresponding MGM adapter in Galaxy; must be unique within its parent category
+    @NotBlank
+    private String name;	
 
 	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);
 	// since Galaxy API response does not include the help text from the MGM config, we need to store help info on AMP side 
@@ -68,16 +72,16 @@ public class MgmTool extends AmpObject {
 	@ToString.Exclude
     private Set<MgmVersion> versions;
     
-	// category of the MGM, corresponding to the section the tool belongs to in Galaxy
+	// category of the MGM, corresponding to the section the tool belongs to in Galaxy;
     // note that this field is somewhat redundant, as it can be inferred from the section the tool belongs to;
     // however, it's more efficient to have a reference to the category on AMP side for query purpose
 	@NotNull
 	@ManyToOne
     private MgmCategory category;     
 
-	// temporary storage of section ID of the MGM for CSV parsing purpose
-	@Transient
-	private String sectionId;		
+//	// temporary storage of section ID of the MGM for CSV parsing purpose
+//	@Transient
+//	private String sectionId;		
 
 	// reference to the corresponding MGM adapter tool in Galaxy,
 	// serving as a cache to store the Tool instance retrieved from Galaxy API call

@@ -16,6 +16,8 @@ public interface MgmRefreshService {
 
 	/**
 	 * Refresh all MGM tables in the appropriate order.
+	 * Note that refreshing a parent table might impact its child tables, which in turn might need a refresh 
+	 * (for ex, MgmCategory is parent of MgmTool and MgmScoringTool, and MgmScoringTool is parent of MgmScoringParameter).
 	 */
 	public void refreshMgmTables();
 	
