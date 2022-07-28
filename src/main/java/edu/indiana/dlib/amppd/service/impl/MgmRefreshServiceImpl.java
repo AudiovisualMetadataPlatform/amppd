@@ -329,9 +329,9 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 
 			// note: we can't just save all parameters directly, as that would create new records in the table;
 			// instead, we need to find each existing record based on ID and update it
-			MgmScoringParameter existScoringParameter = mgmScoringParameterRepository.findFirstByMstIdAndName(mst.getId(), parameter.getName());			
-			if (existScoringParameter != null) {
-				parameter.setId(existScoringParameter.getId());				
+			MgmScoringParameter existParam = mgmScoringParameterRepository.findFirstByMstIdAndName(mst.getId(), parameter.getName());			
+			if (existParam != null) {
+				parameter.setId(existParam.getId());				
 			}			
 			mgmScoringParameterRepository.save(parameter);	
 		}		

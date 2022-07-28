@@ -63,12 +63,12 @@ public class MgmScoringParameter extends AmpObject {
 	@ToString.Exclude
 	private MgmScoringTool mst; 
 
-	// temporary storage of toolId of the parent mst of the parameter for CSV parsing purpose
-	@Transient
-	private String mstToolId;
-	
 	// temporary storage of name of the dependency parameter for CSV parsing purpose
 	@Transient
 	private String dependencyName;
-	
+
+	// temporary storage of toolId of the parent mst of the parameter for CSV parsing purpose
+	@Transient
+	private String mstToolId;
+		
 }
