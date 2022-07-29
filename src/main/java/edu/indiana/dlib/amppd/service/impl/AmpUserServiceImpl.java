@@ -73,9 +73,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  log.trace("Fetched AMP admin email id from property file:"+adminEmail);
 		  uiUrl = amppdUiPropertyConfig.getUrl();
 		  
-		  // Note: Alternatively, below bootstrap can also be done in AmppdApplicaiton.main, but it seems natural to do here.
-		  // bootstrap AMP admin user
-		  bootstrapAdmin();
+		  // Note: bootstrap of AMP admin user is now moved to AmppdStartupRunner.run;
 	  } 
 
 	  @Override
