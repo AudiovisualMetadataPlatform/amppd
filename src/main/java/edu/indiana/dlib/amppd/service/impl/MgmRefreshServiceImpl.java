@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -320,13 +321,15 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 
 			// check that the dependency parameter is a valid existing one and report error if not;
 			// note that the dependency parameter must appear before the current one in the CSV
-			MgmScoringParameter dependency = mgmScoringParameterRepository.findFirstByMstIdAndName(mst.getId(), parameter.getDependencyName());
-			if (dependency == null) {
-				throw new RuntimeException("Failed to refresh MgmScoringParameter table: invalid parameter with non-existing dependencyName in CSV: " + parameter);
+			if (StringUtils.isNotEmpty(parameter.getDependencyName())) {
+				MgmScoringParameter dependency = mgmScoringParameterRepository.findFirstByMstIdAndName(mst.getId(), parameter.getDependencyName());
+				if (dependency == null) {
+					throw new RuntimeException("Failed to refresh MgmScoringParameter table: invalid parameter with non-existing dependencyName in CSV: " + parameter);
+				}
+				// otherwise populate the parameter's dependency
+				parameter.setDependency(dependency);
 			}
-			// otherwise populate the parameter's dependency
-			parameter.setDependency(dependency);
-
+			
 			// note: we can't just save all parameters directly, as that would create new records in the table;
 			// instead, we need to find each existing record based on ID and update it
 			MgmScoringParameter existParam = mgmScoringParameterRepository.findFirstByMstIdAndName(mst.getId(), parameter.getName());			
