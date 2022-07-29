@@ -17,4 +17,7 @@ public interface AmpObjectRepository <S extends AmpObject> extends PagingAndSort
 	List<S> findByModifiedDate(@Param("modifiedDate") String createdDate);
 	List<S> findByModifiedBy(@Param("modifiedBy") String modifiedBy);
 
+	// delete obsolete record
+	List<S> deleteByModifiedDateBefore(Date dateObsolete);
+	
 }

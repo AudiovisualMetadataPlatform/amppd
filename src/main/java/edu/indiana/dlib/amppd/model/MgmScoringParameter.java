@@ -2,9 +2,12 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -31,7 +34,7 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class MgmScoringParameter extends AmpObject {
 	
-	public enum ParamType {TEXT, ENUMERATION, NUMBER};
+	public enum ParamType {TEXT, SINGLE_SELECT, MULTI_SELECT, INTEGER, FLOAT};
        
     // must be unique within its parent mst
     @NotBlank
@@ -43,17 +46,33 @@ public class MgmScoringParameter extends AmpObject {
 	
     // value type
     @NotBlank
+	@Enumerated(EnumType.STRING)
     private ParamType type;
 	
-    // value range for NUMBER parameter
-    private Float min, max;
+    // value range for INTEGER/FLOAT parameter
+    private Double min, max;
 	    
-    // value range for ENUM parameter, a comma separated list of words/phrases
-    private String enums;
+    // value set selections for SELECT type of parameter, a comma separated list of words/phrases
+    @Type(type="text")
+    private String selections;
 
+    // the sibling parameter (of the same parent mst) on which this parameter's value set depends on, applicable to sing/multi-select ParamType
+    @ManyToOne
+    private MgmScoringParameter dependency;
+    
     // category of the associated MGM, corresponding to the tool panel section in Galaxy
 	@NotNull
 	@ManyToOne
-    private MgmScoringTool mst; 
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private MgmScoringTool mst; 
 
+	// temporary storage of name of the dependency parameter for CSV parsing purpose
+	@Transient
+	private String dependencyName;
+
+	// temporary storage of toolId of the parent mst of the parameter for CSV parsing purpose
+	@Transient
+	private String mstToolId;
+		
 }
