@@ -27,6 +27,7 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
+		@Index(columnList = "mgm_id"),
 		@Index(columnList = "upgradeDate"),
 		@Index(columnList = "mgm_id, upgradeDate", unique = true)
 })

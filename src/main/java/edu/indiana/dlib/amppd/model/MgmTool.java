@@ -33,7 +33,10 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "toolId", unique = true)
+		@Index(columnList = "toolId", unique = true),
+		@Index(columnList = "name"),
+		@Index(columnList = "category_id"),
+		@Index(columnList = "category_id, name", unique = true)
 })
 @Data
 @EqualsAndHashCode(callSuper=true)
@@ -77,11 +80,7 @@ public class MgmTool extends AmpObject {
     // however, it's more efficient to have a reference to the category on AMP side for query purpose
 	@NotNull
 	@ManyToOne
-    private MgmCategory category;     
-
-//	// temporary storage of section ID of the MGM for CSV parsing purpose
-//	@Transient
-//	private String sectionId;		
+    private MgmCategory category;     		
 
 	// reference to the corresponding MGM adapter tool in Galaxy,
 	// serving as a cache to store the Tool instance retrieved from Galaxy API call
