@@ -34,7 +34,11 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
+		@Index(columnList = "toolId"),
 		@Index(columnList = "name"),
+		@Index(columnList = "workflowResultType"),
+		@Index(columnList = "groundtruthFormat"),
+		@Index(columnList = "workflowResultType, groundtruthFormat"),
 		@Index(columnList = "category_id")
 })
 @Data

@@ -38,7 +38,8 @@ import lombok.ToString;
 @Table(indexes = {
 		@Index(columnList = "mst_id"),
 		@Index(columnList = "supplement_id"),
-		@Index(columnList = "workflow_result_id")
+		@Index(columnList = "workflow_result_id"),
+		@Index(columnList = "status")
 })
 @Data
 public class MgmEvaluationTest {
