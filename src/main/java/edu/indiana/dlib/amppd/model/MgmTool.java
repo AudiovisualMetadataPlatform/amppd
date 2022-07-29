@@ -35,7 +35,8 @@ import lombok.ToString;
 @Table(indexes = {
 		@Index(columnList = "toolId", unique = true),
 		@Index(columnList = "name"),
-		@Index(columnList = "category_id")		
+		@Index(columnList = "category_id"),
+		@Index(columnList = "category_id, name", unique = true)
 })
 @Data
 @EqualsAndHashCode(callSuper=true)
