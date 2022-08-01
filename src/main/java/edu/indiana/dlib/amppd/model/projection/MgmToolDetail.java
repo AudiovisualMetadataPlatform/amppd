@@ -18,6 +18,6 @@ public interface MgmToolDetail extends AmpObjectDetail {
 	public String getName();	
 	public String getHelp();
 	public String getModule(); 
-	public Set<MgmVersion> getVersionss();
+	public Set<MgmVersion> getVersions();
 	
 }
