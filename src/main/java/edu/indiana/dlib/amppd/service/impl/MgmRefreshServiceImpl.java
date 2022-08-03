@@ -81,10 +81,16 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 	@Override
     @Transactional
 	public void refreshMgmTables() {
-		refreshMgmCategory();
-		refreshMgmTool();
-		refreshMgmScoringTool();	
-		refreshMgmScoringParameter();	
+		// TODO remove catch exception once issues with AMP packaging is resolved
+		try {
+			refreshMgmCategory();
+			refreshMgmTool();
+			refreshMgmScoringTool();	
+			refreshMgmScoringParameter();	
+		}
+		catch(Exception e) {
+			log.error("Failed to refresh MGM tables. MGM Evaluation Module will encounter issues.", e);
+		}
 	}
 	
 	/**
