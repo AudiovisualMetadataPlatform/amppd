@@ -32,16 +32,20 @@ import lombok.ToString;
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
 @UniqueName(message="item name must be unique within its parent collection")
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class Item extends Content {
     
 	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="primaryfiles")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<Primaryfile> primaryfiles;
 
 	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<ItemSupplement> supplements;
 
 	@NotNull

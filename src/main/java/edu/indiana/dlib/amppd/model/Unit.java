@@ -28,12 +28,14 @@ import lombok.ToString;
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueUnitName", columnNames = {"name"})})
 @UniqueName(message="unit name must be unique")
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class Unit extends Dataentity {
 
 	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="collections")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<Collection> collections;
 
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 

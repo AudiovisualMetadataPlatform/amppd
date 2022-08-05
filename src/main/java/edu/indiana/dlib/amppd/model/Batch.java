@@ -19,6 +19,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Class containing information of a batch manifest. Fields that apply to the whole spreadsheet such as collection name are entered via UI; 
@@ -56,6 +58,8 @@ public class Batch {
 	
 	// the following info come from batch manifest
 	@OneToMany(mappedBy="batch", cascade = CascadeType.REMOVE)
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
 	private List<BatchFile> batchFiles;
 
 	public void addBatchFile(BatchFile batchFile) {

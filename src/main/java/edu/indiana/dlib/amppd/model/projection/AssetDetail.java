@@ -14,7 +14,6 @@ public interface AssetDetail extends DataentityDetail {
 
 	public String getOriginalFilename();
     public String getPathname();
-	public String getDatasetId();
     public String getSymlink();
     public String getMediaInfo();	
     public String getAbsolutePathname();	

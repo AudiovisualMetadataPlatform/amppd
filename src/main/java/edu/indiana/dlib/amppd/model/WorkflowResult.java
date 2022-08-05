@@ -5,6 +5,8 @@ import java.util.Date;
 import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,12 +16,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 @Data
-@NoArgsConstructor
 public class WorkflowResult {
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
@@ -122,6 +122,7 @@ public class WorkflowResult {
 
 	//@NotNull
 	@Index
+	@Enumerated(EnumType.STRING)
 	private GalaxyJobState status;
 
 	@Index

@@ -116,7 +116,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		String jsonpath = getMediaInfoJsonPath(filepath);
 		ProcessBuilder pb = new ProcessBuilder(
 				amppdPropertyConfig.getPythonPath(), 
-				amppdPropertyConfig.getMediaprobeDir() + "media_probe.py", 
+				amppdPropertyConfig.getMediaprobeDir() + "/media_probe.py", 
 				"--json", 
 				fileStorageService.absolutePathName(filepath));
 

@@ -25,8 +25,8 @@ import lombok.ToString;
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"primaryfile_id", "name"})})
 @UniqueName(message="primaryfileSupplement name must be unique within its parent primaryfile")
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class PrimaryfileSupplement extends Supplement {
 
 	@NotNull

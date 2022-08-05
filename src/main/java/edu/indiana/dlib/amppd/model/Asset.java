@@ -25,20 +25,15 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @MappedSuperclass
-@EqualsAndHashCode(callSuper=true)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Data
+@EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 @Slf4j
 public abstract class Asset extends Dataentity {
 
 	private String originalFilename;	// the file name of the original file uploaded by user or batch	
     private String pathname;			// path name relative to storage root for the file associated with the asset
-
-    // TODO move datesetId and symlink to Primaryfile
-    // supplement always input via Supplement MGM, no need to load into Galaxy library, thus no need for datasetId;
-    // currently we don't provide UI link to access supplement file, so no need for symlink so far.
-	private String datasetId;			// ID of the dataset as a result of upload to Galaxy
     private String symlink;				// the symlink under the static content directory used for serving large media file
     
     // Note: mediaInfo must be a valid json string

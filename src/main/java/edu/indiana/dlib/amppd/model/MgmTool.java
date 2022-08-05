@@ -1,52 +1,90 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.Date;
+import java.util.Set;
 
-import javax.jdo.annotations.Index;
+import javax.jdo.annotations.Unique;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
- * This class contains information about the underlying MGM models used by MGM adapter tools in Galaxy.
- * Note that the table for this class is manually maintained, i.e. each time a new local MGM (or a new version of it) 
- * is installed, or a new version of the cloud MGM is released, this table shall be updated with that information. 
+ * This class contains information about an MGM adapter, including properties stored in the corresponding AMP table, 
+ * as well as a reference to the corresponding tool in Galaxy.
  * @author yingfeng
  *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Index(members={"toolId","upgradeDate"}, unique="true")
+@Table(indexes = {
+		@Index(columnList = "toolId", unique = true),
+		@Index(columnList = "name"),
+		@Index(columnList = "category_id"),
+		@Index(columnList = "category_id, name", unique = true)
+})
 @Data
-@NoArgsConstructor
-public class MgmTool {
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
+public class MgmTool extends AmpObject {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Long id;
+    // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy; must be unique
+    @NotBlank
+	@Unique
+    private String toolId;	
     
-	//@NotNull
-	@Index
-    private String toolId;	// ID of the MGM adapter tool in galaxy
+    // name of the MGM, populated from the tool name of the corresponding MGM adapter in Galaxy; must be unique within its parent category
+    @NotBlank
+    private String name;	
+
+	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);
+	// since Galaxy API response does not include the help text from the MGM config, we need to store help info on AMP side 
+    @NotBlank
+    @Type(type="text")
+	private String help; 
+	
+	// underlying main module/package/model dependency required by the MGM adapter, 
+    // corresponding roughly to the main requirement (not tool name) in MGM config in Galaxy
+    @NotBlank
+    private String module;	
+
+    /* TODO
+     * It's possible that an MGM could depend on multiple modules, for now we care only about the main one;
+     * if in the future we need to trace multiple other dependencies, we can move module field to MgmVersion. 
+     */    
+
+    // version upgrade info for the main dependency module
+	@OneToMany(mappedBy="mgm", cascade = CascadeType.REMOVE)
+	@JsonBackReference(value="versions")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+    private Set<MgmVersion> versions;
     
-	//@NotNull
-    private String mgmName;	// name of the underlying MGM model used by the adapter
-        
-	//@NotNull
-    private String version;	// version of the MGM model
-    
-	//@NotNull
-	@Index
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss.SSS")
-    private Date upgradeDate; // date when this version of the MGM model is installed (for local tools) or released (for cloud tools)
+	// category of the MGM, corresponding to the section the tool belongs to in Galaxy;
+    // note that this field is somewhat redundant, as it can be inferred from the section the tool belongs to;
+    // however, it's more efficient to have a reference to the category on AMP side for query purpose
+	@NotNull
+	@ManyToOne
+    private MgmCategory category;     		
+
+	// reference to the corresponding MGM adapter tool in Galaxy,
+	// serving as a cache to store the Tool instance retrieved from Galaxy API call
+	@Transient
+	private Tool tool;
 
 }

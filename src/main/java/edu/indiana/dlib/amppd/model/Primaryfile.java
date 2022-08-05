@@ -33,8 +33,8 @@ import lombok.ToString;
 @UniqueName(message="primaryfile name must be unique within its parent item")
 //@UniqueName(message="primaryfile name must be unique within its parent item", groups = {WithReference.class})
 @Data
-@EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
-@ToString(callSuper=true, onlyExplicitlyIncluded=true)
+@EqualsAndHashCode(callSuper=true)
+@ToString(callSuper=true)
 public class Primaryfile extends Asset {
 	// Lombok's impl of toString, equals, and hashCode doesn't handle circular references as in Bundle and Item and will cause StackOverflow exception.
 
@@ -49,9 +49,16 @@ public class Primaryfile extends Asset {
 	@Index(unique="true")	// historyId could be null, but it should be unique among all primaryfiles
     private String historyId;			
 
+    // Note:
+	// datasetId is moved from Asset to Primaryfile, as Supplement always input 
+	// via Supplement MGM, no need to load into Galaxy library, thus no need for datasetId.
+	private String datasetId;			// ID of the dataset as a result of upload to Galaxy
+
 	@OneToMany(mappedBy="primaryfile", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
-    private Set<PrimaryfileSupplement> supplements;
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private Set<PrimaryfileSupplement> supplements;
 
 //	@NotNull(groups = {WithReference.class})
 	@NotNull
@@ -61,6 +68,8 @@ public class Primaryfile extends Asset {
 		
     @ManyToMany(mappedBy = "primaryfiles")
 	@JsonBackReference(value="bundles")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
     private Set<Bundle> bundles;  
     
 //    @OneToMany(mappedBy="primaryfile")
