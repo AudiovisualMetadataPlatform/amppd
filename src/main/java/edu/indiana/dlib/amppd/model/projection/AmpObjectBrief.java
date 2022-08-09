@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.model.projection;
 
+import java.util.Date;
+
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.AmpObject;
@@ -11,6 +13,10 @@ import edu.indiana.dlib.amppd.model.AmpObject;
 @Projection(name = "brief", types = {AmpObject.class}) 
 public interface AmpObjectBrief {
 
-	public Long getId();
-	
+	public Long getId();	
+    public Date getCreatedDate();
+    public Date getModifiedDate();    
+    public String getCreatedBy();
+    public String getModifiedBy();
+
 }

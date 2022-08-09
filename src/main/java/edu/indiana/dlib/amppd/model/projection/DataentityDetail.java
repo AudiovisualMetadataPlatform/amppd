@@ -9,6 +9,6 @@ import edu.indiana.dlib.amppd.model.Dataentity;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Dataentity.class}) 
-public interface DataentityDetail extends AmpObjectDetail, DataentityBrief {  
+public interface DataentityDetail extends DataentityBrief, AmpObjectDetail {  
 
 }

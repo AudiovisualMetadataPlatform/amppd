@@ -14,7 +14,7 @@ public interface CollectionSupplementRepository extends SupplementRepository<Col
 	List<CollectionSupplement> findByCollectionId(Long collectionId);
 	List<CollectionSupplement> findByCollectionIdAndName(Long collectionId, String name);
 	List<CollectionSupplement> findByCollectionIdAndCategory(Long collectionId, String category); 
-	List<CollectionSupplement> findByCollectionIdAndCategoryAndOriginalFilenameEndsWith(Long collectionId, String category, String format); 
-	List<CollectionSupplement> findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWith(Long collectionId, String name, String category, String format); 
+	List<CollectionSupplement> findByCollectionIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(Long collectionId, String category, String format); 
+	List<CollectionSupplement> findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(Long collectionId, String name, String category, String format); 
 
 }

@@ -9,9 +9,7 @@ import edu.indiana.dlib.amppd.model.Supplement;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Supplement.class}) 
-public interface SupplementDetail extends AssetDetail {
-
-	public String getCategory();
+public interface SupplementDetail extends SupplementBrief, AssetDetail {
 
 }
 

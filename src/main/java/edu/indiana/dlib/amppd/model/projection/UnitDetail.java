@@ -13,9 +13,10 @@ import edu.indiana.dlib.amppd.model.Unit;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Unit.class}) 
-public interface UnitDetail extends DataentityDetail {
+public interface UnitDetail extends UnitBrief, DataentityDetail {
 
 	public Set<Collection> getCollections();
+//	public Set<UnitSupplement> getSupplements();
 //	public Set<DataentityBrief> getCollections();
 	
 }

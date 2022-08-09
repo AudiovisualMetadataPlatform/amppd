@@ -14,7 +14,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Item.class}) 
-public interface ItemDetail extends ContentDetail {
+public interface ItemDetail extends ItemBrief, ContentDetail {
 
 	public Set<Primaryfile> getPrimaryfiles();
 	public Set<ItemSupplement> getSupplements();

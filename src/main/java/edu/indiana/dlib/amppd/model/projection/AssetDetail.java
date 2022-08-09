@@ -10,7 +10,7 @@ import edu.indiana.dlib.amppd.model.Asset;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Asset.class}) 
-public interface AssetDetail extends DataentityDetail {
+public interface AssetDetail extends AssetBrief, DataentityDetail {
 
 	public String getOriginalFilename();
     public String getPathname();
