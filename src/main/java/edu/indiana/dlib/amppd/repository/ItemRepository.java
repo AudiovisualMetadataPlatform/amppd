@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 
 
 //@RepositoryRestResource(collectionResourceRel = "items", path = "items")
+@RepositoryRestResource(excerptProjection = ItemBrief.class)
 public interface ItemRepository extends ContentRepository<Item> {
 	
 	List<Item> findByCollectionUnitNameAndCollectionNameAndName(String collectionUnitName, String collectionName, String name);

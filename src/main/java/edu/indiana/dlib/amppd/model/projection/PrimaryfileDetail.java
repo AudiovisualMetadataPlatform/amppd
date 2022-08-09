@@ -13,7 +13,7 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Primaryfile.class}) 
-public interface PrimaryfileDetail extends AssetDetail {
+public interface PrimaryfileDetail extends PrimaryfileBrief, AssetDetail {
 
 	public String getHistoryId();	
 	public String getDatasetId();
