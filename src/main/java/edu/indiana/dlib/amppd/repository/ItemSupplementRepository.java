@@ -14,7 +14,7 @@ public interface ItemSupplementRepository extends SupplementRepository<ItemSuppl
 	List<ItemSupplement> findByItemId(Long itemId);
 	List<ItemSupplement> findByItemIdAndName(Long itemId, String name);
 	List<ItemSupplement> findByItemIdAndCategory(Long itemId, String category); 
-	List<ItemSupplement> findByItemIdAndCategoryAndOriginalFilenameEndsWith(Long itemId, String category, String format); 
-	List<ItemSupplement> findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWith(Long itemId, String name, String category, String format); 
+	List<ItemSupplement> findByItemIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(Long itemId, String category, String format); 
+	List<ItemSupplement> findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(Long itemId, String name, String category, String format); 
 
 }
