@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.springframework.data.rest.core.config.Projection;
 
-import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Unit;
 
 
@@ -13,9 +12,9 @@ import edu.indiana.dlib.amppd.model.Unit;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Unit.class}) 
-public interface UnitDetail extends DataentityDetail {
+public interface UnitDetail extends UnitBrief, DataentityDetail {
 
-	public Set<Collection> getCollections();
-//	public Set<DataentityBrief> getCollections();
+	public Set<CollectionBrief> getCollections();
+//	public Set<UnitSupplementBrief> getSupplements();
 	
 }

@@ -10,9 +10,6 @@ import edu.indiana.dlib.amppd.model.Content;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {Content.class}) 
-public interface ContentDetail extends DataentityDetail {
-
-    public String externalSource();
-    public String getExternalId();
+public interface ContentDetail extends ContentBrief, DataentityDetail {
 
 }

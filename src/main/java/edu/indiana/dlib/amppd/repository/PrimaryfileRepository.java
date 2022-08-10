@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
 
 
 //@RepositoryRestResource(collectionResourceRel = "primaryfiles", path = "primaryfiles")
+@RepositoryRestResource(excerptProjection = PrimaryfileBrief.class)
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
