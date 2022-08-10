@@ -2,11 +2,10 @@ package edu.indiana.dlib.amppd.model.projection;
 
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.Collection;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
-import edu.indiana.dlib.amppd.model.Item;
 
 
 /**
@@ -16,8 +15,10 @@ import edu.indiana.dlib.amppd.model.Item;
 @Projection(name = "detail", types = {Collection.class}) 
 public interface CollectionDetail extends CollectionBrief, ContentDetail {
 
-	public Set<Item> getItems();
-	public Set<CollectionSupplement> getSupplements();
-//	public Set<DataentityBrief> getItems();
+	public Set<ItemBrief> getItems();
+	public Set<CollectionSupplementBrief> getSupplements();
+	
+	@Value("#{target.unit.id}")
+	public String getUnitId();
 	
 }

@@ -12,6 +12,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 @Projection(name = "brief", types = {Collection.class}) 
 public interface CollectionBrief extends ContentBrief {
 
+	public Boolean getActive();	
 	public String getTaskManager();
 	
 	@Value("#{target.unit.name}")
