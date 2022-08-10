@@ -11,7 +11,7 @@ import edu.indiana.dlib.amppd.model.Item;
  */
 @Projection(name = "brief", types = {Item.class}) 
 public interface ItemBrief extends ContentBrief {
-	
+		
 	@Value("#{target.collection.name}")
 	public String getCollectionName();	
 	

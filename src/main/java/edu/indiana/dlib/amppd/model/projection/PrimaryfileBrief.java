@@ -10,7 +10,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
  * @author yingfeng
  */
 @Projection(name = "brief", types = {Primaryfile.class}) 
-public interface PrimaryfileBrief {
+public interface PrimaryfileBrief extends AssetBrief {
 	
 	@Value("#{target.item.name}")
 	public String getItemName();
@@ -20,5 +20,5 @@ public interface PrimaryfileBrief {
 	
 	@Value("#{target.item.collection.unit.name}")
 	public String getUnitName();
-
+	
 }

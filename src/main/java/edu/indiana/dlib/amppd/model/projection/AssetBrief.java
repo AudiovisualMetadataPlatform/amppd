@@ -11,4 +11,6 @@ import edu.indiana.dlib.amppd.model.Asset;
 @Projection(name = "brief", types = {Asset.class}) 
 public interface AssetBrief extends DataentityBrief {
 
+	public String getOriginalFilename();
+
 }

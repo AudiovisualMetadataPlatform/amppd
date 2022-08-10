@@ -1,23 +1,16 @@
 package edu.indiana.dlib.amppd.model.projection;
 
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-import edu.indiana.dlib.amppd.model.Primaryfile;
-
+import edu.indiana.dlib.amppd.model.ItemSupplement;
 
 /**
- * Projection for a detailed view of a primaryfile.
+ * Projection for a detailed view of a item supplement, suitable for listing item supplements.
  * @author yingfeng
  */
-@Projection(name = "detail", types = {Primaryfile.class}) 
-public interface PrimaryfileDetail extends PrimaryfileBrief, AssetDetail {
-
-	public String getHistoryId();	
-	public String getDatasetId();
-	public Set<PrimaryfileSupplementBrief> getSupplements();
+@Projection(name = "detail", types = {ItemSupplement.class}) 
+public interface ItemSupplementDetail extends SupplementBrief {
 
 	@Value("#{target.item.id}")
 	public String getItemId();
@@ -29,3 +22,4 @@ public interface PrimaryfileDetail extends PrimaryfileBrief, AssetDetail {
 	public String getUnitId();
 	
 }
+
