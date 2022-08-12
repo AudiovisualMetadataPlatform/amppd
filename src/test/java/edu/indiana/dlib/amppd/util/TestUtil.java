@@ -14,6 +14,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.service.DataentityService;
 
 /**
@@ -90,6 +91,14 @@ public class TestUtil {
 			json = mapper.writeValueAsString(primaryfile);
 			json = StringUtils.replace(json, "\"item\":null", "\"item\":\"" + dataentityService.getDataentityUrl(item) + "\"");
 			primaryfile.setItem(item);
+		}
+		else if (dataentity instanceof UnitSupplement) {
+			UnitSupplement unitSupplement = (UnitSupplement)dataentity;
+			Unit unit = unitSupplement.getUnit();
+			unitSupplement.setUnit(null);
+			json = mapper.writeValueAsString(unitSupplement);
+			json = StringUtils.replace(json, "\"unit\":null", "\"unit\":\"" + dataentityService.getDataentityUrl(unit) + "\"");
+			unitSupplement.setUnit(unit);
 		}
 		else if (dataentity instanceof CollectionSupplement) {
 			CollectionSupplement collectionSupplement = (CollectionSupplement)dataentity;

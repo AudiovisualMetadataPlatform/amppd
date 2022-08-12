@@ -11,6 +11,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
@@ -38,8 +39,12 @@ public class DataentityProcessor implements Processor {
 			((Item)dataentity).setCollection(collection);
 		}
 		else if (dataentity instanceof Primaryfile) {
-			Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Test Item");
+			Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Te	st Item");
 			((Primaryfile)dataentity).setItem(item);
+		}
+		else if (dataentity instanceof UnitSupplement) {
+			Unit unit = testHelper.ensureUnit("Test Unit");
+			((UnitSupplement)dataentity).setUnit(unit);
 		}
 		else if (dataentity instanceof CollectionSupplement) {
 			Collection collection = testHelper.ensureCollection("Test Unit", "Test Collection");

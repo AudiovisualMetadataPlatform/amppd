@@ -30,6 +30,7 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
@@ -40,6 +41,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.AmpUserService;
@@ -87,14 +89,17 @@ public class TestHelper {
     private PrimaryfileRepository primaryfileRepository;
 	
 	@Autowired
-	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
-
+	private UnitSupplementRepository unitSupplementRepository;
+	
+	@Autowired
+	private CollectionSupplementRepository collectionSupplementRepository;
+	
 	@Autowired
 	private ItemSupplementRepository itemSupplementRepository;
 
 	@Autowired
-	private CollectionSupplementRepository collectionSupplementRepository;
-	
+	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+
 	@Autowired
     private FileStorageService fileStorageService; 
 
@@ -139,6 +144,16 @@ public class TestHelper {
 	 */
 	public Primaryfile ensureTestVideo() {
 		return ensurePrimaryfile(TEST_VIDEO, "mp4");
+	}
+	
+	/**
+	 * Check whether the unitSupplement named TestImages with zip file extension is associated with the given primaryfile in Amppd; 
+	 * if not, upload it from its resource file.
+	 * @param primaryfile the given primaryfile
+	 * @return the prepared unitSupplement as existing in Amppd 
+	 */
+	public UnitSupplement ensureTestUnitSupplementZip(Primaryfile primaryfile) {
+		return (UnitSupplement)ensureSupplement(primaryfile, TEST_IMAGES, SupplementType.COLLECTION, "zip");
 	}
 	
 	/**
@@ -386,7 +401,10 @@ public class TestHelper {
 	 */
 	public Supplement ensureSupplement(Dataentity dataentity, String name) {
 		List<? extends Supplement> supplements = null;		
-		if (dataentity instanceof Collection) {
+		if (dataentity instanceof Unit) {
+			supplements = unitSupplementRepository.findByUnitIdAndName(dataentity.getId(), name);
+		}
+		else if (dataentity instanceof Collection) {
 			supplements = collectionSupplementRepository.findByCollectionIdAndName(dataentity.getId(), name);
 		}
 		else if (dataentity instanceof Item) {
@@ -407,7 +425,15 @@ public class TestHelper {
 		}
 
 		// otherwise, create an supplement with the given name	
-		if (dataentity instanceof Collection) {
+		if (dataentity instanceof Unit) {
+			UnitSupplement newSup = new UnitSupplement();
+			newSup.setUnit((Unit)dataentity);
+			newSup.setName(name);
+			newSup.setDescription("supplement for tests");
+			newSup = unitSupplementRepository.save(newSup);
+			return newSup;
+		}
+		else if (dataentity instanceof Collection) {
 			CollectionSupplement newSup = new CollectionSupplement();
 			newSup.setCollection((Collection)dataentity);
 			newSup.setName(name);
@@ -448,6 +474,9 @@ public class TestHelper {
 		// retrieve supplement from DB for the given primaryfile, supplement name, based on its association type 
 		List<? extends Supplement> supplements = null;
 		switch(type) {
+		case UNIT:
+			supplements = unitSupplementRepository.findByUnitIdAndName(primaryfile.getItem().getCollection().getUnit().getId(), name);
+			break;
 		case COLLECTION:
 			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getItem().getCollection().getId(), name);
 			break;
@@ -480,6 +509,14 @@ public class TestHelper {
 
 		// and create a supplement with the given name and type for the associated primaryfile, and upload its resource file	
 		switch(type) {
+		case UNIT:
+	    	supplement = new UnitSupplement();
+	    	((UnitSupplement)supplement).setUnit(primaryfile.getItem().getCollection().getUnit());
+			supplement.setName(name);
+			supplement.setDescription(type + " Supplement for tests");			
+			supplement = unitSupplementRepository.save((UnitSupplement)supplement);
+			supplement = (UnitSupplement)fileStorageService.uploadAsset(supplement, file);
+			break;
 		case COLLECTION:
 	    	supplement = new CollectionSupplement();
 	    	((CollectionSupplement)supplement).setCollection(primaryfile.getItem().getCollection());
@@ -525,6 +562,9 @@ public class TestHelper {
 
 		// retrieve supplement from DB via original filename
 		switch(type) {
+		case UNIT:
+			supplements = unitSupplementRepository.findByOriginalFilename(filename);
+			break;
 		case COLLECTION:
 			supplements = collectionSupplementRepository.findByOriginalFilename(filename);
 			break;
@@ -592,6 +632,13 @@ public class TestHelper {
 
 		// and create a supplement with the given name and the created parent hierarchy, and upload its resource file	
 		switch(type) {
+		case UNIT:
+	    	supplement = new UnitSupplement();
+	    	((UnitSupplement)supplement).setUnit(unit);
+			supplement.setName(type + " Supplement for " + name);
+			supplement.setDescription(type + " Supplement for tests");						
+			supplement = unitSupplementRepository.save((UnitSupplement)supplement);
+			supplement = (UnitSupplement)fileStorageService.uploadAsset(supplement, file);
 		case COLLECTION:
 	    	supplement = new CollectionSupplement();
 	    	((CollectionSupplement)supplement).setCollection(collection);

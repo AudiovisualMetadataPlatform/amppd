@@ -22,6 +22,7 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
@@ -29,6 +30,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
@@ -70,14 +72,17 @@ public class DataentityServiceImpl implements DataentityService {
 	private PrimaryfileRepository primaryfileRepository;
 
 	@Autowired
-	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
-
-	@Autowired
-	private ItemSupplementRepository itemSupplementRepository;
+	private UnitSupplementRepository unitSupplementRepository;
 
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
 	
+	@Autowired
+	private ItemSupplementRepository itemSupplementRepository;
+
+	@Autowired
+	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+
 	@Autowired
 	private MediaService mediaService;
 
@@ -127,6 +132,9 @@ public class DataentityServiceImpl implements DataentityService {
 		}
 		else if (dataentity instanceof Primaryfile) {
 			destr = "primaryfiles";
+		}
+		else if (dataentity instanceof UnitSupplement) {
+			destr = "unitSupplements";
 		}
 		else if (dataentity instanceof CollectionSupplement) {
 			destr = "collectionSupplements";
@@ -213,6 +221,11 @@ public class DataentityServiceImpl implements DataentityService {
 			Item item = ((Primaryfile)dataentity).getItem();			
 			if (item == null) return desFound;		
 			desFound = primaryfileRepository.findByItemIdAndName(item.getId(), name);
+		}
+		else if (dataentity instanceof UnitSupplement) {
+			Unit unit = ((UnitSupplement)dataentity).getUnit();
+			if (unit == null) return desFound;		
+			desFound = unitSupplementRepository.findByUnitIdAndName(unit.getId(), name);
 		}
 		else if (dataentity instanceof CollectionSupplement) {
 			Collection collection = ((CollectionSupplement)dataentity).getCollection();
@@ -308,7 +321,7 @@ public class DataentityServiceImpl implements DataentityService {
 		case COLLECTION:
 			return collectionSupplementRepository.findById(id).orElseThrow(() -> new StorageException("CollectionSupplement <" + id + "> does not exist!"));        	
 		case UNIT:
-			return null;        	
+			return unitSupplementRepository.findById(id).orElseThrow(() -> new StorageException("UnitSupplement <" + id + "> does not exist!"));        	
 		}
 		return null;
 	}
@@ -330,6 +343,9 @@ public class DataentityServiceImpl implements DataentityService {
 		else if (asset instanceof CollectionSupplement) {
 			return collectionSupplementRepository.save((CollectionSupplement)asset);
 		}
+		else if (asset instanceof UnitSupplement) {
+			return unitSupplementRepository.save((UnitSupplement)asset);
+		}
 		return asset;
 	}
 	
@@ -348,11 +364,13 @@ public class DataentityServiceImpl implements DataentityService {
 		// find all supplements associated with the primaryfile at all parent levels by its category/format and optionally name,
 		// along with associated parent's ID, assuming the original filenames have extensions that can be matched against format 
 		if (StringUtils.isBlank(name)) {
+			supplements.addAll(unitSupplementRepository.findByUnitIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), category, format));
 			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), category, format));
 			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), category, format));
 			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), category, format));
 		}		
 		else {
+			supplements.addAll(unitSupplementRepository.findByUnitIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), name, category, format));
 			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), name, category, format));
 			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), name, category, format));
 			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), name, category, format));

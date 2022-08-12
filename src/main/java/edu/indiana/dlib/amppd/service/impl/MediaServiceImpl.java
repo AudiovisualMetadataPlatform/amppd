@@ -32,6 +32,7 @@ import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -75,6 +76,9 @@ public class MediaServiceImpl implements MediaService {
 
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
+
+	@Autowired
+	private UnitSupplementRepository unitSupplementRepository;
 
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
@@ -140,6 +144,9 @@ public class MediaServiceImpl implements MediaService {
 		
 		// find the supplements by its name and associated parent's ID
 		switch(type) {
+		case UNIT:
+			supplements = unitSupplementRepository.findByUnitIdAndName(primaryfile.getItem().getCollection().getUnit().getId(), name);
+			break;
 		case COLLECTION:
 			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getItem().getCollection().getId(), name);
 			break;
