@@ -37,6 +37,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -92,6 +93,20 @@ public class FileStorageServiceTests {
     	assertTrue(pathname.equals("U-1/C-2/I-3/P-4.mp4"));
     }
 
+    @Test
+    public void shouldGetUnitSupplementPathname() {
+    	Unit unit = new Unit();
+    	unit.setId(1l);
+    	    	
+    	UnitSupplement supplement = new UnitSupplement();
+    	supplement.setId(2l);
+    	supplement.setUnit(unit);
+    	supplement.setOriginalFilename("supplementtest.pdf");
+  	
+    	String pathname = fileStorageService.getFilePathname(supplement);
+    	assertTrue(pathname.equals("U-1/S-2.pdf"));
+    }
+    
     @Test
     public void shouldGetCollectionSupplementPathname() {
     	Unit unit = new Unit();

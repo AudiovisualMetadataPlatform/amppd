@@ -33,6 +33,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -134,7 +135,10 @@ public class FileStorageServiceImpl implements FileStorageService {
 		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
 		String dirname = "";
 
-		if (asset instanceof CollectionSupplement) {
+		if (asset instanceof UnitSupplement) {
+			dirname = getDirPathname(((UnitSupplement)asset).getUnit());
+		}
+		else if (asset instanceof CollectionSupplement) {
 			dirname = getDirPathname(((CollectionSupplement)asset).getCollection());
 		}
 		else if (asset instanceof ItemSupplement) {

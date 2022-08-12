@@ -28,6 +28,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
@@ -35,6 +36,7 @@ import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -64,6 +66,9 @@ public class DataentityController {
 	@Autowired
 	private PrimaryfileRepository primaryfileRepository;
 	
+	@Autowired
+	private UnitSupplementRepository unitSupplementRepository;
+
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
 
@@ -152,6 +157,46 @@ public class DataentityController {
     	return primaryfile;
     }
 		
+	/**
+	 * Create the given unit supplement with the given media file and add it to the given parent unit.
+	 * @param unitId ID of the given unit
+	 * @param unitSupplement the given unit supplement
+	 * @param mediaFile the media file content to be uploaded for the unit supplement
+	 * @return the added unit supplement
+	 */
+	@PostMapping(path = "/units/{unitId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//	public UnitSupplement addUnitSupplement(@PathVariable Long unitId, @Validated(WithoutReference.class) @RequestPart UnitSupplement unitSupplement, @RequestPart MultipartFile mediaFile) {		
+	public UnitSupplement addUnitSupplement(@PathVariable Long unitId, @RequestPart UnitSupplement unitSupplement, @RequestPart MultipartFile mediaFile) {		
+    	log.info("Adding unitSupplement " + unitSupplement.getName() + " under unit " + unitId);
+    	
+    	// populate unitSupplement.unit in case it's not specified in RequestPart
+    	Long pid; // parent's ID
+    	if (unitSupplement.getUnit() == null) {
+    		unitSupplement.setUnit(unitRepository.findById(unitId).orElse(null));
+    	}
+    	else if ((pid = unitSupplement.getUnit().getId()) != unitId) {
+    		log.warn("UnitSupplement's unit ID " + pid + " is different from the specified unit ID " + unitId + ", will use the former.");    		
+    	}
+    	
+    	// validate unitSupplement after parent population and before persistence
+    	Set<ConstraintViolation<UnitSupplement>> violations = validator.validate(unitSupplement);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	
+		// save unitSupplement to DB 
+    	unitSupplement = unitSupplementRepository.save(unitSupplement);
+		
+		// ingest media file after unitSupplement is saved
+		if (mediaFile == null) {
+			throw new RuntimeException("No media file is provided for the unitSupplement to be added.");
+		}
+		unitSupplement = (UnitSupplement)fileStorageService.uploadAsset(unitSupplement, mediaFile);
+		
+    	log.info("Successfully addedunitSupplement " + unitSupplement.getName() + " under unit " + unitId);
+    	return unitSupplement;
+    }
+	
 	/**
 	 * Create the given collection supplement with the given media file and add it to the given parent collection.
 	 * @param collectionId ID of the given collection
@@ -372,6 +417,33 @@ public class DataentityController {
         return primaryfile;
     }
 	
+	/**
+	 * Move the given unitSupplement to the given parent unit if different from its original parent.
+	 * @param unitSupplementId ID of the given unitSupplement
+	 * @param unitId ID of the given parent unit
+	 * @return the updated unitSupplement
+	 */
+	@PostMapping(path = "/unitSupplements/{unitSupplementId}/move")
+	public UnitSupplement moveUnitSupplement(@PathVariable Long unitSupplementId, @RequestParam Long unitId) {		
+    	log.info("Moving unitSupplement " + unitSupplementId + " to new unit " + unitId);
+    	
+    	// retrieve unitSupplement and unit from DB
+    	UnitSupplement unitSupplement = unitSupplementRepository.findById(unitSupplementId).orElseThrow(() -> new StorageException("UnitSupplement <" + unitSupplementId + "> does not exist!"));
+    	Unit unit =	unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit <" + unitId + "> does not exist!"));
+
+    	// if parent unit is the same, no action
+    	if (unitSupplement.getUnit().getId().equals(unit.getId())) {
+    		log.warn("No need to move unitSupplement " + unitSupplementId + " to the same parent unit " + unitId);
+    		return unitSupplement;
+    	}    	
+
+    	// otherwise, move unitSupplement media/info files to new subdir and update its parent unit
+        fileStorageService.moveAsset(unitSupplement, true);
+
+    	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new unit " + unitId);
+        return unitSupplement;
+    }
+		
 	/**
 	 * Move the given collectionSupplement to the given parent collection if different from its original parent.
 	 * @param collectionSupplementId ID of the given collectionSupplement

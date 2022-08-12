@@ -16,22 +16,22 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * CollectionSupplement is a supplemental file associated with a collection and shared by all items within that collection.
+ * UnitSupplement is a supplemental file associated with a unit and shared by all collections within that unit.
  * @author yingfeng
  *
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueCollectionSupplementNamePerCollection", columnNames = {"collection_id", "name"})})
-@UniqueName(message="collectionSupplement name must be unique within its parent collection")
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueUnitSupplementNamePerUnit", columnNames = {"unit_id", "name"})})
+@UniqueName(message="unitSupplement name must be unique within its parent unit")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class CollectionSupplement extends Supplement {
+public class UnitSupplement extends Supplement {
 
 	@NotNull
 	@Index
 	@ManyToOne
-    private Collection collection;
+    private Unit unit;
     
 }

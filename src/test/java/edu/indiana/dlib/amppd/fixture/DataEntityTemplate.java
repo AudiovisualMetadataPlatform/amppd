@@ -10,6 +10,7 @@ import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 
 
 //@Component
@@ -94,6 +95,20 @@ public class DataEntityTemplate implements TemplateLoader {
 		Fixture.of(Primaryfile.class).addTemplate("invalid", new Rule() {{ 
 			add("name", "");
 		}});
+		
+		Fixture.of(UnitSupplement.class).addTemplate("valid", new Rule() {{
+			add("name", regex("Test UnitSupplement - " + nameRegex));
+			add("description", "Description for ${name}");	
+			add("category", regex(CATEGORY));	
+//			add("unit", unitUrl);
+//			add("originalFilename", firstName());
+//			add("pathname", "C:/New Folder/${name}");
+//			add("mediaInfo", "{}");
+		}});
+
+		Fixture.of(UnitSupplement.class).addTemplate("invalid", new Rule() {{
+			add("name", "");
+		}}); 
 		
 		Fixture.of(CollectionSupplement.class).addTemplate("valid", new Rule() {{
 			add("name", regex("Test CollectionSupplement - " + nameRegex));
