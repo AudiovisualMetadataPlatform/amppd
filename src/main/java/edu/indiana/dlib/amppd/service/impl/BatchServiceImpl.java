@@ -38,7 +38,6 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
  * Implementation of BatchService.
