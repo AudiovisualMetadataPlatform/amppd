@@ -17,6 +17,7 @@ public class WorkflowResultFilterValues {
 	private List<String> workflows;
 	private List<String> steps;
 	private List<String> outputs;
+	private List<String> types;
 	private List<GalaxyJobState> statuses;
 	private List<String> searchTerms;
 }

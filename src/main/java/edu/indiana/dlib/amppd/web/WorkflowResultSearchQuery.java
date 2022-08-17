@@ -24,6 +24,7 @@ public class WorkflowResultSearchQuery {
 		filterByWorkflows = new String[0];
 		filterBySteps = new String[0];
 		filterByOutputs = new String[0];
+		filterByTypes = new String[0];
 		filterByStatuses = new GalaxyJobState[0];
 		filterBySearchTerms = new String[0];
 		filterByRelevant = false;
@@ -45,6 +46,7 @@ public class WorkflowResultSearchQuery {
 	private String[] filterByWorkflows;
 	private String[] filterBySteps;
 	private String[] filterByOutputs;
+	private String[] filterByTypes;
 	private GalaxyJobState[] filterByStatuses;
 	private String[] filterBySearchTerms;	
 	private boolean filterByRelevant;
@@ -67,6 +69,8 @@ public class WorkflowResultSearchQuery {
 			return filterBySteps;
 		case "outputName":
 			return filterByOutputs;
+		case "outputType":
+			return filterByTypes;
 		default:
 			// return null for other fields
 			return null;
@@ -94,6 +98,9 @@ public class WorkflowResultSearchQuery {
 			break;
 		case "outputName":
 			setFilterByOutputs(values);
+			break;
+		case "outputType":
+			setFilterByTypes(values);
 			break;
 		default:
 			// do nothing for other fields
