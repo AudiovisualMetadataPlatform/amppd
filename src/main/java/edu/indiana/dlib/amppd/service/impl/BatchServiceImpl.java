@@ -478,19 +478,20 @@ public class BatchServiceImpl implements BatchService {
 					if(matchesExternalId && matchesExternalSource) {
 						found = true;
 						item = i;
-//						if(!i.getName().contentEquals(itemName) && !i.getName().contentEquals(expectedName)) {
-//							log.info("BATCH PROCESSING : External Item id already exists");
-//							if(itemRepository.findByCollectionIdAndName(collection.getId(), itemName).size() == 0){
-//								itemRepository.updateName(itemName,i.getId());
-//							} else if(itemRepository.findByCollectionIdAndName(collection.getId(), expectedName).size() == 0){
-//								itemRepository.updateName(expectedName,i.getId());
-//							} else {
-//								log.error("BATCH PROCESSING : Item with same names " + itemName +" and " + expectedName +" already existed");
-//								return null;
-//							}
-//							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists")
-//
-//						}
+						// TODO: we are updating item name when not match but not updating when
+						if(!i.getName().contentEquals(itemName) && !i.getName().contentEquals(expectedName)) {
+							log.info("BATCH PROCESSING : External Item id already exists");
+							if(itemRepository.findByCollectionIdAndName(collection.getId(), itemName).size() == 0){
+								itemRepository.updateName(itemName,i.getId());
+							} else if(itemRepository.findByCollectionIdAndName(collection.getId(), expectedName).size() == 0){
+								itemRepository.updateName(expectedName,i.getId());
+							} else {
+								log.error("BATCH PROCESSING : Item with same names " + itemName +" and " + expectedName +" already existed");
+								return null;
+							}
+							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists")
+
+						}
 					} else if(i.getName().contentEquals(itemName) && !externalSource.isBlank()) {
 						newItemName = expectedName;
 					}
