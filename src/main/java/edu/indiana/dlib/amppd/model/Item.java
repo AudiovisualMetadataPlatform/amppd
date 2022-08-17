@@ -13,7 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
-import edu.indiana.dlib.amppd.validator.UniqueItem;
+import edu.indiana.dlib.amppd.validator.UniqueName;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -29,7 +29,8 @@ import lombok.ToString;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@UniqueItem(message="Item name must be unique within its parent collection")
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
+@UniqueName(message="item name must be unique within its parent collection")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)

@@ -38,6 +38,7 @@ import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
  * Implementation of BatchService.
@@ -69,7 +70,7 @@ public class BatchServiceImpl implements BatchService {
 	
 	int currRow;
 	
-	@Transactional	
+	@Transactional
 	public BatchValidationResponse processBatch(BatchValidationResponse batchValidation, String username) {
 		List<String> errors = new ArrayList<String>();
 		Batch batch = batchValidation.getBatch();
@@ -109,7 +110,7 @@ public class BatchServiceImpl implements BatchService {
 		// Get an existing item if found in this collection, otherwise create a new one. 
 		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
 		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalId(), batchFile.getExternalSource());
-		
+		if (item == null) throw new Exception("item with same name already existed");
 		collection.addItem(item);
 		log.info("BATCH PROCESSING : The item found was added to the collection");
 		
@@ -466,21 +467,33 @@ public class BatchServiceImpl implements BatchService {
 		Item item = null;
 		Set<Item> items = collection.getItems();
 		boolean found = false;
+		String newItemName = itemName;
+		String delimiter = " - ";
 		if(items!=null) {
 			log.info("BATCH PROCESSING : check for matching item in this collection"); 
 			for(Item i : items) {
 				if(!externalId.isBlank()) {
 					boolean matchesExternalId = i.getExternalId() != null && i.getExternalId().equals(externalId);
 					boolean matchesExternalSource = externalSource.isBlank() || (i.getExternalSource()!=null && externalSource.equals(i.getExternalSource()));
-							
+					String expectedName = itemName + delimiter + externalSource + delimiter + externalId;
 					if(matchesExternalId && matchesExternalSource) {
 						found = true;
 						item = i;
-						if(!i.getName().contentEquals(itemName)) {
-							log.info("BATCH PROCESSING : External Item id already exists"); 
-							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists");
-							itemRepository.updateName(itemName,i.getId());
+						if(!i.getName().contentEquals(itemName) && !i.getName().contentEquals(expectedName)) {
+							log.info("BATCH PROCESSING : External Item id already exists");
+							if(itemRepository.findByCollectionIdAndName(collection.getId(), itemName).size() == 0){
+								itemRepository.updateName(itemName,i.getId());
+							} else if(itemRepository.findByCollectionIdAndName(collection.getId(), expectedName).size() == 0){
+								itemRepository.updateName(expectedName,i.getId());
+							} else {
+								log.error("BATCH PROCESSING : Item with same names " + itemName +" and " + expectedName +" already existed");
+								return null;
+							}
+							//batchValidationResponse.addProcessingError("ERROR: In row "+currRow+" Item name already exists")
+
 						}
+					} else if(i.getName().contentEquals(itemName) && !externalSource.isBlank()) {
+						newItemName = expectedName;
 					}
 				}
 				else if(i.getName().contentEquals(itemName)) {
@@ -496,7 +509,7 @@ public class BatchServiceImpl implements BatchService {
 		// If item doesn't already exists
 		if(item==null && !found) {
 			item = new Item();
-			item.setName(itemName);
+			item.setName(newItemName);
 			if(!externalId.isBlank()) {
 				item.setExternalId(externalId);
 			}
@@ -509,7 +522,13 @@ public class BatchServiceImpl implements BatchService {
 			item.setCreatedDate(new Date());
 			item.setModifiedDate(new Date());
 			item.setCollection(collection);
-			itemRepository.save(item);
+			if(itemRepository.findByCollectionIdAndName(collection.getId(), newItemName).size() == 0){
+				itemRepository.save(item);
+			} else {
+				log.error("BATCH PROCESSING : Item with same name (" + newItemName +") already existed");
+				return null;
+			}
+
 			log.info("BATCH PROCESSING : Item was not found and hence new item was created"); 
 		}
 		

@@ -13,13 +13,13 @@ import java.util.List;
  * Validator for uniqueness of the name, external id and source fields within its parent's scope for Item.
  * @author rimshakhalid
  */
-public class UniqueItemValidator implements ConstraintValidator<UniqueItem, Dataentity> {
+public class UniqueExternalIdValidator implements ConstraintValidator<UniqueExternalId, Dataentity> {
 
     @Autowired
     private DataentityService dataentityService;
 
     @Override
-    public void initialize(UniqueItem uwp) {
+    public void initialize(UniqueExternalId uwp) {
     }
 
     @Override
