@@ -402,4 +402,29 @@ public class DataentityServiceImpl implements DataentityService {
 		return supplementss;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByExternalSrcAndId(Dataentity)
+	 */
+	@Override
+	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity) {
+		if (dataentity == null) {
+			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
+		}
+
+		List<? extends Dataentity> desFound = new ArrayList<Dataentity>();
+		String name = dataentity.getName();
+
+		if (dataentity instanceof Item) {
+			Collection collection = ((Item)dataentity).getCollection();
+			if (collection == null) return desFound;
+			String externalSource = ((Item)dataentity).getExternalSource();
+			String externalId = ((Item)dataentity).getExternalId();
+			desFound = itemRepository.findByCollectionIdAndExternalSourceAndExternalId(collection.getId(),externalSource, externalId);
+		}
+		else {
+			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+		}
+
+		return desFound;
+	}
 }

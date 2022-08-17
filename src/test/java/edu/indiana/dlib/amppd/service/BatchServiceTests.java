@@ -420,6 +420,35 @@ public class BatchServiceTests {
         
         Assert.assertTrue(response.hasErrors());
 	}
+
+	@Ignore
+	@Test
+	public void shouldProcessWithSameName() throws Exception {
+		String fileName = "batch_manifest_with_same_name.csv";
+		ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+		File file = new File(classLoader.getResource(fileName).getFile());
+		String content = new String(Files.readAllBytes(file.toPath()));
+
+		System.out.println(content);
+
+		Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
+
+		BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+
+		if(response.getValidationErrors()!=null) {
+			for(String s : response.getValidationErrors()) {
+				System.out.println("Should be valid fails validation: " + s);
+			}
+		}
+
+		Assert.assertFalse(response.hasErrors());
+
+		response = batchService.processBatch(response, ampUsername);
+
+
+		Assert.assertTrue(!response.hasProcessingErrors());
+
+	}
 	
 	/*
 	 * Helper method to unzip zip file to destination directory
