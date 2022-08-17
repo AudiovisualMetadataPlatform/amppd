@@ -251,6 +251,31 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity)
+	 */
+	@Override
+	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity) {
+		if (dataentity == null) {
+			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
+		}
+
+		List<? extends Dataentity> desFound = new ArrayList<Dataentity>();
+
+		if (dataentity instanceof Item) {
+			Collection collection = ((Item)dataentity).getCollection();
+			if (collection == null) return desFound;
+			String externalSource = ((Item)dataentity).getExternalSource();
+			String externalId = ((Item)dataentity).getExternalId();
+			desFound = itemRepository.findByCollectionIdAndExternalSourceAndExternalId(collection.getId(),externalSource, externalId);
+		}
+		else {
+			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+		}
+
+		return desFound;
+	}
+		
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getParentDataentity(Dataentity)
 	 */
 	@Override
@@ -402,29 +427,4 @@ public class DataentityServiceImpl implements DataentityService {
 		return supplementss;
 	}
 
-	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity)
-	 */
-	@Override
-	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity) {
-		if (dataentity == null) {
-			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
-		}
-
-		List<? extends Dataentity> desFound = new ArrayList<Dataentity>();
-
-		if (dataentity instanceof Item) {
-			Collection collection = ((Item)dataentity).getCollection();
-			if (collection == null) return desFound;
-			String externalSource = ((Item)dataentity).getExternalSource();
-			String externalId = ((Item)dataentity).getExternalId();
-			desFound = itemRepository.findByCollectionIdAndExternalSourceAndExternalId(collection.getId(),externalSource, externalId);
-		}
-		else {
-			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity " + dataentity.getId() + " is of invalid type.");
-		}
-
-		return desFound;
-	}
-	
 }

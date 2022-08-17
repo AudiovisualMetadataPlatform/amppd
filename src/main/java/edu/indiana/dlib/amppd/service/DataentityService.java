@@ -53,6 +53,13 @@ public interface DataentityService {
 	public List<? extends Dataentity> findDuplicateDataentitiesByName(Dataentity dataentity);
 
 	/**
+	 * Find the duplicate dataentities, i.e. those with the same external source, id (if exists) and name as the given dataentity, from DB.
+	 * @param dataentity the given dataentity
+	 * @return the list of duplicate dataentities found
+	 */
+	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity);
+
+	/**
 	 * Get the given dataentity's parent dataentity.
 	 * @param dataentity the given dataentity
 	 * @return the parent dataentity
@@ -101,10 +108,4 @@ public interface DataentityService {
 	 */
 	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format);
 
-	/**
-	 * Find the duplicate dataentities, i.e. those with the same external source, id (if exists) and name as the given dataentity, from DB.
-	 * @param dataentity the given dataentity
-	 * @return the list of duplicate dataentities found
-	 */
-	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity);
 }
