@@ -50,7 +50,7 @@ public interface DataentityService {
 	 * @param dataentity the given dataentity
 	 * @return the list of duplicate dataentities found
 	 */
-	public List<? extends Dataentity> findDuplicateDataentities(Dataentity dataentity);
+	public List<? extends Dataentity> findDuplicateDataentitiesByName(Dataentity dataentity);
 
 	/**
 	 * Get the given dataentity's parent dataentity.
@@ -106,5 +106,5 @@ public interface DataentityService {
 	 * @param dataentity the given dataentity
 	 * @return the list of duplicate dataentities found
 	 */
-	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity);
+	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity);
 }

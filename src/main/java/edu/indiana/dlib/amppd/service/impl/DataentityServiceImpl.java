@@ -193,10 +193,10 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentities(Dataentity)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByName(Dataentity)
 	 */
 	@Override
-	public List<? extends Dataentity> findDuplicateDataentities(Dataentity dataentity) {
+	public List<? extends Dataentity> findDuplicateDataentitiesByName(Dataentity dataentity) {
 		if (dataentity == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
 		}
@@ -403,16 +403,15 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByExternalSrcAndId(Dataentity)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity)
 	 */
 	@Override
-	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity) {
+	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity) {
 		if (dataentity == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
 		}
 
 		List<? extends Dataentity> desFound = new ArrayList<Dataentity>();
-		String name = dataentity.getName();
 
 		if (dataentity instanceof Item) {
 			Collection collection = ((Item)dataentity).getCollection();
@@ -427,4 +426,5 @@ public class DataentityServiceImpl implements DataentityService {
 
 		return desFound;
 	}
+	
 }
