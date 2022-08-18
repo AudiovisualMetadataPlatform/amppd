@@ -6,6 +6,7 @@ import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 
 /**
  * Service for common Dataentitiy operations. 
@@ -13,24 +14,6 @@ import edu.indiana.dlib.amppd.model.Supplement;
  */
 public interface DataentityService {
 
-	/**
-	 * Return all supplement categories handled by AMP defined in application configuration.
-	 * @return the array of allowed supplement categories
-	 */
-	public List<String> getSupplementCategories();
-	
-	/**
-	 * Return all external sources supported by AMP defined in application configuration.
-	 * @return the array of allowed external sources 
-	 */
-	public List<String> getExternalSources();
-	
-	/**
-	 * Return all task managers supported by AMP defined in application configuration.
-	 * @return the array of allowed task managers
-	 */
-	public List<String> getTaskManagers();
-	
 	/**
 	 * Get the URL for the given dataentity.
 	 * @param dataentity the given dataentity
@@ -74,12 +57,20 @@ public interface DataentityService {
 	public void setParentDataentity(Dataentity dataentity, Dataentity parent);	
 
 	/**
+	 * Find the parent dataentity with the given ID for a supplement of the given type.
+	 * @param id ID of the parent dataentity
+	 * @param type type of the supplement
+	 * @return the parent dataentity
+	 */
+	public Dataentity findParentDataEntity(Long id, SupplementType type);
+	
+	/**
 	 * Find the asset with the given ID and type from DB.
 	 * @param id ID of the given asset
 	 * @param type SupplementType of the given asset
 	 * @return the found asset
 	 */
-	public Asset findAsset(Long id, Supplement.SupplementType type);
+	public Asset findAsset(Long id, SupplementType type);
 
 	/**
 	 * Save the given asset to DB.
@@ -87,6 +78,21 @@ public interface DataentityService {
 	 * @return the saved asset
 	 */
 	public Asset saveAsset(Asset asset);
+	
+	/**
+	 * Get the SupplementType of the given supplement.
+	 * @param supplement the given supplement
+	 * @return SupplementType of the given supplement
+	 */
+	public SupplementType getSupplementType(Supplement supplement);
+	
+	/**
+	 * Move the given supplement into one with the given new type if different from the current type;
+	 * @param supplement the supplement to be duplicated
+	 * @param type the supplement type to be duplicated into
+	 * @return the new duplicated supplement of a different type, or the original one if of same type
+	 */
+	public Supplement dupSupplement(Supplement supplement, SupplementType type);	
 	
 	/**
 	 * Get all supplements associated with the given primaryfile at all parent levels, with the given supplement name, category and format.

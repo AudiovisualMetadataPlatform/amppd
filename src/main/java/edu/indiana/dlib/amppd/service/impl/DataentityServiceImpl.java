@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.nimbusds.oauth2.sdk.util.StringUtils;
@@ -43,21 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
 	
-	public static final String SUPPLEMENT_CATEGORIES = "supplementCategories";
-	public static final String EXTERNAL_SOURCES = "externalSources";
-	public static final String TASK_MANAGERS = "taskManagers";
-
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
-	
-	@Value("#{'${amppd.supplementCategories}'.split(',')}")
-	private List<String> supplementCategories;
-	
-	@Value("#{'${amppd.externalSources}'.split(',')}")
-	private List<String> externalSources;
-	
-	@Value("#{'${amppd.taskManagers}'.split(',')}")
-	private List<String> taskManagers;
 	
 	@Autowired
 	private UnitRepository unitRepository;
@@ -88,27 +74,6 @@ public class DataentityServiceImpl implements DataentityService {
 
 	//	@Autowired
 //	private EntityManager entityManager;
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementCategories()
-	 */
-	public List<String> getSupplementCategories() {
-		return supplementCategories;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getExternalSources()
-	 */
-	public List<String> getExternalSources() {
-		return externalSources;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getTaskManagers()
-	 */
-	public List<String> getTaskManagers() {
-		return taskManagers;
-	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getDataentityUrl(Dataentity)
@@ -332,6 +297,26 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findParentDataEntity(Long, String)
+	 */
+	@Override
+	public Dataentity findParentDataEntity(Long id, SupplementType type) {
+		switch (type) {
+		case PFILE:
+			throw new StorageException("Failed to get parent dateentity: the provided type " + type + " is invalid.");
+		case PRIMARYFILE:
+			return primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
+		case ITEM:
+			return itemRepository.findById(id).orElseThrow(() -> new StorageException("Item <" + id + "> does not exist!"));        	
+		case COLLECTION:
+			return collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));        	
+		case UNIT:
+			return unitRepository.findById(id).orElseThrow(() -> new StorageException("Unit <" + id + "> does not exist!"));        	
+		}
+		return null;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.findAsset(Long, SupplementType)
 	 */
 	@Override
@@ -372,6 +357,42 @@ public class DataentityServiceImpl implements DataentityService {
 			return unitSupplementRepository.save((UnitSupplement)asset);
 		}
 		return asset;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementType(Supplement)
+	 */
+	@Override
+	public SupplementType getSupplementType(Supplement supplement) {
+		if (supplement instanceof PrimaryfileSupplement) {
+			return SupplementType.PRIMARYFILE;
+		}
+		else if (supplement instanceof ItemSupplement) {
+			return SupplementType.ITEM;
+		}
+		else if (supplement instanceof CollectionSupplement) {
+			return SupplementType.COLLECTION;
+		}
+		else if (supplement instanceof UnitSupplement) {
+			return SupplementType.UNIT;
+		}
+		return null;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.dupSupplement(Supplement, SupplementType)
+	 */
+	@Override
+	public Supplement dupSupplement(Supplement supplement, SupplementType type) {
+		SupplementType stype = getSupplementType(supplement);
+		
+		// return the original supplement if type doesn't change
+		if (stype == type) {
+			return supplement;
+		}
+		
+		
+		return null;
 	}
 	
 	/**

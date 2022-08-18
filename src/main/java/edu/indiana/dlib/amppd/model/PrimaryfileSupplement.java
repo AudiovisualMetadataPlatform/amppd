@@ -34,4 +34,8 @@ public class PrimaryfileSupplement extends Supplement {
 	@ManyToOne
     private Primaryfile primaryfile;
     
+//	public PrimaryfileSupplement(Supplement supplement) {
+//		
+//	}
+	
 }

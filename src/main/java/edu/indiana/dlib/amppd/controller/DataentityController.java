@@ -22,11 +22,13 @@ import org.springframework.web.multipart.MultipartFile;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
@@ -87,33 +89,6 @@ public class DataentityController {
 	@Autowired
 	private DropboxService dropboxService;
 
-	/**
-	 * Return the requested configuration properties.
-	 * @param properties name of the properties requested; null means all client visible properties.
-	 * @return a map of property name-value pairs
-	 */
-	@GetMapping("/config")
-	public Map<String,List<String>> getConfigProperties(@RequestParam(required = false) List<String> properties) {
-		Map<String,List<String>> map = new HashMap<String,List<String>>();
-		
-		// Currently, client visible config properties include supplementCategories, externalSources and taskManagers;
-		// all other ones requested are ignored.
-		if (properties == null || properties.contains(DataentityServiceImpl.SUPPLEMENT_CATEGORIES)) {
-			log.info("Getting configuration property " + DataentityServiceImpl.SUPPLEMENT_CATEGORIES);
-			map.put(DataentityServiceImpl.SUPPLEMENT_CATEGORIES, dataentityService.getSupplementCategories());
-		}
-		if (properties == null || properties.contains(DataentityServiceImpl.EXTERNAL_SOURCES)) {
-			log.info("Getting configuration property " + DataentityServiceImpl.EXTERNAL_SOURCES);
-			map.put(DataentityServiceImpl.EXTERNAL_SOURCES, dataentityService.getExternalSources());
-		}
-		if (properties == null || properties.contains(DataentityServiceImpl.TASK_MANAGERS)) {
-			log.info("Getting configuration property " + DataentityServiceImpl.TASK_MANAGERS);
-			map.put(DataentityServiceImpl.TASK_MANAGERS, dataentityService.getTaskManagers());
-		}
-		
-		return map;
-	}
-	
 	/**
 	 * Move the given primaryfile to the given parent item.
 	 * @param itemId ID of the given item
@@ -407,7 +382,7 @@ public class DataentityController {
     		return primaryfile;
     	}    	
 
-    	// otherwise, move primaryfile media subdir (if exists) and media/info files to new subdir and update/save its parent item
+    	// otherwise, move primaryfile media subdir (if exists) and media/info files to new subdir and update its parent item and save;
     	// note that moveEntityDir should be done before moveAsset; otherwise the former won't work properly 
     	// as the original parent would have been lost after primaryfile is saved by the latter
     	fileStorageService.moveEntityDir(primaryfile, item);
@@ -417,33 +392,64 @@ public class DataentityController {
         return primaryfile;
     }
 	
+//	/**
+//	 * Move the given unitSupplement to the given parent unit if different from its original parent.
+//	 * @param unitSupplementId ID of the given unitSupplement
+//	 * @param unitId ID of the given parent unit
+//	 * @return the updated unitSupplement
+//	 */
+//	@PostMapping(path = "/unitSupplements/{unitSupplementId}/move")
+//	public UnitSupplement moveUnitSupplement(@PathVariable Long unitSupplementId, @RequestParam Long unitId) {		
+//    	log.info("Moving unitSupplement " + unitSupplementId + " to new unit " + unitId);
+//    	
+//    	// retrieve unitSupplement and unit from DB
+//    	UnitSupplement unitSupplement = unitSupplementRepository.findById(unitSupplementId).orElseThrow(() -> new StorageException("UnitSupplement <" + unitSupplementId + "> does not exist!"));
+//    	Unit unit =	unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit <" + unitId + "> does not exist!"));
+//
+//    	// if parent unit is the same, no action
+//    	if (unitSupplement.getUnit().getId().equals(unit.getId())) {
+//    		log.warn("No need to move unitSupplement " + unitSupplementId + " to the same parent unit " + unitId);
+//    		return unitSupplement;
+//    	}    	
+//
+//    	// otherwise, move unitSupplement media/info files to new subdir and update its parent unit
+//        fileStorageService.moveAsset(unitSupplement, true);
+//
+//    	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new unit " + unitId);
+//        return unitSupplement;
+//    }
+		
 	/**
 	 * Move the given unitSupplement to the given parent unit if different from its original parent.
 	 * @param unitSupplementId ID of the given unitSupplement
-	 * @param unitId ID of the given parent unit
+	 * @param parentId ID of the given parent unit
 	 * @return the updated unitSupplement
 	 */
 	@PostMapping(path = "/unitSupplements/{unitSupplementId}/move")
-	public UnitSupplement moveUnitSupplement(@PathVariable Long unitSupplementId, @RequestParam Long unitId) {		
-    	log.info("Moving unitSupplement " + unitSupplementId + " to new unit " + unitId);
+	public UnitSupplement moveUnitSupplement(@PathVariable Long unitSupplementId, @RequestParam Long parentId, @RequestParam String parentType) {		
+    	log.info("Moving unitSupplement " + unitSupplementId + " to new " + parentType + " " + parentId);
     	
-    	// retrieve unitSupplement and unit from DB
+    	// retrieve unitSupplement and new parent from DB
+		SupplementType type = Supplement.getSupplementType(parentType);
     	UnitSupplement unitSupplement = unitSupplementRepository.findById(unitSupplementId).orElseThrow(() -> new StorageException("UnitSupplement <" + unitSupplementId + "> does not exist!"));
-    	Unit unit =	unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit <" + unitId + "> does not exist!"));
+    	Dataentity parent =	dataentityService.findParentDataEntity(parentId, type);
 
-    	// if parent unit is the same, no action
-    	if (unitSupplement.getUnit().getId().equals(unit.getId())) {
-    		log.warn("No need to move unitSupplement " + unitSupplementId + " to the same parent unit " + unitId);
+    	// if new parent unit is the same, no action
+    	if (type == SupplementType.UNIT && unitSupplement.getUnit().getId().equals(parentId)) {
+    		log.warn("No need to move unitSupplement " + unitSupplementId + " to the same parent unit " + parentId);
     		return unitSupplement;
     	}    	
+    	
+    	// otherwise, duplicate the supplement with the new type if different from current type
+    	Supplement supplement = dataentityService.dupSupplement(unitSupplement, type);
 
     	// otherwise, move unitSupplement media/info files to new subdir and update its parent unit
         fileStorageService.moveAsset(unitSupplement, true);
 
-    	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new unit " + unitId);
+    	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new unit " + parentId);
         return unitSupplement;
     }
-		
+			
 	/**
 	 * Move the given collectionSupplement to the given parent collection if different from its original parent.
 	 * @param collectionSupplementId ID of the given collectionSupplement
