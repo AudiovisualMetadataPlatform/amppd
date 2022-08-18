@@ -51,7 +51,7 @@ public class FileUploadController {
     @PostMapping("/unitSupplements/{id}/upload")
     public UnitSupplement uploadUnitSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
     	log.info("Uploading media file " + file.getName() + " for unitSupplement ID " + id);
-    	return (UnitSupplement)fileStorageService.uploadAsset(id, file, SupplementType.COLLECTION);
+    	return (UnitSupplement)fileStorageService.uploadAsset(id, file, SupplementType.UNIT);
     }
     
 	/**
