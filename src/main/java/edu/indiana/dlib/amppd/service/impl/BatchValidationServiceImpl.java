@@ -217,6 +217,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     		// validate item fields
         	List<String> itemErrors = validateItem( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
         	response.addErrors(itemErrors);
+
+			// validate external id and source
+			List<String> externalSrcIdErrors = validateExternalSrcAndId( batchFile.getExternalSource(), batchFile.getExternalId(), batchFile.getRowNum());
+			response.addErrors(externalSrcIdErrors);
         	
         	// validate primaryfile fields
         	List<String> primaryfileErrors = validatePrimaryfile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
@@ -514,6 +518,18 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	private boolean collectionExists(String collectionName) {
 		List<Collection> collections = collectionRepository.findByName(collectionName);
 		return collections!=null && collections.size()>0;
+	}
+
+	private List<String> validateExternalSrcAndId(String externalSrc, String externalId, int lineNum) {
+		List<String> errors = new ArrayList<String>();
+
+		// checks whether both external id and source exists
+		if (externalId.isBlank() && !externalSrc.isBlank()) {
+			errors.add(String.format("Row: %s: External Id is missing", lineNum));
+		} else if (!externalId.isBlank() && externalSrc.isBlank()) {
+			errors.add(String.format("Row: %s: External Source is missing", lineNum));
+		}
+		return errors;
 	}
 	
 }
