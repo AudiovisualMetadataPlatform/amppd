@@ -29,6 +29,7 @@ HELP.md
 /build/
 /mvnw
 /mvnw.cmd
+*MyController.java
 
 ### application-env.properties shall not be included in VCS as it contains sensitive info
 application-*.properties
