@@ -29,7 +29,8 @@ import lombok.ToString;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"})})
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"}),
+		@UniqueConstraint(name = "UniqueExternalSrcAndIdPerCollection", columnNames = {"collection_id", "externalId", "externalSource"})})
 @UniqueName(message="item name must be unique within its parent collection")
 @Data
 @EqualsAndHashCode(callSuper=true)
