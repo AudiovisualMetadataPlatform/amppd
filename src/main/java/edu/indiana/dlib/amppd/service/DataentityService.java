@@ -87,13 +87,26 @@ public interface DataentityService {
 	public SupplementType getSupplementType(Supplement supplement);
 	
 	/**
-	 * Move the given supplement into one with the given new type if different from the current type;
-	 * @param supplement the supplement to be duplicated
-	 * @param type the supplement type to be duplicated into
-	 * @return the new duplicated supplement of a different type, or the original one if of same type
+	 * Change the parent of the given supplement into the given new parent dataentity; 
+	 * If the new parent is of a different type, the old supplement will be deleted and a new one of the new type will be created.
+	 * Note that this method doesn't perform any DB or file system updates.
+	 * @param supplement the supplement to be moved
+	 * @param parent the new parent of the supplement
+	 * @return the updated supplement after moving 
 	 */
-	public Supplement dupSupplement(Supplement supplement, SupplementType type);	
+	public Supplement changeSupplementParent(Supplement supplement, Dataentity parent);	
 	
+	/**
+	 * Move the given supplement into the given parent dataentity, deleting the old and creating a new supplement if type changes,
+	 * move its asset into the new parent's folder, and save the updated supplement.
+	 * @param supplementId ID of the supplement to be moved
+	 * @param supplementType type of the original supplement
+	 * @param parentId ID of the new parent of the supplement
+	 * @param parentType type of the new parent of the supplement
+	 * @return the updated supplement after moving 
+	 */
+	public Supplement moveSupplement(Long supplementId, SupplementType supplementType, Long parentId, String parentType);	
+
 	/**
 	 * Get all supplements associated with the given primaryfile at all parent levels, with the given supplement name, category and format.
 	 * @param primaryfile the given primaryfile

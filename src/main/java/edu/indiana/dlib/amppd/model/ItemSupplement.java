@@ -34,4 +34,14 @@ public class ItemSupplement extends Supplement {
 	@ManyToOne
     private Item item;
     
+//	/**
+//	 * Construct a new ItemSupplement by duplicating the given supplement but under the given parent item.
+//	 * @param supplement the supplement to duplicate from
+//	 * @param item the parent of this supplement
+//	 */
+//	public ItemSupplement(Supplement supplement, Item item) {
+//		copy(supplement);
+//		setItem(item);
+//	}
+	
 }

@@ -3,10 +3,9 @@ package edu.indiana.dlib.amppd.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -31,6 +30,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,6 +68,9 @@ public class DataentityServiceImpl implements DataentityService {
 
 	@Autowired
 	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	
+	@Autowired
+	private FileStorageService fileStorageService;
 
 	@Autowired
 	private MediaService mediaService;
@@ -249,7 +252,7 @@ public class DataentityServiceImpl implements DataentityService {
 			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity is null.");
 		}
 
-		// only handle non-supplement types allowing parent
+		// only handle entities allowing parent
 		if (dataentity instanceof Collection) {
 			return ((Collection)dataentity).getUnit();
 		}
@@ -258,6 +261,18 @@ public class DataentityServiceImpl implements DataentityService {
 		}
 		else if (dataentity instanceof Primaryfile) {
 			return ((Primaryfile)dataentity).getItem();
+		}
+		else if (dataentity instanceof UnitSupplement) {
+			return ((UnitSupplement)dataentity).getUnit();
+		}		
+		else if (dataentity instanceof CollectionSupplement) {
+			return ((CollectionSupplement)dataentity).getCollection();
+		}		
+		else if (dataentity instanceof ItemSupplement) {
+			return ((ItemSupplement)dataentity).getItem();
+		}		
+		else if (dataentity instanceof PrimaryfileSupplement) {
+			return ((PrimaryfileSupplement)dataentity).getPrimaryfile();
 		}
 		else {
 			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
@@ -276,7 +291,7 @@ public class DataentityServiceImpl implements DataentityService {
 			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent is null.");
 		}
 
-		// only handle non-supplement types allowing parent
+		// only handle entities allowing parent
 		try {
 			if (dataentity instanceof Collection) {
 				((Collection)dataentity).setUnit((Unit)parent);
@@ -286,6 +301,18 @@ public class DataentityServiceImpl implements DataentityService {
 			}
 			else if (dataentity instanceof Primaryfile) {
 				((Primaryfile)dataentity).setItem((Item)parent);
+			}
+			else if (dataentity instanceof UnitSupplement) {
+				((UnitSupplement)dataentity).setUnit((Unit)parent);
+			}		
+			else if (dataentity instanceof CollectionSupplement) {
+				((CollectionSupplement)dataentity).setCollection((Collection)parent);
+			}		
+			else if (dataentity instanceof ItemSupplement) {
+				((ItemSupplement)dataentity).setItem((Item)parent);
+			}		
+			else if (dataentity instanceof PrimaryfileSupplement) {
+				((PrimaryfileSupplement)dataentity).setPrimaryfile((Primaryfile)parent);
 			}
 			else {
 				throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
@@ -380,21 +407,76 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.dupSupplement(Supplement, SupplementType)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.moveSupplement(Supplement, Dataentity)
 	 */
 	@Override
-	public Supplement dupSupplement(Supplement supplement, SupplementType type) {
-		SupplementType stype = getSupplementType(supplement);
-		
-		// return the original supplement if type doesn't change
-		if (stype == type) {
+	public Supplement changeSupplementParent(Supplement supplement, Dataentity parent) {		
+		// if type doesn't change, just update the parent of the original supplement and return 
+		if (getParentDataentity(supplement).getClass().equals(parent.getClass())) {
+			setParentDataentity(supplement, parent);
+			log.debug("Changed supplement " + supplement.getId() + " with new parent " + parent.getId() + " of the same type ");  
 			return supplement;
 		}
 		
+		// otherwise create a supplement of the new type
+		Supplement newsup = null;
+		if (parent instanceof Unit) {
+			newsup = new UnitSupplement();
+		}
+		else if (parent instanceof Collection) {
+			newsup = new CollectionSupplement();
+		}
+		else if (parent instanceof Item) {
+			newsup = new ItemSupplement();
+		}
+		else if (parent instanceof Primaryfile) {
+			newsup = new PrimaryfileSupplement();
+		}
+		else {
+			throw new RuntimeException("Failed to duplicate supplement " + supplement.getId() + " under parent " + parent.getId() + ": invalid parent type.");
+		}
 		
-		return null;
-	}
+		// and duplicate the contents of the supplement under the new parent
+		newsup.copy(supplement);
+		setParentDataentity(supplement, parent);
+		
+		log.debug("Changed supplement " + supplement.getId() + " with new parent " + parent.getId() + " of a different type.");  
+		return newsup;
+	}	
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.moveSupplement(Supplement, Dataentity)
+	 */
+	@Override
+	public Supplement moveSupplement(Long supplementId, SupplementType supplementType, Long parentId, String parentType) {
+    	// retrieve supplement from DB
+    	Supplement supplement = (Supplement)findAsset(supplementId, supplementType);
+		
+    	// if parentType not provided, then it defaults to the same as the current type 
+    	SupplementType newType = StringUtils.isEmpty(parentType) ? supplementType : Supplement.getSupplementType(parentType);
+		if (newType == null) {
+			new RuntimeException("Invalid parent type provided: " + parentType);
+		}
+
+    	// retrieve new parent from DB
+		Dataentity parent =	findParentDataEntity(parentId, newType);
+
+    	// if parent doesn't change, no action
+    	if (supplementType == newType && getParentDataentity(supplement).getId().equals(parent.getId())) {
+    		log.warn("No need to move supplement " + supplementId + " to the same parent " + parentId);
+    		return supplement;
+    	}    	
+    	
+    	// otherwise, change the supplement's parent to the new parent
+    	Supplement newsup = changeSupplementParent(supplement, parent);
+
+    	// and move unitSupplement media/info files to new subdir
+        fileStorageService.moveAsset(supplement, true);
+
+    	log.info("Successfully moved " + supplementType + " supplement " + supplementId + " to new parent " + parentType + " " + parentId);
+        return supplement;
+	}
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfile(Primaryfile, String, String, String)
 	 */
