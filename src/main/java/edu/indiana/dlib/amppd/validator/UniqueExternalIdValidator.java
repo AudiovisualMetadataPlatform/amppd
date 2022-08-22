@@ -27,7 +27,7 @@ public class UniqueExternalIdValidator implements ConstraintValidator<UniqueExte
         List<? extends Dataentity> desFound = null;
         try {
             if(((Item) dataentity).getExternalId() != null && ((Item) dataentity).getExternalSource() != null) desFound = dataentityService.findDuplicateDataentitiesByExternalSrcAndId(dataentity);
-            else desFound = dataentityService.findDuplicateDataentities(dataentity);
+            else desFound = dataentityService.findDuplicateDataentitiesByName(dataentity);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId(), e);
         }

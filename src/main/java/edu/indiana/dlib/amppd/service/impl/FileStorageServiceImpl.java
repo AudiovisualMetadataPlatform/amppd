@@ -288,8 +288,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new StorageException("Failed to move non-existing asset " + asset.getId() + " media info file: " + oldJson + " -> " + newJson);
 		}
 		
-		// otherwise, update asset pathname
+		// otherwise, update asset pathname and reset symlink
 		asset.setPathname(newMedia);
+	
 		
 		// save asset if indicated
 		if (persist) {

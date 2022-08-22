@@ -30,7 +30,7 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 
 		// look for duplicate dataentities sharing the same parent and name as the dataentity
 		try {
-			desFound = dataentityService.findDuplicateDataentities(dataentity);
+			desFound = dataentityService.findDuplicateDataentitiesByName(dataentity);
 		}
 		catch (IllegalArgumentException e) {
 			throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId(), e);

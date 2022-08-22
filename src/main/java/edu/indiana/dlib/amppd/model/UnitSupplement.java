@@ -33,5 +33,5 @@ public class UnitSupplement extends Supplement {
 	@Index
 	@ManyToOne
     private Unit unit;
-    
+		
 }

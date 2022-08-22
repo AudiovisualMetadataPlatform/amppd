@@ -33,5 +33,5 @@ public class ItemSupplement extends Supplement {
 	@Index
 	@ManyToOne
     private Item item;
-    
+	
 }
