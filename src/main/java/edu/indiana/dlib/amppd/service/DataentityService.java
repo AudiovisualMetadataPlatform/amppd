@@ -36,6 +36,14 @@ public interface DataentityService {
 	public void setParentDataentity(Dataentity dataentity, Dataentity parent);	
 	
 	/**
+	 * Find the parent dataentity with the given ID for a supplement of the given type.
+	 * @param id ID of the parent dataentity
+	 * @param type type of the supplement
+	 * @return the parent dataentity
+	 */
+	public Dataentity findParentDataEntity(Long id, SupplementType type);
+	
+	/**
 	 * Find the original dataentity with the same ID as the given dataentity from DB.
 	 * @param dataentity the given dataentity
 	 * @return the dataentity found
@@ -56,14 +64,6 @@ public interface DataentityService {
 	 */
 	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity);
 
-	/**
-	 * Find the parent dataentity with the given ID for a supplement of the given type.
-	 * @param id ID of the parent dataentity
-	 * @param type type of the supplement
-	 * @return the parent dataentity
-	 */
-	public Dataentity findParentDataEntity(Long id, SupplementType type);
-	
 	/**
 	 * Find the asset with the given ID and type from DB.
 	 * @param id ID of the given asset

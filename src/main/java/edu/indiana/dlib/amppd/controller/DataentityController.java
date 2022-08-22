@@ -390,7 +390,7 @@ public class DataentityController {
 			
 	/**
 	 * Move the given unitSupplement to the given parent dataentity if different from its original parent.
-	 * @param unitSupplementId ID of the given unitSupplement
+	 * @param unitSupplementId ID of the unitSupplement to be moved
 	 * @param parentId ID of the given parent dataentity
 	 * @return the updated supplement
 	 */
@@ -400,117 +400,62 @@ public class DataentityController {
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
     	log.info("Moving unitSupplement " + unitSupplementId + " to new " + parentType + " " + parentId);
-    	Supplement supplement = dataentityService.moveSupplement(unitSupplementId, SupplementType.UNIT, parentId, parentType);
-    	
-//    	// retrieve unitSupplement from DB
-//    	UnitSupplement unitSupplement = unitSupplementRepository.findById(unitSupplementId).orElseThrow(() -> new StorageException("UnitSupplement <" + unitSupplementId + "> does not exist!"));
-//		
-//    	// if parentType not provided, then it defaults to the same as the current type 
-//    	SupplementType type = StringUtils.isEmpty(parentType) ? SupplementType.UNIT : Supplement.getSupplementType(parentType);
-//		if (type == null) {
-//			new RuntimeException("Invalid parent type provided: " + parentType);
-//		}
-//
-//    	// retrieve new parent from DB
-//		Dataentity parent =	dataentityService.findParentDataEntity(parentId, type);
-//
-//    	// if new parent is the same unit, no action
-//    	if (parent instanceof Unit && unitSupplement.getUnit().getId().equals(parent.getId())) {
-//    		log.warn("No need to move unitSupplement " + unitSupplementId + " to the same parent unit " + parentId);
-//    		return unitSupplement;
-//    	}    	
-//    	
-//    	// otherwise, move the supplement entity into the new parent
-//    	Supplement supplement = dataentityService.moveSupplement(unitSupplement, parent);
-//
-//    	// and move unitSupplement media/info files to new subdir
-//        fileStorageService.moveAsset(supplement, true);
-
+    	Supplement supplement = dataentityService.moveSupplement(unitSupplementId, SupplementType.UNIT, parentId, parentType);    	
     	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new " + parentType + " "  + parentId);
         return supplement;
     }
 			
 	/**
-	 * Move the given collectionSupplement to the given parent collection if different from its original parent.
-	 * @param collectionSupplementId ID of the given collectionSupplement
-	 * @param collectionId ID of the given parent collection
-	 * @return the updated collectionSupplement
+	 * Move the given collectionSupplement to the given parent dataentity if different from its original parent.
+	 * @param collectionSupplementId ID of the collectionSupplement to be moved
+	 * @param parentId ID of the given parent dataentity
+	 * @return the updated supplement
 	 */
 	@PostMapping(path = "/collectionSupplements/{collectionSupplementId}/move")
-	public CollectionSupplement moveCollectionSupplement(@PathVariable Long collectionSupplementId, @RequestParam Long collectionId) {		
-    	log.info("Moving collectionSupplement " + collectionSupplementId + " to new collection " + collectionId);
-    	
-    	// retrieve collectionSupplement and collection from DB
-    	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(collectionSupplementId).orElseThrow(() -> new StorageException("CollectionSupplement <" + collectionSupplementId + "> does not exist!"));
-    	Collection collection =	collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("Collection <" + collectionId + "> does not exist!"));
-
-    	// if parent collection is the same, no action
-    	if (collectionSupplement.getCollection().getId().equals(collection.getId())) {
-    		log.warn("No need to move collectionSupplement " + collectionSupplementId + " to the same parent collection " + collectionId);
-    		return collectionSupplement;
-    	}    	
-
-    	// otherwise, move collectionSupplement media/info files to new subdir and update its parent collection
-        fileStorageService.moveAsset(collectionSupplement, true);
-
-    	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new collection " + collectionId);
-        return collectionSupplement;
+	public Supplement moveCollectionSupplement(
+			@PathVariable Long collectionSupplementId, 
+			@RequestParam Long parentId, 
+			@RequestParam(required = false) String parentType) {		
+    	log.info("Moving collectionSupplement " + collectionSupplementId + " to new " + parentType + " " + parentId);
+    	Supplement supplement = dataentityService.moveSupplement(collectionSupplementId, SupplementType.UNIT, parentId, parentType);    	
+    	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new " + parentType + " "  + parentId);
+        return supplement;
     }
-		
+					
 	/**
-	 * Move the given itemSupplement to the given parent item if different from its original parent.
-	 * @param itemSupplementId ID of the given itemSupplement
-	 * @param itemId ID of the given parent item
-	 * @return the updated itemSupplement
+	 * Move the given itemSupplement to the given parent dataentity if different from its original parent.
+	 * @param itemSupplementId ID of the itemSupplement to be moved
+	 * @param parentId ID of the given parent dataentity
+	 * @return the updated supplement
 	 */
 	@PostMapping(path = "/itemSupplements/{itemSupplementId}/move")
-	public ItemSupplement moveItemSupplement(@PathVariable Long itemSupplementId, @RequestParam Long itemId) {		
-    	log.info("Moving itemSupplement " + itemSupplementId + " to new item " + itemId);
-    	
-    	// retrieve itemSupplement and item from DB
-    	ItemSupplement itemSupplement = itemSupplementRepository.findById(itemSupplementId).orElseThrow(() -> new StorageException("ItemSupplement <" + itemSupplementId + "> does not exist!"));
-    	Item item =	itemRepository.findById(itemId).orElseThrow(() -> new StorageException("Item <" + itemId + "> does not exist!"));
-
-    	// if parent item is the same, no action
-    	if (itemSupplement.getItem().getId().equals(item.getId())) {
-    		log.warn("No need to move itemSupplement " + itemSupplementId + " to the same parent item " + itemId);
-    		return itemSupplement;
-    	}    	
-
-    	// otherwise, move itemSupplement media/info files to new subdir and update its parent item
-        fileStorageService.moveAsset(itemSupplement, true);
-
-    	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new item " + itemId);
-        return itemSupplement;
+	public Supplement moveItemSupplement(
+			@PathVariable Long itemSupplementId, 
+			@RequestParam Long parentId, 
+			@RequestParam(required = false) String parentType) {		
+    	log.info("Moving itemSupplement " + itemSupplementId + " to new " + parentType + " " + parentId);
+    	Supplement supplement = dataentityService.moveSupplement(itemSupplementId, SupplementType.UNIT, parentId, parentType);    	
+    	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new " + parentType + " "  + parentId);
+        return supplement;
     }
-		
+					
 	/**
-	 * Move the given primaryfileSupplement to the given parent primaryfile if different from its original parent.
-	 * @param primaryfileSupplementId ID of the given primaryfileSupplement
-	 * @param primaryfileId ID of the given parent primaryfile
-	 * @return the updated primaryfileSupplement
+	 * Move the given primaryfileSupplement to the given parent dataentity if different from its original parent.
+	 * @param primaryfileSupplementId ID of the primaryfileSupplement to be moved
+	 * @param parentId ID of the given parent dataentity
+	 * @return the updated supplement
 	 */
 	@PostMapping(path = "/primaryfileSupplements/{primaryfileSupplementId}/move")
-	public PrimaryfileSupplement movePrimaryfileSupplement(@PathVariable Long primaryfileSupplementId, @RequestParam Long primaryfileId) {		
-    	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
-    	
-    	// retrieve primaryfileSupplement and primaryfile from DB
-    	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(primaryfileSupplementId).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + primaryfileSupplementId + "> does not exist!"));
-    	Primaryfile primaryfile =	primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-
-    	// if parent primaryfile is the same, no action
-    	if (primaryfileSupplement.getPrimaryfile().getId().equals(primaryfile.getId())) {
-    		log.warn("No need to move primaryfileSupplement " + primaryfileSupplementId + " to the same parent primaryfile " + primaryfileId);
-    		return primaryfileSupplement;
-    	}    	
-
-    	// otherwise, move primaryfileSupplement media/info files to new subdir and update its parent primaryfile
-        fileStorageService.moveAsset(primaryfileSupplement, true);
-    	
-    	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
-        return primaryfileSupplement;
+	public Supplement movePrimaryfileSupplement(
+			@PathVariable Long primaryfileSupplementId, 
+			@RequestParam Long parentId, 
+			@RequestParam(required = false) String parentType) {		
+    	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new " + parentType + " " + parentId);
+    	Supplement supplement = dataentityService.moveSupplement(primaryfileSupplementId, SupplementType.UNIT, parentId, parentType);    	
+    	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new " + parentType + " "  + parentId);
+        return supplement;
     }
-
+			
 	/**
 	 * Get all supplements associated the primaryfiles at all parent levels, with the given supplement name, category and format.
 	 * @param primaryfileIds IDs of the given primaryfiles

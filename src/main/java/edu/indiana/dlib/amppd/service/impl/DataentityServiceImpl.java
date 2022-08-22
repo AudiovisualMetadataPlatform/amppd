@@ -119,6 +119,106 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 		
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getParentDataentity(Dataentity)
+	 */
+	@Override
+	public Dataentity getParentDataentity(Dataentity dataentity) {		
+		if (dataentity == null) {
+			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity is null.");
+		}
+
+		// only handle entities allowing parent
+		if (dataentity instanceof Collection) {
+			return ((Collection)dataentity).getUnit();
+		}
+		else if (dataentity instanceof Item) {
+			return ((Item)dataentity).getCollection();
+		}
+		else if (dataentity instanceof Primaryfile) {
+			return ((Primaryfile)dataentity).getItem();
+		}
+		else if (dataentity instanceof UnitSupplement) {
+			return ((UnitSupplement)dataentity).getUnit();
+		}		
+		else if (dataentity instanceof CollectionSupplement) {
+			return ((CollectionSupplement)dataentity).getCollection();
+		}		
+		else if (dataentity instanceof ItemSupplement) {
+			return ((ItemSupplement)dataentity).getItem();
+		}		
+		else if (dataentity instanceof PrimaryfileSupplement) {
+			return ((PrimaryfileSupplement)dataentity).getPrimaryfile();
+		}
+		else {
+			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+		}
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.setParentDataentity(Dataentity, Dataentity)
+	 */
+	@Override
+	public void setParentDataentity(Dataentity dataentity, Dataentity parent) {		
+		if (dataentity == null) {
+			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity is null.");
+		}
+		if (parent == null) {
+			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent is null.");
+		}
+
+		// only handle entities allowing parent
+		try {
+			if (dataentity instanceof Collection) {
+				((Collection)dataentity).setUnit((Unit)parent);
+			}
+			else if (dataentity instanceof Item) {
+				((Item)dataentity).setCollection((Collection)parent);
+			}
+			else if (dataentity instanceof Primaryfile) {
+				((Primaryfile)dataentity).setItem((Item)parent);
+			}
+			else if (dataentity instanceof UnitSupplement) {
+				((UnitSupplement)dataentity).setUnit((Unit)parent);
+			}		
+			else if (dataentity instanceof CollectionSupplement) {
+				((CollectionSupplement)dataentity).setCollection((Collection)parent);
+			}		
+			else if (dataentity instanceof ItemSupplement) {
+				((ItemSupplement)dataentity).setItem((Item)parent);
+			}		
+			else if (dataentity instanceof PrimaryfileSupplement) {
+				((PrimaryfileSupplement)dataentity).setPrimaryfile((Primaryfile)parent);
+			}
+			else {
+				throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
+			}
+		}
+		catch(ClassCastException e) {
+			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent " + parent.getId() + " is of invalid type.");			
+		}
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findParentDataEntity(Long, String)
+	 */
+	@Override
+	public Dataentity findParentDataEntity(Long id, SupplementType type) {
+		switch (type) {
+		case PFILE:
+			throw new StorageException("Failed to get parent dateentity: the provided type " + type + " is invalid.");
+		case PRIMARYFILE:
+			return primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
+		case ITEM:
+			return itemRepository.findById(id).orElseThrow(() -> new StorageException("Item <" + id + "> does not exist!"));        	
+		case COLLECTION:
+			return collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));        	
+		case UNIT:
+			return unitRepository.findById(id).orElseThrow(() -> new StorageException("Unit <" + id + "> does not exist!"));        	
+		}
+		return null;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.findOriginalDataentity(Dataentity)
 	 */
 	@Override
@@ -244,106 +344,6 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getParentDataentity(Dataentity)
-	 */
-	@Override
-	public Dataentity getParentDataentity(Dataentity dataentity) {		
-		if (dataentity == null) {
-			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity is null.");
-		}
-
-		// only handle entities allowing parent
-		if (dataentity instanceof Collection) {
-			return ((Collection)dataentity).getUnit();
-		}
-		else if (dataentity instanceof Item) {
-			return ((Item)dataentity).getCollection();
-		}
-		else if (dataentity instanceof Primaryfile) {
-			return ((Primaryfile)dataentity).getItem();
-		}
-		else if (dataentity instanceof UnitSupplement) {
-			return ((UnitSupplement)dataentity).getUnit();
-		}		
-		else if (dataentity instanceof CollectionSupplement) {
-			return ((CollectionSupplement)dataentity).getCollection();
-		}		
-		else if (dataentity instanceof ItemSupplement) {
-			return ((ItemSupplement)dataentity).getItem();
-		}		
-		else if (dataentity instanceof PrimaryfileSupplement) {
-			return ((PrimaryfileSupplement)dataentity).getPrimaryfile();
-		}
-		else {
-			throw new IllegalArgumentException("Failed to get dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
-		}
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.setParentDataentity(Dataentity, Dataentity)
-	 */
-	@Override
-	public void setParentDataentity(Dataentity dataentity, Dataentity parent) {		
-		if (dataentity == null) {
-			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity is null.");
-		}
-		if (parent == null) {
-			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent is null.");
-		}
-
-		// only handle entities allowing parent
-		try {
-			if (dataentity instanceof Collection) {
-				((Collection)dataentity).setUnit((Unit)parent);
-			}
-			else if (dataentity instanceof Item) {
-				((Item)dataentity).setCollection((Collection)parent);
-			}
-			else if (dataentity instanceof Primaryfile) {
-				((Primaryfile)dataentity).setItem((Item)parent);
-			}
-			else if (dataentity instanceof UnitSupplement) {
-				((UnitSupplement)dataentity).setUnit((Unit)parent);
-			}		
-			else if (dataentity instanceof CollectionSupplement) {
-				((CollectionSupplement)dataentity).setCollection((Collection)parent);
-			}		
-			else if (dataentity instanceof ItemSupplement) {
-				((ItemSupplement)dataentity).setItem((Item)parent);
-			}		
-			else if (dataentity instanceof PrimaryfileSupplement) {
-				((PrimaryfileSupplement)dataentity).setPrimaryfile((Primaryfile)parent);
-			}
-			else {
-				throw new IllegalArgumentException("Failed to set dataentity's parent: the provided dataentity " + dataentity.getId() + " is of invalid type.");
-			}
-		}
-		catch(ClassCastException e) {
-			throw new IllegalArgumentException("Failed to set dataentity's parent: the provided parent " + parent.getId() + " is of invalid type.");			
-		}
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.findParentDataEntity(Long, String)
-	 */
-	@Override
-	public Dataentity findParentDataEntity(Long id, SupplementType type) {
-		switch (type) {
-		case PFILE:
-			throw new StorageException("Failed to get parent dateentity: the provided type " + type + " is invalid.");
-		case PRIMARYFILE:
-			return primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));        	
-		case ITEM:
-			return itemRepository.findById(id).orElseThrow(() -> new StorageException("Item <" + id + "> does not exist!"));        	
-		case COLLECTION:
-			return collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));        	
-		case UNIT:
-			return unitRepository.findById(id).orElseThrow(() -> new StorageException("Unit <" + id + "> does not exist!"));        	
-		}
-		return null;
-	}
-	
-	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.findAsset(Long, SupplementType)
 	 */
 	@Override
@@ -414,7 +414,7 @@ public class DataentityServiceImpl implements DataentityService {
 		// if type doesn't change, just update the parent of the original supplement and return 
 		if (getParentDataentity(supplement).getClass().equals(parent.getClass())) {
 			setParentDataentity(supplement, parent);
-			log.debug("Changed supplement " + supplement.getId() + " with new parent " + parent.getId() + " of the same type ");  
+			log.debug("Changed supplement " + supplement.getId() + " with new parent " + parent.getId() + " of the same type.");  
 			return supplement;
 		}
 		
@@ -433,12 +433,12 @@ public class DataentityServiceImpl implements DataentityService {
 			newsup = new PrimaryfileSupplement();
 		}
 		else {
-			throw new RuntimeException("Failed to duplicate supplement " + supplement.getId() + " under parent " + parent.getId() + ": invalid parent type.");
+			throw new RuntimeException("Failed to change supplement " + supplement.getId() + " with new parent " + parent.getId() + ": invalid parent type.");
 		}
 		
 		// and duplicate the contents of the supplement under the new parent
 		newsup.copy(supplement);
-		setParentDataentity(supplement, parent);
+		setParentDataentity(newsup, parent);
 		
 		log.debug("Changed supplement " + supplement.getId() + " with new parent " + parent.getId() + " of a different type.");  
 		return newsup;
@@ -471,10 +471,10 @@ public class DataentityServiceImpl implements DataentityService {
     	Supplement newsup = changeSupplementParent(supplement, parent);
 
     	// and move unitSupplement media/info files to new subdir
-        fileStorageService.moveAsset(supplement, true);
+        fileStorageService.moveAsset(newsup, true);
 
     	log.info("Successfully moved " + supplementType + " supplement " + supplementId + " to new parent " + parentType + " " + parentId);
-        return supplement;
+        return newsup;
 	}
 		
 	/**

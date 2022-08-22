@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import edu.indiana.dlib.amppd.service.ConfigService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
-public class ConfigServiceImpl {
+public class ConfigServiceImpl implements ConfigService {
 
 	public static final String SUPPLEMENT_CATEGORIES = "supplementCategories";
 	public static final String EXTERNAL_SOURCES = "externalSources";
