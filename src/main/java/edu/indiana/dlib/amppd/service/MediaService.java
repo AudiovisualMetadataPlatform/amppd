@@ -83,6 +83,14 @@ public interface MediaService {
 	public String getWorkflowResultOutputSymlinkUrl(Long id);
 	
 	/**
+	 * Reset the symlink of the given asset to null, delete the symlink from the symlink directoy,
+	 * and persist the updated asset if indicated.
+	 * @param the given asset
+	 * @return the deleted symlink.
+	 */
+	public String resetSymlink(Asset asset, boolean persist);
+
+	/**
 	 * Create an obscure symlink for the given asset, if it hasn't been created,
 	 * in the symlink directory where static contents are served by AMPPD-UI Apache server.
 	 * @param the given asset

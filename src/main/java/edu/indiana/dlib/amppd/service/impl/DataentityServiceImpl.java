@@ -2,6 +2,11 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +46,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
+	
+	@Autowired
+	private Validator validator;
 	
 	@Autowired
 	private AmppdPropertyConfig amppdPropertyConfig;
@@ -445,6 +453,25 @@ public class DataentityServiceImpl implements DataentityService {
 	}	
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.deleteSupplement(Supplement)
+	 */
+	@Override
+	public void deleteSupplement(Supplement supplement) {
+		if (supplement instanceof PrimaryfileSupplement) {
+			primaryfileSupplementRepository.delete((PrimaryfileSupplement)supplement);
+		}
+		else if (supplement instanceof ItemSupplement) {
+			itemSupplementRepository.delete((ItemSupplement)supplement);
+		}
+		else if (supplement instanceof CollectionSupplement) {
+			collectionSupplementRepository.delete((CollectionSupplement)supplement);
+		}
+		else if (supplement instanceof UnitSupplement) {
+			unitSupplementRepository.delete((UnitSupplement)supplement);
+		}
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.moveSupplement(Supplement, Dataentity)
 	 */
 	@Override
@@ -470,9 +497,20 @@ public class DataentityServiceImpl implements DataentityService {
     	// otherwise, change the supplement's parent to the new parent
     	Supplement newsup = changeSupplementParent(supplement, parent);
 
-    	// and move unitSupplement media/info files to new subdir
-        fileStorageService.moveAsset(newsup, true);
+    	// and validate supplement uniqueness under new parent before taking further actions
+    	Set<ConstraintViolation<Supplement>> violations = validator.validate(newsup);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	
+    	// if new supplement is valid, move its media/info files to new parent subdir and save updated supplement
+    	newsup = (Supplement)fileStorageService.moveAsset(newsup, true);
 
+    	// if new supplement is newly created, i.e. of a different type, delete the original supplement
+    	if (newsup != supplement) {
+    		deleteSupplement(supplement);
+    	}
+    	
     	log.info("Successfully moved " + supplementType + " supplement " + supplementId + " to new parent " + parentType + " " + parentId);
         return newsup;
 	}
