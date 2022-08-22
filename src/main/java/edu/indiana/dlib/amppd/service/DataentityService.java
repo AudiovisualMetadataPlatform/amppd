@@ -97,6 +97,12 @@ public interface DataentityService {
 	public Supplement changeSupplementParent(Supplement supplement, Dataentity parent);	
 	
 	/**
+	 * Delete the given supplement from DB.
+	 * @param supplement the supplement to be deleted
+	 */
+	public void deleteSupplement(Supplement supplement);
+	
+	/**
 	 * Move the given supplement into the given parent dataentity, deleting the old and creating a new supplement if type changes,
 	 * move its asset into the new parent's folder, and save the updated supplement.
 	 * @param supplementId ID of the supplement to be moved

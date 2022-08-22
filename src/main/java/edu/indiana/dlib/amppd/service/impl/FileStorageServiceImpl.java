@@ -37,6 +37,7 @@ import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -58,6 +59,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Autowired
     private PreprocessService preprocessService;
 		
+	@Autowired
+	private MediaService mediaService;
+
 	@Autowired
 	private DataentityService dataentityService;
 	
@@ -262,7 +266,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadAsset(Asset, boolean)
 	 */
 	@Override
-	public String moveAsset(Asset asset, boolean persist) {
+	public Asset moveAsset(Asset asset, boolean persist) {
 		// get the un-updated media/info file pathnames 
 		String oldmedia = asset.getPathname();
         String oldJson = preprocessService.getMediaInfoJsonPath(oldmedia);        
@@ -273,7 +277,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         
 		// if the media pathname isn't changed, do nothing
 		if (StringUtils.pathEquals(oldmedia, newMedia)) {
-			return newMedia;
+			return asset;
 		}
 		
 		// otherwise move the media/info files
@@ -290,15 +294,15 @@ public class FileStorageServiceImpl implements FileStorageService {
 		
 		// otherwise, update asset pathname and reset symlink
 		asset.setPathname(newMedia);
-	
+		mediaService.resetSymlink(asset, false);
 		
-		// save asset if indicated
+		// save asset if indicated		
 		if (persist) {
-			dataentityService.saveAsset(asset); 
+			asset = dataentityService.saveAsset(asset); 
 		} 
 		
 		log.info("Successfully moved asset " + asset.getId() + " media/info file : " + oldmedia + " -> " + newMedia + ", " + oldJson + " -> " + newJson);	
-        return newMedia;
+        return asset;
 	}
 	
 	/**

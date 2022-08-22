@@ -62,10 +62,11 @@ public abstract class Supplement extends Asset {
 	}	
 	
 	/**
-	 * Copy all fields of the given supplement to this one.
+	 * Copy all fields other than ID and parent of the given supplement to this one.
 	 */
 	public void copy(Supplement supplement) {
-		setId(supplement.getId());
+		// no need to copy ID as it will be ignored if this supplement is of a different type than the given one;
+		// and the copy is only used in such cases.
 		setCreatedBy(supplement.getCreatedBy());
 		setModifiedBy(supplement.getModifiedBy());
 		setCreatedDate(supplement.getCreatedDate());
