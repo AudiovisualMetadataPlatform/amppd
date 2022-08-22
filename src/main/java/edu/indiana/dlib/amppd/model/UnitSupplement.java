@@ -33,15 +33,5 @@ public class UnitSupplement extends Supplement {
 	@Index
 	@ManyToOne
     private Unit unit;
-    
-//	/**
-//	 * Construct a new UnitSupplement by duplicating the given supplement but under the given parent unit.
-//	 * @param supplement the supplement to duplicate from
-//	 * @param unit the parent of this supplement
-//	 */
-//	public UnitSupplement(Supplement supplement, Unit unit) {
-//		copy(supplement);
-//		setUnit(unit);
-//	}
 		
 }

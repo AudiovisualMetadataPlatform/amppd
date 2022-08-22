@@ -22,6 +22,20 @@ public interface DataentityService {
 	public String getDataentityUrl(Dataentity dataentity);
 
 	/**
+	 * Get the given dataentity's parent dataentity.
+	 * @param dataentity the given dataentity
+	 * @return the parent dataentity
+	 */
+	public Dataentity getParentDataentity(Dataentity dataentit);	
+
+	/**
+	 * Set the given dataentity's parent to the given parent dataentity.
+	 * @param dataentity the given dataentity
+	 * @param parent the given parent dataentity
+	 */
+	public void setParentDataentity(Dataentity dataentity, Dataentity parent);	
+	
+	/**
 	 * Find the original dataentity with the same ID as the given dataentity from DB.
 	 * @param dataentity the given dataentity
 	 * @return the dataentity found
@@ -40,21 +54,7 @@ public interface DataentityService {
 	 * @param dataentity the given dataentity
 	 * @return the list of duplicate dataentities found
 	 */
-	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity);
-
-	/**
-	 * Get the given dataentity's parent dataentity.
-	 * @param dataentity the given dataentity
-	 * @return the parent dataentity
-	 */
-	public Dataentity getParentDataentity(Dataentity dataentit);	
-
-	/**
-	 * Set the given dataentity's parent to the given parent dataentity.
-	 * @param dataentity the given dataentity
-	 * @param parent the given parent dataentity
-	 */
-	public void setParentDataentity(Dataentity dataentity, Dataentity parent);	
+	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity);
 
 	/**
 	 * Find the parent dataentity with the given ID for a supplement of the given type.

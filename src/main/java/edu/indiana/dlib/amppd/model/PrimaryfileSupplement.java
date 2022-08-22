@@ -34,14 +34,4 @@ public class PrimaryfileSupplement extends Supplement {
 	@ManyToOne
     private Primaryfile primaryfile;
     
-//	/**
-//	 * Construct a new PrimaryfileSupplement by duplicating the given supplement but under the given parent primaryfile.
-//	 * @param supplement the supplement to duplicate from
-//	 * @param primaryfile the parent of this supplement
-//	 */
-//	public PrimaryfileSupplement(Supplement supplement, Primaryfile primaryfile) {
-//		copy(supplement);
-//		setPrimaryfile(primaryfile);
-//	}
-	
 }

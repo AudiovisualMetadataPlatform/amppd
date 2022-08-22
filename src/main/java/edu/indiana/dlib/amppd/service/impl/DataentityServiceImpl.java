@@ -219,10 +219,10 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDuplicateDataentitiesByExternalSrcAndId(Dataentity)
 	 */
 	@Override
-	public List<? extends Dataentity> findDuplicateDataentitiesByNameByExternalSrcAndId(Dataentity dataentity) {
+	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity) {
 		if (dataentity == null) {
 			throw new IllegalArgumentException("Failed to find dataentity: the provided dataentity is null.");
 		}
@@ -407,7 +407,7 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.moveSupplement(Supplement, Dataentity)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.changeSupplementParent(Supplement, Dataentity)
 	 */
 	@Override
 	public Supplement changeSupplementParent(Supplement supplement, Dataentity parent) {		

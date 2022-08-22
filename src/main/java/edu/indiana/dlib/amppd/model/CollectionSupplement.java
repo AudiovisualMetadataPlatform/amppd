@@ -34,14 +34,4 @@ public class CollectionSupplement extends Supplement {
 	@ManyToOne
     private Collection collection;
 	
-//	/**
-//	 * Construct a new CollectionSupplement by duplicating the given supplement but under the given parent collection.
-//	 * @param supplement the supplement to duplicate from
-//	 * @param collection the parent of this supplement
-//	 */
-//	public CollectionSupplement(Supplement supplement, Collection collection) {
-//		copy(supplement);
-//		setCollection(collection);
-//	}
-	
 }
