@@ -23,7 +23,7 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileSupplementNamePerPrimaryfile", columnNames = {"primaryfile_id", "name"})})
-@UniqueName(message="primaryfileSupplement name must be unique within its parent primaryfile")
+@UniqueName(message="Primaryfile supplement name must be unique within its parent primaryfile")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
