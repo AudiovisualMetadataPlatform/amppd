@@ -508,14 +508,17 @@ public class DataentityServiceImpl implements DataentityService {
           throw new ConstraintViolationException(violations);
         }
     	
-    	// if new supplement is valid, move its media/info files to new parent subdir and save updated supplement
-    	newsup = (Supplement)fileStorageService.moveAsset(newsup, true);
-
-    	// if new supplement is newly created, i.e. of a different type, delete the original supplement
+    	// if valid and newly created, i.e. of a different type, delete the original supplement,
+    	// and save the new supplement, as the ID needs to be populated before moving asset
     	if (newsup != supplement) {
     		deleteSupplement(supplement);
+    		saveAsset(supplement);
     	}
     	
+    	// move its media/info files to new parent subdir and save updated supplement
+    	// note that we need to save it first so that it has
+    	newsup = (Supplement)fileStorageService.moveAsset(newsup, true);
+
     	log.info("Successfully moved " + supplementType + " supplement " + supplementId + " to " + newsup.getId() + " under new parent " + parentType + " " + parentId);
         return newsup;
 	}
