@@ -56,6 +56,9 @@ public class UnitHandler {
 
     	// no need to move media subdir as unit doesn't have parent
     	
+    	/* TODO
+    	 * DropboxServiceImpl.renameSubdir(Unit) might not work well, see its TODO comment.
+    	 */
     	// rename dropbox subdir (if exists) of the unit in case its name is changed
         dropboxService.renameSubdir(unit);        
     }

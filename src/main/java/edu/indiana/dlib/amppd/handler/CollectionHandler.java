@@ -61,11 +61,17 @@ public class CollectionHandler {
         // Below file system operations should be done before the data entity is updated, 
     	// as we need the values stored in the old entity
 
+    	/* TODO
+    	 * fileStorageService.moveEntityDir might not be called, see its TODO comment 
+    	 */
     	// move media subdir (if exists) of the collection in case its parent is changed 
     	fileStorageService.moveEntityDir(collection);
     	
+    	/* TODO
+    	 * DropboxServiceImpl.renameSubdir(Collection) might not work well, see its TODO comment.
+    	 */
         // rename (if previously exists) or create (if previously doesn't exist) the dropbox subdir of the collection
-    	// in case its name is changed, and/or move the subdir if its parent unit changed
+    	// in case its name is changed, and/or move the subdir if its parent unit changed    	
         dropboxService.renameSubdir(collection); 
     }
 

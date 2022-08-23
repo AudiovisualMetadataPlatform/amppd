@@ -33,5 +33,5 @@ public class CollectionSupplement extends Supplement {
 	@Index
 	@ManyToOne
     private Collection collection;
-    
+	
 }
