@@ -460,7 +460,7 @@ public class DataentityController {
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
     	log.info("Moving collectionSupplement " + collectionSupplementId + " to new " + parentType + " " + parentId);
-    	Supplement supplement = dataentityService.moveSupplement(collectionSupplementId, SupplementType.UNIT, parentId, parentType);    	
+    	Supplement supplement = dataentityService.moveSupplement(collectionSupplementId, SupplementType.COLLECTION, parentId, parentType);    	
     	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new " + parentType + " "  + parentId);
         return supplement;
     }
@@ -477,7 +477,7 @@ public class DataentityController {
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
     	log.info("Moving itemSupplement " + itemSupplementId + " to new " + parentType + " " + parentId);
-    	Supplement supplement = dataentityService.moveSupplement(itemSupplementId, SupplementType.UNIT, parentId, parentType);    	
+    	Supplement supplement = dataentityService.moveSupplement(itemSupplementId, SupplementType.ITEM, parentId, parentType);    	
     	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new " + parentType + " "  + parentId);
         return supplement;
     }
@@ -494,7 +494,7 @@ public class DataentityController {
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
     	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new " + parentType + " " + parentId);
-    	Supplement supplement = dataentityService.moveSupplement(primaryfileSupplementId, SupplementType.UNIT, parentId, parentType);    	
+    	Supplement supplement = dataentityService.moveSupplement(primaryfileSupplementId, SupplementType.PRIMARYFILE, parentId, parentType);    	
     	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new " + parentType + " "  + parentId);
         return supplement;
     }
