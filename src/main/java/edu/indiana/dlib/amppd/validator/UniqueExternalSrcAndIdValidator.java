@@ -27,18 +27,20 @@ public class UniqueExternalSrcAndIdValidator implements ConstraintValidator<Uniq
         List<? extends Dataentity> desFound = null;
         if (dataentity instanceof Item) {
             try {
-                if(((Item) dataentity).getExternalId() == null && ((Item) dataentity).getExternalSource() == null) return true;
-                if(((Item) dataentity).getExternalId() == null && ((Item) dataentity).getExternalSource() != null) {
+                String externalId = ((Item) dataentity).getExternalId();
+                String externalSource = ((Item) dataentity).getExternalSource();
+                if((externalId == null || externalId.isBlank()) && (externalSource == null || externalSource.isBlank())) return true;
+                if(externalId == null && externalSource != null)  {
                     context.disableDefaultConstraintViolation();
                     context.buildConstraintViolationWithTemplate("External ID is required with External Source.")
                             .addConstraintViolation();
                     return false;
-                } else if(((Item) dataentity).getExternalId() != null && ((Item) dataentity).getExternalSource() == null) {
+                } else if(externalId != null && externalSource == null) {
                     context.disableDefaultConstraintViolation();
                     context.buildConstraintViolationWithTemplate("External Source is required with External ID.")
                             .addConstraintViolation();
                     return false;
-                } else if(((Item) dataentity).getExternalId() != null && ((Item) dataentity).getExternalSource() != null) desFound = dataentityService.findDuplicateDataentitiesByExternalSrcAndId(dataentity);
+                } else if(externalId != null && externalSource != null) desFound = dataentityService.findDuplicateDataentitiesByExternalSrcAndId(dataentity);
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Exception while validating UniqueName for dataentity " + dataentity.getId(), e);
             }
