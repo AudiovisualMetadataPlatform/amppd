@@ -30,12 +30,12 @@ public class UniqueExternalSrcAndIdValidator implements ConstraintValidator<Uniq
                 String externalId = ((Item) dataentity).getExternalId();
                 String externalSource = ((Item) dataentity).getExternalSource();
                 if((externalId == null || externalId.isBlank()) && (externalSource == null || externalSource.isBlank())) return true;
-                if(externalId == null && externalSource != null)  {
+                if((externalId == null || externalId.isBlank()) && externalSource != null)  {
                     context.disableDefaultConstraintViolation();
                     context.buildConstraintViolationWithTemplate("External ID is required with External Source.")
                             .addConstraintViolation();
                     return false;
-                } else if(externalId != null && externalSource == null) {
+                } else if(externalId != null && (externalSource == null || externalSource.isBlank())) {
                     context.disableDefaultConstraintViolation();
                     context.buildConstraintViolationWithTemplate("External Source is required with External ID.")
                             .addConstraintViolation();

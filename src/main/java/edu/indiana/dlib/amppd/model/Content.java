@@ -2,8 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.jdo.annotations.Index;
 import javax.persistence.MappedSuperclass;
-
-import edu.indiana.dlib.amppd.validator.UniqueExternalSrcAndId;
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import org.hibernate.annotations.Type;
 
@@ -19,7 +17,6 @@ import lombok.ToString;
  */
 @MappedSuperclass
 @Index(members={"externalSource","externalId"}, unique="true")
-@UniqueExternalSrcAndId(message="External Source and ID must be unique within its parent collection")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
