@@ -290,6 +290,13 @@ public class DataentityController {
     	return primaryfileSupplement;
     }	
 	
+	/* TODO
+	 * The moveCollection/Item/Primaryfile methods may not be needed, as the only actions needed are validation
+	 * and moving entityDir/dropbox/asset, all of which can be done in the handlers' update methods.
+	 * The caviar is that we need to resolve the issues in FileStorageService.moveEntityDir and DropboxSerice.renameSubdir,
+	 * which relates to the issue in DateentityService.findOriginalDataentity.
+	 */
+	
 	/**
 	 * Move the given collection to the given parent unit if different from its original parent.
 	 * @param collectionId ID of the given collection
@@ -309,11 +316,21 @@ public class DataentityController {
     		log.warn("No need to move collection " + collectionId + " to the same parent unit " + unitId);
     		return collection;
     	}    	
-
-    	// otherwise, keep the collection's current parent unit with another reference
-    	Unit oldUnit = collection.getUnit();
     	
-    	// move collection dropbox/media subdir (if exist) to new subdir
+    	// otherwise, record old parent unit and update parent to new unit 
+    	Unit oldUnit = collection.getUnit();
+    	collection.setUnit(unit);
+    	
+    	// validate collection uniqueness under new parent before further actions
+    	Set<ConstraintViolation<Collection>> violations = validator.validate(collection);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	
+    	// if valid, reset parent back to the old one to facilitate moving entity dir
+    	collection.setUnit(oldUnit);
+    	
+    	// move collection media subdir (if exist) to new subdir
     	// note that this operation updates collection's parent unit
     	fileStorageService.moveEntityDir(collection, unit);
     	
@@ -350,7 +367,20 @@ public class DataentityController {
     		return item;
     	}    	
 
-    	// otherwise, move item media subdir (if exists) to new subdir and update/save its parent collection
+    	// otherwise, record old parent collection and update parent to new collection 
+    	Collection oldCollection = item.getCollection();
+    	item.setCollection(collection);
+    	
+    	// validate item uniqueness under new parent before further actions
+    	Set<ConstraintViolation<Item>> violations = validator.validate(item);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	
+    	// if valid, reset parent back to the old one to facilitate moving entity dir
+    	item.setCollection(oldCollection);
+    	
+    	// move item media subdir (if exists) to new subdir and update/save its parent collection
     	fileStorageService.moveEntityDir(item, collection);
     	itemRepository.save(item);
 
@@ -378,10 +408,23 @@ public class DataentityController {
     		return primaryfile;
     	}    	
 
-    	// otherwise, move primaryfile media subdir (if exists) and media/info files to new subdir and update its parent item and save;
+    	// otherwise, record old parent item and update parent to new item 
+    	Item oldItem = primaryfile.getItem();
+    	primaryfile.setItem(item);
+    	
+    	// validate primaryfile uniqueness under new parent before further actions
+    	Set<ConstraintViolation<Primaryfile>> violations = validator.validate(primaryfile);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+    	
+    	// if valid, reset parent back to the old one to facilitate moving entity dir
+    	primaryfile.setItem(oldItem);
+
+    	// move primaryfile media subdir (if exists) and media/info files to new subdir and update its parent item and save;
     	// note that moveEntityDir should be done before moveAsset; otherwise the former won't work properly 
     	// as the original parent would have been lost after primaryfile is saved by the latter
-    	fileStorageService.moveEntityDir(primaryfile, item);
+    	fileStorageService.moveEntityDir(primaryfile, oldItem);
         fileStorageService.moveAsset(primaryfile, true);
 
     	log.info("Successfully moved primaryfile " + primaryfileId + " to new item " + itemId);
