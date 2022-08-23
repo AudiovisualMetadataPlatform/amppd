@@ -49,6 +49,9 @@ public class ItemHandler {
         // Below file system operations should be done before the data entity is updated, 
     	// as we need the values stored in the old entity
 
+    	/* TODO
+    	 * fileStorageService.moveEntityDir might not be called, see its TODO comment 
+    	 */
     	// move media subdir (if exists) of the item in case its parent is changed 
     	fileStorageService.moveEntityDir(item);    	
     }

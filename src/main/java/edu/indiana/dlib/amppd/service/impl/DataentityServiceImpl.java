@@ -246,7 +246,8 @@ public class DataentityServiceImpl implements DataentityService {
 		 * This means that once the retrieved object has fields updated, it's impossible to get the original values from DB.
 		 * The only way to get around this is to call entityManager.clear() or session.refresh(object) with customized repositories.
 		 * This method currently doesn't work as expected, thus the callers which rely on it doesn't fully work either
-		 * (for ex, methods called by entity repository handlers to move dropbox/media subdirs). 
+		 * (for ex, methods called by entity repository handlers to rename/move dropbox/media subdirs). 
+		 * The workaround is to add extra APIs in DataentityController for moving dataentities.
 		 */		
 //		entityManager.refresh(dataentity);
 
@@ -459,15 +460,19 @@ public class DataentityServiceImpl implements DataentityService {
 	public void deleteSupplement(Supplement supplement) {
 		if (supplement instanceof PrimaryfileSupplement) {
 			primaryfileSupplementRepository.delete((PrimaryfileSupplement)supplement);
+			log.debug("Deleted PrimaryfileSupplement " + supplement.getId());
 		}
 		else if (supplement instanceof ItemSupplement) {
 			itemSupplementRepository.delete((ItemSupplement)supplement);
+			log.debug("Deleted ItemSupplement " + supplement.getId());
 		}
 		else if (supplement instanceof CollectionSupplement) {
 			collectionSupplementRepository.delete((CollectionSupplement)supplement);
+			log.debug("Deleted CollectionSupplement " + supplement.getId());
 		}
 		else if (supplement instanceof UnitSupplement) {
 			unitSupplementRepository.delete((UnitSupplement)supplement);
+			log.debug("Deleted UnitSupplement " + supplement.getId());
 		}
 	}
 	
@@ -511,7 +516,7 @@ public class DataentityServiceImpl implements DataentityService {
     		deleteSupplement(supplement);
     	}
     	
-    	log.info("Successfully moved " + supplementType + " supplement " + supplementId + " to new parent " + parentType + " " + parentId);
+    	log.info("Successfully moved " + supplementType + " supplement " + supplementId + " to " + newsup.getId() + " under new parent " + parentType + " " + parentId);
         return newsup;
 	}
 		

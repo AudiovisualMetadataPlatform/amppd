@@ -222,14 +222,25 @@ public class FileStorageServiceImpl implements FileStorageService {
 		dataentityService.setParentDataentity(dataentity, parent);
 		String newdir = getDirPathname(dataentity);
 		
-		// otherwise move the subdir
-		Path path = move(olddir, newdir);
-		if (path != null) {
-	        log.info("Successfully moved dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);
-		}
-		else {
-	        log.info("No need to move non-existing dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);			
-		}
+		/* TODO
+		 * Below code is commented out, because if we move entity subdir, all the media files under that subdir hieararchy 
+		 * will have their paths changed; thus, all the corresponding child entities need to have their pathnames updated.
+		 * This would be too much overhead and by all means need to be avoided. Without moving entity subdir, the original
+		 * dataentity media subidr hierarchy won't be enforced, but this wouldn't break the code or functionality, 
+		 * as the saved asset pathnames shall still be valid. Two other optionss for long term solution:
+		 * 1. Enforce the media subdir hierarchy: instead of saving pathname in Asset, always infer asset pathname using 
+		 * the getter to compute the pathname based on the parent hierarchy; meanwhile, moveEntityDir when entity is moved.
+		 * 2. Use a flat media dir structure instead of based on parent hierarchy; this way, there is no entity subdir and
+		 * no need to move asset file when entity is moved; asset pathname can either be inferred from ID or saved with Asset. 
+		 */		
+		// and move the subdir
+//		Path path = move(olddir, newdir);
+//		if (path != null) {
+//	        log.info("Successfully moved dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);
+//		}
+//		else {
+//	        log.info("No need to move non-existing dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);			
+//		}
 
 		return newdir;
 	}
@@ -239,6 +250,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */
 	@Override
 	public String moveEntityDir(Dataentity dataentity) {
+		/* TODO
+		 * This method won't have any effect, see explanation in DataentityServiceImpl.findOriginalDataentity.
+		 * On the other hand, we shouldn't just moveEntityDir anyways due to the reason explained in above moveEntityDir method.
+		 */
+		
 		// get the media subdir pathname for the original and current dataentity
 		// note that pathname will change if dataentity's parent is changed
 		Dataentity oldentity = dataentityService.findOriginalDataentity(dataentity);
