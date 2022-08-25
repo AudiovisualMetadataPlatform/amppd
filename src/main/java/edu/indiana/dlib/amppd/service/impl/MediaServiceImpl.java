@@ -32,6 +32,7 @@ import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
@@ -75,6 +76,9 @@ public class MediaServiceImpl implements MediaService {
 
 	@Autowired
 	private CollectionSupplementRepository collectionSupplementRepository;
+
+	@Autowired
+	private UnitSupplementRepository unitSupplementRepository;
 
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
@@ -140,6 +144,9 @@ public class MediaServiceImpl implements MediaService {
 		
 		// find the supplements by its name and associated parent's ID
 		switch(type) {
+		case UNIT:
+			supplements = unitSupplementRepository.findByUnitIdAndName(primaryfile.getItem().getCollection().getUnit().getId(), name);
+			break;
 		case COLLECTION:
 			supplements = collectionSupplementRepository.findByCollectionIdAndName(primaryfile.getItem().getCollection().getId(), name);
 			break;
@@ -244,6 +251,32 @@ public class MediaServiceImpl implements MediaService {
 	}
 		
 	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.resetSymlink(Asset, boolean)
+	 */
+	@Override
+	public String resetSymlink(Asset asset, boolean persist) {
+		// make sure the asset exists
+		if (asset == null) {
+			throw new RuntimeException("The given asset for resetting symlink is null.");
+		}
+		
+		// delete the symlink if exists
+		String symlink = asset.getSymlink();
+		if (StringUtils.isNotEmpty(symlink)) {
+			delete(symlink);
+		}
+		
+		// reset asset symlink and save it if indicated		
+		asset.setSymlink(null);
+		if (persist) {
+			asset = dataentityService.saveAsset(asset); 
+		} 
+		
+		log.info("Successfully reset symlink " + symlink + " for asset " + asset.getId());
+		return symlink;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.createSymlink(Asset)
 	 */
 	@Override
@@ -265,9 +298,9 @@ public class MediaServiceImpl implements MediaService {
 
 		// if symlink was created and exists, reuse it
 		String symlink = asset.getSymlink();
-		if ( symlink != null && Files.exists(resolve(symlink))) {
+		if (!StringUtils.isEmpty(symlink) && Files.exists(resolve(symlink))) {
 			log.info("Symlink for asset " + asset.getId() + " already exists, will reuse it");
-			return asset.getSymlink();
+			return symlink;
 		}
 		// otherwise, create a new one
 		
@@ -361,8 +394,13 @@ public class MediaServiceImpl implements MediaService {
     public void delete(String symlink) {
     	try {
     		Path path = resolve(symlink);
-    		FileSystemUtils.deleteRecursively(path);
-    		log.info("Successfully deleted directory/file " + symlink);
+    		boolean deleted = FileSystemUtils.deleteRecursively(path);
+    		if (deleted) {
+    			log.debug("Successfully deleted directory/file " + symlink);
+    		}
+    		else {
+    			log.warn("Failed to delete non-ecisting directory/file " + symlink);
+    		}
     	}
     	catch (IOException e) {
     		throw new StorageException("Could not delete file " + symlink, e);
@@ -376,7 +414,7 @@ public class MediaServiceImpl implements MediaService {
     public void cleanup() {
     	try {
     		FileUtils.cleanDirectory(new File(root.toString()));
-    		log.info("Successfully deleted all directories/files under media symlink root.");
+    		log.debug("Successfully deleted all directories/files under media symlink root.");
     	}
     	catch (IOException e) {
     		throw new StorageException("Could not delete all directories/files under media symlink root.");

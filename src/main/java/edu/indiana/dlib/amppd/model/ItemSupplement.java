@@ -22,8 +22,8 @@ import lombok.ToString;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"item_id", "name"})})
-@UniqueName(message="itemSupplement name must be unique within its parent item")
+@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemSupplementNamePerItem", columnNames = {"item_id", "name"})})
+@UniqueName(message="Item supplement name must be unique within its parent item")
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
@@ -33,5 +33,5 @@ public class ItemSupplement extends Supplement {
 	@Index
 	@ManyToOne
     private Item item;
-    
+	
 }

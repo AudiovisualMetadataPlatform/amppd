@@ -38,7 +38,7 @@ public abstract class Supplement extends Asset {
 //	@ManyToMany
 //	private Set<InputBag> bags;
 	
-	/*
+	/**
 	 * Convert the given supplemental file type string to the corresponding SupplementType enum.
 	 */
 	public static SupplementType getSupplementType(String type) {
@@ -60,5 +60,24 @@ public abstract class Supplement extends Asset {
 				return null;
 		}
 	}	
+	
+	/**
+	 * Copy all fields other than ID and parent of the given supplement to this one.
+	 */
+	public void copy(Supplement supplement) {
+		// no need to copy ID as it will be ignored if this supplement is of a different type than the given one;
+		// and the copy is only used in such cases.
+		setCreatedBy(supplement.getCreatedBy());
+		setModifiedBy(supplement.getModifiedBy());
+		setCreatedDate(supplement.getCreatedDate());
+		setModifiedDate(supplement.getModifiedDate());
+		setName(supplement.getName());
+		setDescription(supplement.getDescription());
+		setOriginalFilename(supplement.getOriginalFilename());
+		setPathname(supplement.getPathname());
+		setSymlink(supplement.getSymlink());
+		setMediaInfo(supplement.getMediaInfo());
+		setCategory(supplement.getCategory());
+	}
 	
 }

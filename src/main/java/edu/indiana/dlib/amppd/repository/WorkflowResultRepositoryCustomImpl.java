@@ -265,6 +265,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         List<String> workflows = getFilterValues("workflowName", wrsq, cb);
         List<String> steps = getFilterValues("workflowStep", wrsq, cb);
         List<String> outputs = getFilterValues("outputName", wrsq, cb);
+        List<String> types = getFilterValues("outputType", wrsq, cb);
         
         // search terms
         List<String> searchTerms = unionTerms(collections, items, files);
@@ -280,6 +281,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         filters.setWorkflows(workflows);
         filters.setSteps(steps);
         filters.setOutputs(outputs);
+        filters.setTypes(types);
         filters.setStatuses(statuses);
         filters.setSearchTerms(searchTerms);        
         return filters;        
@@ -380,6 +382,12 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         if(wrsq.getFilterByOutputs().length>0) {
         	Path<String> path = root.get("outputName");
             Predicate predicate = path.in((Object[])wrsq.getFilterByOutputs());
+            predicates.add(predicate);
+        }
+        
+        if(wrsq.getFilterByTypes().length>0) {
+        	Path<String> path = root.get("outputType");
+            Predicate predicate = path.in((Object[])wrsq.getFilterByTypes());
             predicates.add(predicate);
         }
         

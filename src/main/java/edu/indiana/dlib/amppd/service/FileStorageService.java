@@ -65,9 +65,9 @@ public interface FileStorageService {
 	 * Move the media and the info files of the given asset, in case its parent is changed and persist the updated asset if indicated.
 	 * @param asset the given asset
 	 * @param persist if true, save the updated asset to DB; otherwise, do not save yet
-	 * @return the updated pathname of the media file 
+	 * @return the updated asset with the updated pathname of the media file 
 	 */
-	public String moveAsset(Asset asset, boolean persist);
+	public Asset moveAsset(Asset asset, boolean persist);
 		
 	/**
 	 * Delete the media sub-directory (if exists) of the given data entity.

@@ -33,9 +33,11 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,6 +59,9 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Autowired
     private PreprocessService preprocessService;
 		
+	@Autowired
+	private MediaService mediaService;
+
 	@Autowired
 	private DataentityService dataentityService;
 	
@@ -134,7 +139,10 @@ public class FileStorageServiceImpl implements FileStorageService {
 		// directory path for supplement depends on the parent of the supplement, could be in the directory of collection/item/primaryfile
 		String dirname = "";
 
-		if (asset instanceof CollectionSupplement) {
+		if (asset instanceof UnitSupplement) {
+			dirname = getDirPathname(((UnitSupplement)asset).getUnit());
+		}
+		else if (asset instanceof CollectionSupplement) {
 			dirname = getDirPathname(((CollectionSupplement)asset).getCollection());
 		}
 		else if (asset instanceof ItemSupplement) {
@@ -214,14 +222,25 @@ public class FileStorageServiceImpl implements FileStorageService {
 		dataentityService.setParentDataentity(dataentity, parent);
 		String newdir = getDirPathname(dataentity);
 		
-		// otherwise move the subdir
-		Path path = move(olddir, newdir);
-		if (path != null) {
-	        log.info("Successfully moved dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);
-		}
-		else {
-	        log.info("No need to move non-existing dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);			
-		}
+		/* TODO
+		 * Below code is commented out, because if we move entity subdir, all the media files under that subdir hieararchy 
+		 * will have their paths changed; thus, all the corresponding child entities need to have their pathnames updated.
+		 * This would be too much overhead and by all means need to be avoided. Without moving entity subdir, the original
+		 * dataentity media subidr hierarchy won't be enforced, but this wouldn't break the code or functionality, 
+		 * as the saved asset pathnames shall still be valid. Two other optionss for long term solution:
+		 * 1. Enforce the media subdir hierarchy: instead of saving pathname in Asset, always infer asset pathname using 
+		 * the getter to compute the pathname based on the parent hierarchy; meanwhile, moveEntityDir when entity is moved.
+		 * 2. Use a flat media dir structure instead of based on parent hierarchy; this way, there is no entity subdir and
+		 * no need to move asset file when entity is moved; asset pathname can either be inferred from ID or saved with Asset. 
+		 */		
+		// and move the subdir
+//		Path path = move(olddir, newdir);
+//		if (path != null) {
+//	        log.info("Successfully moved dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);
+//		}
+//		else {
+//	        log.info("No need to move non-existing dataentity " + dataentity.getId() + " media sub-directory: " + olddir + " -> " + newdir);			
+//		}
 
 		return newdir;
 	}
@@ -231,6 +250,11 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */
 	@Override
 	public String moveEntityDir(Dataentity dataentity) {
+		/* TODO
+		 * This method won't have any effect, see explanation in DataentityServiceImpl.findOriginalDataentity.
+		 * On the other hand, we shouldn't just moveEntityDir anyways due to the reason explained in above moveEntityDir method.
+		 */
+		
 		// get the media subdir pathname for the original and current dataentity
 		// note that pathname will change if dataentity's parent is changed
 		Dataentity oldentity = dataentityService.findOriginalDataentity(dataentity);
@@ -258,7 +282,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadAsset(Asset, boolean)
 	 */
 	@Override
-	public String moveAsset(Asset asset, boolean persist) {
+	public Asset moveAsset(Asset asset, boolean persist) {
 		// get the un-updated media/info file pathnames 
 		String oldmedia = asset.getPathname();
         String oldJson = preprocessService.getMediaInfoJsonPath(oldmedia);        
@@ -269,7 +293,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         
 		// if the media pathname isn't changed, do nothing
 		if (StringUtils.pathEquals(oldmedia, newMedia)) {
-			return newMedia;
+			return asset;
 		}
 		
 		// otherwise move the media/info files
@@ -284,16 +308,17 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new StorageException("Failed to move non-existing asset " + asset.getId() + " media info file: " + oldJson + " -> " + newJson);
 		}
 		
-		// otherwise, update asset pathname
+		// otherwise, update asset pathname and reset symlink
 		asset.setPathname(newMedia);
+		mediaService.resetSymlink(asset, false);
 		
-		// save asset if indicated
+		// save asset if indicated		
 		if (persist) {
-			dataentityService.saveAsset(asset); 
+			asset = dataentityService.saveAsset(asset); 
 		} 
 		
 		log.info("Successfully moved asset " + asset.getId() + " media/info file : " + oldmedia + " -> " + newMedia + ", " + oldJson + " -> " + newJson);	
-        return newMedia;
+        return asset;
 	}
 	
 	/**

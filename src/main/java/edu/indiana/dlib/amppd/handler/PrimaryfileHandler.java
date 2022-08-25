@@ -60,6 +60,9 @@ public class PrimaryfileHandler {
         // Below file system operations should be done before the data entity is updated, 
     	// as we need the values stored in the old entity
 
+    	/* TODO
+    	 * fileStorageService.moveEntityDir might not be called, see its TODO comment 
+    	 */
     	// move media subdir (if exists) and media/info files of the primaryfile in case its parent is changed
     	// no need to save primaryfile here as it will be saved by RepositoryRestResource after this
     	// plus, if primaryfile is saved by moveAsset before moveEntityDir, 

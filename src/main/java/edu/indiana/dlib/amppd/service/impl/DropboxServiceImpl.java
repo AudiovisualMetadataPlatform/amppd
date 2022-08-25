@@ -8,7 +8,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
@@ -115,6 +114,12 @@ public class DropboxServiceImpl implements DropboxService {
 		Path oldPath = getSubDirPath(oldUnit);
 		Path path = getSubDirPath(unit);
 		
+		/* TODO
+		 * Because dataentityService.findOriginalDataentity doesn't work (see its TODO comment),
+		 * the oldPath will the same as path. If old unit dir doesn't exist, that's OK, new one won't be created if not exist;
+		 * otherwise old dir won't be renamed to the new one, causing its collections dropboxes not found
+		 */
+		
 		// only rename subdir if the name changed and the previous subdir exists 
 		return move(oldPath, path, unit.getId(), false);	
 	}	
@@ -128,6 +133,13 @@ public class DropboxServiceImpl implements DropboxService {
 		Collection oldCol = (Collection)dataentityService.findOriginalDataentity(collection);     
 		Path oldPath = getSubDirPath(oldCol);
 		Path path = getSubDirPath(collection);
+		
+		/* TODO
+		 * Because dataentityService.findOriginalDataentity doesn't work (see its TODO comment),
+		 * the oldPath will the same as path. 
+		 * If old collection dir doesn't exist, that's OK, the new dir will be created if not already exists;
+		 * otherwise old dir won't be renamed to the new one, ending up with both old and new dirs exist.
+		 */
 		
 		// rename/move subdir from oldPath to current path as needed
 		return move(oldPath, path, collection.getId(), true);		

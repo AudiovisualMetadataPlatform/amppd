@@ -17,7 +17,9 @@ public interface ItemRepository extends ContentRepository<Item> {
 	
 	List<Item> findByCollectionUnitNameAndCollectionNameAndName(String collectionUnitName, String collectionName, String name);
 	List<Item> findByCollectionIdAndName(Long collectionId, String name);
-	
+
+	List<Item> findByCollectionIdAndExternalSourceAndExternalId(Long collectionId, String externalSource, String externalId);
+
 	// TODO tried various ways below to achieve case-insensitive keyword match, but none worked
 	//	// Note: ilike is a PostgreSQL extension, not part of standard SQL, so need to use nativeQuery. However, the query still fails with exception.
 	//	@Query(value = "select i from Item i where i.name ilike %:keyword% or i.description ilike %:keyword%", nativeQuery = true)

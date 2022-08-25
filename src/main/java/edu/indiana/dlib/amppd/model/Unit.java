@@ -38,6 +38,12 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<Collection> collections;
 
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
+	@JsonBackReference(value="supplements")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+    private Set<UnitSupplement> supplements;
+	
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 
 //	@OneToMany(mappedBy="unit")
 //	private Set<Workflow> workflows;
