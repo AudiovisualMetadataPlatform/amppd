@@ -37,22 +37,29 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class MgmCategory extends AmpObject {
         
-	// ID of the corresponding tool section, provided in tool config in Galaxy; must be unique
+	// ID of the corresponding tool section, as provided in tool config in Galaxy; must be unique
     @NotBlank
 	@Unique
     private String sectionId;	
 
-    // name of the category, populated from the name of the corresponding Galaxy section; must be unique
+    // name of the category is the same as the name of the corresponding Galaxy section; must be unique
     @NotBlank
 	@Unique
     private String name;	
         
-	// Galaxy section doesn't include description property, so we need to add this on AMP side
+	// Galaxy section doesn't include description/help properties, so we need to add them on AMP side
+    
+    // short description
     @NotBlank
     @Type(type="text")
     private String description; 
     
-	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
+    // long description
+    @NotBlank
+    @Type(type="text")
+    private String help;	
+
+    @OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="mgms")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
