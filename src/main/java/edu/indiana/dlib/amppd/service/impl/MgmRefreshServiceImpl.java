@@ -134,13 +134,20 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		for (MgmCategory category : categories) {
 			String sectionId = category.getSectionId();
 			
+			/* Note:
+			 * Below validation on sectionId existing in Galaxy is currently not enforced, 
+			 * as the Galaxy tool sections are not necessarily consistent with MGM categories in AMP.
+			 */
 			// check that the corresponding section exists in Galaxy and report error if not
 			String sectionName = sectionMap.get(sectionId);
 			if (sectionName == null) {
-				throw new RuntimeException("Failed to refresh MgmCategory table: Invalid category with non-existing section ID in CSV: " + category);
+				log.warn("Did not overwrite category name with section name: section ID from csv doesn't exist in Galaxy.");
+//				throw new RuntimeException("Failed to refresh MgmCategory table: Invalid category with non-existing section ID in CSV: " + category);
 			}
-			// otherwise populate category name from the section name
-			category.setName(sectionName);
+			else {
+				// otherwise overwrite category name with the section name
+				category.setName(sectionName);
+			}
 			
 			// note: we can't just save all categories directly, as that would create new records in the table;
 			// instead, we need to find each existing record if any based on ID and update it
@@ -200,6 +207,10 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 			// otherwise populate MGM name from the tool name
 			mgm.setName(tool.getName());
 			
+			/* Note:
+			 * SectionId existing in Galaxy is not enforced; however, 
+			 * it still needs to be consistent with what's used as the human-readable ID of an MGM category in the csv/table.
+			 */
 			// check that the tool's sectionId is valid for an existing category and report error if not
 			String sectionId = tool.getSectionId();
 			MgmCategory category = mgmCategoryRepository.findFirstBySectionId(sectionId);
