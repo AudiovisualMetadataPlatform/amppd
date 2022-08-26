@@ -11,7 +11,7 @@ import edu.indiana.dlib.amppd.model.MgmCategory;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {MgmCategory.class}) 
-public interface MgmCategoryDetail extends MgmMetaBrief, MgmMetaDetail {
+public interface MgmCategoryDetail extends MgmCategoryBrief, MgmMetaDetail {
 
 	public Set<MgmScoringToolBrief> getMsts();
 	public Set<MgmToolBrief> getMgms();
