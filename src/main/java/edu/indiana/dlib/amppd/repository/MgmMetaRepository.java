@@ -9,6 +9,9 @@ import edu.indiana.dlib.amppd.model.MgmMeta;
 @NoRepositoryBean
 public interface MgmMetaRepository<S extends MgmMeta> extends AmpObjectRepository<S>  {
 
+	List<S> findByName(String name);
+	List<S> findByDescription(String description); 
+
 	List<S> findByNameContainingIgnoreCase(String keyword);
 	List<S> findByDescriptionContainingIgnoreCase(String keyword); 
 	List<S> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String keywordName, String keywordDescription);
