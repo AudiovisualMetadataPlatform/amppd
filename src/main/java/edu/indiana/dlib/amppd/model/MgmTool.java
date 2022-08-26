@@ -41,7 +41,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class MgmTool extends AmpObject {
+public class MgmTool extends MgmMeta {
 
     // populated from the ID of the corresponding MGM adapter in Galaxy; must be unique
     @NotBlank
@@ -49,13 +49,13 @@ public class MgmTool extends AmpObject {
     private String toolId;	
     
     // populated from the name of the corresponding MGM adapter in Galaxy; must be unique within its parent category
-    @NotBlank
-    private String name;	
+//    @NotBlank
+//    private String name;	
 
     // populated from the description of the corresponding MGM adapter in Galaxy
-    @NotBlank
-    @Type(type="text")
-    private String description;	
+//    @NotBlank
+//    @Type(type="text")
+//    private String description;	
 
 	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);
 	// since Galaxy API response does not include the help text from the MGM config, we need to store help info on AMP side 
