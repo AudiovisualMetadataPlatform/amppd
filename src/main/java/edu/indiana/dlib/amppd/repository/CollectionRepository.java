@@ -8,7 +8,6 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.projection.CollectionBrief;
 
 
-//@RepositoryRestResource(collectionResourceRel = "collections", path = "collections")
 @RepositoryRestResource(excerptProjection = CollectionBrief.class)
 public interface CollectionRepository extends ContentRepository<Collection> {
 	

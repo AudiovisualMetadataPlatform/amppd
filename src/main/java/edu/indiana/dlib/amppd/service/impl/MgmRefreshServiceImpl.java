@@ -200,7 +200,7 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 			}
 			// otherwise populate MGM name from the tool name and description
 			mgm.setName(tool.getName());
-			mgm.setName(tool.getDescription());
+			mgm.setDescription(tool.getDescription());
 			
 			/* Note:
 			 * SectionId existing in Galaxy is not enforced, so it's provided in the CSV instead of retrieved from Galaxy tool;
