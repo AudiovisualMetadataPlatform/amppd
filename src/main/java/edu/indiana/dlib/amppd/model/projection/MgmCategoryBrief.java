@@ -16,6 +16,6 @@ public interface MgmCategoryBrief extends MgmMetaBrief {
 	public String getHelp();
 
 	@Value("#{target.msts.size}")
-	public String getMstCount();
+	public String getMstsCount();
 	
 }
