@@ -12,6 +12,9 @@ import edu.indiana.dlib.amppd.model.projection.MgmScoringToolBrief;
 @RepositoryRestResource(excerptProjection = MgmScoringToolBrief.class)
 public interface MgmScoringToolRepository extends MgmMetaRepository<MgmScoringTool> {
 	
+	// count the MSTs within the given category
+	int countByCategoryId(Long categoryId);
+	
 	// find all scoring tools within the given category
 	List<MgmScoringTool> findByCategoryId(Long categoryId);
 
