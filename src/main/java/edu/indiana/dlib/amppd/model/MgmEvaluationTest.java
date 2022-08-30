@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.model;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -39,7 +40,9 @@ import lombok.ToString;
 		@Index(columnList = "mst_id"),
 		@Index(columnList = "supplement_id"),
 		@Index(columnList = "workflow_result_id"),
-		@Index(columnList = "status")
+		@Index(columnList = "status"),
+		@Index(columnList = "submitter"),
+		@Index(columnList = "dateSubmitted")
 })
 @Data
 public class MgmEvaluationTest {
@@ -59,25 +62,11 @@ public class MgmEvaluationTest {
     private Long id;
            
     // JSON representation of the MET parameters map as <name, value> pairs 
+    // could be null if the test doesn't require parameters
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     private String parameters; 
 
-    // status of the test: running, success or failure with error code
-	@NotNull
-	@Enumerated(EnumType.STRING)
-    private TestStatus status = TestStatus.RUNNING; 
-    
- 	// path of the output JSON score file, relative to the score root directory
-    private String scorePath;   
-
-    // JSON representation of the output scores
-    // Note: The scores can also be stored in formats other than JSON, (ex. CSV or binary array of float numbers), 
-    // depending on the need of visualization tools
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
-    private String scores;   
-    
     // MGM scoring tool used by this test
 	@NotNull
 	@ManyToOne
@@ -93,10 +82,34 @@ public class MgmEvaluationTest {
 	@ManyToOne
     private WorkflowResult workflowResult; 
 
+    // status of the test: running, success or failure with error code
+	@NotNull
+	@Enumerated(EnumType.STRING)
+    private TestStatus status = TestStatus.RUNNING; 
+    
+ 	// path of the output JSON score file, relative to the score root directory
+	// could be null if the test failed
+    private String scorePath;   
+
+    // JSON representation of the output scores, could be null if the test failed
+    // Note: The scores can also be stored in formats other than JSON, (ex. CSV or binary array of float numbers), 
+    // depending on the need of visualization tools
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "jsonb")
+    private String scores;   
+    
+    // username of the AMP user who submitted the test
+	@NotNull
+	private String submitter;
+	
+	// timestamp when the test is submitted
+	@NotNull
+	private Date dateSubmitted;
+    
 	// <name, value> map of the parameters of the MET parsed from the parameters JSON
 	@Transient
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private Map<String, Object> parametersMap; 	
-	
+
 }
