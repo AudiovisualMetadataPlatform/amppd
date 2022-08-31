@@ -18,11 +18,11 @@ import time
 import io
 import zipfile
 import xml.etree.ElementTree as ET
+from amp.package import *
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--debug', default=False, action='store_true', help="Turn on debugging")
-    parser.add_argument('--version', default=None, help="Package Version")  
     parser.add_argument('--package', default=False, action='store_true', help="build a package instead of installing")
     parser.add_argument('--clean', default=False, action='store_true', help="Clean previous build & dependencies")
     parser.add_argument('destdir', help="Output directory for package or webserver path root", nargs='?')
@@ -38,11 +38,6 @@ def main():
         destdir = Path(args.destdir).resolve()
     else:
         destdir = None
-
-    if args.version is None:
-        # if the version isn't set on the command line, we can find it in the POM file
-        root = ET.parse("pom.xml").getroot()
-        args.version = root.find('{http://maven.apache.org/POM/4.0.0}version').text
 
     if 'JAVA_HOME' not in os.environ:
         logging.error("Please set the JAVA_HOME to a JDK11 Path (this won't build on JDK17)")
@@ -67,7 +62,28 @@ def main():
         exit(0)
 
     # OK so the .war file is in the target directory.
-    logging.info("Building package")
+    # find the version:
+    root = ET.parse("pom.xml").getroot()
+    version = root.find('{http://maven.apache.org/POM/4.0.0}version').text
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        shutil.copy(warfile, tmpdir + "/rest.war")
+
+
+        pfile = create_package(Path(args.destdir), Path(tmpdir),
+                            metadata={'name': 'amp_rest',
+                                        'version': version,
+                                        'install_path': 'tomcat/webapps'
+                                        },
+                            hooks={'post': 'amp_hook_post.py',
+                                    'config': 'amp_hook_config.py'},
+                            defaults='amp_config.default',
+                            depends_on='tomcat')
+                                
+        logging.info(f"New package is in {pfile}")
+
+        exit(0)
+
 
     buildtime = datetime.now().strftime("%Y%m%d_%H%M%S")
     basedir = f"amp_rest-{args.version}"
