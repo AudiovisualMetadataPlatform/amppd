@@ -16,7 +16,7 @@ def main():
     setup_logging(None, args.debug)
 
     # manually deploy the servlet if it is the UI or REST
-    amp_root = Path(os.environ('AMP_ROOT'))
+    amp_root = Path(os.environ['AMP_ROOT'])
     logging.info("Deploying war file")
     warfile = amp_root / 'tomcat/webapps/rest.war'
     deployroot = amp_root / 'tomcat/webapps/rest'
