@@ -29,6 +29,16 @@ def main():
     # set amp_root
     amp_root = Path(os.environ['AMP_ROOT'])
 
+    # These two things used to get carried over when the config was running
+    # from within the amp_control.py script.  Need to recompute these...
+    #"galaxy.port": (['amp', 'galaxy_port'], None),  # set during galaxy config generation
+    #"galaxy.userId": (['galaxy', "user_id"], None), # set during galaxy config generation
+    if 'galaxy_port' not in config['amp']:
+        config['amp']['galaxy_port'] = int(config['amp']['port']) + 2
+    if 'user_id' not in config['galaxy']:
+        pass
+
+
 
     """Create the configuration file for the AMP REST service"""
     # make sure the configuration file is specified in the tomcat startup env stuff:

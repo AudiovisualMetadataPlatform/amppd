@@ -76,9 +76,10 @@ def main():
                                         'install_path': 'tomcat/webapps'
                                         },
                             hooks={'post': 'amp_hook_post.py',
-                                    'config': 'amp_hook_config.py'},
+                                   'config': 'amp_hook_config.py',
+                                   'start': 'amp_hook_start.py'},
                             defaults='amp_config.default',
-                            depends_on='tomcat')
+                            depends_on=['tomcat', 'galaxy'])
                                 
         logging.info(f"New package is in {pfile}")
 
