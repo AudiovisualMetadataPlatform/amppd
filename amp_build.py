@@ -68,8 +68,6 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         shutil.copy(warfile, tmpdir + "/rest.war")
-
-
         pfile = create_package(Path(args.destdir), Path(tmpdir),
                             metadata={'name': 'amp_rest',
                                         'version': version,
