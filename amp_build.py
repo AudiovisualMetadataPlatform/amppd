@@ -77,7 +77,7 @@ def main():
                                    'config': 'amp_hook_config.py',
                                    'start': 'amp_hook_start.py'},
                             defaults='amp_config.default',
-                            depends_on=['tomcat', 'galaxy'])
+                            depends_on=['tomcat', 'galaxy', 'mediaprobe'])
                                 
         logging.info(f"New package is in {pfile}")
 
