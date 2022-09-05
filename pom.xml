@@ -227,6 +227,12 @@
 			<artifactId>galaxy-bootstrap</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.junit.vintage</groupId>-->
+<!--			<artifactId>junit-vintage-engine</artifactId>-->
+<!--			<version>5.9.0</version>-->
+<!--			<scope>test</scope>-->
+<!--		</dependency>-->
 	</dependencies>
 
 	<build>
