@@ -9,14 +9,9 @@ import tempfile
 from pathlib import Path
 import shutil
 import sys
-import yaml
-from datetime import datetime
 import os
 import subprocess
-import tarfile
-import time
-import io
-import zipfile
+
 import xml.etree.ElementTree as ET
 from amp.package import *
 
@@ -33,11 +28,6 @@ def main():
     if args.package and not args.destdir:
         logging.error("You must supply a destdir when building a package")
         exit(1)
-
-    if args.destdir is not None:
-        destdir = Path(args.destdir).resolve()
-    else:
-        destdir = None
 
     if 'JAVA_HOME' not in os.environ:
         logging.error("Please set the JAVA_HOME to a JDK11 Path (this won't build on JDK17)")
@@ -68,58 +58,17 @@ def main():
 
     with tempfile.TemporaryDirectory() as tmpdir:
         shutil.copy(warfile, tmpdir + "/rest.war")
-        pfile = create_package(Path(args.destdir), Path(tmpdir),
-                            metadata={'name': 'amp_rest',
-                                        'version': version,
-                                        'install_path': 'tomcat/webapps'
-                                        },
-                            hooks={'post': 'amp_hook_post.py',
-                                   'config': 'amp_hook_config.py',
-                                   'start': 'amp_hook_start.py'},
-                            defaults='amp_config.default',
-                            depends_on=['tomcat', 'galaxy', 'mediaprobe'])
+        pfile = create_package("amp_rest", version, "tomcat/webapps",
+                               Path(args.destdir), Path(tmpdir),
+                               hooks={'post': 'amp_hook_post.py',
+                                      'config': 'amp_hook_config.py',
+                                      'start': 'amp_hook_start.py'},
+                               user_defaults='amp_config.user_defaults',
+                               system_defaults='amp_config.system_defaults',
+                               depends_on=['tomcat', 'galaxy', 'mediaprobe'])
                                 
         logging.info(f"New package is in {pfile}")
 
-        exit(0)
-
-
-    buildtime = datetime.now().strftime("%Y%m%d_%H%M%S")
-    basedir = f"amp_rest-{args.version}"
-    pkgfile = Path(destdir, f"{basedir}.tar")
-    with tarfile.open(pkgfile, "w") as tfile:
-        # create base directory
-        base_info = tarfile.TarInfo(name=basedir)
-        base_info.mtime = int(time.time())
-        base_info.type = tarfile.DIRTYPE
-        base_info.mode = 0o755
-        tfile.addfile(base_info, None)
-        
-        
-        # write metadata file
-        metafile = tarfile.TarInfo(name=f"{basedir}/amp_package.yaml")
-        metafile_data = yaml.safe_dump({
-            'name': 'amp_rest',
-            'version': args.version,
-            'build_date': buildtime,
-            'install_path': 'tomcat/webapps'
-        }).encode('utf-8')
-        metafile.size = len(metafile_data)
-        metafile.mtime = int(time.time())
-        metafile.mode = 0o644
-        tfile.addfile(metafile, io.BytesIO(metafile_data))
-
-        # create the data directory
-        data_info = tarfile.TarInfo(name=f'{basedir}/data')
-        data_info.mtime = int(time.time())
-        data_info.type = tarfile.DIRTYPE
-        data_info.mode = 0o755
-        tfile.addfile(data_info, None)
-
-        logging.debug("Adding ROOT.war to tarball")
-        tfile.add(warfile, f"{basedir}/data/rest.war")        
-        logging.info(f"Build complete.  Package is in: {pkgfile}")
-    
 
 if __name__ == "__main__":
     main()

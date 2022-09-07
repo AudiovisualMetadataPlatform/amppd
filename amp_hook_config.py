@@ -10,8 +10,6 @@ import argparse
 import logging
 from pathlib import Path
 import os
-import yaml
-import subprocess
 from amp.config import load_amp_config
 from amp.logging import setup_logging
 
