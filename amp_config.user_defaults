@@ -16,6 +16,4 @@ rest:
     avalon_url: https://avalon.example.edu
     avalon_token: some-really-long-hex-string
 
-    # secrets
-    encryption_secret: encryption-secret-text
-    jwt_secret: jwt-secret-text
+

@@ -12,6 +12,8 @@ from pathlib import Path
 import os
 from amp.config import load_amp_config
 from amp.logging import setup_logging
+import random
+import yaml
 
 def main():
     parser = argparse.ArgumentParser()
@@ -36,7 +38,19 @@ def main():
     if 'user_id' not in config['galaxy']:
         pass
 
+    # If the encryption_secret or the jwt_secret isn't set, set it to a sufficiently
+    # random value and then reload the configuration.
+    for sec in ('encryption_secret', 'jwt_secret'):
+        if config['rest'].get(sec, None) in (None, "CHANGE ME"):
+            logging.info(f"Generating a new {sec}")
+            secret = "".join(random.choices("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", k=16))
+            rdata = {'rest': {sec: secret}}
+            with open(amp_root / f"data/package_config/rest__{sec}.yaml", "w") as x:
+                yaml.safe_dump(rdata, x)
+            config = load_amp_config()
 
+    # inject the amp.data_root value into the config since it is now passed via AMP_DATA_ROOT
+    config['amp']['data_root'] = os.environ['AMP_DATA_ROOT']
 
     """Create the configuration file for the AMP REST service"""
     # make sure the configuration file is specified in the tomcat startup env stuff:
@@ -57,6 +71,9 @@ def main():
                         o.write(l)
                         o.write('\n')
                 o.write(f'JAVA_OPTS="$JAVA_OPTS -Dspring.config.location={amp_root / "data/config/application.properties"!s}"\n')
+
+
+
 
     # create the configuration file, based on config data...
     with open(amp_root / "data/config/application.properties", "w") as f:

@@ -7,6 +7,10 @@ rest:
     # mediaprobe location (relative to amp:data_root)
     mediaprobe_dir: MediaProbe
 
+    # secrets
+    encryption_secret: CHANGE ME
+    jwt_secret: CHANGE ME
+
     # These properties are to populate the "boilerplate" bits of
     # application properties.  You shouldn't need to change any of these...
     properties:
