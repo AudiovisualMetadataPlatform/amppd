@@ -18,6 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.service.impl.ConfigServiceImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -36,8 +37,9 @@ import lombok.ToString;
 		@Index(columnList = "toolId", unique = true),
 		@Index(columnList = "name"),
 		@Index(columnList = "workflowResultType"),
+		@Index(columnList = "groundtruthSubcategory"),
 		@Index(columnList = "groundtruthFormat"),
-		@Index(columnList = "workflowResultType, groundtruthFormat"),
+		@Index(columnList = "workflowResultType, groundtruthSubcategory, groundtruthFormat"),
 		@Index(columnList = "category_id"),
 		@Index(columnList = "category_id, name", unique = true)
 })
@@ -78,11 +80,15 @@ public class MgmScoringTool extends MgmMeta {
     @NotBlank
     private String workflowResultType; 
     
+    // subcategory of the groundtruth supplement used by the MST
+    @NotBlank
+    private String groundtruthSubcategory; 
+    
     // format (extensions) of the groundtruth file used by the MST
     @NotBlank
     private String groundtruthFormat; 
-    
-	// static info of the parameters
+
+    // static info of the parameters
 	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="parameters")
 	@EqualsAndHashCode.Exclude
@@ -98,4 +104,11 @@ public class MgmScoringTool extends MgmMeta {
 	@Transient
 	private String sectionId;		
 
+	/**
+	 * Get the concatenated groundtruth category in the form of Groundtruth-subcategory
+	 */
+	public String getGroundtruthCategory() {
+		return ConfigServiceImpl.getGroundtruthCategory(groundtruthSubcategory);
+	}
+	
 }

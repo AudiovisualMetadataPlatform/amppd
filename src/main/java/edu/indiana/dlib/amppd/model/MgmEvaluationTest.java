@@ -38,7 +38,7 @@ import lombok.ToString;
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(indexes = {
 		@Index(columnList = "mst_id"),
-		@Index(columnList = "supplement_id"),
+		@Index(columnList = "groundtruth_supplement_id"),
 		@Index(columnList = "workflow_result_id"),
 		@Index(columnList = "status"),
 		@Index(columnList = "submitter"),
@@ -75,7 +75,7 @@ public class MgmEvaluationTest {
 	// primaryfileSupplement used by this test as the groundtruth 
 	@NotNull
 	@ManyToOne
-    private PrimaryfileSupplement supplement;	
+    private PrimaryfileSupplement groundtruthSupplement;	
     
 	// workflow result evaluated by this test
 	@NotNull
