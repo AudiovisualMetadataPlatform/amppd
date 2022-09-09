@@ -33,17 +33,17 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class MgmScoringParameter extends AmpObject {
+public class MgmScoringParameter extends MgmMeta {
 	
 	public enum ParamType {TEXT, SINGLE_SELECT, MULTI_SELECT, INTEGER, FLOAT};
        
-    // must be unique within its parent mst
-    @NotBlank
-    private String name; 
+    // name of parameter must be unique within its parent mst
+//    @NotBlank
+//    private String name; 
         
-    @NotBlank
-    @Type(type="text")
-    private String description;
+//    @NotBlank
+//    @Type(type="text")
+//    private String description;
 	
     // value type
     @NotBlank

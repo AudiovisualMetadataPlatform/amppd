@@ -11,7 +11,6 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 
 
-//@RepositoryRestResource(collectionResourceRel = "items", path = "items")
 @RepositoryRestResource(excerptProjection = ItemBrief.class)
 public interface ItemRepository extends ContentRepository<Item> {
 	

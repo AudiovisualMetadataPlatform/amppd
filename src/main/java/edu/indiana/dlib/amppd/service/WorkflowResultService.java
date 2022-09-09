@@ -12,7 +12,6 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.web.WorkflowResultFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
@@ -103,6 +102,13 @@ public interface WorkflowResultService {
 	 * @return WorkflowResult updated
 	 */
 	public WorkflowResult updateWorkflowResult(Long workflowResultId, String outputLabel, Boolean isFinal);
+
+	/**
+	 * Delete the specified WorkflowResult from AMP table and Galaxy history.
+	 * @param workflowResultId id of the specified WorkflowResult
+	 * @return WorkflowResult deleted
+	 */
+	public WorkflowResult deleteWorkflowResult(Long workflowResultId);
 
 	/**
 	 * Set and export workflow result csv file as part of reponse

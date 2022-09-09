@@ -512,7 +512,7 @@ public class DataentityServiceImpl implements DataentityService {
     	// and save the new supplement, as the ID needs to be populated before moving asset
     	if (newsup != supplement) {
     		deleteSupplement(supplement);
-    		newsup = (Supplement)saveAsset(supplement);
+    		newsup = (Supplement)saveAsset(newsup);
     	}
     	
     	// move its media/info files to new parent subdir and save updated supplement

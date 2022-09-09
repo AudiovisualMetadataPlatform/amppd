@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 /**
- * Super class for most data entities created in AMP. 
+ * Base class for most media data entities created in AMP. 
  * @author yingfeng
  *
  */

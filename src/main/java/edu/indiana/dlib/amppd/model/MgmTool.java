@@ -41,16 +41,21 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class MgmTool extends AmpObject {
+public class MgmTool extends MgmMeta {
 
-    // tool ID of the corresponding MGM adapter, provided in MGM config in Galaxy; must be unique
+    // populated from the ID of the corresponding MGM adapter in Galaxy; must be unique
     @NotBlank
 	@Unique
     private String toolId;	
     
-    // name of the MGM, populated from the tool name of the corresponding MGM adapter in Galaxy; must be unique within its parent category
-    @NotBlank
-    private String name;	
+    // populated from the name of the corresponding MGM adapter in Galaxy; must be unique within its parent category
+//    @NotBlank
+//    private String name;	
+
+    // populated from the description of the corresponding MGM adapter in Galaxy
+//    @NotBlank
+//    @Type(type="text")
+//    private String description;	
 
 	// long description providing help info for the MGM (not the MGM description from its config xml in Galaxy);
 	// since Galaxy API response does not include the help text from the MGM config, we need to store help info on AMP side 
@@ -81,6 +86,10 @@ public class MgmTool extends AmpObject {
 	@NotNull
 	@ManyToOne
     private MgmCategory category;     		
+
+	// temporary storage of section ID of the MGM for CSV parsing purpose
+	@Transient
+	private String sectionId;		
 
 	// reference to the corresponding MGM adapter tool in Galaxy,
 	// serving as a cache to store the Tool instance retrieved from Galaxy API call

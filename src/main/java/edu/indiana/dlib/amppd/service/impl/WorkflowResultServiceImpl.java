@@ -1024,7 +1024,34 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
 		return result;
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.deleteWorkflowResult(Long)
+	 */
+	@Override
+	@Transactional
+	public WorkflowResult deleteWorkflowResult(Long workflowResultId) {
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
+
+		// delete from Galaxy history
+		try {
+			HistoriesClient historiesClient = jobService.getHistoriesClient();
+			Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
+			dataset.setDeleted(true);
+			historiesClient.updateDataset(result.getHistoryId(), dataset);		
+			log.info("Successfully deleted dataset for workflowResult in Galaxy: " + result);
+		} 
+		catch (Exception e) {
+			throw new GalaxyWorkflowException("Failed to delete dataset for workflowResult in Galaxy: " + result, e);
+		}	
+
+		// delete result from AMP table
+		workflowResultRepository.delete(result);
+		log.info("Successfully deleted workflowResult from AMP table: " + result);
 		
+		return result;
+	}
+	
 	/**
 	 *  Map the status in Galaxy to what we want on the front end.
 	 */

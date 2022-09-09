@@ -14,7 +14,6 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -45,7 +44,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class MgmScoringTool extends AmpObject {
+public class MgmScoringTool extends MgmMeta {
        
     // human-readable tool ID of the scoring tool, must be unique
     @NotBlank
@@ -53,12 +52,12 @@ public class MgmScoringTool extends AmpObject {
     private String toolId;	
     
     // name of the scoring tool must be unique within its parent category
-    @NotBlank
-    private String name;
+//    @NotBlank
+//    private String name;
         
-    @NotBlank
-    @Type(type="text")
-    private String description;
+//    @NotBlank
+//    @Type(type="text")
+//    private String description;
         
     // TODO create separate data model class/table for MST versions
     
