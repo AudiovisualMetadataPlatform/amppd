@@ -11,6 +11,10 @@ rest:
     encryption_secret: CHANGE ME
     jwt_secret: CHANGE ME
 
+    # Avalon integration.  This should be somewhere else, maybe?
+    avalon_url: https://avalon.example.edu
+    avalon_token: some-really-long-hex-string
+
     # These properties are to populate the "boilerplate" bits of
     # application properties.  You shouldn't need to change any of these...
     properties:

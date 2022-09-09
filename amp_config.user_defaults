@@ -12,8 +12,6 @@ rest:
     admin_password: amppass
     admin_email: ampadmin@example.edu
 
-    # Avalon integration
-    avalon_url: https://avalon.example.edu
-    avalon_token: some-really-long-hex-string
+
 
 
