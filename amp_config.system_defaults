@@ -1,0 +1,94 @@
+rest:
+    # paths, relative to the amp:data_root directory, if the value is a relative path
+    logging_path: logs
+    storage_path: media
+    dropbox_path: dropbox
+
+    # mediaprobe location (relative to amp:data_root)
+    mediaprobe_dir: MediaProbe
+
+    # secrets
+    encryption_secret: CHANGE ME
+    jwt_secret: CHANGE ME
+
+    # Avalon integration.  This should be somewhere else, maybe?
+    avalon_url: https://avalon.example.edu
+    avalon_token: some-really-long-hex-string
+
+    # These properties are to populate the "boilerplate" bits of
+    # application properties.  You shouldn't need to change any of these...
+    properties:
+        # tomcat configuration
+        server.servlet.context-path: /rest
+
+        # Spring datasource
+        spring.datasource.driver-class-name: org.postgresql.Driver
+        spring.datasource.platform: postgres 
+
+        # Spring JPA Stuff
+        spring.jpa.database: POSTGRESQL
+        spring.jpa.generate-ddl: true
+        # ddl-auto should be set to 'create' initially(?) and then 'update' later
+        spring.jpa.hibernate.ddl-auto: update
+        spring.jpa.show-sql: true 
+        spring.jpa.properties.hibernate.format_sql: true
+        spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+        spring.jpa.properties.hibernate.temp.use_jdbc_metadata_defaults: false
+        spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation: true 
+        spring.jpa.properties.javax.persistence.validation.mode: none
+
+        # Mail
+        spring.mail.host: localhost
+        spring.mail.port: 25
+        spring.mail.protocol: smtp
+        spring.mail.properties.mail.smtp.auth: false
+        spring.mail.properties.mail.smtp.starttls.enable: false
+        spring.mail.properties.mail.smtp.connectiontimeout: 5000
+        spring.mail.properties.mail.smtp.timeout: 3000
+        spring.mail.properties.mail.smtp.writetimeout: 5000
+
+        # Multipart Request limits
+        spring.servlet.multipart.max-file-size: 5GB
+        spring.servlet.multipart.max-request-size: 5GB
+        spring.servlet.multipart.enabled: true
+        
+        # Session
+        server.servlet.session.timeout: 1800s
+        spring.session.timeout: 1800s        
+        spring.session.store-type: jdbc
+        spring.session.jdbc.initialize-schema: always
+        # do I need to fill in the @@platform@@ value?
+        spring.session.jdbc.schema: classpath:org/springframework/session/jdbc/schema-@@platform@@.sql
+        spring.session.jdbc.table-name: SPRING_SESSION
+
+        # Logging
+        logging.level.edu.indiana.dlib.amppd: TRACE
+        
+        # External sources and task managers
+        amppd.externalSources: MCO,DarkAvalon,NYPL
+        amppd.taskManagers: Jira,Trello
+
+        # refresh intervals
+        amppd.refreshResultsTableMinutes: 300
+        amppd.refreshResultsStatusCron: 0 0/10 6-18 ? * MON-FRI
+        amppd.refreshResultsTableCron: 0 0 1 ? * MON-FRI
+        amppd.refreshWorkflowResultsStatusCron: 0 0/10 6-18 ? * MON-FRI
+        amppd.refreshWorkflowResultsAllCron: 0 0 1 ? * MON-FRI
+
+        # misc
+        management.endpoints.web.exposure.include: '*'
+        amppd.auth: true
+        amppd.passwordResetTokenExpiration: 600
+        amppd.accountActivationTokenExpiration: 604800
+        amppd.environment: prod
+        amppd.pythonPath: python3
+        
+        amppd.corsOriginPattern: http://localhost:8080
+        amppd.supplementCategories: Face,Transcript,Vocabulary,Program,Groundtruth,Other
+
+
+        # timeouts
+        amppd.jwtExpireMinutes: 60
+        amppd.workflowEditMinutes: 60
+        amppd.resetPasswordMinutes: 10
+        amppd.activateAccountDays: 7

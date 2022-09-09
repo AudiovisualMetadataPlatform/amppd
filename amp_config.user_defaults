@@ -1,0 +1,17 @@
+rest:
+    # PostgreSQL database configuration
+    db_host: localhost
+    db_name: ampdb
+    db_user: ampuser
+    db_pass: amppass
+
+    # AMP administrator user, set up on intial start.
+    # NOTE: password should be changed interactively after initial start
+    # NOTE: After initial setup, these values are ignored(?). 
+    admin_username: ampadmin
+    admin_password: amppass
+    admin_email: ampadmin@example.edu
+
+
+
+
