@@ -84,8 +84,8 @@ rest:
         amppd.pythonPath: python3
         
         amppd.corsOriginPattern: http://localhost:8080
-        amppd.supplementCategories: Face,Transcript,Vocabulary,Program,Groundtruth,Other
-
+        amppd.supplementCategories: Face,Transcript,Vocabulary,Program,Other
+        amppd.groundtruthSubcategories: segment,applause,transcript,ner,shot,face,vocr
 
         # timeouts
         amppd.jwtExpireMinutes: 60
