@@ -1,11 +1,24 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.net.HttpCookie;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
+import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
+import edu.indiana.dlib.amppd.web.GalaxyUpdateWorkflowRequest;
+import edu.indiana.dlib.amppd.web.GalaxyWorkflowRequest;
+import edu.indiana.dlib.amppd.web.GalaxyWorkflowResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -13,38 +26,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.security.JwtTokenUtil;
-import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
-import edu.indiana.dlib.amppd.web.GalaxyWorkflowRequest;
-import edu.indiana.dlib.amppd.web.GalaxyWorkflowResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Proxy between AMP client and AMP servr for requests related to workflow edit between AMP UI and Galaxy workflow editor.
@@ -93,6 +80,9 @@ public class WorkflowEditProxy {
 	private String csrfToken = null;
 	private String galaxySession = null;
 	private HttpCookie galaxySessionCookie = null;
+
+	@Autowired
+	private AmpUserService ampUserService;
 
 	/**
 	 *  Upon initialization of the controller, 
@@ -211,7 +201,6 @@ public class WorkflowEditProxy {
 	
 	    	// populate Galaxy request body with default GalaxyWorkflowRequest, i.e. with default name and empty annotation
 	    	GalaxyWorkflowRequest gwreq = new GalaxyWorkflowRequest();
-			
 			// send PUT request with headers and body to Galaxy 
 			String url = galaxyPropertyConfig.getBaseUrl() + "/workflow/create";
 			HttpEntity<GalaxyWorkflowRequest> request = new HttpEntity<GalaxyWorkflowRequest>(gwreq, headers);
@@ -224,9 +213,18 @@ public class WorkflowEditProxy {
 			}
 			
 			// retrieve workflowId from galaxy response
-			workflowId = gwres.getId();			
+			workflowId = gwres.getId();
 			if (StringUtils.isEmpty(workflowId)) {
 				throw new GalaxyWorkflowException("Failed to create workflow in Galaxy: empty workflow ID returned.");
+			}
+			try {
+				String update_url = galaxyPropertyConfig.getBaseUrl() + "/api/workflows/" + workflowId.toString();
+				GalaxyUpdateWorkflowRequest updateRequest = new GalaxyUpdateWorkflowRequest(ampUserService.getCurrentUsername(), gwreq.getWorkflow_name(), gwreq.getWorkflow_annotation());
+				String workflow_creator = updateRequest.params();
+				HttpEntity<String> update_request = new HttpEntity<String>(workflow_creator, headers);
+				restTemplate.exchange(update_url, HttpMethod.PUT, update_request, GalaxyWorkflowResponse.class);
+			}catch(RestClientException e) {
+				throw new GalaxyWorkflowException("Exception while updating workflow creator in Galaxy", e);
 			}
 		}
 		catch(RestClientException e) {
@@ -461,7 +459,7 @@ public class WorkflowEditProxy {
 			}
 			// workflow ID on the request path must match the ID of the workflow currently being edited
 			return checkWorkflowId(path, "/workflows/", null, workflowId, "PUT", "save");
-			// payload must be valid tool info: this will be handled by Galaxy		
+			// payload must be valid tool info: this will be handled by Galaxy
 		}		
 		
 		// filter GET requests
