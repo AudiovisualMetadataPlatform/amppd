@@ -10,7 +10,6 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
 
 
-//@RepositoryRestResource(collectionResourceRel = "primaryfiles", path = "primaryfiles")
 @RepositoryRestResource(excerptProjection = PrimaryfileBrief.class)
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	

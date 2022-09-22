@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -108,7 +110,7 @@ public class WorkflowResultController {
 	/**
 	 * Set the WorkflowResults matching the given list of workflow-step-output maps as relevant/irrelevant, 
 	 * and update their corresponding output datasets in Galaxy as visible/invisible accordingly.
-	 * Note that if a wild card is used in a field of a search criteria map, then that criteria matches all values of that field.
+	 * Note that if a wild-card is used in a field of a search criteria map, then that criteria matches all values of that field.
 	 * @param workflowStepOutputs the list of workflowId-workflowStep-outputName maps identifying the results to be set
 	 * @param relevant indicator on whether or not to set WorkflowResults as relevant
 	 * @return the number of WorkflowResults updated
@@ -127,12 +129,23 @@ public class WorkflowResultController {
 	 * @param isFinal the specified final status
 	 * @return WorkflowResult updated
 	 */
-	@PostMapping(path = "/workflow-results/{workflowResultId}")
+	@PatchMapping(path = "/workflow-results/{workflowResultId}")
 	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
 		log.info("Updating workflow result "  + workflowResultId + ": outputLabel + " + outputLabel + "  isfinal = " + isFinal);
 		return workflowResultService.updateWorkflowResult(workflowResultId, outputLabel, isFinal);
 	}
 
+	/**
+	 * Delete the specified WorkflowResult from AMP table and Galaxy history.
+	 * @param workflowResultId id of the specified WorkflowResult
+	 * @return WorkflowResult deleted
+	 */
+	@DeleteMapping(path = "/workflow-results/{workflowResultId}")
+	public WorkflowResult deleteWorkflowResult(@PathVariable Long workflowResultId) {
+		log.info("Deleting workflow result "  + workflowResultId + workflowResultId);
+		return workflowResultService.deleteWorkflowResult(workflowResultId);		
+	}
+	
 	/**
 	 * Set and export workflow result csv file as part of response
 	 * @param response HttpServletResponse

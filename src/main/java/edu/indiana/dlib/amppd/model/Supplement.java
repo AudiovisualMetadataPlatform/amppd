@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import edu.indiana.dlib.amppd.service.impl.ConfigServiceImpl;
 import edu.indiana.dlib.amppd.validator.EnumConfig;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -60,6 +61,13 @@ public abstract class Supplement extends Asset {
 				return null;
 		}
 	}	
+	
+	/**
+	 * Get the subcategory stripped off the groundtruth cateogry prefix, if this supplement is of a groundtruth category.
+	 */
+	public String getGroundtruthSubcategory() {
+		return ConfigServiceImpl.getGroundtruthSubCategory(category);
+	}
 	
 	/**
 	 * Copy all fields other than ID and parent of the given supplement to this one.

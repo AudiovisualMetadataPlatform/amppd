@@ -13,11 +13,11 @@ import javax.validation.Payload;
  * @author rimshakhalid
  */
 @Documented
-@Constraint(validatedBy = UniqueExternalIdValidator.class)
+@Constraint(validatedBy = UniqueExternalSrcAndIdValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UniqueExternalId {
-    String message() default "Item name must be unique within its parent's scope";
+public @interface UniqueExternalSrcAndId {
+    String message() default "External Source and ID must be unique within its parent collection!";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

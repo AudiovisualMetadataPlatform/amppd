@@ -9,7 +9,8 @@ import java.util.List;
 public interface ConfigService {
 
 	/**
-	 * Return all supplement categories handled by AMP defined in application configuration.
+	 * Return all supplement categories handled by AMP defined in application configuration,
+	 * including all groundtruth subcategories if exist
 	 * @return the array of allowed supplement categories
 	 */
 	public List<String> getSupplementCategories();

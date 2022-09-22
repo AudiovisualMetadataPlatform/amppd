@@ -3,9 +3,17 @@ package edu.indiana.dlib.amppd.repository;
 import java.util.Date;
 import java.util.List;
 
-import edu.indiana.dlib.amppd.model.MgmScoringTool;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-public interface MgmScoringToolRepository extends AmpObjectRepository<MgmScoringTool> {
+import edu.indiana.dlib.amppd.model.MgmScoringTool;
+import edu.indiana.dlib.amppd.model.projection.MgmScoringToolBrief;
+
+
+@RepositoryRestResource(excerptProjection = MgmScoringToolBrief.class)
+public interface MgmScoringToolRepository extends MgmMetaRepository<MgmScoringTool> {
+	
+	// count the MSTs within the given category
+	int countByCategoryId(Long categoryId);
 	
 	// find all scoring tools within the given category
 	List<MgmScoringTool> findByCategoryId(Long categoryId);

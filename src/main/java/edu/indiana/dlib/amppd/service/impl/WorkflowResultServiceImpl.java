@@ -165,23 +165,34 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * The steps/outputs values below are based on current MGMs and how visibilities are generally set in most workflows,
 	 * thus is subject to update upon future changes. 
 	 */
-	// outputs within the following outputName list are relevant, disregarding its workflow step
-	private static final List<String> SHOW_OUTPUTS = Arrays.asList(
-			"web_vtt",
-			"amp_csv_entities",
-			"tagged_words",
-			"amp_faces",
-			"amp_shots",
-			"amp_vocr",
-			"amp_vocr_dedupe",
-			"amp_vocr_csv", 
-			"contact_sheet"
-			);
-	// outputs within the following outputName-workflowStepList map are relevant
-	private static final HashMap<String, List<String>> SHOW_OUTPUTS_STEPS =  new HashMap<String, List<String>>() {{
+	// results with the following statuses are always relevant, disregarding Galaxy output visibility
+	private static final List<GalaxyJobState> SHOW_STATUSES = Arrays.asList(
+			GalaxyJobState.IN_PROGRESS,
+			GalaxyJobState.ERROR
+	);
+	// results from the following steps are relevant while status is Scheduled
+	private static final List<String> SHOW_STEPS = Arrays.asList(
+			"extract_audio",
+			"hmgm_transcript",
+			"hmgm_ner"			
+	);
+//	// outputs within the following outputName list are relevant, disregarding its workflow step
+//	private static final List<String> SHOW_OUTPUTS = Arrays.asList(
+//			"web_vtt",
+//			"amp_csv_entities",
+//			"tagged_words",
+//			"amp_faces",
+//			"amp_shots",
+//			"amp_vocr",
+//			"amp_vocr_dedupe",
+//			"amp_vocr_csv", 
+//			"contact_sheet"
+//			);
+//	// outputs within the following outputName-workflowStepList map are relevant
+//	private static final HashMap<String, List<String>> SHOW_OUTPUTS_STEPS =  new HashMap<String, List<String>>() {{
 //		put ("web_vtt", Arrays.asList("transcript_to_webvtt"));
 //		put ("amp_csv_entities", Arrays.asList("ner_to_csv"));
-	}};	
+//	}};	
 
 	/* Note: 
 	 * The three lists below are used by the hideIrrelevantWorkflowResults process.
@@ -1024,7 +1035,34 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
 		return result;
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.deleteWorkflowResult(Long)
+	 */
+	@Override
+	@Transactional
+	public WorkflowResult deleteWorkflowResult(Long workflowResultId) {
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
+
+		// delete from Galaxy history
+		try {
+			HistoriesClient historiesClient = jobService.getHistoriesClient();
+			Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
+			dataset.setDeleted(true);
+			historiesClient.updateDataset(result.getHistoryId(), dataset);		
+			log.info("Successfully deleted dataset for workflowResult in Galaxy: " + result);
+		} 
+		catch (Exception e) {
+			throw new GalaxyWorkflowException("Failed to delete dataset for workflowResult in Galaxy: " + result, e);
+		}	
+
+		// delete result from AMP table
+		workflowResultRepository.delete(result);
+		log.info("Successfully deleted workflowResult from AMP table: " + result);
 		
+		return result;
+	}
+	
 	/**
 	 *  Map the status in Galaxy to what we want on the front end.
 	 */
@@ -1088,22 +1126,48 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	}
 	
 	/**
-	 * Check if the specified result is relevant based on its current status and the visibility of its corresponding dataset in Galaxy.
+	 * Check if the specified result is relevant based on its status, step, and the visibility of its corresponding dataset in Galaxy.
 	 */
 	protected boolean isRelevant(WorkflowResult result, Dataset dataeet) {
-		String step = result.getWorkflowStep();
-		String output = result.getOutputName();		
+		GalaxyJobState status = result.getStatus();
+		String step = result.getWorkflowStep();	
 		
-		// if the job status is COMPLETE or ERROR, it's relevant if its dataset is visible in Galaxy	
-		if (result.getStatus() == GalaxyJobState.COMPLETE || result.getStatus() == GalaxyJobState.ERROR) {
+		// it's relevant if the status is one of those always to be shown
+		if (SHOW_STATUSES.contains(status))  {
+			return true;
+		}
+		
+		// otherwise, it's relevant if the step is one of those to be shown while status is Scheduled
+		if (status == GalaxyJobState.SCHEDULED) {
+			return SHOW_STEPS.contains(step);
+		}			
+		
+		// otherwise, it's relevant if its dataset is visible in Galaxy	when status is Complete
+		if (status == GalaxyJobState.COMPLETE) {
 			return dataeet.getVisible();
 		}
-		// otherwise it's relevant if its step/output is not in the irrelevant step/output list/map
-		else {
-			List<String> steps = SHOW_OUTPUTS_STEPS.get(output);
-			return SHOW_OUTPUTS.contains(output) || steps != null && steps.contains(step);
-		}			
-	}
+		
+		// all other cases, it's not relevant
+		return false;
+	}	
+	
+//	/**
+//	 * Check if the specified result is relevant based on its current status and the visibility of its corresponding dataset in Galaxy.
+//	 */
+//	protected boolean isRelevant(WorkflowResult result, Dataset dataeet) {
+//		String step = result.getWorkflowStep();
+//		String output = result.getOutputName();		
+//		
+//		// if the job status is COMPLETE or ERROR, it's relevant if its dataset is visible in Galaxy	
+//		if (result.getStatus() == GalaxyJobState.COMPLETE || result.getStatus() == GalaxyJobState.ERROR) {
+//			return dataeet.getVisible();
+//		}
+//		// otherwise it's relevant if its step/output is not in the irrelevant step/output list/map
+//		else {
+//			List<String> steps = SHOW_OUTPUTS_STEPS.get(output);
+//			return SHOW_OUTPUTS.contains(output) || steps != null && steps.contains(step);
+//		}			
+//	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.exportWorkflowResults(HttpServletResponse, WorkflowResultSearchQuery)
