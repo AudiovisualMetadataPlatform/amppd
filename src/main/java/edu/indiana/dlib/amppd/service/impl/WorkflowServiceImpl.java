@@ -1,17 +1,5 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.github.jmchilton.blend4j.galaxy.ToolsClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Tool;
@@ -19,11 +7,19 @@ import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 import com.sun.jersey.api.client.UniformInterfaceException;
-
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.web.WorkflowFilterValues;
+import edu.indiana.dlib.amppd.web.WorkflowResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of WorkflowService.
@@ -47,6 +43,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	
 	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
+	private List<Workflow> workflowCache = new ArrayList<Workflow>();
 			
 	/**
 	 * Initialize the WorkflowServiceImpl bean.
@@ -82,39 +79,35 @@ public class WorkflowServiceImpl implements WorkflowService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflows(Boolean, Boolean, Boolean)
 	 */	
 	@Override
-	public List<Workflow> listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted) {
+	public WorkflowResponse listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted,
+										  String[] tag, String[] name, String[] annotations, String[] creators, Date[] dateRange) {
 		// TODO 
 		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list.
 		// We can replace it with the commented code at the end of the method once the Galaxy bug is fixed;
 		// provided that special care is taken to handle the case when the published tag is used.
-			
-		List <Workflow> workflows = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
-		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		WorkflowResponse response = new WorkflowResponse();
+		if(showDeleted == null && showHidden == null && showPublished == null &&
+				(tag == null || tag.length <= 0) &&
+				(name == null || name.length <= 0) &&
+				(annotations == null || annotations.length <= 0) &&
+				(creators == null || creators.length <= 0) &&
+				(dateRange == null  || dateRange.length <= 0)) {
+			clearWorkflowsCache();
+		}
 
-		// if showPublished not specified, include both published and unpublished workflows
-		if (showPublished == null ) {
-			filterWorkflows = workflows;
+		if (workflowCache.size() <= 0) {
+			workflowCache = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 		}
-		// otherwise filter workflows based on showPublished
-		else {
-			for (Workflow workflow : workflows) {
-				Boolean isPublished = isWorkflowPublished(workflow);
-				if (showPublished && isPublished) {
-					filterWorkflows.add(workflow);			
-				}
-				else if (!showPublished && !isPublished) {
-					filterWorkflows.add(workflow);			
-				}
-			}
-		}
-		
-		String published = showPublished == null ? "" : (showPublished ? "published " : "unpublished "); 
+		List <Workflow> filterWorkflows = filters(workflowCache, showPublished, tag, name, annotations, creators, dateRange);
+		WorkflowFilterValues filterBy = prepareFilters(filterWorkflows);
+		String published = showPublished == null ? "" : (showPublished ? "published " : "unpublished ");
 		String hidden = showHidden != null && showHidden ? "hidden " : ""; 
 		String deleted = showDeleted != null && showDeleted ? "deleted " : ""; 
 		log.info("Successfully listed " + filterWorkflows.size() + " " + published + hidden + deleted + "workflows currently existing in Galaxy.");
-		return filterWorkflows;			
-		
-//		return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);
+		response.setRows(filterWorkflows);
+		response.setTotalResults(filterWorkflows.size());
+		response.setFilters(filterBy);
+		return response;
 	}
 	
 	/**
@@ -236,5 +229,167 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public Integer workflowNamesCacheSize() {
 		return workflowNames.size();
 	}
-	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowsCache()
+	 */
+	public void clearWorkflowsCache() {
+		workflowCache.clear();
+		log.info("Workflows cache has been cleared up.");
+	}
+
+	private List <Workflow> filterTags(List<Workflow> workflows, String[] tags) {
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		for (Workflow wf : workflows) {
+			for (String t : tags) {
+				System.out.println("tag---->" + t);
+				if (hasWorkflowTag(wf, t)) {
+					filterWorkflows.add(wf);
+					break;
+				}
+			}
+		}
+		return filterWorkflows;
+	}
+
+	private List<Workflow> filterCreators(List<Workflow> workflows, String[] creators) {
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		for(String creator: creators) {
+			for (Workflow wf : workflows) {
+				log.info(wf.getCreator() + " ---- " + creator);
+				if(StringUtils.equalsIgnoreCase(wf.getCreator(), creator) || StringUtils.equalsIgnoreCase(wf.getOwner(), creator)) {
+					filterWorkflows.add(wf);
+					break;
+				}
+			}
+		}
+		return filterWorkflows;
+	}
+
+	private List<Workflow> filterWFName(List<Workflow> workflows, String[] names) {
+		List<Workflow> filterWorkflows = new ArrayList <Workflow>();
+		for (String name : names) {
+			for (Workflow wf : workflows) {
+				System.out.println("tag---->" + name);
+				if (StringUtils.equalsIgnoreCase(wf.getName(), name)) {
+					filterWorkflows.add(wf);
+					break;
+				}
+			}
+		}
+		return filterWorkflows;
+	}
+
+	private List<Workflow> filterDateRange(List<Workflow> workflows, Date[] dateRange) {
+		List<Workflow> filterWorkflows = new ArrayList <Workflow>();
+		Date startDate = dateRange[0];
+		Date endDate = dateRange[1];
+		for (Workflow wf : workflows) {
+			Date wfDate = wf.getUpdateTime();
+			if ((wfDate.after(startDate) || wfDate.equals(startDate))  && (wfDate.before(endDate) || wfDate.equals(endDate))) {
+				filterWorkflows.add(wf);
+			}
+		}
+		return filterWorkflows;
+	}
+
+	private List<Workflow> filterAnnotations(List<Workflow> workflows, String[] annotations) {
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		for(String term: annotations) {
+			for (Workflow wf : workflows) {
+				for (String a : wf.getAnnotations()) {
+					if (StringUtils.containsIgnoreCase(a, term)) {
+						filterWorkflows.add(wf);
+						break;
+					}
+				}
+			}
+		}
+		return filterWorkflows;
+	}
+
+	private List<Workflow> filterPublished(List<Workflow> workflows, Boolean showPublished) {
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		for (Workflow workflow : workflows) {
+			Boolean isPublished = isWorkflowPublished(workflow);
+			if (showPublished && isPublished) {
+				filterWorkflows.add(workflow);
+			} else if (showPublished != null && !showPublished && !isPublished) {
+				filterWorkflows.add(workflow);
+			}
+		}
+		return filterWorkflows;
+	}
+
+	private List<Workflow> filters(List<Workflow> workflows,
+								   Boolean showPublished,
+								   String[] tag,
+								   String[] name,
+								   String[] annotations,
+								   String[] creators,
+								   Date[] dateRange) {
+		if(showPublished == null && tag == null && name == null && annotations == null && dateRange == null && creators == null) {
+			return workflows;
+		}
+		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+		List <Workflow> filterByPublished = showPublished != null ? filterPublished(workflows, showPublished) : null;
+		List <Workflow> filterByTags = tag != null && tag.length >= 1 ? filterTags(workflows, tag) : null;
+		List <Workflow> filterByNames = name != null && name.length >= 1 ? filterWFName(workflows, name) : null;
+		List<Workflow> filterByAnnotations = annotations != null && annotations.length >= 1 ? filterAnnotations(workflows, annotations) : null;
+		List <Workflow> filterByCreators = creators != null && creators.length >= 1 ? filterCreators(workflows, creators) : null;
+		List <Workflow> filterByDate = dateRange != null && dateRange.length >= 1 ? filterDateRange(workflows, dateRange) : null;
+		if(filterByPublished != null) {
+			filterWorkflows = filterByPublished;
+		}
+
+		if(filterByTags != null) {
+			filterWorkflows = filterWorkflows.size() <= 0 ? filterByTags :
+					filterWorkflows.stream().filter(filterByTags::contains).collect(Collectors.toList());
+		}
+
+		if(filterByNames != null) {
+			filterWorkflows = filterWorkflows.size() <= 0 ? filterByNames :
+					filterWorkflows.stream().filter(filterByNames::contains).collect(Collectors.toList());
+		}
+
+		if(filterByAnnotations != null) {
+			filterWorkflows = filterWorkflows.size() <= 0 ? filterByAnnotations :
+					filterWorkflows.stream().filter(filterByAnnotations::contains).collect(Collectors.toList());
+		}
+
+		if(filterByCreators != null) {
+			filterWorkflows = filterWorkflows.size() <= 0 ? filterByCreators :
+					filterWorkflows.stream().filter(filterByCreators::contains).collect(Collectors.toList());
+		}
+
+		if(filterByDate != null) {
+			filterWorkflows = filterWorkflows.size() <= 0 ? filterByDate :
+					filterWorkflows.stream().filter(filterByDate::contains).collect(Collectors.toList());
+		}
+
+		return filterWorkflows;
+	}
+
+	private WorkflowFilterValues prepareFilters(List<Workflow> workflows) {
+		WorkflowFilterValues filters = new WorkflowFilterValues();
+		List<String> names = new ArrayList<String>();
+		List<String> tags = new ArrayList<String>();
+		List<String> creators = new ArrayList<String>();
+		for(Workflow wf: workflows) {
+			names.add(wf.getName());
+			if(wf.getCreator() == null || wf.getCreator() == ""){
+				creators.add(wf.getOwner());
+			}else{
+				creators.add(wf.getCreator());
+			}
+			for(String tag: wf.getTags()) {
+				tags.add(tag);
+			}
+		}
+
+		filters.setCreators(creators.stream().distinct().collect(Collectors.toList()));
+		filters.setNames(names.stream().distinct().collect(Collectors.toList()));
+		filters.setTags(tags.stream().distinct().collect(Collectors.toList()));
+		return filters;
+	}
 }

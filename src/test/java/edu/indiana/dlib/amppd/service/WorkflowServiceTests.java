@@ -1,7 +1,8 @@
 package edu.indiana.dlib.amppd.service;
 
-import java.util.List;
-
+import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import edu.indiana.dlib.amppd.util.TestHelper;
+import edu.indiana.dlib.amppd.web.WorkflowResponse;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,10 +10,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-
-import edu.indiana.dlib.amppd.util.TestHelper;
 
 
 @RunWith(SpringRunner.class)
@@ -52,14 +49,14 @@ public class WorkflowServiceTests {
     @Test
     public void shouldListPublishedWorkflows() {
     	// list both published and unpublished workflows
-    	List<Workflow> workflows = workflowService.listWorkflows(true, null, null);
+    	WorkflowResponse workflows = workflowService.listWorkflows(true, null, null, null, null, null,null, null);
     	
     	// there should be at least 1 published workflows
-    	Assert.assertNotNull(workflows);
-    	Assert.assertTrue(workflows.size() >= 1);
+    	Assert.assertNotNull(workflows.getRows());
+    	Assert.assertTrue(workflows.getRows().size() >= 1);
     	
     	// all listed workflows should be published
-    	for (Workflow workflow : workflows) {
+    	for (Workflow workflow : workflows.getRows()) {
     		Assert.assertTrue(workflowService.isWorkflowPublished(workflow));
     	}
     }
@@ -67,14 +64,14 @@ public class WorkflowServiceTests {
     @Test
     public void shouldListUnpublishedWorkflows() {
     	// list both published and unpublished workflows
-    	List<Workflow> workflows = workflowService.listWorkflows(false, null, null);
+		WorkflowResponse workflows = workflowService.listWorkflows(false, null, null,null, null, null,null, null);
     	
     	// there should be at least 1 unpublished workflows
-    	Assert.assertNotNull(workflows);
-    	Assert.assertTrue(workflows.size() >= 1);
+    	Assert.assertNotNull(workflows.getRows());
+    	Assert.assertTrue(workflows.getRows().size() >= 1);
     	
     	// all listed workflows should be unpublished
-    	for (Workflow workflow : workflows) {
+    	for (Workflow workflow : workflows.getRows()) {
     		Assert.assertFalse(workflowService.isWorkflowPublished(workflow));
     	}
     }
