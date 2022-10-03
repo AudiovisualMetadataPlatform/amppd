@@ -95,6 +95,8 @@ public class WorkflowEditProxy {
 		ResponseEntity<String> responseRootLogin = restTemplate.getForEntity(urlRootLogin, String.class);
 		galaxySession = responseRootLogin.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
 		galaxySessionCookie = HttpCookie.parse(galaxySession).get(0);
+		log.info(galaxySessionCookie.getValue());
+		log.info(galaxySession);
 		
 		// retrieve CSRF token from the response body using regex
 		// TODO do we need to enforce utf-8
