@@ -295,6 +295,10 @@ public class WorkflowEditProxy {
 	 * @param request the HttpServletRequest
 	 * @return response from Galaxy, including error response
 	 */
+	/* Note: 
+	 * The hardcoded origins URL below is a temporary work-around to allow AMP UI devs to connect to AMP Test server 
+	 * from their localhost client for dev work. This doesn't impact other use cases.  
+	 */	
 	@CrossOrigin(origins = "https://amp-test.dlib.indiana.edu", allowedHeaders = "*", exposedHeaders = "*", allowCredentials = "true" )
 	@RequestMapping(value = GALAXY_ROOT + "/**")
 	public ResponseEntity<byte[]> proxyEdit(
