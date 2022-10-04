@@ -43,6 +43,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 	
 	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
+
+	// use following list to cache result of workflow for listing and once it is loaded we use it for filtering
 	private List<Workflow> workflowCache = new ArrayList<Workflow>();
 			
 	/**
@@ -86,7 +88,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 		// We can replace it with the commented code at the end of the method once the Galaxy bug is fixed;
 		// provided that special care is taken to handle the case when the published tag is used.
 		WorkflowResponse response = new WorkflowResponse();
-		if(showDeleted == null && showHidden == null && showPublished == null &&
+
+		// if all filtering values are null then we will clear cache and load new data from galaxy api call
+		if(showPublished == null &&
 				(tag == null || tag.length <= 0) &&
 				(name == null || name.length <= 0) &&
 				(annotations == null || annotations.length <= 0) &&
@@ -95,6 +99,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 			clearWorkflowsCache();
 		}
 
+		// refreshing workflow cache data
 		if (workflowCache.size() <= 0) {
 			workflowCache = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 		}
@@ -238,87 +243,78 @@ public class WorkflowServiceImpl implements WorkflowService {
 		log.info("Workflows cache has been cleared up.");
 	}
 
-	private List <Workflow> filterTags(List<Workflow> workflows, String[] tags) {
-		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
-		for (Workflow wf : workflows) {
-			for (String t : tags) {
-				System.out.println("tag---->" + t);
-				if (hasWorkflowTag(wf, t)) {
-					filterWorkflows.add(wf);
-					break;
-				}
+	private Boolean filterTags(Workflow workflow, String[] tags) {
+		if (tags == null || tags.length <= 0){
+			return true;
+		}
+		for (String t : tags) {
+			if (hasWorkflowTag(workflow, t)) {
+				return true;
 			}
 		}
-		return filterWorkflows;
+		return false;
 	}
 
-	private List<Workflow> filterCreators(List<Workflow> workflows, String[] creators) {
-		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+	private Boolean filterCreators(Workflow workflow, String[] creators) {
+		if(creators == null || creators.length <= 0){
+			return true;
+		}
 		for(String creator: creators) {
-			for (Workflow wf : workflows) {
-				log.info(wf.getCreator() + " ---- " + creator);
-				if(StringUtils.equalsIgnoreCase(wf.getCreator(), creator) || StringUtils.equalsIgnoreCase(wf.getOwner(), creator)) {
-					filterWorkflows.add(wf);
-					break;
-				}
+			if(StringUtils.equalsIgnoreCase(workflow.getCreator(), creator) || StringUtils.equalsIgnoreCase(workflow.getOwner(), creator)) {
+				return true;
 			}
 		}
-		return filterWorkflows;
+		return false;
 	}
 
-	private List<Workflow> filterWFName(List<Workflow> workflows, String[] names) {
-		List<Workflow> filterWorkflows = new ArrayList <Workflow>();
+	private Boolean filterWFName(Workflow workflow, String[] names) {
+		if (names == null || names.length <= 0){
+			return true;
+		}
 		for (String name : names) {
-			for (Workflow wf : workflows) {
-				System.out.println("tag---->" + name);
-				if (StringUtils.equalsIgnoreCase(wf.getName(), name)) {
-					filterWorkflows.add(wf);
-					break;
-				}
+			if (StringUtils.equalsIgnoreCase(workflow.getName(), name)) {
+				return true;
 			}
 		}
-		return filterWorkflows;
+		return false;
 	}
 
-	private List<Workflow> filterDateRange(List<Workflow> workflows, Date[] dateRange) {
-		List<Workflow> filterWorkflows = new ArrayList <Workflow>();
+	private Boolean filterDateRange(Workflow workflow, Date[] dateRange) {
+		if(dateRange == null || dateRange.length <= 0) {
+			return true;
+		}
 		Date startDate = dateRange[0];
 		Date endDate = dateRange[1];
-		for (Workflow wf : workflows) {
-			Date wfDate = wf.getUpdateTime();
-			if ((wfDate.after(startDate) || wfDate.equals(startDate))  && (wfDate.before(endDate) || wfDate.equals(endDate))) {
-				filterWorkflows.add(wf);
-			}
+		Date wfDate = workflow.getUpdateTime();
+		if ((wfDate.after(startDate) || wfDate.equals(startDate))  && (wfDate.before(endDate) || wfDate.equals(endDate))) {
+			return true;
 		}
-		return filterWorkflows;
+		return false;
 	}
 
-	private List<Workflow> filterAnnotations(List<Workflow> workflows, String[] annotations) {
-		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
+	private Boolean filterAnnotations(Workflow workflow, String[] annotations) {
+		if (annotations == null || annotations.length <= 0){
+			return true;
+		}
 		for(String term: annotations) {
-			for (Workflow wf : workflows) {
-				for (String a : wf.getAnnotations()) {
-					if (StringUtils.containsIgnoreCase(a, term)) {
-						filterWorkflows.add(wf);
-						break;
-					}
+			for (String a : workflow.getAnnotations()) {
+				if (StringUtils.containsIgnoreCase(a, term)) {
+					return true;
 				}
 			}
 		}
-		return filterWorkflows;
+		return false;
 	}
 
-	private List<Workflow> filterPublished(List<Workflow> workflows, Boolean showPublished) {
-		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
-		for (Workflow workflow : workflows) {
-			Boolean isPublished = isWorkflowPublished(workflow);
-			if (showPublished && isPublished) {
-				filterWorkflows.add(workflow);
-			} else if (showPublished != null && !showPublished && !isPublished) {
-				filterWorkflows.add(workflow);
-			}
+	private Boolean filterPublished(Workflow workflow, Boolean showPublished) {
+		Boolean isPublished = isWorkflowPublished(workflow);
+		if (showPublished == null) {
+			return true;
 		}
-		return filterWorkflows;
+		else if ((showPublished && isPublished) || (showPublished != null && !showPublished && !isPublished)) {
+			return true;
+		}
+		return false;
 	}
 
 	private List<Workflow> filters(List<Workflow> workflows,
@@ -332,41 +328,17 @@ public class WorkflowServiceImpl implements WorkflowService {
 			return workflows;
 		}
 		List <Workflow> filterWorkflows = new ArrayList <Workflow>();
-		List <Workflow> filterByPublished = showPublished != null ? filterPublished(workflows, showPublished) : null;
-		List <Workflow> filterByTags = tag != null && tag.length >= 1 ? filterTags(workflows, tag) : null;
-		List <Workflow> filterByNames = name != null && name.length >= 1 ? filterWFName(workflows, name) : null;
-		List<Workflow> filterByAnnotations = annotations != null && annotations.length >= 1 ? filterAnnotations(workflows, annotations) : null;
-		List <Workflow> filterByCreators = creators != null && creators.length >= 1 ? filterCreators(workflows, creators) : null;
-		List <Workflow> filterByDate = dateRange != null && dateRange.length >= 1 ? filterDateRange(workflows, dateRange) : null;
-		if(filterByPublished != null) {
-			filterWorkflows = filterByPublished;
+		for (Workflow workflow : workflows) {
+			Boolean filterByPublished = filterPublished(workflow, showPublished);
+			Boolean filterByTags = filterTags(workflow, tag);
+			Boolean filterByNames = filterWFName(workflow, name);
+			Boolean filterByAnnotations = filterAnnotations(workflow, annotations);
+			Boolean filterByCreators = filterCreators(workflow, creators);
+			Boolean filterByDate = filterDateRange(workflow, dateRange);
+			if (filterByPublished && filterByTags && filterByNames && filterByAnnotations && filterByCreators && filterByDate) {
+				filterWorkflows.add(workflow);
+			}
 		}
-
-		if(filterByTags != null) {
-			filterWorkflows = filterWorkflows.size() <= 0 ? filterByTags :
-					filterWorkflows.stream().filter(filterByTags::contains).collect(Collectors.toList());
-		}
-
-		if(filterByNames != null) {
-			filterWorkflows = filterWorkflows.size() <= 0 ? filterByNames :
-					filterWorkflows.stream().filter(filterByNames::contains).collect(Collectors.toList());
-		}
-
-		if(filterByAnnotations != null) {
-			filterWorkflows = filterWorkflows.size() <= 0 ? filterByAnnotations :
-					filterWorkflows.stream().filter(filterByAnnotations::contains).collect(Collectors.toList());
-		}
-
-		if(filterByCreators != null) {
-			filterWorkflows = filterWorkflows.size() <= 0 ? filterByCreators :
-					filterWorkflows.stream().filter(filterByCreators::contains).collect(Collectors.toList());
-		}
-
-		if(filterByDate != null) {
-			filterWorkflows = filterWorkflows.size() <= 0 ? filterByDate :
-					filterWorkflows.stream().filter(filterByDate::contains).collect(Collectors.toList());
-		}
-
 		return filterWorkflows;
 	}
 

@@ -35,9 +35,9 @@ public class WorkflowController {
 			@RequestParam(required = false) Boolean showPublished,
 			@RequestParam(required = false) Boolean showHidden,
 			@RequestParam(required = false) Boolean showDeleted,
-			@RequestParam(required = false) String[] tag,
+			@RequestParam(required = false) String[] tags,
 			@RequestParam(required = false) String[] name,
-			@RequestParam(required = false) String[] annotation,
+			@RequestParam(required = false) String[] annotations,
 			@RequestParam(required = false) String[] creator,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date[] dateRange) {
 		try {
@@ -45,7 +45,7 @@ public class WorkflowController {
 			String hidden = showHidden == null ? "null" : showHidden.toString();
 			String deleted = showDeleted == null ? "null" : showDeleted.toString();
 			log.info("Listing workflows in Galaxy, showPublished = " + published + ", showHidden = " + hidden + ", showDeleted = " + deleted);
-			return workflowService.listWorkflows(showPublished, showHidden, showDeleted, tag, name, annotation, creator, dateRange);
+			return workflowService.listWorkflows(showPublished, showHidden, showDeleted, tags, name, annotations, creator, dateRange);
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflows from Galaxy.";
