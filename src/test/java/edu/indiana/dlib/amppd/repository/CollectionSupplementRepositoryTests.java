@@ -186,7 +186,7 @@ public class CollectionSupplementRepositoryTests {
 		mockMvc.perform(post("/collectionSupplements").header("Authorization", token).content(json))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.validationErrors").isArray())
-			.andExpect(jsonPath("$.validationErrors", hasSize(3)));
+			.andExpect(jsonPath("$.validationErrors", hasSize(4)));
 //			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.collectionSupplement.name"))
 //			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
 //			.andExpect(jsonPath("$.validationErrors[1].field").value("handleBeforeCreate.itemSupplement.category"))
@@ -208,7 +208,7 @@ public class CollectionSupplementRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors").isArray())
 			.andExpect(jsonPath("$.validationErrors", hasSize(1)))
 			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.supplement"))
-			.andExpect(jsonPath("$.validationErrors[0].message").value("collectionSupplement name must be unique within its parent collection"));
+			.andExpect(jsonPath("$.validationErrors[0].message").value("Collection supplement name must be unique within its parent collection"));
 	}
 		
 	@Test
