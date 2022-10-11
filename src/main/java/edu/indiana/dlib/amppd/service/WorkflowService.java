@@ -1,10 +1,11 @@
 package edu.indiana.dlib.amppd.service;
 
-import java.util.List;
-
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
+import edu.indiana.dlib.amppd.web.WorkflowResponse;
+
+import java.util.Date;
 
 /**
  * Service for workflow related functionalities.
@@ -40,7 +41,7 @@ public interface WorkflowService {
 	 * @param showDeleted: if true, include only deleted workflows; otherwise include only undeleted workflows
 	 * @return workflows satisfying the given criteria
 	 */
-	public List<Workflow> listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted);
+	public WorkflowResponse listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted, String[] tag, String[] name, String[] annotations, String[] creators, Date[] dateRange);
 	
 	/**
 	 * Show details of a workflow based on information retrieved from Galaxy.
@@ -78,5 +79,10 @@ public interface WorkflowService {
 	 * Returns the size of the workflow names cache. 
 	 */
 	public Integer workflowNamesCacheSize();
-	
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowsCache()
+	 */
+	public void clearWorkflowsCache();
+
 }
