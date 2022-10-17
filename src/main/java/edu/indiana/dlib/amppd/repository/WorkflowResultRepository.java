@@ -9,6 +9,8 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdName;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
 public interface WorkflowResultRepository extends PagingAndSortingRepository<WorkflowResult, Long>, WorkflowResultRepositoryCustom {	
 		
@@ -29,7 +31,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	Set<WorkflowResult> findByWorkflowStepAndOutputNameAndRelevant(String workflowStep, String outputName, Boolean relevant);
 	Set<WorkflowResult> findByWorkflowIdAndWorkflowStepAndOutputNameAndRelevant(String workflowId, String workflowStep, String outputName, Boolean relevant);
 
-	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
+	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);	
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
 
@@ -43,5 +45,20 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	
 	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
 	List<WorkflowResult> findObsolete(Date dateObsolete);
+
+	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 	
+//	select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId 
+//	from (
+//		select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType 
+//		from WorkflowResult w 
+//		where w.outputType in :outputTypes 
+//		group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType
+//		) p
+//	group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId
+//	having count(*) = 2
+//	order by p.primaryfileId
+	@Query(value = "select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId from (select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType from WorkflowResult w where w.outputType in :outputTypes group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType) p group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId having count(*) = 2 order by p.primaryfileId")
+	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(List<String> outputTypes);
+
 }

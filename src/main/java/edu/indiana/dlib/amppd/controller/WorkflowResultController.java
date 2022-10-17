@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.controller;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdName;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkflowResultController {
 	
+	@Autowired
+	private WorkflowResultRepository workflowResultRepository;
+
 	@Autowired
 	private WorkflowResultService workflowResultService;
 	
@@ -48,6 +56,34 @@ public class WorkflowResultController {
 		return workflowResultService.getWorkflowResults(query);
 	}
 
+	/**
+	 * Get a list of primaryfiles with completed intermediate result outputs for each data type in the given outputTypes list.
+	 * @param outputTypes the given outputTypes
+	 * @return list of primaryfiles satisfying above criteria
+	 */
+	@GetMapping(path = "/workflow-results/intermediate/primaryfiles", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<PrimaryfileIdName> getPrimaryfilesForOutputTypes(@RequestParam List<String> outputTypes) {
+		List<PrimaryfileIdName> primaryfiles = workflowResultRepository.findPrimaryfileIdNamesByOutputTypes(outputTypes);
+		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with completed result outputs for " +s outputTypes.size() + " output types.");
+		return primaryfiles;
+	}
+	
+	/**
+	 * Get a list of completed intermediate workflow results associated with the given primaryfile for each data type in the given outputTypes list.
+	 * @param outputTypes the given outputTypes
+	 * @return list of workflow results satisfying above criteria
+	 */
+	@GetMapping(path = "/workflow-results/intermediate/outputs", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfilesOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {
+		List<List<WorkflowResult>> resultss = new ArrayList<List<WorkflowResult>>();
+		for (String outputType : outputTypes) {
+			List<WorkflowResult> results = workflowResultRepository.findByPrimaryfileIdAndOutputTypeAndStatus(primaryfileId, outputType, GalaxyJobState.COMPLETE);			
+			resultss.add(results);
+		}
+		log.info("Retrieved " + resultss.size() + " groups of intermediate workflow results with completed outputs for " + " primaryfile " + primaryfileId + " and " + outputTypes.size() + " output types.");
+		return resultss;
+	}
+		
 	/* TODO
 	 * More request params can be added to allow various scope of partial refresh. 
 	 * For ex, the scope of records to be refreshed can be defined by the following criteria:
