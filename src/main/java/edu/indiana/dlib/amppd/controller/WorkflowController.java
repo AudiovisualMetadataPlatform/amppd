@@ -66,12 +66,13 @@ public class WorkflowController {
 	public WorkflowDetails showWorkflow(
 			@PathVariable("workflowId") String workflowId, 
 			@RequestParam(required = false) Boolean instance,
-			@RequestParam(required = false) Boolean includeToolName) {	
+			@RequestParam(required = false) Boolean includeToolName,	
+			@RequestParam(required = false) Boolean includeInputDetails) {	
 		WorkflowDetails workflow = null;
 	
 		try {
 			log.info("Retrieving workflow details with ID: " +  workflowId + ", instance: " + instance + ", includeToolName: " + includeToolName);
-			workflow = workflowService.showWorkflow(workflowId, instance, includeToolName);
+			workflow = workflowService.showWorkflow(workflowId, instance, includeToolName, includeInputDetails);
 		}
 		catch (Exception e) {
 			throw new GalaxyWorkflowException("Unable to retrieve workflow details with ID " + workflowId + " from Galaxy.", e);

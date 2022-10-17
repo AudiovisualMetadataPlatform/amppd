@@ -180,7 +180,7 @@ public class TestHelper {
 	 */
 	public WorkflowDetails ensureTestWorkflowDetails() {
 		Workflow workflow = ensureWorkflow(TEST_WORKFLOW);
-		return workflowService.showWorkflow(workflow.getId(), null, null);
+		return workflowService.showWorkflow(workflow.getId(), null, null, null);
 	}
 	
 	/**
@@ -205,7 +205,7 @@ public class TestHelper {
 	 */
 	public WorkflowDetails ensureTestHmgmWorkflowDetails() {
 		Workflow workflow = ensureWorkflow(TEST_HMGM_WORKFLOW);
-		return workflowService.showWorkflow(workflow.getId(), null, null);
+		return workflowService.showWorkflow(workflow.getId(), null, null, null);
 	}
 	
 	/**

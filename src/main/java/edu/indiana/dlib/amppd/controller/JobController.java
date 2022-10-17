@@ -75,19 +75,17 @@ public class JobController {
 
 	/**
 	 * Create AMP jobs, one for each row of WorkflowResult outputs specified in the given list of arrays, to invoke the given workflow in
-	 * Galaxy along with the given parameterss, including their associated primaryfile as the first input if the given indicator is true. 
+	 * Galaxy along with the given parameterss, including their associated primaryfile as one input according to the workflow inputs. 
 	 * @param workflowId ID of the given workflow
 	 * @param resultIdss list of arrays of WorkflowResult IDs of the given outputs
 	 * @param parameterss the dynamic parameterss to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @param includePrimaryfile if true include the primaryfile as the first input for each job
 	 * @return list of CreateJobResponses containing detailed information for the job submitted
 	 */
 	@PostMapping(path = "/jobs/submitResults", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam List<Long[]> resultIdss, 
-			@RequestBody(required = false) CreateJobParameters[] parameterss,
-			@RequestParam(required = false) Boolean includePrimaryfile) {
+			@RequestBody(required = false) CreateJobParameters[] parameterss) {
 		if (resultIdss == null ) {
 			resultIdss = new ArrayList<Long[]>();
 		}
@@ -97,11 +95,8 @@ public class JobController {
 			// in which case, we need to remove the last empty array to avoid error
 			resultIdss.remove(resultIdss.size()-1);
 		}
-		if (includePrimaryfile == null ) {
-			includePrimaryfile = false;
-		}		
 		log.info("Processing request to submit a workflow against a list of arrays of workflow result outputs with parameterss ... ");
-		return jobService.createJobs(workflowId, resultIdss, parameterss, includePrimaryfile);
+		return jobService.createJobs(workflowId, resultIdss, parameterss);
 	}
 
 	/**
@@ -109,7 +104,6 @@ public class JobController {
 	 * by submitting to Galaxy the given workflow along with the given parameterss.
 	 * @param workflowId ID of the given workflow
 	 * @param inputCsv CSV file each row specifying the primaryfile and previous outputs to use as workflow inputs
-	 * @param includePrimaryfile if true include the primaryfile as the first input for each job; otherwise (default false) ignore the primaryfile
 	 * @param parameterss the dynamic parameterss to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
@@ -117,17 +111,13 @@ public class JobController {
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
-			@RequestParam(value = "parameterss", required = false) CreateJobParameters[] parameterss,
-			@RequestParam(required = false) Boolean includePrimaryfile) {
+			@RequestParam(value = "parameterss", required = false) CreateJobParameters[] parameterss) {
 		// TODO 
 		// parameterss is supposed to use @RequestBody or @RequestPart in order to be parsed as JSON string properly;
 		// but for some reason Spring Boot request handler throws exception on multipart request boundary;
 		// as a workaround, @RequestParam is used for now
-		if (includePrimaryfile == null ) {
-			includePrimaryfile = false;
-		}
 		log.info("Processing request to submit a workflow against an inputCsv file containing primaryfile IDs and workflow result IDs with parameterss ... ");
-		return jobService.createJobs(workflowId, inputCsv, parameterss, includePrimaryfile);
+		return jobService.createJobs(workflowId, inputCsv, parameterss);
 	}
 	
 	/**

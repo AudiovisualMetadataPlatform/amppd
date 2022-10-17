@@ -1,25 +1,35 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import com.github.jmchilton.blend4j.galaxy.ToolsClient;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
-import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputDefinition;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 import com.sun.jersey.api.client.UniformInterfaceException;
+
+import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.MgmTool;
+import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.WorkflowFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResponse;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Implementation of WorkflowService.
@@ -33,14 +43,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public static String PUBLISHED = "published";
 	
 	@Autowired
+	private MgmToolRepository mgmToolRepository;	
+	
+	@Autowired
 	private GalaxyApiService galaxyApiService;
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
-	
-	@Getter
-	private ToolsClient toolsClient;
-	
+		
 	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
 
@@ -53,7 +63,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@PostConstruct
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
-		toolsClient = galaxyApiService.getGalaxyInstance().getToolsClient();
 	}	
 	
 	/**
@@ -119,12 +128,26 @@ public class WorkflowServiceImpl implements WorkflowService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.showWorkflow(String, Boolean, Boolean)
 	 */	
 	@Override
-	public WorkflowDetails showWorkflow(String workflowId, Boolean instance, Boolean includeToolName) {
+	public WorkflowDetails showWorkflow(String workflowId, Boolean instance, Boolean includeToolName, Boolean includeInputDetails) {
 		// by default, not for instance
 		if (instance == null) {
 			instance = false;
 		}
+
+		// by default, include tool name
+		if (includeToolName == null) {
+			includeToolName = true;
+		}		
 		
+		// by default, include input detail
+		if (includeInputDetails == null) {
+			includeInputDetails = true;
+		}		
+
+		String store = instance ? "" : "stored ";
+		String withtn = includeToolName ? " with" : " without";
+		String withid = includeInputDetails ? " with" : " without";
+
 		// retrieve workflow details by workflow ID from galaxy
 		WorkflowDetails workflowDetails = null;
 		if (instance) {
@@ -134,35 +157,22 @@ public class WorkflowServiceImpl implements WorkflowService {
 			workflowDetails = workflowsClient.showWorkflow(workflowId);
 		}
 		
-		// by default, include tool name
-		if (includeToolName == null) {
-			includeToolName = true;
-		}		
-
-		// retrieve tool name by tool ID for each tool in the workflow steps
-		if (includeToolName && workflowDetails != null) {
-			Collection<WorkflowStepDefinition> steps = workflowDetails.getSteps().values();
-			for (WorkflowStepDefinition step : steps) {
-				String toolId = step.getToolId();
-				if (!StringUtils.isEmpty(toolId)) {
-					Tool tool = toolsClient.showTool(toolId);					
-					if (tool != null) {
-						String toolName = tool.getName();
-						// use tool name if not empty, otherwise use tool ID as name
-						if (!StringUtils.isEmpty(toolName)) {
-							step.setToolName(toolName);
-						}
-						else {
-							step.setToolName(toolId);
-						}					
-					}
-				}
-			}
+		if (workflowDetails == null) {
+			log.error("Failed to retriev workflow with " + store + "ID " + workflowId + withtn + " tool name and " +  withid + " input details.");
+			return null;			
 		}
 		
-		String store = instance ? "" : "stored ";
-		String include = includeToolName ? " with" : " without";
-		log.info("Successfully retrieved workflow with " + store + "ID " + workflowId + include + " tool name.");
+		// retrieve tool name by tool ID for each tool in the workflow steps
+		if (includeToolName) {
+			populateToolNames(workflowDetails);
+		}
+		
+		// populate input details such as data type, and whether the input is a primaryfile or an intermediate workflow result
+		if (includeInputDetails) {
+			populateInputDetails(workflowDetails);
+		}
+		
+		log.info("Successfully retrieved workflow with " + store + "ID " + workflowId + withtn + " tool name, " +  withid + " input details ");
 		return workflowDetails;
 	}
 	
@@ -243,6 +253,111 @@ public class WorkflowServiceImpl implements WorkflowService {
 		log.info("Workflows cache has been cleared up.");
 	}
 
+	/**
+	 * Returns true if the input of the given format should be fed from a primaryfile.  
+	 */
+	protected boolean fromPrimaryfile(String format) {
+		// we don't require format to be specified for primaryfile input, so null format indicates primaryfile
+		return StringUtils.isBlank(format) || "av".equals(format) || "audio".equals(format) || "video".equals(format);
+	}
+	
+	/**
+	 * Return true if the given workflowDetails is a partial one; 
+	 * false otherwise, i.e. there is one and only one primaryfile input.
+	 */
+	protected boolean isPartial(WorkflowDetails workflowDetails) {
+		int idx = workflowDetails.getInputPrimaryfileIndex();
+		int n = workflowDetails.getInputWprkflowResultLabels().size();
+		if (n == 0 && idx < 0) {
+			throw new GalaxyWorkflowException("Invalid workflow " + workflowDetails.getId() + ": has no valid input!"); 
+		}
+		return !(n == 0 && idx == 0);
+	}
+	
+	/**
+	 * Populate input details for the specified workflowDetails retrieved from Galaxy.
+	 */
+	private void populateInputDetails(WorkflowDetails workflowDetails) {
+		// initialize input details fields
+		List<String> labels = new ArrayList<String>();
+		List<String> formats = new ArrayList<String>();
+		workflowDetails.setInputWprkflowResultLabels(labels);
+		workflowDetails.setInputWprkflowResultFormats(formats);
+		workflowDetails.setInputPrimaryfileIndex(-1); // -1 indicate no primaryfile input
+		workflowDetails.setInputPrimaryfileFormat("");
+		int n = workflowDetails.getInputs().size();
+		
+		// iterate through all input nodes, indices of these steps range from 0 to (n-1) 
+		for (Integer i=0; i<n; i++) {
+			String stepMsg = "Invalid workflow " + workflowDetails.getId() + ": step " + i;
+			String inputMsg = "Invalid workflow " + workflowDetails.getId() + ": input " + i;
+			
+			// verify that the step corresponding to the input index exists
+			WorkflowStepDefinition step = workflowDetails.getSteps().get(i.toString());
+			if (step == null) {
+				throw new GalaxyWorkflowException(stepMsg + " doesn't exist!");
+			}
+			
+			// verify that the step is an input node
+			String type = (String)step.getType();
+			if (!"data_input".equals(type)) {
+				throw new GalaxyWorkflowException(stepMsg  + " is not an input node!");
+			}
+
+			// for some reason, input format is returned as an array with one element instead of a simple String
+			Object formatobj = step.getToolInputs().get("format");
+			String format = formatobj == null ? null : (String)((Object[])formatobj)[0];
+
+			// set index/format for Pfile input
+			if (fromPrimaryfile(format)) {
+				int idx = workflowDetails.getInputPrimaryfileIndex();
+				if (idx >= 0) {
+					throw new GalaxyWorkflowException(stepMsg + " of format " + format + " should be the only input from prirmayfile, but there is already one such step " + idx + " with format " + workflowDetails.setInputPrimaryfileFormat());
+				}
+				workflowDetails.setInputPrimaryfileIndex(i);
+				workflowDetails.setInputPrimaryfileFormat(format);
+			}
+			// set label/format for result input
+			else {
+				// verify that the step corresponding to the input index exists
+				WorkflowInputDefinition input = workflowDetails.getInputs().get(i.toString());
+				if (input == null) {
+					throw new GalaxyWorkflowException(inputMsg + " doesn't exist!");
+				}				
+				labels.add(input.getLabel());
+				formats.add(format);
+			}			
+		}
+		
+		// decide if workflow is partial
+		workflowDetails.setPartial(isPartial(workflowDetails));
+	}
+		
+	/**
+	 * Populate tool names for the specified workflowDetails retrieved from Galaxy.
+	 */
+	private void populateToolNames(WorkflowDetails workflowDetails ) {
+		Collection<WorkflowStepDefinition> steps = workflowDetails.getSteps().values();
+		for (WorkflowStepDefinition step : steps) {
+			String toolId = step.getToolId();
+			if (!StringUtils.isEmpty(toolId)) {
+				// it's more efficient to get tool name from MgmTool table (now that we have it) than querying Galaxy
+				MgmTool mgm = mgmToolRepository.findFirstByToolId(toolId);
+				
+				if (mgm != null) {
+					String toolName = mgm.getName();
+					// use tool name if not empty, otherwise use tool ID as name
+					if (!StringUtils.isEmpty(toolName)) {
+						step.setToolName(toolName);
+					}
+					else {
+						step.setToolName(toolId);
+					}					
+				}
+			}
+		}
+	}
+	
 	private Boolean filterTags(Workflow workflow, String[] tags) {
 		if (tags == null || tags.length <= 0){
 			return true;
