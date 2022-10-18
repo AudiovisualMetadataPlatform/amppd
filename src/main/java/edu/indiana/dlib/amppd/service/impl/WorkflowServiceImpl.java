@@ -312,7 +312,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 			if (fromPrimaryfile(format)) {
 				int idx = workflowDetails.getInputPrimaryfileIndex();
 				if (idx >= 0) {
-					throw new GalaxyWorkflowException(stepMsg + " of format " + format + " should be the only input from prirmayfile, but there is already one such step " + idx + " with format " + workflowDetails.setInputPrimaryfileFormat());
+					throw new GalaxyWorkflowException(stepMsg + " of format " + format + " should be the only input from prirmayfile, but there is already one such step " + idx + " with format " + workflowDetails.getInputPrimaryfileFormat());
 				}
 				workflowDetails.setInputPrimaryfileIndex(i);
 				workflowDetails.setInputPrimaryfileFormat(format);
