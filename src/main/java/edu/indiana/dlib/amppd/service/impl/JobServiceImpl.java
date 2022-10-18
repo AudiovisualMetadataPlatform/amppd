@@ -199,6 +199,13 @@ public class JobServiceImpl implements JobService {
 		String historyId = primaryfile == null ? null : primaryfile.getHistoryId();
 		List<String> formats = workflowDetails.getInputWprkflowResultFormats();
  
+		// the total number of provided results must match the total number of workflow result inputs
+		// this also ensures that when both are 0, the non-null primaryfile is the only input
+		int n = workflowDetails.getInputWprkflowResultLabels().size();
+		if (resultIds.length !=  n) {
+			throw new GalaxyWorkflowException("The number of provided results " + resultIds.length + " doesn't match the number of workflow result inputs " + n);
+		}
+		
 		// validate each result against the corresponding input
 		int i = 0;
 		for (Long resultId : resultIds) {
@@ -273,13 +280,6 @@ public class JobServiceImpl implements JobService {
 			throw new GalaxyWorkflowException("Primaryfile " + primaryfileId + " MIME type " + type + " doesn't match the corresponding input format " + format);
 		}
 		
-		// the total number of provided results must match the total number of workflow result inputs
-		// this also ensures that when both are 0, the non-null primaryfile is the only input
-		int n = workflowDetails.getInputWprkflowResultLabels().size();
-		if (resultIds.length !=  n) {
-			throw new GalaxyWorkflowException("The number of provided results " + resultIds.length + " doesn't match the number of workflow result inputs " + n);
-		}
-		
 		log.info("Succesfully validated and retrieved " + outputIds.size() + " workflow result outputs for the shared primaryfile " + primaryfileId);
 		return primaryfile;
 	}
@@ -330,7 +330,13 @@ public class JobServiceImpl implements JobService {
 			WorkflowInput winput = new WorkflowInput(outputId, InputSourceType.HDA);
 			winputs.setInput(inputId, winput);		
 		}
-
+		// in case primaryfile input is the last input, add it after all results inputs
+		if (index.intValue() == primaryfileIndex.intValue()) {
+			String inputId = (index++).toString();
+			WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+			winputs.setInput(inputId, winput);
+		}
+		
 		// build parameters
 		parameters.forEach((stepId, stepParams) -> {
 			stepParams.forEach((paramName, paramValue) -> {
@@ -655,10 +661,6 @@ public class JobServiceImpl implements JobService {
 		// note that we must use the workflow retrieved by workflowService instead of workflowsClient (no need for tool name), as 
 		// the former populates the raw workflowDetails from the latter with additional input details needed for the process here
 		WorkflowDetails workflowDetails = workflowService.showWorkflow(workflowId, null, false, true);
-		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			// TODO find a good way to return error instead of exception
-		}
 		
 		// remove redundant primaryfile IDs
 		Set<Long> pidset = primaryfileIds == null ? new HashSet<Long>() : new HashSet<Long>(Arrays.asList(primaryfileIds));
@@ -695,11 +697,9 @@ public class JobServiceImpl implements JobService {
 		int nSuccess = 0;
 
 		// retrieve the workflow 
-		WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			// TODO find a good way to return error instead of exception
-		}
+		// note that we must use the workflow retrieved by workflowService instead of workflowsClient (no need for tool name), as 
+		// the former populates the raw workflowDetails from the latter with additional input details needed for the process here
+		WorkflowDetails workflowDetails = workflowService.showWorkflow(workflowId, null, false, true);
 		
 		// retrieve bundle
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("Bundle <" + bundleId + "> does not exist!"));        	
@@ -737,11 +737,9 @@ public class JobServiceImpl implements JobService {
 		int nSuccess = 0;
 
 		// retrieve the workflow 
-		WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			// TODO find a good way to return error instead of exception
-		}
+		// note that we must use the workflow retrieved by workflowService instead of workflowsClient (no need for tool name), as 
+		// the former populates the raw workflowDetails from the latter with additional input details needed for the process here
+		WorkflowDetails workflowDetails = workflowService.showWorkflow(workflowId, null, false, true);
 				
 		// create job for each WorkflowResults array
 		for (int i=0; i < resultIdss.size(); i++) {

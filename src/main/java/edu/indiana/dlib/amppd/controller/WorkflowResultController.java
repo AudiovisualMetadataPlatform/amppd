@@ -64,23 +64,24 @@ public class WorkflowResultController {
 	@GetMapping(path = "/workflow-results/intermediate/primaryfiles", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<PrimaryfileIdName> getPrimaryfilesForOutputTypes(@RequestParam List<String> outputTypes) {
 		List<PrimaryfileIdName> primaryfiles = workflowResultRepository.findPrimaryfileIdNamesByOutputTypes(outputTypes);
-		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with completed result outputs for " + outputTypes.size() + " output types.");
+		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with COMPLETE outputs for " + outputTypes.size() + " output types.");
 		return primaryfiles;
 	}
 	
 	/**
-	 * Get a list of completed intermediate workflow results associated with the given primaryfile for each data type in the given outputTypes list.
-	 * @param outputTypes the given outputTypes
-	 * @return list of workflow results satisfying above criteria
+	 * Get a list of intermediate workflow results in COMPLETE status associated with the given primaryfile for each data type in the given outputTypes list.
+	 * @param primaryfileId ID of the given primaryfile
+	 * @param outputTypes the given outputTypes list
+	 * @return list of workflow results grouped by output types for the primaryfile
 	 */
 	@GetMapping(path = "/workflow-results/intermediate/outputs", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfilesOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {
+	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfileOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {
 		List<List<WorkflowResult>> resultss = new ArrayList<List<WorkflowResult>>();
 		for (String outputType : outputTypes) {
 			List<WorkflowResult> results = workflowResultRepository.findByPrimaryfileIdAndOutputTypeAndStatus(primaryfileId, outputType, GalaxyJobState.COMPLETE);			
 			resultss.add(results);
 		}
-		log.info("Retrieved " + resultss.size() + " groups of intermediate workflow results with completed outputs for " + " primaryfile " + primaryfileId + " and " + outputTypes.size() + " output types.");
+		log.info("Retrieved " + resultss.size() + " groups of intermediate workflow results with COMPLETE outputs for " + " primaryfile " + primaryfileId + " and " + outputTypes.size() + " output types.");
 		return resultss;
 	}
 		

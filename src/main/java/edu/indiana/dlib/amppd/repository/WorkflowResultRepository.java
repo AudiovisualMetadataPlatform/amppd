@@ -45,9 +45,8 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	
 	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
 	List<WorkflowResult> findObsolete(Date dateObsolete);
-
-	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 	
+	// find eligible primaryfiles with existing outputs of all the given types
 //	select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId 
 //	from (
 //		select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType 
@@ -56,9 +55,13 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 //		group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType
 //		) p
 //	group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId
-//	having count(*) = 2
+//	having count(*) = :outpuType.size()
 //	order by p.primaryfileId
-	@Query(value = "select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId from (select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType from WorkflowResult w where w.outputType in :outputTypes group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType) p group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId having count(*) = 2 order by p.primaryfileId")
+//	@Query(value = "select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId from (select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outputType from WorkflowResult w where w.outputType in :outputTypes group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType) p group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId having count(*) = :outputTypes.size() order by p.primaryfileId")
+	@Query(value = "select distinct w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId from WorkflowResult w where w.outputType in :outputTypes")  
 	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(List<String> outputTypes);
+
+	// find results of the given primaryfile, outputType, and status
+	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 
 }

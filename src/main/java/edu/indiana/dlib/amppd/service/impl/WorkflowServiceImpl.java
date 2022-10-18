@@ -158,8 +158,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		
 		if (workflowDetails == null) {
-			log.error("Failed to retriev workflow with " + store + "ID " + workflowId + withtn + " tool name and " +  withid + " input details.");
-			return null;			
+			throw new GalaxyWorkflowException("Failed to retriev workflow with " + store + "ID " + workflowId + withtn + " tool name and " +  withid + " input details.");		
 		}
 		
 		// retrieve tool name by tool ID for each tool in the workflow steps
@@ -306,7 +305,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 			// for some reason, input format is returned as an array with one element instead of a simple String
 			Object formatobj = step.getToolInputs().get("format");
-			String format = formatobj == null ? null : (String)((Object[])formatobj)[0];
+			String format = formatobj == null ? null : ((ArrayList<String>)formatobj).get(0);
 
 			// set index/format for Pfile input
 			if (fromPrimaryfile(format)) {
