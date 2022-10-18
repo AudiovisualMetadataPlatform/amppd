@@ -237,11 +237,11 @@ public class CollectionRepositoryTests {
 			.andExpect(jsonPath("$.validationErrors").isArray())
 			.andExpect(jsonPath("$.validationErrors", hasSize(4)));
 //			.andExpect(jsonPath("$.validationErrors[0].field").value("handleBeforeCreate.collection.name"))
-//			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"));
+//			.andExpect(jsonPath("$.validationErrors[0].message").value("must not be blank"))
 //			.andExpect(jsonPath("$.validationErrors[1].field").value("handleBeforeCreate.collection.taskManager"))
-//			.andExpect(jsonPath("$.validationErrors[1].message").value("must match \"Jira\""));
+//			.andExpect(jsonPath("$.validationErrors[1].message").value("must match \"Jira\""))
 //			.andExpect(jsonPath("$.validationErrors[2].field").value("handleBeforeCreate.collection.externalSource"))
-//			.andExpect(jsonPath("$.validationErrors[2].message").value("must match \"^\\s*$|MCO|DarkAvalon|NYPL\""));
+//			.andExpect(jsonPath("$.validationErrors[2].message").value("must match \"^\\s*$|MCO|DarkAvalon|NYPL\""))
 //			.andExpect(jsonPath("$.validationErrors[3].field").value("handleBeforeCreate.collection.unit"))
 //			.andExpect(jsonPath("$.validationErrors[3].message").value("must not be null"));
 	}

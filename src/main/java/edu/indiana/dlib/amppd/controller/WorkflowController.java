@@ -1,19 +1,18 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.util.List;
-
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
+import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.web.WorkflowResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
-
-import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
-import edu.indiana.dlib.amppd.service.WorkflowService;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
 
 /**
  * Controller for REST operations on Workflow.
@@ -32,26 +31,27 @@ public class WorkflowController {
 	 * @return a list of workflows with name, ID, and URL.
 	 */
 	@GetMapping("/workflows")
-	public List<Workflow> listWorkflows(
-			@RequestParam(required = false) Boolean showPublished, 
-			@RequestParam(required = false) Boolean showHidden, 
-			@RequestParam(required = false) Boolean showDeleted) {	
-		List<Workflow> workflows = null;
-	
+	public WorkflowResponse listWorkflows(
+			@RequestParam(required = false) Boolean showPublished,
+			@RequestParam(required = false) Boolean showHidden,
+			@RequestParam(required = false) Boolean showDeleted,
+			@RequestParam(required = false) String[] tags,
+			@RequestParam(required = false) String[] name,
+			@RequestParam(required = false) String[] annotations,
+			@RequestParam(required = false) String[] creator,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date[] dateRange) {
 		try {
-			String published = showPublished == null ? "null" : showPublished.toString(); 
-			String hidden = showHidden == null ? "null" : showHidden.toString(); 
-			String deleted = showDeleted == null ? "null" : showDeleted.toString(); 
+			String published = showPublished == null ? "null" : showPublished.toString();
+			String hidden = showHidden == null ? "null" : showHidden.toString();
+			String deleted = showDeleted == null ? "null" : showDeleted.toString();
 			log.info("Listing workflows in Galaxy, showPublished = " + published + ", showHidden = " + hidden + ", showDeleted = " + deleted);
-			workflows = workflowService.listWorkflows(showPublished, showHidden, showDeleted);
+			return workflowService.listWorkflows(showPublished, showHidden, showDeleted, tags, name, annotations, creator, dateRange);
 		}
 		catch (Exception e) {
 			String msg = "Unable to retrieve workflows from Galaxy.";
 			log.error(msg);
 			throw new GalaxyWorkflowException(msg, e);
 		}
-		
-		return workflows;
 	}
 	
 	/**
