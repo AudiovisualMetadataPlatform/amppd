@@ -50,6 +50,7 @@ import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
+import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.CreateJobParameters;
 import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.Getter;
@@ -102,6 +103,9 @@ public class JobServiceImpl implements JobService {
 	
 	@Autowired
     private WorkflowResultService workflowResultService;	
+	
+	@Autowired
+    private WorkflowService workflowService;	
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
@@ -180,18 +184,32 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	/**
-	 * Check whether the given workflow results outputs are valid to be used as workflow inputs, i.e. they all exist
-	 * and share the same primaryfileId and historyId, and share those with the provided primaryfile if not null; 
-	 * if all results are valid, add their outputIds to the given list, and return the shared primaryfile; 
+	 * Check whether the given workflow results outputs are valid to be used as inputs for the given workflow, i.e. 
+	 * the number of result inputs match that specified in the workflow;
+	 * if primaryfile is required as one input, its MIMI type must match the format specified in the workflow;  
+	 * all results exist and share the same primaryfileId and historyId, and share those with primaryfile is provided; 
+	 * furthermore, each result data type must match the corresponding input format.
+	 * If all results are valid, add their outputIds to the given list, and return the shared primaryfile; 
 	 * otherwise throw exception.
+	 * @param workflowDetails the given workflowDetails with input details
 	 * @param primaryfile ID the given primaryfile, could be null
 	 * @param resultIds array of the IDs of the given workflow results, assumed not null but could be empty
 	 * @param outputIds list of the outputIds of the given workflow results. assumed to be initialized to empty list
 	 */
-	protected Primaryfile retrieveSharedPrimaryfileValidateOutputs(Primaryfile primaryfile, Long[] resultIds, List<String> outputIds) {
+	protected Primaryfile retrieveSharedPrimaryfileValidateOutputs(WorkflowDetails workflowDetails, Primaryfile primaryfile, Long[] resultIds, List<String> outputIds, CreateJobResponse response) {
 		Long primaryfileId = primaryfile == null ? null : primaryfile.getId();
 		String historyId = primaryfile == null ? null : primaryfile.getHistoryId();
+		List<String> formats = workflowDetails.getInputWprkflowResultFormats();
  
+		// the total number of provided results must match the total number of workflow result inputs
+		// this also ensures that when both are 0, the non-null primaryfile is the only input
+		int n = workflowDetails.getInputWprkflowResultLabels().size();
+		if (resultIds.length !=  n) {
+			throw new GalaxyWorkflowException("The number of provided results " + resultIds.length + " doesn't match the number of workflow result inputs " + n);
+		}
+		
+		// validate each result against the corresponding input
+		int i = 0;
 		for (Long resultId : resultIds) {
 			// retrieve WorkflowResult by ID and make sure the outputId is populated
 			WorkflowResult result = workflowResultRepository.findById(resultId).orElseThrow(() -> new StorageException("WorkflowResult <" + resultId + "> does not exist!"));
@@ -207,6 +225,8 @@ public class JobServiceImpl implements JobService {
 			else if (primaryfileId == null) {
 				// assign the first non-empty primaryfileId among the results as the shared one to compare against
 				primaryfileId = result.getPrimaryfileId();
+				// initialize job creation response with primaryfileId
+				response.setPrimaryfileId(primaryfileId); 				
 			}
 			else if (!primaryfileId.equals(result.getPrimaryfileId())) {
 				throw new GalaxyWorkflowException("WorkflowResult " + resultId + " has a different primaryfileId " + result.getPrimaryfileId() + " than the shared " + primaryfileId);
@@ -224,9 +244,17 @@ public class JobServiceImpl implements JobService {
 				throw new GalaxyWorkflowException("WorkflowResult " + resultId + " has a different historyId " + result.getPrimaryfileId() + " than the shared " + historyId);
 			}
 			
+			// result output date type must match the corresponding input format
+			String type = result.getOutputType();
+			String format = formats.get(i);
+			if (!StringUtils.equals(type, format)) {
+				throw new GalaxyWorkflowException("WorkflowResult " + resultId + " data type " + type + " doesn't match the corresponding input format " + format);
+			}
+						
+			i++;
 			outputIds.add(outputId);
-		}
-		
+		}		
+
 		// at least one of the input source, i.e. primaryfile or results, must be provided
 		if (primaryfileId == null || historyId == null) {
 			throw new GalaxyWorkflowException("No valid primaryfile or previous results are provided as the workflow inputs!");    			
@@ -235,13 +263,25 @@ public class JobServiceImpl implements JobService {
 		// if passed in primaryfile is not null, use it; otherwise retrieve the shared primaryfile 
 		// to make sure it actually exists and has the same historyId as shared by the results
 		if (primaryfile == null) {
-			Long id = primaryfileId; // Java compiler disallows using non-final local variable such as primaryfileId in below line
+			// Java compiler disallows using non-final local variable such as primaryfileId in below line
+			Long id = primaryfileId; 
 			primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
+			
+			// update job creation response with primaryfile names
+			response.setNames(primaryfile); // use an invalid primaryfileId since no primaryfile was retrieved
+
 			if (!primaryfile.getHistoryId().equals(historyId)) {
 				throw new GalaxyWorkflowException("Primaryfile " + id + " shared by the results has a different historyId " + primaryfile.getHistoryId() + " than the shared " + historyId);				
-			}
+			}			
 		}
 
+		// if primaryfile is needed as one input, its MIME type must match input format if specified as audio/video
+		String format = workflowDetails.getInputPrimaryfileFormat();
+		String type = primaryfile.getMimeType();
+		if (!StringUtils.isBlank(format) && !"av".equals(format) && StringUtils.equalsIgnoreCase(format, type)) {
+			throw new GalaxyWorkflowException("Primaryfile " + primaryfileId + " MIME type " + type + " doesn't match the corresponding input format " + format);
+		}
+		
 		log.info("Succesfully validated and retrieved " + outputIds.size() + " workflow result outputs for the shared primaryfile " + primaryfileId);
 		return primaryfile;
 	}
@@ -250,45 +290,56 @@ public class JobServiceImpl implements JobService {
 	 * Build the inputs for the given workflow in Galaxy, by feeding them with the given primaryfile's dataset,
 	 * and the outputs of the given workflow results, with the given user-defined parameters, in the given history.
 	 * Note that the passed-in parameters here are user defined, and this method does not do any HMGM specific handling to the parameters.  
-	 * @param workflowDetails the given workflow details
+	 * @param workflowId ID of the given workflow details
+	 * @param primaryfileIndex input node index for the primaryfile input
 	 * @param datasetId dataset ID of the primaryfile
-	 * @param outputIds list of the output IDs of the given workflow results
 	 * @param historyId ID of the given history
+	 * @param outputIds list of the output IDs of the given workflow results
 	 * @param parameters step parameters for running the workflow
 	 * @return the built WorkflowInputs instance
 	 */
-	protected WorkflowInputs buildWorkflowInputs(WorkflowDetails workflowDetails, String datasetId, List<String> outputIds, String historyId, Map<String, Map<String, String>> parameters) {
-		// count total number of provided inputs
-		int count = datasetId == null ? outputIds.size() : outputIds.size() + 1;
-		
-		// each input in the workflow corresponds to an input step with a unique ID, the inputs of workflow detail is a map of {stepId: {label: value}}
-		Set<String> inputIds = workflowDetails.getInputs().keySet();
-		
-		// the total number of provided inputs must equal the total number of expected inputs in the workflow
-		if (inputIds.size() != count) {
-			throw new GalaxyWorkflowException("Workflow " + workflowDetails.getId() + " expects " + inputIds.size() + " inputs, but a total of " + count + " inputs are provided.");
-		}
+	protected WorkflowInputs buildWorkflowInputs(String workflowId, Integer primaryfileIndex, String datasetId, String historyId, List<String> outputIds, Map<String, Map<String, String>> parameters) {
+		// below inputs number validation is not needed as it's already done in retrieveSharedPrimaryfileValidateOutputs
+//		// count total number of provided inputs
+//		int count = datasetId == null ? outputIds.size() : outputIds.size() + 1;
+//		
+//		// each input in the workflow corresponds to an input step with a unique ID, the inputs of workflow detail is a map of {stepId: {label: value}}
+//		Set<String> inputIds = workflowDetails.getInputs().keySet();
+//		
+//		// the total number of provided inputs must equal the total number of expected inputs in the workflow
+//		if (inputIds.size() != count) {
+//			throw new GalaxyWorkflowException("Workflow " + workflowDetails.getId() + " expects " + inputIds.size() + " inputs, but a total of " + count + " inputs are provided.");
+//		}
 
 		WorkflowInputs winputs = new WorkflowInputs();
 		winputs.setDestination(new ExistingHistory(historyId));
 		winputs.setImportInputsToHistory(false);
-		winputs.setWorkflowId(workflowDetails.getId());
+		winputs.setWorkflowId(workflowId);
 
-		// if primaryfile dataset is provided, it's assumed to be the first input in the workflow, which has key "0"
-		Integer index = 0;
-		if (datasetId != null) {
-			String inputId = (index++).toString();
-			WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
-			winputs.setInput(inputId, winput);		
-		}
-
-		// if outputs are provided, it's assumed that they are in the order of the input keys, starting after primaryfile input if any
+		// if outputs are provided, it's assumed that they are in the order of the input kyes/indices, 
+		// with primaryfile input at the specified input node index if applicable
+		Integer index = 0; // current input index, starting at "0"
 		for (String outputId : outputIds) {
+			// if we reach the primaryfile input index, which implies that it's greater than 0 and thus the 
+			// primaryfile is a required input, insert the input as the current one, and advance the current index by 1
+			if (index.intValue() == primaryfileIndex.intValue()) {
+				String inputId = (index++).toString();
+				WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+				winputs.setInput(inputId, winput);
+			}
+			// add result input
 			String inputId = (index++).toString();
 			WorkflowInput winput = new WorkflowInput(outputId, InputSourceType.HDA);
 			winputs.setInput(inputId, winput);		
 		}
-
+		// in case primaryfile input is the last input, add it after all results inputs
+		if (index.intValue() == primaryfileIndex.intValue()) {
+			String inputId = (index++).toString();
+			WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+			winputs.setInput(inputId, winput);
+		}
+		
+		// build parameters
 		parameters.forEach((stepId, stepParams) -> {
 			stepParams.forEach((paramName, paramValue) -> {
 				winputs.setStepParameter(stepId, paramName, paramValue);
@@ -297,7 +348,7 @@ public class JobServiceImpl implements JobService {
 
 		String datasetMsg = datasetId == null ? "" : ", datasetId: " + datasetId;
 		String outputsMsg = outputIds.isEmpty() ? "" : ", outputIds: " + outputIds;
-		log.info("Successfully built job inputs, workflowId: " + workflowDetails.getId() + datasetMsg + outputsMsg + ", parameters: " + parameters);
+		log.info("Successfully built job inputs, workflowId: " + workflowId + datasetMsg + outputsMsg + ", parameters: " + parameters);
 		return winputs;
 	}
 	
@@ -453,19 +504,19 @@ public class JobServiceImpl implements JobService {
 	
 	/**
 	 * Create an AMP job to invoke the given workflow in Galaxy on the given primaryfile and/or previous WorkflowResult outputs, 
-	 * along with the given parameters, based on the given includePrimaryfile indicator:
-	 * if resultIds is null, includePrimaryfile is ignored, only primaryfile will be used as the input;
-	 * otherwise, if includePrimaryfile is true, include the primaryfile shared by the workflowResults as the first input, 
-	 * with the outputs from the workflowResults as the following inputs in that order;
-	 * otherwise (includePrimaryfile is false), exclude the primaryfile and use only the outputs as the workflow inputs.
+	 * along with the given parameters:
+	 * if resultIds is null but primaryfileId is provided, use the primaryfile as the only input; 
+	 * if resultIds is provided but primaryfileId is null, use the workflowResults outputs as the workflow inputs in the corresponding order, 
+	 * plus, if the workflow takes a primaryfile as one input, include the primaryfile associated with the results as the corresponding input
+	 * if both resultIds and primaryfileId are provided, the primaryfile from either should match;
+	 * if neither resultIds nor primaryfileId is provided, throw expception.
 	 * @param workflowDetails details of the given workflow, assumed not null
 	 * @param primaryfileId ID of the given primaryfile, could be null
 	 * @param resultIds array of IDs of the given WorkflowResults, could be null or empty
 	 * @param parameters the dynamic parameters to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
-	 * @param includePrimaryfile the given indicator on whether or not to include primaryfile as workflow input
 	 * @return CreateJobResponse containing detailed information for the job submitted
 	 */
-	protected CreateJobResponse createJob(WorkflowDetails workflowDetails, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
+	protected CreateJobResponse createJob(WorkflowDetails workflowDetails, Long primaryfileId, Long[] resultIds, Map<String, Map<String, String>> parameters) {
 		String primaryfileMsg = primaryfileId == null ? "" : ", primaryfileId: " + primaryfileId;
 		String resultsMsg = "";
 		if (resultIds != null) {
@@ -477,17 +528,19 @@ public class JobServiceImpl implements JobService {
 		}
 		String workflowId = workflowDetails.getId();
 		String msg = "AMP job for: workflowId: " + workflowId + primaryfileMsg + resultsMsg;
-		String msg_param = ", parameters (user defined): " + parameters;
-		
+		String msg_param = ", parameters (user defined): " + parameters;		
 		log.info("Creating " + msg + msg_param);		
-		CreateJobResponse response = null;
+		
+		// we should initialize the response with primaryfile ID info as early as possible so that 
+		// if the process fails at certain point, the error message will more likely carry that info
+		CreateJobResponse response = new CreateJobResponse();
 
 		try {			
 			// handle primaryfile as input if provided
 			Primaryfile primaryfile = null;
     		if (primaryfileId != null) {
-    			// initialize job creation response
-    			response = new CreateJobResponse(primaryfileId);
+    			// update job creation response with primaryfileId
+    			response.setPrimaryfileId(primaryfileId);
     			
     			// retrieve primaryfile via ID
     			primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
@@ -499,18 +552,13 @@ public class JobServiceImpl implements JobService {
         		preparePrimaryfileForJobs(primaryfile);	
     		}
     		
-    		// handle previous results as input if provided
-    		List<String> outputIds = new ArrayList<String>();
-    		if (resultIds != null) {
-    			// make sure that all results have valid outputs and share the same primaryfile and history
-    			primaryfile = retrieveSharedPrimaryfileValidateOutputs(primaryfile, resultIds, outputIds);
-        		
-    			// if not done yet, initialize job creation response with primaryfile info
-        		if (response == null) {
-        			response = new CreateJobResponse(primaryfile.getId());
-        			response.setNames(primaryfile);
-        		}
+    		// handle intermediate results as input if provided
+    		// make sure that all results have valid outputs and share the same primaryfile and history
+    		if (resultIds == null) {
+    			resultIds = new Long[0];
     		}
+    		List<String> outputIds = new ArrayList<String>();
+    		primaryfile = retrieveSharedPrimaryfileValidateOutputs(workflowDetails, primaryfile, resultIds, outputIds, response);
     		
     		/* TODO 
     		 * We could do more intensive validation on primaryfile and results, i.e.
@@ -527,9 +575,10 @@ public class JobServiceImpl implements JobService {
     		 */
 
     		// build inputs and invoke the workflow 
-    		// when resultIds is not provided, includePrimaryfile will be ignored, and primaryfile will be the only input 
-			String datasetId = resultIds == null || includePrimaryfile ? primaryfile.getDatasetId() : null; 
-			WorkflowInputs winputs = buildWorkflowInputs(workflowDetails, datasetId, outputIds, primaryfile.getHistoryId(), parameters);
+			WorkflowInputs winputs = buildWorkflowInputs(
+					workflowDetails.getId(), workflowDetails.getInputPrimaryfileIndex(), 
+					primaryfile.getDatasetId(),	primaryfile.getHistoryId(), 
+					outputIds, parameters);
     		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		WorkflowOutputs woutputs = workflowsClient.runWorkflow(winputs);    		
@@ -545,8 +594,8 @@ public class JobServiceImpl implements JobService {
     	catch (Exception e) {  
     		String error = "";
 			// if not done yet, initialize job creation response with primaryfile info
-    		if (response == null) {
-    			response = new CreateJobResponse(0l); // use an invalid primaryfileId since no primaryfile was retrieved
+    		if (response.getPrimaryfileId() == null) {
+    			response.setPrimaryfileId(0l); // use an invalid primaryfileId since no primaryfile was retrieved
     			error = "Failed to retrieve/validate primaryfile/results!\n";
     		}
     		// update response with failure job creation status
@@ -562,14 +611,14 @@ public class JobServiceImpl implements JobService {
 	 */	
 	@Override
 	public CreateJobResponse createJob(WorkflowDetails workflowDetails, Long primaryfileId, Map<String, Map<String, String>> parameters) {
-		return createJob(workflowDetails, primaryfileId, null, parameters, true);
+		return createJob(workflowDetails, primaryfileId, null, parameters);
 	}
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJob(WorkflowDetails, Long[], Map<String, Map<String, String>>, Boolean)
 	 */
-	public CreateJobResponse createJob(WorkflowDetails workflowDetails, Long[] resultIds, Map<String, Map<String, String>> parameters, Boolean includePrimaryfile) {
-		return createJob(workflowDetails, null, resultIds, parameters, includePrimaryfile);
+	public CreateJobResponse createJob(WorkflowDetails workflowDetails, Long[] resultIds, Map<String, Map<String, String>> parameters) {
+		return createJob(workflowDetails, null, resultIds, parameters);
 	}
 
 	/**
@@ -611,11 +660,9 @@ public class JobServiceImpl implements JobService {
 		int nSuccess = 0;
 
 		// retrieve the workflow 
-		WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			// TODO find a good way to return error instead of exception
-		}
+		// note that we must use the workflow retrieved by workflowService instead of workflowsClient (no need for tool name), as 
+		// the former populates the raw workflowDetails from the latter with additional input details needed for the process here
+		WorkflowDetails workflowDetails = workflowService.showWorkflow(workflowId, null, false, true);
 		
 		// remove redundant primaryfile IDs
 		Set<Long> pidset = primaryfileIds == null ? new HashSet<Long>() : new HashSet<Long>(Arrays.asList(primaryfileIds));
@@ -652,11 +699,9 @@ public class JobServiceImpl implements JobService {
 		int nSuccess = 0;
 
 		// retrieve the workflow 
-		WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			// TODO find a good way to return error instead of exception
-		}
+		// note that we must use the workflow retrieved by workflowService instead of workflowsClient (no need for tool name), as 
+		// the former populates the raw workflowDetails from the latter with additional input details needed for the process here
+		WorkflowDetails workflowDetails = workflowService.showWorkflow(workflowId, null, false, true);
 		
 		// retrieve bundle
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("Bundle <" + bundleId + "> does not exist!"));        	
@@ -684,26 +729,24 @@ public class JobServiceImpl implements JobService {
 	}	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, List<Long[]>, CreateJobParameters[], Boolean)
+	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, List<Long[]>, CreateJobParameters[])
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, CreateJobParameters[] parameterss, Boolean includePrimaryfile) {
-		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", resultIdss: " + resultIdss + ", parameterss: " + parameterss + ", includePrimaryfile: " + includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, List<Long[]> resultIdss, CreateJobParameters[] parameterss) {
+		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", resultIdss: " + resultIdss + ", parameterss: " + parameterss);
 
 		// initialize responses
 		List<CreateJobResponse> responses = new ArrayList<CreateJobResponse>();
 		int nSuccess = 0;
 
 		// retrieve the workflow 
-		WorkflowDetails workflowDetails = workflowsClient.showWorkflow(workflowId);
-		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Can't find workflow with ID " + workflowId);
-			// TODO find a good way to return error instead of exception
-		}
+		// note that we must use the workflow retrieved by workflowService instead of workflowsClient (no need for tool name), as 
+		// the former populates the raw workflowDetails from the latter with additional input details needed for the process here
+		WorkflowDetails workflowDetails = workflowService.showWorkflow(workflowId, null, false, true);
 				
 		// create job for each WorkflowResults array
 		for (int i=0; i < resultIdss.size(); i++) {
 			// no need to catch exception as createJob catches all and always returns a response 
-			CreateJobResponse response = createJob(workflowDetails, null, resultIdss.get(i), getParameters(parameterss, i), includePrimaryfile);			
+			CreateJobResponse response = createJob(workflowDetails, null, resultIdss.get(i), getParameters(parameterss, i));			
 			responses.add(response);						
 			if (response.getSuccess()) {
 				nSuccess++;
@@ -718,15 +761,15 @@ public class JobServiceImpl implements JobService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.JobService.createJobs(String, MultipartFile, CreateJobParameters[], Boolean)
 	 */
-	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, CreateJobParameters[] parameterss, Boolean includePrimaryfile) {
-		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", inputCsv: " + inputCsv.getOriginalFilename() + ", parameterss: " + parameterss + ", includePrimaryfile: " + includePrimaryfile);
+	public List<CreateJobResponse> createJobs(String workflowId, MultipartFile inputCsv, CreateJobParameters[] parameterss) {
+		log.info("Creating AMP jobs for: workflowId: " + workflowId + ", inputCsv: " + inputCsv.getOriginalFilename() + ", parameterss: " + parameterss);
 
 		// parse the input CSV into list of arrays of WorkflowResults
 		List<Long[]> resultIdss = parseInputCsv(inputCsv);
 		// TODO find a good way to return error instead of exception from parseInputCsv
 
 		// create jobs for WorkflowResults list of arrays
-		return createJobs(workflowId, resultIdss, parameterss, includePrimaryfile); 
+		return createJobs(workflowId, resultIdss, parameterss); 
 	}
 
 	/**

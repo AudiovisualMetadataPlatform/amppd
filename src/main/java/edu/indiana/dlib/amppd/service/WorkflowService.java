@@ -1,11 +1,12 @@
 package edu.indiana.dlib.amppd.service;
 
+import java.util.Date;
+
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
-import edu.indiana.dlib.amppd.web.WorkflowResponse;
 
-import java.util.Date;
+import edu.indiana.dlib.amppd.web.WorkflowResponse;
 
 /**
  * Service for workflow related functionalities.
@@ -49,9 +50,10 @@ public interface WorkflowService {
 	 * @param workflowId ID of the queried workflow
 	 * @param instance true if fetch by Workflow ID instead of StoredWorkflow id; false by default
 	 * @param includeToolName include tool name in the workflow details if true; true by default
+	 * @param includeInputDetails include details about input such as data type and data source if true; true by default
 	 * @return all the details information of the queried workflow
 	 */
-	public WorkflowDetails showWorkflow(String workflowName, Boolean instance, Boolean includeToolName);
+	public WorkflowDetails showWorkflow(String workflowName, Boolean instance, Boolean includeToolName, Boolean includeInputDetails);
 	
 	/**
 	 * Get the workflow with the specified name.
