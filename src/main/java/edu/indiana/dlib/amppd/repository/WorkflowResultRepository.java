@@ -46,7 +46,10 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
 	List<WorkflowResult> findObsolete(Date dateObsolete);
 	
-	// find eligible primaryfiles with existing outputs of all the given types
+	// find results of the given primaryfile, outputType, and status
+	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
+
+// below query is correct in logic but won't work with JPA, which doesn't support subquery in FROM clause
 //	select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId 
 //	from (
 //		select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType 
@@ -55,13 +58,30 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 //		group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType
 //		) p
 //	group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId
-//	having count(*) = :outpuType.size()
+//	having count(*) = :outputType.size()
 //	order by p.primaryfileId
 //	@Query(value = "select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId from (select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outputType from WorkflowResult w where w.outputType in :outputTypes group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType) p group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId having count(*) = :outputTypes.size() order by p.primaryfileId")
-	@Query(value = "select distinct w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId from WorkflowResult w where w.outputType in :outputTypes")  
+//
+// below querry works with JPA, but the logic is not quite the desired one:
+// it returns all primaryfiles that have some results for at least one instead for each outputType in the given list 
+//	@Query(value = "select distinct w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId from WorkflowResult w where w.outputType in :outputTypes")  
+//
+	// find primaryfiles with existing outputs for each of the given outputTypes
+	@Query(value = 
+			"select distinct p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId " + 
+			"from WorkflowResult p " + 
+			"where not exists ( " + 
+			"	select distinct o.outputType " + 
+			"	from WorkflowResult o " + 
+			"	where o.outputType in :outputTypes " +  
+			"	and not exists ( " + 
+			"		select w.id " + 
+			"		from WorkflowResult w " + 
+			"		where w.primaryfileId = p.primaryfileId " + 
+			"		and w.outputType = o.outputType " + 
+			"	) " + 
+			") "
+	)
 	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(List<String> outputTypes);
-
-	// find results of the given primaryfile, outputType, and status
-	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 
 }
