@@ -68,7 +68,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 //
 	// find primaryfiles with existing outputs for each of the given outputTypes
 	@Query(value = 
-			"select distinct p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId " + 
+			"select distinct p.collectionName as collectionName, p.itemName as itemName, p.primaryfileName as primaryfileName, p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
 			"where not exists ( " + 
 			"	select distinct o.outputType " + 
@@ -79,6 +79,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			"		from WorkflowResult w " + 
 			"		where w.primaryfileId = p.primaryfileId " + 
 			"		and w.outputType = o.outputType " + 
+			"		and w.status = 'COMPLETE' " + 
 			"	) " + 
 			") "
 	)
