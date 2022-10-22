@@ -303,9 +303,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 				throw new GalaxyWorkflowException(stepMsg  + " is not an input node!");
 			}
 
-			// for some reason, input format is returned as an array with one element instead of a simple String
+			// for some reason, input format is returned sometimes as a String, sometimes as an array list with one String element
 			Object formatobj = step.getToolInputs().get("format");
-			String format = formatobj == null ? null : ((ArrayList<String>)formatobj).get(0);
+			String format = null;
+			if (formatobj != null) {
+				format = formatobj instanceof String ? (String)formatobj : ((ArrayList<String>)formatobj).get(0);
+			}
 
 			// set index/format for Pfile input
 			if (fromPrimaryfile(format)) {
