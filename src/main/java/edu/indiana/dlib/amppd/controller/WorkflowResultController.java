@@ -63,6 +63,13 @@ public class WorkflowResultController {
 	 */
 	@GetMapping(path = "/workflow-results/intermediate/primaryfiles", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<PrimaryfileIdName> getPrimaryfilesForOutputTypes(@RequestParam List<String> outputTypes) {
+		// if not all given output types exist in the workflow result table, return empty list
+		int count = workflowResultRepository.countDistinctOutputTypesByOutputTypeIn(outputTypes);
+		if (count < outputTypes.size()) {
+			return new ArrayList<PrimaryfileIdName>();
+		}
+		
+		// otherwise return the primaryfiles with outputs for each given type
 		List<PrimaryfileIdName> primaryfiles = workflowResultRepository.findPrimaryfileIdNamesByOutputTypes(outputTypes);
 		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with COMPLETE outputs for " + outputTypes.size() + " output types.");
 		return primaryfiles;
