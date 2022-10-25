@@ -48,25 +48,13 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	
 	// find results of the given primaryfile, outputType, and status
 	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
-
-// below query is correct in logic but won't work with JPA, which doesn't support subquery in FROM clause
-//	select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId 
-//	from (
-//		select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType 
-//		from WorkflowResult w 
-//		where w.outputType in :outputTypes 
-//		group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType
-//		) p
-//	group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId
-//	having count(*) = :outputType.size()
-//	order by p.primaryfileId
-//	@Query(value = "select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId from (select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outputType from WorkflowResult w where w.outputType in :outputTypes group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType) p group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId having count(*) = :outputTypes.size() order by p.primaryfileId")
-//
-// below querry works with JPA, but the logic is not quite the desired one:
-// it returns all primaryfiles that have some results for at least one instead for each outputType in the given list 
-//	@Query(value = "select distinct w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId from WorkflowResult w where w.outputType in :outputTypes")  
-//
-	// find primaryfiles with existing outputs for each of the given outputTypes
+	
+	// count the distinct output types existing in the table within the given outputTypes list
+	// Note: for some reason Spring JPA doesn't work correctly with count distinct, thus the query is provided
+	@Query(value = "select count(distinct outputType) from WorkflowResult where outputType in :outputTypes")
+	int countDistinctOutputTypesByOutputTypeIn(List<String> outputTypes);
+	
+	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
 	@Query(value = 
 			"select distinct p.collectionName as collectionName, p.itemName as itemName, p.primaryfileName as primaryfileName, p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
@@ -84,5 +72,57 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			") "
 	)
 	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(List<String> outputTypes);
+
+	
+// below query is correct in logic but won't work with JPA, which doesn't support subquery in FROM clause
+//		select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId 
+//		from (
+//			select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType 
+//			from WorkflowResult w 
+//			where w.outputType in :outputTypes 
+//			group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType
+//			) p
+//		group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId
+//		having count(*) = :outputType.size()
+//		order by p.primaryfileId
+//		@Query(value = "select p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId from (select w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outputType from WorkflowResult w where w.outputType in :outputTypes group by w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId, w.outpuType) p group by p.collectionName, p.itemName, p.primaryfileName, p.primaryfileId having count(*) = :outputTypes.size() order by p.primaryfileId")
+//
+// below query is correct in logic but not accepted by JPA syntax, with the "o(outputType)" part
+//		@Query(value = 
+//		"select distinct p.collectionName as collectionName, p.itemName as itemName, p.primaryfileName as primaryfileName, p.primaryfileId as primaryfileId " + 
+//		"from WorkflowResult p " + 
+//		"where not exists ( " + 
+//		"	select * from unnest(:outputTypes) o(outputType) " +  
+//		"	where not exists ( " + 
+//		"		select w.id " + 
+//		"		from WorkflowResult w " + 
+//		"		where w.primaryfileId = p.primaryfileId " + 
+//		"		and w.outputType = o.outputType " + 
+//		"		and w.status = 'COMPLETE' " + 
+//		"	) " + 
+//		") "
+//)		
+//
+// below query is correct in logic but not accepted by JPA syntax, with the ":outputTypes.size()" part
+//	@Query(value = 
+//	"select distinct p.collectionName as collectionName, p.itemName as itemName, p.primaryfileName as primaryfileName, p.primaryfileId as primaryfileId " + 
+//	"from WorkflowResult p " + 
+//	"where (select count(distinct outputType) from WorkflowResult where outputType in :outputTypes) = :outputTypes.size() " + 
+//	"and not exists ( " + 
+//	"	select distinct o.outputType " + 
+//	"	from WorkflowResult o " + 
+//	"	where o.outputType in :outputTypes " +  
+//	"	and not exists ( " + 
+//	"		select w.id " + 
+//	"		from WorkflowResult w " + 
+//	"		where w.primaryfileId = p.primaryfileId " + 
+//	"		and w.outputType = o.outputType " + 
+//	"		and w.status = 'COMPLETE' " + 
+//	"	) " + 
+//	") "
+//)	
+// below querry works with JPA, but the logic is not quite the desired one:
+// it returns all primaryfiles that have some results for at least one instead for each outputType in the given list 
+//		@Query(value = "select distinct w.collectionName, w.itemName, w.primaryfileName, w.primaryfileId from WorkflowResult w where w.outputType in :outputTypes")  
 
 }
