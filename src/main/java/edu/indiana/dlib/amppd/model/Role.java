@@ -33,8 +33,9 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "entity_type", unique = true),
-		@Index(columnList = "name", unique = true),
+		@Index(columnList = "entityType"),
+		@Index(columnList = "name"),
+		@Index(columnList = "entityType, name", unique = true),
 		@Index(columnList = "unit_id"),
 		@Index(columnList = "unit_id, name", unique = true),
 })

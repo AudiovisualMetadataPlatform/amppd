@@ -30,8 +30,9 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "actionType", unique = true),
-		@Index(columnList = "targetType", unique = true),
+		@Index(columnList = "actionType"),
+		@Index(columnList = "targetType"),
+		@Index(columnList = "actionType, targetType", unique = true),
 		@Index(columnList = "urlPattern", unique = true),
 })
 @Data

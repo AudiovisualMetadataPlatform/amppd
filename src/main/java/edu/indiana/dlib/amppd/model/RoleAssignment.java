@@ -20,9 +20,9 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "actionType", unique = true),
-		@Index(columnList = "targetType", unique = true),
-		@Index(columnList = "urlPattern", unique = true),
+		@Index(columnList = "user_id"),
+		@Index(columnList = "role_id"),
+		@Index(columnList = "entityId"),
 })
 @Data
 @EqualsAndHashCode(callSuper=true)
