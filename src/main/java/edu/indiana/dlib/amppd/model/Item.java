@@ -21,8 +21,10 @@ import java.util.Set;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(uniqueConstraints = {@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"}),
-		@UniqueConstraint(name = "UniqueExternalSrcAndIdPerCollection", columnNames = {"collection_id", "externalId", "externalSource"})})
+@Table(uniqueConstraints = {
+		@UniqueConstraint(name = "UniqueItemNamePerCollection", columnNames = {"collection_id", "name"}),
+		@UniqueConstraint(name = "UniqueExternalSrcAndIdPerCollection", columnNames = {"collection_id", "externalId", "externalSource"})
+})
 @UniqueName(message="item name must be unique within its parent collection")
 @UniqueExternalSrcAndId(message="External Source and ID must be unique within its parent collection")
 @Data

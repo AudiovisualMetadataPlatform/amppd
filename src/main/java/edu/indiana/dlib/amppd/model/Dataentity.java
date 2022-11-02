@@ -21,7 +21,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 public abstract class Dataentity extends AmpObject {
-    
+	
 	@NotBlank
 	@Index
     @Type(type="text")
