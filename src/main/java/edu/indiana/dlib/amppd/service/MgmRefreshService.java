@@ -23,22 +23,32 @@ public interface MgmRefreshService {
 	
 	/**
 	 * Refresh MgmCategory table from mgm_category.csv file.
+	 * @return the list of MgmCategories refreshed
 	 */
 	public List<MgmCategory> refreshMgmCategory();
 
 	/**
 	 * Refresh MgmTool table from mgm_tool.csv file.
+	 * @return the list of MgmTools refreshed
 	 */
 	public List<MgmTool> refreshMgmTool();
 	
 	/**
 	 * Refresh MgmScoringTool table from mgm_scoring_tool.csv file.
+	 * @return the list of MgmScoringTools refreshed
 	 */
 	public List<MgmScoringTool> refreshMgmScoringTool();	
 
 	/**
 	 * Refresh MgmScoringParameter table from mgm_scoring_parameter.csv file.
+	 * @return the list of MgmScoringParameters refreshed
 	 */
 	public List<MgmScoringParameter> refreshMgmScoringParameter();	
+		
+	/**
+	 * Populate dependency parameters of all MgmScoringTools based on the parameter names
+	 * @return the list of MgmScoringTools populated with valid dependency parameters
+	 */
+	public List<MgmScoringTool> populateMgmScoringToolDependencyParameters(List<MgmScoringTool> msts);	
 		
 }

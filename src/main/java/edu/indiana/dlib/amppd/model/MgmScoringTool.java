@@ -9,6 +9,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
@@ -81,6 +82,8 @@ public class MgmScoringTool extends MgmMeta {
     private String workflowResultType; 
     
     // subcategory of the groundtruth supplement used by the MST
+    // Note: this field is a simple string for most tools, but could also be a JSON string of a map, 
+    // between the depending parameter value and the actual subcategory: { paramName: subcategory }
     @NotBlank
     private String groundtruthSubcategory; 
     
@@ -100,6 +103,18 @@ public class MgmScoringTool extends MgmMeta {
 	@ManyToOne
     private MgmCategory category;     
        
+    // the parameter on which the groundtruthSubcategory depends on, applicable to sing/multi-select ParamType;
+	// when null, the groundtruthSubcategory is a simple string;
+	// when not null, the groundtruthSubcategory is a map JSON.
+	// Note that the parameter must be one of those associated with this scoring tool    
+    @OneToOne
+//    @OneToOne(mappedBy = "mst", cascade = CascadeType.REMOVE)
+	private MgmScoringParameter dependencyParameter;
+
+	// temporary storage of name of the dependency parameter for CSV parsing purpose
+	@Transient
+	private String dependencyParamName;
+	
 	// temporary storage of section ID of the MST for CSV parsing purpose
 	@Transient
 	private String sectionId;		
