@@ -1,0 +1,5 @@
+name,description
+AMP Admin,administrator for AMP
+Unit Manager,manager for a unit
+Collection Manager,manager for collections in a unit
+Unit Viewer,generic user who can view unit data

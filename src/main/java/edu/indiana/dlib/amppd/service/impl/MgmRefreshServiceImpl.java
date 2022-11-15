@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Implementation of MgmRefreshService
  * @author yingfeng
- *
  */
 @Service
 @Slf4j
@@ -83,8 +82,10 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 	public void refreshMgmTables() {
 		refreshMgmCategory();
 		refreshMgmTool();
-		refreshMgmScoringTool();	
+		List<MgmScoringTool> msts = refreshMgmScoringTool();	
 		refreshMgmScoringParameter();	
+		// need to populate dependency parameters for MSTs only after all MGM scoring parameters are loaded
+		populateMgmScoringToolDependencyParameters(msts);
 	}
 	
 	/**
@@ -360,5 +361,32 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 		log.info("Successfully refreshed " + parameters.size() + " parameters from " + filename);
 		return parameters;
 	}
-		
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MgmRefreshService.populateMgmScoringToolDependencyParameters(List<MgmScoringTool>)
+	 */
+	public List<MgmScoringTool> populateMgmScoringToolDependencyParameters(List<MgmScoringTool> msts) {
+		List<MgmScoringTool> mstsu = new ArrayList<MgmScoringTool>(); 
+	
+		// go through all MSTs for those with dependency parameters
+		for (MgmScoringTool mst : msts) {
+			String paramName = mst.getDependencyParamName();
+			if (StringUtils.isNotEmpty(paramName)) {
+				// check that the dependency parameter is a valid existing one and report error if not;
+				MgmScoringParameter parameter = mgmScoringParameterRepository.findFirstByMstIdAndName(mst.getId(), paramName);
+				if (parameter == null) {
+					throw new RuntimeException("Failed to populate non-existing dependency parameter " + paramName + " for MgmScoringTool " + mst.getId());
+				}
+				
+				// otherwise populate the parameter's dependency and persist it
+				mst.setDependencyParameter(parameter);				
+				mgmScoringToolRepository.save(mst);	
+				mstsu.add(mst);				
+			}
+		}
+	
+		log.info("Successfully populated " + msts.size() + " dependency parameters for " + msts.size() + " MSTs");		
+		return mstsu;
+	}
+	
 }

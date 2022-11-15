@@ -1,20 +1,34 @@
 package edu.indiana.dlib.amppd.model;
 
 
-import javax.jdo.annotations.Index;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Index;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-@EntityListeners(AuditingEntityListener.class)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(indexes = {
+		@Index(columnList = "username", unique = true),
+		@Index(columnList = "email", unique = true),
+		@Index(columnList = "status"),
+})
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
@@ -29,25 +43,33 @@ public class AmpUser extends AmpObject {
     public enum Role {ADMIN, MANAGER, SUPERVISOR, STUDENT}
     public enum State {REQUESTED, ACCEPTED, ACTIVATED, REJECTED}
 	
-	//@NotNull
-	@Index(unique="true")
+	@NotNull
 	private String username;
 	
-	//@NotNull
-	@Index(unique="true")
+	@NotNull
 	private String email;	// email is always the same as username
 	
-	//@NotNull
+	@NotNull
 	private String password;
 
+	@NotNull
 	private String firstName;
+
+	@NotNull
 	private String lastName;
 		
-	//@NotNull
-	@Index
+	@NotNull
 	@Enumerated(EnumType.STRING)
 	private State status = State.REQUESTED;
 	
-	private Role role;	// currently not used
+	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
+	@JsonBackReference(value="roleAssignements")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+	private Set<RoleAssignment> roleAssignements;
+	
+	// TODO replace with AMP Role
+	private Role role;
+		
 
 }

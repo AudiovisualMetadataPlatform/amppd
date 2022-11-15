@@ -13,6 +13,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.model.ac.Role;
+import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -43,6 +45,19 @@ public class Unit extends Dataentity {
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<UnitSupplement> supplements;
+	
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
+	@JsonBackReference(value="roles")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+    private Set<Role> roles;
+	
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
+	@JsonBackReference(value="roleAssignments")
+	@EqualsAndHashCode.Exclude
+	@ToString.Exclude
+    private Set<RoleAssignment> roleAssignments;
+	
 	
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 
 //	@OneToMany(mappedBy="unit")
