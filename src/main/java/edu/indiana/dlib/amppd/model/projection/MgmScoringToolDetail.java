@@ -21,7 +21,7 @@ public interface MgmScoringToolDetail extends MgmScoringToolBrief, MgmMetaDetail
     public String getGroundtruthFormat(); 
 	public Set<MgmScoringParameter> getParameters();
 	
-	@Value("#{target.dependencyParameter.name}")
+	@Value("#{target.dependencyParameter == null ? null : target.dependencyParameter.name}")
 	public String getDependencyParamName();
 
 	@Value("#{target.category.id}")
