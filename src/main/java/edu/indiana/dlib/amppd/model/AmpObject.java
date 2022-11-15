@@ -39,4 +39,9 @@ public abstract class AmpObject {
     @LastModifiedBy
     private String modifiedBy;    
 
+    @Override
+    public boolean equals(Object ampobj) {
+    	return ampobj instanceof AmpObject && id.intValue() == (((AmpObject)ampobj).getId()).intValue();
+    }
+    
 }

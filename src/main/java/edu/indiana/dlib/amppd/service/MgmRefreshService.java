@@ -10,7 +10,6 @@ import edu.indiana.dlib.amppd.model.MgmTool;
 /**
  * Service for refreshing all MGM related tables.
  * @author yingfeng
- *
  */
 public interface MgmRefreshService {
 

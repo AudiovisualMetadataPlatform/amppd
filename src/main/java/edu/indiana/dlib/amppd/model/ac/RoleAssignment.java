@@ -1,14 +1,17 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.ac;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import edu.indiana.dlib.amppd.model.AmpObject;
+import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.Unit;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -22,11 +25,12 @@ import lombok.ToString;
 @Table(indexes = {
 		@Index(columnList = "user_id"),
 		@Index(columnList = "role_id"),
-		@Index(columnList = "entityId"),
+		@Index(columnList = "unit_id"),
 })
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
+@AllArgsConstructor 
 public class RoleAssignment extends AmpObject {
 
 	@ManyToOne
@@ -35,13 +39,12 @@ public class RoleAssignment extends AmpObject {
 	@ManyToOne
     private Role role;
 	
-	// ID of the host entity for the role
-	private Long entityId;
-	
-//	@ManyToOne
-	// reference to the role's host entity, which can be either a unit or collection or null;
-	// it can't be directly mapped as an abstract superclass instance, but can be retrieved from repository as needed 
-	@Transient
-    private Dataentity entity;
+	/* Note:
+	 * We will assign roles at AMP or Unit level, not any lower level, 
+	 * thus the only entity type that can be associated with a role is Unit.
+	 */
+	// reference to the role's assignment unit
+	@ManyToOne
+    private Unit unit;
 		
 }
