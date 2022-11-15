@@ -68,7 +68,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		List<Role> roles = refreshRole();
 		List<Action> actions = refreshAction();
 		refreshRoleAction(roles, actions);		
-		initRoleAssignment();
+//		initRoleAssignment();
 	}
 
 	/**
