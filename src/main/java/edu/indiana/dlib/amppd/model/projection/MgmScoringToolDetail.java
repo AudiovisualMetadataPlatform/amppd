@@ -17,7 +17,7 @@ public interface MgmScoringToolDetail extends MgmScoringToolBrief, MgmMetaDetail
 	
 	public String getScriptPath(); 
     public String getWorkflowResultType(); 
-    public String groundtruthSubcategory(); 
+    public String getGroundtruthSubcategory(); 
     public String getGroundtruthFormat(); 
 	public Set<MgmScoringParameter> getParameters();
 	
