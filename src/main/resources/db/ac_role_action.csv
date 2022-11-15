@@ -1,0 +1,20 @@
+roleName,actionName
+AMP Admin,create unit
+AMP Admin,view unit
+AMP Admin,edit unit
+AMP Admin,delete unit
+AMP Admin,create collection
+AMP Admin,view collection
+AMP Admin,edit collection
+AMP Admin,delete collection
+AMP Admin,create item
+Unit Viewer,view collection
+Unit Manager,view unit
+Unit Manager,edit unit
+Unit Manager,delete unit
+Unit Manager,create collection
+Collection Manager,view collection
+Collection Manager,edit collection
+Collection Manager,delete collection
+Collection Manager,create item
+Unit Viewer,view collection

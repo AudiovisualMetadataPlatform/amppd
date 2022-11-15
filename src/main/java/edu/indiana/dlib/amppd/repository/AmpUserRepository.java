@@ -14,6 +14,8 @@ import edu.indiana.dlib.amppd.model.AmpUser;
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 	
+	AmpUser findFirstByUsername(String username);
+	
 	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.status=:status")
 	String findByApprovedUser(@Param("username") String username, @Param("pswd") String pswd, @Param("status") AmpUser.State status);
 	

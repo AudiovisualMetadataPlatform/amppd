@@ -36,7 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Implementation of MgmRefreshService
  * @author yingfeng
- *
  */
 @Service
 @Slf4j

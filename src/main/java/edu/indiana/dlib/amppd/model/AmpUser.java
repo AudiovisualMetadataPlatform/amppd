@@ -17,6 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

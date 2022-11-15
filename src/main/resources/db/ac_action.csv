@@ -1,0 +1,10 @@
+name,description,actionType,targetType,httpMethod,urlPattern
+create unit,create a new unit,Create,Unit,POST,/units
+view unit,list collections or view details of a unit,Read,Unit,GET,/units
+edit unit,edit metadate of a unit,Update,Unit,PATCH,/units/
+delete unit,delete a unit and all its associated data,Delete,Unit,DELETE,/units/
+create collection,create a new collection,Create,Collection,POST,/collections
+view collection,list collections or view details of a collection,Read,Collection,GET,/collections
+edit collection,edit metadate of a collection,Update,Collection,PATCH,/collections/
+delete collection,delete a collection and all its associated data,Delete,Collection,DELETE,/collections/
+create item,create an item under a collection,Create,Item,POST,/items

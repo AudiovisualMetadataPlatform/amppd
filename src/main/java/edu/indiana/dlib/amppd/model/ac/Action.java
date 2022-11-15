@@ -1,9 +1,10 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.ac;
 
 
 
 import java.util.Set;
 
+import javax.jdo.annotations.Unique;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
@@ -15,9 +16,11 @@ import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpMethod;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.model.AmpObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -30,10 +33,9 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "actionType"),
-		@Index(columnList = "targetType"),
+		@Index(columnList = "name", unique = true),
 		@Index(columnList = "actionType, targetType", unique = true),
-		@Index(columnList = "urlPattern", unique = true),
+		@Index(columnList = "httpMethod, urlPattern", unique = true),
 })
 @Data
 @EqualsAndHashCode(callSuper=true)
@@ -49,6 +51,14 @@ public class Action extends AmpObject {
 		AmpUser, Role, RoleAction, RoleAssignment}
 	
 	@NotBlank
+	@Unique
+    @Type(type="text")
+    private String name;
+    
+    @Type(type="text")
+    private String description;
+
+    @NotBlank
 	@Enumerated(EnumType.STRING)
     private ActionType actionType;
 
@@ -56,8 +66,9 @@ public class Action extends AmpObject {
 	@Enumerated(EnumType.STRING)
     private TargetType targetType;
     
-    @Type(type="text")
-    private String description;
+    @NotBlank
+    @Enumerated(EnumType.STRING)
+    private HttpMethod httpMethod;
     
     @NotBlank
     @Type(type="text")

@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.model;
+package edu.indiana.dlib.amppd.model.ac;
 
 
 import java.util.Set;
@@ -6,8 +6,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -22,6 +20,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import edu.indiana.dlib.amppd.model.AmpObject;
+import edu.indiana.dlib.amppd.model.Unit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -33,9 +33,7 @@ import lombok.ToString;
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
-		@Index(columnList = "entityType"),
 		@Index(columnList = "name"),
-		@Index(columnList = "entityType, name", unique = true),
 		@Index(columnList = "unit_id"),
 		@Index(columnList = "unit_id, name", unique = true),
 })
@@ -43,15 +41,7 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 public class Role extends AmpObject {
-    
-	// the granularity of roles only go down to Colleciton level. AMP refers to global roles.
-	public enum EntitytType { AMP, Unit, Collection }
-	
-	// the type of entity this role is associated with
-	@NotBlank
-	@Enumerated(EnumType.STRING)
-    private EntitytType entityType;
-    
+
 	@NotBlank
     @Type(type="text")
     private String name;
@@ -78,14 +68,5 @@ public class Role extends AmpObject {
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private Set<RoleAssignment> roleAssignements;
-	
-	
-	/**
-	 * Return the entity type plus name as the complete role name to be displayed
-	 * @return
-	 */
-	public String getCompleteName() {
-		return entityType + " " + name;		
-	}
 	
 }

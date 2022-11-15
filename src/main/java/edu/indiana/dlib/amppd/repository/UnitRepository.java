@@ -8,4 +8,6 @@ import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 @RepositoryRestResource(excerptProjection = UnitBrief.class)
 public interface UnitRepository extends DataentityRepository<Unit> {
 	
+	Unit findFirstByName(String name);
+	
 }
