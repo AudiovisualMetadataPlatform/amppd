@@ -14,6 +14,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -30,6 +31,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
+@NoArgsConstructor 
 @AllArgsConstructor 
 public class RoleAssignment extends AmpObject {
 
