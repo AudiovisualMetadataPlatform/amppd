@@ -241,19 +241,22 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	 * Put in some tmp test data.
 	 */
 	private void initRoleAssignment() {
+		final String AMP_ADMIN = "AMP Admin";
 		String[] usernames = {"ampadmin", "yingfeng@iu.edu", "mcwhitak@iu.edu", "ghoshar@iu.edu"};
-		String[] roleNames = {"AMP Admin", "Unit Manager", "Collection Manager", "Unit Viewer"};
+		String[] roleNames = {AMP_ADMIN, "Unit Manager", "Collection Manager", "Unit Viewer"};
 		String unitName = "AMP Pilot Unit";
 		
-		Unit unit = unitRepository.findFirstByName(unitName);
+		Unit unitScope = unitRepository.findFirstByName(unitName);
 		int i = 0;
 		
 		for (String username : usernames) {
 			AmpUser user = ampUserRepository.findFirstByUsername(username);
 			Role role = roleRepository.findFirstByNameAndUnitId(roleNames[i++], null);
-			RoleAssignment ra = new RoleAssignment(user, role, unit);
-			
-			RoleAssignment existRa = this.roleAssignmentRepository.findFirstByUserIdAndRoleIdAndUnitId(user.getId(), role.getId(), unit.getId());
+			Unit unit = AMP_ADMIN.equals(role.getName()) ? null : unitScope;
+			Long unitId = unit == null ? null : unit.getId();
+
+			RoleAssignment ra = new RoleAssignment(user, role, unit);			
+			RoleAssignment existRa = this.roleAssignmentRepository.findFirstByUserIdAndRoleIdAndUnitId(user.getId(), role.getId(), unitId);
 			if (existRa == null) {
 				roleAssignmentRepository.save(ra);
 			}
