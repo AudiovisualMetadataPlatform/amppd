@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigServiceImpl implements ConfigService {
 
-	public static final String GROUNDTRUTH_CATEGORY_PREFIX = "Groudtruth"; 	
+	public static final String GROUNDTRUTH_CATEGORY_PREFIX = "Groundtruth"; 	
 	public static final String SUPPLEMENT_CATEGORIES = "supplementCategories";
 	public static final String EXTERNAL_SOURCES = "externalSources";
 	public static final String TASK_MANAGERS = "taskManagers";
