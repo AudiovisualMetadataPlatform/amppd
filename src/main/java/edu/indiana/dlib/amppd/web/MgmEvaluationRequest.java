@@ -9,5 +9,5 @@ public class MgmEvaluationRequest {
     private Long categoryId;
     private Long mstId;
     private ArrayList<Map> parameters;
-    private ArrayList<Map> files;
+    private ArrayList<Map<String, Map>> files;
 }
