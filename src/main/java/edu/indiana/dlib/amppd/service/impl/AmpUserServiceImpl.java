@@ -396,7 +396,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else if (type.equalsIgnoreCase("account approval")){
 			log.info("Constructing email for User account activation"+user.getEmail());
 			url = contextPath;
-			message = "Your registeration request has been reviewed and accepted. \n Click the link below to activate your AMP account";
+			message = "Your registration request has been reviewed and accepted. \n Click the link below to activate your AMP account";
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
