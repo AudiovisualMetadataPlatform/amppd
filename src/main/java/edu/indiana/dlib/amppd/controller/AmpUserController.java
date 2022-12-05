@@ -60,8 +60,8 @@ import lombok.extern.slf4j.Slf4j;
 
 	  @PostMapping(path = "/account/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	  public @ResponseBody AuthResponse register(@RequestBody AmpUser user) { 
-		log.info("Registeration for User=> Name:"+ user.getUsername());	
-		log.info("Registeration for User=> Email:"+ user.getEmail());	
+		log.info("Registration for User=> Name:"+ user.getUsername());	
+		log.info("Registration for User=> Email:"+ user.getEmail());	
 		AuthResponse res = ampService.registerAmpUser(user);
 		log.info(" Registeration result: " + res);
 		return res;
