@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model.projection;
 
 
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 /**
@@ -11,9 +10,15 @@ import org.springframework.data.rest.core.config.Projection;
  */
 @Projection(name = "brief", types = {MgmScoringParameter.class})
 public interface MgmScoringParameterBrief extends MgmMetaBrief {
-    @Value("#{target.mst.id}")
-    public Long getMstId();
+    public String getType();
+    public Double getMin();
+    public Double getMax();
 
-    @Value("#{target.dependency?.name ?: ''}")
-    public String getDependencyName();
+    public String getSelections();
+
+    public Boolean getRequired();
+
+    public String getDefault_value();
+    public String getUnit();
+    public String getShort_name();
 }
