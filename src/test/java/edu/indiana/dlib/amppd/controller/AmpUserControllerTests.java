@@ -162,7 +162,7 @@ public class AmpUserControllerTests {
     	
     }
     
-    //Test if registeration sends an email for approval
+    //Test if registration sends an email for approval
     @Test
 	public void shouldTestApproveUser() throws Exception {
     	AmpUser user = getAmpUser(); 
