@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 		log.info("Registration for User=> Name:"+ user.getUsername());	
 		log.info("Registration for User=> Email:"+ user.getEmail());	
 		AuthResponse res = ampService.registerAmpUser(user);
-		log.info(" Registeration result: " + res);
+		log.info(" Registration result: " + res);
 		return res;
 	  }
 
