@@ -12,15 +12,18 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class MgmEvaluationValidationServiceImpl implements MgmEvaluationValidationService {
+public class MgmEvaluationTestServiceImpl implements MgmEvaluationValidationService {
     @Override
-    public MgmEvaluationValidationResponse validateGroundTruthFileFormat(ArrayList<Map> files, MgmScoringTool mst) {
-        MgmEvaluationValidationResponse response = null;
-        for(Map<String, String> file: files) {
-            String groundtruth_filename = String.valueOf(file.get("groundtruth_filename"));
-            if(!groundtruth_filename.endsWith(mst.getGroundtruthFormat())) {
-                response.addError("Invalid groundtruth file format for " + groundtruth_filename + ". Please provide " + mst.getGroundtruthFormat() + " file.");
+    public MgmEvaluationValidationResponse validateGroundTruthFileFormat(MgmEvaluationValidationResponse response, ArrayList<Map> files, MgmScoringTool mst) {
+        if (files.size() > 0) {
+            for (Map<String, String> file : files) {
+                String groundtruth_filename = String.valueOf(file.get("groundtruth_filename"));
+                if (!groundtruth_filename.endsWith(mst.getGroundtruthFormat())) {
+                    response.addError("Invalid groundtruth file format for " + groundtruth_filename + ". Please provide " + mst.getGroundtruthFormat() + " file.");
+                }
             }
+        } else {
+            response.addError("No Primary and Groundtruth files selected.");
         }
         return response;
     }
@@ -53,6 +56,13 @@ public class MgmEvaluationValidationServiceImpl implements MgmEvaluationValidati
 //                response.addError("Invalid groundtruth file format for " + groundtruth_filename + ". Please provide " + mst.getGroundtruthFormat() + " file.");
 //            }
 //        }
+        return response;
+    }
+
+    @Override
+    public MgmEvaluationValidationResponse process(MgmScoringTool mst, Long categoryId, ArrayList<Map> files, ArrayList<Map> parameters) {
+        MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
+        response = validateGroundTruthFileFormat(files, mst);
         return response;
     }
 }
