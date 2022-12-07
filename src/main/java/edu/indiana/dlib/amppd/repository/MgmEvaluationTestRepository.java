@@ -6,7 +6,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import java.util.List;
 
-public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<MgmEvaluationTest, Long> {
+public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<MgmEvaluationTest, Long>, MgmEvaluationTestRepositoryCustom {
 	
 	List<MgmEvaluationTest> findByStatus(TestStatus status);
 	List<MgmEvaluationTest> findByMstId(Long mstId);
