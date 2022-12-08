@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.repository;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
 import edu.indiana.dlib.amppd.web.MgmEvaluationTestResponse;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestResult;
 import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,8 +13,6 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 @Slf4j
 public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestRepositoryCustom {
@@ -92,30 +91,26 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         return preds;
     }
 
-    private List<Map> prepareRows(List<MgmEvaluationTest> rows){
-        List<Map> datatable = new ArrayList<Map>();
+    private List<MgmEvaluationTestResult> prepareRows(List<MgmEvaluationTest> rows){
+        ArrayList<MgmEvaluationTestResult> datatable = new ArrayList<MgmEvaluationTestResult>();
         for(MgmEvaluationTest test: rows) {
-            Map<String, String> row = new HashMap<String, String>()
-            {
-                {
-                    put("id", test.getId().toString());
-                    put("testDate", test.getDateSubmitted().toString());
-                    put("OutputDate", test.getWorkflowResult().getDateCreated().toString());
-                    put("submitter", test.getSubmitter());
-                    put("unit", test.getWorkflowResult().getUnitName());
-                    put("collection", test.getWorkflowResult().getCollectionName());
-                    put("externalSource", test.getWorkflowResult().getExternalSource());
-                    put("externalId", test.getWorkflowResult().getExternalId());
-                    put("item", test.getWorkflowResult().getItemName());
-                    put("primaryFile", test.getWorkflowResult().getPrimaryfileName());
-                    put("workflow", test.getWorkflowResult().getWorkflowName());
-                    put("step", test.getWorkflowResult().getWorkflowStep());
-                    put("output", test.getWorkflowResult().getOutputName());
-                    put("groundTruth", test.getGroundtruthSupplement().getName());
-                    put("testOutput", "amp_evaluation");
-                    put("workflowId", test.getWorkflowResult().getId().toString());
-                }
-            };
+            MgmEvaluationTestResult row = new MgmEvaluationTestResult();
+            row.setId(test.getId());
+            row.setTestDate(test.getDateSubmitted());
+            row.setOutputDate(test.getWorkflowResult().getDateCreated());
+            row.setSubmitter(test.getSubmitter());
+            row.setUnit(test.getWorkflowResult().getUnitName());
+            row.setCollection(test.getWorkflowResult().getCollectionName());
+            row.setExternalSource(test.getWorkflowResult().getExternalSource());
+            row.setExternalId(test.getWorkflowResult().getExternalId());
+            row.setItem(test.getWorkflowResult().getItemName());
+            row.setPrimaryFile(test.getWorkflowResult().getPrimaryfileName());
+            row.setWorkflow(test.getWorkflowResult().getWorkflowName());
+            row.setStep(test.getWorkflowResult().getWorkflowStep());
+            row.setOutput(test.getWorkflowResult().getOutputName());
+            row.setGroundTruth(test.getGroundtruthSupplement().getName());
+            row.setTestOutput("amp_evaluation");
+            row.setWorkflowId(test.getWorkflowResult().getId().toString());
             datatable.add(row);
         }
         return datatable;
