@@ -7,7 +7,7 @@ import java.util.Date;
 public class MgmEvaluationTestResult {
     private Long id;
     private Date testDate;
-    private Date OutputDate;
+    private Date outputDate;
     private String submitter;
     private String unit;
     private String collection;
@@ -17,8 +17,9 @@ public class MgmEvaluationTestResult {
     private String primaryFile;
     private String workflow;
     private String step;
-    private String output;
+    private String outputName;
+    private String outputLabel;
     private String groundTruth;
-    private String testOutput;
+    private String outputTest;
     private String workflowId;
 }
