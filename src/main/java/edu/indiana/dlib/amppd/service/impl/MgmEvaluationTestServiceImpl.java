@@ -2,7 +2,7 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
-import edu.indiana.dlib.amppd.service.MgmEvaluationValidationService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationTestService;
 import edu.indiana.dlib.amppd.web.MgmEvaluationValidationResponse;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class MgmEvaluationTestServiceImpl implements MgmEvaluationValidationService {
+public class MgmEvaluationTestServiceImpl implements MgmEvaluationTestService {
     @Override
     public MgmEvaluationValidationResponse validateGroundTruthFileFormat(MgmEvaluationValidationResponse response, ArrayList<Map> files, MgmScoringTool mst) {
         if (files.size() > 0) {
@@ -62,7 +62,7 @@ public class MgmEvaluationTestServiceImpl implements MgmEvaluationValidationServ
     @Override
     public MgmEvaluationValidationResponse process(MgmScoringTool mst, Long categoryId, ArrayList<Map> files, ArrayList<Map> parameters) {
         MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
-        response = validateGroundTruthFileFormat(files, mst);
+        response = validateGroundTruthFileFormat(response, files, mst);
         return response;
     }
 }
