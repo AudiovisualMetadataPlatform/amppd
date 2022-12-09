@@ -1,16 +1,20 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.repository.*;
+import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
+import edu.indiana.dlib.amppd.web.ItemSearchResult;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -20,26 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
-import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement;
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
-import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
-import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
-import edu.indiana.dlib.amppd.service.DataentityService;
-import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.ItemSearchResponse;
-import edu.indiana.dlib.amppd.web.ItemSearchResult;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Implementation of MediaService.
@@ -446,11 +436,11 @@ public class MediaServiceImpl implements MediaService {
 					primaryfilerows = new ArrayList<Map>();					
 				}
 				String mime_type = p.getMimeType();
-				if(mime_type!=null && !mediaType.contentEquals("000"))
-				{
-					if((mime_type.contains("audio") && mediaType.substring(0, 1).contentEquals("1")) 
-							|| (mime_type.contains("video") && mediaType.substring(1, 2).contentEquals("1")) 
-							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
+//				if(mime_type!=null && !mediaType.contentEquals("000"))
+//				{
+//					if((mime_type.contains("audio") && mediaType.substring(0, 1).contentEquals("1"))
+//							|| (mime_type.contains("video") && mediaType.substring(1, 2).contentEquals("1"))
+//							|| (!mime_type.contains("video") && !mime_type.contains("audio") && mediaType.contentEquals("001"))){
 						curr_item_id = p.getItem().getId();
 						result.setCollectionId(p.getItem().getCollection().getId());
 						result.setCollectionName(p.getItem().getCollection().getName());
@@ -463,20 +453,20 @@ public class MediaServiceImpl implements MediaService {
 						primaryfileinfo.put("mediaType",mime_type);
 						primaryfileinfo.put("originalFilename",p.getOriginalFilename());
 						primaryfilerows.add(primaryfileinfo);
-					}
-				}
-				else {
-					curr_item_id = p.getItem().getId();
-					result.setItemName(p.getItem().getName());
-					result.setExternalSource(p.getItem().getExternalSource());
-					result.setExternalId(p.getItem().getExternalId());
-					result.setCollectionName(p.getItem().getCollection().getName());
-					primaryfileinfo.put("id", p.getId()); 
-					primaryfileinfo.put("name",p.getName());
-					primaryfileinfo.put("mediaType",mime_type);
-					primaryfileinfo.put("originalFilename",p.getOriginalFilename());
-					primaryfilerows.add(primaryfileinfo);
-				}
+//					}
+//				}
+//				else {
+//					curr_item_id = p.getItem().getId();
+//					result.setItemName(p.getItem().getName());
+//					result.setExternalSource(p.getItem().getExternalSource());
+//					result.setExternalId(p.getItem().getExternalId());
+//					result.setCollectionName(p.getItem().getCollection().getName());
+//					primaryfileinfo.put("id", p.getId());
+//					primaryfileinfo.put("name",p.getName());
+//					primaryfileinfo.put("mediaType",mime_type);
+//					primaryfileinfo.put("originalFilename",p.getOriginalFilename());
+//					primaryfilerows.add(primaryfileinfo);
+//				}
 			}
 			//add the last item to the rows
 			if(primaryfilerows.size()>0) {
