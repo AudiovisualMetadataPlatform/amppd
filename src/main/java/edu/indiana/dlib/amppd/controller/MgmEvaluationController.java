@@ -1,8 +1,10 @@
 package edu.indiana.dlib.amppd.controller;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.repository.MgmScoringToolRepository;
+import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.web.MgmEvaluationRequest;
 import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
@@ -22,14 +24,17 @@ public class MgmEvaluationController {
 
     @Autowired
     MgmScoringToolRepository mstRepo;
+
+    @Autowired
+    private AmpUserService ampUserService;
+
     @PostMapping(path = "/mgm-evaluation-test/new", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public MgmEvaluationValidationResponse submitTestRequest(@RequestBody MgmEvaluationRequest request) {
-        System.out.println(request.toString());
-        System.out.println(request.getFiles().get(0).toString());
+        AmpUser ampUser = ampUserService.getCurrentUser();
         MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
         MgmScoringTool mst = mstRepo.findById(request.getMstId()).orElseThrow(() -> new StorageException("Mgm scoring tool <" + request.getMstId() + "> does not exist!"));
         if (mst != null) {
-            return mgmEvalService.process(mst, request.getCategoryId(), request.getFiles(), request.getParameters());
+            return mgmEvalService.process(mst, request, ampUser);
         } else {
             response.addError("Mgm Scoring Tool is required.");
         }

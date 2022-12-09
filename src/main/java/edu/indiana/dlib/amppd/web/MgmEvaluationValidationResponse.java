@@ -11,11 +11,9 @@ public class MgmEvaluationValidationResponse {
     private boolean success;
     private MgmEvaluationTest mgmEvaluationTest;
     private List<String> validationErrors;
-    private List<String> processingErrors;
 
     public MgmEvaluationValidationResponse() {
         validationErrors = new ArrayList<String>();
-        processingErrors = new ArrayList<String>();
     }
 
     public void addError(String error) {
@@ -27,20 +25,8 @@ public class MgmEvaluationValidationResponse {
         }
     }
 
-    public void addProcessingError(String error) {
-        processingErrors.add(error);
-    }
-    public void addProcessingErrors(List<String> errors) {
-        if(processingErrors!=null && !errors.isEmpty()) {
-            processingErrors.addAll(errors);
-        }
-    }
-
     public boolean hasErrors() {
         return !validationErrors.isEmpty();
     }
 
-    public boolean hasProcessingErrors() {
-        return !processingErrors.isEmpty();
-    }
 }

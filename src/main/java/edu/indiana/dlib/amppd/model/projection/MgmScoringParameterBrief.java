@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.model.projection;
 
 
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 /**
@@ -16,9 +17,13 @@ public interface MgmScoringParameterBrief extends MgmMetaBrief {
 
     public String getSelections();
 
+    @Value("#{target.isRequired}")
     public Boolean getRequired();
 
+    @Value("#{target.defaultValue}")
     public String getDefault_value();
     public String getUnit();
+
+    @Value("#{target.shortName}")
     public String getShort_name();
 }
