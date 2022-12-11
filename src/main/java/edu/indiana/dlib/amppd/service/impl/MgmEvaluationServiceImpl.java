@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.indiana.dlib.amppd.model.*;
 import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
@@ -97,9 +99,17 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 mgmEvalTest.setCategory(mst.getCategory());
                 mgmEvalTest.setMst(mst);
                 mgmEvalTest.setSubmitter(user.getUsername());
-                
-                System.out.println(request.getParameters().toString());
-//                mgmEvalTest.setParameters(String.valueOf(parameters));
+                ArrayList<MgmEvaluationParameterObj> params = request.getParameters();
+                if(!params.isEmpty()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        String newJsonData = mapper.writeValueAsString(params);
+                        mgmEvalTest.setParameters(newJsonData);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
                 MgmEvaluationGroundtruthObj groundtruth = file.getGroundtruthFile();
                 mgmEvalTest.setDateSubmitted(new Date());
                 mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNNING);
