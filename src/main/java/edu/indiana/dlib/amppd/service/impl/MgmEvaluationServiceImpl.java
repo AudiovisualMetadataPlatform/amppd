@@ -119,6 +119,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
             response.setSuccess(false);
         } else {
             mgmEvalRepo.saveAll(mgmEvaluationTests);
+            response.setMgmEvaluationTest(mgmEvaluationTests);
             response.setSuccess(true);
         }
         return response;

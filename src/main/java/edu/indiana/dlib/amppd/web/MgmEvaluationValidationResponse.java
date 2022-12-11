@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class MgmEvaluationValidationResponse {
     private boolean success;
-    private MgmEvaluationTest mgmEvaluationTest;
+    private List<MgmEvaluationTest> mgmEvaluationTest;
     private List<String> validationErrors;
 
     public MgmEvaluationValidationResponse() {
