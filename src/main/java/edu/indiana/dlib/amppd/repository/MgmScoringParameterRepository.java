@@ -1,9 +1,9 @@
 package edu.indiana.dlib.amppd.repository;
 
+import edu.indiana.dlib.amppd.model.MgmScoringParameter;
+
 import java.util.Date;
 import java.util.List;
-
-import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 
 public interface MgmScoringParameterRepository extends MgmMetaRepository<MgmScoringParameter> {
 	

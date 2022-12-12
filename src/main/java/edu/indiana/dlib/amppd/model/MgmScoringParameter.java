@@ -70,14 +70,14 @@ public class MgmScoringParameter extends MgmMeta {
 	private String mstToolId;
 
 	@Type(type="text")
-	private String default_value;
+	private String defaultValue;
 
 	@Type(type = "boolean")
-	private boolean required = false;
+	private boolean isRequired = false;
 
 	@Type(type="text")
 	private String unit;
 
 	@Type(type="text")
-	private String short_name;
+	private String shortName;
 }
