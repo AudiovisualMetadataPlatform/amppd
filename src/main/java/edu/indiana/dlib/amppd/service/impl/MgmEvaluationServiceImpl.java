@@ -26,8 +26,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     private WorkflowResultRepository wfRepo;
 
 
-
-
     @Override
     public MgmEvaluationTestResponse getMgmEvaluationTests(MgmEvaluationSearchQuery query) {
         MgmEvaluationTestResponse response = mgmEvalRepo.findByQuery(query);
@@ -53,7 +51,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
             for (MgmEvaluationFilesObj file : files) {
                 MgmEvaluationGroundtruthObj groundtruth = file.getGroundtruthFile();
                 MgmEvaluationPrimaryFileObj primaryFile = file.getPrimaryFile();
-                if(groundtruth.getId() == null || primaryFile.getId() == null) {
+                if(groundtruth == null || primaryFile == null) {
                     errors.add("Both primary and groundtruth files required.");
                 } else if (groundtruth.getId() != null){
                     if (groundtruth.getOriginalFilename() != null && !groundtruth.getOriginalFilename().endsWith(mst.getGroundtruthFormat())) {
@@ -109,7 +107,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         throw new RuntimeException(e);
                     }
                 }
-
                 MgmEvaluationGroundtruthObj groundtruth = file.getGroundtruthFile();
                 mgmEvalTest.setDateSubmitted(new Date());
                 mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNNING);
