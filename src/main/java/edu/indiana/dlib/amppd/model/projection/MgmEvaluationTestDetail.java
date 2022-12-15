@@ -20,4 +20,7 @@ public interface MgmEvaluationTestDetail extends MgmEvaluationTestBrief {
     public String getScorePath();
     public String getScores();
     public String getParameters();
+
+    @Value("#{target.primaryFile.originalFilename}")
+    public String getPrimaryFileMedia();
 }

@@ -104,6 +104,10 @@ public class MgmEvaluationTest {
 	@Transient
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
-	private Map<String, Object> parametersMap; 	
+	private Map<String, Object> parametersMap;
+
+	@NotNull
+	@ManyToOne
+	private Primaryfile primaryFile;
 
 }
