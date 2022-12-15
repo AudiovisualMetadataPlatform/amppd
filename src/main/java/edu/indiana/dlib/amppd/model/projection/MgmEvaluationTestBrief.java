@@ -8,5 +8,5 @@ import java.util.Date;
 public interface MgmEvaluationTestBrief {
     public Long getId();
     public String getStatus();
-    public Date getTestDate();
+    public Date getDateSubmitted();
 }
