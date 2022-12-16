@@ -11,6 +11,7 @@ import edu.indiana.dlib.amppd.web.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
 import java.util.*;
 
@@ -24,6 +25,9 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 
     @Autowired
     private WorkflowResultRepository wfRepo;
+
+    @Autowired
+    private PrimaryfileRepository pfRepository;
 
 
     @Override
@@ -108,16 +112,27 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                     }
                 }
                 MgmEvaluationGroundtruthObj groundtruth = file.getGroundtruthFile();
+                MgmEvaluationPrimaryFileObj pfile = file.getPrimaryFile();
                 mgmEvalTest.setDateSubmitted(new Date());
                 mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNNING);
                 PrimaryfileSupplement groundtruthFile = supplementRepository.findById(groundtruth.getId()).orElse(null);
                 mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
+
+                Primaryfile primaryFile = pfRepository.findById(pfile.getId()).orElse(null);
+                if (primaryFile != null){
+                    mgmEvalTest.setPrimaryFile(primaryFile);
+                } else{
+                    response.addError("Primary File is required for evaluation test.");
+                }
+
                 WorkflowResult wfr = wfRepo.findById(file.getWorkflowId()).orElse(null);
                 if(wfr != null){
                     mgmEvalTest.setWorkflowResult(wfr);
-                    mgmEvaluationTests.add(mgmEvalTest);
                 } else {
                     response.addError("Workflow is required for evaluation test.");
+                }
+                if (!response.hasErrors()) {
+                    mgmEvaluationTests.add(mgmEvalTest);
                 }
             }
         }
