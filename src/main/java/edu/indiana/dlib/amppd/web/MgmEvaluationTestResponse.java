@@ -8,5 +8,5 @@ import java.util.List;
 public class MgmEvaluationTestResponse {
     private List<MgmEvaluationTestResult> rows;
     private int totalResults;
-    private WorkflowResultFilterValues filters;
+    private MgmEvaluationTestFilters filters;
 }
