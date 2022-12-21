@@ -89,7 +89,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
         for (MgmScoringParameter p : mstParams) {
             if(p.isRequired() == true){
                 Optional<MgmEvaluationParameterObj> result = inputParams.stream().filter(obj -> obj.getId().equals(p.getId())).findFirst();
-                if(result == null || result.isEmpty() || result.get().getValue() == null || result.get().getValue() == "") {
+                if(result == null || result.isEmpty() || result.get().getValue() == null || result.get().getValue().size() <= 0) {
                     errors.add("Input parameter " + p.getName() + " is required.");
                 }
             }
