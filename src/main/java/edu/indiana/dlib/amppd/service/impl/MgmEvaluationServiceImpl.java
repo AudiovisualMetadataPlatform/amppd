@@ -3,15 +3,12 @@ package edu.indiana.dlib.amppd.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.indiana.dlib.amppd.model.*;
-import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
-import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.repository.*;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.web.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 
 import java.util.*;
 
@@ -28,6 +25,9 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 
     @Autowired
     private PrimaryfileRepository pfRepository;
+
+    @Autowired
+    private MgmScoringParameterRepository paramsRepo;
 
 
     @Override
@@ -53,21 +53,29 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
         ArrayList<String> errors = new ArrayList<>();
         if (files.size() > 0) {
             for (MgmEvaluationFilesObj file : files) {
-                MgmEvaluationGroundtruthObj groundtruth = file.getGroundtruthFile();
-                MgmEvaluationPrimaryFileObj primaryFile = file.getPrimaryFile();
-                if(groundtruth == null || primaryFile == null) {
-                    errors.add("Both primary and groundtruth files required.");
-                } else if (groundtruth.getId() != null){
-                    if (groundtruth.getOriginalFilename() != null && !groundtruth.getOriginalFilename().endsWith(mst.getGroundtruthFormat())) {
-                        errors.add("Invalid groundtruth file format for " + groundtruth.getName() + ". Please provide " + mst.getGroundtruthFormat() + " file.");
-                    } else if (groundtruth.getOriginalFilename() == null) {
-                        Optional<PrimaryfileSupplement> groundtruthFile = supplementRepository.findById(groundtruth.getId());
-                        if(groundtruthFile.isEmpty()){
-                            errors.add("Groundtruth file "+ groundtruth.getName() +" does not exist.");
-                        } else if (groundtruthFile.get().getOriginalFilename() != null && !groundtruthFile.get().getOriginalFilename().endsWith(mst.getGroundtruthFormat())) {
-                            errors.add("Invalid groundtruth file format for " + groundtruth.getName() + ". Please provide " + mst.getGroundtruthFormat() + " file.");
+                if(file.getGroundtruthFileId() == null) {
+                    errors.add("Groundtruth file is required.");
+                } else {
+                    Optional<PrimaryfileSupplement> groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId());
+                    if (groundtruthFile == null) {
+                        errors.add("Groundtruth file does not exist.");
+                    } else if (groundtruthFile != null && !groundtruthFile.get().getOriginalFilename().endsWith(mst.getGroundtruthFormat())) {
+                        errors.add("Invalid groundtruth file format for " + groundtruthFile.get().getName() + ". Please provide " + mst.getGroundtruthFormat() + " file.");
+                    }
+                }
+                if(file.getWorkflowId() == null) {
+                    errors.add("Workflow is required for evaluation test.");
+                }else {
+                    Optional<WorkflowResult> wfr = wfRepo.findById(file.getWorkflowId());
+                    if (wfr == null) {
+                        errors.add("Workflow does not exist.");
+                    } else if (wfr != null) {
+                        Primaryfile primaryFile = pfRepository.findById(wfr.get().getPrimaryfileId()).orElse(null);
+                        if (primaryFile == null) {
+                            errors.add("Primary File is required for evaluation test.");
                         }
                     }
+
                 }
             }
         }
@@ -80,7 +88,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
         Set<MgmScoringParameter> mstParams = mst.getParameters();
         for (MgmScoringParameter p : mstParams) {
             if(p.isRequired() == true){
-                Optional<MgmEvaluationParameterObj> result = inputParams.stream().filter(obj -> obj.getId() == p.getId()).findFirst();
+                Optional<MgmEvaluationParameterObj> result = inputParams.stream().filter(obj -> obj.getId().equals(p.getId())).findFirst();
                 if(result == null || result.isEmpty() || result.get().getValue() == null || result.get().getValue() == "") {
                     errors.add("Input parameter " + p.getName() + " is required.");
                 }
@@ -103,6 +111,13 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 mgmEvalTest.setSubmitter(user.getUsername());
                 ArrayList<MgmEvaluationParameterObj> params = request.getParameters();
                 if(!params.isEmpty()) {
+                    for(MgmEvaluationParameterObj pp: params) {
+                        MgmScoringParameter obj = paramsRepo.findById(pp.getId()).orElse(null);
+                        if (obj != null) {
+                            pp.setShortName(obj.getShortName());
+                            pp.setName(obj.getName());
+                        }
+                    }
                     ObjectMapper mapper = new ObjectMapper();
                     try {
                         String newJsonData = mapper.writeValueAsString(params);
@@ -111,29 +126,15 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         throw new RuntimeException(e);
                     }
                 }
-                MgmEvaluationGroundtruthObj groundtruth = file.getGroundtruthFile();
-                MgmEvaluationPrimaryFileObj pfile = file.getPrimaryFile();
+                WorkflowResult wfr = wfRepo.findById(file.getWorkflowId()).orElse(null);
+                mgmEvalTest.setWorkflowResult(wfr);
                 mgmEvalTest.setDateSubmitted(new Date());
                 mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNNING);
-                PrimaryfileSupplement groundtruthFile = supplementRepository.findById(groundtruth.getId()).orElse(null);
+                PrimaryfileSupplement groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId()).orElse(null);
                 mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
-
-                Primaryfile primaryFile = pfRepository.findById(pfile.getId()).orElse(null);
-                if (primaryFile != null){
-                    mgmEvalTest.setPrimaryFile(primaryFile);
-                } else{
-                    response.addError("Primary File is required for evaluation test.");
-                }
-
-                WorkflowResult wfr = wfRepo.findById(file.getWorkflowId()).orElse(null);
-                if(wfr != null){
-                    mgmEvalTest.setWorkflowResult(wfr);
-                } else {
-                    response.addError("Workflow is required for evaluation test.");
-                }
-                if (!response.hasErrors()) {
-                    mgmEvaluationTests.add(mgmEvalTest);
-                }
+                Primaryfile primaryFile = pfRepository.findById(wfr.getPrimaryfileId()).orElse(null);
+                mgmEvalTest.setPrimaryFile(primaryFile);
+                mgmEvaluationTests.add(mgmEvalTest);
             }
         }
 
@@ -141,7 +142,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
             response.setSuccess(false);
         } else {
             mgmEvalRepo.saveAll(mgmEvaluationTests);
-            response.setMgmEvaluationTest(mgmEvaluationTests);
+            response.setMgmEvaluationTestCount(mgmEvaluationTests.size());
             response.setSuccess(true);
         }
         return response;
