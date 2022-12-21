@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class MgmEvaluationFilesObj {
-    private MgmEvaluationGroundtruthObj groundtruthFile;
-    private MgmEvaluationPrimaryFileObj primaryFile;
-    private Long workflowId;
+    private Long groundtruthFileId;
+    private Long workflowResultId;
 }
