@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class MgmEvaluationFilesObj {
     private Long groundtruthFileId;
-    private Long workflowId;
+    private Long workflowResultId;
 }

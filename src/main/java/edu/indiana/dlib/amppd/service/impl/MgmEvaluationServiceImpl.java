@@ -63,10 +63,10 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         errors.add("Invalid groundtruth file format for " + groundtruthFile.get().getName() + ". Please provide " + mst.getGroundtruthFormat() + " file.");
                     }
                 }
-                if(file.getWorkflowId() == null) {
+                if(file.getWorkflowResultId() == null) {
                     errors.add("Workflow is required for evaluation test.");
                 }else {
-                    Optional<WorkflowResult> wfr = wfRepo.findById(file.getWorkflowId());
+                    Optional<WorkflowResult> wfr = wfRepo.findById(file.getWorkflowResultId());
                     if (wfr == null) {
                         errors.add("Workflow does not exist.");
                     } else if (wfr != null) {
@@ -126,7 +126,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         throw new RuntimeException(e);
                     }
                 }
-                WorkflowResult wfr = wfRepo.findById(file.getWorkflowId()).orElse(null);
+                WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
                 mgmEvalTest.setWorkflowResult(wfr);
                 mgmEvalTest.setDateSubmitted(new Date());
                 mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNNING);
