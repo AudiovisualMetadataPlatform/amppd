@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.web;
 
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
 import lombok.Data;
 
 import java.util.Date;
@@ -31,6 +32,7 @@ public class MgmEvaluationSearchQuery {
         filterByRelevant = false;
         filterByFinal = false;
         filterByTestDates = new Date[0];
+        filterByTestStatus = new TestStatus[1];
     }
 
     private int pageNum;
@@ -56,6 +58,8 @@ public class MgmEvaluationSearchQuery {
     private boolean filterByFinal;
 
     private Date[] filterByTestDates;
+
+    private TestStatus[] filterByTestStatus;
     /**
      * Get the filter value for the specified WorkflowResult field of String type.
      * @param field the specified WorkflowResult field

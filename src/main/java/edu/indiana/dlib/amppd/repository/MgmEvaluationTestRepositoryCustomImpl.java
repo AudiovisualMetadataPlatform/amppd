@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
 import edu.indiana.dlib.amppd.web.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -172,6 +173,12 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         if(mesq.getFilterByStatuses().length>0) {
             Path<String> path = root.get("workflowResult").get("status");
             Predicate predicate = path.in((Object[])mesq.getFilterByStatuses());
+            predicates.add(predicate);
+        }
+
+        if(mesq.getFilterByTestStatus().length>0) {
+            Path<String> path = root.get("status");
+            Predicate predicate = path.in((Object[])mesq.getFilterByTestStatus());
             predicates.add(predicate);
         }
 
@@ -382,6 +389,22 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         }
         List<GalaxyJobState> statuses = em.createQuery(cqStatus.select(rtStatus.get("workflowResult").get("status")).distinct(true)).getResultList();
 
+
+        // mgm evaluation test status filter
+        CriteriaQuery<TestStatus> cqTestStatus = cb.createQuery(TestStatus.class);
+        Root<MgmEvaluationTest> rtTestStatus = cqTestStatus.from(MgmEvaluationTest.class);
+        TestStatus[] fbTestStatuses = wrsq.getFilterByTestStatus();
+        if (fbTestStatuses.length > 0) {
+            wrsq.setFilterByTestStatus(new TestStatus[1]);
+            addPredicates(wrsq, cb, cqTestStatus, rtTestStatus);
+            wrsq.setFilterByTestStatus(fbTestStatuses);
+        }
+        else {
+            addPredicates(wrsq, cb, cqTestStatus, rtTestStatus);
+        }
+        List<TestStatus> testStatuses = em.createQuery(cqTestStatus.select(rtTestStatus.get("status")).distinct(true)).getResultList();
+
+
         // String type filters
         List<String> submitters = getFilterValues("submitter", wrsq, cb, false);
         List<String> externalIds = getFilterValues("externalId", wrsq, cb, true);
@@ -432,6 +455,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         filters.setStatuses(statuses);
         filters.setSearchTerms(searchTerms);
         filters.setTestDateFilter(testDates);
+        filters.setTestStatuses(testStatuses);
 
         return filters;
     }
