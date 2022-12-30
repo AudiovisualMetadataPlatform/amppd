@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.web;
 
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
 import lombok.Data;
 
 import java.util.Date;
@@ -21,4 +22,5 @@ public class MgmEvaluationTestFilters {
     private List<GalaxyJobState> statuses;
     private List<String> searchTerms;
     private List<Date> testDateFilter;
+    private List<TestStatus> testStatuses;
 }
