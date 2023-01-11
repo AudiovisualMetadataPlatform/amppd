@@ -13,5 +13,6 @@ import edu.indiana.dlib.amppd.model.MgmScoringTool;
 public interface MgmScoringToolBrief extends MgmMetaBrief {
 	
 	public String getToolId();
+	public String getGroundtruthTemplate();
 	
 }

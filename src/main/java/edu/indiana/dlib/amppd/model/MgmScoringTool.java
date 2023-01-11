@@ -1,28 +1,17 @@
 package edu.indiana.dlib.amppd.model;
 
-import java.util.Set;
-
-import javax.jdo.annotations.Unique;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.Index;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import edu.indiana.dlib.amppd.service.impl.ConfigServiceImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.jdo.annotations.Unique;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 /**
  * This class contains information about an MGM Scoring Tool (MST) associated with an executable script,
@@ -117,7 +106,10 @@ public class MgmScoringTool extends MgmMeta {
 	
 	// temporary storage of section ID of the MST for CSV parsing purpose
 	@Transient
-	private String sectionId;		
+	private String sectionId;
+
+	@NotBlank
+	private String groundtruthTemplate;
 
 	/**
 	 * Get the concatenated groundtruth category in the form of Groundtruth-subcategory

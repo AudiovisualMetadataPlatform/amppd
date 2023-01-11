@@ -1,0 +1,5 @@
+label,start,end
+non-applause,00:00:00,00:00:10
+applause,00:00:10,00:00:13
+non-applause,00:00:13,00:01:04
+applause,00:01:04,00:01:42
