@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -72,8 +73,9 @@ public class MgmScoringParameter extends MgmMeta {
 	@Type(type="text")
 	private String defaultValue;
 
-	@Type(type = "boolean")
-	private boolean isRequired = false;
+	@NotNull
+	@ColumnDefault("false")
+	private boolean isRequired;
 
 	@Type(type="text")
 	private String unit;
