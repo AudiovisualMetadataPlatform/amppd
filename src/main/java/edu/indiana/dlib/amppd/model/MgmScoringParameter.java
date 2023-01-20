@@ -1,22 +1,15 @@
 package edu.indiana.dlib.amppd.model;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Index;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Type;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * This class contains information about a parameter of an MGM Scoring Tool (MST).
@@ -60,6 +53,7 @@ public class MgmScoringParameter extends MgmMeta {
     // the sibling parameter (of the same parent mst) on which this parameter's value set depends on, applicable to sing/multi-select ParamType
     @ManyToOne
     private MgmScoringParameter dependency;
+
     
     // category of the associated MGM, corresponding to the tool panel section in Galaxy
 	@NotNull
@@ -75,5 +69,17 @@ public class MgmScoringParameter extends MgmMeta {
 	// temporary storage of toolId of the parent mst of the parameter for CSV parsing purpose
 	@Transient
 	private String mstToolId;
-		
+
+	@Type(type="text")
+	private String defaultValue;
+
+	@NotNull
+	@ColumnDefault("false")
+	private boolean isRequired;
+
+	@Type(type="text")
+	private String unit;
+
+	@Type(type="text")
+	private String shortName;
 }

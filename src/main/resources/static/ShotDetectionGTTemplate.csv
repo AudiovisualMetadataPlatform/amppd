@@ -1,0 +1,6 @@
+start,end,transition_type (optional)
+00:00:00,00:00:16,cut
+00:00:16,00:00:21,cut
+00:00:21,00:00:23,cut
+00:00:23,00:00:33,panning
+00:00:33,00:00:36,dissolve

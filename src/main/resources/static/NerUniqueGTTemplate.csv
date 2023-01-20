@@ -1,0 +1,5 @@
+text,type,count (optional)
+Indiana,LOCATION,2
+civil war,EVENT,1
+jane,PERSON,1
+the emancipation proclamation,TITLE,1

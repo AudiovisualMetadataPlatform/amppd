@@ -1,12 +1,11 @@
 package edu.indiana.dlib.amppd.repository;
 
-import java.util.Date;
-import java.util.List;
-
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.projection.MgmScoringToolBrief;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+import java.util.Date;
+import java.util.List;
 
 
 @RepositoryRestResource(excerptProjection = MgmScoringToolBrief.class)
