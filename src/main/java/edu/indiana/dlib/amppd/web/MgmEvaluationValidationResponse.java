@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.web;
 
-import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.List;
 @Data
 public class MgmEvaluationValidationResponse {
     private boolean success;
-    private List<MgmEvaluationTest> mgmEvaluationTest;
+    private Integer mgmEvaluationTestCount;
     private List<String> validationErrors;
 
     public MgmEvaluationValidationResponse() {

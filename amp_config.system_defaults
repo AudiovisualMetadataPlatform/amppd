@@ -84,8 +84,8 @@ rest:
         amppd.pythonPath: python3
         
         amppd.corsOriginPattern: http://localhost:8080
-        amppd.supplementCategories: Face,Transcript,Vocabulary,Program,Other
-        amppd.groundtruthSubcategories: segment_timecodes_labels,applause_timecodes_labels,stt_transcript,ner_all,ner_all-aws,ner_all_spacy,ner_unique,ner_unique_aws,ner_unique_spacy,shots_timecodes_labels,face_timecodes,face_labels,vocr_timecodes_texts,vocr_timecodes,vocr_texts,vocr_unique_texts,ner_all_common,ner_unique_common
+        amppd.supplementCategories: Face,Transcript,Vocabulary,Program,Groundtruth,Other
+        amppd.groundtruthSubcategories: segment_timecodes_labels,applause_timecodes_labels,stt_transcript,ner_all,ner_all-aws,ner_all_spacy,ner_unique,ner_unique_aws,ner_unique_spacy,shot_timecodes_labels,face_timecodes,face_labels,vocr_timecodes_texts,vocr_timecodes,vocr_texts,vocr_unique_texts,ner_all_common
 
         # timeouts
         amppd.jwtExpireMinutes: 60
