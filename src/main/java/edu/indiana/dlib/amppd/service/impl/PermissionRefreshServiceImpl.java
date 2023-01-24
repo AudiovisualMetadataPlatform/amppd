@@ -204,12 +204,12 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		for (RoleAction roleAction : roleActions) {	
 			Role role = roleRepository.findFirstByNameAndUnitId(roleAction.getRoleName(), null);
 			if (role == null) {
-				throw new RuntimeException("Failed to refresh RoleAction table: Invalid roleAction with non-existing role name in CSV: " + role.getName());
+				throw new RuntimeException("Failed to refresh RoleAction table: Invalid roleAction with non-existing role name in CSV: " + roleAction.getRoleName());
 			}
 			
 			Action action = actionRepository.findFirstByName(roleAction.getActionName());
 			if (action == null) {
-				throw new RuntimeException("Failed to refresh ActionAction table: Invalid roleAction with non-existing action name in CSV: " + roleAction.getActionName());
+				throw new RuntimeException("Failed to refresh Action table: Invalid roleAction with non-existing action name in CSV: " + roleAction.getActionName());
 			}
 			 
 			Role existRole = existRoles.get(role.getId());
