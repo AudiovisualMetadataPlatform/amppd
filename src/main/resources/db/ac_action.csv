@@ -15,19 +15,19 @@ list items,list all or search for a subset of items,Query,Item,GET,/items
 view item detail,view details of an item,Read,Item,GET,/items/{id}
 edit item data,edit metadata of an item,Update,Item,PATCH,/items/{id}
 delete item,delete an item and all its associated data,Delete,Item,DELETE,/items/{id}
-add file to item,add a new primaryfile to an item,Update,Item,POST,/items/{id}/addPrimaryfile
+add file to item,add a new primaryfile to an item,Create,Primaryfile,POST,/items/{id}/addPrimaryfile
 list content files,list all or search for a subset of primaryfiles,Query,Primaryfile,GET,/primaryfiles
 view/play content file,view details of a primaryfile or play its media content,Read,Primaryfile,GET,/primaryfiles/{id}
 edit content file data,edit metadata of a primaryfile,Update,Primaryfile,PATCH,/primaryfiles/{id}
 delete  content file,delete a primaryfile and all its associated data,Delete,Primaryfile,DELETE,/primaryfiles/{id}
-add unit supplement,add a new supplement to a unit,Add,Unit,POST,/units/{id}/addSupplement
-add collection supplement,add a new supplement to a collection,Add,Collection,POST,/collections/{id}/addSupplement
-add item supplement,add a new supplement to a item,Add,Item,POST,/items/{id}/addSupplement
-add content file supplement,add a new supplement to a primaryfile,Add,Primaryfile,POST,/primaryfiles/{id}/addSupplement
-move unit supplement,move a unit supplement to another parent,Move,Unit,POST,/units/{id}/moveSupplement
-move collection supplement,move a collection supplement to another parent,Move,Collection,POST,/collections/{id}/moveSupplement
-move item supplement,move an item supplement to another parent,Move,Item,POST,/items/{id}/moveSupplement
-move content file supplement,move a primaryfile supplement to another parent,Move,Primaryfile,POST,/primaryfiles/{id}/moveSupplement
+add unit supplement,add a new supplement to a unit,Create,UnitSupplement,POST,/units/{id}/addSupplement
+add collection supplement,add a new supplement to a collection,Create,CollectionSupplement,POST,/collections/{id}/addSupplement
+add item supplement,add a new supplement to a item,Create,ItemSupplement,POST,/items/{id}/addSupplement
+add content file supplement,add a new supplement to a primaryfile,Create,PrimaryfileSupplement,POST,/primaryfiles/{id}/addSupplement
+move unit supplement,move a unit supplement to another parent,Move,UnitSupplement,POST,/units/{id}/moveSupplement
+move collection supplement,move a collection supplement to another parent,Move,CollectionSupplement,POST,/collections/{id}/moveSupplement
+move item supplement,move an item supplement to another parent,Move,ItemSupplement,POST,/items/{id}/moveSupplement
+move content file supplement,move a primaryfile supplement to another parent,Move,PrimaryfileSupplement,POST,/primaryfiles/{id}/moveSupplement
 list supplement files,list all or search for a subset of supplements,Query,Supplement,GET,/supplements
 view supplement file,view details of a supplement,Read,Supplement,GET,/supplements/{id}
 edit supplement file data,edit metadata of a supplement,Update,Supplement,PATCH,/supplements/{id}
@@ -36,7 +36,7 @@ view dashboard,list all or search for a subset of workflow results,Query,Workflo
 view workflow output,view content of a workflow result output file,Read,WorkflowResult,GET,/workflow-results/{id}/output
 edit workflow output,edit workflow result output name and/or final status,Update,WorkflowResult,PATCH,/workflow-results/{id}
 delete workflow output,delete a workflow result from dashboard and Galaxy,Delete,WorkflowResult,DELETE,/workflow-results/{id}
-export workflow outputs,export selected workflow results to a CSV file,Export,WorkflowResult,POST,/workflow-results/export
+export workflow outputs,export selected workflow results to a CSV file,Execute,WorkflowResult,POST,/workflow-results/export
 create workflow,create a new workflow,Create,Workflow,POST,/workflows/create
 list workflow,list all or search for a subset of workflows,Query,Workflow,GET,/workflows
 view workflow details,view details of a workflow,Read,Workflow,GET,/workflows/{id}
