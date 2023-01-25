@@ -1,20 +1,16 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
-import edu.indiana.dlib.amppd.exception.StorageException;
-import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.Supplement;
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.repository.*;
-import edu.indiana.dlib.amppd.service.DataentityService;
-import edu.indiana.dlib.amppd.service.FileStorageService;
-import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.ItemSearchResponse;
-import edu.indiana.dlib.amppd.web.ItemSearchResult;
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,12 +20,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
+import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.service.DataentityService;
+import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
+import edu.indiana.dlib.amppd.web.ItemSearchResult;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of MediaService.
@@ -100,6 +110,23 @@ public class MediaServiceImpl implements MediaService {
 			throw new StorageException("Could not initialize media symlink root directory " + root, e);
 		}		
 	}	
+	
+	/**
+	 * @see eedu.indiana.dlib.amppd.service.MediaService.isMediaTypeAV(String)
+	 */
+	@Override
+	public boolean isMediaTypeAV(String mediaType) {
+		return StringUtils.isBlank(mediaType) || "av".equalsIgnoreCase(mediaType) || "audio/video".equalsIgnoreCase(mediaType);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.isMediaTypeMatched(Primaryfile, String)
+	 */
+	@Override
+	public boolean isMediaTypeMatched(Primaryfile primaryfile, String mediaType) {
+		String type = primaryfile.getMimeType();
+		return isMediaTypeAV(mediaType) || StringUtils.containsIgnoreCase(type, mediaType);
+	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileMediaUrl(Long)

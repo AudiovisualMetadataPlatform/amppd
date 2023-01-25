@@ -278,7 +278,7 @@ public class JobServiceImpl implements JobService {
 		// if primaryfile is needed as one input, its MIME type must match input format if specified as audio/video
 		String format = workflowDetails.getInputPrimaryfileFormat();
 		String type = primaryfile.getMimeType();
-		if (!StringUtils.isBlank(format) && !"av".equals(format) && StringUtils.equalsIgnoreCase(format, type)) {
+		if (!mediaService.isMediaTypeMatched(primaryfile, format)) {
 			throw new GalaxyWorkflowException("Primaryfile " + primaryfileId + " MIME type " + type + " doesn't match the corresponding input format " + format);
 		}
 		

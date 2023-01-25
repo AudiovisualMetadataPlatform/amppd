@@ -55,10 +55,12 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	int countDistinctOutputTypesByOutputTypeIn(List<String> outputTypes);
 	
 	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
+	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case
 	@Query(value = 
 			"select distinct p.collectionName as collectionName, p.itemName as itemName, p.primaryfileName as primaryfileName, p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
-			"where not exists ( " + 
+			"where lower(p.primaryfileName) like lower(concat('%', :keyword,'%')) " +
+			"and not exists ( " + 
 			"	select distinct o.outputType " + 
 			"	from WorkflowResult o " + 
 			"	where o.outputType in :outputTypes " +  
@@ -71,7 +73,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			"	) " + 
 			") "
 	)
-	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(List<String> outputTypes);
+	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(String keyword, List<String> outputTypes);
 
 	
 // below query is correct in logic but won't work with JPA, which doesn't support subquery in FROM clause
