@@ -15,6 +15,21 @@ import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 public interface MediaService {
 
 	/**
+	 * Check if the given mediaType (equivalent to Galaxy media data type) is not specified or AV.
+	 * @param mediaType the given mediaType
+	 * @return true if mediaType is not specified or AV
+	 */
+	public boolean isMediaTypeAV(String mediaType); 
+
+	/**
+	 * Check if the MIME type of the given primaryfile matches the given mediaType (equivalent to Galaxy media data type).
+	 * @param primaryfile the given primaryfile
+	 * @param mediaType the given mediaType
+	 * @return true if matches false otherwise
+	 */
+	public boolean isMediaTypeMatched(Primaryfile primaryfile, String mediaType); 
+	
+	/**
 	 * Get the media file download URL for the given primaryfile ID.
 	 * Note that this method does not verify that the primaryfile for this ID exists in the system.
 	 * @param primaryfileId the given primaryfile ID

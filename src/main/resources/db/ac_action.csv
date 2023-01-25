@@ -47,6 +47,7 @@ run workflow,run a workflow on selected files via creating new AMP/Galaxy jobs,C
 ingest batch,run batch ingest process to create content data,Execute,Batch,POST,/batch/ingest
 retrieve bags,retrieve bag contents at various levels,Read,Bag,GET,/bags/{entity}/{id}
 deliver bag,deliver bag contents to Avalon at various levels,Execute,Bag,POST,/deliver/avalon/{collections|items}/{id}
+run evaluation,run MGM evaluations,Execute,Evaluation,POST,/mgm*
 create role,create a new unit scope role,Create,Role,POST,/roles
 view role,view details of a unit scope role,Read,Role,GET,/roles/{id}
 edit role,edit a unit scope role,Update,Role,PATCH,/roles/{id}

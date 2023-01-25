@@ -21,9 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdName;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -36,7 +40,13 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkflowResultController {
 	
 	@Autowired
+	private PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
+
+	@Autowired
+	private MediaService mediaService;
 
 	@Autowired
 	private WorkflowResultService workflowResultService;
@@ -57,21 +67,48 @@ public class WorkflowResultController {
 	}
 
 	/**
-	 * Get a list of primaryfiles with completed intermediate result outputs for each data type in the given outputTypes list.
+	 * Get a list of primaryfiles with matching mediaType, keyword in name, and completed intermediate result outputs for each data type in the given outputTypes list.
 	 * @param outputTypes the given outputTypes
 	 * @return list of primaryfiles satisfying above criteria
 	 */
 	@GetMapping(path = "/workflow-results/intermediate/primaryfiles", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<PrimaryfileIdName> getPrimaryfilesForOutputTypes(@RequestParam List<String> outputTypes) {
+	public List<PrimaryfileIdName> getPrimaryfilesForOutputTypes(
+			@RequestParam(required = false) String mediaType, 
+			@RequestParam(required = false) String keyword, 
+			@RequestParam List<String> outputTypes) {
+		List<PrimaryfileIdName> primaryfiles = new ArrayList<PrimaryfileIdName>();
+		
+		// ensure that keyword has a value for below query
+		// Note: when keyword is empty, any name is matched 
+		if (keyword == null) {
+			keyword = "";
+		}
+
 		// if not all given output types exist in the workflow result table, return empty list
 		int count = workflowResultRepository.countDistinctOutputTypesByOutputTypeIn(outputTypes);
 		if (count < outputTypes.size()) {
-			return new ArrayList<PrimaryfileIdName>();
+			log.info("Retrieved none legitimate primaryfile with COMPLETE outputs for all " + outputTypes.size() + " output types.");
+			return primaryfiles;
 		}
 		
-		// otherwise return the primaryfiles with outputs for each given type
-		List<PrimaryfileIdName> primaryfiles = workflowResultRepository.findPrimaryfileIdNamesByOutputTypes(outputTypes);
-		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with COMPLETE outputs for " + outputTypes.size() + " output types.");
+		// otherwise retrieve the primaryfiles with outputs for all of the given types
+		List<PrimaryfileIdName> pfs = workflowResultRepository.findPrimaryfileIdNamesByOutputTypes(keyword, outputTypes);
+		
+		// if primaryfile is not used as one input or the required input media type is AV, return above primaryfiles list
+		if (mediaService.isMediaTypeAV(mediaType)) {
+			log.info("Retrieved " + pfs.size() + " primaryfiles with keyword " + keyword + " and COMPLETE outputs for all " + outputTypes.size() + " output types.");
+			return pfs;
+		}		
+		
+		// otherwise only return primaryfiles with matching media type
+		for (PrimaryfileIdName pf : pfs) {			
+			Primaryfile primaryfile = primaryfileRepository.findById(pf.getPrimaryfileId()).orElseThrow(() -> new StorageException("Primaryfile <" + pf.getPrimaryfileId() + "> does not exist!"));
+			if (mediaService.isMediaTypeMatched(primaryfile, mediaType)) {
+				primaryfiles.add(pf);
+			}
+		}
+
+		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with mediaType " + mediaType + ", keyword " + keyword + ", and COMPLETE outputs for all " + outputTypes.size() + " output types.");
 		return primaryfiles;
 	}
 	
