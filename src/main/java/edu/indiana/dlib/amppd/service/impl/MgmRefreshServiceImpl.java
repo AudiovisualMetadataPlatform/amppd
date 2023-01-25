@@ -1,25 +1,9 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.github.jmchilton.blend4j.galaxy.ToolsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.ToolSection;
 import com.opencsv.bean.CsvToBeanBuilder;
-
 import edu.indiana.dlib.amppd.model.MgmCategory;
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
@@ -32,6 +16,19 @@ import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.MgmRefreshService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Implementation of MgmRefreshService
@@ -139,10 +136,10 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 				log.warn("Did not overwrite category name with section name: section ID from csv doesn't exist in Galaxy.");
 //				throw new RuntimeException("Failed to refresh MgmCategory table: Invalid category with non-existing section ID in CSV: " + category);
 			}
-			else {
-				// otherwise overwrite category name with the section name
-				category.setName(sectionName);
-			}
+//			else {
+//				// otherwise overwrite category name with the section name
+//				category.setName(sectionName);
+//			}
 			
 			// note: we can't just save all categories directly, as that would create new records in the table;
 			// instead, we need to find each existing record if any based on ID and update it
