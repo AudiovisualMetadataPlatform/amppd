@@ -56,7 +56,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
 	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case
 	@Query(value = 
-			"select p.primaryfileId as primaryfileId " + 
+			"select distinct p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
 			"where lower(p.primaryfileName) like lower(concat('%', :keyword,'%')) " +
 			"and not exists ( " + 
