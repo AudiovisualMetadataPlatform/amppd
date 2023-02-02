@@ -12,11 +12,11 @@ import edu.indiana.dlib.amppd.model.WorkflowResult;
 @Projection(name = "primaryfileIdName", types = {WorkflowResult.class}) 
 public interface PrimaryfileIdName {
 	
+	public Long getCollectionId();
+	public String getCollectionName();	
+	public Long getItemId();
+	public String getItemName();
 	public Long getPrimaryfileId();	
 	public String getPrimaryfileName();	
-//	public Long getItemId();
-	public String getItemName();
-//	public Long getCollectionId();
-	public String getCollectionName();	
 	
 }

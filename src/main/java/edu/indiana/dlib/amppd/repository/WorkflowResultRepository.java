@@ -9,7 +9,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdName;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
 public interface WorkflowResultRepository extends PagingAndSortingRepository<WorkflowResult, Long>, WorkflowResultRepositoryCustom {	
@@ -57,7 +56,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
 	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case
 	@Query(value = 
-			"select distinct p.collectionName as collectionName, p.itemName as itemName, p.primaryfileName as primaryfileName, p.primaryfileId as primaryfileId " + 
+			"select p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
 			"where lower(p.primaryfileName) like lower(concat('%', :keyword,'%')) " +
 			"and not exists ( " + 
@@ -71,9 +70,34 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			"		and w.outputType = o.outputType " + 
 			"		and w.status = 'COMPLETE' " + 
 			"	) " + 
-			") "
+			") " + 
+			"order by p.collectionId, p.itemId, p.primaryfileId "
 	)
-	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(String keyword, List<String> outputTypes);
+	List<Long> findPrimaryfileIdsByOutputTypes(String keyword, List<String> outputTypes);
+
+//	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
+//	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case
+//	@Query(value = 
+//			"select distinct p.collectionId as collectionId, p.collectionName as collectionName, " + 
+//			"p.itemId as itemId, p.itemName as itemName, " +
+//			"p.primaryfileId as primaryfileId, p.primaryfileName as primaryfileName " + 
+//			"from WorkflowResult p " + 
+//			"where lower(p.primaryfileName) like lower(concat('%', :keyword,'%')) " +
+//			"and not exists ( " + 
+//			"	select distinct o.outputType " + 
+//			"	from WorkflowResult o " + 
+//			"	where o.outputType in :outputTypes " +  
+//			"	and not exists ( " + 
+//			"		select w.id " + 
+//			"		from WorkflowResult w " + 
+//			"		where w.primaryfileId = p.primaryfileId " + 
+//			"		and w.outputType = o.outputType " + 
+//			"		and w.status = 'COMPLETE' " + 
+//			"	) " + 
+//			") " + 
+//			"order by p.collectionId, p.itemId, p.primaryfileId "
+//	)
+//	List<PrimaryfileIdName> findPrimaryfileIdNamesByOutputTypes(String keyword, List<String> outputTypes);
 
 	
 // below query is correct in logic but won't work with JPA, which doesn't support subquery in FROM clause

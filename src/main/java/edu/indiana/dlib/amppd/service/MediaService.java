@@ -22,6 +22,14 @@ public interface MediaService {
 	public boolean isMediaTypeAV(String mediaType); 
 
 	/**
+	 * Check if the given MIME type matches the given mediaType (equivalent to Galaxy media data type).
+	 * @param mimeType the given mimeType
+	 * @param mediaType the given mediaType
+	 * @return true if matches false otherwise
+	 */
+	public boolean isMediaTypeMatched(String mimeType, String mediaType); 
+	
+	/**
 	 * Check if the MIME type of the given primaryfile matches the given mediaType (equivalent to Galaxy media data type).
 	 * @param primaryfile the given primaryfile
 	 * @param mediaType the given mediaType

@@ -210,7 +210,7 @@ public class MediaServiceTests {
 		ItemSearchResponse response= mediaService.findItemOrFile(primaryfileName.substring(0,4),mediaType);
 		Assert.assertTrue(response.getRows().size()>=2);
 		ItemSearchResponse fileSearchResponse= mediaService.findItemOrFile(primaryfileName,mediaType);
-		Assert.assertEquals(primaryfileName,fileSearchResponse.getRows().get(0).getPrimaryfiles().get(0).get("name"));
+		Assert.assertEquals(primaryfileName,fileSearchResponse.getRows().get(0).getPrimaryfiles().get(0).getName());
 	}	
 	
 	@Test
