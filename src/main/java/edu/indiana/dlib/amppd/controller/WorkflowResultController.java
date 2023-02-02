@@ -26,6 +26,7 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.MediaService;
@@ -99,7 +100,7 @@ public class WorkflowResultController {
 		}
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
-		List<Long> pids = workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes);
+		List<PrimaryfileIdInfo> pidis = workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes);
 		List<ItemInfo> itemis = response.getItems();	
 		ItemInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
@@ -110,7 +111,8 @@ public class WorkflowResultController {
 //		}		
 		
 		// only include primaryfiles with matching media type
-		for (Long pid : pids) {			
+		for (PrimaryfileIdInfo pidi : pidis) {	
+			Long pid = pidi.getPrimaryfileId();
 			Primaryfile primaryfile = primaryfileRepository.findById(pid).orElseThrow(() -> new StorageException("Primaryfile <" + pid + "> does not exist!"));
 			
 			// if current primaryfile belongs to another item than the current item, start a new item as the current item
