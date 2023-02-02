@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 public class PrimaryfileInfo {
 	Long id;
 	String name;
-	String mediaType;
+	String mimeType;
 	String originalFilename;
 }

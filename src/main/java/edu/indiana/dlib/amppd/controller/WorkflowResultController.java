@@ -31,8 +31,8 @@ import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
-import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import edu.indiana.dlib.amppd.web.ItemInfo;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import edu.indiana.dlib.amppd.web.PrimaryfileInfo;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
@@ -100,7 +100,7 @@ public class WorkflowResultController {
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
 		List<Long> pids = workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes);
-		List<ItemInfo> itemis = response.getRows();	
+		List<ItemInfo> itemis = response.getItems();	
 		ItemInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
 		
@@ -113,14 +113,14 @@ public class WorkflowResultController {
 		for (Long pid : pids) {			
 			Primaryfile primaryfile = primaryfileRepository.findById(pid).orElseThrow(() -> new StorageException("Primaryfile <" + pid + "> does not exist!"));
 			
-			// if current primaryfile belongs to another item than the current one, start a new item as the current item
+			// if current primaryfile belongs to another item than the current item, start a new item as the current item
 			Item item = primaryfile.getItem();
 			Collection collection = item.getCollection();
 			if (itemi == null || itemi.getItemId().longValue() != item.getId().longValue()) {
 				itemi = new ItemInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
 			}
 			
-			// if current primaryfile is of the matching media type, add it to the current item 
+			// if current primaryfile MIME type matches the required media type, add it to the current item 
 			List<PrimaryfileInfo> pfileis = itemi.getPrimaryfiles();
 			String mimeType = primaryfile.getMimeType();
 			if (mediaService.isMediaTypeMatched(mimeType, mediaType)) {
@@ -138,51 +138,7 @@ public class WorkflowResultController {
 		log.info("Retrieved " + countp + " primaryfiles with mediaType " + mediaType + ", keyword " + keyword + ", and COMPLETE outputs for all " + outputTypes.size() + " output types.");
 		return response;
 	}
-	
-//	/**
-//	 * Get a list of primaryfiles with matching mediaType, keyword in name, and completed intermediate result outputs for each data type in the given outputTypes list.
-//	 * @param mediaType the given mediaType
-//	 * @param keyword the given keyword
-//	 * @param outputTypes the given outputTypes
-//	 * @return list of PrimaryfileIdNames satisfying above criteria
-//	 */
-//	protected List<PrimaryfileIdName> getPrimaryfilesForOutputTypes(String mediaType, String keyword, List<String> outputTypes) {
-//		List<PrimaryfileIdName> primaryfiles = new ArrayList<PrimaryfileIdName>();
-//		
-//		// ensure that keyword has a value for below query
-//		// Note: when keyword is empty, any name is matched 
-//		if (keyword == null) {
-//			keyword = "";
-//		}
-//
-//		// if not all given output types exist in the workflow result table, return empty list
-//		int count = workflowResultRepository.countDistinctOutputTypesByOutputTypeIn(outputTypes);
-//		if (count < outputTypes.size()) {
-//			log.info("Retrieved none legitimate primaryfile with COMPLETE outputs for all " + outputTypes.size() + " output types.");
-//			return primaryfiles;
-//		}
-//		
-//		// otherwise retrieve the primaryfiles with outputs for all of the given types
-//		List<PrimaryfileIdName> pfs = workflowResultRepository.findPrimaryfileIdNamesByOutputTypes(keyword, outputTypes);
-//		
-//		// if primaryfile is not used as one input or the required input media type is AV, return above primaryfiles list
-//		if (mediaService.isMediaTypeAV(mediaType)) {
-//			log.info("Retrieved " + pfs.size() + " primaryfiles with keyword " + keyword + " and COMPLETE outputs for all " + outputTypes.size() + " output types.");
-//			return pfs;
-//		}		
-//		
-//		// otherwise only return primaryfiles with matching media type
-//		for (PrimaryfileIdName pf : pfs) {			
-//			Primaryfile primaryfile = primaryfileRepository.findById(pf.getPrimaryfileId()).orElseThrow(() -> new StorageException("Primaryfile <" + pf.getPrimaryfileId() + "> does not exist!"));
-//			if (mediaService.isMediaTypeMatched(primaryfile, mediaType)) {
-//				primaryfiles.add(pf);
-//			}
-//		}
-//
-//		log.info("Retrieved " + primaryfiles.size() + " primaryfiles with mediaType " + mediaType + ", keyword " + keyword + ", and COMPLETE outputs for all " + outputTypes.size() + " output types.");
-//		return primaryfiles;
-//	}
-	
+		
 	/**
 	 * Get a list of intermediate workflow results in COMPLETE status associated with the given primaryfile for each data type in the given outputTypes list.
 	 * @param primaryfileId ID of the given primaryfile

@@ -188,9 +188,9 @@ public class MediaServiceTests {
 		String collectionName=primaryfile.getItem().getCollection().getName();
 		String mediaType="000";
 		ItemSearchResponse response= mediaService.findItemOrFile(collectionName.substring(0,4),mediaType);
-		Assert.assertTrue(response.getRows().size()>=2);
+		Assert.assertTrue(response.getItems().size()>=2);
 		ItemSearchResponse collectionSearchResponse= mediaService.findItemOrFile(collectionName,mediaType);
-		Assert.assertEquals(collectionName, collectionSearchResponse.getRows().get(0).getCollectionName());
+		Assert.assertEquals(collectionName, collectionSearchResponse.getItems().get(0).getCollectionName());
 	}
 	
 	@Test
@@ -198,9 +198,9 @@ public class MediaServiceTests {
 		String ItemName=primaryfile.getItem().getName();
 		String mediaType="000";
 		ItemSearchResponse response= mediaService.findItemOrFile(ItemName.substring(0,4),mediaType);
-		Assert.assertTrue(response.getRows().size()>=2);
+		Assert.assertTrue(response.getItems().size()>=2);
 		ItemSearchResponse itemSearchResponse= mediaService.findItemOrFile(ItemName,mediaType);
-		Assert.assertEquals(ItemName,itemSearchResponse.getRows().get(0).getItemName());
+		Assert.assertEquals(ItemName,itemSearchResponse.getItems().get(0).getItemName());
 	}	
 	
 	@Test
@@ -208,9 +208,9 @@ public class MediaServiceTests {
 		String primaryfileName=primaryfile.getName();
 		String mediaType="000";
 		ItemSearchResponse response= mediaService.findItemOrFile(primaryfileName.substring(0,4),mediaType);
-		Assert.assertTrue(response.getRows().size()>=2);
+		Assert.assertTrue(response.getItems().size()>=2);
 		ItemSearchResponse fileSearchResponse= mediaService.findItemOrFile(primaryfileName,mediaType);
-		Assert.assertEquals(primaryfileName,fileSearchResponse.getRows().get(0).getPrimaryfiles().get(0).getName());
+		Assert.assertEquals(primaryfileName,fileSearchResponse.getItems().get(0).getPrimaryfiles().get(0).getName());
 	}	
 	
 	@Test
@@ -219,7 +219,7 @@ public class MediaServiceTests {
 		String mediaType="000";
 		ItemSearchResponse response= mediaService.findItemOrFile(keyword,mediaType);
 		Assert.assertTrue(response.isSuccess());
-		Assert.assertNull(response.getRows());
+		Assert.assertNull(response.getItems());
 	}
 
 	

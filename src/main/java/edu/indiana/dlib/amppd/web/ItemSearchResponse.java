@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 public class ItemSearchResponse {
 	private boolean success = true;
-	private String error = null;
-	private List<ItemInfo> rows = new ArrayList<ItemInfo>();	
+	private String error = "";
+	private List<ItemInfo> items = new ArrayList<ItemInfo>();	
 }

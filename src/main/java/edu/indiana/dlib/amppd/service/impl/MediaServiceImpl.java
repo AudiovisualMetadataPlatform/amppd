@@ -35,8 +35,8 @@ import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import edu.indiana.dlib.amppd.web.ItemInfo;
+import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import edu.indiana.dlib.amppd.web.PrimaryfileInfo;
 import lombok.extern.slf4j.Slf4j;
 
@@ -482,7 +482,7 @@ public class MediaServiceImpl implements MediaService {
 			if(primaryfilerows.size()>0) {
 				result.setPrimaryfiles(primaryfilerows);
 				rows.add(result);
-				response.setRows(rows);
+				response.setItems(rows);
 			}
 			else {
 				response.setError("No primary file found");
