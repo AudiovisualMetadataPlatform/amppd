@@ -1,17 +1,20 @@
 package edu.indiana.dlib.amppd.web;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class ItemSearchResult {
+@NoArgsConstructor 
+@AllArgsConstructor
+public class ItemInfo {
 	private Long collectionId;
 	private String collectionName;
 	private Long itemId;
 	private String itemName;
 	private String externalSource;
 	private String externalId;
-	private ArrayList<Map> primaryfiles;
+	private List<PrimaryfileInfo> primaryfiles;
 }
