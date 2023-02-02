@@ -217,7 +217,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getWorkflowResultOutputUrl(Long workflowResultId) {
-		String url = amppdPropertyConfig.getUrl() + "/workflow-results/" + workflowResultId + "/output";
+		String url = amppdPropertyConfig.getUrl() + "/workflow-iteminfos/" + workflowResultId + "/output";
 		return url;
 	}
 	
@@ -451,44 +451,44 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
 		ItemSearchResponse response = new ItemSearchResponse();
-		List<ItemInfo> rows = new ArrayList<ItemInfo>();
+		List<ItemInfo> iteminfos = new ArrayList<ItemInfo>();
 
 		try {
 			List<Primaryfile> matchedFiles = primaryfileRepository.findActiveByCollectionOrItemOrFileName(keyword);
-			ItemInfo result = new ItemInfo();;
-			List<PrimaryfileInfo> primaryfilerows = new ArrayList<PrimaryfileInfo>();
+			ItemInfo iteminfo = new ItemInfo();
+			List<PrimaryfileInfo> primaryfileinfos = new ArrayList<PrimaryfileInfo>();
 			long curr_item_id = 0;
 			for(Primaryfile p : matchedFiles) {
 				//reset if the current item is a new entry
-				if(p.getItem().getId() != curr_item_id && primaryfilerows.size()>0) {
+				if(p.getItem().getId() != curr_item_id && primaryfileinfos.size()>0) {
 					log.trace("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
-					result.setPrimaryfiles(primaryfilerows);
-					rows.add(result);
-					result = new ItemInfo();
-					primaryfilerows = new ArrayList<PrimaryfileInfo>();					
+					iteminfo.setPrimaryfiles(primaryfileinfos);
+					iteminfos.add(iteminfo);
+					iteminfo = new ItemInfo();
+					primaryfileinfos = new ArrayList<PrimaryfileInfo>();					
 				}
 				String mime_type = p.getMimeType();
 				curr_item_id = p.getItem().getId();
-				result.setCollectionId(p.getItem().getCollection().getId());
-				result.setCollectionName(p.getItem().getCollection().getName());
-				result.setItemId(p.getItem().getId());
-				result.setItemName(p.getItem().getName());
-				result.setExternalSource(p.getItem().getExternalSource());
-				result.setExternalId(p.getItem().getExternalId());
+				iteminfo.setCollectionId(p.getItem().getCollection().getId());
+				iteminfo.setCollectionName(p.getItem().getCollection().getName());
+				iteminfo.setItemId(p.getItem().getId());
+				iteminfo.setItemName(p.getItem().getName());
+				iteminfo.setExternalSource(p.getItem().getExternalSource());
+				iteminfo.setExternalId(p.getItem().getExternalId());
 				PrimaryfileInfo primaryfileinfo = new PrimaryfileInfo(p.getId(), p.getName(), mime_type, p.getOriginalFilename());
-				primaryfilerows.add(primaryfileinfo);
+				primaryfileinfos.add(primaryfileinfo);
 			}
-			//add the last item to the rows
-			if(primaryfilerows.size()>0) {
-				result.setPrimaryfiles(primaryfilerows);
-				rows.add(result);
-				response.setItems(rows);
+			//add the last item to the iteminfos
+			if(primaryfileinfos.size()>0) {
+				iteminfo.setPrimaryfiles(primaryfileinfos);
+				iteminfos.add(iteminfo);
+				response.setItems(iteminfos);
 			}
 			else {
 				response.setError("No primary file found");
 			}
 			response.setSuccess(true);
-			log.info("Successfully found " + rows.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
+			log.info("Successfully found " + iteminfos.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
 		} catch (Exception e) {
 			response.setError(e.getMessage());
 			response.setSuccess(false);
