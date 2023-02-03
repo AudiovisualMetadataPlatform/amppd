@@ -1,18 +1,18 @@
 name,description,actionType,targetType,httpMethod,urlPattern
 create unit,create a new unit,Create,Unit,POST,/units
-list units,list all or query a subset of units,List,Unit,GET,/units
 view unit,view details of a unit,Read,Unit,GET,/units/{id}
+list units,list all or query a subset of units,List,Unit,GET,/units
 edit unit,edit metadata of a unit,Update,Unit,PATCH,/units/{id}
 delete unit,delete a unit and all its associated data,Delete,Unit,DELETE,/units/{id}
 create collection,create a new collection under a unit,Create,Collection,POST,/collections
-list collections,list all or query a subset of collections,List,Collection,GET,/collections
 view collection,view details of a collection,Read,Collection,GET,/collections/{id}
+list collections,list all or query a subset of collections,List,Collection,GET,/collections
 edit collection,edit metadata of a collection,Update,Collection,PATCH,/collections/{id}
 activate collection,activate/deactivate a collection and its associated data,Activate,Collection,POST,/collections/{id}/activate
 delete collection,delete a collection and all its associated data,Delete,Collection,DELETE,/collections/{id}
 create item,create an item under a collection,Create,Item,POST,/items
-list items,list all or query a subset of items,List,Item,GET,/items
 view item,view details of an item,Read,Item,GET,/items/{id}
+list items,list all or query a subset of items,List,Item,GET,/items
 edit item,edit metadata of an item,Update,Item,PATCH,/items/{id}
 delete item,delete an item and all its associated data,Delete,Item,DELETE,/items/{id}
 add content file,add a new primaryfile to an item,Create,Primaryfile,POST,/items/{id}/addPrimaryfile
