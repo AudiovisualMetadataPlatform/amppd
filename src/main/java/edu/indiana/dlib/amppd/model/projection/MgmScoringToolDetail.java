@@ -26,4 +26,6 @@ public interface MgmScoringToolDetail extends MgmScoringToolBrief, MgmMetaDetail
 	@Value("#{target.category.id}")
 	public String getCategoryId();
 
+	public String getWorkflowResultOutput();
+
 }
