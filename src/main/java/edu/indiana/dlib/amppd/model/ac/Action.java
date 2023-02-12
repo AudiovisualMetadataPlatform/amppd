@@ -42,12 +42,14 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class Action extends AmpObject {
 
-	public enum ActionType { Create, Read, Update, Delete, Execute }
+	public enum ActionType { Create, Read, List, Execute, Update, Move, Activate, Restrict, Delete }
 	
 	public enum TargetType {  
-		Unit, Collection, Item, Primaryfile, Supplement,
-		Workflow, WorkflowResult, EvaluationResult,
-		Batch, Evaluation,
+		Unit, Collection, Item, Primaryfile, 
+		Supplement, UnitSupplement, CollectionSupplement, ItemSupplement, PrimaryfileSupplement, 
+		Batch, Job, Bag,
+		Workflow, WorkflowResult, 
+		Evaluation, EvaluationResult,
 		AmpUser, Role, RoleAction, RoleAssignment}
 	
 	@NotBlank

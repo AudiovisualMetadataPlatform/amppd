@@ -136,10 +136,10 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 				log.warn("Did not overwrite category name with section name: section ID from csv doesn't exist in Galaxy.");
 //				throw new RuntimeException("Failed to refresh MgmCategory table: Invalid category with non-existing section ID in CSV: " + category);
 			}
-			else {
-				// otherwise overwrite category name with the section name
-				category.setName(sectionName);
-			}
+//			else {
+//				// otherwise overwrite category name with the section name
+//				category.setName(sectionName);
+//			}
 			
 			// note: we can't just save all categories directly, as that would create new records in the table;
 			// instead, we need to find each existing record if any based on ID and update it

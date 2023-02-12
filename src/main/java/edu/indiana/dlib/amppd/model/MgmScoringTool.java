@@ -111,6 +111,8 @@ public class MgmScoringTool extends MgmMeta {
 	@NotBlank
 	private String groundtruthTemplate;
 
+	private String workflowResultOutput;
+
 	/**
 	 * Get the concatenated groundtruth category in the form of Groundtruth-subcategory
 	 */

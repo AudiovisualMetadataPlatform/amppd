@@ -62,7 +62,7 @@ public abstract class Asset extends Dataentity {
 //    }
     
     /**
-     * Get the MIME type of the asset based on the MIME and streams from its media info.
+     * Get the MIME type of the asset based on the MIME and streams from its media info, for ex. audio/mp3, video/mp4.
      */
 	public String getMimeType() {		
 		// media info should never be null; otherwise pre-process must have failed and the asset wasn't ingested/uploaded properly
