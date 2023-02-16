@@ -228,6 +228,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
             row.setGroundTruth(test.getGroundtruthSupplement().getName());
             row.setOutputTest("amp_evaluation");
             row.setWorkflowId(test.getWorkflowResult().getId().toString());
+            row.setPrimaryfileId(test.getWorkflowResult().getPrimaryfileId());
             datatable.add(row);
         }
         return datatable;
