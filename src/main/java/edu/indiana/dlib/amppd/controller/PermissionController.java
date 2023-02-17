@@ -31,7 +31,7 @@ public class PermissionController {
 	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments assoicated with.
 	 * @return the list of units the current user has access to
 	 */
-	@GetMapping("/permissions/accessibleUnits")
+	@GetMapping("/permissions/units")
 	public List<Unit> getAccessibleUnits() {
 		log.info("Retrieving all units the current user has access to ...");
 		return permissionService.getAccessibleUnits();
