@@ -1,5 +1,5 @@
 roleName,actionName
-Unit Manager,list units
+Unit Viewer,list units
 Unit Viewer,view unit
 Unit Viewer,list collections
 Unit Viewer,view collection
