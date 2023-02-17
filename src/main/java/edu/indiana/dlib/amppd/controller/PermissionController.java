@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,7 @@ public class PermissionController {
 		}
 		else if (httpMethod != null && urlPattern != null) {
 			has = permissionService.hasPermsion(httpMethod, urlPattern, unitId);
-			log.info("Checking current user permission to send request " + httpMethod + " " + urlPattern + " in unit " +  + unitId);
+			log.info("Checking current user permission to issue request " + httpMethod + " " + urlPattern + " in unit " +  + unitId);
 		} 
 		
 		return has;

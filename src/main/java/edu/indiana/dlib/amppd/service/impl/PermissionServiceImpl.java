@@ -76,7 +76,7 @@ public class PermissionServiceImpl implements PermissionService {
 			units.add(unit);
 		}
 		
-		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units" );
+		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
 		return units;
 	}
 	
