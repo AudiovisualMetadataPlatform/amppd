@@ -1,4 +1,5 @@
 roleName,actionName
+Unit Manager,list units
 Unit Viewer,view unit
 Unit Viewer,list collections
 Unit Viewer,view collection
@@ -16,7 +17,6 @@ Collection Manager,delete item
 Collection Manager,add content file
 Collection Manager,edit content file
 Collection Manager,delete  content file
-Unit Manager,list units
 Unit Manager,edit unit
 Unit Manager,delete unit
 Unit Manager,create collection

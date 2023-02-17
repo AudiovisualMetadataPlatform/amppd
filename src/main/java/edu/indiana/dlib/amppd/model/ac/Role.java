@@ -50,7 +50,7 @@ public class Role extends AmpObject {
     private String description;
 
     // the unit within which scope this role is visible/applicable;
-    // if null, it's a global role with static permission settings populated from configuration;
+    // if null, it's a global role with the same set of permissions shared across units;
     // otherwise, it's a dynamic role with permissions dynamically set by its unit admin for that unit
 	@ManyToOne
     private Unit unit;
