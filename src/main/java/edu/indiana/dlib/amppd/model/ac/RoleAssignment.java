@@ -42,8 +42,9 @@ public class RoleAssignment extends AmpObject {
     private Role role;
 	
 	/* Note:
-	 * We will assign roles at AMP or Unit level, not any lower level, 
-	 * thus the only entity type that can be associated with a role is Unit.
+	 * We will assign roles at AMP or Unit level, not any lower level, thus the only entity type that can be associated with a role is Unit;
+	 * When unit is null, the assignment is global, i.e. applies to all units; 
+	 * currently, the only role with global assignment is AMP Admin; all other assignments must be assoicated with a unit.
 	 */
 	// reference to the role's assignment unit
 	@ManyToOne

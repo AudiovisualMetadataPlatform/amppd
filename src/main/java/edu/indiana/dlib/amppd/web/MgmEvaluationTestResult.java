@@ -22,4 +22,5 @@ public class MgmEvaluationTestResult {
     private String groundTruth;
     private String outputTest;
     private String workflowId;
+    private Long primaryfileId;
 }
