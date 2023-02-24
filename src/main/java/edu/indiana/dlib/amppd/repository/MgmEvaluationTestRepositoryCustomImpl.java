@@ -110,6 +110,13 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
             predicates.add(predicate);
         }
 
+        if(mesq.getFilterByTestDates().length>0) {
+            Predicate fromDate = cb.greaterThanOrEqualTo(root.get("dateSubmitted").as(java.util.Date.class),mesq.getFilterByTestDates()[0]);
+            Predicate toDate = cb.lessThanOrEqualTo(root.get("dateSubmitted").as(java.util.Date.class), mesq.getFilterByTestDates()[1]);
+            Predicate predicate = cb.and(fromDate, toDate);
+            predicates.add(predicate);
+        }
+
         if(mesq.getFilterBySubmitters().length>0) {
             Path<String> path = root.get("submitter");
             Predicate predicate = path.in((Object[])mesq.getFilterBySubmitters());
@@ -221,6 +228,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
             row.setGroundTruth(test.getGroundtruthSupplement().getName());
             row.setOutputTest("amp_evaluation");
             row.setWorkflowId(test.getWorkflowResult().getId().toString());
+            row.setPrimaryfileId(test.getWorkflowResult().getPrimaryfileId());
             datatable.add(row);
         }
         return datatable;
