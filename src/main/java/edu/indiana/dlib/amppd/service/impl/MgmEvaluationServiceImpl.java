@@ -86,11 +86,9 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         if (primaryFile == null) {
                             errors.add("Primary File is required for evaluation test.");
                         } else{
-                            if(!wfr.get().getStatus().equals("COMPLETE")) {
+                            log.info("Rimsha test ----> " + wfr.get().getStatus());
+                            if(!wfr.get().getStatus().toString().contains("COMPLETE")) {
                                 errors.add("Workflow Result status should be complete. " + wfr.get().getStatus()  +" status for primary file: " + primaryFile.getName());
-                            }
-                            if(!wfr.get().getOutputType().equals("json") && !wfr.get().getOutputType().equals("csv")) {
-                                errors.add("Mgm Outputs should be json/csv file for primary file: " + primaryFile.getName());
                             }
                             String url = mediaService.getWorkflowResultOutputSymlinkUrl(wfr.get().getId());
                             if(url == null){
