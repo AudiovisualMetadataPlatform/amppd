@@ -44,6 +44,6 @@ public class AmppdPropertyConfig {
     @NotNull private List<String> supplementCategories;
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;
-    @NotNull private String mgmEvaluationScriptsPath;
+    @NotNull private String mgmEvaluationScriptsRoot;
     
 }

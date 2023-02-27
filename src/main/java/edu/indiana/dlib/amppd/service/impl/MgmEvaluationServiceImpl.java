@@ -3,7 +3,6 @@ package edu.indiana.dlib.amppd.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.*;
 import edu.indiana.dlib.amppd.repository.*;
 import edu.indiana.dlib.amppd.service.MediaService;
@@ -15,7 +14,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.apache.commons.lang3.StringUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -41,10 +39,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 
     @Autowired
     AmppdPropertyConfig config;
-
-    @Autowired
-	private AmppdUiPropertyConfig amppduiConfig; 
-
 
     @Override
     public MgmEvaluationTestResponse getMgmEvaluationTests(MgmEvaluationSearchQuery query) {
@@ -139,16 +133,12 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
                 List<String> cmd = new ArrayList<>();
                 cmd.add("amp_python.sif");
-                cmd.add(config.getMgmEvaluationScriptsPath() + File.separator +  mst.getScriptPath());
+                cmd.add(config.getMgmEvaluationScriptsRoot() + File.separator +  mst.getScriptPath());
                 cmd.add("-g");
                 String gtFilePath = config.getFileStorageRoot() + File.separator + groundtruthFile.getPathname();
                 cmd.add(gtFilePath);
                 cmd.add("-m");
-                String url = mediaService.getWorkflowResultOutputSymlinkUrl(wfr.getId());
-                log.info(amppduiConfig.getUrl() + " ---- " + url);
-                String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
-		        String MgmOutputPath = url.replace(serverUrl + "/", "");
-                cmd.add(amppduiConfig.getDocumentRoot() + MgmOutputPath.replace(".segment", ".json"));
+                cmd.add(wfr.getOutputPath());
                 cmd.add("-o");
                 cmd.add(config.getDropboxRoot() + File.separator + "mgm_scoring_tools");
                 if (mst.getUseCase() != null && mst.getUseCase() != "") {
@@ -179,7 +169,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
                 Primaryfile primaryFile = pfRepository.findById(wfr.getPrimaryfileId()).orElse(null);
                 mgmEvalTest.setPrimaryFile(primaryFile);
-                log.info("rimi tesssst");
                 log.info(cmd.toString());
 
                 String result = runCMD((String[]) cmd.toArray(new String[0]));
@@ -215,10 +204,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
             response.setSuccess(true);
         }
         return response;
-    }
-
-    private String[] tmdoArray() {
-        return null;
     }
 
     private String runCMD(String[] cmd) {

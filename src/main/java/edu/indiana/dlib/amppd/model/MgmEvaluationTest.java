@@ -98,7 +98,8 @@ public class MgmEvaluationTest {
 	@NotNull
 	private Date dateSubmitted;
 
-	@Column(columnDefinition  = "TEXT")
+	@Type(type="text")
+	@Column(columnDefinition="text", length=10485760)
 	private String mstErrorMsg;
 
 	// <name, value> map of the parameters of the MET parsed from the parameters JSON
