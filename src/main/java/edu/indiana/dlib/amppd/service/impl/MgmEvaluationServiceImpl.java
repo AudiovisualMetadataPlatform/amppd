@@ -48,6 +48,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     }
 
     private List<String> validate(ArrayList<MgmEvaluationFilesObj> files, ArrayList<MgmEvaluationParameterObj> inputParams, MgmScoringTool mst){
+        log.info("Validating required files and params");
         ArrayList<String> errors = new ArrayList<>();
         if (files.size() <= 0) {
             errors.add("No Primary and Groundtruth files selected.");
@@ -59,13 +60,14 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 
 
     private List<String> validateFiles(ArrayList<MgmEvaluationFilesObj> files,MgmScoringTool mst) {
-        log.info("Validating Groundtruth files format");
         ArrayList<String> errors = new ArrayList<>();
         if (files.size() > 0) {
             for (MgmEvaluationFilesObj file : files) {
+
                 if(file.getGroundtruthFileId() == null) {
                     errors.add("Groundtruth file is required.");
                 } else {
+                    log.info("Validating Groundtruth files format");
                     Optional<PrimaryfileSupplement> groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId());
                     if (groundtruthFile == null) {
                         errors.add("Groundtruth file does not exist.");
@@ -76,10 +78,12 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 if(file.getWorkflowResultId() == null) {
                     errors.add("Workflow is required for evaluation test.");
                 }else {
+                    log.info("Validating workflow existed in request.");
                     Optional<WorkflowResult> wfr = wfRepo.findById(file.getWorkflowResultId());
                     if (wfr == null) {
                         errors.add("Workflow does not exist.");
                     } else if (wfr != null) {
+                        log.info("Validating primary file in WF");
                         Primaryfile primaryFile = pfRepository.findById(wfr.get().getPrimaryfileId()).orElse(null);
                         if (primaryFile == null) {
                             errors.add("Primary File is required for evaluation test.");
@@ -102,7 +106,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     }
 
     private List<String> validateRequiredParameters(ArrayList<MgmEvaluationParameterObj> inputParams, MgmScoringTool mst) {
-        log.info("Validating if all required parameters");
+        log.info("Validating all required parameters filled");
         ArrayList<String> errors = new ArrayList<>();
         Set<MgmScoringParameter> mstParams = mst.getParameters();
         for (MgmScoringParameter p : mstParams) {
@@ -119,18 +123,21 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     @Override
     public MgmEvaluationValidationResponse process(MgmScoringTool mst, MgmEvaluationRequest request, AmpUser user) {
         MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
+        log.info("Validating request");
         List<String> errors = validate(request.getFiles(), request.getParameters(), mst);
         List<MgmEvaluationTest> mgmEvaluationTests = new ArrayList<>();
         response.addErrors(errors);
         if(!response.hasErrors()){
             for (MgmEvaluationFilesObj file : request.getFiles()) {
+                PrimaryfileSupplement groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId()).orElse(null);
+                WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
+                log.info("Processing file: "+ groundtruthFile.getName() + " with WF " + wfr.getWorkflowName());
                 MgmEvaluationTest mgmEvalTest = new MgmEvaluationTest();
                 mgmEvalTest.setCategory(mst.getCategory());
                 mgmEvalTest.setMst(mst);
                 mgmEvalTest.setSubmitter(user.getUsername());
                 ArrayList<MgmEvaluationParameterObj> params = request.getParameters();
-                PrimaryfileSupplement groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId()).orElse(null);
-                WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
+                log.info("Preparing command");
                 List<String> cmd = new ArrayList<>();
                 cmd.add("amp_python.sif");
                 cmd.add(config.getMgmEvaluationScriptsRoot() + File.separator +  mst.getScriptPath());
@@ -169,13 +176,11 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
                 Primaryfile primaryFile = pfRepository.findById(wfr.getPrimaryfileId()).orElse(null);
                 mgmEvalTest.setPrimaryFile(primaryFile);
-                log.info(cmd.toString());
-
+                log.info("Command: " + cmd.toString());
                 String result = runCMD((String[]) cmd.toArray(new String[0]));
-
-                log.info(result);
                 try {
                     if(result.startsWith("success:")) {
+                        log.info("command run successfully.");
                         String output = result.split("success:")[1];
                         JSONParser parser = new JSONParser();
                         Object obj = parser.parse(new FileReader(output));
@@ -187,6 +192,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNTIME_ERROR);
                         mgmEvalTest.setMstErrorMsg(result);
                         errors.add("RUNTIME ERROR: Failed to process.");
+                        log.info("File "+ groundtruthFile.getName() + " with WF " + wfr.getWorkflowName() + " failed with error msg: "+ result);
                     }
                 } catch(IOException e){
                     log.error("Exception in reading output "+ e.toString());
@@ -214,9 +220,8 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
             String result = "";
             String line;
             try{
-                System.out.println("Checking output");
+                log.info("Checking script output");
                 while((line = reader.readLine()) != null){
-                    log.info("line---> " + line);
                     result += line;
                 }
                 return result;
