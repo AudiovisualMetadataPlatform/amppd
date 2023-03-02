@@ -20,5 +20,8 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	List<RoleAssignment> findByUserId(Long userId);	
 	List<RoleAssignment> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
 	List<RoleAssignment> findByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
-		
+
+	List<RoleAssignment> findByUserIdOrderByUnitId(Long userId);	
+	List<RoleAssignment> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
+
 }

@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.web.UnitActions;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -35,6 +37,39 @@ public class PermissionController {
 	public List<Unit> getAccessibleUnits() {
 		log.info("Retrieving all units the current user has access to ...");
 		return permissionService.getAccessibleUnits();
+	}
+	
+	/**
+	 * Get the actions the current (non-admin) user can perform, given the list of actionTypes, targetTypes and units;
+	 * if actionTypes not provided, get for all actionTypes;
+	 * if targetTypes not provided, get for all targetTypes;
+	 * if units not provided, get for all units.
+	 * Note: Client should only call this API on non-admin users, because admin can perform all actions in all units, so there is no need to check.
+	 * @param actionTypes types of the queried actions
+	 * @param targetTypes targets of the queried actions
+	 * @param unitIds IDs of the units the action target belongs to
+	 * @return list of permitted actions per unit
+	 */
+	@GetMapping("/permissions/actions")
+	public List<UnitActions> getPermittedActions(
+			@RequestParam(required = false) List<ActionType> actionTypes, 
+			@RequestParam(required = false) List<TargetType> targetTypes, 
+			@RequestParam(required = false) List<Long> unitIds) {
+		log.info("Retrieving all actions the current user has access to ...");
+		
+		if (actionTypes == null) {
+			actionTypes = new ArrayList<ActionType>();
+		}
+		
+		if (targetTypes == null) {
+			targetTypes = new ArrayList<TargetType>();
+		}
+
+		if (unitIds == null) {
+			unitIds = new ArrayList<Long>();
+		}
+
+		return permissionService.getPermittedActions(actionTypes, targetTypes, unitIds);		
 	}
 	
 	/**
@@ -66,5 +101,6 @@ public class PermissionController {
 		
 		return has;
 	}
-	
+		
+
 }

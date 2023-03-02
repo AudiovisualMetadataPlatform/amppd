@@ -22,6 +22,7 @@ import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.web.UnitActions;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -78,6 +79,58 @@ public class PermissionServiceImpl implements PermissionService {
 		
 		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
 		return units;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getPermittedActions(List<ActionType>, List<TargetType>, List<Long>)
+	 */
+	@Override
+	public List<UnitActions> getPermittedActions(List<ActionType> actionTypes, List<TargetType> targetTypes, List<Long> unitIds) {
+		List<UnitActions> uas = new ArrayList<UnitActions>();
+		
+		// find all role assignments for the current user per given units ordered by unit ID
+		AmpUser user = ampUserService.getCurrentUser();		
+		List<RoleAssignment> ras = unitIds.isEmpty() ?
+			roleAssignmentRepository.findByUserIdOrderByUnitId(user.getId()) : 
+			roleAssignmentRepository.findByUserIdAndUnitIdInOrderByUnitId(user.getId(), unitIds);
+
+		
+		// for all the user's roles within each unit, merge the unique actions matching the actionTypes and/or targetTypes
+		UnitActions ua = new UnitActions(0L, null);	// current UnitActions
+		for (RoleAssignment ra : ras) {
+			Unit unit = ra.getUnit();		
+			
+			// skip AMP admin global role, where unit is null
+			if (unit == null) {
+				continue;
+			}
+			
+			// start a new UnitAction if the unit ID switched
+			Long unitId = unit.getId();
+			if (!unitId.equals(ua.getUnitId())) {
+				ua = new UnitActions(unitId, new ArrayList<Action>());	
+			}
+			
+			// merge the actions for the current role into current UnitActions  
+			List<Action> actionsU = ua.getActions();
+			Set<Action> actionsR = ra.getRole().getActions();
+			for (Action action : actionsR) {
+				// add the action if it's unique and match the query criteria
+				boolean match = !actionsU.contains(action);
+				if (!actionTypes.isEmpty()) {
+					match = match && actionTypes.contains(action.getActionType());
+				}
+				if (!targetTypes.isEmpty()) {
+					match = match && targetTypes.contains(action.getTargetType());
+				}
+				if (match) {
+					actionsU.add(action);
+				}
+			}			
+		}
+		
+		log.info("Successfully found all permitted actions in " + uas.size() + " units for the current user " + user.getUsername());
+		return uas;
 	}
 	
 	/**
