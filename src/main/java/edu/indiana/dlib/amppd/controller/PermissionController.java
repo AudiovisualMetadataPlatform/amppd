@@ -54,7 +54,7 @@ public class PermissionController {
 	 * if actionTypes not provided, get for all actionTypes;
 	 * if targetTypes not provided, get for all targetTypes;
 	 * if units not provided, get for all units.
-	 * Note: Actions for global roles are excluded from the returned list, as actions for such roles are cross units; 
+	 * Note: Actions for global role assignments are excluded from the returned list, as actions for such roles are cross units; 
 	 * Currently, the only global role is AMP admin, who can perform all actions across all units. 
 	 * which can perform all actions in all units.
 	 * @param actionTypes types of the queried actions

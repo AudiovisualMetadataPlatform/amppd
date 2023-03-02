@@ -120,29 +120,36 @@ public class PermissionServiceImpl implements PermissionService {
 		for (RoleAssignment ra : ras) {
 			Unit unit = ra.getUnit();		
 			
-			// skip global role, where unit is null
+			// skip global role assignment, where unit is null
 			if (unit == null) {
 				continue;
 			}
 			
-			// start a new UnitAction if the unit ID switched
+			// start a new UnitAction and add it to the list if the current role assignment's unit ID is a new one
 			Long unitId = unit.getId();
 			if (!unitId.equals(ua.getUnitId())) {
 				ua = new UnitActions(unitId, new ArrayList<Action>());	
+				uas.add(ua);
 			}
 			
 			// merge the actions for the current role into current UnitActions  
 			List<Action> actionsU = ua.getActions();
 			Set<Action> actionsR = ra.getRole().getActions();
 			for (Action action : actionsR) {
-				// add the action if it's unique and match the query criteria
+				// the current action must be unique, i.e. not already added to the UnitAction list yet
 				boolean match = !actionsU.contains(action);
+				
+				// if actionTypes is specified, the current actionType must be one of them
 				if (!actionTypes.isEmpty()) {
 					match = match && actionTypes.contains(action.getActionType());
 				}
+
+				// if targetTypes is specified, the current targetType must be one of them
 				if (!targetTypes.isEmpty()) {
 					match = match && targetTypes.contains(action.getTargetType());
 				}
+				
+				// add the action if all criteria satisfy
 				if (match) {
 					actionsU.add(action);
 				}
