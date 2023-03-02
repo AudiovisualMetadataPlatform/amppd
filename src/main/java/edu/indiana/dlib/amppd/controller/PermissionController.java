@@ -67,7 +67,7 @@ public class PermissionController {
 			@RequestParam(required = false) List<ActionType> actionTypes, 
 			@RequestParam(required = false) List<TargetType> targetTypes, 
 			@RequestParam(required = false) List<Long> unitIds) {
-		log.info("Retrieving all actions the current user has access to ...");
+		log.info("Retrieving all actions the current user is permitted to perform ...");
 		
 		if (actionTypes == null) {
 			actionTypes = new ArrayList<ActionType>();
