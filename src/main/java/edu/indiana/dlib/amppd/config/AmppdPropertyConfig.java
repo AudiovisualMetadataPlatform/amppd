@@ -1,15 +1,13 @@
 package edu.indiana.dlib.amppd.config;
 
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import lombok.Getter;
-import lombok.Setter;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 
 /**
@@ -46,5 +44,6 @@ public class AmppdPropertyConfig {
     @NotNull private List<String> supplementCategories;
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;
+    @NotNull private String mgmEvaluationScriptsRoot;
     
 }
