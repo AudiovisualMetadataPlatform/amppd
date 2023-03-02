@@ -40,11 +40,23 @@ public class PermissionController {
 	}
 	
 	/**
+	 * Check if the current user is AMP admin.
+	 * @return true if the user is admin; false otherwise
+	 */
+	@GetMapping("/permissions/isAdmin")
+	public boolean isAdmin() {
+		log.info("Checking if the current user is AMP admin ...");
+		return permissionService.isAdmin();		
+	}
+	
+	/**
 	 * Get the actions the current (non-admin) user can perform, given the list of actionTypes, targetTypes and units;
 	 * if actionTypes not provided, get for all actionTypes;
 	 * if targetTypes not provided, get for all targetTypes;
 	 * if units not provided, get for all units.
-	 * Note: Client should only call this API on non-admin users, because admin can perform all actions in all units, so there is no need to check.
+	 * Note: Actions for global roles are excluded from the returned list, as actions for such roles are cross units; 
+	 * Currently, the only global role is AMP admin, who can perform all actions across all units. 
+	 * which can perform all actions in all units.
 	 * @param actionTypes types of the queried actions
 	 * @param targetTypes targets of the queried actions
 	 * @param unitIds IDs of the units the action target belongs to

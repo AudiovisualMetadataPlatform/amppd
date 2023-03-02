@@ -32,7 +32,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
-public class PermissionServiceImpl implements PermissionService {		
+public class PermissionServiceImpl implements PermissionService {	
+	public static String AMP_ADMIN_ROLE_NAME = "AMP Admin";
 
 	@Autowired
 	private UnitRepository unitRepository;
@@ -82,6 +83,25 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.isAdmin()
+	 */
+	@Override
+	public boolean isAdmin() {
+		// find all role assignments for the current user
+		AmpUser user = ampUserService.getCurrentUser();		
+
+		// get AMP Admin role
+		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
+		
+		// check whether the user has a role assignment with AMP Admin
+		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+		String isstr = is ? "is" : "is not";
+		
+		log.info("The current user " + isstr + " " + AMP_ADMIN_ROLE_NAME);
+		return is;
+	}		
+		
+	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getPermittedActions(List<ActionType>, List<TargetType>, List<Long>)
 	 */
 	@Override
@@ -100,7 +120,7 @@ public class PermissionServiceImpl implements PermissionService {
 		for (RoleAssignment ra : ras) {
 			Unit unit = ra.getUnit();		
 			
-			// skip AMP admin global role, where unit is null
+			// skip global role, where unit is null
 			if (unit == null) {
 				continue;
 			}
