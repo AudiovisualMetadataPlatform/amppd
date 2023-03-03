@@ -66,9 +66,7 @@ public class PermissionController {
 	public List<UnitActions> getPermittedActions(
 			@RequestParam(required = false) List<ActionType> actionTypes, 
 			@RequestParam(required = false) List<TargetType> targetTypes, 
-			@RequestParam(required = false) List<Long> unitIds) {
-		log.info("Retrieving all actions the current user is permitted to perform ...");
-		
+			@RequestParam(required = false) List<Long> unitIds) {		
 		if (actionTypes == null) {
 			actionTypes = new ArrayList<ActionType>();
 		}
@@ -81,6 +79,7 @@ public class PermissionController {
 			unitIds = new ArrayList<Long>();
 		}
 
+		log.info("Retrieving all actions the current user is permitted to perform for actionTypes = " + actionTypes + ", targetTypes = " + targetTypes + ", unitIds = " + unitIds);
 		return permissionService.getPermittedActions(actionTypes, targetTypes, unitIds);		
 	}
 	
