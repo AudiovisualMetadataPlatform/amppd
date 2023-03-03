@@ -22,6 +22,7 @@ import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.web.UnitActions;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -31,7 +32,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
-public class PermissionServiceImpl implements PermissionService {		
+public class PermissionServiceImpl implements PermissionService {	
+	public static String AMP_ADMIN_ROLE_NAME = "AMP Admin";
 
 	@Autowired
 	private UnitRepository unitRepository;
@@ -78,6 +80,84 @@ public class PermissionServiceImpl implements PermissionService {
 		
 		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
 		return units;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.isAdmin()
+	 */
+	@Override
+	public boolean isAdmin() {
+		// find all role assignments for the current user
+		AmpUser user = ampUserService.getCurrentUser();		
+
+		// get AMP Admin role
+		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
+		
+		// check whether the user has a role assignment with AMP Admin
+		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+		String isstr = is ? "is" : "is not";
+		
+		log.info("The current user " + isstr + " " + AMP_ADMIN_ROLE_NAME);
+		return is;
+	}		
+		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getPermittedActions(List<ActionType>, List<TargetType>, List<Long>)
+	 */
+	@Override
+	public List<UnitActions> getPermittedActions(List<ActionType> actionTypes, List<TargetType> targetTypes, List<Long> unitIds) {
+		List<UnitActions> uas = new ArrayList<UnitActions>();
+		
+		// find all role assignments for the current user per given units ordered by unit ID
+		AmpUser user = ampUserService.getCurrentUser();		
+		List<RoleAssignment> ras = unitIds.isEmpty() ?
+			roleAssignmentRepository.findByUserIdOrderByUnitId(user.getId()) : 
+			roleAssignmentRepository.findByUserIdAndUnitIdInOrderByUnitId(user.getId(), unitIds);
+
+		
+		// for all the user's roles within each unit, merge the unique actions matching the actionTypes and/or targetTypes
+		UnitActions ua = new UnitActions(0L, null);	// current UnitActions
+		for (RoleAssignment ra : ras) {
+			Unit unit = ra.getUnit();		
+			
+			// skip global role assignment, where unit is null
+			if (unit == null) {
+				continue;
+			}
+			
+			// start a new UnitAction and add it to the list if the current role assignment's unit ID is a new one
+			Long unitId = unit.getId();
+			if (!unitId.equals(ua.getUnitId())) {
+				ua = new UnitActions(unitId, new ArrayList<Action>());	
+				uas.add(ua);
+			}
+			
+			// merge the actions for the current role into current UnitActions  
+			List<Action> actionsU = ua.getActions();
+			Set<Action> actionsR = ra.getRole().getActions();
+			for (Action action : actionsR) {
+				// the current action must be unique, i.e. not already added to the UnitAction list yet
+				boolean match = !actionsU.contains(action);
+				
+				// if actionTypes is specified, the current actionType must be one of them
+				if (!actionTypes.isEmpty()) {
+					match = match && actionTypes.contains(action.getActionType());
+				}
+
+				// if targetTypes is specified, the current targetType must be one of them
+				if (!targetTypes.isEmpty()) {
+					match = match && targetTypes.contains(action.getTargetType());
+				}
+				
+				// add the action if all criteria satisfy
+				if (match) {
+					actionsU.add(action);
+				}
+			}			
+		}
+		
+		log.info("Successfully found all permitted actions in " + uas.size() + " units for the current user " + user.getUsername());
+		return uas;
 	}
 	
 	/**
