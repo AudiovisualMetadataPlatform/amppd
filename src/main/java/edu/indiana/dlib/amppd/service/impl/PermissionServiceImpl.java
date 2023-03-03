@@ -116,7 +116,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 		
 		// for all the user's roles within each unit, merge the unique actions matching the actionTypes and/or targetTypes
-		UnitActions ua = new UnitActions(0L, null);	// current UnitActions
+		UnitActions ua = new UnitActions(0L, new ArrayList<Action>());	// current UnitActions
 		for (RoleAssignment ra : ras) {
 			Unit unit = ra.getUnit();		
 			
@@ -125,11 +125,16 @@ public class PermissionServiceImpl implements PermissionService {
 				continue;
 			}
 			
-			// start a new UnitAction and add it to the list if the current role assignment's unit ID is a new one
+			// when the current role assignment's unit ID is a new one
 			Long unitId = unit.getId();
 			if (!unitId.equals(ua.getUnitId())) {
+				// if the previous UnitActions contains any actions, add it to the parent list
+				if (!ua.getActions().isEmpty()) {
+					uas.add(ua);
+				}
+
+				// start a new UnitAction as the current one
 				ua = new UnitActions(unitId, new ArrayList<Action>());	
-				uas.add(ua);
 			}
 			
 			// merge the actions for the current role into current UnitActions  
@@ -155,6 +160,11 @@ public class PermissionServiceImpl implements PermissionService {
 				}
 			}			
 		}
+			
+		// add the last UnitActions to the parent list if containing any actions
+		if (!ua.getActions().isEmpty()) {
+			uas.add(ua);
+		}		
 		
 		log.info("Successfully found all permitted actions in " + uas.size() + " units for the current user " + user.getUsername());
 		return uas;
