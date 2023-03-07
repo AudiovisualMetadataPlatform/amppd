@@ -1,8 +1,7 @@
-name,description
-AMP Admin,administrator for AMP
-Tenant Manager,manager for a tenant
-Unit Manager,manager for a unit
-Collection Manager,manager for collections within a unit
-Collection Staff,staff who can perform certain actions on behalf of a collection manager within own unit
-Collection Helper,user who can help collection staff/manager for certain actions within own unit
-Unit Viewer,generic user who can view data within own unit
+name,description,level
+AMP Admin,administrator for AMP,0
+Unit Manager,manager for a unit,1
+Collection Manager,manager for collections within a unit,2
+Collection Staff,staff who can perform certain actions on behalf of a collection manager within own unit,3
+Collection Helper,user who can help collection staff/manager for certain actions within own unit,4
+Unit Viewer,generic user who can view data within own unit,5
