@@ -34,6 +34,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
 		@Index(columnList = "name"),
+		@Index(columnList = "level", unique = true),
 		@Index(columnList = "unit_id"),
 		@Index(columnList = "unit_id, name", unique = true),
 })
@@ -49,6 +50,14 @@ public class Role extends AmpObject {
     @Type(type="text")
     private String description;
 
+    @NotBlank
+    // inheritance hierarchy level
+    /* Note:
+     * This is only used during role/permission refresh, to avoid manual input of redundant rows in permission table; it's not used for permission checking. 
+     * The role hierarchy is linear and role level is unique, starting at 0 for the root (AMP Admin), and increasing by 1 with each lower level role.
+     */
+    private Integer level;	
+    
     // the unit within which scope this role is visible/applicable;
     // if null, it's a global role with the same set of permissions shared across units;
     // otherwise, it's a dynamic role with permissions dynamically set by its unit admin for that unit

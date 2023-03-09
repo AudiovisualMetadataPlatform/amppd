@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 
@@ -20,7 +21,7 @@ public interface PermissionService {
 	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments.
 	 * @return the list of units the current user has access to
 	 */
-	public List<Unit> getAccessibleUnits();
+	public Set<Unit> getAccessibleUnits();
 	
 	/**
 	 * Check if the current user is AMP admin.

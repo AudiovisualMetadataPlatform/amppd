@@ -1,23 +1,50 @@
 roleName,actionName
-Unit Viewer,list units
+AMP Admin,create unit
 Unit Viewer,view unit
-Unit Viewer,list collections
+Unit Manager,edit unit
+AMP Admin,delete unit
+Collection Manager,create collection
 Unit Viewer,view collection
-Unit Viewer,list items
-Unit Viewer,view item
-Unit Viewer,list content files
-Unit Viewer,view content file
-Unit Viewer,view role assignment
-Collection Manager,edit collection
+Collection Staff,edit collection
 Collection Manager,activate collection
 Collection Manager,delete collection
-Collection Manager,create item
-Collection Manager,edit item
-Collection Manager,delete item
-Collection Manager,add content file
-Collection Manager,edit content file
-Collection Manager,delete  content file
-Unit Manager,edit unit
-Unit Manager,delete unit
-Unit Manager,create collection
-AMP Admin,edit role assignment
+Collection Helper,create item
+Unit Viewer,view item
+Collection Helper,edit item
+Collection Staff,delete item
+Collection Helper,add content file
+Unit Viewer,view content file
+Collection Staff,play  content file
+Collection Helper,edit content file
+Collection Staff,delete  content file
+Collection Staff,add supplement
+Unit Viewer,view supplement
+Collection Staff,edit supplement
+Collection Staff,move supplement
+Collection Staff,delete  supplement
+Collection Helper,run unrestricted workflow
+Collection Staff,run restricted workflow
+Collection Helper,view workflow result
+Collection Staff,export workflow result
+Collection Helper,edit workflow result
+Collection Staff,delete workflow result
+Collection Manager,create workflow
+Unit Viewer,view workflow
+Collection Manager,edit workflow
+Collection Manager,restrict workflow
+Collection Manager,delete workflow
+Collection Staff,ingest batch
+Collection Staff,retrieve bag
+Collection Staff,deliver bag
+Collection Staff,run evaluation
+Collection Staff,view evaluation
+AMP Admin,approve user
+Unit Manager,create unit role
+Unit Manager,delete unit role
+Unit Viewer,view permission
+AMP Admin,config global permission
+Unit Manager,config unit permission
+Collection Staff,view role assignment
+Collection Manager,assign staff role
+Unit Manager,assign collection manager
+AMP Admin,assign unit manager

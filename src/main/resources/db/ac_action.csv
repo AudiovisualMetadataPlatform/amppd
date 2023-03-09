@@ -1,60 +1,50 @@
-name,description,actionType,targetType,httpMethod,urlPattern
+name,description,actionType,tarGETType,httpMethod,urlPattern
 create unit,create a new unit,Create,Unit,POST,/units
-view unit,view details of a unit,Read,Unit,GET,/units/{id}
-list units,list all or query a subset of units,List,Unit,GET,/units
+view unit,list units or view details of a unit,Read,Unit,GET,/units/{id}
 edit unit,edit metadata of a unit,Update,Unit,PATCH,/units/{id}
 delete unit,delete a unit and all its associated data,Delete,Unit,DELETE,/units/{id}
 create collection,create a new collection under a unit,Create,Collection,POST,/collections
-view collection,view details of a collection,Read,Collection,GET,/collections/{id}
-list collections,list all or query a subset of collections,List,Collection,GET,/collections
+view collection,list/query collections or view details of a collection,Read,Collection,GET,/collections/{id}
 edit collection,edit metadata of a collection,Update,Collection,PATCH,/collections/{id}
 activate collection,activate/deactivate a collection and its associated data,Activate,Collection,POST,/collections/{id}/activate
 delete collection,delete a collection and all its associated data,Delete,Collection,DELETE,/collections/{id}
 create item,create an item under a collection,Create,Item,POST,/items
-view item,view details of an item,Read,Item,GET,/items/{id}
-list items,list all or query a subset of items,List,Item,GET,/items
+view item,list/query items or view details of an item,Read,Item,GET,/items/{id}
 edit item,edit metadata of an item,Update,Item,PATCH,/items/{id}
 delete item,delete an item and all its associated data,Delete,Item,DELETE,/items/{id}
 add content file,add a new primaryfile to an item,Create,Primaryfile,POST,/items/{id}/addPrimaryfile
-list content files,list all or query a subset of primaryfiles,List,Primaryfile,GET,/primaryfiles
-view content file,view details of a primaryfile or play its media content,Read,Primaryfile,GET,/primaryfiles/{id}
+view content file,list/query primaryfiles or view details of a primaryfile,Read,Primaryfile,GET,/primaryfiles/{id}
+play  content file,play the media file of a primaryfile,Read,Primaryfile_Media,GET,/primaryfiles/{id}/media
 edit content file,edit metadata of a primaryfile,Update,Primaryfile,PATCH,/primaryfiles/{id}
 delete  content file,delete a primaryfile and all its associated data,Delete,Primaryfile,DELETE,/primaryfiles/{id}
-add unit supplement,add a new supplement to a unit,Create,UnitSupplement,POST,/units/{id}/addSupplement
-add collection supplement,add a new supplement to a collection,Create,CollectionSupplement,POST,/collections/{id}/addSupplement
-add item supplement,add a new supplement to a item,Create,ItemSupplement,POST,/items/{id}/addSupplement
-add primaryfile supplement,add a new supplement to a primaryfile,Create,PrimaryfileSupplement,POST,/primaryfiles/{id}/addSupplement
-move unit supplement,move a unit supplement to another parent,Move,UnitSupplement,POST,/units/{id}/moveSupplement
-move collection supplement,move a collection supplement to another parent,Move,CollectionSupplement,POST,/collections/{id}/moveSupplement
-move item supplement,move an item supplement to another parent,Move,ItemSupplement,POST,/items/{id}/moveSupplement
-move primaryfile supplement,move a primaryfile supplement to another parent,Move,PrimaryfileSupplement,POST,/primaryfiles/{id}/moveSupplement
-list supplements,list all or query a subset of supplements,List,Supplement,GET,/supplements
-view supplement,view details of a supplement,Read,Supplement,GET,/supplements/{id}
+add supplement,add a new supplement to a unit/collection/item/primaryfile,Create,Supplement,POST,/[units|collections|items|primaryfiles]/{id}/addSupplement
+view supplement,list/query supplements or view details of a supplement,Read,Supplement,GET,/supplements/{id}
 edit supplement,edit metadata of a supplement,Update,Supplement,PATCH,/supplements/{id}
+move supplement,move a unit/collection/item/primaryfile supplement to another parent,Move,Supplement,POST,/[units|collections|items|primaryfiles]/{id}/moveSupplement
 delete  supplement,delete a supplement and all its associated data,Delete,Supplement,DELETE,/supplements/{id}
-list workflow results,list all or query a subset of workflow results,List,WorkflowResult,GET,/workflow-results/query
-view workflow result,view content of a workflow result output file,Read,WorkflowResult,GET,/workflow-results/{id}/output
-edit workflow result,edit workflow result output name and/or final status,Update,WorkflowResult,PATCH,/workflow-results/{id}
+run unrestricted workflow,run unrestricted workflow on selected files,Create,WorkflowResult,POST,/jobs/submit*
+run restricted workflow,run restricted workflow on selected files,Create,WorkflowResult_Restricted,POST,/jobs/submit*/restricted
+view workflow result,list/query workflow results or view a workflow result output file,Read,WorkflowResult,GET,/workflow-results/[query|intermediate*|/{id}/output]
+export workflow result,export selected workflow results to a CSV file,Export,WorkflowResult,POST,/workflow-results/export
+edit workflow result,edit workflow result output name/alias and/or final status,Update,WorkflowResult,PATCH,/workflow-results/{id}
 delete workflow result,delete a workflow result from dashboard and Galaxy,Delete,WorkflowResult,DELETE,/workflow-results/{id}
-export workflow results,export selected workflow results to a CSV file,Execute,WorkflowResult,POST,/workflow-results/export
 create workflow,create a new workflow,Create,Workflow,POST,/workflows/create
-list workflows,list all or query a subset of workflows,List,Workflow,GET,/workflows
-view workflow,view details of a workflow,Read,Workflow,GET,/workflows/{id}
-edit workflow,edit metadata and/or structure of a workflow,Update,Workflow,PATCH,/workflows/{id}/edit*
-restrict workflow,set/unset access restrictions on a workflow,Restrict,Workflow,PATCH,/workflows/{id}/access
+view workflow,list/query workflows or view details of a workflow,Read,Workflow,GET,/workflows/{id}
+edit workflow,edit metadata and/or structure of a workflow,Update,Workflow,POST,/workflows/{id}/edit*
+restrict workflow,set/unset access restrictions on a workflow,Restrict,Workflow,POST,/workflows/{id}/restrict
 delete workflow,delete a workflow and all its associated data,Delete,Workflow,DELETE,/workflows/{id}
-run workflow,run a workflow on selected files via creating new AMP/Galaxy jobs,Create,Job,POST,/jobs/submit*
-ingest batch,run batch ingest process to create content data,Execute,Batch,POST,/batch/ingest
-retrieve bags,retrieve bag contents at various levels,Read,Bag,GET,/bags/{entity}/{id}
-deliver bag,deliver bag contents to Avalon at various levels,Execute,Bag,POST,/deliver/avalon/{collections|items}/{id}
-run evaluation,run MGM evaluations,Execute,Evaluation,POST,/mgm*
-create role,create a new unit scope role,Create,Role,POST,/roles
-view role,view details of a unit scope role,Read,Role,GET,/roles/{id}
-edit role,edit a unit scope role,Update,Role,PATCH,/roles/{id}
-delete role,delete a unit scope role,Delete,Role,DELETE,/roles/{id}
-edit permissions,config permission settings for roles/actions,Update,RoleAction,PATCH,/role-action/{id}
-create role assignment,create a new role assignment record,Create,RoleAssignment,POST,/role-assignments
-list role assignments,list all or query a subset of role assignments,List,RoleAssignment,GET,/role-assignments
-view role assignment,view role assignments,Read,RoleAssignment,GET,/role-assignments/{id}
-edit role assignment,edit a role assignment record,Update,RoleAssignment,PATCH,/role-assignments/{id}
-delete role assignment,delete a role assignment record,Delete,RoleAssignment,DELETE,/role-assignments/{id}
+ingest batch,run batch ingest process to create content data,Create,Batch,POST,/batch/[ingest|preprocess]
+retrieve bag,retrieve bag contents at various levels,Read,Bag,GET,/bags/units|collections|items|primaryfiles/{id}
+deliver bag,deliver bag contents to Avalon at various levels,Export,Bag,POST,/deliver/avalon/[collections|items]/{id}
+run evaluation,run MGM evaluation tests,Create,MgmEvaluationTest,POST,/mgm*
+view evaluation,list/view/visualize MGM evaluation tools/tests/results,Read,MgmEvaluationTest,GET,/mgm*
+approve user,approve/reject user account registration,Update,AmpUser,POST,/account/[approve|reject]
+create unit role,create a new unit scope role,Create,Role,POST,/roles
+delete unit role,delete a unit scope role,Delete,Role,DELETE,/roles/{id}
+view permission,list/view permission settings,Read,RoleAction,GET,/[roles|actions|roleActions]
+config global permission,config permission settings on actions for global roles,Update,RoleAction,POST,/roleActions
+config unit permission,config permission settings on actions for unit-scope roles,Update,RoleAction_Unit,POST,/roleActions/unit
+view role assignment,view user role assignments within a unit,Read,RoleAssignment,GET,/roleAssignments
+assign staff role,assign staff roles other than unit/collection manager to users within a unit,Update,RoleAssignment,POST,/roleAssignments
+assign collection manager,assign collection manager role to users within a unit,Update,RoleAssignment_CollectionManager,POST,/roleAssignments/collectionManager
+assign unit manager,assign unit manager role to users within a unit,Update,RoleAssignment_UnitManager,POST,/roleAssignments/unitManager
