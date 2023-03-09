@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
@@ -34,7 +35,7 @@ public class PermissionController {
 	 * @return the list of units the current user has access to
 	 */
 	@GetMapping("/permissions/units")
-	public List<Unit> getAccessibleUnits() {
+	public Set<Unit> getAccessibleUnits() {
 		log.info("Retrieving all units the current user has access to ...");
 		return permissionService.getAccessibleUnits();
 	}

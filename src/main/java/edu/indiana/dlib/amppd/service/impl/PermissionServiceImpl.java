@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -55,8 +56,8 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
 	 */
 	@Override
-	public List<Unit> getAccessibleUnits() {
-		List<Unit> units = new ArrayList<Unit>();
+	public Set<Unit> getAccessibleUnits() {
+		Set<Unit> units = new HashSet<Unit>();
 
 		// find all role assignments for the current user
 		AmpUser user = ampUserService.getCurrentUser();		
@@ -69,7 +70,7 @@ public class PermissionServiceImpl implements PermissionService {
 			// if an assignment is not associated with any unit, it's a global one, which means the user has AMP Admin role and can access all units 
 			if (unit == null) {
 				Iterable<Unit> allunits = unitRepository.findAll();
-				units = IterableUtils.toList(allunits);
+				units.addAll(IterableUtils.toList(allunits));
 				log.info("The current user " + user.getUsername() + " is AMP Admin and thus has access to all " + units.size() + " units." );
 				return units;
 			}
