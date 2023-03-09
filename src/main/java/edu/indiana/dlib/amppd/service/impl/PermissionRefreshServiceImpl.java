@@ -286,7 +286,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	 */
 	private void initRoleAssignment() {
 		final String AMP_ADMIN = "AMP Admin";
-		String[] usernames = {"ampadmin", "yingfeng@iu.edu", "mcwhitak@iu.edu", "ghoshar@iu.edu"};
+		String[] usernames = {"ampadmin", "amppd@iu.edu", "yingfeng@iu.edu", "amppdiu@gmail.com"};
 		String[] roleNames = {AMP_ADMIN, "Unit Manager", "Collection Manager", "Unit Viewer"};
 		String unitName = "AMP Pilot Unit";
 		
