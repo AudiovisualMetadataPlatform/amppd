@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -9,12 +10,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.AmpUser.State;
 
 
 @RepositoryRestResource(collectionResourceRel = "users", path = "users")
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 	
 	AmpUser findFirstByUsername(String username);
+	
+	List<AmpUser> findByStatusIsAndUsernameStartsWithAndUserIdNotInOrderByUsername(State state, String nameStarting, List<Long> idsExcluded);
 	
 	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.status=:status")
 	String findByApprovedUser(@Param("username") String username, @Param("pswd") String pswd, @Param("status") AmpUser.State status);
@@ -35,4 +39,5 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	@Modifying
 	@Query(value = "update AmpUser set status = :status where id = :id")
 	int updateStatus(@Param("id") Long id, @Param("status") AmpUser.State status);
+		
 }
