@@ -134,7 +134,7 @@ public class AmpUserController {
 	}
 
 	/**
-	 * Get the list of users with active account, whose names start with the given pattern, but IDs not in the given list (if provided).
+	 * Get the list of users with active accounts, names starting with the given pattern, but IDs not in the given list (if provided).
 	 * @param nameStarting typeahead pattern for user name
 	 * @param idsExcluded IDs of the users to exclude
 	 * @return the list of users satisfying the query criteria
@@ -146,7 +146,7 @@ public class AmpUserController {
 			idsExcluded = new ArrayList<Long>();
 		}
 		
-		List<AmpUser> users = ampUserRepository.findByStatusIsAndUsernameStartsWithAndUserIdNotInOrderByUsername(State.ACTIVATED, nameStarting, idsExcluded);
+		List<AmpUser> users = ampUserRepository.findByStatusAndLastNameStartsWithAndUserIdNotInOrderByLastName(State.ACTIVATED, nameStarting, idsExcluded);
 		
 		log.info("Successfully found " + users.size() + " active users with name starting with " + nameStarting + ", excluding the " + idsExcluded.size() + " users in the given list.");
 		return users;

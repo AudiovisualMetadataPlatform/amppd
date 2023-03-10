@@ -18,7 +18,7 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	
 	AmpUser findFirstByUsername(String username);
 	
-	List<AmpUser> findByStatusIsAndUsernameStartsWithAndUserIdNotInOrderByUsername(State state, String nameStarting, List<Long> idsExcluded);
+	List<AmpUser> findByStatusAndLastNameStartsWithAndUserIdNotInOrderByLastName(State state, String nameStarting, List<Long> idsExcluded);
 	
 	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.status=:status")
 	String findByApprovedUser(@Param("username") String username, @Param("pswd") String pswd, @Param("status") AmpUser.State status);
