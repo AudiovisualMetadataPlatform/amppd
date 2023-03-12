@@ -146,7 +146,7 @@ public class AmpUserController {
 			idsExcluded = new ArrayList<Long>();
 		}
 		
-		List<AmpUser> users = ampUserRepository.findByStatusAndLastNameStartsWithAndUserIdNotInOrderByLastName(State.ACTIVATED, nameStarting, idsExcluded);
+		List<AmpUser> users = ampUserRepository.findByStatusAndNameStartsWithAndUserIdNotInOrderByName(State.ACTIVATED, nameStarting, idsExcluded);
 		
 		log.info("Successfully found " + users.size() + " active users with name starting with " + nameStarting + ", excluding the " + idsExcluded.size() + " users in the given list.");
 		return users;

@@ -55,8 +55,9 @@ public class Role extends AmpObject {
     /* Note:
      * This is only used during role/permission refresh, to avoid manual input of redundant rows in permission table; it's not used for permission checking. 
      * The role hierarchy is linear and role level is unique, starting at 0 for the root (AMP Admin), and increasing by 1 with each lower level role.
+     * Unit scope roles are assigned with MAX_VALUE by default, as we disallow these roles to assign other roles, so they don't have a linear order.
      */
-    private Integer level;	
+    private Integer level = Integer.MAX_VALUE;	
     
     // the unit within which scope this role is visible/applicable;
     // if null, it's a global role with the same set of permissions shared across units;

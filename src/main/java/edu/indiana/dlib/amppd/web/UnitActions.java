@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UnitActions {
 	
-	Long unitId;
-	List<Action> actions;
+	private Long unitId;
+	private List<Action> actions;
 
 }

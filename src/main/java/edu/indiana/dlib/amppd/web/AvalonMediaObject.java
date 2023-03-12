@@ -8,5 +8,5 @@ import lombok.Data;
  */
 @Data
 public class AvalonMediaObject {
-	String id;
+	private String id;
 }

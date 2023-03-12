@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor 
 @AllArgsConstructor 
 public class PrimaryfileInfo {
-	Long id;
-	String name;
-	String mimeType;
-	String originalFilename;
+	private Long id;
+	private String name;
+	private String mimeType;
+	private String originalFilename;
 }
