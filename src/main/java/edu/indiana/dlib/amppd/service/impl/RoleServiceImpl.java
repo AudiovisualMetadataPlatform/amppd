@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.ac.Role;
@@ -15,7 +14,8 @@ import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
 import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.RoleService;
-import edu.indiana.dlib.amppd.web.RoleAssignTable;
+import edu.indiana.dlib.amppd.web.RoleAssignRequest;
+import edu.indiana.dlib.amppd.web.RoleAssignResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,10 +66,10 @@ public class RoleServiceImpl implements RoleService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.RoleService.getUserRoleAssignments(Long)
+	 * @see edu.indiana.dlib.amppd.service.RoleService.retrieveRoleAssignments(Long)
 	 */
 	@Override
-	public RoleAssignTable getUserRoleAssignments(Long unitId) {		
+	public RoleAssignResponse retrieveRoleAssignments(Long unitId) {		
 		// find the role assignment level limit for the current user in the unit
 		Integer level = getAssignableRoleLevel(unitId);
 
@@ -89,7 +89,7 @@ public class RoleServiceImpl implements RoleService {
 		// initialize users list and assignments array
 		Long userIdC = 0L;
 		List<AmpUser> users = new ArrayList<AmpUser>();
-		List<Boolean[]> usersRoles = new ArrayList<Boolean[]>();
+		List<Boolean[]> assignments = new ArrayList<Boolean[]>();
 		int nRoles = roles.size();
 		
 		// go through role assignments ordered by user IDs, populate users list and users-roles assignment table
@@ -101,20 +101,37 @@ public class RoleServiceImpl implements RoleService {
 			if (!userId.equals(userIdC)) {
 				userIdC = userId;
 				users.add(user);
-				usersRoles.add(new Boolean[nRoles]);
+				assignments.add(new Boolean[nRoles]);
 			}
 			
-			// populate usersRoles cell
-			int row = usersRoles.size();
+			// populate assignments cell
+			int row = assignments.size();
 			int col = mapRoles.get(ra.getRole().getId());
-			Boolean[] userRoles = usersRoles.get(row-1);
+			Boolean[] userRoles = assignments.get(row-1);
 			userRoles[col] = true;
 		}
 		
 		// generate the assignment table
-		RoleAssignTable raTable = new RoleAssignTable(level, roles, users, usersRoles);
+		RoleAssignResponse response = new RoleAssignResponse(level, roles, users, assignments);
 		log.info("Successfully found " + users.size() + " users and " + nRoles + " roles for assignment in unit " + unitId);
-		return raTable;
+		return response;
+	}
+	
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.RoleService.updateRoleAssignments(Long, List<RoleAssignRequest>)
+	 */
+	@Override
+	public List<RoleAssignment> updateRoleAssignments(Long unitId, List<RoleAssignRequest> assignments) {
+		List<RoleAssignment> ras = new ArrayList<RoleAssignment>();
+		
+		for (RoleAssignRequest assignment : assignments) {
+			RoleAssignment ra = roleAssignmentRepository.updateByUserIdAndRoleIdAndUnitId(assignment.getUserId(), assignment.getRoleId(), unitId);
+			ras.add(ra);
+		}
+		
+		log.info("Successfully updated " + ras.size() + " role assignments within unit " + unitId);
+		return ras;
 	}
 	
 }

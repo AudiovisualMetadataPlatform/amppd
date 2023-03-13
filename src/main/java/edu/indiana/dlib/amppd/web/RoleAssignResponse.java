@@ -9,13 +9,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Response for role assignment retrieval request, containing roles, users, and assignment info for a unit.
+ * Response for role assignment retrieval request, containing roles, users, and assignments for a unit.
  * @author yingfeng
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleAssignTable {
+public class RoleAssignResponse {
 	
 	// assignable role level threshold for the current user in the current unit
 	private Integer level;
@@ -30,7 +30,7 @@ public class RoleAssignTable {
 	private List<AmpUser> users;
 	
 	// 2D Boolean array (list of boolean arrays), with rows of users and columns of roles, and cells indicating whether the user has the role 
-	private List<Boolean[]> usersRoles;
+	private List<Boolean[]> assignments;
 	
 	
 }

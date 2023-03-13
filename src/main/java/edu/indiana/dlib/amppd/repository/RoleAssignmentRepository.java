@@ -30,4 +30,6 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	@Query(value = "select min(ra.r.level) from RoleAssignment ra where ra.userId = :userId and (ra.unitId = :unitId or ra.unitId is null)")
 	Integer findMinRoleLevelByUserIdAndUnitId(Long userId, Long unitId);
 	
+	RoleAssignment updateByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitid);
+	
 }

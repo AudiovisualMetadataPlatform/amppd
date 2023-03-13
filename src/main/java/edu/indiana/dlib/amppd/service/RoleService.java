@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import edu.indiana.dlib.amppd.model.ac.Role;
-import edu.indiana.dlib.amppd.web.RoleAssignTable;
+import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.web.RoleAssignRequest;
+import edu.indiana.dlib.amppd.web.RoleAssignResponse;
 
 /**
  * Service for role and role assignment related operations.
@@ -33,6 +35,14 @@ public interface RoleService {
 	 * @unitId ID of the unit associated with the role assignment
 	 * @return the user-role assignment table 
 	 */
-	public RoleAssignTable getUserRoleAssignments(Long unitId);
+	public RoleAssignResponse retrieveRoleAssignments(Long unitId);
+
+	/**
+	 * Update the given role assignments within the given unit.
+	 * @unitId ID of the given unit
+	 * assignments list of user-role-assignment 
+	 * @return the updated roleAssignments
+	 */
+	public List<RoleAssignment> updateRoleAssignments(Long unitId, List<RoleAssignRequest> assignments);
 	
 }
