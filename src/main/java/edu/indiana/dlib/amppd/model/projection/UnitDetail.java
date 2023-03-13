@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.Unit;
+import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 
 
 /**
@@ -16,5 +17,6 @@ public interface UnitDetail extends UnitBrief, DataentityDetail {
 
 	public Set<CollectionBrief> getCollections();
 	public Set<UnitSupplementBrief> getSupplements();
+	public Set<RoleAssignment> getRoleAssignments();
 	
 }

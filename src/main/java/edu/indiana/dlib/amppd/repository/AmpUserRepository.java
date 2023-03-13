@@ -11,9 +11,10 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.AmpUser.State;
+import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 
 
-@RepositoryRestResource(collectionResourceRel = "users", path = "users")
+@RepositoryRestResource(excerptProjection = AmpUserBrief.class, collectionResourceRel = "users", path = "users")
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 
 	AmpUser findFirstByUsername(String username);

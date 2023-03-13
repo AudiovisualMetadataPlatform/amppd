@@ -116,8 +116,7 @@ public class RoleServiceImpl implements RoleService {
 		log.info("Successfully found " + users.size() + " users and " + nRoles + " roles for assignment in unit " + unitId);
 		return response;
 	}
-	
-	
+		
 	/**
 	 * @see edu.indiana.dlib.amppd.service.RoleService.updateRoleAssignments(Long, List<RoleAssignRequest>)
 	 */
