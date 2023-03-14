@@ -45,11 +45,11 @@ public class RoleController {
 	 * Update the given role assignments within the given unit.
 	 * @unitId ID of the given unit
 	 * assignments list of user-role-assignment 
-	 * @return the updated roleAssignments
+	 * @return the pair of Lists of the added/deleted roleAssignments
 	 */
 	@PostMapping("/roleAssignments")
 	public ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> updateRoleAssignments(@RequestParam Long unitId, @RequestBody List<RoleAssignRequest> assignments) {
-		log.info("Updating + " + assignments.size() + " within unit " + unitId);
+		log.info("Updating + " + assignments.size() + " role assignments within unit " + unitId);
 		ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> ras = roleService.updateRoleAssignments(unitId, assignments);
 		return ras;
 	}

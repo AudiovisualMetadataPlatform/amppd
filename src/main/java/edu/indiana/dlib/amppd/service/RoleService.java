@@ -42,7 +42,7 @@ public interface RoleService {
 	 * Update the given role assignments within the given unit.
 	 * @unitId ID of the given unit
 	 * assignments list of user-role-assignment 
-	 * @return the list of added/deleted roleAssignments
+	 * @return the list of added/deleted RoleAssignments
 	 */
 	public ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> updateRoleAssignments(Long unitId, List<RoleAssignRequest> assignments);
 	

@@ -79,7 +79,7 @@ public class RoleServiceImpl implements RoleService {
 	 */
 	@Override
 	public RoleAssignResponse retrieveRoleAssignments(Long unitId) {		
-		// find the role assignment level threshold for the current user in the unit
+		// find the role assignment level threshold for the current user in the unit, roles with greater levels above the threshold are assignable
 		Integer level = getAssignableRoleLevel(unitId);
 
 		// get all viewable roles for the unit
@@ -96,26 +96,25 @@ public class RoleServiceImpl implements RoleService {
 		List<RoleAssignment> ras = roleAssignmentRepository.findByUnitIdOrderByUserId(unitId);
 		
 		// initialize users list and assignments array
-		Long userIdC = 0L;
 		int nRoles = roles.size();
 		List<AmpUserDto> users = new ArrayList<AmpUserDto>();
 		List<boolean[]> assignments = new ArrayList<boolean[]>();
 		
 		// go through role assignments ordered by user IDs, populate users list and users-roles assignment table
 		for (RoleAssignment ra : ras) {
+			int row = users.size() - 1;
+			AmpUserDto userDto = row < 0 ? null : users.get(row);
 			AmpUser user = ra.getUser();
-			Long userId = user.getId();
 
 			// start a new user when userId changes
-			if (!userId.equals(userIdC)) {
-				userIdC = userId;
-				AmpUserDto userDto = new AmpUserDto(user);
+			if (userDto == null || !userDto.getId().equals(user.getId())) {				
+				userDto = new AmpUserDto(user);
 				users.add(userDto);
-				assignments.add(new boolean[nRoles]); // initially the boolean array cells are all false
+				// initialize the current user-roles assignment boolean array with cells are all false
+				assignments.add(new boolean[nRoles]); 
 			}
 			
-			// populate current assignment cell
-			int row = assignments.size() - 1;
+			// populate current assignment cell			
 			int col = mapRoles.get(ra.getRole().getId());
 			boolean[] userRoles = assignments.get(row);
 			userRoles[col] = true;

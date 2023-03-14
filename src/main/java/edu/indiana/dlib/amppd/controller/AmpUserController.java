@@ -135,11 +135,11 @@ public class AmpUserController {
 
 	/**
 	 * Get the list of users with active accounts, names starting with the given pattern, but IDs not in the given list (if provided).
-	 * @param nameStarting typeahead pattern for user name
+	 * @param nameStarting type-ahead pattern for user name
 	 * @param idsExcluding IDs of the users to exclude
 	 * @return the list of users satisfying the query criteria
 	 */
-	@GetMapping("/account/query")
+	@GetMapping("/users/active")
 	public List<AmpUserDto> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluding) {
 		List<AmpUserDto> users = null;
 		
