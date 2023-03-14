@@ -27,9 +27,9 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	List<RoleAssignment> findByUnitIdOrderByUserId(Long unitId);
 
 	// find the lowest role level for the user in a unit
-	@Query(value = "select min(ra.r.level) from RoleAssignment ra where ra.userId = :userId and (ra.unitId = :unitId or ra.unitId is null)")
+	@Query(value = "select min(ra.role.level) from RoleAssignment ra where ra.user.id = :userId and (ra.unit is null or ra.unit.id = :unitId)")
 	Integer findMinRoleLevelByUserIdAndUnitId(Long userId, Long unitId);
 	
-	RoleAssignment updateByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitid);
+	RoleAssignment deleteByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
 	
 }

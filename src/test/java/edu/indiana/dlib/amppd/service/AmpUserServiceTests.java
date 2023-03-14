@@ -95,10 +95,10 @@ public class AmpUserServiceTests {
 	 	AmpUser user2 = ampUserRepository.findByEmail(user.getEmail()).get();
 	 	if(user2 != null) {
 	 		Long id = user2.getId();
-	 		Assert.assertFalse(user.getStatus()==AmpUser.State.ACCEPTED);
+	 		Assert.assertFalse(user.getStatus()==AmpUser.Status.ACCEPTED);
 	 		ampUserService.accountAction(id, "approve");
 	 		user2 = ampUserRepository.findByEmail(user.getEmail()).get();
-	 		Assert.assertTrue(user2.getStatus()==AmpUser.State.ACCEPTED);
+	 		Assert.assertTrue(user2.getStatus()==AmpUser.Status.ACCEPTED);
 	 	}
     }
 	
@@ -115,12 +115,12 @@ public class AmpUserServiceTests {
 		calendar.add(Calendar.HOUR, amppdconfig.getActivateAccountDays() * 24);
 		myToken.setExpiryDate(calendar.getTime());
 		timedTokenRepository.save(myToken);
-		Assert.assertFalse(user.getStatus()==AmpUser.State.ACTIVATED);
+		Assert.assertFalse(user.getStatus()==AmpUser.Status.ACTIVATED);
 	 	try { 
-	 		ampUserRepository.updateStatus(user.getId(), AmpUser.State.ACCEPTED);
+	 		ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACCEPTED);
 			ampUserService.activateAccount(token);
 			AmpUser retrievedUser = ampUserRepository.findByEmail(user.getEmail()).get();
-			Assert.assertTrue(retrievedUser.getStatus()==AmpUser.State.ACTIVATED);
+			Assert.assertTrue(retrievedUser.getStatus()==AmpUser.Status.ACTIVATED);
 		  }
 		  catch(Exception ex) {
 			  System.out.println(ex.toString());

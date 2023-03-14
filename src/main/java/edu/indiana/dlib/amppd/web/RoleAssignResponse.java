@@ -2,8 +2,8 @@ package edu.indiana.dlib.amppd.web;
 
 import java.util.List;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.ac.Role;
+import edu.indiana.dlib.amppd.model.dto.AmpUserDto;
+import edu.indiana.dlib.amppd.model.dto.RoleDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,16 +21,16 @@ public class RoleAssignResponse {
 	private Integer level;
 	
 	// roles for which the current user can view assignments in the current unit
-	private List<Role> roles;	
+	private List<RoleDto> roles;	
 
 //	// roles for which the current user can update assignments in the current unit
 //	private List<Role> assignableRoles;
 	
 	// users currently assigned with roles in the current unit
-	private List<AmpUser> users;
+	private List<AmpUserDto> users;
 	
 	// 2D Boolean array (list of boolean arrays), with rows of users and columns of roles, and cells indicating whether the user has the role 
-	private List<Boolean[]> assignments;
+	private List<boolean[]> assignments;
 	
 	
 }

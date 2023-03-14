@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -41,7 +42,7 @@ public class AmpUser extends AmpObject {
 	 * Supervisor and Student are for Human MGM use only, and we assume they don't overlap with AMPPD Content User such as Collection Manager.
 	 */	
     public enum Role {ADMIN, MANAGER, SUPERVISOR, STUDENT}
-    public enum State {REQUESTED, ACCEPTED, ACTIVATED, REJECTED}
+    public enum Status {REQUESTED, ACCEPTED, ACTIVATED, REJECTED}
 	
 	@NotNull
 	private String username;
@@ -60,9 +61,9 @@ public class AmpUser extends AmpObject {
 		
 	@NotNull
 	@Enumerated(EnumType.STRING)
-	private State status = State.REQUESTED;
+	private Status status = Status.REQUESTED;
 	
-	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

@@ -801,7 +801,7 @@ public class TestHelper {
 			ampUser.setPassword(TEST_USER);
 			ampUser.setFirstName("AMP");
 			ampUser.setLastName("USER");
-			ampUser.setStatus(AmpUser.State.ACCEPTED);
+			ampUser.setStatus(AmpUser.Status.ACCEPTED);
 			ampUserService.registerAmpUser(ampUser);
 		}
 		ampUser.setPassword(TEST_USER);

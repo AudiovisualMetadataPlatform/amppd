@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -66,14 +67,14 @@ public class Role extends AmpObject {
     private Unit unit;
     
 	// permissions: the actions this role can perform 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "role_action", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "action_id"))
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private Set<Action> actions;
 	
 	// role-entity-user assignment
-	@OneToMany(mappedBy="role", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="role", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

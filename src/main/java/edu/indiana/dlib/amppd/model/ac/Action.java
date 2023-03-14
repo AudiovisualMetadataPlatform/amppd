@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
@@ -74,7 +75,7 @@ public class Action extends AmpObject {
     private String urlPattern;    
 	
     // permissions: the roles that can perform this action
-    @ManyToMany(mappedBy = "actions")
+    @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY)
 	@JsonBackReference(value="roles")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

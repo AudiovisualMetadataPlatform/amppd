@@ -3,7 +3,7 @@ package edu.indiana.dlib.amppd.model.projection;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.AmpUser.State;
+import edu.indiana.dlib.amppd.model.AmpUser.Status;
 
 
 /**
@@ -18,6 +18,6 @@ public interface AmpUserBrief extends AmpObjectBrief {
 	public String getPassword();
 	public String getFirstName();
 	public String getLastName();
-	public State getStatus();
+	public Status getStatus();
 
 }

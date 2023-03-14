@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.controller;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,9 +48,9 @@ public class RoleController {
 	 * @return the updated roleAssignments
 	 */
 	@PostMapping("/roleAssignments")
-	public List<RoleAssignment> updateRoleAssignments(@RequestParam Long unitId, @RequestBody List<RoleAssignRequest> assignments) {
+	public ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> updateRoleAssignments(@RequestParam Long unitId, @RequestBody List<RoleAssignRequest> assignments) {
 		log.info("Updating + " + assignments.size() + " within unit " + unitId);
-		List<RoleAssignment> ras = roleService.updateRoleAssignments(unitId, assignments);
+		ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> ras = roleService.updateRoleAssignments(unitId, assignments);
 		return ras;
 	}
 		

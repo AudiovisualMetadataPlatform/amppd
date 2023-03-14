@@ -14,6 +14,6 @@ public class RoleAssignRequest {
 
 	private Long userId;
 	private Long roleId;
-	private Boolean assigned;
+	private boolean assigned;
 	
 }

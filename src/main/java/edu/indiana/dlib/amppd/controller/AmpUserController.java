@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.AmpUser.State;
+import edu.indiana.dlib.amppd.model.AmpUser.Status;
+import edu.indiana.dlib.amppd.model.dto.AmpUserDto;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.security.JwtRequest;
 import edu.indiana.dlib.amppd.security.JwtResponse;
@@ -136,19 +136,23 @@ public class AmpUserController {
 	/**
 	 * Get the list of users with active accounts, names starting with the given pattern, but IDs not in the given list (if provided).
 	 * @param nameStarting typeahead pattern for user name
-	 * @param idsExcluded IDs of the users to exclude
+	 * @param idsExcluding IDs of the users to exclude
 	 * @return the list of users satisfying the query criteria
 	 */
 	@GetMapping("/account/query")
-	public List<AmpUser> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluded) {
-		// in case users to exclude is not provided, make it an empty list 
-		if (idsExcluded == null) {
-			idsExcluded = new ArrayList<Long>();
+	public List<AmpUserDto> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluding) {
+		List<AmpUserDto> users = null;
+		
+		// if users to exclude is not provided, skip the exclude-user criteria 
+		if (idsExcluding == null || idsExcluding.isEmpty()) {
+			users = ampUserRepository.findByStatusAndNameStartsOrderByName(Status.ACTIVATED, nameStarting);
+			log.info("Successfully found " + users.size() + " active users with name starting with " + nameStarting);
+		}
+		else {
+			users = ampUserRepository.findByStatusAndNameStartsAndIdNotInOrderByName(Status.ACTIVATED, nameStarting, idsExcluding);
+			log.info("Successfully found " + users.size() + " active users with name starting with " + nameStarting + ", excluding the " + idsExcluding.size() + " users in the given list.");
 		}
 		
-		List<AmpUser> users = ampUserRepository.findByStatusAndNameStartsWithAndUserIdNotInOrderByName(State.ACTIVATED, nameStarting, idsExcluded);
-		
-		log.info("Successfully found " + users.size() + " active users with name starting with " + nameStarting + ", excluding the " + idsExcluded.size() + " users in the given list.");
 		return users;
 	}
 

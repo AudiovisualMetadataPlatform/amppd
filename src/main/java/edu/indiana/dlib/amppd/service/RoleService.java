@@ -2,10 +2,11 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.model.dto.RoleDto;
 import edu.indiana.dlib.amppd.web.RoleAssignRequest;
 import edu.indiana.dlib.amppd.web.RoleAssignResponse;
 
@@ -28,7 +29,7 @@ public interface RoleService {
 	 * @unitId ID of the unit associated with the role assignment
 	 * @return the set of roles assignable by the current user
 	 */
-	public List<Role> getAssignableRoles(@RequestParam Long unitId);
+	public List<RoleDto> getAssignableRoles(@RequestParam Long unitId);
 
 	/**
 	 * Get the users, roles, and assignment info for the current user and the given unit.
@@ -41,8 +42,8 @@ public interface RoleService {
 	 * Update the given role assignments within the given unit.
 	 * @unitId ID of the given unit
 	 * assignments list of user-role-assignment 
-	 * @return the updated roleAssignments
+	 * @return the list of added/deleted roleAssignments
 	 */
-	public List<RoleAssignment> updateRoleAssignments(Long unitId, List<RoleAssignRequest> assignments);
+	public ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> updateRoleAssignments(Long unitId, List<RoleAssignRequest> assignments);
 	
 }
