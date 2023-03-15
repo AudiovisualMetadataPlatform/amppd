@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.web;
+package edu.indiana.dlib.amppd.model.dto;
 
 import lombok.Data;
 
@@ -8,5 +8,5 @@ import lombok.Data;
  */
 @Data
 public class AvalonMediaObject {
-	String id;
+	private String id;
 }

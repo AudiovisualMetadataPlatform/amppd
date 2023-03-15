@@ -1,4 +1,4 @@
-package edu.indiana.dlib.amppd.web;
+package edu.indiana.dlib.amppd.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor 
 @AllArgsConstructor 
 public class PrimaryfileInfo {
-	Long id;
-	String name;
-	String mimeType;
-	String originalFilename;
+	private Long id;
+	private String name;
+	private String mimeType;
+	private String originalFilename;
 }

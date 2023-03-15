@@ -16,5 +16,6 @@ public interface UnitDetail extends UnitBrief, DataentityDetail {
 
 	public Set<CollectionBrief> getCollections();
 	public Set<UnitSupplementBrief> getSupplements();
+	public Set<RoleAssignmentBrief> getRoleAssignments();
 	
 }

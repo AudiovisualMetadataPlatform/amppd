@@ -5,18 +5,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.ac.Role;
-import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.model.projection.ActionBrief;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
+import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
 import edu.indiana.dlib.amppd.repository.RoleRepository;
@@ -53,37 +54,6 @@ public class PermissionServiceImpl implements PermissionService {
 	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
-	 */
-	@Override
-	public Set<Unit> getAccessibleUnits() {
-		Set<Unit> units = new HashSet<Unit>();
-
-		// find all role assignments for the current user
-		AmpUser user = ampUserService.getCurrentUser();		
-		List<RoleAssignment> ras = roleAssignmentRepository.findByUserId(user.getId());
-		
-		// retrieve the associated units
-		for (RoleAssignment ra : ras) {
-			Unit unit = ra.getUnit();
-			
-			// if an assignment is not associated with any unit, it's a global one, which means the user has AMP Admin role and can access all units 
-			if (unit == null) {
-				Iterable<Unit> allunits = unitRepository.findAll();
-				units.addAll(IterableUtils.toList(allunits));
-				log.info("The current user " + user.getUsername() + " is AMP Admin and thus has access to all " + units.size() + " units." );
-				return units;
-			}
-			
-			// otherwise add the associated unit to the list
-			units.add(unit);
-		}
-		
-		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
-		return units;
-	}
-	
-	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.isAdmin()
 	 */
 	@Override
@@ -91,17 +61,46 @@ public class PermissionServiceImpl implements PermissionService {
 		// find all role assignments for the current user
 		AmpUser user = ampUserService.getCurrentUser();		
 
-		// get AMP Admin role
-		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
-		
-		// check whether the user has a role assignment with AMP Admin
-		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+//		// get AMP Admin role
+//		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
+//		
+//		// check whether the user has a role assignment with AMP Admin
+//		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+		boolean is = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), AMP_ADMIN_ROLE_NAME);		
 		String isstr = is ? "is" : "is not";
 		
 		log.info("The current user " + isstr + " " + AMP_ADMIN_ROLE_NAME);
 		return is;
-	}		
+	}				
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
+	 */
+	@Override
+	public Set<UnitBrief> getAccessibleUnits() {
+		Set<UnitBrief> units = new HashSet<UnitBrief>();
+
+		// if current user is AMP Admin, then all units are accessible
+		AmpUser user = ampUserService.getCurrentUser();		
+		if (isAdmin()) {
+			units = unitRepository.findAllProjectedBy();			
+			log.info("The current user " + user.getUsername() + " is AMP Admin and thus has access to all " + units.size() + " units." );
+			return units;
+		}
 		
+		// find all role assignments for current user
+		List<RoleAssignmentDetail> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
+		
+		// retrieve the associated units
+		for (RoleAssignmentDetail ra : ras) {
+			UnitBrief unit = ra.getUnit();
+			units.add(unit);
+		}
+		
+		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
+		return units;
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getPermittedActions(List<ActionType>, List<TargetType>, List<Long>)
 	 */
@@ -111,23 +110,22 @@ public class PermissionServiceImpl implements PermissionService {
 		
 		// find all role assignments for the current user per given units ordered by unit ID
 		AmpUser user = ampUserService.getCurrentUser();		
-		List<RoleAssignment> ras = unitIds.isEmpty() ?
+		List<RoleAssignmentDetailActions> ras = unitIds.isEmpty() ?
 			roleAssignmentRepository.findByUserIdOrderByUnitId(user.getId()) : 
 			roleAssignmentRepository.findByUserIdAndUnitIdInOrderByUnitId(user.getId(), unitIds);
 
 		
 		// for all the user's roles within each unit, merge the unique actions matching the actionTypes and/or targetTypes
-		UnitActions ua = new UnitActions(0L, new ArrayList<Action>());	// current UnitActions
-		for (RoleAssignment ra : ras) {
-			Unit unit = ra.getUnit();		
+		UnitActions ua = new UnitActions(0L, new HashSet<ActionBrief>());	// current UnitActions
+		for (RoleAssignmentDetailActions ra : ras) {
+			Long unitId = ra.getUnitId();		
 			
 			// skip global role assignment, where unit is null
-			if (unit == null) {
+			if (unitId == null) {
 				continue;
 			}
 			
 			// when the current role assignment's unit ID is a new one
-			Long unitId = unit.getId();
 			if (!unitId.equals(ua.getUnitId())) {
 				// if the previous UnitActions contains any actions, add it to the parent list
 				if (!ua.getActions().isEmpty()) {
@@ -135,13 +133,13 @@ public class PermissionServiceImpl implements PermissionService {
 				}
 
 				// start a new UnitAction as the current one
-				ua = new UnitActions(unitId, new ArrayList<Action>());	
+				ua = new UnitActions(unitId, new HashSet<ActionBrief>());	
 			}
 			
 			// merge the actions for the current role into current UnitActions  
-			List<Action> actionsU = ua.getActions();
-			Set<Action> actionsR = ra.getRole().getActions();
-			for (Action action : actionsR) {
+			Set<ActionBrief> actionsU = ua.getActions();
+			Set<ActionBrief> actionsR = ra.getRole().getActions();
+			for (ActionBrief action : actionsR) {
 				// the current action must be unique, i.e. not already added to the UnitAction list yet
 				boolean match = !actionsU.contains(action);
 				
@@ -213,7 +211,7 @@ public class PermissionServiceImpl implements PermissionService {
 		has = has || roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitId(user.getId(), roleIds, unitId);
 		
 		String hasstr = has ? "has" : "has no";
-		log.info("Current user " + user.getUsername() + " " + has + " permission to perform action " + action.getName() +" in unit " + unitId);				
+		log.info("Current user " + user.getUsername() + " " + hasstr + " permission to perform action " + action.getName() +" in unit " + unitId);				
 		return has;
 	}
 	

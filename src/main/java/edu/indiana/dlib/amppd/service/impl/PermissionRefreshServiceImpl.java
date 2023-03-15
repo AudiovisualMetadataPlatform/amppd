@@ -16,17 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.ac.RoleAction;
-import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
-import edu.indiana.dlib.amppd.repository.AmpUserRepository;
-import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
 import edu.indiana.dlib.amppd.repository.RoleRepository;
-import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.PermissionRefreshService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,14 +43,14 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	@Autowired
 	private ActionRepository actionRepository;
 
-	@Autowired
-	private RoleAssignmentRepository roleAssignmentRepository;
-	
-	@Autowired
-	private AmpUserRepository ampUserRepository;
-	
-	@Autowired
-	private UnitRepository unitRepository;
+//	@Autowired
+//	private RoleAssignmentRepository roleAssignmentRepository;
+//	
+//	@Autowired
+//	private AmpUserRepository ampUserRepository;
+//	
+//	@Autowired
+//	private UnitRepository unitRepository;
 	
 	
 	/**
@@ -281,30 +275,30 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		return roleActions;
 	}
 
-	/**
-	 * Put in some tmp test data.
-	 */
-	private void initRoleAssignment() {
-		final String AMP_ADMIN = "AMP Admin";
-		String[] usernames = {"ampadmin", "amppd@iu.edu", "yingfeng@iu.edu", "amppdiu@gmail.com"};
-		String[] roleNames = {AMP_ADMIN, "Unit Manager", "Collection Manager", "Unit Viewer"};
-		String unitName = "AMP Pilot Unit";
-		
-		Unit unitScope = unitRepository.findFirstByName(unitName);
-		int i = 0;
-		
-		for (String username : usernames) {
-			AmpUser user = ampUserRepository.findFirstByUsername(username);
-			Role role = roleRepository.findFirstByNameAndUnitId(roleNames[i++], null);
-			Unit unit = AMP_ADMIN.equals(role.getName()) ? null : unitScope;
-			Long unitId = unit == null ? null : unit.getId();
-
-			RoleAssignment ra = new RoleAssignment(user, role, unit);			
-			RoleAssignment existRa = this.roleAssignmentRepository.findFirstByUserIdAndRoleIdAndUnitId(user.getId(), role.getId(), unitId);
-			if (existRa == null) {
-				roleAssignmentRepository.save(ra);
-			}
-		}		
-	}
-	
+//	/**
+//	 * Put in some tmp test data.
+//	 */
+//	private void initRoleAssignment() {
+//		final String AMP_ADMIN = "AMP Admin";
+//		String[] usernames = {"ampadmin", "amppd@iu.edu", "yingfeng@iu.edu", "amppdiu@gmail.com"};
+//		String[] roleNames = {AMP_ADMIN, "Unit Manager", "Collection Manager", "Unit Viewer"};
+//		String unitName = "AMP Pilot Unit";
+//		
+//		Unit unitScope = unitRepository.findFirstByName(unitName);
+//		int i = 0;
+//		
+//		for (String username : usernames) {
+//			AmpUser user = ampUserRepository.findFirstByUsername(username);
+//			Role role = roleRepository.findFirstByNameAndUnitId(roleNames[i++], null);
+//			Unit unit = AMP_ADMIN.equals(role.getName()) ? null : unitScope;
+//			Long unitId = unit == null ? null : unit.getId();
+//
+//			RoleAssignment ra = new RoleAssignment(user, role, unit);			
+//			RoleAssignment existRa = this.roleAssignmentRepository.findFirstByUserIdAndRoleIdAndUnitId(user.getId(), role.getId(), unitId);
+//			if (existRa == null) {
+//				roleAssignmentRepository.save(ra);
+//			}
+//		}		
+//	}
+//	
 }

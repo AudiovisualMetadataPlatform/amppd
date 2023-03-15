@@ -2,9 +2,13 @@ package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentBrief;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 
 
 @RepositoryRestResource()
@@ -12,15 +16,25 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 
 	boolean existsByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);		
 	boolean existsByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
+	boolean existsByUserIdAndRoleNameAndUnitIdIsNull(Long userId, String roleName);
 	boolean existsByUserIdAndRoleIdAndUnitIdIsNull(Long userId, Long roleId);
 	boolean existsByUserIdAndRoleIdInAndUnitIdIsNull(Long userId, List<Long> roleIds);	
 	
 	RoleAssignment findFirstByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);	
 
-	List<RoleAssignment> findByUserId(Long userId);	
-	List<RoleAssignment> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
+	List<RoleAssignmentBrief> findByUserId(Long userId);	
+	List<RoleAssignmentBrief> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
 
-	List<RoleAssignment> findByUserIdOrderByUnitId(Long userId);	
-	List<RoleAssignment> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
+	List<RoleAssignmentDetailActions> findByUserIdOrderByUnitId(Long userId);	
+	List<RoleAssignmentDetailActions> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
 
+	List<RoleAssignmentDetail> findByUserIdAndUnitIdNotNull(Long userId);
+	List<RoleAssignmentDetail> findByUnitIdOrderByUserId(Long unitId);
+
+	// find the lowest role level for the user in a unit
+	@Query(value = "select min(ra.role.level) from RoleAssignment ra where ra.user.id = :userId and (ra.unit is null or ra.unit.id = :unitId)")
+	Integer findMinRoleLevelByUserIdAndUnitId(Long userId, Long unitId);
+	
+	RoleAssignmentBrief deleteByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
+	
 }

@@ -4,12 +4,9 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 
-import lombok.extern.java.Log;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import lombok.Getter;
 import lombok.Setter;

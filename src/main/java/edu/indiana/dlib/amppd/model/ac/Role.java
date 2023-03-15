@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -43,6 +44,7 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class Role extends AmpObject {
 
+	public static final Integer MAX_LEVEL = Integer.MAX_VALUE;
 	@NotBlank
     @Type(type="text")
     private String name;
@@ -55,8 +57,9 @@ public class Role extends AmpObject {
     /* Note:
      * This is only used during role/permission refresh, to avoid manual input of redundant rows in permission table; it's not used for permission checking. 
      * The role hierarchy is linear and role level is unique, starting at 0 for the root (AMP Admin), and increasing by 1 with each lower level role.
+     * Unit scope roles are assigned with MAX_VALUE by default, as we disallow these roles to assign other roles, so they don't have a linear order.
      */
-    private Integer level;	
+    private Integer level = MAX_LEVEL;
     
     // the unit within which scope this role is visible/applicable;
     // if null, it's a global role with the same set of permissions shared across units;
@@ -65,14 +68,14 @@ public class Role extends AmpObject {
     private Unit unit;
     
 	// permissions: the actions this role can perform 
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "role_action", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "action_id"))
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private Set<Action> actions;
 	
 	// role-entity-user assignment
-	@OneToMany(mappedBy="role", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="role", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
