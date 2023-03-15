@@ -28,6 +28,7 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	List<RoleAssignmentDetailActions> findByUserIdOrderByUnitId(Long userId);	
 	List<RoleAssignmentDetailActions> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
 
+	List<RoleAssignmentDetail> findByUserIdAndUnitIdNotNull(Long userId);
 	List<RoleAssignmentDetail> findByUnitIdOrderByUserId(Long unitId);
 
 	// find the lowest role level for the user in a unit

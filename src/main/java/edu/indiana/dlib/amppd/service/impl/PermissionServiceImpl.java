@@ -15,7 +15,7 @@ import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.projection.ActionBrief;
-import edu.indiana.dlib.amppd.model.projection.RoleAssignmentBrief;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
@@ -54,38 +54,6 @@ public class PermissionServiceImpl implements PermissionService {
 	
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
-	 */
-	@Override
-	public Set<UnitBrief> getAccessibleUnits() {
-		Set<UnitBrief> units = new HashSet<UnitBrief>();
-
-		// find all role assignments for the current user
-		AmpUser user = ampUserService.getCurrentUser();		
-		List<RoleAssignmentBrief> ras = roleAssignmentRepository.findByUserId(user.getId());
-		
-		// retrieve the associated units
-		for (RoleAssignmentBrief ra : ras) {
-			Long unitId = ra.getUnitId();
-			
-			// if an assignment is not associated with any unit, it's a global one, which means the user has AMP Admin role and can access all units 
-			if (unitId == null) {
-				List<UnitBrief> allunits = unitRepository.findAllProjectedBy();
-				units.addAll(allunits);
-				log.info("The current user " + user.getUsername() + " is AMP Admin and thus has access to all " + units.size() + " units." );
-				return units;
-			}
-			
-			// otherwise add the associated unit to the list
-			UnitBrief unit = unitRepository.findByIdProjectedBy(unitId);
-			units.add(unit);
-		}
-		
-		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
-		return units;
-	}
-	
-	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.isAdmin()
 	 */
 	@Override
@@ -103,8 +71,36 @@ public class PermissionServiceImpl implements PermissionService {
 		
 		log.info("The current user " + isstr + " " + AMP_ADMIN_ROLE_NAME);
 		return is;
-	}		
+	}				
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
+	 */
+	@Override
+	public Set<UnitBrief> getAccessibleUnits() {
+		Set<UnitBrief> units = new HashSet<UnitBrief>();
+
+		// if current user is AMP Admin, then all units are accessible
+		AmpUser user = ampUserService.getCurrentUser();		
+		if (isAdmin()) {
+			units = unitRepository.findAllProjectedBy();			
+			log.info("The current user " + user.getUsername() + " is AMP Admin and thus has access to all " + units.size() + " units." );
+			return units;
+		}
 		
+		// find all role assignments for current user
+		List<RoleAssignmentDetail> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
+		
+		// retrieve the associated units
+		for (RoleAssignmentDetail ra : ras) {
+			UnitBrief unit = ra.getUnit();
+			units.add(unit);
+		}
+		
+		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
+		return units;
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getPermittedActions(List<ActionType>, List<TargetType>, List<Long>)
 	 */
