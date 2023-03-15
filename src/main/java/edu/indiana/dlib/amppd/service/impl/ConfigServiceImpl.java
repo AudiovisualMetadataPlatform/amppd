@@ -69,6 +69,7 @@ public class ConfigServiceImpl implements ConfigService {
 			}
 		}
 		
+		log.info("Successfully found " + categories.size() + " supplement categories.");
 		return categories;
 	}
 	

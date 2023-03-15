@@ -1,15 +1,34 @@
 package edu.indiana.dlib.amppd.repository;
 
-import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
-import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
-import edu.indiana.dlib.amppd.web.*;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
-import java.util.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
+import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestFilters;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestResponse;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestResult;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterCollection;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterFile;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterItem;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterUnit;
+import edu.indiana.dlib.amppd.web.WorkflowResultSortRule;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestRepositoryCustom {

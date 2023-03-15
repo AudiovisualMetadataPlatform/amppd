@@ -1,8 +1,9 @@
 package edu.indiana.dlib.amppd.web;
 
-import org.json.simple.JSONObject;
-import org.json.simple.JSONArray;
 import java.util.HashMap;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 public class GalaxyUpdateWorkflowRequest {
     private String creator_name;
@@ -19,7 +20,7 @@ public class GalaxyUpdateWorkflowRequest {
         JSONObject request =new JSONObject();
         JSONObject workflow =new JSONObject();
         JSONArray creators =new JSONArray();
-        HashMap creator = new HashMap();
+        HashMap<String, String> creator = new HashMap<String, String>();
         creator.put("name", this.creator_name);
         creator.put("class", "Person");
         creators.add(creator);

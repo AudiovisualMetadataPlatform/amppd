@@ -213,7 +213,7 @@ public class PermissionServiceImpl implements PermissionService {
 		has = has || roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitId(user.getId(), roleIds, unitId);
 		
 		String hasstr = has ? "has" : "has no";
-		log.info("Current user " + user.getUsername() + " " + has + " permission to perform action " + action.getName() +" in unit " + unitId);				
+		log.info("Current user " + user.getUsername() + " " + hasstr + " permission to perform action " + action.getName() +" in unit " + unitId);				
 		return has;
 	}
 	

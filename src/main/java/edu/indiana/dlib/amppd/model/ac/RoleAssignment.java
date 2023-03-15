@@ -27,6 +27,9 @@ import lombok.ToString;
 		@Index(columnList = "user_id"),
 		@Index(columnList = "role_id"),
 		@Index(columnList = "unit_id"),
+		@Index(columnList = "user_id, unit_id"),
+		@Index(columnList = "role_id, unit_id"),
+		@Index(columnList = "user_id, role_id, unit_id", unique = true),
 })
 @Data
 @EqualsAndHashCode(callSuper=true)

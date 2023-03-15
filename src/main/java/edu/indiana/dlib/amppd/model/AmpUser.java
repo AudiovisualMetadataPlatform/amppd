@@ -28,7 +28,9 @@ import lombok.ToString;
 @Table(indexes = {
 		@Index(columnList = "username", unique = true),
 		@Index(columnList = "email", unique = true),
-		@Index(columnList = "status"),
+		@Index(columnList = "first_name"),
+		@Index(columnList = "last_name"),
+		@Index(columnList = "status"),	
 })
 @Data
 @EqualsAndHashCode(callSuper=true)

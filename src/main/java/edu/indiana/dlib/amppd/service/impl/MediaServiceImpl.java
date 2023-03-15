@@ -26,6 +26,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.dto.ItemInfo;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -35,7 +36,6 @@ import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.ItemInfo;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import edu.indiana.dlib.amppd.web.PrimaryfileInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -180,6 +180,8 @@ public class MediaServiceImpl implements MediaService {
 		case PRIMARYFILE:
 			supplements = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), name);
 			break;
+		default:
+			supplements = null;			
 		}		
 		
 		// there should be exactly one supplement found, as supplement is unique by name within its parent's scope

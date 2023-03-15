@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.web;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.indiana.dlib.amppd.model.dto.ItemInfo;
 import lombok.Data;
 
 @Data

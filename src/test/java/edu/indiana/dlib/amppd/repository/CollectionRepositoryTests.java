@@ -213,7 +213,7 @@ public class CollectionRepositoryTests {
 	public void shouldDeleteCollection() throws Exception {
 		// create a collection for delete
 		ImmutableTriple<Collection, String, String> tripple = createValidCollection();		
-		Collection collection = tripple.getLeft();
+//		Collection collection = tripple.getLeft();
 		String location = tripple.getRight();
 //		Collection collection = Fixture.from(Collection.class).uses(dataentityProcessor).gimme("valid");
 //		String json = testUtil.toJson(collection);

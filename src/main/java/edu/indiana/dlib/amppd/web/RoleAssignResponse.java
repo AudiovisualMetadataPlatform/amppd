@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class RoleAssignResponse {
 	
 	// assignable role level threshold for the current user in the current unit
-	private int level;
+	private Integer level;
 	
 	// roles for which the current user can view assignments in the current unit
 	private List<RoleDto> roles;	

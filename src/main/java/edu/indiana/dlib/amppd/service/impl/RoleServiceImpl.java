@@ -112,6 +112,7 @@ public class RoleServiceImpl implements RoleService {
 				users.add(userDto);
 				// initialize the current user-roles assignment boolean array with cells are all false
 				assignments.add(new boolean[nRoles]); 
+				row++;
 			}
 			
 			// populate current assignment cell			

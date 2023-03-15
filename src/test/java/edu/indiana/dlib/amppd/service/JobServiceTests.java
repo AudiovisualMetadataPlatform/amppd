@@ -150,11 +150,11 @@ public class JobServiceTests {
 
 		String withDoubleQuote = "text\"";
 		String withDoubleQuoteS = jobService.sanitizeText(withDoubleQuote);
-		Assert.assertEquals(withDoubleQuote, "text%22");
+		Assert.assertEquals(withDoubleQuoteS, "text%22");
 
 		String withBothQuotes = "text'\"";
 		String withBothQuotesS = jobService.sanitizeText(withBothQuotes);
-		Assert.assertEquals(withBothQuotes, "text%27%22");
+		Assert.assertEquals(withBothQuotesS, "text%27%22");
 	}
     
     @Test

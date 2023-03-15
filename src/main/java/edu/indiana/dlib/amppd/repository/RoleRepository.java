@@ -20,11 +20,13 @@ public interface RoleRepository extends AmpObjectRepository<Role> {
 	List<RoleDto> findByUnitIdIsNullOrUnitIdOrderByLevel(Long unitId);	// global or unit roles
 		
 	// viewable roles: global or unit roles excluding AMP Admin
-	@Query(value = "select r.id, r.uit.id, r.name, r.level from Role r where r.name <> 'AMP Admin' and (r.unit is null or r.unit.id = :unitId) order by r.level")
+//	@Query(value = "select new RoleDto(r.id as id, r.unit.id as unitId, r.name as name, r.level as level) from Role r where r.name <> 'AMP Admin' and (r.unit is null or r.unit.id = :unitId) order by r.level")
+	@Query(value = "select r from Role r where r.name <> 'AMP Admin' and (r.unit is null or r.unit.id = :unitId) order by r.level")
 	List<RoleDto> findViewableRolesInUnit(Long unitId);					
 
 	// assignable roles: global or unit roles excluding AMP Admin, with level greater than the given threshold
-	@Query(value = "select r.id, r.unit.id, r.name, r.level from Role r where r.name <> 'AMP Admin' and r.level > :level and (r.unit is null or r.unit.id = :unitId) order by r.level")
+//	@Query(value = "select new RoleDto(r.id as id, r.unit.id as unitId, r.name as name, r.level as level) from Role r where r.name <> 'AMP Admin' and r.level > :level and (r.unit is null or r.unit.id = :unitId) order by r.level")
+	@Query(value = "select r from Role r where r.name <> 'AMP Admin' and r.level > :level and (r.unit is null or r.unit.id = :unitId) order by r.level")
 	List<RoleDto> findAssignableRolesInUnit(Integer level, Long unitId);
 	
 }

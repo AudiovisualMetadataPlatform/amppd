@@ -17,7 +17,6 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class DropboxServiceImpl implements DropboxService {
-	
-	@Autowired
-	private UnitRepository unitRepository;
 	
 	@Autowired
 	private CollectionRepository collectionRepository;
