@@ -5,10 +5,10 @@ import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.web.UnitActions;
 
 /**
@@ -21,7 +21,7 @@ public interface PermissionService {
 	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments.
 	 * @return the list of units the current user has access to
 	 */
-	public Set<Unit> getAccessibleUnits();
+	public Set<UnitBrief> getAccessibleUnits();
 	
 	/**
 	 * Check if the current user is AMP admin.

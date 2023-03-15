@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.controller;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 import edu.indiana.dlib.amppd.service.RoleService;
-import edu.indiana.dlib.amppd.web.RoleAssignRequest;
-import edu.indiana.dlib.amppd.web.RoleAssignResponse;
+import edu.indiana.dlib.amppd.web.RoleAssignTable;
+import edu.indiana.dlib.amppd.web.RoleAssignTuple;
+import edu.indiana.dlib.amppd.web.RoleAssignUpdate;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -35,9 +34,9 @@ public class RoleController {
 	 * @return the user-role assignment table 
 	 */
 	@GetMapping("/roleAssignments")
-	public RoleAssignResponse retrieveRoleAssignments(@RequestParam Long unitId) {
+	public RoleAssignTable retrieveRoleAssignments(@RequestParam Long unitId) {
 		log.info("Retrieving user-role assignments for unit " + unitId);
-		RoleAssignResponse response = roleService.retrieveRoleAssignments(unitId);
+		RoleAssignTable response = roleService.retrieveRoleAssignments(unitId);
 		return response;
 	}
 
@@ -48,10 +47,10 @@ public class RoleController {
 	 * @return the pair of Lists of the added/deleted roleAssignments
 	 */
 	@PostMapping("/roleAssignments")
-	public ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> updateRoleAssignments(@RequestParam Long unitId, @RequestBody List<RoleAssignRequest> assignments) {
+	public RoleAssignUpdate updateRoleAssignments(@RequestParam Long unitId, @RequestBody List<RoleAssignTuple> assignments) {
 		log.info("Updating + " + assignments.size() + " role assignments within unit " + unitId);
-		ImmutablePair<List<RoleAssignment>, List<RoleAssignment>> ras = roleService.updateRoleAssignments(unitId, assignments);
-		return ras;
+		RoleAssignUpdate rau = roleService.updateRoleAssignments(unitId, assignments);
+		return rau;
 	}
 		
 

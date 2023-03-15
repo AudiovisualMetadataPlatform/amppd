@@ -4,16 +4,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Request containing user, role, and assignment info.
+ * Request for role assignment within a particular unit, containing user, role, and assignment info.
  * @author yingfeng
  *
  */
 @Data
 @NoArgsConstructor
-public class RoleAssignRequest {
+public class RoleAssignTuple {
 
 	private Long userId;
 	private Long roleId;
+	private String userName;
+	private String roleName;
 	private boolean assigned;
 	
 }

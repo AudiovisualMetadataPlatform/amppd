@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.web.UnitActions;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class PermissionController {
 	 * @return the list of units the current user has access to
 	 */
 	@GetMapping("/permissions/units")
-	public Set<Unit> getAccessibleUnits() {
+	public Set<UnitBrief> getAccessibleUnits() {
 		log.info("Retrieving all units the current user has access to ...");
 		return permissionService.getAccessibleUnits();
 	}

@@ -5,7 +5,6 @@ import java.util.Set;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 
 
 /**
@@ -15,6 +14,6 @@ import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 @Projection(name = "detail", types = {AmpUser.class}) 
 public interface AmpUserDetail extends AmpUserBrief, AmpObjectDetail {
 
-    public Set<RoleAssignment> getRoleAssignements();	
+    public Set<RoleAssignmentBrief> getRoleAssignements();	
 
 }

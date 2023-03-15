@@ -8,15 +8,16 @@ import org.springframework.http.HttpMethod;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 
-@RepositoryRestResource()
+@RepositoryRestResource(excerptProjection = ActionBrief.class)
 public interface ActionRepository extends AmpObjectRepository<Action> {
 
 	Action findFirstByName(String name);
 	Action findFirstByActionTypeAndTargetType(ActionType actionType, TargetType targetType);
 	Action findFirstByHttpMethodAndUrlPattern(HttpMethod httpMethod, String urlPattern);
 
-	List<Action> findByActionTypeInAndTargetTypeIn(List<ActionType> actionTypes, List<TargetType> targetTypes);	
-	List<Action> findByHttpMethodInAndUrlPatternIn(List<HttpMethod> httpMethods, List<String> urlPatterns);
+	List<ActionBrief> findByActionTypeInAndTargetTypeIn(List<ActionType> actionTypes, List<TargetType> targetTypes);	
+	List<ActionBrief> findByHttpMethodInAndUrlPatternIn(List<HttpMethod> httpMethods, List<String> urlPatterns);
 	
 }

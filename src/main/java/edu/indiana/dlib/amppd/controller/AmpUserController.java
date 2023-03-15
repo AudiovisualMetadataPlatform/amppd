@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.AmpUser.Status;
-import edu.indiana.dlib.amppd.model.dto.AmpUserDto;
+import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.security.JwtRequest;
 import edu.indiana.dlib.amppd.security.JwtResponse;
@@ -140,8 +140,8 @@ public class AmpUserController {
 	 * @return the list of users satisfying the query criteria
 	 */
 	@GetMapping("/users/active")
-	public List<AmpUserDto> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluding) {
-		List<AmpUserDto> users = null;
+	public List<AmpUserBrief> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluding) {
+		List<AmpUserBrief> users = null;
 		
 		// if users to exclude is not provided, skip the exclude-user criteria 
 		if (idsExcluding == null || idsExcluding.isEmpty()) {

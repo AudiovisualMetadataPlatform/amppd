@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.model.ac;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -38,10 +39,10 @@ import lombok.ToString;
 @AllArgsConstructor 
 public class RoleAssignment extends AmpObject {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
     private AmpUser user;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
     private Role role;
 	
 	/* Note:
@@ -50,7 +51,7 @@ public class RoleAssignment extends AmpObject {
 	 * currently, the only role with global assignment is AMP Admin; all other assignments must be assoicated with a unit.
 	 */
 	// reference to the role's assignment unit
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
     private Unit unit;
 		
 }

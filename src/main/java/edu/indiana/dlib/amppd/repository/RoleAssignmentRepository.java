@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentBrief;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 
 
 @RepositoryRestResource()
@@ -18,18 +21,18 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	
 	RoleAssignment findFirstByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);	
 
-	List<RoleAssignment> findByUserId(Long userId);	
-	List<RoleAssignment> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
+	List<RoleAssignmentBrief> findByUserId(Long userId);	
+	List<RoleAssignmentBrief> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
 
-	List<RoleAssignment> findByUserIdOrderByUnitId(Long userId);	
-	List<RoleAssignment> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
+	List<RoleAssignmentDetailActions> findByUserIdOrderByUnitId(Long userId);	
+	List<RoleAssignmentDetailActions> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
 
-	List<RoleAssignment> findByUnitIdOrderByUserId(Long unitId);
+	List<RoleAssignmentDetail> findByUnitIdOrderByUserId(Long unitId);
 
 	// find the lowest role level for the user in a unit
 	@Query(value = "select min(ra.role.level) from RoleAssignment ra where ra.user.id = :userId and (ra.unit is null or ra.unit.id = :unitId)")
 	Integer findMinRoleLevelByUserIdAndUnitId(Long userId, Long unitId);
 	
-	RoleAssignment deleteByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
+	RoleAssignmentBrief deleteByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
 	
 }
