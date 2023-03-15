@@ -93,11 +93,12 @@ public class PermissionServiceImpl implements PermissionService {
 		// find all role assignments for the current user
 		AmpUser user = ampUserService.getCurrentUser();		
 
-		// get AMP Admin role
-		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
-		
-		// check whether the user has a role assignment with AMP Admin
-		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+//		// get AMP Admin role
+//		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
+//		
+//		// check whether the user has a role assignment with AMP Admin
+//		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+		boolean is = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), AMP_ADMIN_ROLE_NAME);		
 		String isstr = is ? "is" : "is not";
 		
 		log.info("The current user " + isstr + " " + AMP_ADMIN_ROLE_NAME);
@@ -119,7 +120,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 		
 		// for all the user's roles within each unit, merge the unique actions matching the actionTypes and/or targetTypes
-		UnitActions ua = new UnitActions(0L, new ArrayList<ActionBrief>());	// current UnitActions
+		UnitActions ua = new UnitActions(0L, new HashSet<ActionBrief>());	// current UnitActions
 		for (RoleAssignmentDetailActions ra : ras) {
 			Long unitId = ra.getUnitId();		
 			
@@ -136,11 +137,11 @@ public class PermissionServiceImpl implements PermissionService {
 				}
 
 				// start a new UnitAction as the current one
-				ua = new UnitActions(unitId, new ArrayList<ActionBrief>());	
+				ua = new UnitActions(unitId, new HashSet<ActionBrief>());	
 			}
 			
 			// merge the actions for the current role into current UnitActions  
-			List<ActionBrief> actionsU = ua.getActions();
+			Set<ActionBrief> actionsU = ua.getActions();
 			Set<ActionBrief> actionsR = ra.getRole().getActions();
 			for (ActionBrief action : actionsR) {
 				// the current action must be unique, i.e. not already added to the UnitAction list yet

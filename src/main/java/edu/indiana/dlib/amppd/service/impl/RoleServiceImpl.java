@@ -63,6 +63,11 @@ public class RoleServiceImpl implements RoleService {
 		// find the highest role (i.e. with smallest role level) the user has
 		Integer level = roleAssignmentRepository.findMinRoleLevelByUserIdAndUnitId(user.getId(), unitId);
 		
+		// if current user doesn't have any role, set the level to max, so he can't assign any role
+		if (level == null) {
+			level = Role.MAX_LEVEL;
+		}
+		
 		log.info("The role assignment level threshold (excluding) for the current user " + user.getUsername() + " in unit " + unitId + " is " + level);
 		return level;
 	}
@@ -140,12 +145,20 @@ public class RoleServiceImpl implements RoleService {
 	 */
 	@Override
 	public RoleAssignUpdate updateRoleAssignments(Long unitId, List<RoleAssignTuple> assignments) {
+		// verify unit exists
+		Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit not found: " + unitId));
+
+		// if the current user can't assign any role, report error 
+		Integer level = getAssignableRoleLevel(unitId);
+		if (level.equals(Role.MAX_LEVEL)) {
+			// TODO return 403 response header
+			throw new RuntimeException("The current user is not allowed to assign/unassign any role."); 
+		}
+		
 		List<RoleAssignmentDto> rasAdd = new ArrayList<RoleAssignmentDto>();
 		List<RoleAssignmentDto> rasDelete = new ArrayList<RoleAssignmentDto>();
 		RoleAssignUpdate raUpdate = new RoleAssignUpdate(rasAdd, rasDelete);
-		Unit unit = unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit not found: " + unitId));
-		Integer level = getAssignableRoleLevel(unitId);
-		
+				
 		// process each assignment request 
 		for (RoleAssignTuple assignment : assignments) {
 			Long userId = assignment.getUserId();
@@ -154,19 +167,21 @@ public class RoleServiceImpl implements RoleService {
 			String roleName = assignment.getRoleName();
 			AmpUser user = null;
 			Role role = null;
-			
-			// verify that the user exists, based on user ID or username;
+
+			// either userId or username must be provided; the former supersedes the latter if both provided
 			if (userId != null) {
 				user = ampUserRepository.findById(userId).orElse(null);
 			}
 			else if (StringUtils.isNotBlank(username)) {
 				user = ampUserRepository.findFirstByUsername(username);
-			}			
+			}	
+			
+			// verify that the user exists, based on user ID or username;
 			if (user == null) {
-				throw new StorageException("Could not find user: userId = " + userId + ", username = " + username);
+				throw new StorageException("User not found: userId = " + userId + ", username = " + username);
 			}
 				
-			// verify that the role exists, based on role ID or name plus unitId;
+			// either userId or username must be provided; the former supersedes the latter if both provided
 			if (roleId != null) {
 				role = roleRepository.findById(roleId).orElse(null);
 			}
@@ -176,12 +191,15 @@ public class RoleServiceImpl implements RoleService {
 				// if not found, check for unit role
 				role = role == null? roleRepository.findFirstByNameAndUnitId(roleName, unitId) : role;
 			}			
+
+			// verify that the role exists, based on role ID or name plus unitId;
 			if (role == null) {
-				throw new StorageException("Could not find role: roleId = " + roleId + ", roleName = " + roleName + " in unit " + unitId);
+				throw new StorageException("Role not found: roleId = " + roleId + ", roleName = " + roleName + ", in unit " + unitId);
 			}
 							
 			// verify that the current user is allowed to assign/unassign this role
 			if (role.getLevel() <= level) {
+				// TODO return 403 response header
 				throw new RuntimeException("The current user is not allowed to assign/unassign role " + role.getName() + " to user " + user.getUsername() + " in unit " + unitId);
 			}
 			

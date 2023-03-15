@@ -35,7 +35,7 @@ public class RoleController {
 	 */
 	@GetMapping("/roleAssignments")
 	public RoleAssignTable retrieveRoleAssignments(@RequestParam Long unitId) {
-		log.info("Retrieving user-role assignments for unit " + unitId);
+		log.info("Retrieving user-role assignments within unit " + unitId);
 		RoleAssignTable response = roleService.retrieveRoleAssignments(unitId);
 		return response;
 	}

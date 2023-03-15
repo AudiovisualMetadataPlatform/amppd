@@ -16,6 +16,7 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 
 	boolean existsByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);		
 	boolean existsByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
+	boolean existsByUserIdAndRoleNameAndUnitIdIsNull(Long userId, String roleName);
 	boolean existsByUserIdAndRoleIdAndUnitIdIsNull(Long userId, Long roleId);
 	boolean existsByUserIdAndRoleIdInAndUnitIdIsNull(Long userId, List<Long> roleIds);	
 	

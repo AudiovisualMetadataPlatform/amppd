@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.web;
 
-import java.util.List;
+import java.util.Set;
 
 import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 import lombok.AllArgsConstructor;
@@ -18,6 +18,6 @@ import lombok.NoArgsConstructor;
 public class UnitActions {
 	
 	private Long unitId;
-	private List<ActionBrief> actions;
+	private Set<ActionBrief> actions;
 
 }

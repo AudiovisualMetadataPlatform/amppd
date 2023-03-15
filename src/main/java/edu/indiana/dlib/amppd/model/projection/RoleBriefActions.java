@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model.projection;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.ac.Role;
