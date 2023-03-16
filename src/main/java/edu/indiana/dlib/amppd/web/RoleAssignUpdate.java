@@ -22,5 +22,10 @@ public class RoleAssignUpdate {
 	// role assignments deleted
 	private List<RoleAssignmentDto> deleted;
 		
-	
+	// role assignments not updated, i.e. already assigned/unassigned
+	private List<RoleAssignTuple> unchanged;
+
+	// role assignments failed, due to none existing user/role/unit or current user not allowed to assign the role
+	private List<RoleAssignTuple> failed;
+
 }

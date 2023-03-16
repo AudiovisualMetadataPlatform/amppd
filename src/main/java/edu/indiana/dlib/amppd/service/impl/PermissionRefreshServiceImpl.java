@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.ac.RoleAction;
@@ -38,6 +39,9 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	public static final String ROLE_ACTION = "ac_role_action";
 
 	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+	
+	@Autowired
 	private RoleRepository roleRepository;
 
 	@Autowired
@@ -59,6 +63,8 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	@Override
     @Transactional
 	public void refreshPermissionTables() {
+		if (!amppdPropertyConfig.getRefreshPermissionTables()) return;
+		
 		List<Role> roles = refreshRole();
 		refreshAction();
 		refreshRoleAction(roles.size());		

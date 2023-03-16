@@ -1,13 +1,15 @@
 package edu.indiana.dlib.amppd.config;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotNull;
-import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**
@@ -33,14 +35,16 @@ public class AmppdPropertyConfig {
     @NotNull private Boolean auth;
     @NotNull private String jwtSecret;
 //    @NotNull private String workflowEditSecret;
-    @NotNull private int jwtExpireMinutes;
-    @NotNull private int workflowEditMinutes;
-    @NotNull private int resetPasswordMinutes;
-    @NotNull private int activateAccountDays;
+    @NotNull private Integer jwtExpireMinutes;
+    @NotNull private Integer workflowEditMinutes;
+    @NotNull private Integer resetPasswordMinutes;
+    @NotNull private Integer activateAccountDays;
 //    @NotNull private int refreshResultsStatusMinutes;
-    @NotNull private int refreshResultsTableMinutes;
+    @NotNull private Integer refreshResultsTableMinutes;
     @NotNull private String refreshResultsStatusCron;
     @NotNull private String refreshResultsTableCron;
+    @NotNull private Boolean refreshPermissionTables;
+    @NotNull private Boolean refreshMgmTables;    
     @NotNull private List<String> supplementCategories;
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;

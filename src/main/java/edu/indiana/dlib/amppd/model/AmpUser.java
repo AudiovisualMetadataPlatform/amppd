@@ -28,8 +28,8 @@ import lombok.ToString;
 @Table(indexes = {
 		@Index(columnList = "username", unique = true),
 		@Index(columnList = "email", unique = true),
-//		@Index(columnList = "first_name"),
-//		@Index(columnList = "last_name"),
+		@Index(columnList = "firstName"),
+		@Index(columnList = "lastName"),
 		@Index(columnList = "status"),	
 })
 @Data
@@ -74,5 +74,12 @@ public class AmpUser extends AmpObject {
 	// TODO replace with AMP Role
 	private Role role;
 		
+	/**
+	 * Check if the user is active.
+	 * @return true if the user status is ACTIVATED, false otherwise.
+	 */
+	public boolean isActive() {
+		return Status.ACTIVATED.equals(status);		
+	}
 
 }
