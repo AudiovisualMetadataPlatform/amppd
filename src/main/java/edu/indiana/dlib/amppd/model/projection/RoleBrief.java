@@ -14,7 +14,7 @@ public interface RoleBrief extends AmpObjectBrief {
 
 	public String getName();
 	public String getDescription();	
-	public String getLvel();
+	public String getLevel();
 	
 	@Value("#{target.unit == null ? null : target.unit.id}")
 	public Long getUnitId(); 

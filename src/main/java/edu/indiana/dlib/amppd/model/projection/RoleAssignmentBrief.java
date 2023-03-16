@@ -12,8 +12,13 @@ import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 @Projection(name = "brief", types = {RoleAssignment.class}) 
 public interface RoleAssignmentBrief extends AmpObjectBrief {
 
+	@Value("#{target.user.id}")
 	public Long getUserId();
+	
+	@Value("#{target.role.id}")	
 	public Long getRoleId();
+
+	@Value("#{target.unit == null ? null : target.unit.id}")
 	public Long getUnitId();
 	
 	@Value("#{target.user.username}")
@@ -22,7 +27,7 @@ public interface RoleAssignmentBrief extends AmpObjectBrief {
 	@Value("#{target.role.name}")
 	public String getRoleName(); 
 
-	@Value("#{target.unit == null ? null : unit.name}")
+	@Value("#{target.unit == null ? null : target.unit.name}")
 	public String getUnitName(); 
 
 }

@@ -15,7 +15,7 @@ public class RoleAssignTuple {
 
 	private Long userId;
 	private Long roleId;
-	private String userName;
+	private String username;
 	private String roleName;
 	private boolean assigned;
 	
