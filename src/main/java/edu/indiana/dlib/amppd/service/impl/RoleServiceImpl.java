@@ -184,11 +184,9 @@ public class RoleServiceImpl implements RoleService {
 				// either userId or username must be provided; the former supersedes the latter if both provided
 				if (userId != null) {
 					user = ampUserRepository.findById(userId).orElse(null);
-					username = user.getUsername();
 				}
 				else if (StringUtils.isNotBlank(username)) {
 					user = ampUserRepository.findFirstByUsername(username);
-					userId = user.getId();
 				}	
 
 				// verify that the user exists and is active, based on user ID or username;
@@ -201,14 +199,12 @@ public class RoleServiceImpl implements RoleService {
 				// either roleId or role name must be provided; the former supersedes the latter if both provided
 				if (roleId != null) {
 					role = roleRepository.findById(roleId).orElse(null);
-					roleName = role.getName();
 				}
 				else if (StringUtils.isNotBlank(roleName)) {
 					// check for global role first
 					role = roleRepository.findFirstByNameAndUnitIdIsNull(roleName);
 					// if not found, check for unit role
 					role = role == null? roleRepository.findFirstByNameAndUnitId(roleName, unitId) : role;
-					roleId = role.getId();
 				}			
 
 				// verify that the role exists, based on role ID or name plus unitId
@@ -217,6 +213,12 @@ public class RoleServiceImpl implements RoleService {
 					failed.add(assignment);
 					continue;
 				}
+
+				// record user/role id/name
+				userId = user.getId();
+				username = user.getUsername();
+				roleId = role.getId();
+				roleName = role.getName();
 
 				// verify that the current user is allowed to assign/unassign this role, based on user's min role level and current role's level
 				int rlevel = role.getLevel();
