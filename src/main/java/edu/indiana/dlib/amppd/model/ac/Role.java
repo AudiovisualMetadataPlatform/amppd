@@ -53,11 +53,14 @@ public class Role extends AmpObject {
     private String description;
 
     @NotBlank
-    // inheritance hierarchy level
+    // role assignment order 
     /* Note:
-     * This is used during role/permission refresh, to avoid manual input of redundant rows in permission table; it's not used for permission checking. 
-     * The role hierarchy is linear and role level is unique, starting at 0 for the root (AMP Admin), and increasing by 1 with each lower level role.
+     * The role assignment order is linear and role levels below assignment threshold is unique.
+     * It starts at 0 for the first role (AMP Admin) in the assignment order, and increases by 1 with each next role in the order.
+     * Roles that can't participate in role assignment all have the same maximum level, which ensures that they can't assign any roles.
      * Unit scope roles are assigned with MAX_VALUE by default, as we disallow these roles to assign other roles, so they don't have a linear order.
+     * For now, role level is also used as inheritance hierarchy level during role/action/permission initialization, to avoid manual input of redundant rows in permission table;
+     * this usage, however, may not apply to the general cases when permissions can be configured by admin, at which point, AC table initialization shall be disabled.
      */
     private Integer level = MAX_LEVEL;
     

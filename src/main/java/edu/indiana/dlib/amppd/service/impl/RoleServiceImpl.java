@@ -134,9 +134,9 @@ public class RoleServiceImpl implements RoleService {
 		}
 
 		// generate the assignment table
-		RoleAssignTable response = new RoleAssignTable(level, roles, users, assignments);
+		RoleAssignTable ratable = new RoleAssignTable(level, roles, users, assignments);
 		log.info("Successfully found " + users.size() + " users and " + nRoles + " roles for assignments in unit " + unitId);
-		return response;
+		return ratable;
 	}
 
 	/**
