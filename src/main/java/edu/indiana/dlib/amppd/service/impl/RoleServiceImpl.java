@@ -42,7 +42,7 @@ public class RoleServiceImpl implements RoleService {
 	@Autowired
 	private UnitRepository unitRepository;	
 
-	@Value("#{'${amppd.unitRolesProperty}'.split(',')}")
+	@Value("#{'${amppd.unitRoles}'.split(',')}")
 	private List<String> unitRolesProperty;
 	
 
@@ -121,12 +121,6 @@ public class RoleServiceImpl implements RoleService {
 				role = unitId == null ? roleRepository.findFirstByNameAndUnitIdIsNull(roleName) : roleRepository.findFirstByNameAndUnitId(roleName, unitId);
 			}			
 
-			// if role not found but roleId was provided, that indicates invalid role, skip all its actions configuration with no update
-			if (role == null && roleId != null) {
-				log.error("Failed to update " + scope + " role configuration: Role not found: roleId = " + roleId + ", roleName = " + roleName);				
-				continue;
-			}
-			
 			// if role not found
 			if (role == null ) {
 				// if roleId is null but unitId and roleName are provided, that indicates a new unit role to be created
@@ -145,13 +139,20 @@ public class RoleServiceImpl implements RoleService {
 					continue;					
 				}
 			}
-			// otherwise the role exists
+
+			// otherwise the role exists, verify that it's configurable, i.e. it's not AMP Admin, skip the role if so
+			roleId = role.getId();
+			roleName = role.getName();
+			String roleStr = scope + " role configuration (" + roleId + ": " + roleName + ")";
+			if (Role.AMP_ADMIN_ROLE_NAME.equalsIgnoreCase(roleName)) {
+				log.error("Failed to update " + roleStr + ": Role not configurable");				
+				continue;									
+			}
 			
 			// reset actions to empty whether or not this is a new role, as the whole set will be overwritten with the current role_actions config
 			Set<Action> actions = new HashSet<Action>();
 			role.setActions(actions);
 			List<Long> actionIds = raId.getActionIds();
-			String roleStr = scope + " role configuration (" + role.getId() + ": " + role.getName() + ")";
 			
 			// find and add the role's new actions by ID
 			for (Long actionId : actionIds) {
@@ -180,6 +181,7 @@ public class RoleServiceImpl implements RoleService {
 			// otherwise save the role with all its actions, and add the updated role to return list			
 			Role roleUpdated = roleRepository.save(role);
 			RoleActionsDto raDto = new RoleActionsDto(roleUpdated);
+			rolesUpdated.add(raDto);
 			log.info("Successfully updated " + roleStr + " with " + actionIds.size() + " actions.");			
 		}			
 

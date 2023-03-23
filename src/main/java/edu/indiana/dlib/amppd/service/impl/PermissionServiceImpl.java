@@ -35,8 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class PermissionServiceImpl implements PermissionService {	
-	public static String AMP_ADMIN_ROLE_NAME = "AMP Admin";
-
 	@Autowired
 	private UnitRepository unitRepository;
 
@@ -62,14 +60,14 @@ public class PermissionServiceImpl implements PermissionService {
 		AmpUser user = ampUserService.getCurrentUser();		
 
 //		// get AMP Admin role
-//		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(AMP_ADMIN_ROLE_NAME);
+//		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(Role.AMP_ADMIN_ROLE_NAME);
 //		
 //		// check whether the user has a role assignment with AMP Admin
 //		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
-		boolean is = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), AMP_ADMIN_ROLE_NAME);		
+		boolean is = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), Role.AMP_ADMIN_ROLE_NAME);		
 		String isstr = is ? "is" : "is not";
 		
-		log.info("The current user " + isstr + " " + AMP_ADMIN_ROLE_NAME);
+		log.info("The current user " + isstr + " " + Role.AMP_ADMIN_ROLE_NAME);
 		return is;
 	}				
 	
