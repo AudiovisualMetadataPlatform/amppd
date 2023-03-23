@@ -134,9 +134,9 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 		}
 
 		// generate the assignment table
-		RoleAssignTable ratable = new RoleAssignTable(level, roles, users, assignments);
+		RoleAssignTable rat = new RoleAssignTable(level, roles, users, assignments);
 		log.info("Successfully retrieved " + users.size() + " users and " + nRoles + " roles for assignments in unit " + unitId);
-		return ratable;
+		return rat;
 	}
 
 	/**
@@ -149,7 +149,7 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 		List<RoleAssignmentDto> deleted = new ArrayList<RoleAssignmentDto>();
 		List<RoleAssignTuple> unchanged = new ArrayList<RoleAssignTuple>();
 		List<RoleAssignTuple> failed = new ArrayList<RoleAssignTuple>();
-		RoleAssignUpdate raUpdate = new RoleAssignUpdate(added, deleted, unchanged, failed);
+		RoleAssignUpdate rau = new RoleAssignUpdate(added, deleted, unchanged, failed);
 		boolean valid = true;
 
 		// verify that unit exists
@@ -267,7 +267,7 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 		}
 
 		log.info("Role assignment results within unit " + unitId + ": " + added.size() + " added, " + deleted.size() + " deleted, " + unchanged.size() + " unchanged, " + failed.size() + " failed.");		
-		return raUpdate;
+		return rau;
 	}
 
 }

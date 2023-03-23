@@ -89,7 +89,7 @@ public class RoleServiceImpl implements RoleService {
 	 */
 	@Override
 	public List<RoleDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
-		List<RoleDto> updated = new ArrayList<RoleDto>();
+		List<RoleDto> rolesUpdated = new ArrayList<RoleDto>();
 		String scope;
 		Unit unit = null;
 		
@@ -103,7 +103,7 @@ public class RoleServiceImpl implements RoleService {
 			unit = unitRepository.findById(unitId).orElse(null);
 			if (unit == null) {
 				log.error("Failed to update all " + roleActions.size() + " roles with actions for " + scope + " role_action configuration: Unit not found");
-				return updated;
+				return rolesUpdated;
 			}
 		}
 
@@ -138,7 +138,7 @@ public class RoleServiceImpl implements RoleService {
 				log.info("Creating new role: roleName = " + roleName + ", unitId = " + unitId);				
 			}
 			
-			// reset actions to empty whether or not this is a new role, as the whole set will be updated with current role_actions config
+			// reset actions to empty whether or not this is a new role, as the whole set will be rolesUpdated with current role_actions config
 			Set<Action> actions = new HashSet<Action>();
 			role.setActions(actions);
 			List<Long> actionIds = ra.getActionIds();
@@ -161,14 +161,14 @@ public class RoleServiceImpl implements RoleService {
 			// if above action loop was broken, i.e. not all actions are valid, skip the configuration of this role with no update, to ensure data integrity
 			if (actions.size() < actionIds.size()) continue; 
 
-			// otherwise save the role with all its actions and data, and add the updated role to return list			
-			Role roleUpdate = roleRepository.save(role);
-			RoleDto roleDto = new RoleDto(role);
-			log.debug("Successfully updated " + scope + " role " + roleDto.getId() + " with " + actionIds.size() + " actions.");			
+			// otherwise save the role with all its actions and data, and add the rolesUpdated role to return list			
+			Role roleUpdated = roleRepository.save(role);
+			RoleDto roleDto = new RoleDto(roleUpdated);
+			log.debug("Successfully rolesUpdated " + scope + " role " + roleDto.getId() + " with " + actionIds.size() + " actions.");			
 		}			
 
-		log.info("Updated " + updated.size() + " roles with actions " + " among all " + roleActions.size() + " requested for " + scope + " role_action configuration.");
-		return updated;
+		log.info("Updated " + rolesUpdated.size() + " roles with actions " + " among all " + roleActions.size() + " requested for " + scope + " role_action configuration.");
+		return rolesUpdated;
 	}
 	
 }
