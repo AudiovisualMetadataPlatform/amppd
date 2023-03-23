@@ -88,7 +88,7 @@ public class RoleServiceImpl implements RoleService {
 	 * @See edu.indiana.dlib.amppd.service.RoleService.updateRoleActionConfig(Long, List<RoleActionsId>)
 	 */
 	@Override
-	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
+	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActionsIds) {
 		List<RoleActionsDto> rolesUpdated = new ArrayList<RoleActionsDto>();
 		String scope;
 		Unit unit = null;
@@ -102,13 +102,13 @@ public class RoleServiceImpl implements RoleService {
 			scope = "unit " + unitId;
 			unit = unitRepository.findById(unitId).orElse(null);
 			if (unit == null) {
-				log.error("Failed to update all " + roleActions.size() + " roles with actions for " + scope + " role_action configuration: Unit not found");
+				log.error("Failed to update all " + roleActionsIds.size() + " roles with actions for " + scope + " role_action configuration: Unit not found");
 				return rolesUpdated;
 			}
 		}
 
 		// update actions config for each role
-		for (RoleActionsId ra : roleActions) {
+		for (RoleActionsId ra : roleActionsIds) {
 			Long roleId = ra.getId();
 			String roleName = ra.getName();
 			Role role = null;
@@ -167,7 +167,7 @@ public class RoleServiceImpl implements RoleService {
 			log.debug("Successfully rolesUpdated " + scope + " role " + raDto.getId() + " with " + actionIds.size() + " actions.");			
 		}			
 
-		log.info("Updated " + rolesUpdated.size() + " roles with actions " + " among all " + roleActions.size() + " requested for " + scope + " role_action configuration.");
+		log.info("Updated " + rolesUpdated.size() + " roles with actions " + " among all " + roleActionsIds.size() + " requested for " + scope + " role_action configuration.");
 		return rolesUpdated;
 	}
 	

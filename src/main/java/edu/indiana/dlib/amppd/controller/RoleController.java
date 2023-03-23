@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.dto.RoleActionsDto;
@@ -30,8 +33,8 @@ public class RoleController {
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
 	 * @return instance of RoleActionConfig containing requested role_action permission info
 	 */
-	@GetMapping("/roleAssignments")
-	public RoleActionConfig retrieveRoleActionConfig(Long unitId) {
+	@GetMapping("/roles/config")
+	public RoleActionConfig retrieveRoleActionConfig(@RequestParam(required = false) Long unitId) {
 		log.info("Retrieving role_action configuration within unit " + unitId);
 		RoleActionConfig raConfig = roleService.retrieveRoleActionConfig(unitId);
 		return raConfig;
@@ -42,9 +45,10 @@ public class RoleController {
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
 	 * @return list of RoleBriefActions successfully updated
 	 */	
-	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
+	@PostMapping("/roles/config")
+	public List<RoleActionsDto> updateRoleActionConfig(@RequestParam(required = false) Long unitId, @RequestBody List<RoleActionsId> roleActionsIds) {
 		log.info("Updateing role_action configuration within unit " + unitId);
-		List<RoleActionsDto> rolesUpdated = roleService.updateRoleActionConfig(unitId, roleActions);
+		List<RoleActionsDto> rolesUpdated = roleService.updateRoleActionConfig(unitId, roleActionsIds);
 		return rolesUpdated;		
 	}
 

@@ -30,6 +30,6 @@ public interface RoleService {
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
 	 * @return list of RoleBriefActions successfully updated
 	 */	
-	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions);
+	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActionsIds);
 	
 }
