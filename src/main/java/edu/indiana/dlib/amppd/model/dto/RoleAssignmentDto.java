@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.model.dto;
 
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,5 +32,16 @@ public class RoleAssignmentDto {
     	roleName = ra.getRole().getName();
     	unitName = ra.getUnit() == null ? null : ra.getUnit().getName();
     }
+    
+    public RoleAssignmentDto(RoleAssignmentDetail rad) {
+    	id = rad.getId();
+    	userId = rad.getUserId();
+    	roleId = rad.getRoleId();
+    	unitId = rad.getUnitId();
+    	username = rad.getUsername();
+    	roleName = rad.getRoleName();
+    	unitName = rad.getUnitName();
+    }
+    
     
 }

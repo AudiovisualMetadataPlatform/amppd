@@ -182,7 +182,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionRefreshService.refreshRoleAction(int)
+	 * @see edu.indiana.dlib.amppd.service.PermissionRefreshService.refresh(int)
 	 */
 	@Override
     @Transactional

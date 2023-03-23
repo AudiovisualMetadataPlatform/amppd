@@ -16,6 +16,7 @@ public interface ActionBrief extends AmpObjectBrief {
 
 	public String getName();
 	public String getDescription();	
+	public Boolean getConfigurable();	
     public ActionType getActionType();
     public TargetType getTargetType();
     public HttpMethod getHttpMethod();

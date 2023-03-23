@@ -24,6 +24,7 @@ public class AmppdPropertyConfig {
     @NotNull private String environment;
     @NotNull private String fileStorageRoot;
     @NotNull private String dropboxRoot;
+    @NotNull private String mgmEvaluationScriptsRoot;
     @NotNull private String pythonPath;
     @NotNull private String mediaprobeDir;
     @NotNull private String encryptionSecret;  
@@ -46,8 +47,9 @@ public class AmppdPropertyConfig {
     @NotNull private Boolean refreshPermissionTables;
     @NotNull private Boolean refreshMgmTables;    
     @NotNull private List<String> supplementCategories;
+    @NotNull private List<String> groundtruthSubcategories;
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;
-    @NotNull private String mgmEvaluationScriptsRoot;
+    @NotNull private List<String> unitRoles;
     
 }

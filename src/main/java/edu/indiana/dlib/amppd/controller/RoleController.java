@@ -9,49 +9,49 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.model.dto.RoleActionsDto;
+import edu.indiana.dlib.amppd.model.dto.RoleActionsId;
 import edu.indiana.dlib.amppd.service.RoleService;
-import edu.indiana.dlib.amppd.web.RoleAssignTable;
-import edu.indiana.dlib.amppd.web.RoleAssignTuple;
-import edu.indiana.dlib.amppd.web.RoleAssignUpdate;
+import edu.indiana.dlib.amppd.web.RoleActionConfig;
 import lombok.extern.slf4j.Slf4j;
 
 
 /**
- * Controller to handle requests for access control.
+ * Controller to handle requests for role related operations.
  * @author yingfeng
  */
 @RestController
 @Slf4j
 public class RoleController {
-
+	
 	@Autowired
 	private RoleService roleService;
 	
 	
 	/**
-	 * Get the users, roles, and assignment info for the current user and the given unit.
-	 * @unitId ID of the unit associated with the role assignment
-	 * @return the user-role assignment table 
+	 * Retrieve global or unit-scope role_action configuration.
+	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
+	 * @return instance of RoleActionConfig containing requested role_action permission info
 	 */
-	@GetMapping("/roleAssignments")
-	public RoleAssignTable retrieveRoleAssignments(@RequestParam Long unitId) {
-		log.info("Retrieving user-role assignments within unit " + unitId);
-		RoleAssignTable ratable = roleService.retrieveRoleAssignments(unitId);
-		return ratable;
+	@GetMapping("/roles/config")
+	public RoleActionConfig retrieveRoleActionConfig(@RequestParam(required = false) Long unitId) {
+		log.info("Retrieving role_action permission configuration within unit " + unitId);
+		RoleActionConfig raConfig = roleService.retrieveRoleActionConfig(unitId);
+		return raConfig;
 	}
 
 	/**
-	 * Update the given role assignments within the given unit.
-	 * @unitId ID of the given unit
-	 * assignments list of user-role-assignment 
-	 * @return the pair of Lists of the added/deleted roleAssignments
-	 */
-	@PostMapping("/roleAssignments")
-	public RoleAssignUpdate updateRoleAssignments(@RequestParam Long unitId, @RequestBody List<RoleAssignTuple> assignments) {
-		log.info("Updating + " + assignments.size() + " role assignments within unit " + unitId);
-		RoleAssignUpdate rau = roleService.updateRoleAssignments(unitId, assignments);
-		return rau;
+	 * Update global or unit-scope role_action configuration with the given role_action configuration.
+	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
+	 * @param roleActionsIds the given role_action configuration as a list of roles with IDs and a list or actions with IDs within each role 
+	 * @return list of RoleActionsDtos successfully updated
+	 */	
+	@PostMapping("/roles/config")
+	public List<RoleActionsDto> updateRoleActionConfig(@RequestParam(required = false) Long unitId, @RequestBody List<RoleActionsId> roleActionsIds) {
+		log.info("Updateing role_action permission configuration within unit " + unitId);
+		List<RoleActionsDto> rolesUpdated = roleService.updateRoleActionConfig(unitId, roleActionsIds);
+		return rolesUpdated;		
 	}
-		
+
 
 }

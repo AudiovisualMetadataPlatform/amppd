@@ -21,13 +21,15 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	boolean existsByUserIdAndRoleIdInAndUnitIdIsNull(Long userId, List<Long> roleIds);	
 	
 	RoleAssignment findFirstByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);	
-
+	
 	List<RoleAssignmentBrief> findByUserId(Long userId);	
 	List<RoleAssignmentBrief> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
 
+	// for user's permitted actions
 	List<RoleAssignmentDetailActions> findByUserIdOrderByUnitId(Long userId);	
 	List<RoleAssignmentDetailActions> findByUserIdAndUnitIdInOrderByUnitId(Long userId, List<Long> unitIds);	
 
+	// for user role assignment
 	List<RoleAssignmentDetail> findByUserIdAndUnitIdNotNull(Long userId);
 	List<RoleAssignmentDetail> findByUnitIdOrderByUserId(Long unitId);
 
@@ -35,6 +37,7 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	@Query(value = "select min(ra.role.level) from RoleAssignment ra where ra.user.id = :userId and (ra.unit is null or ra.unit.id = :unitId)")
 	Integer findMinRoleLevelByUserIdAndUnitId(Long userId, Long unitId);
 	
+	// un-assign user role
 	RoleAssignmentBrief deleteByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
 	
 }

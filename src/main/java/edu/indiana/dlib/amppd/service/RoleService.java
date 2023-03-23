@@ -2,47 +2,35 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.RequestParam;
-
-import edu.indiana.dlib.amppd.model.projection.RoleBrief;
-import edu.indiana.dlib.amppd.web.RoleAssignTable;
-import edu.indiana.dlib.amppd.web.RoleAssignTuple;
-import edu.indiana.dlib.amppd.web.RoleAssignUpdate;
+import edu.indiana.dlib.amppd.model.dto.RoleActionsDto;
+import edu.indiana.dlib.amppd.model.dto.RoleActionsId;
+import edu.indiana.dlib.amppd.web.RoleActionConfig;
 
 /**
- * Service for role and role assignment related operations.
+ * Service for role and role related operations.
  * @author yingfeng
  */
 public interface RoleService {
 	
 	/**
-	 * Get the role assignment level threshold (excluding) for the current user in the given unit, based on the rules that
-	 * a user can only assign roles weaker (with greater level value) than his strongest role (with least level value).  
-	 * @param unitId ID of the given unit
-	 * @return role assignment level threshold 
+	 * Get the list of unit-scope role names.
+	 * @return list of unit-scope role names.
 	 */
-	public Integer getAssignableRoleLevel(Long unitId);
-	
-	/**
-	 * Get all the roles the current user has permission to assign users to, within the given unit.
-	 * @unitId ID of the unit associated with the role assignment
-	 * @return the set of roles assignable by the current user
-	 */
-	public List<RoleBrief> getAssignableRoles(@RequestParam Long unitId);
+	public List<String> getUnitRoleNames();
 
 	/**
-	 * Get the users, roles, and assignment info for the current user and the given unit.
-	 * @unitId ID of the unit associated with the role assignment
-	 * @return the user-role assignment table 
+	 * Retrieve global or unit-scope role_action configuration.
+	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
+	 * @return instance of RoleActionConfig containing requested role_action permission info
 	 */
-	public RoleAssignTable retrieveRoleAssignments(Long unitId);
+	public RoleActionConfig retrieveRoleActionConfig(Long unitId);
 
 	/**
-	 * Update the given role assignments within the given unit.
-	 * @unitId ID of the given unit
-	 * assignments list of user-role-assignment 
-	 * @return the list of added/deleted RoleAssignments
-	 */
-	public RoleAssignUpdate updateRoleAssignments(Long unitId, List<RoleAssignTuple> assignments);
+	 * Update global or unit-scope role_action configuration with the given role_action configuration.
+	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
+	 * @param roleActionsIds the given role_action configuration as a list of roles with IDs and a list or actions with IDs within each role 
+	 * @return list of RoleActionsDtos successfully updated
+	 */	
+	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActionsIds);
 	
 }
