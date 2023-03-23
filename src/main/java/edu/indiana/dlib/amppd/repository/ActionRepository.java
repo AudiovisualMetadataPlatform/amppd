@@ -21,7 +21,7 @@ public interface ActionRepository extends AmpObjectRepository<Action> {
 	List<ActionBrief> findBy();
 
 	// find the actions for which the role permissions are or not configurable;
-	// currently, Create/Delete Unit, update RoleDto or RoleAssignment are not configurable 
+	// currently, Create/Delete Unit, update RoleAction or RoleAssignment are not configurable 
 	List<ActionBrief> findByConfigurable(Boolean configurable);
 	
 	// find actions by actionType-targetType, httpMethod-UrlPattern 
@@ -29,14 +29,14 @@ public interface ActionRepository extends AmpObjectRepository<Action> {
 	List<ActionBrief> findByHttpMethodInAndUrlPatternIn(List<HttpMethod> httpMethods, List<String> urlPatterns);
 	
 //	// find the actions for which the role permissions are not configurable, i.e.
-//	// Create/Delete Unit, update RoleDto or RoleAssignment 
+//	// Create/Delete Unit, update Role or RoleAssignment 
 //	@Query(value = "select a from Action a where " +
 //			"a.actionType in ('Create', 'Delete') and a.targetType = 'Unit' or " + 
 //			"a.actionType = 'Update' and a.targetType like 'Role%'")			
 //	List<ActionBrief> findNonConfigurableActions();
 //
 //	// find the actions for which the role permissions are configurable, i.e. except
-//	// Create/Delete Unit, update RoleDto or RoleAssignment 
+//	// Create/Delete Unit, update Role or RoleAssignment 
 //	@Query(value = "select a from Action a where " +
 //			"(a.actionType not in ('Create', 'Delete') or a.targetType <> 'Unit') and " + 
 //			"(a.actionType <> 'Update' or a.targetType not like 'Role%')")			

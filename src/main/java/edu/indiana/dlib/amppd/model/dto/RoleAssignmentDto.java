@@ -35,12 +35,12 @@ public class RoleAssignmentDto {
     
     public RoleAssignmentDto(RoleAssignmentDetail rad) {
     	id = rad.getId();
-    	userId = rad.getUser().getId();
-    	roleId = rad.getRole().getId();
-    	unitId = rad.getUnit() == null ? null : rad.getUnit().getId();
-    	username = rad.getUser().getUsername();
-    	roleName = rad.getRole().getName();
-    	unitName = rad.getUnit() == null ? null : rad.getUnit().getName();
+    	userId = rad.getUserId();
+    	roleId = rad.getRoleId();
+    	unitId = rad.getUnitId();
+    	username = rad.getUsername();
+    	roleName = rad.getRoleName();
+    	unitName = rad.getUnitName();
     }
     
     

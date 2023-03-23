@@ -51,7 +51,7 @@ public class Action extends AmpObject {
 	public enum TargetType {  
 		Unit, Collection, Item, Primaryfile, Primaryfile_Media, Supplement, 
 		Batch, Bag, Workflow, WorkflowResult, WorkflowResult_Restricted, MgmEvaluationTest,
-		AmpUser, Role, RoleAction, RoleAction_Unit, RoleAssignment, RoleAssignment_CollectionManager, RoleAssignment_UnitManager}
+		AmpUser, Role, Role_Unit, RoleAssignment, RoleAssignment_CollectionManager, RoleAssignment_UnitManager}
 	
 	@NotBlank
 	@Unique

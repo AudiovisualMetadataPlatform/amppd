@@ -11,13 +11,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Class for Role projection, used for role assignment or role_action configuration.
+ * Class for Role with Actions projection, used for role_action configuration.
  * @author yingfeng
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoleDto {
+public class RoleActionsDto {
 
     private Long id;
     private Long unitId;
@@ -25,7 +25,7 @@ public class RoleDto {
     private Integer level;	
 	public Set<ActionDto> actions;
     
-    public RoleDto(Role role) {
+    public RoleActionsDto(Role role) {
     	id = role.getId();
     	Unit unit = role.getUnit(); 
     	unitId = unit == null ? null : unit.getId();

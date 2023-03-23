@@ -3,7 +3,7 @@ package edu.indiana.dlib.amppd.service;
 import java.util.List;
 
 import edu.indiana.dlib.amppd.model.dto.RoleActionsId;
-import edu.indiana.dlib.amppd.model.dto.RoleDto;
+import edu.indiana.dlib.amppd.model.dto.RoleActionsDto;
 import edu.indiana.dlib.amppd.web.RoleActionConfig;
 
 /**
@@ -30,6 +30,6 @@ public interface RoleService {
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
 	 * @return list of RoleBriefActions successfully updated
 	 */	
-	public List<RoleDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions);
+	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions);
 	
 }

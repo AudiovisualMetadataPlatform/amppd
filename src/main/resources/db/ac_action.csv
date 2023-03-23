@@ -39,9 +39,9 @@ deliver bag,deliver bag contents to Avalon at various levels,Export,Bag,POST,/de
 run evaluation,run MGM evaluation tests,Create,MgmEvaluationTest,POST,/mgm*,TRUE
 view evaluation,list/view/visualize MGM evaluation tools/tests/results,Read,MgmEvaluationTest,GET,/mgm*,TRUE
 approve user,approve/reject user account registration,Update,AmpUser,POST,/account/[approve|reject],TRUE
-view permission,list/view permission settings,Read,RoleAction,GET,/[roles|actions|roleActions],TRUE
-config global permission,config permission settings on actions for global roles,Update,RoleAction,POST,/roleActions,FALSE
-config unit permission,config permission settings on actions for unit-scope roles,Update,RoleAction_Unit,POST,/roleActions/unit,FALSE
+view permission,list/view role_action permission configuration,Read,Role,GET,/[roles|actions|roleActions],TRUE
+config global permission,config permission settings on actions for global roles,Update,Role,POST,/roleActions,FALSE
+config unit permission,config permission settings on actions for unit-scope roles,Update,Role_Unit,POST,/roleActions/unit,FALSE
 view role assignment,view user role assignments within a unit,Read,RoleAssignment,GET,/roleAssignments,TRUE
 assign staff role,assign staff roles other than unit/collection manager to users within a unit,Update,RoleAssignment,POST,/roleAssignments,FALSE
 assign collection manager,assign collection manager role to users within a unit,Update,RoleAssignment_CollectionManager,POST,/roleAssignments/collectionManager,FALSE

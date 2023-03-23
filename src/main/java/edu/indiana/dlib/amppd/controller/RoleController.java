@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.model.dto.RoleActionsDto;
 import edu.indiana.dlib.amppd.model.dto.RoleActionsId;
-import edu.indiana.dlib.amppd.model.dto.RoleDto;
 import edu.indiana.dlib.amppd.service.RoleService;
 import edu.indiana.dlib.amppd.web.RoleActionConfig;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +42,9 @@ public class RoleController {
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
 	 * @return list of RoleBriefActions successfully updated
 	 */	
-	public List<RoleDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
+	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
 		log.info("Updateing role_action configuration within unit " + unitId);
-		List<RoleDto> rolesUpdated = roleService.updateRoleActionConfig(unitId, roleActions);
+		List<RoleActionsDto> rolesUpdated = roleService.updateRoleActionConfig(unitId, roleActions);
 		return rolesUpdated;		
 	}
 

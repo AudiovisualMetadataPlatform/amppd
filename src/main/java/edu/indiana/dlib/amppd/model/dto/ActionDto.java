@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 /**
  * Class for Action projection, used for role_action configuration.
  * @author yingfeng

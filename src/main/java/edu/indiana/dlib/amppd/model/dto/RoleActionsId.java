@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Class for role with actions projection, used for role_action configuration.
+ * Class for role ID with actions IDs projection, used for role_action configuration.
  * @author yingfeng
  */
 @Data

@@ -14,8 +14,8 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
+import edu.indiana.dlib.amppd.model.dto.RoleActionsDto;
 import edu.indiana.dlib.amppd.model.dto.RoleActionsId;
-import edu.indiana.dlib.amppd.model.dto.RoleDto;
 import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 import edu.indiana.dlib.amppd.model.projection.RoleBriefActions;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
@@ -88,8 +88,8 @@ public class RoleServiceImpl implements RoleService {
 	 * @See edu.indiana.dlib.amppd.service.RoleService.updateRoleActionConfig(Long, List<RoleActionsId>)
 	 */
 	@Override
-	public List<RoleDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
-		List<RoleDto> rolesUpdated = new ArrayList<RoleDto>();
+	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActions) {
+		List<RoleActionsDto> rolesUpdated = new ArrayList<RoleActionsDto>();
 		String scope;
 		Unit unit = null;
 		
@@ -163,8 +163,8 @@ public class RoleServiceImpl implements RoleService {
 
 			// otherwise save the role with all its actions and data, and add the rolesUpdated role to return list			
 			Role roleUpdated = roleRepository.save(role);
-			RoleDto roleDto = new RoleDto(roleUpdated);
-			log.debug("Successfully rolesUpdated " + scope + " role " + roleDto.getId() + " with " + actionIds.size() + " actions.");			
+			RoleActionsDto raDto = new RoleActionsDto(roleUpdated);
+			log.debug("Successfully rolesUpdated " + scope + " role " + raDto.getId() + " with " + actionIds.size() + " actions.");			
 		}			
 
 		log.info("Updated " + rolesUpdated.size() + " roles with actions " + " among all " + roleActions.size() + " requested for " + scope + " role_action configuration.");
