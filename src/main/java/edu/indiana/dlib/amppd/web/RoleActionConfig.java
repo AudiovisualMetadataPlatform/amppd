@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * Response for role_action permission configuration (global or unit-scope) retrieval request, containing actions and roles with permissions.
+ * Response for (global or unit-scope) role_action permission configuration retrieval request, containing roles, actions and permissions.
  * @author yingfeng
  */
 @Data

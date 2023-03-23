@@ -43,7 +43,7 @@ public class RoleController {
 	/**
 	 * Update global or unit-scope role_action configuration.
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
-	 * @return list of RoleBriefActions successfully updated
+	 * @return list of RoleActionsDtos successfully updated
 	 */	
 	@PostMapping("/roles/config")
 	public List<RoleActionsDto> updateRoleActionConfig(@RequestParam(required = false) Long unitId, @RequestBody List<RoleActionsId> roleActionsIds) {
