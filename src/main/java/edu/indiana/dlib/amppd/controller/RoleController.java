@@ -35,19 +35,20 @@ public class RoleController {
 	 */
 	@GetMapping("/roles/config")
 	public RoleActionConfig retrieveRoleActionConfig(@RequestParam(required = false) Long unitId) {
-		log.info("Retrieving role_action configuration within unit " + unitId);
+		log.info("Retrieving role_action permission configuration within unit " + unitId);
 		RoleActionConfig raConfig = roleService.retrieveRoleActionConfig(unitId);
 		return raConfig;
 	}
 
 	/**
-	 * Update global or unit-scope role_action configuration.
+	 * Update global or unit-scope role_action configuration with the given role_action configuration.
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
+	 * @param roleActionsIds the given role_action configuration as a list of roles with IDs and a list or actions with IDs within each role 
 	 * @return list of RoleActionsDtos successfully updated
 	 */	
 	@PostMapping("/roles/config")
 	public List<RoleActionsDto> updateRoleActionConfig(@RequestParam(required = false) Long unitId, @RequestBody List<RoleActionsId> roleActionsIds) {
-		log.info("Updateing role_action configuration within unit " + unitId);
+		log.info("Updateing role_action permission configuration within unit " + unitId);
 		List<RoleActionsDto> rolesUpdated = roleService.updateRoleActionConfig(unitId, roleActionsIds);
 		return rolesUpdated;		
 	}

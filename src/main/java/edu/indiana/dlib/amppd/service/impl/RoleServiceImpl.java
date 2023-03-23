@@ -74,9 +74,9 @@ public class RoleServiceImpl implements RoleService {
 		// for unit-scope config
 		else {
 			scope = "unit " + unitId;
-			unitRoleNames = unitRolesProperty;							// all predefined unit role names
+			unitRoleNames = getUnitRoleNames();							// all predefined unit role names
 			actions = actionRepository.findByConfigurable(true);		// get configurable actions only
-			roles = roleRepository.findByUnitIdOrderByLevel(unitId);	// get roles with actions for the unit
+			roles = roleRepository.findByUnitIdOrderByLevel(unitId);	// get roles with actions within the unit
 		}
 		
 		RoleActionConfig raConfig = new RoleActionConfig(unitRoleNames, roles, actions);
@@ -102,15 +102,15 @@ public class RoleServiceImpl implements RoleService {
 			scope = "unit " + unitId;
 			unit = unitRepository.findById(unitId).orElse(null);
 			if (unit == null) {
-				log.error("Failed to update all " + roleActionsIds.size() + " roles with actions for " + scope + " role_action configuration: Unit not found");
+				log.error("Failed to update all " + roleActionsIds.size() + " requested " + scope + " roles configuration: Unit not found");
 				return rolesUpdated;
 			}
 		}
 
 		// update actions config for each role
-		for (RoleActionsId ra : roleActionsIds) {
-			Long roleId = ra.getId();
-			String roleName = ra.getName();
+		for (RoleActionsId raId : roleActionsIds) {
+			Long roleId = raId.getId();
+			String roleName = raId.getName();
 			Role role = null;
 
 			// either roleId or roleName must be provided; the former supersedes the latter if both provided
@@ -123,34 +123,50 @@ public class RoleServiceImpl implements RoleService {
 
 			// if role not found but roleId was provided, that indicates invalid role, skip all its actions configuration with no update
 			if (role == null && roleId != null) {
-				log.error("Failed to update role with actions: Role not found: roleId = " + roleId + ", roleName = " + roleName + ", unitId = " + unitId);				
+				log.error("Failed to update " + scope + " role configuration: Role not found: roleId = " + roleId + ", roleName = " + roleName);				
 				continue;
 			}
 			
-			// otherwise if role and roleId are null but unitId and roleName are provided, that indicates a new unit role to be created
-			if (role == null && roleId == null && unitId != null && StringUtils.isNotBlank(roleName)) {
-				role = new Role();
-				role.setName(roleName);
-				role.setDescription(roleName);	// TODO use name as description for unit roles now, can be configurable as well if desired
-				role.setLevel(Role.MAX_LEVEL);	// unit roles all have max level
-				role.setUnit(unit);				// associate with the current unit
-				role.setRoleAssignements(new HashSet<RoleAssignment>()); // no assignment for new role
-				log.info("Creating new role: roleName = " + roleName + ", unitId = " + unitId);				
+			// if role not found
+			if (role == null ) {
+				// if roleId is null but unitId and roleName are provided, that indicates a new unit role to be created
+				if (roleId == null && unitId != null && StringUtils.isNotBlank(roleName)) {
+					role = new Role();
+					role.setName(roleName);
+					role.setDescription(roleName);	// TODO use name as description for unit roles now, can be configurable in the future if desired
+					role.setLevel(Role.MAX_LEVEL);	// unit roles all have max level
+					role.setUnit(unit);				// associate the role with the given unit
+					role.setRoleAssignements(new HashSet<RoleAssignment>()); // no assignment for new role
+					log.info("Creating new " + scope + " role, roleName = " + roleName);				
+				}
+				// otherwise it's an invalid request, skip all its actions configuration with no update
+				else {
+					log.error("Failed to update " + scope + " role configuration: Role not found: roleId = " + roleId + ", roleName = " + roleName);				
+					continue;					
+				}
 			}
+			// otherwise the role exists
 			
-			// reset actions to empty whether or not this is a new role, as the whole set will be rolesUpdated with current role_actions config
+			// reset actions to empty whether or not this is a new role, as the whole set will be overwritten with the current role_actions config
 			Set<Action> actions = new HashSet<Action>();
 			role.setActions(actions);
-			List<Long> actionIds = ra.getActionIds();
+			List<Long> actionIds = raId.getActionIds();
+			String roleStr = scope + " role configuration (" + role.getId() + ": " + role.getName() + ")";
 			
 			// find and add the role's new actions by ID
 			for (Long actionId : actionIds) {
 				// verify that the action exist, 
 				Action action = actionRepository.findById(actionId).orElse(null);				
 				
-				// if one action of the role is invalid, abandon all rest of the actions to skip the role with no update
+				// if current action doesn't, abandon the rest of the actions to skip the role with no update
 				if (action == null) {
-					log.error("Failed to update role with actions: Role not found: roleId = " + roleId + ", roleName = " + roleName + ", unit = " + unitId);				
+					log.error("Failed to update " + roleStr + ": Action not found: actionId = " + actionId);				
+					break;					
+				}
+				
+				// if current action is not configurable, abandon the rest of the actions to skip the role with no update
+				if (!action.getConfigurable()) {
+					log.error("Failed to update " + roleStr + ": Action not configurable: actionId = " + actionId + ", actionName = " + action.getName());				
 					break;					
 				}
 				
@@ -161,13 +177,13 @@ public class RoleServiceImpl implements RoleService {
 			// if above action loop was broken, i.e. not all actions are valid, skip the configuration of this role with no update, to ensure data integrity
 			if (actions.size() < actionIds.size()) continue; 
 
-			// otherwise save the role with all its actions and data, and add the rolesUpdated role to return list			
+			// otherwise save the role with all its actions, and add the updated role to return list			
 			Role roleUpdated = roleRepository.save(role);
 			RoleActionsDto raDto = new RoleActionsDto(roleUpdated);
-			log.debug("Successfully rolesUpdated " + scope + " role " + raDto.getId() + " with " + actionIds.size() + " actions.");			
+			log.info("Successfully updated " + roleStr + " with " + actionIds.size() + " actions.");			
 		}			
 
-		log.info("Updated " + rolesUpdated.size() + " roles with actions " + " among all " + roleActionsIds.size() + " requested for " + scope + " role_action configuration.");
+		log.info("Updated " + rolesUpdated.size() + " among all " + roleActionsIds.size() + " requested " + scope + "roles configuration.");
 		return rolesUpdated;
 	}
 	

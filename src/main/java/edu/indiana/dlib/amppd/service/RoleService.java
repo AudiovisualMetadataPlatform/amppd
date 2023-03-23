@@ -26,8 +26,9 @@ public interface RoleService {
 	public RoleActionConfig retrieveRoleActionConfig(Long unitId);
 
 	/**
-	 * Update global or unit-scope role_action configuration.
+	 * Update global or unit-scope role_action configuration with the given role_action configuration.
 	 * @param unitId unit ID for unit-scope configuration, null if for global configuration
+	 * @param roleActionsIds the given role_action configuration as a list of roles with IDs and a list or actions with IDs within each role 
 	 * @return list of RoleActionsDtos successfully updated
 	 */	
 	public List<RoleActionsDto> updateRoleActionConfig(Long unitId, List<RoleActionsId> roleActionsIds);
