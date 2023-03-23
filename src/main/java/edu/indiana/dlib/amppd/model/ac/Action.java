@@ -35,6 +35,7 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
 		@Index(columnList = "name", unique = true),
+		@Index(columnList = "configurable"),
 		@Index(columnList = "actionType"),
 		@Index(columnList = "targetType"),
 		@Index(columnList = "actionType, targetType", unique = true),
@@ -60,6 +61,10 @@ public class Action extends AmpObject {
     @Type(type="text")
     private String description;
 
+    // whether role permissions for the action is configurable
+    @NotBlank
+    private Boolean configurable;    
+	
     @NotBlank
 	@Enumerated(EnumType.STRING)
     private ActionType actionType;
@@ -75,7 +80,7 @@ public class Action extends AmpObject {
     @NotBlank
     @Type(type="text")
     private String urlPattern;    
-	
+    
     // permissions: the roles that can perform this action
     @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY)
 	@JsonBackReference(value="roles")

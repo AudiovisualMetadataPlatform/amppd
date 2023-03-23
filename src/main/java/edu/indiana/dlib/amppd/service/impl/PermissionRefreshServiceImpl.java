@@ -186,8 +186,8 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	 */
 	@Override
     @Transactional
-	public List<RoleAction> refreshRoleAction(int roleDepth) {
-		log.info("Start refreshing RoleAction table with depth of role hierarchy = " + roleDepth);
+	public List<RoleDto> refreshRoleAction(int roleDepth) {
+		log.info("Start refreshing RoleDto table with depth of role hierarchy = " + roleDepth);
 		
 		// open ac_role_action.csv
 		String filename = DIR + "/" + ROLE_ACTION + ".csv"; 
@@ -199,13 +199,13 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 			throw new RuntimeException("Failed to refresh Role table: unable to open " + filename, e);
 		}		
 		
-		// parse the csv into list of RoleAction objects
-		List<RoleAction> roleActions;
+		// parse the csv into list of RoleDto objects
+		List<RoleDto> roleActions;
 		try {
-			roleActions = new CsvToBeanBuilder<RoleAction>(breader).withType(RoleAction.class).build().parse();
+			roleActions = new CsvToBeanBuilder<RoleDto>(breader).withType(RoleDto.class).build().parse();
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to refresh RoleAction table: invalid CSV format with " + filename, e);
+			throw new RuntimeException("Failed to refresh RoleDto table: invalid CSV format with " + filename, e);
 		}
 		
 		// initialize roles records
@@ -213,7 +213,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		Role[] lroles = new Role[roleDepth];	// role array indexed by its level		
 		
 		// add actions in the parsed action list to each role in the parsed role list
-		for (RoleAction roleAction : roleActions) {	
+		for (RoleDto roleAction : roleActions) {	
 			String roleName = roleAction.getRoleName();
 			Role role = nroles.get(roleName);
 			
@@ -222,7 +222,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 				// make sure the role exists in DB
 				role = roleRepository.findFirstByNameAndUnitId(roleName, null);				
 				if (role == null) {
-					throw new RuntimeException("Failed to refresh RoleAction table: Invalid roleAction with non-existing role name in CSV: " + roleAction.getRoleName());
+					throw new RuntimeException("Failed to refresh RoleDto table: Invalid roleAction with non-existing role name in CSV: " + roleAction.getRoleName());
 				}
 				
 				// record role in name-role map
@@ -231,7 +231,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 				// record role in level-role array, make sure the level is valid
 				int level = role.getLevel();
 				if (level < 0 || level > roleDepth - 1) {
-					throw new RuntimeException("Failed to refresh RoleAction table: Invalid role level " + level + " for role " + roleAction.getRoleName());
+					throw new RuntimeException("Failed to refresh RoleDto table: Invalid role level " + level + " for role " + roleAction.getRoleName());
 				}
 				lroles[level] = role;
 
@@ -241,7 +241,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 
 			Action action = actionRepository.findFirstByName(roleAction.getActionName());
 			if (action == null) {
-				throw new RuntimeException("Failed to refresh RoleAction table: Invalid roleAction with non-existing action name in CSV: " + roleAction.getActionName());
+				throw new RuntimeException("Failed to refresh RoleDto table: Invalid roleAction with non-existing action name in CSV: " + roleAction.getActionName());
 			}
 			 
 			role.getActions().add(action);
@@ -253,7 +253,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 			
 			// make sure each level has a role
 			if (role == null) {
-				throw new RuntimeException("Failed to refresh RoleAction table: there is no role at level " + level + " in CSV.");				
+				throw new RuntimeException("Failed to refresh RoleDto table: there is no role at level " + level + " in CSV.");				
 			}
 			
 			// append actions from role one level below if within the array boundary
@@ -268,7 +268,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		}		
 		
 		/* Note:
-		 * RoleAction table is mapped by Spring Data and doesn't have DB audit fields such as lastUpdateDate; thus, 
+		 * RoleDto table is mapped by Spring Data and doesn't have DB audit fields such as lastUpdateDate; thus, 
 		 * we can't use lastUpdateDate to identify obsolete rows to delete; furthermore, the permission table also contains 
 		 * permissions dynamically assigned for unit-specific roles, which shouldn't be refreshed based on the csv file.
 		 * On the other hand, the role_action.csv should contain permissions for all currently valid roles,

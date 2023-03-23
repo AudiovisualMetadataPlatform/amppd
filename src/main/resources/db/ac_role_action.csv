@@ -39,8 +39,6 @@ Collection Staff,deliver bag
 Collection Staff,run evaluation
 Collection Staff,view evaluation
 AMP Admin,approve user
-Unit Manager,create unit role
-Unit Manager,delete unit role
 Unit Viewer,view permission
 AMP Admin,config global permission
 Unit Manager,config unit permission

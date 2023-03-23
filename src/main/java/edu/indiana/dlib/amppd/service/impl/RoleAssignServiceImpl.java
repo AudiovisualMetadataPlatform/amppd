@@ -135,7 +135,7 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 
 		// generate the assignment table
 		RoleAssignTable ratable = new RoleAssignTable(level, roles, users, assignments);
-		log.info("Successfully found " + users.size() + " users and " + nRoles + " roles for assignments in unit " + unitId);
+		log.info("Successfully retrieved " + users.size() + " users and " + nRoles + " roles for assignments in unit " + unitId);
 		return ratable;
 	}
 
@@ -196,7 +196,7 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 					continue;
 				}
 
-				// either roleId or role name must be provided; the former supersedes the latter if both provided
+				// either roleId or roleName must be provided; the former supersedes the latter if both provided
 				if (roleId != null) {
 					role = roleRepository.findById(roleId).orElse(null);
 				}
