@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +30,8 @@ public interface RoleRepository extends AmpObjectRepository<Role> {
 //	@Query(value = "select new RoleBrief(r.id as id, r.unit.id as unitId, r.name as name, r.level as level) from Role r where r.name <> 'AMP Admin' and r.level > :level and (r.unit is null or r.unit.id = :unitId) order by r.level")
 	@Query(value = "select r from Role r where r.name <> 'AMP Admin' and r.level > :level and (r.unit is null or r.unit.id = :unitId) order by r.level")
 	List<RoleBrief> findAssignableRolesInUnit(Integer level, Long unitId);
+	
+	// delete unrefreshed global roles
+	List<Role> deleteByUnitIdIsNullAndModifiedDateBefore(Date date);
 	
 }

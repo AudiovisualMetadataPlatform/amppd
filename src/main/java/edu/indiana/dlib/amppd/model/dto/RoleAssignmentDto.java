@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Class for RoleAssignment projection.
+ * Class for RoleAssignment brief DTO.
  * @author yingfeng
  */
 @Data
@@ -41,7 +41,6 @@ public class RoleAssignmentDto {
     	username = rad.getUsername();
     	roleName = rad.getRoleName();
     	unitName = rad.getUnitName();
-    }
-    
+    }    
     
 }

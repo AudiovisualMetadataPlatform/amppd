@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Class for AmpUser projection, used for role assignment.
+ * Class for AmpUser brief DTO.
  * @author yingfeng
  */
 @Data
