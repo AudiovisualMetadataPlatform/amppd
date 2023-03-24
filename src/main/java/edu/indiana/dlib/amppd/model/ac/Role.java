@@ -45,7 +45,7 @@ import lombok.ToString;
 public class Role extends AmpObject {
 
 	public static final Integer MAX_LEVEL = Integer.MAX_VALUE;
-	public static String AMP_ADMIN_ROLE_NAME = "AMP Admin";
+	public static final String AMP_ADMIN_ROLE_NAME = "AMP Admin";
 		
 	@NotBlank
     @Type(type="text")
