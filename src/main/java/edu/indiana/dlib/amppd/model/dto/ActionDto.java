@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * Class for Action projection, used for role_action configuration.
+ * Class for Action brief DTO.
  * @author yingfeng
  */
 @Data
@@ -27,6 +27,9 @@ public class ActionDto {
     private HttpMethod httpMethod;
     private String urlPattern;    
 
+    /**
+     * Construct ActionDto from Action.
+     */
     public ActionDto(Action action) {
     	id = action.getId();
     	name = action.getName();
@@ -36,6 +39,19 @@ public class ActionDto {
     	targetType = action.getTargetType();
     	httpMethod = action.getHttpMethod();
     	urlPattern = action.getUrlPattern();
+    }
+    
+    /**
+     * Copy ActionDto fields to Action, except ID.
+     */
+    public void copyTo(Action action) {
+    	action.setName(name);
+    	action.setDescription(description);
+    	action.setConfigurable(configurable);
+    	action.setActionType(actionType);
+    	action.setTargetType(targetType);
+    	action.setHttpMethod(httpMethod);
+    	action.setUrlPattern(urlPattern);
     }
     
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Role;
-import edu.indiana.dlib.amppd.model.ac.RoleAction;
+import edu.indiana.dlib.amppd.model.dto.RoleAction;
 
 /**
  * Service for refreshing all access control related tables.

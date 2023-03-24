@@ -19,7 +19,9 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Role;
-import edu.indiana.dlib.amppd.model.ac.RoleAction;
+import edu.indiana.dlib.amppd.model.dto.ActionDto;
+import edu.indiana.dlib.amppd.model.dto.RoleAction;
+import edu.indiana.dlib.amppd.model.dto.RoleDto;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
 import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.service.PermissionRefreshService;
@@ -91,9 +93,9 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		}		
 		
 		// parse the csv into list of Role objects
-		List<Role> rolesCsv;
+		List<RoleDto> rolesCsv;
 		try {
-			rolesCsv = new CsvToBeanBuilder<Role>(breader).withType(Role.class).build().parse();
+			rolesCsv = new CsvToBeanBuilder<RoleDto>(breader).withType(RoleDto.class).build().parse();
 		}
 		catch(Exception e) {
 			throw new RuntimeException("Failed to refresh Role table: invalid CSV format with " + filename, e);
@@ -103,26 +105,27 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		Date refreshStart = new Date();
 		
 		// save each of the Role objects, either creating a new one or updating the existing one
-		for (Role roleCsv : rolesCsv) {			
-			// note: we can't just save all roles directly, as that would create new records in the table;
-			// instead, we need to find each existing record if any based on ID and update it
-			Role existRole = roleRepository.findFirstByNameAndUnitId(roleCsv.getName(), null);			
-			if (existRole != null) {
-				roleCsv.setId(existRole.getId());				
+		for (RoleDto roleCsv : rolesCsv) {			
+			// note: we can't just save all roles directly, as that would create new records in the table; instead,
+			// we need to find each existing record if any based on ID and update it, and create new one only if no existing one
+			Role role = roleRepository.findFirstByNameAndUnitId(roleCsv.getName(), null);			
+			if (role == null) {
+				role = new Role();
 			}
+			roleCsv.copyTo(role);
 			
 			// add the saved role to roles list to return
 			// Note that roleCsv and role could be different, the former may not have ID populated if it's a new role not existing in DB
-			Role role = roleRepository.save(roleCsv);
+			role = roleRepository.save(role);
 			roles.add(role);	
 		}		
 		
-		// delete all obsolete roles, i.e. those not updated during this pass of refresh;
+		// delete all obsolete global roles, i.e. those with null unitId and not updated during this pass of refresh;
 		// based on the assumption that the csv file includes all the roles we want to keep 
-		List<Role> deletedRoles = roleRepository.deleteByModifiedDateBefore(refreshStart);
-		log.info("Deleted " + deletedRoles.size() + " obsolete roles older than current refresh start time at " + refreshStart);			
+		List<Role> deletedRoles = roleRepository.deleteByUnitIdIsNullAndModifiedDateBefore(refreshStart);
+		log.info("Deleted " + deletedRoles.size() + " obsolete global roles older than current refresh start time at " + refreshStart);			
 		
-		log.info("Successfully refreshed " + roles.size() + " roles from " + filename);
+		log.info("Successfully refreshed " + roles.size() + " global roles from " + filename);
 		return roles;
 	}
 	
@@ -146,9 +149,9 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		}		
 		
 		// parse the csv into list of Action objects
-		List<Action> actionsCsv;
+		List<ActionDto> actionsCsv;
 		try {
-			actionsCsv = new CsvToBeanBuilder<Action>(breader).withType(Action.class).build().parse();
+			actionsCsv = new CsvToBeanBuilder<ActionDto>(breader).withType(ActionDto.class).build().parse();
 		}
 		catch(Exception e) {
 			throw new RuntimeException("Failed to refresh Action table: invalid CSV format with " + filename, e);
@@ -158,17 +161,18 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		Date refreshStart = new Date();
 		
 		// save each of the Action objects, either creating a new one or updating the existing one
-		for (Action actionCsv : actionsCsv) {			
-			// note: we can't just save all actions directly, as that would create new records in the table;
-			// instead, we need to find each existing record if any based on ID and update it
-			Action existAction = actionRepository.findFirstByName(actionCsv.getName());			
-			if (existAction != null) {
-				actionCsv.setId(existAction.getId());				
+		for (ActionDto actionCsv : actionsCsv) {			
+			// note: we can't just save all actions directly, as that would create new records in the table; instead, 
+			// we need to find each existing record if any based on ID and update it, and create new one only if no existing one
+			Action action = actionRepository.findFirstByName(actionCsv.getName());			
+			if (action == null) {
+				action = new Action();			
 			}
+			actionCsv.copyTo(action);
 			
 			// add the saved action to actions list to return
 			// Note that actionCsv and action could be different, the former may not have ID populated if it's a new action not existing in DB
-			Action action = actionRepository.save(actionCsv);
+			action = actionRepository.save(action);
 			actions.add(action);
 		}		
 		
