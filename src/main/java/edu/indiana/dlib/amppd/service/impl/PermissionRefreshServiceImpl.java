@@ -114,6 +114,10 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 			}
 			roleCsv.copyTo(role);
 			
+			// it appears that if saving the same object to DB without any field value changed, modifiedDate won't be updated by Spring Data
+			// thus, need to set it explicitly, in order to distinguish obsolete records.
+			role.setModifiedDate(new Date());
+			
 			// add the saved role to roles list to return
 			// Note that roleCsv and role could be different, the former may not have ID populated if it's a new role not existing in DB
 			role = roleRepository.save(role);
@@ -170,6 +174,10 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 			}
 			actionCsv.copyTo(action);
 			
+			// it appears that if saving the same object to DB without any field value changed, modifiedDate won't be updated by Spring Data
+			// thus, need to set it explicitly, in order to distinguish obsolete records.
+			action.setModifiedDate(new Date());
+
 			// add the saved action to actions list to return
 			// Note that actionCsv and action could be different, the former may not have ID populated if it's a new action not existing in DB
 			action = actionRepository.save(action);
