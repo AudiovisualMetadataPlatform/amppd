@@ -76,6 +76,15 @@ def main():
 
 
     # create the configuration file, based on config data...
+    # in the property map, the key is the name of the key in the properties file
+    # the value is a tuple with these fields:
+    #   - a list of keys to walk in the configuration to find the value  (req)
+    #   - the default value (req)
+    #   - the transformation function (opt)  I think only path rel is implemented
+    #   - for path_rel, the list of keys to walk for the relative directory value (opt)
+    # the list of keys is equivalent to dot-notation in javascript using the 
+    # amp configuration as the data structure.  Computed configuration can be
+    # obtained by running ./amp_control.py configure --dump
     with open(amp_root / "data/config/application.properties", "w") as f:
         # simple property map
         property_map = {
