@@ -1,8 +1,8 @@
 package edu.indiana.dlib.amppd.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -36,7 +36,7 @@ public class TestUtil {
 	 * @return the corresponding content type
 	 */
 	public String getContentType(String extension) {
-		if (StringUtils.isEmpty(extension)) {
+		if (StringUtils.isBlank(extension)) {
 			return null;
 		}		
 		String extlow =  extension.toLowerCase();

@@ -16,11 +16,9 @@ import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
-import lombok.extern.slf4j.Slf4j;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@Slf4j
 public class HmgmController {
 		
 	@Autowired HmgmTranscriptService hmgmTranscriptService;

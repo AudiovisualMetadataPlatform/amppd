@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -46,13 +47,13 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<UnitSupplement> supplements;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roles")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Role> roles;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignments")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

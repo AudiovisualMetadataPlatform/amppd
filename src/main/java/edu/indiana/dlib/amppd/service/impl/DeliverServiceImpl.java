@@ -22,13 +22,13 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
+import edu.indiana.dlib.amppd.model.dto.AvalonMediaObject;
+import edu.indiana.dlib.amppd.model.dto.AvalonRelatedItems;
+import edu.indiana.dlib.amppd.model.dto.AvalonRelatedItems.AvalonRelatedItemsFields;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.service.BagService;
 import edu.indiana.dlib.amppd.service.DeliverService;
 import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.web.AvalonMediaObject;
-import edu.indiana.dlib.amppd.web.AvalonRelatedItems;
-import edu.indiana.dlib.amppd.web.AvalonRelatedItems.AvalonRelatedItemsFields;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 

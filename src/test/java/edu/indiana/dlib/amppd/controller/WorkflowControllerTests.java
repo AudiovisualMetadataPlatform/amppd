@@ -1,8 +1,9 @@
 package edu.indiana.dlib.amppd.controller;
 
-import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-import edu.indiana.dlib.amppd.service.WorkflowService;
-import edu.indiana.dlib.amppd.util.TestHelper;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,17 +13,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+
+import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
 public class WorkflowControllerTests {
 		
-	@Autowired
-	private WorkflowService workflowService;   
+//	@Autowired
+//	private WorkflowService workflowService;   
 
 	@Autowired
 	private TestHelper testHelper;   

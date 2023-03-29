@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -27,7 +28,9 @@ import lombok.ToString;
 @Table(indexes = {
 		@Index(columnList = "username", unique = true),
 		@Index(columnList = "email", unique = true),
-		@Index(columnList = "status"),
+		@Index(columnList = "firstName"),
+		@Index(columnList = "lastName"),
+		@Index(columnList = "status"),	
 })
 @Data
 @EqualsAndHashCode(callSuper=true)
@@ -41,7 +44,7 @@ public class AmpUser extends AmpObject {
 	 * Supervisor and Student are for Human MGM use only, and we assume they don't overlap with AMPPD Content User such as Collection Manager.
 	 */	
     public enum Role {ADMIN, MANAGER, SUPERVISOR, STUDENT}
-    public enum State {REQUESTED, ACCEPTED, ACTIVATED, REJECTED}
+    public enum Status {REQUESTED, ACCEPTED, ACTIVATED, REJECTED}
 	
 	@NotNull
 	private String username;
@@ -60,9 +63,9 @@ public class AmpUser extends AmpObject {
 		
 	@NotNull
 	@Enumerated(EnumType.STRING)
-	private State status = State.REQUESTED;
+	private Status status = Status.REQUESTED;
 	
-	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
@@ -71,5 +74,12 @@ public class AmpUser extends AmpObject {
 	// TODO replace with AMP Role
 	private Role role;
 		
+	/**
+	 * Check if the user is active.
+	 * @return true if the user status is ACTIVATED, false otherwise.
+	 */
+	public boolean isActive() {
+		return Status.ACTIVATED.equals(status);		
+	}
 
 }

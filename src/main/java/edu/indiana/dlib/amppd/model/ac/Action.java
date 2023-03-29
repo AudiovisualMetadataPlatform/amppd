@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
@@ -34,6 +35,9 @@ import lombok.ToString;
 @EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
 		@Index(columnList = "name", unique = true),
+		@Index(columnList = "configurable"),
+		@Index(columnList = "actionType"),
+		@Index(columnList = "targetType"),
 		@Index(columnList = "actionType, targetType", unique = true),
 		@Index(columnList = "httpMethod, urlPattern", unique = true),
 })
@@ -42,15 +46,12 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class Action extends AmpObject {
 
-	public enum ActionType { Create, Read, List, Execute, Update, Move, Activate, Restrict, Delete }
+	public enum ActionType {Create, Read, Export, Update, Activate, Restrict, Move, Delete}
 	
 	public enum TargetType {  
-		Unit, Collection, Item, Primaryfile, 
-		Supplement, UnitSupplement, CollectionSupplement, ItemSupplement, PrimaryfileSupplement, 
-		Batch, Job, Bag,
-		Workflow, WorkflowResult, 
-		Evaluation, EvaluationResult,
-		AmpUser, Role, RoleAction, RoleAssignment}
+		Unit, Collection, Item, Primaryfile, Primaryfile_Media, Supplement, 
+		Batch, Bag, Workflow, WorkflowResult, WorkflowResult_Restricted, MgmEvaluationTest,
+		AmpUser, Role, Role_Unit, RoleAssignment, RoleAssignment_CollectionManager, RoleAssignment_UnitManager}
 	
 	@NotBlank
 	@Unique
@@ -60,6 +61,10 @@ public class Action extends AmpObject {
     @Type(type="text")
     private String description;
 
+    // whether role permissions for the action is configurable
+    @NotBlank
+    private Boolean configurable;    
+	
     @NotBlank
 	@Enumerated(EnumType.STRING)
     private ActionType actionType;
@@ -75,9 +80,9 @@ public class Action extends AmpObject {
     @NotBlank
     @Type(type="text")
     private String urlPattern;    
-	
+    
     // permissions: the roles that can perform this action
-    @ManyToMany(mappedBy = "actions")
+    @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY)
 	@JsonBackReference(value="roles")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

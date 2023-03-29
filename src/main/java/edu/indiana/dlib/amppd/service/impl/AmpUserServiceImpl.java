@@ -84,7 +84,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			  response.addError("Username and password do not match");
 		  }
 		  String encryptedPswd = MD5Encryption.getMd5(pswd);
-		  String userFound = ampUserRepository.findByApprovedUser(username, encryptedPswd, AmpUser.State.ACTIVATED);  
+		  String userFound = ampUserRepository.findByApprovedUser(username, encryptedPswd, AmpUser.Status.ACTIVATED);  
 		  if (userFound != null) {
 			  response.setSuccess(true);
 			  log.info("User " + username + " validated Successfully");
@@ -161,7 +161,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		log.info("Executing emailToken() for user:"+emailid);
 		try {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
-			if(user.getStatus() == AmpUser.State.ACTIVATED){
+			if(user.getStatus() == AmpUser.Status.ACTIVATED){
 				log.info("Activated user account found with entered email id");
 				mailSender.send(constructTokenEmail(uiUrl, user, "reset password"));
 				log.info("Token email sent successfully");
@@ -220,12 +220,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		if(!response.hasErrors()) {
 			try {
 				if(action.contentEquals("approve")){
-					user.setStatus(AmpUser.State.ACCEPTED);
+					user.setStatus(AmpUser.Status.ACCEPTED);
 					mailSender.send(constructTokenEmail(uiUrl, user, "account approval"));
 				}
 				else if(action.contentEquals("reject")){
 					mailSender.send(constructEmailAttributes(uiUrl, user, "account rejection"));
-					user.setStatus(AmpUser.State.REJECTED);
+					user.setStatus(AmpUser.Status.REJECTED);
 				}
 				
 			}
@@ -253,7 +253,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		    }
 		else {
 			AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
-			if(user!= null && user.getStatus() == AmpUser.State.ACTIVATED){
+			if(user!= null && user.getStatus() == AmpUser.Status.ACTIVATED){
 				response.setEmailid(user.getEmail());
 				response.setSuccess(true);
 				log.info("Email fetched successfully");
@@ -318,10 +318,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		    	log.info("Token expiration validated.");
 				AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
 				if(user!= null) {
-					if(user.getStatus() == AmpUser.State.ACCEPTED){
+					if(user.getStatus() == AmpUser.Status.ACCEPTED){
 						log.info("Corresponding amp user was found.");
 						try {
-							ampUserRepository.updateStatus(user.getId(), AmpUser.State.ACTIVATED);
+							ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
 							response.setSuccess(true);
 							log.info("User activated successfully");
 						}
@@ -331,7 +331,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 							response.addError("System encountered error");
 						}
 					}
-					else if(user.getStatus() == AmpUser.State.ACTIVATED) {
+					else if(user.getStatus() == AmpUser.Status.ACTIVATED) {
 						log.error("User account already active");
 						response.setSuccess(false);
 						response.addError("User account already active");
@@ -468,7 +468,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		try {
 			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
 			if(user!=null)
-				ampUserRepository.updateStatus(user.getId(), AmpUser.State.ACTIVATED);
+				ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
 		}
 		catch(Exception ex) {
 			  System.out.println(ex.toString());
@@ -541,8 +541,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		
 		// for new admin or existing admin account which somehow didn't get activated, update the status and save to repository
-		if (admin.getStatus() != AmpUser.State.ACTIVATED) {
-			admin.setStatus(AmpUser.State.ACTIVATED);
+		if (admin.getStatus() != AmpUser.Status.ACTIVATED) {
+			admin.setStatus(AmpUser.Status.ACTIVATED);
 			ampUserRepository.save(admin);
 			log.info("Activated the new or existing AMP admin account to be ready for use.");
 		}

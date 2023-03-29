@@ -111,6 +111,7 @@ public class MgmScoringTool extends MgmMeta {
 	@NotBlank
 	private String groundtruthTemplate;
 
+	private String useCase;
 	private String workflowResultOutput;
 
 	/**

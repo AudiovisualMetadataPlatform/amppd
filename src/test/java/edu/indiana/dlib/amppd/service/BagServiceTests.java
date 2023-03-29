@@ -22,7 +22,6 @@ import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
 import edu.indiana.dlib.amppd.model.Unit;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @Ignore
@@ -39,7 +38,7 @@ public class BagServiceTests {
 	private Primaryfile primaryfile;
 	private Workflow workflow;
 	private Invocation invocation;
-	private List<WorkflowResult> results;
+//	private List<WorkflowResult> results;
 
 	/**
 	 * Initialize Dashboard.
@@ -50,7 +49,7 @@ public class BagServiceTests {
 		primaryfile = testHelper.ensureTestAudio();
 		workflow = testHelper.ensureTestWorkflow();
 		invocation = testHelper.ensureTestJob(true);
-		results = testHelper.ensureTestWorkflowResults(true);		
+//		results = testHelper.ensureTestWorkflowResults(true);		
 	}
 	
 	@Test
