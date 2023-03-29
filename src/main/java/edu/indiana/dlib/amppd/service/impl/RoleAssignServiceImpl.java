@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Role;
@@ -50,7 +51,10 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 	@Autowired
 	private AmpUserService ampUserService;
 
-	
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.RoleAssignService.getAssignableRoleLevel(Long)
 	 */
@@ -62,8 +66,9 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 		// find the highest role (i.e. with smallest role level) the user has
 		Integer level = roleAssignmentRepository.findMinRoleLevelByUserIdAndUnitId(user.getId(), unitId);
 
-		// if current user doesn't have any role, set the level to max, so he can't assign any role
-		if (level == null) {
+		// if current user doesn't have any role, or if his role level is higher than the role assignment level threshold, set his level to max, so he can't assign any role
+		Integer threshold = amppdPropertyConfig.getRoleAssignmentMaxLevel();
+		if (level == null || level > threshold) {
 			level = Role.MAX_LEVEL;
 		}
 

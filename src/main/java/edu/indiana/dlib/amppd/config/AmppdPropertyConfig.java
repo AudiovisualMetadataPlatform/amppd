@@ -51,5 +51,6 @@ public class AmppdPropertyConfig {
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;
     @NotNull private List<String> unitRoles;
+    @NotNull private Integer roleAssignmentMaxLevel;
     
 }
