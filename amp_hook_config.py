@@ -51,6 +51,7 @@ def main():
 
     # inject the amp.data_root value into the config since it is now passed via AMP_DATA_ROOT
     config['amp']['data_root'] = os.environ['AMP_DATA_ROOT']
+    config['amp']['amp_root'] = amp_root
 
     """Create the configuration file for the AMP REST service"""
     # make sure the configuration file is specified in the tomcat startup env stuff:
@@ -111,6 +112,7 @@ def main():
             'amppd.dropboxRoot': (['rest', 'dropbox_path'], 'dropbox', 'path_rel', ['amp', 'data_root']),
             'logging.path': (['rest', 'logging_path'], 'logs', 'path_rel', ['amp', 'data_root']),
             'amppd.mediaprobeDir': (['rest', 'mediaprobe_dir'], 'MediaProbe', 'path_rel', ['amp', 'data_root']),
+            'amppd.mgmEvaluationScriptsRoot': (['rest', 'mgm_evaluation_scripts_root'], 'mgm_scoring_tools', 'path_rel', ['amp', 'amp_root']),
             # Avalon integration
             "avalon.url": (['rest', 'avalon_url'], 'https://avalon.example.edu'),
             "avalon.token": (['rest', 'avalon_token'], 'dummytoken'),
