@@ -21,8 +21,8 @@ rest:
     properties:
         # tomcat configuration
         server.servlet.context-path: /rest
-        server.tomcat.relaxed-path-chars = [,] 
-        server.tomcat.relaxed-query-chars = [,]
+        server.tomcat.relaxed-path-chars: [,] 
+        server.tomcat.relaxed-query-chars: [,]
 
         # Spring datasource
         spring.datasource.driver-class-name: org.postgresql.Driver
@@ -79,8 +79,8 @@ rest:
         amppd.refreshResultsTableMinutes: 300
         amppd.refreshResultsStatusCron: 0 0/10 6-18 ? * MON-FRI
         amppd.refreshResultsTableCron: 0 0 1 ? * MON-FRI
-        amppd.refreshPermissionTables = true
-        amppd.refreshMgmTables = true
+        amppd.refreshPermissionTables: true
+        amppd.refreshMgmTables: true
 
         # environment / web 
         amppd.environment: dev
