@@ -2,16 +2,21 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.*;
 import edu.indiana.dlib.amppd.repository.*;
+import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.web.*;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-
 @Service
 @Slf4j
 public class MgmEvaluationServiceImpl implements MgmEvaluationService {
@@ -29,6 +34,11 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     @Autowired
     private MgmScoringParameterRepository paramsRepo;
 
+    @Autowired
+    private MediaService mediaService;
+
+    @Autowired
+    AmppdPropertyConfig config;
 
     @Override
     public MgmEvaluationTestResponse getMgmEvaluationTests(MgmEvaluationSearchQuery query) {
@@ -38,6 +48,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     }
 
     private List<String> validate(ArrayList<MgmEvaluationFilesObj> files, ArrayList<MgmEvaluationParameterObj> inputParams, MgmScoringTool mst){
+        log.info("Validating required files and params");
         ArrayList<String> errors = new ArrayList<>();
         if (files.size() <= 0) {
             errors.add("No Primary and Groundtruth files selected.");
@@ -49,13 +60,14 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 
 
     private List<String> validateFiles(ArrayList<MgmEvaluationFilesObj> files,MgmScoringTool mst) {
-        log.info("Validating Groundtruth files format");
         ArrayList<String> errors = new ArrayList<>();
         if (files.size() > 0) {
             for (MgmEvaluationFilesObj file : files) {
+
                 if(file.getGroundtruthFileId() == null) {
                     errors.add("Groundtruth file is required.");
                 } else {
+                    log.info("Validating Groundtruth files format");
                     Optional<PrimaryfileSupplement> groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId());
                     if (groundtruthFile == null) {
                         errors.add("Groundtruth file does not exist.");
@@ -66,13 +78,24 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 if(file.getWorkflowResultId() == null) {
                     errors.add("Workflow is required for evaluation test.");
                 }else {
+                    log.info("Validating workflow existed in request.");
                     Optional<WorkflowResult> wfr = wfRepo.findById(file.getWorkflowResultId());
                     if (wfr == null) {
                         errors.add("Workflow does not exist.");
                     } else if (wfr != null) {
+                        log.info("Validating primary file in WF");
                         Primaryfile primaryFile = pfRepository.findById(wfr.get().getPrimaryfileId()).orElse(null);
                         if (primaryFile == null) {
                             errors.add("Primary File is required for evaluation test.");
+                        } else{
+                            log.info("Rimsha test ----> " + wfr.get().getStatus());
+                            if(!wfr.get().getStatus().toString().contains("COMPLETE")) {
+                                errors.add("Workflow Result status should be complete. " + wfr.get().getStatus()  +" status for primary file: " + primaryFile.getName());
+                            }
+                            String url = mediaService.getWorkflowResultOutputSymlinkUrl(wfr.get().getId());
+                            if(url == null){
+                                errors.add("No mgm output file existed.");
+                            }
                         }
                     }
 
@@ -83,7 +106,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     }
 
     private List<String> validateRequiredParameters(ArrayList<MgmEvaluationParameterObj> inputParams, MgmScoringTool mst) {
-        log.info("Validating if all required parameters");
+        log.info("Validating all required parameters filled");
         ArrayList<String> errors = new ArrayList<>();
         Set<MgmScoringParameter> mstParams = mst.getParameters();
         for (MgmScoringParameter p : mstParams) {
@@ -100,22 +123,43 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     @Override
     public MgmEvaluationValidationResponse process(MgmScoringTool mst, MgmEvaluationRequest request, AmpUser user) {
         MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
+        log.info("Validating request");
         List<String> errors = validate(request.getFiles(), request.getParameters(), mst);
         List<MgmEvaluationTest> mgmEvaluationTests = new ArrayList<>();
         response.addErrors(errors);
         if(!response.hasErrors()){
             for (MgmEvaluationFilesObj file : request.getFiles()) {
+                PrimaryfileSupplement groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId()).orElse(null);
+                WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
+                log.info("Processing file: "+ groundtruthFile.getName() + " with WF " + wfr.getWorkflowName());
                 MgmEvaluationTest mgmEvalTest = new MgmEvaluationTest();
                 mgmEvalTest.setCategory(mst.getCategory());
                 mgmEvalTest.setMst(mst);
                 mgmEvalTest.setSubmitter(user.getUsername());
                 ArrayList<MgmEvaluationParameterObj> params = request.getParameters();
+                log.info("Preparing command");
+                List<String> cmd = new ArrayList<>();
+                cmd.add("amp_python.sif");
+                cmd.add(config.getMgmEvaluationScriptsRoot() + File.separator +  mst.getScriptPath());
+                cmd.add("-g");
+                String gtFilePath = config.getFileStorageRoot() + File.separator + groundtruthFile.getPathname();
+                cmd.add(gtFilePath);
+                cmd.add("-m");
+                cmd.add(wfr.getOutputPath());
+                cmd.add("-o");
+                cmd.add(config.getDropboxRoot() + File.separator + "mgm_scoring_tools");
+                if (mst.getUseCase() != null && mst.getUseCase() != "") {
+                    cmd.add("--use-case");
+                    cmd.add(mst.getUseCase());
+                }
                 if(!params.isEmpty()) {
                     for(MgmEvaluationParameterObj pp: params) {
                         MgmScoringParameter obj = paramsRepo.findById(pp.getId()).orElse(null);
                         if (obj != null) {
                             pp.setShortName(obj.getShortName());
                             pp.setName(obj.getName());
+                            cmd.add("--" + obj.getShortName());
+                            cmd.add(String.join(",", pp.getValue()));
                         }
                     }
                     ObjectMapper mapper = new ObjectMapper();
@@ -126,25 +170,69 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         throw new RuntimeException(e);
                     }
                 }
-                WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
                 mgmEvalTest.setWorkflowResult(wfr);
                 mgmEvalTest.setDateSubmitted(new Date());
                 mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNNING);
-                PrimaryfileSupplement groundtruthFile = supplementRepository.findById(file.getGroundtruthFileId()).orElse(null);
                 mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
                 Primaryfile primaryFile = pfRepository.findById(wfr.getPrimaryfileId()).orElse(null);
                 mgmEvalTest.setPrimaryFile(primaryFile);
+                log.info("Command: " + cmd.toString());
+                String result = runCMD((String[]) cmd.toArray(new String[0]));
+                try {
+                    if(result.startsWith("success:")) {
+                        log.info("command run successfully.");
+                        String output = result.split("success:")[1];
+                        JSONParser parser = new JSONParser();
+                        Object obj = parser.parse(new FileReader(output));
+                        JSONObject jsonObject = (JSONObject)obj;
+                        mgmEvalTest.setScores(jsonObject.toJSONString());
+                        mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.SUCCESS);
+                        mgmEvalTest.setScorePath(output);
+                    } else {
+                        mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNTIME_ERROR);
+                        mgmEvalTest.setMstErrorMsg(result);
+                        errors.add("RUNTIME ERROR: Failed to process.");
+                        log.info("File "+ groundtruthFile.getName() + " with WF " + wfr.getWorkflowName() + " failed with error msg: "+ result);
+                    }
+                } catch(IOException e){
+                    log.error("Exception in reading output "+ e.toString());
+                } catch (ParseException e) {
+                    log.error("Exception in reading output file "+ e.toString());
+                }
                 mgmEvaluationTests.add(mgmEvalTest);
             }
+            mgmEvalRepo.saveAll(mgmEvaluationTests);
+            response.setMgmEvaluationTestCount(mgmEvaluationTests.size());
         }
-
         if(response.hasErrors()){
             response.setSuccess(false);
         } else {
-            mgmEvalRepo.saveAll(mgmEvaluationTests);
-            response.setMgmEvaluationTestCount(mgmEvaluationTests.size());
             response.setSuccess(true);
         }
         return response;
     }
+
+    private String runCMD(String[] cmd) {
+        try {
+            Process ps = Runtime.getRuntime().exec(cmd);
+            InputStream stdout = ps.getInputStream();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stdout, StandardCharsets.UTF_8));
+            String result = "";
+            String line;
+            try{
+                log.info("Checking script output");
+                while((line = reader.readLine()) != null){
+                    result += line;
+                }
+                return result;
+            } catch(IOException e){
+                log.error("Exception in reading output "+ e.toString());
+            }
+        } catch (IOException e) {
+            log.error("Exception in running cmd "+ e.toString());
+            log.error(cmd.toString());
+        }
+        return null;
+    }
+
 }

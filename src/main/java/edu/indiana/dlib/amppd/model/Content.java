@@ -2,7 +2,7 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.jdo.annotations.Index;
 import javax.persistence.MappedSuperclass;
-import edu.indiana.dlib.amppd.validator.UniqueName;
+
 import org.hibernate.annotations.Type;
 
 import edu.indiana.dlib.amppd.validator.EnumConfig;

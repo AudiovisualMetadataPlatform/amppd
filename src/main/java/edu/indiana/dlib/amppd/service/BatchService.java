@@ -1,7 +1,5 @@
 package edu.indiana.dlib.amppd.service;
 
-import java.util.List;
-
 import edu.indiana.dlib.amppd.web.BatchValidationResponse;
 /**
  * Handles the processing of a Batch once it has been validated.  Processing includes creating all database

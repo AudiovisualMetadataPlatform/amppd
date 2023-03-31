@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.dto.AvalonRelatedItems;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.service.DeliverService;
 import edu.indiana.dlib.amppd.service.impl.DeliverServiceImpl;
-import edu.indiana.dlib.amppd.web.AvalonRelatedItems;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,13 +1,15 @@
 package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.http.HttpMethod;
 
-import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.model.projection.UnitBrief;
+import edu.indiana.dlib.amppd.web.UnitActions;
 
 /**
  * Service for access control permission checking related operations.
@@ -16,10 +18,31 @@ import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 public interface PermissionService {
 
 	/**
+	 * Check if the current user is AMP admin.
+	 * @return true if the user is admin; false otherwise
+	 */
+	public boolean isAdmin();
+
+	/**
 	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments.
 	 * @return the list of units the current user has access to
 	 */
-	public List<Unit> getAccessibleUnits();
+	public Set<UnitBrief> getAccessibleUnits();
+	
+	/**
+	 * Get the actions the current user can perform, given the list of actionTypes, targetTypes and units;
+	 * if actionTypes not provided, get for all actionTypes;
+	 * if targetTypes not provided, get for all targetTypes;
+	 * if units not provided, get for all units.
+	 * Note: Actions for global role assignments are excluded from the returned list, as actions for such roles are cross units; 
+	 * Currently, the only global role is AMP admin, who can perform all actions across all units. 
+	 * which can perform all actions in all units.
+	 * @param actionTypes types of the queried actions
+	 * @param targetTypes targets of the queried actions
+	 * @param unitIds IDs of the units the action target belongs to
+	 * @return list of permitted actions per unit
+	 */
+	public List<UnitActions> getPermittedActions(List<ActionType> actionTypes, List<TargetType> targetTypes, List<Long> unitIds);
 	
 	/**
 	 * Check if the current user has permission to perform the given action on the given target in the given unit.

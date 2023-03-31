@@ -50,7 +50,6 @@ import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.service.impl.GalaxyDataServiceImpl;
-import edu.indiana.dlib.amppd.web.CreateJobResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -541,6 +540,7 @@ public class TestHelper {
 			supplement = primaryfileSupplementRepository.save((PrimaryfileSupplement)supplement);
 			supplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(supplement, file);
 			break;
+		default:
 		}			
 
 		// return the persisted supplement with ID populated 
@@ -639,6 +639,7 @@ public class TestHelper {
 			supplement.setDescription(type + " Supplement for tests");						
 			supplement = unitSupplementRepository.save((UnitSupplement)supplement);
 			supplement = (UnitSupplement)fileStorageService.uploadAsset(supplement, file);
+			break;
 		case COLLECTION:
 	    	supplement = new CollectionSupplement();
 	    	((CollectionSupplement)supplement).setCollection(collection);
@@ -646,6 +647,7 @@ public class TestHelper {
 			supplement.setDescription(type + " Supplement for tests");						
 			supplement = collectionSupplementRepository.save((CollectionSupplement)supplement);
 			supplement = (CollectionSupplement)fileStorageService.uploadAsset(supplement, file);
+			break;
 		case ITEM:
 	    	supplement = new ItemSupplement();
 	    	((ItemSupplement)supplement).setItem(item);
@@ -653,6 +655,7 @@ public class TestHelper {
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = itemSupplementRepository.save((ItemSupplement)supplement);
 			supplement = (ItemSupplement)fileStorageService.uploadAsset(supplement, file);
+			break;
 		case PRIMARYFILE:
 	    	supplement = new PrimaryfileSupplement();
 	    	((PrimaryfileSupplement)supplement).setPrimaryfile(primaryfile);
@@ -660,6 +663,8 @@ public class TestHelper {
 			supplement.setDescription(type + " Supplement for tests");			
 			supplement = primaryfileSupplementRepository.save((PrimaryfileSupplement)supplement);
 			supplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(supplement, file);
+			break;
+		default:
 		}			
 
 		// return the persisted supplement with ID populated 
@@ -712,7 +717,7 @@ public class TestHelper {
 		}
 		else {
 			// otherwise run the job once and return the WorkflowOutputs
-			CreateJobResponse result = jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
+			jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
 			invocations = jobService.listJobs(workflowDetails.getId(), primaryfile.getId());
 			return invocations.get(0);
 		}
@@ -801,7 +806,7 @@ public class TestHelper {
 			ampUser.setPassword(TEST_USER);
 			ampUser.setFirstName("AMP");
 			ampUser.setLastName("USER");
-			ampUser.setStatus(AmpUser.State.ACCEPTED);
+			ampUser.setStatus(AmpUser.Status.ACCEPTED);
 			ampUserService.registerAmpUser(ampUser);
 		}
 		ampUser.setPassword(TEST_USER);

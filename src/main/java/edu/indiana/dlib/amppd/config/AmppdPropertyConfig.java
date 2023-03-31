@@ -24,6 +24,7 @@ public class AmppdPropertyConfig {
     @NotNull private String environment;
     @NotNull private String fileStorageRoot;
     @NotNull private String dropboxRoot;
+    @NotNull private String mgmEvaluationScriptsRoot;
     @NotNull private String pythonPath;
     @NotNull private String mediaprobeDir;
     @NotNull private String encryptionSecret;  
@@ -35,16 +36,21 @@ public class AmppdPropertyConfig {
     @NotNull private Boolean auth;
     @NotNull private String jwtSecret;
 //    @NotNull private String workflowEditSecret;
-    @NotNull private int jwtExpireMinutes;
-    @NotNull private int workflowEditMinutes;
-    @NotNull private int resetPasswordMinutes;
-    @NotNull private int activateAccountDays;
+    @NotNull private Integer jwtExpireMinutes;
+    @NotNull private Integer workflowEditMinutes;
+    @NotNull private Integer resetPasswordMinutes;
+    @NotNull private Integer activateAccountDays;
 //    @NotNull private int refreshResultsStatusMinutes;
-    @NotNull private int refreshResultsTableMinutes;
+    @NotNull private Integer refreshResultsTableMinutes;
     @NotNull private String refreshResultsStatusCron;
     @NotNull private String refreshResultsTableCron;
+    @NotNull private Boolean refreshPermissionTables;
+    @NotNull private Boolean refreshMgmTables;    
     @NotNull private List<String> supplementCategories;
+    @NotNull private List<String> groundtruthSubcategories;
     @NotNull private List<String> externalSources;
     @NotNull private List<String> taskManagers;
+    @NotNull private List<String> unitRoles;
+    @NotNull private Integer roleAssignmentMaxLevel;
     
 }

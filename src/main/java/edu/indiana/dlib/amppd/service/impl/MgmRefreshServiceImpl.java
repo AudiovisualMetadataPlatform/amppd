@@ -1,9 +1,26 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.github.jmchilton.blend4j.galaxy.ToolsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.ToolSection;
 import com.opencsv.bean.CsvToBeanBuilder;
+
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.MgmCategory;
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
@@ -16,19 +33,6 @@ import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.MgmRefreshService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Implementation of MgmRefreshService
@@ -44,6 +48,9 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 	public static final String MGM_SCORING_TOOL = "mgm_scoring_tool";
 	public static final String MGM_SCORING_PARAMETER = "mgm_scoring_parameter";
 	 
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;
+	
 	@Autowired
 	private MgmCategoryRepository mgmCategoryRepository;
 	
@@ -77,10 +84,13 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 	@Override
     @Transactional
 	public void refreshMgmTables() {
+		if (!amppdPropertyConfig.getRefreshMgmTables()) return;
+		
 		refreshMgmCategory();
 		refreshMgmTool();
 		List<MgmScoringTool> msts = refreshMgmScoringTool();	
 		refreshMgmScoringParameter();	
+		
 		// need to populate dependency parameters for MSTs only after all MGM scoring parameters are loaded
 		populateMgmScoringToolDependencyParameters(msts);
 	}

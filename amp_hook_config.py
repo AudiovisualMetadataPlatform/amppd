@@ -51,6 +51,7 @@ def main():
 
     # inject the amp.data_root value into the config since it is now passed via AMP_DATA_ROOT
     config['amp']['data_root'] = os.environ['AMP_DATA_ROOT']
+    config['amp']['amp_root'] = amp_root
 
     """Create the configuration file for the AMP REST service"""
     # make sure the configuration file is specified in the tomcat startup env stuff:
@@ -76,6 +77,15 @@ def main():
 
 
     # create the configuration file, based on config data...
+    # in the property map, the key is the name of the key in the properties file
+    # the value is a tuple with these fields:
+    #   - a list of keys to walk in the configuration to find the value  (req)
+    #   - the default value (req)
+    #   - the transformation function (opt)  I think only path rel is implemented
+    #   - for path_rel, the list of keys to walk for the relative directory value (opt)
+    # the list of keys is equivalent to dot-notation in javascript using the 
+    # amp configuration as the data structure.  Computed configuration can be
+    # obtained by running ./amp_control.py configure --dump
     with open(amp_root / "data/config/application.properties", "w") as f:
         # simple property map
         property_map = {
@@ -102,6 +112,7 @@ def main():
             'amppd.dropboxRoot': (['rest', 'dropbox_path'], 'dropbox', 'path_rel', ['amp', 'data_root']),
             'logging.path': (['rest', 'logging_path'], 'logs', 'path_rel', ['amp', 'data_root']),
             'amppd.mediaprobeDir': (['rest', 'mediaprobe_dir'], 'MediaProbe', 'path_rel', ['amp', 'data_root']),
+            'amppd.mgmEvaluationScriptsRoot': (['rest', 'mgm_evaluation_scripts_root'], 'mgm_scoring_tools', 'path_rel', ['amp', 'amp_root']),
             # Avalon integration
             "avalon.url": (['rest', 'avalon_url'], 'https://avalon.example.edu'),
             "avalon.token": (['rest', 'avalon_token'], 'dummytoken'),

@@ -19,13 +19,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.util.TestHelper;
-import lombok.extern.slf4j.Slf4j;
 
 @Ignore
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
-@Slf4j
 public class DropboxControllerTests {
 
     @Autowired
