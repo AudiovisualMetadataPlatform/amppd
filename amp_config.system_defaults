@@ -21,8 +21,6 @@ rest:
     properties:
         # tomcat configuration
         server.servlet.context-path: /rest
-        server.tomcat.relaxed-path-chars: [,] 
-        server.tomcat.relaxed-query-chars: [,]
 
         # Spring datasource
         spring.datasource.driver-class-name: org.postgresql.Driver
