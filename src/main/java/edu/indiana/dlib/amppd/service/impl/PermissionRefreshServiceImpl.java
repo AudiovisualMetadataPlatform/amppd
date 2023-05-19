@@ -27,6 +27,7 @@ import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.service.PermissionRefreshService;
 import lombok.extern.slf4j.Slf4j;
 
+
 /**
  * Implementation of MgmRefreshService
  * @author yingfeng

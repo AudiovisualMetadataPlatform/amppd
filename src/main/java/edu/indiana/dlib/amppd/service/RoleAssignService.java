@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
+import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
 import edu.indiana.dlib.amppd.model.projection.RoleBrief;
 import edu.indiana.dlib.amppd.web.RoleAssignTable;
 import edu.indiana.dlib.amppd.web.RoleAssignTuple;
@@ -14,6 +16,11 @@ import edu.indiana.dlib.amppd.web.RoleAssignUpdate;
  * @author yingfeng
  */
 public interface RoleAssignService {
+	
+	/**
+	 * Assign AMP Admin role to the given user. 
+	 */
+	public RoleAssignment assignAdminRole(AmpUser user);
 	
 	/**
 	 * Get the role assignment level threshold (excluding) for the current user in the given unit, based on the rules that

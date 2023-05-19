@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Role;
@@ -55,6 +56,39 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 	private AmppdPropertyConfig amppdPropertyConfig;
 
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.RoleAssignService.assignAdminRole(AmpUser)
+	 */
+	@Override
+	public RoleAssignment assignAdminRole(AmpUser user) {	
+		// verify user
+		String roleName = Role.AMP_ADMIN_ROLE_NAME;
+		if (user == null) {
+			throw new StorageException("Failed to assign user with role " + roleName + ": user is null.");			
+		}		
+		String username = user.getUsername();
+		
+		// find AMP Admin role
+		Role role = roleRepository.findFirstByNameAndUnitIdIsNull(roleName);
+		if (role == null) {
+			throw new StorageException("Failed to assign user " + username + " with role " + roleName + ": role not found.");
+		}
+
+		// if the user is already assigned with AMP Admin role, no action needed
+		RoleAssignment ra = roleAssignmentRepository.findFirstByUserIdAndRoleIdAndUnitIdNull(user.getId(), role.getId());
+		if (ra != null) {
+			log.info("User " + username + " is already assigned with role " + roleName);
+			return ra;
+		}
+		
+		// otherwise add new role assignment
+		ra = new RoleAssignment(user, role, null);
+		ra = roleAssignmentRepository.save(ra);
+		
+		log.info("Successfully asssigned user " + username + " with role " + roleName + " at RoleAssignment " + ra.getId());
+		return ra;
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.RoleAssignService.getAssignableRoleLevel(Long)
 	 */
