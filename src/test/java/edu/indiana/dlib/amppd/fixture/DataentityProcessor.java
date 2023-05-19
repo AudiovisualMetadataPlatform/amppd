@@ -39,7 +39,7 @@ public class DataentityProcessor implements Processor {
 			((Item)dataentity).setCollection(collection);
 		}
 		else if (dataentity instanceof Primaryfile) {
-			Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Te	st Item");
+			Item item = testHelper.ensureItem("Test Unit", "Test Collection", "Test Item");
 			((Primaryfile)dataentity).setItem(item);
 		}
 		else if (dataentity instanceof UnitSupplement) {
