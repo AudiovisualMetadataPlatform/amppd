@@ -75,13 +75,14 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 		}
 
 		// if the user is already assigned with AMP Admin role, no action needed
-		boolean assigned = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), roleName);
-		if (assigned) {
+		RoleAssignment ra = roleAssignmentRepository.findFirstByUserIdAndRoleIdAndUnitIdNull(user.getId(), role.getId());
+		if (ra != null) {
 			log.info("User " + username + " is already assigned with role " + roleName);
+			return ra;
 		}
 		
 		// otherwise add new role assignment
-		RoleAssignment ra = new RoleAssignment(user, role, null);
+		ra = new RoleAssignment(user, role, null);
 		ra = roleAssignmentRepository.save(ra);
 		
 		log.info("Successfully asssigned user " + username + " with role " + roleName + " at RoleAssignment " + ra.getId());
