@@ -47,10 +47,12 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("id", random(Long.class));
 			add("name", regex("Test Unit - [0-9]{10}"));
 			add("description", "Description for ${name}");	
+			add("taskManager", regex(TASK_MANAGER));
 		}});
 
 		Fixture.of(Unit.class).addTemplate("invalid", new Rule() {{ 
 			add("name", "");
+			add("taskManager", "FakeTaskManager");
 		}});
 
 		Fixture.of(Collection.class).addTemplate("valid", new Rule() {{
