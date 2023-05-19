@@ -5,9 +5,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.MgmRefreshService;
 import edu.indiana.dlib.amppd.service.PermissionRefreshService;
-import edu.indiana.dlib.amppd.service.impl.DataentityServiceImpl;
 
 @Component
 public class AmppdStartupRunner  implements CommandLineRunner {
@@ -19,10 +19,10 @@ public class AmppdStartupRunner  implements CommandLineRunner {
 	private MgmRefreshService mgmRefreshService;
 	
 	@Autowired
-	private AmpUserService ampUserService;
+	private DataentityService dataentityService;
 
 	@Autowired
-	private DataentityServiceImpl dataentityServiceImpl;
+	private AmpUserService ampUserService;
 
 	
     @Override
@@ -34,7 +34,7 @@ public class AmppdStartupRunner  implements CommandLineRunner {
 		mgmRefreshService.refreshMgmTables();
 
 		// initialize/refresh Unit table
-		dataentityServiceImpl.refreshUnit();
+		dataentityService.refreshUnit();
 
 		// bootstrap AMP admin user
     	ampUserService.bootstrapAdmin();		
