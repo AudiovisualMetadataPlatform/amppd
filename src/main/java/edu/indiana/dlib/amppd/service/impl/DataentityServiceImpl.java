@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.service.impl;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +12,10 @@ import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
+import com.opencsv.bean.CsvToBeanBuilder;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -46,6 +51,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class DataentityServiceImpl implements DataentityService {
+	
+	public static final String DIR = "db";
+	public static final String UNIT = "unit";
 	
 	@Autowired
 	private Validator validator;
@@ -527,27 +535,27 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfile(Primaryfile, String, String, String)
 	 */
 	@Override
-	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format) {
+	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String unit, String format) {
 		List<Supplement> supplements = new ArrayList<Supplement>();
 		
-		// primaryfile must exist, category and format must not be blank
-		if (primaryfile == null || StringUtils.isBlank(category) || StringUtils.isBlank(format)) {
+		// primaryfile must exist, unit and format must not be blank
+		if (primaryfile == null || StringUtils.isBlank(unit) || StringUtils.isBlank(format)) {
 			return supplements;
 		}
 					
-		// find all supplements associated with the primaryfile at all parent levels by its category/format and optionally name,
+		// find all supplements associated with the primaryfile at all parent levels by its unit/format and optionally name,
 		// along with associated parent's ID, assuming the original filenames have extensions that can be matched against format 
 		if (StringUtils.isBlank(name)) {
-			supplements.addAll(unitSupplementRepository.findByUnitIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), category, format));
-			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), category, format));
-			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), category, format));
-			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), category, format));
+			supplements.addAll(unitSupplementRepository.findByUnitIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), unit, format));
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), unit, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), unit, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), unit, format));
 		}		
 		else {
-			supplements.addAll(unitSupplementRepository.findByUnitIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), name, category, format));
-			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), name, category, format));
-			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), name, category, format));
-			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), name, category, format));
+			supplements.addAll(unitSupplementRepository.findByUnitIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), name, unit, format));
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), name, unit, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), name, unit, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), name, unit, format));
 		}		
 		
 		// set absolute path for each supplement, to be used for Supplement MGM path parameter
@@ -563,17 +571,66 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Long[], String, String, String)
 	 */
 	@Override
-	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format) {
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String unit, String format) {
 		List<List<Supplement>> supplementss = new ArrayList<List<Supplement>>();
 		
 		for (Long primaryfileId : primaryfileIds) {
 			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElse(null);
-			List<Supplement> supplements = getSupplementsForPrimaryfile(primaryfile, name, category, format);
+			List<Supplement> supplements = getSupplementsForPrimaryfile(primaryfile, name, unit, format);
 			supplementss.add(supplements);
 		}
 		
-		log.info("Successfully retrieved supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
+		log.info("Successfully retrieved supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", unit: " + unit + ", format: " + format);
 		return supplementss;
 	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Long[], String, String, String)
+	 */
+	@Override
+	public List<Unit> refreshUnit() {
+		log.info("Start refreshing Unit table ...");
+		List<Unit> units = new ArrayList<Unit>();
+		List<Unit> newUnits = new ArrayList<Unit>();
+		String filename = DIR + "/" + UNIT + ".csv"; 
+		BufferedReader breader = null;
+		
+		// open unit.csv
+		try {
+			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
+		}
+		catch(Exception e) {
+			throw new RuntimeException("Failed to refresh Unit table: unable to open " + filename, e);
+		}		
+		
+		// parse the csv into list of Unit objects
+		try {
+			units = new CsvToBeanBuilder<Unit>(breader).withType(Unit.class).build().parse();
+		}
+		catch(Exception e) {
+			throw new RuntimeException("Failed to refresh Unit table: invalid CSV format with " + filename, e);
+		}
+		
+		// save each of the Unit objects, either creating a new one or updating the existing one
+		for (Unit unit : units) {
+			// note: we can't just save all units directly, as that would create new records in the table;
+			// instead, we need to find each existing record if any based on name and update it
+			Unit newUnit = unitRepository.findFirstByName(unit.getName());			
+			if (newUnit == null) {
+				newUnit = new Unit();
+				newUnit.setName(unit.getName());
+			}			
+			
+			newUnit.setDescription(unit.getDescription());				
+			newUnit.setTaskManager(unit.getDescription());							
+			newUnit = unitRepository.save(newUnit);
+			newUnits.add(newUnit);
+		}		
+		
+		// don't delete any existing units not included in the csv, as we might already have some manually created ones
+				
+		log.info("Successfully refreshed " + newUnits.size() + " units from " + filename);
+		return newUnits;
+	}
+	
 }

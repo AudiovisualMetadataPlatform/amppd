@@ -99,7 +99,8 @@ public interface AmpUserService {
 	public AmpUser getCurrentUser();
 		
 	/**
-	 * Bootstrap the AMP admin user as the first AMP user upon AMP app start, by creating the user with ACTIVATED status in DB.
+	 * Bootstrap the AMP admin user as the first AMP user upon AMP app start, by creating the user with ACTIVATED status in DB,
+	 * and also assign this user with AMP Admin role.
 	 * @return the AMP admin user created
 	 */
 	public AmpUser bootstrapAdmin();

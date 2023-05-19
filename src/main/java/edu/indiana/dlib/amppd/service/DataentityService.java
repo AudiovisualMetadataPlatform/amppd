@@ -7,6 +7,7 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.Unit;
 
 /**
  * Service for common Dataentitiy operations. 
@@ -133,4 +134,10 @@ public interface DataentityService {
 	 */
 	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format);
 
+	/**
+	 * Refresh units from its corresponding csv file.
+	 * Note: This is a temporary workaround to initialize units, until we have UI to create/edit/delete units. 
+	 */
+	public List<Unit> refreshUnit();
+	
 }

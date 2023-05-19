@@ -32,6 +32,7 @@ import edu.indiana.dlib.amppd.model.TimedToken;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.RoleAssignService;
 import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -63,14 +64,18 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  
 	  @Autowired
 	  private JavaMailSender mailSender;
+	  
+	  @Autowired
+	  private RoleAssignService roleAssignService;
 
-	  private String adminEmail ;
-	  private String uiUrl ;	  
+	  private String adminEmail;
+	  private String uiUrl;	  
+	  
 	  
 	  @PostConstruct
 	  public void init() {
 		  adminEmail = amppdPropertyConfig.getAdminEmail();
-		  log.trace("Fetched AMP admin email id from property file:"+adminEmail);
+		  log.trace("Fetched AMP admin email id from property file: "+ adminEmail);
 		  uiUrl = amppdUiPropertyConfig.getUrl();
 		  
 		  // Note: bootstrap of AMP admin user is now moved to AmppdStartupRunner.run;
@@ -549,6 +554,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else {
 			log.info("AMP admin alaredy exists and has been activated.");
 		}
+		
+		// assign AMP Admin role 
+		roleAssignService.assignAdminRole(admin);
 		return admin;
 	}
 	

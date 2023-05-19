@@ -21,6 +21,7 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	boolean existsByUserIdAndRoleIdInAndUnitIdIsNull(Long userId, List<Long> roleIds);	
 	
 	RoleAssignment findFirstByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);	
+	RoleAssignment findFirstByUserIdAndRoleIdAndUnitIdNull(Long userId, Long roleId);	
 	
 	List<RoleAssignmentBrief> findByUserId(Long userId);	
 	List<RoleAssignmentBrief> findByUserIdAndRoleIdInAndUnitId(Long userId, List<Long> roleIds, Long unitId);
