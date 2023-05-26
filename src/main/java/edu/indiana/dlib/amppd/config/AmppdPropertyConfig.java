@@ -46,6 +46,7 @@ public class AmppdPropertyConfig {
     @NotNull private String refreshResultsTableCron;
     @NotNull private Boolean refreshPermissionTables;
     @NotNull private Boolean refreshMgmTables;    
+    @NotNull private Boolean refresUnitTable; 
     @NotNull private List<String> supplementCategories;
     @NotNull private List<String> groundtruthSubcategories;
     @NotNull private List<String> externalSources;

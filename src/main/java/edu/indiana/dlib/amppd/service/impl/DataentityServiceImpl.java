@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 
@@ -588,7 +589,10 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Long[], String, String, String)
 	 */
 	@Override
-	public List<Unit> refreshUnit() {
+    @Transactional
+	public List<Unit> refreshUnitTable() {
+		if (!amppdPropertyConfig.getRefresUnitTable()) return null; 
+		
 		log.info("Start refreshing Unit table ...");
 		List<Unit> units = new ArrayList<Unit>();
 		List<Unit> newUnits = new ArrayList<Unit>();
@@ -619,10 +623,14 @@ public class DataentityServiceImpl implements DataentityService {
 			if (newUnit == null) {
 				newUnit = new Unit();
 				newUnit.setName(unit.getName());
-			}			
+				log.debug("Adding new unit " + newUnit.getName());
+			}	
+			else {
+				log.debug("Updating existing unit " + newUnit.getName());				
+			}
 			
 			newUnit.setDescription(unit.getDescription());				
-			newUnit.setTaskManager(unit.getDescription());							
+			newUnit.setTaskManager(unit.getTaskManager());							
 			newUnit = unitRepository.save(newUnit);
 			newUnits.add(newUnit);
 		}		
