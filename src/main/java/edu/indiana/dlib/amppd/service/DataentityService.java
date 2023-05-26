@@ -138,6 +138,6 @@ public interface DataentityService {
 	 * Refresh units from its corresponding csv file.
 	 * Note: This is a temporary workaround to initialize units, until we have UI to create/edit/delete units. 
 	 */
-	public List<Unit> refreshUnit();
+	public List<Unit> refreshUnitTable();
 	
 }

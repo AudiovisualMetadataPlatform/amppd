@@ -512,6 +512,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	 * @see edu.indiana.dlib.amppd.service.AmpUserService.bootstrapAdminUser()
 	 */
 	@Override
+    @Transactional
 	public AmpUser bootstrapAdmin() {
 		String username = amppdPropertyConfig.getUsername();
 		String password = amppdPropertyConfig.getPassword();

@@ -34,7 +34,7 @@ public class AmppdStartupRunner  implements CommandLineRunner {
 		mgmRefreshService.refreshMgmTables();
 
 		// initialize/refresh Unit table
-		dataentityService.refreshUnit();
+		dataentityService.refreshUnitTable();
 
 		// bootstrap AMP admin user
     	ampUserService.bootstrapAdmin();		
