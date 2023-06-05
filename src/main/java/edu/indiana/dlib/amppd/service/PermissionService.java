@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDeniedException;
 
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.web.UnitActions;
+import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 /**
@@ -82,10 +84,17 @@ public interface PermissionService {
 	/**
 	 * Apply access control prefilter to the given WorkflowResultSearchQuery.
 	 * @param query the given WorkflowResultSearchQuery
-	 * @return true if prefilter is applied; falise otherwise
+	 * @return the set of accessible units for the current user on WorkflowResult Search
 	 * @throws AccessDeniedException if the current user is not allowed to view WorkflowResult in any unit or for the user defined unit filters
 	 */
-	public boolean prefilter(WorkflowResultSearchQuery query);
+	public Set<Long> prefilter(WorkflowResultSearchQuery query);
 	
+	/**
+	 * Apply access control postfilter to the given WorkflowResultResponse with the given accessibleUnits
+	 * @param response the given WorkflowResultResponse
+	 * @param accessibleUnits the set of given accessibleUnits
+	 */
+	public void postfilter(WorkflowResultResponse response, Set<Long> accessibleUnits);
 	
+
 }

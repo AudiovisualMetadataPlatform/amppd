@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -68,15 +69,19 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
-		// AC prefilter on WorkflowResultSearchQuery
-		permissionService.prefilter(query);
+		// AC prefilter on WorkflowResultSearchQuery to restrict unit filters to only accessible ones by current user
+		Set<Long> accessibleUnits = permissionService.prefilter(query);
 		
 		// Note:
 		// This should better be a GET request instead of POST, according to REST API standards.
 		// However, Axios doesn't support GET with body, while sending the request with the query as a param  
 		// could result in a very long URL, which might exceeds the URL length limit.
-		log.info("Retrieving WorkflowResults for query ...");
-		return workflowResultService.getWorkflowResults(query);
+		log.info("Retrieving WorkflowResults for query ...");		
+		WorkflowResultResponse response = workflowResultService.getWorkflowResults(query);
+		
+		// AC postfilter on WorkflowResultResponse to restrict WorkflowResultFilterValues.units to only accessible ones by current user
+		permissionService.postfilter(response, accessibleUnits);		
+		return response;
 	}
 
 	/**

@@ -10,16 +10,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.projection.ActionBrief;
-import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
-import edu.indiana.dlib.amppd.model.projection.RoleBrief;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
@@ -28,6 +25,8 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.web.UnitActions;
+import edu.indiana.dlib.amppd.web.WorkflowResultFilterUnit;
+import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,10 +90,10 @@ public class PermissionServiceImpl implements PermissionService {
 		}
 		
 		// find all role assignments for current user
-		List<RoleAssignmentDetail> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
+		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
 		
 		// retrieve the associated units
-		for (RoleAssignmentDetail ra : ras) {
+		for (RoleAssignmentDetailActions ra : ras) {
 			UnitBrief unit = ra.getUnit();
 			units.add(unit);
 		}
@@ -116,23 +115,22 @@ public class PermissionServiceImpl implements PermissionService {
 			log.info("The current user " + user.getUsername() + " is admin and can perform action <" + actionType + ", " + targetType + "> in all units." );
 			return null;
 		}
-		
-		// find the action
-		Action action = actionRepository.findFirstByActionTypeAndTargetType(actionType, targetType);
-		if (action == null) {
-			throw new StorageException("Failed to find action for: " + "actionType = " + actionType + ", targetType = " + targetType);
-		}
-		
+			
 		// find all role assignments for current user
-		List<RoleAssignmentDetail> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
+		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
 		
 		// retrieve the associated units if the role can perform the action
-		Set<Role> roles = action.getRoles();
-		for (RoleAssignmentDetail ra : ras) {
-			RoleBrief role = ra.getRole();
-			if (roles.contains(role)) {
-				Long unitId = ra.getUnit().getId();
-				unitIds.add(unitId);
+		for (RoleAssignmentDetailActions ra : ras) {
+			// skip if the unit ID of this assignment is already included
+			if (unitIds.contains(ra.getUnitId())) continue;
+			
+			// include the unit ID of this assignment if the role can perform the action
+			for (ActionBrief action : ra.getRole().getActions()) {
+				if (action.getActionType() == actionType && action.getTargetType() == targetType) {
+					Long unitId = ra.getUnit().getId();
+					unitIds.add(unitId);
+					break;
+				}
 			}
 		}
 		
@@ -262,35 +260,70 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(WorkflowResultSearchQuery)
 	 */
 	@Override
-	public boolean prefilter(WorkflowResultSearchQuery query) {
+	public Set<Long> prefilter(WorkflowResultSearchQuery query) {
+		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
 		Set<Long> accessibleUnits = getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+
+		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed;  
+		if (accessibleUnits == null) return accessibleUnits;
+		
+		// otherwise apply AC prefilter by intersecting with user filters		
 		Long[] fus = query.getFilterByUnits();
 		Set<Long> filterUnits = Set.of(fus);
-		boolean filtered = false;
 		
-		// for admin, i.e. accessibleUnits is null, no AC prefilter needed;  
-		// otherwise apply AC prefilter to user filters
-		if (accessibleUnits != null) {
-			// if no user filter defined, use the AC filter
-			if (filterUnits.isEmpty()) {
-				filterUnits = accessibleUnits;
-			}
-			// otherwise retain only permitted units in user filters
-			else {
-				filterUnits.retainAll(accessibleUnits);
-				// if after applying AC filter the query filters becomes empty, then user cannot perform this query
-				if (filterUnits.isEmpty()) {
-					throw new AccessDeniedException("The current user cannot query workflow results in the filtered units.");
-				}
-			}
-
-			// update unit filters in query
-			filtered = true;
-			fus = filterUnits.toArray(fus);
-			query.setFilterByUnits(fus);
+		// retain user filtered units if exist, among all accessible units
+		if (!filterUnits.isEmpty()) {
+			// note: filterUnits.retainAll(accessibleUnits) won't work as filterUnits is immutable
+			accessibleUnits.retainAll(filterUnits);
 		}
+
+		// if above intersection is empty, the user cannot perform this query
+		if (accessibleUnits.isEmpty()) {
+			throw new AccessDeniedException("The current user cannot query workflow results in the filtered units.");
+		}
+
+		// update unit filters in query if changed
+		Long[] fusNew = accessibleUnits.toArray(fus);	
 		
-		return filtered;
+		// note: fusNew.length < fus.length won't work in case fus is empty
+		if (fusNew.length != fus.length) {
+			query.setFilterByUnits(fusNew);
+			log.info("WorkflowResultSearchQuery has been prefiltered with only accessible units.");
+		}
+		else {
+			log.info("WorkflowResultSearchQuery reamins the same after AC units prefilter.");				
+		}			
+		
+		return accessibleUnits;
 	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.postfilter(WorkflowResultResponse, Set<Long>)
+	 */
+	@Override
+	public void postfilter(WorkflowResultResponse response, Set<Long> accessibleUnits) {
+		List<WorkflowResultFilterUnit> fus = response.getFilters().getUnits();
+		List<WorkflowResultFilterUnit> fusNew = new ArrayList<WorkflowResultFilterUnit>();
+
+		// if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed;  
+		if (accessibleUnits == null) return;
+
+		// otherwise apply AC postfilter by intersecting with user filters
+		for (WorkflowResultFilterUnit fu : fus) {
+			if (accessibleUnits.contains(fu.getUnitId())) {
+				fusNew.add(fu);
+			}
+		}
+
+		// update unit filters in response if changed
+		if (fusNew.size() < fus.size()) {
+			response.getFilters().setUnits(fusNew);
+			log.info("WorkflowResultResponse has been postfiltered with only accessible units.");
+		}
+		else {
+			log.info("WorkflowResultResponse reamins the same after AC units postfilter.");				
+		}			
+	}
+	
 	
 }
