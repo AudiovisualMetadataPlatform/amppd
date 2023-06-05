@@ -7,8 +7,10 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
@@ -17,6 +19,7 @@ import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
+import edu.indiana.dlib.amppd.model.projection.RoleBrief;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
@@ -25,6 +28,7 @@ import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.web.UnitActions;
+import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -82,7 +86,7 @@ public class PermissionServiceImpl implements PermissionService {
 		AmpUser user = ampUserService.getCurrentUser();		
 		if (isAdmin()) {
 			units = unitRepository.findAllProjectedBy();			
-			log.info("The current user " + user.getUsername() + " is AMP Admin and thus has access to all " + units.size() + " units." );
+			log.info("The current user " + user.getUsername() + " is Admin and has access to all " + units.size() + " units." );
 			return units;
 		}
 		
@@ -100,6 +104,48 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits(ActionType, TargetType)
+	 */
+	@Override
+	public Set<Long> getAccessibleUnits(ActionType actionType, TargetType targetType) {
+		Set<Long> unitIds = new HashSet<Long>();
+
+		// if current user is AMP Admin, then all units are accessible, return null to indicate no restraints on unit ID
+		AmpUser user = ampUserService.getCurrentUser();		
+		if (isAdmin()) {
+			log.info("The current user " + user.getUsername() + " is admin and can perform action <" + actionType + ", " + targetType + "> in all units." );
+			return null;
+		}
+		
+		// find the action
+		Action action = actionRepository.findFirstByActionTypeAndTargetType(actionType, targetType);
+		if (action == null) {
+			throw new StorageException("Failed to find action for: " + "actionType = " + actionType + ", targetType = " + targetType);
+		}
+		
+		// find all role assignments for current user
+		List<RoleAssignmentDetail> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
+		
+		// retrieve the associated units if the role can perform the action
+		Set<Role> roles = action.getRoles();
+		for (RoleAssignmentDetail ra : ras) {
+			RoleBrief role = ra.getRole();
+			if (roles.contains(role)) {
+				Long unitId = ra.getUnit().getId();
+				unitIds.add(unitId);
+			}
+		}
+		
+		// throw access denied exception if the user can't perform the action in any unit at all
+		if (unitIds.isEmpty()) {
+			throw new AccessDeniedException("The current user " + user.getUsername() + " cannot perform action " + actionType + " " + targetType  + " in any unit.");
+		}
+		
+		log.info("The current user " + user.getUsername() + " can perform action " + actionType + " " + targetType + " in " + unitIds.size() + " units." );
+		return unitIds;
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getPermittedActions(List<ActionType>, List<TargetType>, List<Long>)
 	 */
 	@Override
@@ -111,7 +157,6 @@ public class PermissionServiceImpl implements PermissionService {
 		List<RoleAssignmentDetailActions> ras = unitIds.isEmpty() ?
 			roleAssignmentRepository.findByUserIdOrderByUnitId(user.getId()) : 
 			roleAssignmentRepository.findByUserIdAndUnitIdInOrderByUnitId(user.getId(), unitIds);
-
 		
 		// for all the user's roles within each unit, merge the unique actions matching the actionTypes and/or targetTypes
 		UnitActions ua = new UnitActions(0L, new HashSet<ActionBrief>());	// current UnitActions
@@ -213,5 +258,39 @@ public class PermissionServiceImpl implements PermissionService {
 		return has;
 	}
 	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(WorkflowResultSearchQuery)
+	 */
+	@Override
+	public boolean prefilter(WorkflowResultSearchQuery query) {
+		Set<Long> accessibleUnits = getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		Long[] fus = query.getFilterByUnits();
+		Set<Long> filterUnits = Set.of(fus);
+		boolean filtered = false;
+		
+		// for admin, i.e. accessibleUnits is null, no AC prefilter needed;  
+		// otherwise apply AC prefilter to user filters
+		if (accessibleUnits != null) {
+			// if no user filter defined, use the AC filter
+			if (filterUnits.isEmpty()) {
+				filterUnits = accessibleUnits;
+			}
+			// otherwise retain only permitted units in user filters
+			else {
+				filterUnits.retainAll(accessibleUnits);
+				// if after applying AC filter the query filters becomes empty, then user cannot perform this query
+				if (filterUnits.isEmpty()) {
+					throw new AccessDeniedException("The current user cannot query workflow results in the filtered units.");
+				}
+			}
+
+			// update unit filters in query
+			filtered = true;
+			fus = filterUnits.toArray(fus);
+			query.setFilterByUnits(fus);
+		}
+		
+		return filtered;
+	}
 	
 }

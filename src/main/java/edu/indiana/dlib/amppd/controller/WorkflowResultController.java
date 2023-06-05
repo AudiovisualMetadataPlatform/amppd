@@ -32,6 +32,7 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
@@ -56,6 +57,10 @@ public class WorkflowResultController {
 	@Autowired
 	private WorkflowResultService workflowResultService;
 	
+	@Autowired
+	private PermissionService permissionService;
+	
+	
 	/**
 	 * Get a list of all workflow results satisfying the given query.
 	 * @param query the search query for workflow results
@@ -63,6 +68,9 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
+		// AC prefilter on WorkflowResultSearchQuery
+		permissionService.prefilter(query);
+		
 		// Note:
 		// This should better be a GET request instead of POST, according to REST API standards.
 		// However, Axios doesn't support GET with body, while sending the request with the query as a param  
