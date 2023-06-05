@@ -4,12 +4,15 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDeniedException;
 
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.web.UnitActions;
+import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
+import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 /**
  * Service for access control permission checking related operations.
@@ -24,10 +27,18 @@ public interface PermissionService {
 	public boolean isAdmin();
 
 	/**
-	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments.
+	 * Get the units in which the current user has at least some access to, i.e. has some role assignments.
 	 * @return the list of units the current user has access to
 	 */
 	public Set<UnitBrief> getAccessibleUnits();
+	
+	/**
+	 * Get the units in which the current user can perform the given action. 
+	 * @param actionType actionType of the given action
+	 * @param targetType targetType of the given action
+	 * @return null if the user is admin; empty set if the user can't perform the action in any unit; or the set of IDs for such units.
+	 */
+	public Set<Long> getAccessibleUnits(ActionType actionType, TargetType targetType);
 	
 	/**
 	 * Get the actions the current user can perform, given the list of actionTypes, targetTypes and units;
@@ -70,4 +81,20 @@ public interface PermissionService {
 	 */
 	public boolean hasPermission(Action action, Long unitId);
 	
+	/**
+	 * Apply access control prefilter to the given WorkflowResultSearchQuery.
+	 * @param query the given WorkflowResultSearchQuery
+	 * @return the set of accessible units for the current user on WorkflowResult Search
+	 * @throws AccessDeniedException if the current user is not allowed to view WorkflowResult in any unit or for the user defined unit filters
+	 */
+	public Set<Long> prefilter(WorkflowResultSearchQuery query);
+	
+	/**
+	 * Apply access control postfilter to the given WorkflowResultResponse with the given accessibleUnits
+	 * @param response the given WorkflowResultResponse
+	 * @param accessibleUnits the set of given accessibleUnits
+	 */
+	public void postfilter(WorkflowResultResponse response, Set<Long> accessibleUnits);
+	
+
 }
