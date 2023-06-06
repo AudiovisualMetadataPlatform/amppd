@@ -29,6 +29,16 @@ public class RoleAssignController {
 	
 	
 	/**
+	 * Check if the current user is AMP admin.
+	 * @return true if the user is admin; false otherwise
+	 */
+	@GetMapping("/roleAssignments/isAdmin")
+	public boolean isAdmin() {
+		log.info("Checking if the current user is AMP admin ...");
+		return roleAssignService.isAdmin();		
+	}
+		
+	/**
 	 * Get the users, roles, and assignment info for the current user and the given unit.
 	 * @unitId ID of the unit associated with the role assignment
 	 * @return the user-role assignment table 

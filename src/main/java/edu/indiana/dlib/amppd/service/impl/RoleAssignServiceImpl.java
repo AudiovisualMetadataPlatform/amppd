@@ -57,6 +57,26 @@ public class RoleAssignServiceImpl implements RoleAssignService {
 
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.RoleAssignService.isAdmin()
+	 */
+	@Override
+	public boolean isAdmin() {
+		// find all role assignments for the current user
+		AmpUser user = ampUserService.getCurrentUser();		
+
+//		// get AMP Admin role
+//		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(Role.AMP_ADMIN_ROLE_NAME);
+//		
+//		// check whether the user has a role assignment with AMP Admin
+//		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
+		boolean is = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), Role.AMP_ADMIN_ROLE_NAME);		
+		String isstr = is ? "is" : "is not";
+		
+		log.info("The current user " + isstr + " " + Role.AMP_ADMIN_ROLE_NAME);
+		return is;
+	}				
+		
+	/**
 	 * @see edu.indiana.dlib.amppd.service.RoleAssignService.assignAdminRole(AmpUser)
 	 */
 	@Override

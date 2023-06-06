@@ -21,12 +21,6 @@ import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 public interface PermissionService {
 
 	/**
-	 * Check if the current user is AMP admin.
-	 * @return true if the user is admin; false otherwise
-	 */
-	public boolean isAdmin();
-
-	/**
 	 * Get the units in which the current user has at least some access to, i.e. has some role assignments.
 	 * @return the list of units the current user has access to
 	 */

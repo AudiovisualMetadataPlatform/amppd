@@ -41,16 +41,6 @@ public class PermissionController {
 	}
 	
 	/**
-	 * Check if the current user is AMP admin.
-	 * @return true if the user is admin; false otherwise
-	 */
-	@GetMapping("/permissions/isAdmin")
-	public boolean isAdmin() {
-		log.info("Checking if the current user is AMP admin ...");
-		return permissionService.isAdmin();		
-	}
-	
-	/**
 	 * Get the actions the current (non-admin) user can perform, given the list of actionTypes, targetTypes and units;
 	 * if actionTypes not provided, get for all actionTypes;
 	 * if targetTypes not provided, get for all targetTypes;

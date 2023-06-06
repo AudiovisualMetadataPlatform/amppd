@@ -20,10 +20,10 @@ import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
-import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.service.RoleAssignService;
 import edu.indiana.dlib.amppd.web.UnitActions;
 import edu.indiana.dlib.amppd.web.WorkflowResultFilterUnit;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -42,9 +42,6 @@ public class PermissionServiceImpl implements PermissionService {
 	private UnitRepository unitRepository;
 
 	@Autowired
-	private RoleRepository roleRepository;
-
-	@Autowired
 	private ActionRepository actionRepository;
 
 	@Autowired
@@ -52,28 +49,11 @@ public class PermissionServiceImpl implements PermissionService {
 
 	@Autowired
 	private AmpUserService ampUserService;
-	
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.isAdmin()
-	 */
-	@Override
-	public boolean isAdmin() {
-		// find all role assignments for the current user
-		AmpUser user = ampUserService.getCurrentUser();		
-
-//		// get AMP Admin role
-//		Role admin = roleRepository.findFirstByNameAndUnitIdIsNull(Role.AMP_ADMIN_ROLE_NAME);
-//		
-//		// check whether the user has a role assignment with AMP Admin
-//		boolean is = roleAssignmentRepository.existsByUserIdAndRoleIdAndUnitIdIsNull(user.getId(), admin.getId());
-		boolean is = roleAssignmentRepository.existsByUserIdAndRoleNameAndUnitIdIsNull(user.getId(), Role.AMP_ADMIN_ROLE_NAME);		
-		String isstr = is ? "is" : "is not";
 		
-		log.info("The current user " + isstr + " " + Role.AMP_ADMIN_ROLE_NAME);
-		return is;
-	}				
-	
+	@Autowired
+	private RoleAssignService roleAssignService;
+
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
 	 */
@@ -83,7 +63,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 		// if current user is AMP Admin, then all units are accessible
 		AmpUser user = ampUserService.getCurrentUser();		
-		if (isAdmin()) {
+		if (roleAssignService.isAdmin()) {
 			units = unitRepository.findAllProjectedBy();			
 			log.info("The current user " + user.getUsername() + " is Admin and has access to all " + units.size() + " units." );
 			return units;
@@ -111,7 +91,7 @@ public class PermissionServiceImpl implements PermissionService {
 
 		// if current user is AMP Admin, then all units are accessible, return null to indicate no restraints on unit ID
 		AmpUser user = ampUserService.getCurrentUser();		
-		if (isAdmin()) {
+		if (roleAssignService.isAdmin()) {
 			log.info("The current user " + user.getUsername() + " is admin and can perform action <" + actionType + ", " + targetType + "> in all units." );
 			return null;
 		}

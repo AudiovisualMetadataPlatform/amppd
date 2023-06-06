@@ -18,6 +18,12 @@ import edu.indiana.dlib.amppd.web.RoleAssignUpdate;
 public interface RoleAssignService {
 	
 	/**
+	 * Check if the current user is AMP admin.
+	 * @return true if the user is admin; false otherwise
+	 */
+	public boolean isAdmin();
+	
+	/**
 	 * Assign AMP Admin role to the given user. 
 	 */
 	public RoleAssignment assignAdminRole(AmpUser user);
@@ -51,5 +57,5 @@ public interface RoleAssignService {
 	 * @return the list of added/deleted RoleAssignments
 	 */
 	public RoleAssignUpdate updateRoleAssignments(Long unitId, List<RoleAssignTuple> assignments);
-	
+
 }
