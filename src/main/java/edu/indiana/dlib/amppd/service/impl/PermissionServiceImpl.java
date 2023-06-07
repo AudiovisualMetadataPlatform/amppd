@@ -55,72 +55,49 @@ public class PermissionServiceImpl implements PermissionService {
 
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(ActionType, TargetType, Long)
 	 */
 	@Override
-	public Set<UnitBrief> getAccessibleUnits() {
-		Set<UnitBrief> units = new HashSet<UnitBrief>();
-
-		// if current user is AMP Admin, then all units are accessible
-		AmpUser user = ampUserService.getCurrentUser();		
-		if (roleAssignService.isAdmin()) {
-			units = unitRepository.findAllProjectedBy();			
-			log.info("The current user " + user.getUsername() + " is Admin and has access to all " + units.size() + " units." );
-			return units;
-		}
-		
-		// find all role assignments for current user
-		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
-		
-		// retrieve the associated units
-		for (RoleAssignmentDetailActions ra : ras) {
-			UnitBrief unit = ra.getUnit();
-			units.add(unit);
-		}
-		
-		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
-		return units;
+	public boolean hasPermsion(ActionType actionType, TargetType targetType, Long unitId) {
+		Action action = actionRepository.findFirstByActionTypeAndTargetType(actionType, targetType);		
+		boolean has = hasPermission(action, unitId);
+		return has;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits(ActionType, TargetType)
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(HttpMethod, String, Long)
 	 */
 	@Override
-	public Set<Long> getAccessibleUnits(ActionType actionType, TargetType targetType) {
-		Set<Long> unitIds = new HashSet<Long>();
-
-		// if current user is AMP Admin, then all units are accessible, return null to indicate no restraints on unit ID
+	public boolean hasPermsion(HttpMethod httpMethod, String urlPattern, Long unitId) {
+		Action action = actionRepository.findFirstByHttpMethodAndUrlPattern(httpMethod, urlPattern);		
+		boolean has = hasPermission(action, unitId);
+		return has;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermission(Action, Long)
+	 */
+	@Override
+	public boolean hasPermission(Action action, Long unitId) {		
+		// find the current user
 		AmpUser user = ampUserService.getCurrentUser();		
-		if (roleAssignService.isAdmin()) {
-			log.info("The current user " + user.getUsername() + " is admin and can perform action <" + actionType + ", " + targetType + "> in all units." );
-			return null;
-		}
-			
-		// find all role assignments for current user
-		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
 		
-		// retrieve the associated units if the role can perform the action
-		for (RoleAssignmentDetailActions ra : ras) {
-			// skip if the unit ID of this assignment is already included
-			if (unitIds.contains(ra.getUnitId())) continue;
-			
-			// include the unit ID of this assignment if the role can perform the action
-			for (ActionBrief action : ra.getRole().getActions()) {
-				if (action.getActionType() == actionType && action.getTargetType() == targetType) {
-					Long unitId = ra.getUnit().getId();
-					unitIds.add(unitId);
-					break;
-				}
-			}
+		// find all roles that can perform the action
+		Set<Role> roles = action.getRoles();		
+		List<Long> roleIds = new ArrayList<Long>();		
+		for (Role role : roles) {
+			roleIds.add(role.getId());
 		}
 		
-		// throw access denied exception if the user can't perform the action in any unit at all
-		if (unitIds.isEmpty()) {
-			throw new AccessDeniedException("The current user " + user.getUsername() + " cannot perform action " + actionType + " " + targetType  + " in any unit.");
-		}
+		// check if the current user is assigned to one of the above roles
+		// the only case when role assignment unit is null is for AMP Admin, who has permission for all actions;
+		// otherwise the role assignment must be associated with some unit
+		boolean has = roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitIdIsNull(user.getId(), roleIds);
+		has = has || roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitId(user.getId(), roleIds, unitId);
 		
-		log.info("The current user " + user.getUsername() + " can perform action " + actionType + " " + targetType + " in " + unitIds.size() + " units." );
-		return unitIds;
+		String hasstr = has ? "has" : "has no";
+		log.info("Current user " + user.getUsername() + " " + hasstr + " permission to perform action " + action.getName() +" in unit " + unitId);				
+		return has;
 	}
 	
 	/**
@@ -191,49 +168,72 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(ActionType, TargetType, Long)
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
 	 */
 	@Override
-	public boolean hasPermsion(ActionType actionType, TargetType targetType, Long unitId) {
-		Action action = actionRepository.findFirstByActionTypeAndTargetType(actionType, targetType);		
-		boolean has = hasPermission(action, unitId);
-		return has;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(HttpMethod, String, Long)
-	 */
-	@Override
-	public boolean hasPermsion(HttpMethod httpMethod, String urlPattern, Long unitId) {
-		Action action = actionRepository.findFirstByHttpMethodAndUrlPattern(httpMethod, urlPattern);		
-		boolean has = hasPermission(action, unitId);
-		return has;
-	}
-	
-	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermission(Action, Long)
-	 */
-	@Override
-	public boolean hasPermission(Action action, Long unitId) {		
-		// find the current user
+	public Set<UnitBrief> getAccessibleUnits() {
+		Set<UnitBrief> units = new HashSet<UnitBrief>();
+
+		// if current user is AMP Admin, then all units are accessible
 		AmpUser user = ampUserService.getCurrentUser();		
-		
-		// find all roles that can perform the action
-		Set<Role> roles = action.getRoles();		
-		List<Long> roleIds = new ArrayList<Long>();		
-		for (Role role : roles) {
-			roleIds.add(role.getId());
+		if (roleAssignService.isAdmin()) {
+			units = unitRepository.findAllProjectedBy();			
+			log.info("The current user " + user.getUsername() + " is Admin and has access to all " + units.size() + " units." );
+			return units;
 		}
 		
-		// check if the current user is assigned to one of the above roles
-		// the only case when role assignment unit is null is for AMP Admin, who has permission for all actions;
-		// otherwise the role assignment must be associated with some unit
-		boolean has = roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitIdIsNull(user.getId(), roleIds);
-		has = has || roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitId(user.getId(), roleIds, unitId);
+		// find all role assignments for current user
+		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
 		
-		String hasstr = has ? "has" : "has no";
-		log.info("Current user " + user.getUsername() + " " + hasstr + " permission to perform action " + action.getName() +" in unit " + unitId);				
-		return has;
+		// retrieve the associated units
+		for (RoleAssignmentDetailActions ra : ras) {
+			UnitBrief unit = ra.getUnit();
+			units.add(unit);
+		}
+		
+		log.info("The current user " + user.getUsername() + " has access to " + units.size() + " units." );
+		return units;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits(ActionType, TargetType)
+	 */
+	@Override
+	public Set<Long> getAccessibleUnits(ActionType actionType, TargetType targetType) {
+		Set<Long> unitIds = new HashSet<Long>();
+
+		// if current user is AMP Admin, then all units are accessible, return null to indicate no restraints on unit ID
+		AmpUser user = ampUserService.getCurrentUser();		
+		if (roleAssignService.isAdmin()) {
+			log.info("The current user " + user.getUsername() + " is admin and can perform action <" + actionType + ", " + targetType + "> in all units." );
+			return null;
+		}
+			
+		// find all role assignments for current user
+		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
+		
+		// retrieve the associated units if the role can perform the action
+		for (RoleAssignmentDetailActions ra : ras) {
+			// skip if the unit ID of this assignment is already included
+			if (unitIds.contains(ra.getUnitId())) continue;
+			
+			// include the unit ID of this assignment if the role can perform the action
+			for (ActionBrief action : ra.getRole().getActions()) {
+				if (action.getActionType() == actionType && action.getTargetType() == targetType) {
+					Long unitId = ra.getUnit().getId();
+					unitIds.add(unitId);
+					break;
+				}
+			}
+		}
+		
+		// throw access denied exception if the user can't perform the action in any unit at all
+		if (unitIds.isEmpty()) {
+			throw new AccessDeniedException("The current user " + user.getUsername() + " cannot perform action " + actionType + " " + targetType  + " in any unit.");
+		}
+		
+		log.info("The current user " + user.getUsername() + " can perform action " + actionType + " " + targetType + " in " + unitIds.size() + " units." );
+		return unitIds;
 	}
 	
 	/**
@@ -242,28 +242,28 @@ public class PermissionServiceImpl implements PermissionService {
 	@Override
 	public Set<Long> prefilter(WorkflowResultSearchQuery query) {
 		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
-		Set<Long> accessibleUnits = getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
 
-		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed;  
-		if (accessibleUnits == null) return accessibleUnits;
+		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		if (acUnitIds == null) return acUnitIds;
 		
 		// otherwise apply AC prefilter by intersecting with user filters		
 		Long[] fus = query.getFilterByUnits();
-		Set<Long> filterUnits = Set.of(fus);
+		Set<Long> ftUnitIds = Set.of(fus);
 		
 		// retain user filtered units if exist, among all accessible units
-		if (!filterUnits.isEmpty()) {
-			// note: filterUnits.retainAll(accessibleUnits) won't work as filterUnits is immutable
-			accessibleUnits.retainAll(filterUnits);
+		if (!ftUnitIds.isEmpty()) {
+			// note: ftUnitIds.retainAll(acUnitIds) won't work as ftUnitIds is immutable
+			acUnitIds.retainAll(ftUnitIds);
 		}
 
 		// if above intersection is empty, the user cannot perform this query
-		if (accessibleUnits.isEmpty()) {
-			throw new AccessDeniedException("The current user cannot query workflow results in the filtered units.");
+		if (acUnitIds.isEmpty()) {
+			throw new AccessDeniedException("The current user cannot query workflow results within the filtered units.");
 		}
 
 		// update unit filters in query if changed
-		Long[] fusNew = accessibleUnits.toArray(fus);	
+		Long[] fusNew = acUnitIds.toArray(fus);	
 		
 		// note: fusNew.length < fus.length won't work in case fus is empty
 		if (fusNew.length != fus.length) {
@@ -274,23 +274,23 @@ public class PermissionServiceImpl implements PermissionService {
 			log.info("WorkflowResultSearchQuery reamins the same after AC units prefilter.");				
 		}			
 		
-		return accessibleUnits;
+		return acUnitIds;
 	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.postfilter(WorkflowResultResponse, Set<Long>)
 	 */
 	@Override
-	public void postfilter(WorkflowResultResponse response, Set<Long> accessibleUnits) {
+	public void postfilter(WorkflowResultResponse response, Set<Long> acUnitIds) {
 		List<WorkflowResultFilterUnit> fus = response.getFilters().getUnits();
 		List<WorkflowResultFilterUnit> fusNew = new ArrayList<WorkflowResultFilterUnit>();
 
-		// if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed;  
-		if (accessibleUnits == null) return;
+		// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		if (acUnitIds == null) return;
 
 		// otherwise apply AC postfilter by intersecting with user filters
 		for (WorkflowResultFilterUnit fu : fus) {
-			if (accessibleUnits.contains(fu.getUnitId())) {
+			if (acUnitIds.contains(fu.getUnitId())) {
 				fusNew.add(fu);
 			}
 		}

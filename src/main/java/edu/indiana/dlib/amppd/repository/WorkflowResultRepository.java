@@ -49,15 +49,17 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	// find results of the given primaryfile, outputType, and status
 	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 	
-	// count the distinct output types existing in the table within the given outputTypes list
+	// count the distinct output types existing in the table within the given outputTypes list, and accessible units if not null
 	// Note: for some reason Spring JPA doesn't work correctly with count distinct, thus the query is provided
 	@Query(value = "select count(distinct outputType) from WorkflowResult where outputType in :outputTypes")
-	int countDistinctOutputTypesByOutputTypeIn(List<String> outputTypes);
+	int countDistinctOutputTypes(List<String> outputTypes);
+	@Query(value = "select count(distinct outputType) from WorkflowResult where outputType in :outputTypes and unitId in :acUnitIds")
+	int countDistinctOutputTypesAC(List<String> outputTypes, Set<Long> acUnitIds);
 	
 	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
 	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case
 	@Query(value = 
-			"select distinct p.collectionId as collectionId, p.itemId as itemId, p.primaryfileId as primaryfileId " + 
+			"select distinct p.unitId as unitId, p.collectionId as collectionId, p.itemId as itemId, p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
 			"where lower(p.primaryfileName) like lower(concat('%', :keyword,'%')) " +
 			"and not exists ( " + 
@@ -75,6 +77,26 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			"order by p.collectionId, p.itemId, p.primaryfileId "
 	)
 	List<PrimaryfileIdInfo> findPrimaryfileIdsByOutputTypes(String keyword, List<String> outputTypes);
+	@Query(value = 
+			"select distinct p.unitId as unitId, p.collectionId as collectionId, p.itemId as itemId, p.primaryfileId as primaryfileId " + 
+			"from WorkflowResult p " + 
+			"where p.unitId in :acUnitIds " +
+			"and lower(p.primaryfileName) like lower(concat('%', :keyword,'%')) " +
+			"and not exists ( " + 
+			"	select distinct o.outputType " + 
+			"	from WorkflowResult o " + 
+			"	where o.outputType in :outputTypes " +  
+			"	and not exists ( " + 
+			"		select w.id " + 
+			"		from WorkflowResult w " + 
+			"		where w.primaryfileId = p.primaryfileId " + 
+			"		and w.outputType = o.outputType " + 
+			"		and w.status = 'COMPLETE' " + 
+			"	) " + 
+			") " + 
+			"order by p.collectionId, p.itemId, p.primaryfileId "
+	)
+	List<PrimaryfileIdInfo> findPrimaryfileIdsByOutputTypesAC(String keyword, List<String> outputTypes, Set<Long> acUnitIds);
 
 //	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
 //	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case

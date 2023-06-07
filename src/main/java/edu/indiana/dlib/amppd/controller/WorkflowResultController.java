@@ -27,6 +27,8 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.dto.ItemInfo;
 import edu.indiana.dlib.amppd.model.dto.PrimaryfileInfo;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
@@ -97,8 +99,12 @@ public class WorkflowResultController {
 			@RequestParam(required = false) String mediaType, 
 			@RequestParam(required = false) String keyword, 
 			@RequestParam List<String> outputTypes) {
-		ItemSearchResponse response = new ItemSearchResponse();
-		
+		// get accessible units for Read WorkflowResult (if none, access deny exception will be thrown)
+		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
+		// otherwise, all queries on WorkflowResult below are limited within the accessible units
+		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		ItemSearchResponse response = new ItemSearchResponse();		
+				
 		// ensure that keyword has a value for below query
 		// Note: when keyword is empty, any name is matched 
 		if (keyword == null) {
@@ -106,14 +112,18 @@ public class WorkflowResultController {
 		}
 
 		// if not all given output types exist in the workflow result table, return empty list
-		int count = workflowResultRepository.countDistinctOutputTypesByOutputTypeIn(outputTypes);
+		int count = acUnitIds == null ?
+				workflowResultRepository.countDistinctOutputTypes(outputTypes) :
+				workflowResultRepository.countDistinctOutputTypesAC(outputTypes, acUnitIds);
 		if (count < outputTypes.size()) {
 			log.info("Retrieved none legitimate primaryfile with COMPLETE outputs for all " + outputTypes.size() + " output types.");
 			return response;
 		}
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
-		List<PrimaryfileIdInfo> pidis = workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes);
+		List<PrimaryfileIdInfo> pidis = acUnitIds == null ?
+				workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes) :
+				workflowResultRepository.findPrimaryfileIdsByOutputTypesAC(keyword, outputTypes, acUnitIds);
 		List<ItemInfo> itemis = response.getItems();	
 		ItemInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
