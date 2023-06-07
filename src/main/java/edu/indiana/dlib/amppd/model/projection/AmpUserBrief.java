@@ -15,7 +15,7 @@ public interface AmpUserBrief extends AmpObjectBrief {
 
 	public String getUsername();
 	public String getEmail();	
-	public String getPassword();
+//	public String getPassword();
 	public String getFirstName();
 	public String getLastName();
 	public Status getStatus();

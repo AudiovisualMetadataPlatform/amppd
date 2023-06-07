@@ -29,8 +29,10 @@ import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.TimedToken;
+import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.repository.TimedTokenRepository;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.RoleAssignService;
 import edu.indiana.dlib.amppd.util.MD5Encryption;
@@ -63,6 +65,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  private TimedTokenRepository timedTokenRepository;		
 	  
 	  @Autowired
+	  private JwtTokenUtil jwtTokenUtil;
+	  
+	  @Autowired
 	  private JavaMailSender mailSender;
 	  
 	  @Autowired
@@ -82,22 +87,32 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	  } 
 
 	  @Override
-	  public AuthResponse authenticate(String username, String pswd) { 
+	  public AuthResponse authenticate(String username, String password) { 
 		  AuthResponse response = new AuthResponse();
 		  
-		  if(!passwordAcceptableLength(pswd)) {
+		  // password must be of valid format
+		  if(!passwordAcceptableLength(password)) {
 			  response.addError("Username and password do not match");
 		  }
-		  String encryptedPswd = MD5Encryption.getMd5(pswd);
-		  String userFound = ampUserRepository.findByApprovedUser(username, encryptedPswd, AmpUser.Status.ACTIVATED);  
-		  if (userFound != null) {
-			  response.setSuccess(true);
-			  log.info("User " + username + " validated Successfully");
+		  
+		  // find user with credentials
+		  String encryptedPswd = MD5Encryption.getMd5(password);
+		  AmpUserBrief user = ampUserRepository.findFirstByUsernameAndPasswordAndStatus(username, encryptedPswd, AmpUser.Status.ACTIVATED);  
+		  
+		  // if user found, generate JWT token and authentication succeeded
+		  if (user != null) {
+				final String token = jwtTokenUtil.generateToken(username);
+				response.setToken(token);
+				response.setUser(user);
+				response.setSuccess(true);
+				log.info("User " + username + " login succeeded.");
 		  }
+		  // otherwise authentication failed
 		  else {
 			  response.setSuccess(false);
-			  log.error("User " + username + " validation failed");
+			  log.error("User " + username + " login failed.");
 		  }
+		  
 		  return response;
 	  }
 
@@ -450,16 +465,15 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
 	public AmpUser getUser(String username) {
 		Optional<AmpUser> userOpt = ampUserRepository.findByUsername(username);
-		if(userOpt.isPresent()) return userOpt.get();
-		
+		if(userOpt.isPresent()) return userOpt.get();		
 		return null;
 	}
+	
 	@Override
 	public AmpUser getUserById(Long userId) {
 		 AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
 		 log.info("User fetched Successfully");
-		 return user;
-		
+		 return user;		
 	}
 
 	public AmpUser getUserByEmail(String email) {
