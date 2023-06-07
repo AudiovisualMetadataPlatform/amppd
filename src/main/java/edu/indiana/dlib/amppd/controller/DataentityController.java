@@ -1,5 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -28,6 +29,13 @@ import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.SupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.UnitSupplementBrief;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
@@ -39,6 +47,7 @@ import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -84,6 +93,10 @@ public class DataentityController {
 	
 	@Autowired
 	private DropboxService dropboxService;
+
+	@Autowired
+	private PermissionService permissionService;
+
 
 	/**
 	 * Move the given primaryfile to the given parent item.
@@ -517,122 +530,39 @@ public class DataentityController {
 		return dataentityService.getSupplementsForPrimaryfiles(primaryfileIds, name, category, format);
 	}
 		
-//	/**
-//	 * Move the given unitSupplement to the given parent unit if different from its original parent.
-//	 * @param unitSupplementId ID of the given unitSupplement
-//	 * @param unitId ID of the given parent unit
-//	 * @return the updated unitSupplement
-//	 */
-//	@PostMapping(path = "/unitSupplements/{unitSupplementId}/move")
-//	public UnitSupplement moveUnitSupplement(@PathVariable Long unitSupplementId, @RequestParam Long unitId) {		
-//   	log.info("Moving unitSupplement " + unitSupplementId + " to new unit " + unitId);
-//   	
-//   	// retrieve unitSupplement and unit from DB
-//   	UnitSupplement unitSupplement = unitSupplementRepository.findById(unitSupplementId).orElseThrow(() -> new StorageException("UnitSupplement <" + unitSupplementId + "> does not exist!"));
-//   	Unit unit =	unitRepository.findById(unitId).orElseThrow(() -> new StorageException("Unit <" + unitId + "> does not exist!"));
-//
-//   	// if parent unit is the same, no action
-//   	if (unitSupplement.getUnit().getId().equals(unit.getId())) {
-//   		log.warn("No need to move unitSupplement " + unitSupplementId + " to the same parent unit " + unitId);
-//   		return unitSupplement;
-//   	}    	
-//
-//   	// otherwise, move unitSupplement media/info files to new subdir and update its parent unit
-//       fileStorageService.moveAsset(unitSupplement, true);
-//
-//   	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new unit " + unitId);
-//       return unitSupplement;
-//   }
-//
-//	/**
-//	 * Move the given collectionSupplement to the given parent collection if different from its original parent.
-//	 * @param collectionSupplementId ID of the given collectionSupplement
-//	 * @param collectionId ID of the given parent collection
-//	 * @return the updated collectionSupplement
-//	 */
-//	@PostMapping(path = "/collectionSupplements/{collectionSupplementId}/move")
-//	public CollectionSupplement moveCollectionSupplement(@PathVariable Long collectionSupplementId, @RequestParam Long collectionId) {		
-//    	log.info("Moving collectionSupplement " + collectionSupplementId + " to new collection " + collectionId);
-//    	
-//    	// retrieve collectionSupplement and collection from DB
-//    	CollectionSupplement collectionSupplement = collectionSupplementRepository.findById(collectionSupplementId).orElseThrow(() -> new StorageException("CollectionSupplement <" + collectionSupplementId + "> does not exist!"));
-//    	Collection collection =	collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("Collection <" + collectionId + "> does not exist!"));
-//
-//    	// if parent collection is the same, no action
-//    	if (collectionSupplement.getCollection().getId().equals(collection.getId())) {
-//    		log.warn("No need to move collectionSupplement " + collectionSupplementId + " to the same parent collection " + collectionId);
-//    		return collectionSupplement;
-//    	}    	
-//
-//    	// otherwise, move collectionSupplement media/info files to new subdir and update its parent collection
-//        fileStorageService.moveAsset(collectionSupplement, true);
-//
-//    	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new collection " + collectionId);
-//        return collectionSupplement;
-//    }
-//		
-//	/**
-//	 * Move the given itemSupplement to the given parent item if different from its original parent.
-//	 * @param itemSupplementId ID of the given itemSupplement
-//	 * @param itemId ID of the given parent item
-//	 * @return the updated itemSupplement
-//	 */
-//	@PostMapping(path = "/itemSupplements/{itemSupplementId}/move")
-//	public ItemSupplement moveItemSupplement(@PathVariable Long itemSupplementId, @RequestParam Long itemId) {		
-//    	log.info("Moving itemSupplement " + itemSupplementId + " to new item " + itemId);
-//    	
-//    	// retrieve itemSupplement and item from DB
-//    	ItemSupplement itemSupplement = itemSupplementRepository.findById(itemSupplementId).orElseThrow(() -> new StorageException("ItemSupplement <" + itemSupplementId + "> does not exist!"));
-//    	Item item =	itemRepository.findById(itemId).orElseThrow(() -> new StorageException("Item <" + itemId + "> does not exist!"));
-//
-//    	// if parent item is the same, no action
-//    	if (itemSupplement.getItem().getId().equals(item.getId())) {
-//    		log.warn("No need to move itemSupplement " + itemSupplementId + " to the same parent item " + itemId);
-//    		return itemSupplement;
-//    	}    	
-//
-//    	// otherwise, move itemSupplement media/info files to new subdir and update its parent item
-//        fileStorageService.moveAsset(itemSupplement, true);
-//
-//    	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new item " + itemId);
-//        return itemSupplement;
-//    }
-//		
-//	/**
-//	 * Move the given primaryfileSupplement to the given parent primaryfile if different from its original parent.
-//	 * @param primaryfileSupplementId ID of the given primaryfileSupplement
-//	 * @param primaryfileId ID of the given parent primaryfile
-//	 * @return the updated primaryfileSupplement
-//	 */
-//	@PostMapping(path = "/primaryfileSupplements/{primaryfileSupplementId}/move")
-//	public PrimaryfileSupplement movePrimaryfileSupplement(@PathVariable Long primaryfileSupplementId, @RequestParam Long primaryfileId) {		
-//    	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
-//    	
-//    	// retrieve primaryfileSupplement and primaryfile from DB
-//    	PrimaryfileSupplement primaryfileSupplement = primaryfileSupplementRepository.findById(primaryfileSupplementId).orElseThrow(() -> new StorageException("PrimaryfileSupplement <" + primaryfileSupplementId + "> does not exist!"));
-//    	Primaryfile primaryfile =	primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
-//
-//    	// if parent primaryfile is the same, no action
-//    	if (primaryfileSupplement.getPrimaryfile().getId().equals(primaryfile.getId())) {
-//    		log.warn("No need to move primaryfileSupplement " + primaryfileSupplementId + " to the same parent primaryfile " + primaryfileId);
-//    		return primaryfileSupplement;
-//    	}    	
-//
-//    	// otherwise, move primaryfileSupplement media/info files to new subdir and update its parent primaryfile
-//        fileStorageService.moveAsset(primaryfileSupplement, true);
-//    	
-//    	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new primaryfile " + primaryfileId);
-//        return primaryfileSupplement;
-//    }
+	/**
+	 * Get all supplements at all levels, subject to authorization.
+	 * @return list of supplements
+	 */
+	@GetMapping(path = "/supplements")
+	public List<SupplementBrief> getSupplements() {
+		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Supplement);
 
-//	@PostMapping(path = "/collections/{id}/activate")
-//	public Collection activateCollection(@PathVariable Long id, @RequestParam Boolean active){
-//		log.info("Activating collection "  + id + ": " + active);		
-//		Collection collection = collectionRepository.findById(id).orElseThrow(() -> new StorageException("Collection <" + id + "> does not exist!"));
-//		collection.setActive(active);
-//		collectionRepository.save(collection);
-//		log.info("Successfully activated collection " + id + ": " + active);	
-//		return collection;
-//	}
+		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		// otherwise apply AC prefilter to query criteria	
+
+		List<UnitSupplementBrief> unitSupplements = acUnitIds == null ?
+				unitSupplementRepository.findBy() :
+				unitSupplementRepository.findByUnitIdIn(acUnitIds);
+		List<CollectionSupplementBrief> collectionSupplements = acUnitIds == null ?
+				collectionSupplementRepository.findBy() :
+				collectionSupplementRepository.findByCollectionUnitIdIn(acUnitIds);
+		List<ItemSupplementBrief> itemSupplements = acUnitIds == null ?
+				itemSupplementRepository.findBy() :
+				itemSupplementRepository.findByItemCollectionUnitIdIn(acUnitIds);	
+		List<PrimaryfileSupplementBrief> primaryfileSupplements = acUnitIds == null ?
+				primaryfileSupplementRepository.findBy() :
+				primaryfileSupplementRepository.findByPrimaryfileItemCollectionUnitIdIn(acUnitIds);	
+
+		List<SupplementBrief> supplements = new ArrayList<SupplementBrief>();
+		supplements.addAll(unitSupplements);
+		supplements.addAll(collectionSupplements);
+		supplements.addAll(itemSupplements);
+		supplements.addAll(primaryfileSupplements);
+		
+		log.info("Successfully retrieved " + supplements.size() + " supplements.");
+		return supplements;
+	}
 	
 }
