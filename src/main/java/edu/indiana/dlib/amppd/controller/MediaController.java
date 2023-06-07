@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.controller;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -14,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +33,11 @@ public class MediaController {
 
 	@Autowired
     private MediaService mediaService;
+	
+	@Autowired
+	private PermissionService permissionService;
 
+	
 	/**
 	 * Serve the media file of the given primaryfile by redirecting the request to the AMPPD UI Apache server.
 	 * @param id ID of the given primaryfile
@@ -69,11 +77,17 @@ public class MediaController {
     }
 		
 	@CrossOrigin(origins = "*")
-	@GetMapping(path = "/primaryfiles/search/findByItemOrFileName")
-	public @ResponseBody ItemSearchResponse searchFile(@RequestParam("keyword") String keyword, @RequestParam("mediaType") String mediaType) {	
+	@GetMapping(path = "/primaryfiles/search/findByKeywordMediaType")
+	public @ResponseBody ItemSearchResponse searchItemFile(@RequestParam("keyword") String keyword, @RequestParam("mediaType") String mediaType) {	
 		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
+		
+		// get accessible units for Read WorkflowResult (if none, access deny exception will be thrown)
+		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
+		// otherwise, all queries below are limited within the accessible units
+		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+
 		ItemSearchResponse res = new ItemSearchResponse();
-		res = mediaService.findItemOrFile(keyword, mediaType);
+		res = mediaService.searchItemFile(keyword, mediaType, acUnitIds);
 		return res;
 	}
 	

@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.service;
 
 import java.nio.file.Path;
+import java.util.Set;
 
 import edu.indiana.dlib.amppd.model.Asset;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -148,11 +149,12 @@ public interface MediaService {
 	public void cleanup();
 	
 	/**
-	 * Find items and/or primaryfiles with names containing the given keyword, and with media of the given media type. 
+	 * Find items and/or primaryfiles with names containing the given keyword, and with media of the given media type, within the accessible units.
 	 * @param keyword the given keyword
 	 * @param mediaType the given media type
+	 * @param acUnitIds IDs of the accessible units
 	 * @return an instance of ItemSearchResponse containing information of the found items/primaryfiles
 	 */
-	public ItemSearchResponse findItemOrFile(String keyword, String mediaType);
+	public ItemSearchResponse searchItemFile(String keyword, String mediaType, Set<Long> acUnitIds);
 	
 }

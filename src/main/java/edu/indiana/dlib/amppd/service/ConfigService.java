@@ -2,6 +2,8 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import edu.indiana.dlib.amppd.model.Unit;
+
 /**
  * Service for accessing AMP configurations. 
  * @author yingfeng
@@ -26,5 +28,11 @@ public interface ConfigService {
 	 * @return the array of allowed task managers
 	 */
 	public List<String> getTaskManagers();
+
+	/**
+	 * Refresh units from its corresponding csv file.
+	 * Note: This is a temporary workaround to initialize units, until we have UI to create/edit/delete units. 
+	 */
+	public List<Unit> refreshUnitTable();
 	
 }

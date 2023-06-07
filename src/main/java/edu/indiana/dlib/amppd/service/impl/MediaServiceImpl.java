@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -448,18 +449,23 @@ public class MediaServiceImpl implements MediaService {
     }
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.findItemOrFile(String, String)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.searchItemFile(String, String)
 	 */
 	@Override
-	public ItemSearchResponse findItemOrFile(String keyword, String mediaType) {
+	public ItemSearchResponse searchItemFile(String keyword, String mediaType, Set<Long> acUnitIds) {	
 		ItemSearchResponse response = new ItemSearchResponse();
 		List<ItemInfo> iteminfos = new ArrayList<ItemInfo>();
 
 		try {
-			List<Primaryfile> matchedFiles = primaryfileRepository.findActiveByCollectionOrItemOrFileName(keyword);
+			List<Primaryfile> matchedFiles = acUnitIds == null ?
+					primaryfileRepository.findActiveByKeyword(keyword) :
+					primaryfileRepository.findActiveByKeywordAC(keyword, acUnitIds);
+					
 			ItemInfo iteminfo = new ItemInfo();
 			List<PrimaryfileInfo> primaryfileinfos = new ArrayList<PrimaryfileInfo>();
 			long curr_item_id = 0;
+			
+			// TODO refactor below code and add logic to handle mediaType criteria, reuse logic in getPrimaryfilesForPartialWorkflow
 			for(Primaryfile p : matchedFiles) {
 				//reset if the current item is a new entry
 				if(p.getItem().getId() != curr_item_id && primaryfileinfos.size()>0) {
@@ -480,6 +486,7 @@ public class MediaServiceImpl implements MediaService {
 				PrimaryfileInfo primaryfileinfo = new PrimaryfileInfo(p.getId(), p.getName(), mime_type, p.getOriginalFilename());
 				primaryfileinfos.add(primaryfileinfo);
 			}
+			
 			//add the last item to the iteminfos
 			if(primaryfileinfos.size()>0) {
 				iteminfo.setPrimaryfiles(primaryfileinfos);

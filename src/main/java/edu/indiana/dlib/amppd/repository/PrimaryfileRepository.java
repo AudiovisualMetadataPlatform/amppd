@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,14 +26,17 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	@Query(value = "select p from Primaryfile p where lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.description) like lower(concat('%', :keyword,'%'))")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 
 		
-	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
+	@Query(value = "select p from Primaryfile p where (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByItemOrFileName(@Param("keyword") String keyword);
 	
-	@Query(value = "select p from Primaryfile p where ( lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
+	@Query(value = "select p from Primaryfile p where (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByCollectionOrItemOrFileName(@Param("keyword") String keyword);
 
-	@Query(value = "select p from Primaryfile p where ( p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%')))) order by p.item.id")
-	List<Primaryfile> findActiveByCollectionOrItemOrFileName(@Param("keyword") String keyword);
+	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
+	List<Primaryfile> findActiveByKeyword(String keyword);
+	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) and p.item.collection.unit.id in :acUnitIds order by p.item.id")
+	List<Primaryfile> findActiveByKeywordAC(String keyword, Set<Long> acUnitIds);
+
 
 	/* TODO 
 	 *  The API for primaryfile creation can be disabled by setting @RepositoryRestResource export = false for saveOnCreation.
