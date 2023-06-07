@@ -18,6 +18,8 @@ import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 
 	AmpUser findFirstByUsername(String username);
+	AmpUserBrief findFirstByUsernameAndPasswordAndStatus(String username, String password, Status status);
+
 	Optional<AmpUser> findByUsername(String username);
 	Optional<AmpUser> findByEmail(String email);			
 
@@ -40,10 +42,7 @@ public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, L
 	List<AmpUserBrief> findByStatusAndLastNameStartsWithIgnoreCaseAndIdNotInOrderByUsername(Status status, String nameStarting, List<Long> idsExcluding);
 	List<AmpUserBrief> findByStatusAndFirstNameStartsWithIgnoreCaseAndIdNotInOrderByUsername(Status status, String nameStarting, List<Long> idsExcluding);
 	List<AmpUserBrief> findByStatusAndUsernameStartsWithIgnoreCaseAndIdNotInOrderByUsername(Status status, String nameStarting, List<Long> idsExcluding);
-
-	@Query(value = "select 1 from AmpUser i where i.username = :username and i.password = :pswd and i.status=:status")
-	String findByApprovedUser(@Param("username") String username, @Param("pswd") String pswd, @Param("status") AmpUser.Status status);
-
+	
 	@Query(value = "select case when COUNT(*)>0 then true else false end from AmpUser i where i.username = :username")
 	boolean usernameExists(@Param("username") String username);
 

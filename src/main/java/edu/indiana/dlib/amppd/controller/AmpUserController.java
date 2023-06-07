@@ -21,8 +21,6 @@ import edu.indiana.dlib.amppd.model.AmpUser.Status;
 import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.security.JwtRequest;
-import edu.indiana.dlib.amppd.security.JwtResponse;
-import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
@@ -45,22 +43,18 @@ public class AmpUserController {
 	@Autowired
 	private AmpUserRepository ampUserRepository;
 
-	@Autowired
-	private JwtTokenUtil jwtTokenUtil;
-
 	@RequestMapping(value = "/account/authenticate", method = RequestMethod.POST)
-	public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+	public ResponseEntity<?> authenticate(@RequestBody JwtRequest authenticationRequest) throws Exception {
 		String username = authenticationRequest.getUsername();
 		AuthResponse response = ampUserService.authenticate(username, authenticationRequest.getPassword());
 
-		// authentication failed, respond with status 401
+		// if authentication failed, respond with status 401
 		if(!response.isSuccess()) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}	
 
-		// otherwise generate JWT token and respond with status 200
-		final String token = jwtTokenUtil.generateToken(username);
-		return ResponseEntity.ok(new JwtResponse(token));
+		// otherwise respond with user info and access token in status 200
+		return ResponseEntity.ok(response);
 	}
 
 	@RequestMapping(value = "/account/validate", method = RequestMethod.POST)
