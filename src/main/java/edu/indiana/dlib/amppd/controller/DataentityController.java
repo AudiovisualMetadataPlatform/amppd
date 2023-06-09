@@ -36,6 +36,7 @@ import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.SupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.model.projection.UnitSupplementBrief;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
@@ -567,9 +568,39 @@ public class DataentityController {
 	}
 	
 	/**
-	 * 
+	 * Find items with name/description matching the given keyword.
+	 * @param keyword the given keyword
+	 * @return list of items found
 	 */
 	@GetMapping(path = "/items/search")
 	public List<ItemBrief> findItems(String keyword) {
+		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Item);
+
+		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		// otherwise apply AC prefilter to query criteria	
+		List<ItemBrief> items = acUnitIds == null ?
+				itemRepository.findByKeyword(keyword) :
+				itemRepository.findByKeywordAC(keyword, acUnitIds);
+
+		log.info("Successfully found " + items.size() + " items matching keyword " + keyword);		
+		return items;
+	}
+	
+	/**
+	 * Get all the units readable to the current user.
+	 * @return the list of readable units
+	 */
+	@GetMapping("/units")
+	public Set<UnitBrief> getUnits() {
+		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit);
+
+		// otherwise if acUnitIds is null, i.e. user is admin, return all units
+		if (acUnitIds == null) {
+			acUnitIds = unitRepository.findByKeyword(keyword) :
+
+	}
+	
 	
 }

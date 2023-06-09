@@ -31,15 +31,35 @@ public class PermissionController {
 	
 	
 	/**
-	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments assoicated with.
-	 * @return the list of units the current user has access to
+	 * Check if the current user has permission to perform the given action or issue the given request in the given unit.
+	 * @param actionType type of the given action
+	 * @param targetType type of the given target
+	 * @param httpMethod HTTP method of the given request
+	 * @param urlPattern URL pattern of the given request
+	 * @param unitId ID of the given unit
+	 * @return true if the user has the permission; false otherwise
 	 */
-	@GetMapping("/permissions/units")
-	public Set<UnitBrief> getAccessibleUnits() {
-		log.info("Retrieving all units the current user has access to ...");
-		return permissionService.getAccessibleUnits();
+	@GetMapping("/permissions/has")
+	public boolean hasPermission(
+			@RequestParam(required = false) ActionType actionType, 
+			@RequestParam(required = false) TargetType targetType, 
+			@RequestParam(required = false) HttpMethod httpMethod, 
+			@RequestParam(required = false) String urlPattern, 
+			@RequestParam(required = false) Long unitId) {
+		boolean has = false;
+		
+		if (actionType != null && targetType != null) {
+			has = permissionService.hasPermsion(actionType, targetType, unitId);
+			log.info("Checking current user permission to perform action " + actionType + " on target " + targetType + " in unit " + unitId);
+		}
+		else if (httpMethod != null && urlPattern != null) {
+			has = permissionService.hasPermsion(httpMethod, urlPattern, unitId);
+			log.info("Checking current user permission to issue request " + httpMethod + " " + urlPattern + " in unit " +  + unitId);
+		} 
+		
+		return has;
 	}
-	
+		
 	/**
 	 * Get the actions the current (non-admin) user can perform, given the list of actionTypes, targetTypes and units;
 	 * if actionTypes not provided, get for all actionTypes;
@@ -75,34 +95,13 @@ public class PermissionController {
 	}
 	
 	/**
-	 * Check if the current user has permission to perform the given action or issue the given request in the given unit.
-	 * @param actionType type of the given action
-	 * @param targetType type of the given target
-	 * @param httpMethod HTTP method of the given request
-	 * @param urlPattern URL pattern of the given request
-	 * @param unitId ID of the given unit
-	 * @return true if the user has the permission; false otherwise
+	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments assoicated with.
+	 * @return the list of units the current user has access to
 	 */
-	@GetMapping("/permissions/has")
-	public boolean hasPermission(
-			@RequestParam(required = false) ActionType actionType, 
-			@RequestParam(required = false) TargetType targetType, 
-			@RequestParam(required = false) HttpMethod httpMethod, 
-			@RequestParam(required = false) String urlPattern, 
-			@RequestParam(required = false) Long unitId) {
-		boolean has = false;
-		
-		if (actionType != null && targetType != null) {
-			has = permissionService.hasPermsion(actionType, targetType, unitId);
-			log.info("Checking current user permission to perform action " + actionType + " on target " + targetType + " in unit " + unitId);
-		}
-		else if (httpMethod != null && urlPattern != null) {
-			has = permissionService.hasPermsion(httpMethod, urlPattern, unitId);
-			log.info("Checking current user permission to issue request " + httpMethod + " " + urlPattern + " in unit " +  + unitId);
-		} 
-		
-		return has;
+	@GetMapping("/permissions/units")
+	public Set<UnitBrief> getAccessibleUnits() {
+		log.info("Retrieving all units the current user has access to ...");
+		return permissionService.getAccessibleUnits();
 	}
-		
-
+	
 }
