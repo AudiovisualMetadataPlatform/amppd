@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.service;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -73,7 +74,7 @@ public interface PermissionService {
 	 * @param targetType targetType of the given action
 	 * @return the set of accessible units (empty if the user can't perform the action in any unit), or null if the user is admin; 
 	 */
-	public Set<UnitBrief> getAccessibleUnits(ActionType actionType, TargetType targetType);
+	public ImmutablePair<Set<Long>, Set<UnitBrief>> getAccessibleUnits(ActionType actionType, TargetType targetType);
 
 	/**
 	 * Get the IDs of the units in which the current user can perform the given action. 

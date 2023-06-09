@@ -573,7 +573,7 @@ public class DataentityController {
 	 * @return list of items found
 	 */
 	@GetMapping(path = "/items/search")
-	public List<ItemBrief> findItems(String keyword) {
+	public List<ItemBrief> findItems(@RequestParam String keyword) {
 		// get accessible units for Read Item, if none, access denied exception will be thrown
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Item);
 
@@ -594,13 +594,14 @@ public class DataentityController {
 	@GetMapping("/units")
 	public Set<UnitBrief> getUnits() {
 		// get accessible units for Read Unit, empty list indicates no unit readable
-		Set<UnitBrief> units = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit);
+		Set<UnitBrief> units = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit).right;
 		
 		// if units is null, i.e. user is admin, return all units
 		if (units == null) {
-			units = unitRepository.findAllProjectedBy();
+			units = unitRepository.findBy();
 		}
 	
+		log.info("Successfully retrieved " + units.size() + " units.");
 		return units;
 	}
 	

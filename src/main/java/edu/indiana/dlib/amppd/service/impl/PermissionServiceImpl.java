@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
@@ -168,16 +169,17 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnitIds()
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
 	 */
 	@Override
 	public Set<UnitBrief> getAccessibleUnits() {
 		Set<UnitBrief> units = new HashSet<UnitBrief>();
+		Set<Long> unitIds = new HashSet<Long>();
 
 		// if current user is AMP Admin, then all units are accessible
 		AmpUser user = ampUserService.getCurrentUser();		
 		if (roleAssignService.isAdmin()) {
-			units = unitRepository.findAllProjectedBy();			
+			units = unitRepository.findBy();			
 			log.info("The current user " + user.getUsername() + " is Admin and has access to all " + units.size() + " units." );
 			return units;
 		}
@@ -188,6 +190,9 @@ public class PermissionServiceImpl implements PermissionService {
 		// retrieve the associated units
 		for (RoleAssignmentDetailActions ra : ras) {
 			UnitBrief unit = ra.getUnit();
+			Long unitId = unit.getId();
+			if (unitIds.contains(unitId)) continue;			
+			unitIds.add(unitId);
 			units.add(unit);
 		}
 		
@@ -199,12 +204,13 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits(ActionType, TargetType)
 	 */
 	@Override
-	public Set<UnitBrief> getAccessibleUnits(ActionType actionType, TargetType targetType) {
+	public ImmutablePair<Set<Long>, Set<UnitBrief>> getAccessibleUnits(ActionType actionType, TargetType targetType) {
 		Set<UnitBrief> units = new HashSet<UnitBrief>();
+		Set<Long> unitIds = new HashSet<Long>();
 
 		// return null to signal that the current user is AMP Admin, in which case all units are accessible
 		AmpUser user = ampUserService.getCurrentUser();		
-		if (roleAssignService.isAdmin()) return null;
+		if (roleAssignService.isAdmin()) return ImmutablePair.of(null, null);
 			
 		// find all role assignments for current user
 		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
@@ -212,20 +218,26 @@ public class PermissionServiceImpl implements PermissionService {
 		// retrieve the associated units if the role can perform the action
 		for (RoleAssignmentDetailActions ra : ras) {
 			UnitBrief unit = ra.getUnit();
+			Long unitId = unit.getId();
 		
 			// skip if the unit of this assignment is already included
-			if (units.contains(unit)) continue;
+			// Note that set of UnitBrief doesn't work directly, as its equals method isn't inherited from Unit, which is based on ID;
+			// rather, comparison is based on object ID as is with Object, but object ID of instance retrieved from DB differs on each read
+			// there isn't a way to override equals method on UnitBrief as it's an interface
+			// the workaround is to use a set of unit IDs to maintain uniqueness
+			if (unitIds.contains(unitId)) continue;			
 			
 			// include the unit of this assignment if the role can perform the action
 			for (ActionBrief action : ra.getRole().getActions()) {
 				if (action.getActionType() == actionType && action.getTargetType() == targetType) {
+					unitIds.add(unitId);
 					units.add(unit);
 					break;
 				}
 			}
 		}
 		
-		return units;
+		return ImmutablePair.of(unitIds, units);
 	}
 	
 	/**
@@ -233,28 +245,22 @@ public class PermissionServiceImpl implements PermissionService {
 	 */
 	@Override
 	public Set<Long> getAccessibleUnitIds(ActionType actionType, TargetType targetType) {
-		Set<Long> unitIds = new HashSet<Long>();
-		
 		// get accessible units for the action
-		Set<UnitBrief> units = getAccessibleUnits(actionType, targetType);		
+		Set<Long> unitIds = getAccessibleUnits(actionType, targetType).left;		
 		
 		// if units is null, i.e. current user is AMP Admin, return null as well to indicate no restraints on unit ID
-		if (units == null ) {
+		if (unitIds == null ) {
 			log.info("The current user is admin and can perform action " + actionType + " " + targetType + " in any unit." );
 			return null;
 		}
 			
 		// otherwise, if units is empty, throw access denied exception as the user can't perform the action in any unit
-		if (units.isEmpty()) {
+		if (unitIds.isEmpty()) {
 			throw new AccessDeniedException("The current user cannot perform action " + actionType + " " + targetType  + " in any unit.");
 		}
 		
-		// otherwise retrieve the accessible units IDs
-		for (UnitBrief unit : units) {
-			unitIds.add(unit.getId());
-		}
-		
-		log.info("The current user can perform action " + actionType + " " + targetType + " in " + units.size() + " units." );
+		// otherwise return the accessible units IDs
+		log.info("The current user can perform action " + actionType + " " + targetType + " in " + unitIds.size() + " units." );
 		return unitIds;
 	}
 	

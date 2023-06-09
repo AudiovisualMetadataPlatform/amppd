@@ -11,6 +11,6 @@ import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 public interface UnitRepository extends DataentityRepository<Unit> {
 	
 	Unit findFirstByName(String name);
-	Set<UnitBrief> findAllProjectedBy();
+	Set<UnitBrief> findBy();
 	
 }
