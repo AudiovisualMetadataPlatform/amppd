@@ -155,6 +155,6 @@ public interface MediaService {
 	 * @param acUnitIds IDs of the accessible units
 	 * @return an instance of ItemSearchResponse containing information of the found items/primaryfiles
 	 */
-	public ItemSearchResponse searchItemFile(String keyword, String mediaType, Set<Long> acUnitIds);
+	public ItemSearchResponse searchItemFiles(String keyword, String mediaType, Set<Long> acUnitIds);
 	
 }

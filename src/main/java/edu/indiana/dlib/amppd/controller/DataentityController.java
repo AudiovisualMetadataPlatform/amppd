@@ -32,9 +32,11 @@ import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.SupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.model.projection.UnitSupplementBrief;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
@@ -536,8 +538,8 @@ public class DataentityController {
 	 */
 	@GetMapping(path = "/supplements")
 	public List<SupplementBrief> getSupplements() {
-		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Supplement);
+		// get accessible units for Read Supplement, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Supplement);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		// otherwise apply AC prefilter to query criteria	
@@ -563,6 +565,44 @@ public class DataentityController {
 		
 		log.info("Successfully retrieved " + supplements.size() + " supplements.");
 		return supplements;
+	}
+	
+	/**
+	 * Find items with name/description matching the given keyword.
+	 * @param keyword the given keyword
+	 * @return list of items found
+	 */
+	@GetMapping(path = "/items/search")
+	public List<ItemBrief> findItems(@RequestParam String keyword) {
+		// get accessible units for Read Item, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Item);
+
+		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		// otherwise apply AC prefilter to query criteria	
+		List<ItemBrief> items = acUnitIds == null ?
+				itemRepository.findByKeyword(keyword) :
+				itemRepository.findByKeywordAC(keyword, acUnitIds);
+
+		log.info("Successfully found " + items.size() + " items matching keyword " + keyword);		
+		return items;
+	}
+	
+	/**
+	 * Get all the units readable by the current user.
+	 * @return the list of readable units
+	 */
+	@GetMapping("/units")
+	public Set<UnitBrief> getUnits() {
+		// get accessible units for Read Unit, empty list indicates no unit readable
+		Set<UnitBrief> units = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit).right;
+		
+		// if units is null, i.e. user is admin, return all units
+		if (units == null) {
+			units = unitRepository.findBy();
+		}
+	
+		log.info("Successfully retrieved " + units.size() + " units.");
+		return units;
 	}
 	
 }

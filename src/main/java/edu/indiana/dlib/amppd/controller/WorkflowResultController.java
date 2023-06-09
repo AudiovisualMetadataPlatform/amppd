@@ -99,10 +99,10 @@ public class WorkflowResultController {
 			@RequestParam(required = false) String mediaType, 
 			@RequestParam(required = false) String keyword, 
 			@RequestParam List<String> outputTypes) {
-		// get accessible units for Read WorkflowResult (if none, access deny exception will be thrown)
+		// get accessible units for Read WorkflowResult (if none, access denied exception will be thrown)
 		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
 		// otherwise, all queries on WorkflowResult below are limited within the accessible units
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.WorkflowResult);
 		ItemSearchResponse response = new ItemSearchResponse();		
 				
 		// ensure that keyword has a value for below query
@@ -122,8 +122,8 @@ public class WorkflowResultController {
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
 		List<PrimaryfileIdInfo> pidis = acUnitIds == null ?
-				workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes) :
-				workflowResultRepository.findPrimaryfileIdsByOutputTypesAC(keyword, outputTypes, acUnitIds);
+				workflowResultRepository.findPrimaryfileIdsByOutputType(keyword, outputTypes) :
+				workflowResultRepository.findPrimaryfileIdsByOutputTypeAC(keyword, outputTypes, acUnitIds);
 		List<ItemInfo> itemis = response.getItems();	
 		ItemInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles

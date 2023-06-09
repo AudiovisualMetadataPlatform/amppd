@@ -449,10 +449,10 @@ public class MediaServiceImpl implements MediaService {
     }
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.MediaService.searchItemFile(String, String)
+	 * @see edu.indiana.dlib.amppd.service.MediaService.searchItemFiles(String, String)
 	 */
 	@Override
-	public ItemSearchResponse searchItemFile(String keyword, String mediaType, Set<Long> acUnitIds) {	
+	public ItemSearchResponse searchItemFiles(String keyword, String mediaType, Set<Long> acUnitIds) {	
 		ItemSearchResponse response = new ItemSearchResponse();
 		List<ItemInfo> iteminfos = new ArrayList<ItemInfo>();
 

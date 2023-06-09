@@ -187,9 +187,9 @@ public class MediaServiceTests {
 	public void shouldFindItemOrFileByCollectionName() {
 		String collectionName=primaryfile.getItem().getCollection().getName();
 		String mediaType="000";
-		ItemSearchResponse response= mediaService.searchItemFile(collectionName.substring(0,4),mediaType, null);
+		ItemSearchResponse response= mediaService.searchItemFiles(collectionName.substring(0,4),mediaType, null);
 		Assert.assertTrue(response.getItems().size()>=2);
-		ItemSearchResponse collectionSearchResponse= mediaService.searchItemFile(collectionName,mediaType, null);
+		ItemSearchResponse collectionSearchResponse= mediaService.searchItemFiles(collectionName,mediaType, null);
 		Assert.assertEquals(collectionName, collectionSearchResponse.getItems().get(0).getCollectionName());
 	}
 	
@@ -197,9 +197,9 @@ public class MediaServiceTests {
     public void shouldFindItemOrFileByItemName() {
 		String ItemName=primaryfile.getItem().getName();
 		String mediaType="000";
-		ItemSearchResponse response= mediaService.searchItemFile(ItemName.substring(0,4),mediaType, null);
+		ItemSearchResponse response= mediaService.searchItemFiles(ItemName.substring(0,4),mediaType, null);
 		Assert.assertTrue(response.getItems().size()>=2);
-		ItemSearchResponse itemSearchResponse= mediaService.searchItemFile(ItemName,mediaType, null);
+		ItemSearchResponse itemSearchResponse= mediaService.searchItemFiles(ItemName,mediaType, null);
 		Assert.assertEquals(ItemName,itemSearchResponse.getItems().get(0).getItemName());
 	}	
 	
@@ -207,9 +207,9 @@ public class MediaServiceTests {
     public void shouldFindItemOrFileByPrimaryfileName() {
 		String primaryfileName=primaryfile.getName();
 		String mediaType="000";
-		ItemSearchResponse response= mediaService.searchItemFile(primaryfileName.substring(0,4),mediaType, null);
+		ItemSearchResponse response= mediaService.searchItemFiles(primaryfileName.substring(0,4),mediaType, null);
 		Assert.assertTrue(response.getItems().size()>=2);
-		ItemSearchResponse fileSearchResponse= mediaService.searchItemFile(primaryfileName,mediaType, null);
+		ItemSearchResponse fileSearchResponse= mediaService.searchItemFiles(primaryfileName,mediaType, null);
 		Assert.assertEquals(primaryfileName,fileSearchResponse.getItems().get(0).getPrimaryfiles().get(0).getName());
 	}	
 	
@@ -217,7 +217,7 @@ public class MediaServiceTests {
 	public void shouldNotFindItemorFileForInvalidString() {
 		String keyword="zjxzzg";
 		String mediaType="000";
-		ItemSearchResponse response= mediaService.searchItemFile(keyword,mediaType, null);
+		ItemSearchResponse response= mediaService.searchItemFiles(keyword,mediaType, null);
 		Assert.assertTrue(response.isSuccess());
 		Assert.assertNull(response.getItems());
 	}

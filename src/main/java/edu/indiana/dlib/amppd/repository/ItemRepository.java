@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -26,7 +27,9 @@ public interface ItemRepository extends ContentRepository<Item> {
 	//	@Query(value = "select i from Item i where lower(i.name) like %:#{keyword.toLowerCase()}% or lower(i.description) like %:#{keyword.toLowerCase()}%")
 	
 	@Query(value = "select i from Item i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
-	List<Item> findByKeyword(@Param("keyword") String keyword);		
+	List<ItemBrief> findByKeyword(@Param("keyword") String keyword);		
+	@Query(value = "select i from Item i where (lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))) and i.collection.unit.id in :acUnitIds")
+	List<ItemBrief> findByKeywordAC(@Param("keyword") String keyword, Set<Long> acUnitIds);		
 	
 	@Modifying
 	@Query(value = "update Item set name = :name where id = :id") 
