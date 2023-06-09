@@ -78,16 +78,22 @@ public class MediaController {
 		
 	@CrossOrigin(origins = "*")
 	@GetMapping(path = "/primaryfiles/search/findByKeywordMediaType")
-	public @ResponseBody ItemSearchResponse searchItemFile(@RequestParam("keyword") String keyword, @RequestParam("mediaType") String mediaType) {	
+	public @ResponseBody ItemSearchResponse searchItemFiles(@RequestParam("keyword") String keyword, @RequestParam("mediaType") String mediaType) {	
 		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		
-		// get accessible units for Read WorkflowResult (if none, access deny exception will be thrown)
+		/* Note: 
+		 * Create WorkflowResult instead of Read Item/Primaryfile permission is used here,
+		 * because this search action is solely used for submitting PFiles to a workflow; 
+		 * if AC defined properly, the former is a stronger privilege than the latter.
+		 * We need to make sure the search results are all good for workflow submission.
+		 */		
+		// get accessible units for Create WorkflowResult (if none, access deny exception will be thrown)
 		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
 		// otherwise, all queries below are limited within the accessible units
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Create, TargetType.WorkflowResult);
 
 		ItemSearchResponse res = new ItemSearchResponse();
-		res = mediaService.searchItemFile(keyword, mediaType, acUnitIds);
+		res = mediaService.searchItemFiles(keyword, mediaType, acUnitIds);
 		return res;
 	}
 	

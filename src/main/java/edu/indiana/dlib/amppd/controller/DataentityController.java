@@ -32,6 +32,7 @@ import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.SupplementBrief;
@@ -564,5 +565,11 @@ public class DataentityController {
 		log.info("Successfully retrieved " + supplements.size() + " supplements.");
 		return supplements;
 	}
+	
+	/**
+	 * 
+	 */
+	@GetMapping(path = "/items/search")
+	public List<ItemBrief> findItems(String keyword) {
 	
 }
