@@ -87,10 +87,10 @@ public class MediaController {
 		 * if AC defined properly, the former is a stronger privilege than the latter.
 		 * We need to make sure the search results are all good for workflow submission.
 		 */		
-		// get accessible units for Create WorkflowResult (if none, access deny exception will be thrown)
+		// get accessible units for Create WorkflowResult (if none, access denied exception will be thrown)
 		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
 		// otherwise, all queries below are limited within the accessible units
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Create, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Create, TargetType.WorkflowResult);
 
 		ItemSearchResponse res = new ItemSearchResponse();
 		res = mediaService.searchItemFiles(keyword, mediaType, acUnitIds);

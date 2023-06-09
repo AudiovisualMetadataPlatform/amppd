@@ -99,10 +99,10 @@ public class WorkflowResultController {
 			@RequestParam(required = false) String mediaType, 
 			@RequestParam(required = false) String keyword, 
 			@RequestParam List<String> outputTypes) {
-		// get accessible units for Read WorkflowResult (if none, access deny exception will be thrown)
+		// get accessible units for Read WorkflowResult (if none, access denied exception will be thrown)
 		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
 		// otherwise, all queries on WorkflowResult below are limited within the accessible units
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.WorkflowResult);
 		ItemSearchResponse response = new ItemSearchResponse();		
 				
 		// ensure that keyword has a value for below query

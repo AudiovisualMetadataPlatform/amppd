@@ -538,8 +538,8 @@ public class DataentityController {
 	 */
 	@GetMapping(path = "/supplements")
 	public List<SupplementBrief> getSupplements() {
-		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Supplement);
+		// get accessible units for Read Supplement, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Supplement);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		// otherwise apply AC prefilter to query criteria	
@@ -574,8 +574,8 @@ public class DataentityController {
 	 */
 	@GetMapping(path = "/items/search")
 	public List<ItemBrief> findItems(String keyword) {
-		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Item);
+		// get accessible units for Read Item, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Item);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		// otherwise apply AC prefilter to query criteria	
@@ -588,19 +588,20 @@ public class DataentityController {
 	}
 	
 	/**
-	 * Get all the units readable to the current user.
+	 * Get all the units readable by the current user.
 	 * @return the list of readable units
 	 */
 	@GetMapping("/units")
 	public Set<UnitBrief> getUnits() {
-		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
-		Set<Long> acUnitIds = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit);
-
-		// otherwise if acUnitIds is null, i.e. user is admin, return all units
-		if (acUnitIds == null) {
-			acUnitIds = unitRepository.findByKeyword(keyword) :
-
-	}
+		// get accessible units for Read Unit, empty list indicates no unit readable
+		Set<UnitBrief> units = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit);
+		
+		// if units is null, i.e. user is admin, return all units
+		if (units == null) {
+			units = unitRepository.findAllProjectedBy();
+		}
 	
+		return units;
+	}
 	
 }

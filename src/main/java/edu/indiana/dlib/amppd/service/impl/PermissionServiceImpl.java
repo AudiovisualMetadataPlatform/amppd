@@ -168,7 +168,7 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits()
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnitIds()
 	 */
 	@Override
 	public Set<UnitBrief> getAccessibleUnits() {
@@ -199,40 +199,62 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnits(ActionType, TargetType)
 	 */
 	@Override
-	public Set<Long> getAccessibleUnits(ActionType actionType, TargetType targetType) {
-		Set<Long> unitIds = new HashSet<Long>();
+	public Set<UnitBrief> getAccessibleUnits(ActionType actionType, TargetType targetType) {
+		Set<UnitBrief> units = new HashSet<UnitBrief>();
 
-		// if current user is AMP Admin, then all units are accessible, return null to indicate no restraints on unit ID
+		// return null to signal that the current user is AMP Admin, in which case all units are accessible
 		AmpUser user = ampUserService.getCurrentUser();		
-		if (roleAssignService.isAdmin()) {
-			log.info("The current user " + user.getUsername() + " is admin and can perform action <" + actionType + ", " + targetType + "> in all units." );
-			return null;
-		}
+		if (roleAssignService.isAdmin()) return null;
 			
 		// find all role assignments for current user
 		List<RoleAssignmentDetailActions> ras = roleAssignmentRepository.findByUserIdAndUnitIdNotNull(user.getId());
 		
 		// retrieve the associated units if the role can perform the action
 		for (RoleAssignmentDetailActions ra : ras) {
-			// skip if the unit ID of this assignment is already included
-			if (unitIds.contains(ra.getUnitId())) continue;
+			UnitBrief unit = ra.getUnit();
+		
+			// skip if the unit of this assignment is already included
+			if (units.contains(unit)) continue;
 			
-			// include the unit ID of this assignment if the role can perform the action
+			// include the unit of this assignment if the role can perform the action
 			for (ActionBrief action : ra.getRole().getActions()) {
 				if (action.getActionType() == actionType && action.getTargetType() == targetType) {
-					Long unitId = ra.getUnit().getId();
-					unitIds.add(unitId);
+					units.add(unit);
 					break;
 				}
 			}
 		}
 		
-		// throw access denied exception if the user can't perform the action in any unit at all
-		if (unitIds.isEmpty()) {
-			throw new AccessDeniedException("The current user " + user.getUsername() + " cannot perform action " + actionType + " " + targetType  + " in any unit.");
+		return units;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAccessibleUnitIds(ActionType, TargetType)
+	 */
+	@Override
+	public Set<Long> getAccessibleUnitIds(ActionType actionType, TargetType targetType) {
+		Set<Long> unitIds = new HashSet<Long>();
+		
+		// get accessible units for the action
+		Set<UnitBrief> units = getAccessibleUnits(actionType, targetType);		
+		
+		// if units is null, i.e. current user is AMP Admin, return null as well to indicate no restraints on unit ID
+		if (units == null ) {
+			log.info("The current user is admin and can perform action " + actionType + " " + targetType + " in any unit." );
+			return null;
+		}
+			
+		// otherwise, if units is empty, throw access denied exception as the user can't perform the action in any unit
+		if (units.isEmpty()) {
+			throw new AccessDeniedException("The current user cannot perform action " + actionType + " " + targetType  + " in any unit.");
 		}
 		
-		log.info("The current user " + user.getUsername() + " can perform action " + actionType + " " + targetType + " in " + unitIds.size() + " units." );
+		// otherwise retrieve the accessible units IDs
+		for (UnitBrief unit : units) {
+			unitIds.add(unit.getId());
+		}
+		
+		log.info("The current user can perform action " + actionType + " " + targetType + " in " + units.size() + " units." );
 		return unitIds;
 	}
 	
@@ -241,8 +263,8 @@ public class PermissionServiceImpl implements PermissionService {
 	 */
 	@Override
 	public Set<Long> prefilter(WorkflowResultSearchQuery query) {
-		// get accessible units for Read WorkflowResult, if none, access deny exception will be thrown
-		Set<Long> acUnitIds = getAccessibleUnits(ActionType.Read, TargetType.WorkflowResult);
+		// get accessible units for Read WorkflowResult, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = getAccessibleUnitIds(ActionType.Read, TargetType.WorkflowResult);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		if (acUnitIds == null) return acUnitIds;
