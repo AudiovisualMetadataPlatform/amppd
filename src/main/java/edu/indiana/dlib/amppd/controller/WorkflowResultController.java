@@ -122,8 +122,8 @@ public class WorkflowResultController {
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
 		List<PrimaryfileIdInfo> pidis = acUnitIds == null ?
-				workflowResultRepository.findPrimaryfileIdsByOutputTypes(keyword, outputTypes) :
-				workflowResultRepository.findPrimaryfileIdsByOutputTypesAC(keyword, outputTypes, acUnitIds);
+				workflowResultRepository.findPrimaryfileIdsByOutputType(keyword, outputTypes) :
+				workflowResultRepository.findPrimaryfileIdsByOutputTypeAC(keyword, outputTypes, acUnitIds);
 		List<ItemInfo> itemis = response.getItems();	
 		ItemInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
