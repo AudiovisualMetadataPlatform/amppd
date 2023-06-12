@@ -3,9 +3,11 @@ rest:
     logging_path: logs
     storage_path: media
     dropbox_path: dropbox
-    symlink_path: symlinks
     mgm_evaluation_scripts_root: mgm_scoring_tools
     
+    # symlink location (relative to amp:data_root)
+    symlink_dir: symlinks
+
     # mediaprobe location (relative to amp:data_root)
     mediaprobe_dir: MediaProbe
 
