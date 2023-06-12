@@ -412,11 +412,15 @@ public class WorkflowEditProxy {
 		// generate a workflow edit token corresponding to the authorization token and workflow ID
 		String wfeToken = jwtTokenUtil.generateWorkflowEditToken(authToken, workflowId);
 		
+		/* Note:
+		 * Setting secure=false allows WF editor to work with VM when accessing UI from a browser outside of VM,  i.e. 
+		 * with http on hosts other than localhost. Meanwhile, Setting sameSite=Strict blocks cross-site access for security.
+		 */
     	// wrap the workflow edit token in a cookie 
 		ResponseCookie rc = ResponseCookie.from(WORKFLOW_EDIT_COOKIE, wfeToken) // key & value
 		        .httpOnly(true)
-		        .secure(true)
-		        .sameSite("None")  // TODO change this to LAX once done with workflow editor UI dev
+		        .secure(false)	
+		        .sameSite("Strict")  
 		        .path(context.getContextPath() + GALAXY_ROOT)
 		        .maxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60)
 		        .build();

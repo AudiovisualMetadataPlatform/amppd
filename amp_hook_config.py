@@ -189,7 +189,7 @@ def main():
             f.write(f"amppd.url = http://{config['amp']['host']}:{config['amp']['port']}/rest\n")
         #  amppdui.documentRoot -- this should be somewhere in the tomcat tree.
         f.write(f"amppdui.documentRoot = {amp_root}/tomcat/webapps/ROOT\n")
-        f.write(f"amppdui.symlinkDir = {amp_root}/{config['amp']['data_root']}/symlinks\n")
+        f.write(f"amppdui.symlinkDir = {amp_root}/tomcat/webapps/ROOT/symlinks\n")
                         
         f.write("# boilerplate properties\n")
         for k,v in config['rest']['properties'].items():
