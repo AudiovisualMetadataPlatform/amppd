@@ -110,6 +110,7 @@ def main():
             # Directories
             'amppd.fileStorageRoot': (['rest', 'storage_path'], 'media', 'path_rel', ['amp', 'data_root']),
             'amppd.dropboxRoot': (['rest', 'dropbox_path'], 'dropbox', 'path_rel', ['amp', 'data_root']),
+            'amppdui.symlinkDir': (['rest', 'symlink_path'], 'symlinks', 'path_rel', ['amp', 'data_root']),
             'logging.path': (['rest', 'logging_path'], 'logs', 'path_rel', ['amp', 'data_root']),
             'amppd.mediaprobeDir': (['rest', 'mediaprobe_dir'], 'MediaProbe', 'path_rel', ['amp', 'data_root']),
             'amppd.mgmEvaluationScriptsRoot': (['rest', 'mgm_evaluation_scripts_root'], 'mgm_scoring_tools', 'path_rel', ['amp', 'amp_root']),
@@ -189,7 +190,6 @@ def main():
             f.write(f"amppd.url = http://{config['amp']['host']}:{config['amp']['port']}/rest\n")
         #  amppdui.documentRoot -- this should be somewhere in the tomcat tree.
         f.write(f"amppdui.documentRoot = {amp_root}/tomcat/webapps/ROOT\n")
-        f.write(f"amppdui.symlinkDir = {amp_root}/tomcat/webapps/ROOT/symlinks\n")
                         
         f.write("# boilerplate properties\n")
         for k,v in config['rest']['properties'].items():

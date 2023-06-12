@@ -100,17 +100,18 @@ public class MediaServiceImpl implements MediaService {
 
 	@Autowired
 	public MediaServiceImpl(AmppdUiPropertyConfig amppduiConfig) {
-		// initialize Amppd UI Apache server media root folder 
+		// initialize Tomcat server static content folder for symlinks to media files 
 		try {
-			root = Paths.get(amppduiConfig.getDocumentRoot(), amppduiConfig.getSymlinkDir());
+//			root = Paths.get(amppduiConfig.getDocumentRoot(), amppduiConfig.getSymlinkDir());
+			root = Paths.get(amppduiConfig.getSymlinkDir());
 			Files.createDirectories(root);	// creates root directory if not already exists
 			log.info("Media symlink root directory " + root + " has been created." );
 		}
 		catch (IOException e) {
 			throw new StorageException("Could not initialize media symlink root directory " + root, e);
 		}		
-	}	
-	
+	}			
+
 	/**
 	 * @see eedu.indiana.dlib.amppd.service.MediaService.isMediaTypeAV(String)
 	 */
