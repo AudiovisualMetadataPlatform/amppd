@@ -102,8 +102,7 @@ public class MediaServiceImpl implements MediaService {
 	public MediaServiceImpl(AmppdUiPropertyConfig amppduiConfig) {
 		// initialize Tomcat server static content folder for symlinks to media files 
 		try {
-//			root = Paths.get(amppduiConfig.getDocumentRoot(), amppduiConfig.getSymlinkDir());
-			root = Paths.get(amppduiConfig.getSymlinkDir());
+			root = Paths.get(amppdPropertyConfig.getSymlinkRoot(), amppdPropertyConfig.getSymlinkDir());
 			Files.createDirectories(root);	// creates root directory if not already exists
 			log.info("Media symlink root directory " + root + " has been created." );
 		}
@@ -261,7 +260,7 @@ public class MediaServiceImpl implements MediaService {
 	public String getPrimaryfileSymlinkUrl(Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
 		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
-		String url = serverUrl + amppduiConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
+		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
 		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
 		return url;
 	}
@@ -273,7 +272,7 @@ public class MediaServiceImpl implements MediaService {
 	public String getWorkflowResultOutputSymlinkUrl(Long id) {
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
 		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
-		String url = serverUrl + amppduiConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
+		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
 		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
 		return url;
 	}

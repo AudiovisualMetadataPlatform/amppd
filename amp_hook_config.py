@@ -50,7 +50,7 @@ def main():
             config = load_amp_config()
 
     # inject the amp.data_root value into the config since it is now passed via AMP_DATA_ROOT
-    config['amp']['data_root'] = os.environ['AMP_DATA_ROOT']
+    data_root = config['amp']['data_root'] = os.environ['AMP_DATA_ROOT']
     config['amp']['amp_root'] = amp_root
 
     """Create the configuration file for the AMP REST service"""
@@ -108,10 +108,10 @@ def main():
             # AMPUI properties           
             'amppdui.hmgmSecretKey': (['mgms', 'hmgm', 'auth_key'], None),
             # Directories
+            'logging.path': (['rest', 'logging_path'], 'logs', 'path_rel', ['amp', 'data_root']),
             'amppd.fileStorageRoot': (['rest', 'storage_path'], 'media', 'path_rel', ['amp', 'data_root']),
             'amppd.dropboxRoot': (['rest', 'dropbox_path'], 'dropbox', 'path_rel', ['amp', 'data_root']),
-            'amppdui.symlinkDir': (['rest', 'symlink_path'], 'symlinks', 'path_rel', ['amp', 'data_root']),
-            'logging.path': (['rest', 'logging_path'], 'logs', 'path_rel', ['amp', 'data_root']),
+            'amppd.symlinkDir': (['rest', 'symlink_dir'], 'symlinks', 'path_rel', ['amp', 'data_root']),
             'amppd.mediaprobeDir': (['rest', 'mediaprobe_dir'], 'MediaProbe', 'path_rel', ['amp', 'data_root']),
             'amppd.mgmEvaluationScriptsRoot': (['rest', 'mgm_evaluation_scripts_root'], 'mgm_scoring_tools', 'path_rel', ['amp', 'amp_root']),
             # Avalon integration
@@ -190,6 +190,8 @@ def main():
             f.write(f"amppd.url = http://{config['amp']['host']}:{config['amp']['port']}/rest\n")
         #  amppdui.documentRoot -- this should be somewhere in the tomcat tree.
         f.write(f"amppdui.documentRoot = {amp_root}/tomcat/webapps/ROOT\n")
+        #  amppd.symlinkRoot is data_root
+        f.write(f"amppd.symlinkRoot = {data_root}\n")
                         
         f.write("# boilerplate properties\n")
         for k,v in config['rest']['properties'].items():

@@ -24,6 +24,8 @@ public class AmppdPropertyConfig {
     @NotNull private String environment;
     @NotNull private String fileStorageRoot;
     @NotNull private String dropboxRoot;
+    @NotNull private String symlinkRoot;
+    @NotNull private String symlinkDir;
     @NotNull private String mgmEvaluationScriptsRoot;
     @NotNull private String pythonPath;
     @NotNull private String mediaprobeDir;
