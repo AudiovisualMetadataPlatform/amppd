@@ -111,7 +111,6 @@ def main():
             'logging.path': (['rest', 'logging_path'], 'logs', 'path_rel', ['amp', 'data_root']),
             'amppd.fileStorageRoot': (['rest', 'storage_path'], 'media', 'path_rel', ['amp', 'data_root']),
             'amppd.dropboxRoot': (['rest', 'dropbox_path'], 'dropbox', 'path_rel', ['amp', 'data_root']),
-            'amppd.symlinkDir': (['rest', 'symlink_dir'], 'symlinks', 'path_rel', ['amp', 'data_root']),
             'amppd.mediaprobeDir': (['rest', 'mediaprobe_dir'], 'MediaProbe', 'path_rel', ['amp', 'data_root']),
             'amppd.mgmEvaluationScriptsRoot': (['rest', 'mgm_evaluation_scripts_root'], 'mgm_scoring_tools', 'path_rel', ['amp', 'amp_root']),
             # Avalon integration
@@ -190,8 +189,9 @@ def main():
             f.write(f"amppd.url = http://{config['amp']['host']}:{config['amp']['port']}/rest\n")
         #  amppdui.documentRoot -- this should be somewhere in the tomcat tree.
         f.write(f"amppdui.documentRoot = {amp_root}/tomcat/webapps/ROOT\n")
-        #  amppd.symlinkRoot is data_root
+        #  amppd.symlinkRoot is data_root, and synlinkDir is symlinks, as defined in tomcat config
         f.write(f"amppd.symlinkRoot = {data_root}\n")
+        f.write(f"amppd.symlinkDir = symlinks\n")
                         
         f.write("# boilerplate properties\n")
         for k,v in config['rest']['properties'].items():
