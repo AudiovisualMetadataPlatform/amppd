@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -116,7 +117,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		String jsonpath = getMediaInfoJsonPath(filepath);
 		ProcessBuilder pb = new ProcessBuilder(
 				amppdPropertyConfig.getPythonPath(), 
-				amppdPropertyConfig.getMediaprobeDir() + "/media_probe.py", 
+				Paths.get(amppdPropertyConfig.getMediaprobeDir(), "media_probe.py").toString(), 
 				"--json", 
 				fileStorageService.absolutePathName(filepath));
 

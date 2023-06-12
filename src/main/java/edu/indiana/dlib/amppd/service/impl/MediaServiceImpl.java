@@ -261,7 +261,7 @@ public class MediaServiceImpl implements MediaService {
 	public String getPrimaryfileSymlinkUrl(Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
 		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
-		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
+		String url = serverUrl + amppduiConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
 		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
 		return url;
 	}
@@ -273,7 +273,7 @@ public class MediaServiceImpl implements MediaService {
 	public String getWorkflowResultOutputSymlinkUrl(Long id) {
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
 		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
-		String url = serverUrl + "/" + amppduiConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
+		String url = serverUrl + amppduiConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
 		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
 		return url;
 	}
