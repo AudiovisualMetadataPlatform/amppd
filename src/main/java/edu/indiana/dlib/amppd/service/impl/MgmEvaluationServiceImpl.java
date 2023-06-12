@@ -1,22 +1,49 @@
 package edu.indiana.dlib.amppd.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.model.*;
-import edu.indiana.dlib.amppd.repository.*;
-import edu.indiana.dlib.amppd.service.MediaService;
-import edu.indiana.dlib.amppd.service.MgmEvaluationService;
-import edu.indiana.dlib.amppd.web.*;
-import lombok.extern.slf4j.Slf4j;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
+import edu.indiana.dlib.amppd.model.MgmScoringParameter;
+import edu.indiana.dlib.amppd.model.MgmScoringTool;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
+import edu.indiana.dlib.amppd.repository.MgmScoringParameterRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
+import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
+import edu.indiana.dlib.amppd.web.MgmEvaluationFilesObj;
+import edu.indiana.dlib.amppd.web.MgmEvaluationParameterObj;
+import edu.indiana.dlib.amppd.web.MgmEvaluationRequest;
+import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestResponse;
+import edu.indiana.dlib.amppd.web.MgmEvaluationValidationResponse;
+import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class MgmEvaluationServiceImpl implements MgmEvaluationService {
@@ -140,14 +167,15 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 log.info("Preparing command");
                 List<String> cmd = new ArrayList<>();
                 cmd.add("amp_python.sif");
-                cmd.add(config.getMgmEvaluationScriptsRoot() + File.separator +  mst.getScriptPath());
+                cmd.add(Paths.get(config.getMgmEvaluationScriptsRoot(), mst.getScriptPath()).toString());
                 cmd.add("-g");
-                String gtFilePath = config.getFileStorageRoot() + File.separator + groundtruthFile.getPathname();
+//                String gtFilePath = config.getFileStorageRoot() + File.separator + groundtruthFile.getPathname();
+                String gtFilePath = Paths.get(config.getFileStorageRoot(), groundtruthFile.getPathname()).toString();
                 cmd.add(gtFilePath);
                 cmd.add("-m");
                 cmd.add(wfr.getOutputPath());
                 cmd.add("-o");
-                cmd.add(config.getDropboxRoot() + File.separator + "mgm_scoring_tools");
+                cmd.add(Paths.get(config.getDropboxRoot(), "mgm_scoring_tools").toString());
                 if (mst.getUseCase() != null && mst.getUseCase() != "") {
                     cmd.add("--use-case");
                     cmd.add(mst.getUseCase());
