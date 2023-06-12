@@ -93,13 +93,13 @@ public class MediaServiceImpl implements MediaService {
 	private AmppdPropertyConfig amppdPropertyConfig;
 	
 	@Autowired
-	private AmppdUiPropertyConfig amppduiConfig; 	
+	private AmppdUiPropertyConfig amppdUiPropertyConfig; 	
 	
 	// absolute path of the root directory for symlinks
 	private Path root;
 
 	@Autowired
-	public MediaServiceImpl(AmppdUiPropertyConfig amppduiConfig) {
+	public MediaServiceImpl(AmppdPropertyConfig amppdPropertyConfig) {
 		// initialize Tomcat server static content folder for symlinks to media files 
 		try {
 			root = Paths.get(amppdPropertyConfig.getSymlinkRoot(), amppdPropertyConfig.getSymlinkDir());
@@ -259,7 +259,7 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String getPrimaryfileSymlinkUrl(Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
-		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
+		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
 		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
 		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
 		return url;
@@ -271,7 +271,7 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String getWorkflowResultOutputSymlinkUrl(Long id) {
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
-		String serverUrl = StringUtils.removeEnd(amppduiConfig.getUrl(), "/#"); // exclude /# for static contents
+		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
 		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
 		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
 		return url;
