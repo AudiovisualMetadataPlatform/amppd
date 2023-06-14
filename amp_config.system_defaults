@@ -65,7 +65,8 @@ rest:
         # Logging
         logging.level.edu.indiana.dlib.amppd: TRACE
         
-        # python3 path
+    	# symlink directory and python path name 
+		amppd.symlinkDir: symlinks
         amppd.pythonPath: python3
 
         # timeouts
