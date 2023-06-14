@@ -259,10 +259,8 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String getPrimaryfileSymlinkUrl(Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
-//		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
-//		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
-		// use host relative URL instead of with hostname to be more flexible
-		String url = "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
+		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
+		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
 		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
 		return url;
 	}
@@ -273,10 +271,8 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String getWorkflowResultOutputSymlinkUrl(Long id) {
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
-//		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
-//		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
-		// use host relative URL instead of with hostname to be more flexible
-		String url = "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
+		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
+		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
 		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
 		return url;
 	}
