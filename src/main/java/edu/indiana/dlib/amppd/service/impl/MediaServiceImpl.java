@@ -141,9 +141,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getPrimaryfileMediaUrl(Long primaryfileId) {		
-//		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfileId + "/media";
-		// use host-relative URL
-		String url = "/primaryfiles/" + primaryfileId + "/media";
+		String url = amppdPropertyConfig.getUrl() + "/primaryfiles/" + primaryfileId + "/media";
 		return url;
 	}
 	
