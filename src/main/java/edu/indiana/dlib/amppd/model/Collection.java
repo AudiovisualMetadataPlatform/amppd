@@ -7,6 +7,7 @@ import javax.jdo.annotations.Index;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -66,7 +67,7 @@ public class Collection extends Content {
 
 	@NotNull
 	@Index
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Unit unit;
 	
 	public void addItem(Item item) {
@@ -74,10 +75,10 @@ public class Collection extends Content {
 		items.add(item);
 	}
 	
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return unit.getAcUnitId();
-    }
+//	@JsonIgnore
+//    public Long getAcUnitId() {
+//    	return unit.getAcUnitId();
+//    }
 
 
 }

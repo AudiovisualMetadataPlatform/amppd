@@ -36,9 +36,9 @@ public class ItemSupplement extends Supplement {
 	@ManyToOne
     private Item item;
 	
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return item.getAcUnitId();
-    }
+//	@JsonIgnore
+//    public Long getAcUnitId() {
+//    	return item.getAcUnitId();
+//    }
 
 }

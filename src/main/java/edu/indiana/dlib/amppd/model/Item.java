@@ -59,10 +59,10 @@ public class Item extends Content {
 	@ManyToOne
 	private Collection collection;	
     
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return collection.getAcUnitId();
-    }
+//	@JsonIgnore
+//    public Long getAcUnitId() {
+//    	return collection.getAcUnitId();
+//    }
 
     
 //    @ManyToMany

@@ -71,10 +71,10 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<RoleAssignment> roleAssignments;
 	
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return getId();
-    }
+//	@JsonIgnore
+//    public Long getAcUnitId() {
+//    	return getId();
+//    }
 
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 
 //	@OneToMany(mappedBy="unit")

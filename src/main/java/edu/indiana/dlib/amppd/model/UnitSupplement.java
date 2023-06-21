@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.model;
 import javax.jdo.annotations.Index;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -33,12 +34,12 @@ public class UnitSupplement extends Supplement {
 
 	@NotNull
 	@Index
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
     private Unit unit;
 		
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return unit.getAcUnitId();
-    }
+//	@JsonIgnore
+//    public Long getAcUnitId() {
+//    	return unit.getAcUnitId();
+//    }
     
 }

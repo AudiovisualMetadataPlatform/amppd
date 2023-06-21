@@ -36,9 +36,9 @@ public class CollectionSupplement extends Supplement {
 	@ManyToOne
     private Collection collection;
 	
-	@JsonIgnore
-    public Long getUnitId() {
-    	return collection.getAcUnitId();
-    }
+//	@JsonIgnore
+//    public Long getUnitId() {
+//    	return collection.getAcUnitId();
+//    }
 
 }
