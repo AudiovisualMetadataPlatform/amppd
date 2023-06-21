@@ -207,9 +207,9 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 				log.error("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
 //				throw new RuntimeException("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
 			}
-			// otherwise populate MGM name from the tool name and description
-			mgm.setName(tool.getName());
-			mgm.setDescription(tool.getDescription());
+//			// otherwise populate MGM name from the tool name and description
+//			mgm.setName(tool.getName());
+//			mgm.setDescription(tool.getDescription());			
 			
 			/* Note:
 			 * SectionId existing in Galaxy is not enforced, so it's provided in the CSV instead of retrieved from Galaxy tool;
