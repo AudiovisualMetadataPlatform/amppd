@@ -73,4 +73,9 @@ public class Collection extends Content {
 		items.add(item);
 	}
 	
+    public Long getUnitId() {
+    	return unit.getUnitId();
+    }
+
+
 }

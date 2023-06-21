@@ -34,4 +34,8 @@ public class UnitSupplement extends Supplement {
 	@ManyToOne
     private Unit unit;
 		
+    public Long getUnitId() {
+    	return unit.getUnitId();
+    }
+    
 }

@@ -529,7 +529,32 @@ public class DataentityController {
 			@RequestParam String category, 
 			@RequestParam String format) {
 		log.info("Retrieving supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
-		return dataentityService.getSupplementsForPrimaryfiles(primaryfileIds, name, category, format);
+
+		// get accessible units for Read Supplement, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Supplement);
+		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();
+
+		// retrieve primaryfiles with AC filter
+		for (Long primaryfileId : primaryfileIds) {
+			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElse(null);
+			
+			// skip invalid primaryfile
+			if (primaryfile == null) {
+				log.error("Invalid primaryfile ID in request" + primaryfileId);
+				continue;
+			}
+			
+			// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+			// otherwise apply AC prefilter to query criteria	
+			if (acUnitIds == null || acUnitIds.contains(primaryfileId)) {
+				primaryfiles.add(primaryfile);
+			}
+			else {
+				log.error("The current user doesn't have permission to Read Supplement for primaryfile " + primaryfileId);
+			}
+		}				
+					
+		return dataentityService.getSupplementsForPrimaryfiles(primaryfiles, name, category, format);
 	}
 		
 	/**

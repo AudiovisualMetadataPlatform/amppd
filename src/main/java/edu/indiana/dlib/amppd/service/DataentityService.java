@@ -125,12 +125,12 @@ public interface DataentityService {
 
 	/**
 	 * Get all supplements associated with the primaryfiles at all parent levels, with the given supplement name, category and format.
-	 * @param primaryfileIds IDs of the given primaryfiles
+	 * @param primaryfiles the given primaryfiles
 	 * @param name name of the supplement
 	 * @param category category of the supplement
 	 * @param format format of the supplement
 	 * @return list of all supplements satisfying the criteria for each primaryfile
 	 */
-	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String category, String format);
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(List<Primaryfile> primaryfiles, String name, String category, String format);
 	
 }

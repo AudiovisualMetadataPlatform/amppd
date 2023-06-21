@@ -34,4 +34,8 @@ public class CollectionSupplement extends Supplement {
 	@ManyToOne
     private Collection collection;
 	
+    public Long getUnitId() {
+    	return collection.getUnitId();
+    }
+
 }
