@@ -34,7 +34,7 @@ public class UnitSupplement extends Supplement {
 
 	@NotNull
 	@Index
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
     private Unit unit;
 		
 //	@JsonIgnore

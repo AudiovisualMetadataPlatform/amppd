@@ -67,7 +67,7 @@ public class Collection extends Content {
 
 	@NotNull
 	@Index
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne
 	private Unit unit;
 	
 	public void addItem(Item item) {
