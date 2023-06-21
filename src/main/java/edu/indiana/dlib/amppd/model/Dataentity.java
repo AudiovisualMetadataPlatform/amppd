@@ -42,5 +42,8 @@ public abstract class Dataentity extends AmpObject {
 //    	this.name = name;
 //    	this.description = description;
 //    }
+
+//  abstract public Long getAcUnitId();
     
+
 }

@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
@@ -71,6 +72,11 @@ public class Primaryfile extends Asset {
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Bundle> bundles;  
+    
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return item.getAcUnitId();
+    }    
     
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<Job> jobs;        

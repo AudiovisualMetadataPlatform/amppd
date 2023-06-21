@@ -14,6 +14,8 @@ import javax.validation.constraints.NotBlank;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
@@ -35,6 +37,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Unit extends Dataentity {
 
 	/* Note:
@@ -70,7 +73,11 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<RoleAssignment> roleAssignments;
 	
-	
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return getId();
+    }
+
 	// TODO: Unit & Workflow do not have a 1:M ownership relation, but could have a M:M access relation. When we add access control we shall reconsider this mapping 
 //	@OneToMany(mappedBy="unit")
 //	private Set<Workflow> workflows;

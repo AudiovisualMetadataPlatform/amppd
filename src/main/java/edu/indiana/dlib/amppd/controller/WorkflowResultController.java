@@ -70,7 +70,7 @@ public class WorkflowResultController {
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
 	@PostMapping(path = "/workflow-results/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public WorkflowResultResponse getWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
+	public WorkflowResultResponse filterWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
 		// AC prefilter on WorkflowResultSearchQuery to restrict unit filters to only accessible ones by current user
 		Set<Long> accessibleUnits = permissionService.prefilter(query);
 		
@@ -205,6 +205,8 @@ public class WorkflowResultController {
 	 */	
 	@PostMapping("/workflow-results/refresh")
 	public int refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
+		// TODO This API can be disabled or accessible to only ADMIN 
+
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
 			return workflowResultService.refreshWorkflowResultsLumpsum().size();
@@ -222,6 +224,8 @@ public class WorkflowResultController {
 	 */
 	@PostMapping("/workflow-results/output-type")
 	public int fixWorkflowResultsOutputType() {
+		// TODO This API can be disabled or accessible to only ADMIN 
+
 		log.info("Fixing workflow results with obsolete output types ...");
 		return workflowResultService.fixWorkflowResultsOutputType().size();
 	}
@@ -236,6 +240,8 @@ public class WorkflowResultController {
 	@Deprecated
 	@PostMapping("/workflow-results/hide")
 	public int hideIrrelevantWorkflowResults() {
+		// TODO This API can be disabled or accessible to only ADMIN 
+
 		log.info("Hiding irrelevant workflow results ...");
 		return workflowResultService.hideIrrelevantWorkflowResults().size();
 	}
@@ -250,6 +256,8 @@ public class WorkflowResultController {
 	 */
 	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int setRelevantWorkflowResults(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
+		// TODO This API can be disabled or accessible to only ADMIN 
+
 		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
 		return workflowResultService.setRelevantWorkflowResults(workflowStepOutputs, relevant).size();
 	}
@@ -287,7 +295,10 @@ public class WorkflowResultController {
 	 */	
 	@PostMapping(path = "/workflow-results/export", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
-        response.setContentType("text/csv");
+		// AC prefilter on WorkflowResultSearchQuery to restrict unit filters to only accessible ones by current user
+		permissionService.prefilter(query);
+		
+		response.setContentType("text/csv");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateTime = dateFormatter.format(new Date());
          

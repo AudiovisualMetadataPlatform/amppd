@@ -10,6 +10,7 @@ import javax.validation.Validator;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -529,7 +530,27 @@ public class DataentityController {
 			@RequestParam String category, 
 			@RequestParam String format) {
 		log.info("Retrieving supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
-		return dataentityService.getSupplementsForPrimaryfiles(primaryfileIds, name, category, format);
+
+		// get accessible units for Read Supplement, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Supplement);
+		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();
+
+		// retrieve primaryfiles by ID with AC filter
+		for (Long primaryfileId : primaryfileIds) {
+			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!")); 			
+			
+			// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+			// otherwise throw AccessDeniedException
+			Long unitId = primaryfile.getAcUnitId();
+			if (acUnitIds == null || acUnitIds.contains(unitId)) {
+				primaryfiles.add(primaryfile);
+			}
+			else {
+				throw new AccessDeniedException("The current user cannot Read Supplement for primaryfile " + primaryfileId + " in unit " + unitId);			
+			}
+		}				
+					
+		return dataentityService.getSupplementsForPrimaryfiles(primaryfiles, name, category, format);
 	}
 		
 	/**

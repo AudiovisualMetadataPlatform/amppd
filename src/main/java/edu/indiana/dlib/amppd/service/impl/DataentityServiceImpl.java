@@ -529,27 +529,27 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfile(Primaryfile, String, String, String)
 	 */
 	@Override
-	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String unit, String format) {
-		List<Supplement> supplements = new ArrayList<Supplement>();
-		
-		// primaryfile must exist, unit and format must not be blank
-		if (primaryfile == null || StringUtils.isBlank(unit) || StringUtils.isBlank(format)) {
-			return supplements;
+	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format) {		
+		// primaryfile must exist, category and format must not be blank
+		if (primaryfile == null || StringUtils.isBlank(category) || StringUtils.isBlank(format)) {
+			throw new IllegalArgumentException("Primaryfile must exist, supplement category and name must not be blank!");
 		}
+
+		List<Supplement> supplements = new ArrayList<Supplement>();
 					
-		// find all supplements associated with the primaryfile at all parent levels by its unit/format and optionally name,
+		// find all supplements associated with the primaryfile at all parent levels by its category/format and optionally name,
 		// along with associated parent's ID, assuming the original filenames have extensions that can be matched against format 
 		if (StringUtils.isBlank(name)) {
-			supplements.addAll(unitSupplementRepository.findByUnitIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), unit, format));
-			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), unit, format));
-			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), unit, format));
-			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), unit, format));
+			supplements.addAll(unitSupplementRepository.findByUnitIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), category, format));
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), category, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), category, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), category, format));
 		}		
 		else {
-			supplements.addAll(unitSupplementRepository.findByUnitIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), name, unit, format));
-			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), name, unit, format));
-			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), name, unit, format));
-			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), name, unit, format));
+			supplements.addAll(unitSupplementRepository.findByUnitIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getUnit().getId(), name, category, format));
+			supplements.addAll(collectionSupplementRepository.findByCollectionIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getCollection().getId(), name, category, format));
+			supplements.addAll(itemSupplementRepository.findByItemIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getItem().getId(), name, category, format));
+			supplements.addAll(primaryfileSupplementRepository.findByPrimaryfileIdAndNameAndCategoryAndOriginalFilenameEndsWithIgnoreCase(primaryfile.getId(), name, category, format));
 		}		
 		
 		// set absolute path for each supplement, to be used for Supplement MGM path parameter
@@ -562,19 +562,18 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(Long[], String, String, String)
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfiles(List<Primaryfile>, String, String, String)
 	 */
 	@Override
-	public List<List<Supplement>> getSupplementsForPrimaryfiles(Long[] primaryfileIds, String name, String unit, String format) {
+	public List<List<Supplement>> getSupplementsForPrimaryfiles(List<Primaryfile> primaryfiles, String name, String category, String format) {
 		List<List<Supplement>> supplementss = new ArrayList<List<Supplement>>();
 		
-		for (Long primaryfileId : primaryfileIds) {
-			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElse(null);
-			List<Supplement> supplements = getSupplementsForPrimaryfile(primaryfile, name, unit, format);
+		for (Primaryfile primaryfile : primaryfiles) {
+			List<Supplement> supplements = getSupplementsForPrimaryfile(primaryfile, name, category, format);
 			supplementss.add(supplements);
 		}
 		
-		log.info("Successfully retrieved supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", unit: " + unit + ", format: " + format);
+		log.info("Successfully retrieved supplements for " + primaryfiles.size() + " primaryfiles, name: " + name + ", category: " + category + ", format: " + format);
 		return supplementss;
 	}
 	

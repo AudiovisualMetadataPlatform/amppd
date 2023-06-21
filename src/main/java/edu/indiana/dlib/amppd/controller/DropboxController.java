@@ -24,6 +24,11 @@ public class DropboxController {
 	 */
 	@PostMapping("/dropbox/create")
 	public void createCollectionSubdirs() {		
+		/* TODO 
+		 * This endpoint was used to create dropbox subdirs for all collections retrospectively.
+		 * We may not need this API anymore as each dropbox subdir is created when a new collection is created.
+		 * Thus the permission for this API would be the same as Create Collection. 
+		 */
     	log.info("Creating dropbox subdirectories for all existing collections ...");
     	dropboxService.createCollectionSubdirs();
     }
