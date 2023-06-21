@@ -82,9 +82,9 @@ rest:
         amppd.refreshResultsTableMinutes: 300
         amppd.refreshResultsStatusCron: 0 0/10 6-18 ? * MON-FRI
         amppd.refreshResultsTableCron: 0 0 1 ? * MON-FRI
-        amppd.refreshPermissionTables: true
-        amppd.refreshMgmTables: true
-        amppd.refresUnitTable: true
+        amppd.refreshPermissionTables: false
+        amppd.refreshMgmTables: false
+        amppd.refresUnitTable: false
 
         # environment / web 
         amppd.environment: dev
