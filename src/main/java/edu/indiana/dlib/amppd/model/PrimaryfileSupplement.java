@@ -36,9 +36,9 @@ public class PrimaryfileSupplement extends Supplement {
 	@ManyToOne
     private Primaryfile primaryfile;
     
-//	@JsonIgnore
-//    public Long getUnitId() {
-//    	return primaryfile.getAcUnitId();
-//    }
+	@JsonIgnore
+    public Long getUnitId() {
+    	return primaryfile.getAcUnitId();
+    }
     
 }

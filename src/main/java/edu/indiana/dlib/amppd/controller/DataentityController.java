@@ -541,8 +541,7 @@ public class DataentityController {
 			
 			// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 			// otherwise throw AccessDeniedException
-//			Long unitId = primaryfile.getAcUnitId();
-			Long unitId = primaryfile.getItem().getCollection().getUnit().getId();
+			Long unitId = primaryfile.getAcUnitId();
 			if (acUnitIds == null || acUnitIds.contains(unitId)) {
 				primaryfiles.add(primaryfile);
 			}

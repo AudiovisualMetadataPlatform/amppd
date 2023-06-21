@@ -73,10 +73,10 @@ public class Primaryfile extends Asset {
 	@ToString.Exclude
     private Set<Bundle> bundles;  
     
-//	@JsonIgnore
-//    public Long getAcUnitId() {
-//    	return item.getAcUnitId();
-//    }    
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return item.getAcUnitId();
+    }    
     
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<Job> jobs;        

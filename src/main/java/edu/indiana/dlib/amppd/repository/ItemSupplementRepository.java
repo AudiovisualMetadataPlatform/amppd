@@ -6,7 +6,6 @@ import java.util.Set;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.ItemSupplement;
-import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
 
 
