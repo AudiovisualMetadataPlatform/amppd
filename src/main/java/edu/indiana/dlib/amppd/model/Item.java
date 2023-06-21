@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.indiana.dlib.amppd.validator.UniqueExternalSrcAndId;
 import edu.indiana.dlib.amppd.validator.UniqueName;
@@ -58,13 +59,11 @@ public class Item extends Content {
 	@ManyToOne
 	private Collection collection;	
     
-    public Long getUnitId() {
-    	return collection.getUnitId();
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return collection.getAcUnitId();
     }
 
-    public Long getCollectionId() {
-    	return collection.getId();
-    }
     
 //    @ManyToMany
 //    @JsonBackReference

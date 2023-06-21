@@ -10,6 +10,8 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,8 +36,9 @@ public class ItemSupplement extends Supplement {
 	@ManyToOne
     private Item item;
 	
-    public Long getUnitId() {
-    	return item.getUnitId();
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return item.getAcUnitId();
     }
 
 }

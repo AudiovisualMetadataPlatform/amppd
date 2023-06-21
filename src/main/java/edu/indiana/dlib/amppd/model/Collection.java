@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.indiana.dlib.amppd.validator.EnumConfig;
 import edu.indiana.dlib.amppd.validator.UniqueName;
@@ -73,8 +74,9 @@ public class Collection extends Content {
 		items.add(item);
 	}
 	
-    public Long getUnitId() {
-    	return unit.getUnitId();
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return unit.getAcUnitId();
     }
 
 

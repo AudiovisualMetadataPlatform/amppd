@@ -14,6 +14,7 @@ import javax.validation.constraints.NotBlank;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.ac.RoleAssignment;
@@ -70,7 +71,8 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<RoleAssignment> roleAssignments;
 	
-    public Long getUnitId() {
+	@JsonIgnore
+    public Long getAcUnitId() {
     	return getId();
     }
 

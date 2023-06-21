@@ -541,11 +541,12 @@ public class DataentityController {
 			
 			// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 			// otherwise throw AccessDeniedException
-			if (acUnitIds == null || acUnitIds.contains(primaryfileId)) {
+			Long unitId = primaryfile.getAcUnitId();
+			if (acUnitIds == null || acUnitIds.contains(unitId)) {
 				primaryfiles.add(primaryfile);
 			}
 			else {
-				throw new AccessDeniedException("The current user cannot Read Supplement for primaryfile " + primaryfileId);			
+				throw new AccessDeniedException("The current user cannot Read Supplement for primaryfile " + primaryfileId + " in unit " + unitId);			
 			}
 		}				
 					
