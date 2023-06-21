@@ -204,7 +204,8 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 			// check that the corresponding MGM adapter exists in Galaxy and report error if not
 			Tool tool = toolsClient.showTool(mgm.getToolId());
 			if (tool == null) {
-				throw new RuntimeException("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
+				log.error("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
+//				throw new RuntimeException("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
 			}
 			// otherwise populate MGM name from the tool name and description
 			mgm.setName(tool.getName());
