@@ -529,13 +529,13 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.getSupplementsForPrimaryfile(Primaryfile, String, String, String)
 	 */
 	@Override
-	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format) {
-		List<Supplement> supplements = new ArrayList<Supplement>();
-		
+	public List<Supplement> getSupplementsForPrimaryfile(Primaryfile primaryfile, String name, String category, String format) {		
 		// primaryfile must exist, category and format must not be blank
 		if (primaryfile == null || StringUtils.isBlank(category) || StringUtils.isBlank(format)) {
-			return supplements;
+			throw new IllegalArgumentException("Primaryfile must exist, supplement category and name must not be blank!");
 		}
+
+		List<Supplement> supplements = new ArrayList<Supplement>();
 					
 		// find all supplements associated with the primaryfile at all parent levels by its category/format and optionally name,
 		// along with associated parent's ID, assuming the original filenames have extensions that can be matched against format 
