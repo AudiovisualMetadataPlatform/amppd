@@ -53,7 +53,7 @@ rest:
         spring.servlet.multipart.enabled: true
         
         # serialization
-        spring.jackson.serialization.FAIL_ON_EMPTY_BEANS = false
+        spring.jackson.serialization.FAIL_ON_EMPTY_BEANS: false
         
         # Mail
         spring.mail.host: localhost
