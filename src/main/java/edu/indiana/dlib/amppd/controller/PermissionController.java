@@ -95,13 +95,38 @@ public class PermissionController {
 	}
 	
 	/**
-	 * Get the list of units in which the current user has at least some access to, i.e. has some role assignments assoicated with.
-	 * @return the list of units the current user has access to
+	 * Get the list of units in which the current user has permission for, i.e. has some role assignments associated with,
+	 * the given action, if both actionType and targetType are provided; or otherwise for at least some action. 
+	 * @param actionType actionType for the given action
+	 * @param targetType targetType for the given action
+	 * @return the list of units the current user has access to the given action or at least some action
 	 */
 	@GetMapping("/permissions/units")
-	public Set<UnitBrief> getAccessibleUnits() {
-		log.info("Retrieving all units the current user has access to ...");
-		return permissionService.getAccessibleUnits();
+	public Set<UnitBrief> getAccessibleUnits(
+			@RequestParam(required = false) ActionType actionType, 
+			@RequestParam(required = false) TargetType targetType) {	
+		Set<UnitBrief> units;
+		String action;
+		
+		if (actionType == null && targetType == null) {
+			action = "some action";
+			units =  permissionService.getAccessibleUnits();
+		}
+		else if (actionType != null && targetType != null) {
+			action = " action <" + actionType + ", " + targetType + ">";
+			units = permissionService.getAccessibleUnits(actionType, targetType).right;	
+			
+			// if current user is admin, get all units by calling getAccessibleUnits without action
+			if (units == null) {
+				units = permissionService.getAccessibleUnits();	
+			}
+		}
+		else {
+			throw new IllegalArgumentException("The request parameters (actionType, targetType) must be both provided or both null!");
+		}
+		
+		log.info("Successfully retrieved " + units.size() + " units in which the current user has access to " + action);
+		return units;
 	}
 	
 }
