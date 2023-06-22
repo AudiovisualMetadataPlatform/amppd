@@ -105,17 +105,28 @@ public class PermissionController {
 	public Set<UnitBrief> getAccessibleUnits(
 			@RequestParam(required = false) ActionType actionType, 
 			@RequestParam(required = false) TargetType targetType) {	
-		if (actionType == null || targetType == null) {
-			log.info("Retrieving all units in which the current user has access to some action ...");
-			return permissionService.getAccessibleUnits();			
+		Set<UnitBrief> units;
+		String action;
+		
+		if (actionType == null && targetType == null) {
+			action = "some action";
+			units =  permissionService.getAccessibleUnits();
 		}
-		else if (actionType == null || targetType == null) {
-			log.info("Retrieving all units in which the current user can perform action <" + actionType + ", " + targetType + ">");
-			return permissionService.getAccessibleUnits(actionType, targetType).right;						
+		else if (actionType != null && targetType != null) {
+			action = " action <" + actionType + ", " + targetType + ">";
+			units = permissionService.getAccessibleUnits(actionType, targetType).right;	
+			
+			// if current user is admin, get all units by calling getAccessibleUnits without action
+			if (units == null) {
+				units = permissionService.getAccessibleUnits();	
+			}
 		}
 		else {
 			throw new IllegalArgumentException("The request parameters (actionType, targetType) must be both provided or both null!");
 		}
+		
+		log.info("Successfully retrieved " + units.size() + " units in which the current user has access to " + action);
+		return units;
 	}
 	
 }
