@@ -29,6 +29,11 @@ def main():
         logging.error("You must supply a destdir when building a package")
         exit(1)
 
+    if args.destdir and not Path(args.destdir).is_dir():
+        logging.error("Destination directory not actually a directory.")
+        exit(1)
+
+
     if 'JAVA_HOME' not in os.environ:
         logging.error("Please set the JAVA_HOME to a JDK11 Path (this won't build on JDK17)")
         exit(1)
@@ -49,6 +54,9 @@ def main():
 
     if not args.package:
         logging.info(f"The war file is in: {warfile}")
+        if args.destdir:
+            shutil.copy(warfile, args.destdir + "/rest.war")
+            logging.info(f"Copied warfile to {args.destdir}/rest.war")
         exit(0)
 
     # OK so the .war file is in the target directory.
