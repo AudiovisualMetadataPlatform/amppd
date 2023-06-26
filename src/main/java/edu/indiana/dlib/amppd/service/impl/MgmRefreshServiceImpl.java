@@ -206,12 +206,16 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 				Tool tool = toolsClient.showTool(mgm.getToolId());
 				log.debug("Found MGM with toolId in Galaxy " + tool.getId());			
 				
-//				// populate MGM name from the tool name and description
-//				mgm.setName(tool.getName());
-//				mgm.setDescription(tool.getDescription());			
+				// populate MGM name/description from the tool name/description
+				mgm.setName(tool.getName());
+				mgm.setDescription(tool.getDescription());			
 			} catch (Exception e) {
-				log.error("Error while refreshing MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);				
 //				throw new RuntimeException("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
+				log.error("Error while refreshing MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);				
+
+				// populate MGM name/description with toolId
+				mgm.setName(mgm.getToolId());
+				mgm.setDescription(mgm.getToolId());							
 			}
 			
 			/* Note:
