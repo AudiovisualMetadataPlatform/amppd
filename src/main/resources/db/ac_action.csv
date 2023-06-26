@@ -24,8 +24,8 @@ move supplement,move a unit/collection/item/primaryfile supplement to another pa
 delete  supplement,delete a supplement and all its associated data,Delete,Supplement,DELETE,/supplements/{id},TRUE
 run unrestricted workflow,run unrestricted workflow on selected files,Create,WorkflowResult,POST,/jobs/submit*,TRUE
 run restricted workflow,run restricted workflow on selected files,Create,WorkflowResult_Restricted,POST,/jobs/submit*/restricted,TRUE
-view workflow result,list/query workflow results or view a workflow result output file,Read,WorkflowResult,GET,/workflow-results/[query|intermediate*|/{id}/output],TRUE
-export workflow result,export selected workflow results to a CSV file,Export,WorkflowResult,POST,/workflow-results/export,TRUE
+view workflow result,list/query/export workflow results,Read,WorkflowResult,GET,/workflow-results/[query|intermediate/*],TRUE
+view workflow result output,view content of workflow results output file,Read,WorkflowResult_Output,GET,/workflow-results/{id}/output,TRUE
 edit workflow result,edit workflow result output name/alias and/or final status,Update,WorkflowResult,PATCH,/workflow-results/{id},TRUE
 delete workflow result,delete a workflow result from dashboard and Galaxy,Delete,WorkflowResult,DELETE,/workflow-results/{id},TRUE
 create workflow,create a new workflow,Create,Workflow,POST,/workflows/create,TRUE

@@ -25,7 +25,7 @@ Collection Staff,delete  supplement
 Collection Helper,run unrestricted workflow
 Collection Staff,run restricted workflow
 Collection Helper,view workflow result
-Collection Staff,export workflow result
+Collection Staff,view workflow result output
 Collection Helper,edit workflow result
 Collection Staff,delete workflow result
 Collection Manager,create workflow
