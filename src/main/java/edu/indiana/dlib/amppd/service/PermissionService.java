@@ -85,12 +85,15 @@ public interface PermissionService {
 	public Set<Long> getAccessibleUnitIds(ActionType actionType, TargetType targetType);
 	
 	/**
-	 * Apply access control prefilter to the given WorkflowResultSearchQuery.
+	 * Apply access control prefilter to the given WorkflowResultSearchQuery for the given action.
+	 * If action is not specified, it defaults to Read WorkflowResult.
 	 * @param query the given WorkflowResultSearchQuery
+	 * @param actionType actionType of the given action
+	 * @param targetType targetType of the given action
 	 * @return the set of IDs of accessible units for the current user on WorkflowResult Search
 	 * @throws AccessDeniedException if the current user is not allowed to view WorkflowResult in any unit or for the user defined unit filters
 	 */
-	public Set<Long> prefilter(WorkflowResultSearchQuery query);
+	public Set<Long> prefilter(WorkflowResultSearchQuery query, ActionType actionType, TargetType targetType);
 	
 	/**
 	 * Apply access control postfilter to the given WorkflowResultResponse with the given accessible units.

@@ -265,12 +265,21 @@ public class PermissionServiceImpl implements PermissionService {
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(WorkflowResultSearchQuery)
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(WorkflowResultSearchQuery, ActionType, TargetType)
 	 */
 	@Override
-	public Set<Long> prefilter(WorkflowResultSearchQuery query) {
+	public Set<Long> prefilter(WorkflowResultSearchQuery query, ActionType actionType, TargetType targetType) {
+		// if action not specified, default to Read WorkflowResult
+		if (actionType == null && targetType == null) {
+			actionType = ActionType.Read;
+			targetType = TargetType.WorkflowResult;
+		}
+		else if (actionType == null || targetType == null) {
+			throw new IllegalArgumentException("The request parameters (actionType, targetType) must be both provided or both null!");			
+		}
+		
 		// get accessible units for Read WorkflowResult, if none, access denied exception will be thrown
-		Set<Long> acUnitIds = getAccessibleUnitIds(ActionType.Read, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = getAccessibleUnitIds(actionType, targetType);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		if (acUnitIds == null) return acUnitIds;
