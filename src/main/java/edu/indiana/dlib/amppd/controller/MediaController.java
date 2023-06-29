@@ -90,9 +90,7 @@ public class MediaController {
 			@RequestParam("keyword") String keyword, 
 			@RequestParam("mediaType") String mediaType,
 			@RequestParam(required = false) ActionType actionType, 
-			@RequestParam(required = false) TargetType targetType) {					
-		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
-		
+			@RequestParam(required = false) TargetType targetType) {							
 		// if action not specified, default to Read WorkflowResult
 		if (actionType == null && targetType == null) {
 			actionType = ActionType.Read;
@@ -113,6 +111,7 @@ public class MediaController {
 		// otherwise, all queries below are limited within the accessible units
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(actionType, targetType);
 
+		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		ItemSearchResponse res = new ItemSearchResponse();
 		res = mediaService.searchItemFiles(keyword, mediaType, acUnitIds);
 		return res;

@@ -540,14 +540,16 @@ public class DataentityController {
 		for (Long primaryfileId : primaryfileIds) {
 			Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!")); 			
 			
-			// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
-			// otherwise throw AccessDeniedException
+			// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed; otherwise throw AccessDeniedException
+			// Note: We throw exception instead of skipping the primaryfile because the client excepts the whole 
+			// list of supplements to be returned corresponding to the list of primaryfiles. 
+			// In practice, exception shouldn't happen if the client sends legitimate primaryfile IDs from prior response.
 			Long unitId = primaryfile.getAcUnitId();
 			if (acUnitIds == null || acUnitIds.contains(unitId)) {
 				primaryfiles.add(primaryfile);
 			}
 			else {
-				throw new AccessDeniedException("The current user cannot Read Supplement for primaryfile " + primaryfileId + " in unit " + unitId);			
+				throw new AccessDeniedException("The current user cannot Create WorkflowResult for primaryfile " + primaryfileId + " in unit " + unitId);			
 			}
 		}				
 					

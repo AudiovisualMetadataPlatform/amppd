@@ -33,6 +33,8 @@ import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.RoleAssignService;
+import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestResponse;
 import edu.indiana.dlib.amppd.web.UnitActions;
 import edu.indiana.dlib.amppd.web.WorkflowResultFilterUnit;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -346,7 +348,7 @@ public class PermissionServiceImpl implements PermissionService {
 			log.info("WorkflowResultSearchQuery has been prefiltered with only accessible units.");
 		}
 		else {
-			log.info("WorkflowResultSearchQuery reamins the same after AC units prefilter.");				
+			log.info("WorkflowResultSearchQuery remains the same after AC units prefilter.");				
 		}			
 		
 		return acUnitIds;
@@ -357,6 +359,74 @@ public class PermissionServiceImpl implements PermissionService {
 	 */
 	@Override
 	public void postfilter(WorkflowResultResponse response, Set<Long> acUnitIds) {
+		List<WorkflowResultFilterUnit> fus = response.getFilters().getUnits();
+		List<WorkflowResultFilterUnit> fusNew = new ArrayList<WorkflowResultFilterUnit>();
+
+		// if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		if (acUnitIds == null) return;
+
+		// otherwise apply AC postfilter by intersecting with user filters
+		for (WorkflowResultFilterUnit fu : fus) {
+			if (acUnitIds.contains(fu.getUnitId())) {
+				fusNew.add(fu);
+			}
+		}
+
+		// update unit filters in response if changed
+		if (fusNew.size() < fus.size()) {
+			response.getFilters().setUnits(fusNew);
+			log.info("WorkflowResultResponse has been postfiltered with only accessible units.");
+		}
+		else {
+			log.info("WorkflowResultResponse reamins the same after AC units postfilter.");				
+		}			
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(MgmEvaluationSearchQuery)
+	 */
+	public Set<Long> prefilter(MgmEvaluationSearchQuery query) {
+		// get accessible units for Read WorkflowResult, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = getAccessibleUnitIds(ActionType.Read, TargetType.MgmEvaluationTest);
+
+		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		if (acUnitIds == null) return acUnitIds;
+		
+		// otherwise apply AC prefilter by intersecting with user filters		
+		Long[] fus = query.getFilterByUnits();
+		Set<Long> ftUnitIds = Set.of(fus);
+		
+		// retain user filtered units if exist, among all accessible units
+		if (!ftUnitIds.isEmpty()) {
+			// note: ftUnitIds.retainAll(acUnitIds) won't work as ftUnitIds is immutable
+			acUnitIds.retainAll(ftUnitIds);
+		}
+
+		// if above intersection is empty, the user cannot perform this query
+		if (acUnitIds.isEmpty()) {
+			throw new AccessDeniedException("The current user cannot query MgmEvaluationTest results within the filtered units.");
+		}
+
+		// update unit filters in query if changed
+		Long[] fusNew = acUnitIds.toArray(fus);	
+		
+		// note: fusNew.length < fus.length won't work in case fus is empty
+		if (fusNew.length != fus.length) {
+			query.setFilterByUnits(fusNew);
+			log.info("MgmEvaluationSearchQuery has been prefiltered with only accessible units.");
+		}
+		else {
+			log.info("MgmEvaluationSearchQuery remains the same after AC units prefilter.");				
+		}			
+		
+		return acUnitIds;
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.postfilter(MgmEvaluationTestResponse, Set<Long>)
+	 */
+	@Override
+	public void postfilter(MgmEvaluationTestResponse response, Set<Long> acUnitIds) {
 		List<WorkflowResultFilterUnit> fus = response.getFilters().getUnits();
 		List<WorkflowResultFilterUnit> fusNew = new ArrayList<WorkflowResultFilterUnit>();
 
