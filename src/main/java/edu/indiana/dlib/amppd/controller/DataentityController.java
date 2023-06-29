@@ -531,8 +531,9 @@ public class DataentityController {
 			@RequestParam String format) {
 		log.info("Retrieving supplements for primaryfiles " + primaryfileIds + ", name: " + name + ", category: " + category + ", format: " + format);
 
-		// get accessible units for Read Supplement, if none, access denied exception will be thrown
-		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Supplement);
+		// get accessible units for Create WorkflowResult, as this API is only used for the purpose of workflow submission;
+		// if none returned, access denied exception will be thrown;
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Create, TargetType.WorkflowResult);
 		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();
 
 		// retrieve primaryfiles by ID with AC filter

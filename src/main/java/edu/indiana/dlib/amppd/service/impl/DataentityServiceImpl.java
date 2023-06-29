@@ -84,7 +84,7 @@ public class DataentityServiceImpl implements DataentityService {
 	@Autowired
 	private MediaService mediaService;
 
-	//	@Autowired
+//	@Autowired
 //	private EntityManager entityManager;
 	
 	

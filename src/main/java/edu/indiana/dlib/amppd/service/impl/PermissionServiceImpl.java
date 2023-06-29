@@ -11,7 +11,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
@@ -22,7 +28,9 @@ import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.RoleAssignService;
 import edu.indiana.dlib.amppd.web.UnitActions;
@@ -43,6 +51,9 @@ public class PermissionServiceImpl implements PermissionService {
 	private UnitRepository unitRepository;
 
 	@Autowired
+	private WorkflowResultRepository workflowResultRepository;
+
+	@Autowired
 	private ActionRepository actionRepository;
 
 	@Autowired
@@ -54,6 +65,9 @@ public class PermissionServiceImpl implements PermissionService {
 	@Autowired
 	private RoleAssignService roleAssignService;
 
+	@Autowired
+	private DataentityService dataentityService;
+		
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(ActionType, TargetType, Long)
@@ -262,6 +276,30 @@ public class PermissionServiceImpl implements PermissionService {
 		// otherwise return the accessible units IDs
 		log.info("The current user can perform action " + actionType + " " + targetType + " in " + unitIds.size() + " units." );
 		return unitIds;
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAcUnitId(Long, Class)
+	 */
+	public Long getAcUnitId(Long id, Class clazz) {
+		if (clazz == Primaryfile.class) {
+			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
+			return asset.getAcUnitId();
+		}
+		
+		if (clazz == PrimaryfileSupplement.class) {
+			Asset asset = dataentityService.findAsset(id, SupplementType.PRIMARYFILE);
+			return asset.getAcUnitId();
+		}
+		
+		if (clazz == WorkflowResult.class) {
+			WorkflowResult result = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("WorkflowResult <" + id + "> does not exist!"));
+			return result.getAcUnitId();
+		}
+				
+		// TODO handle other class types
+		
+		return null;			
 	}
 	
 	/**

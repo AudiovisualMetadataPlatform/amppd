@@ -85,6 +85,14 @@ public interface PermissionService {
 	public Set<Long> getAccessibleUnitIds(ActionType actionType, TargetType targetType);
 	
 	/**
+	 * Get the unit ID the given object belongs for the purpose of access control.
+	 * @param id ID of the given object
+	 * @param clazz class of the given object
+	 * @return the access control unit ID of the object
+	 */
+	public Long getAcUnitId(Long id, Class clazz);
+	
+	/**
 	 * Apply access control prefilter to the given WorkflowResultSearchQuery for the given action.
 	 * If action is not specified, it defaults to Read WorkflowResult.
 	 * @param query the given WorkflowResultSearchQuery

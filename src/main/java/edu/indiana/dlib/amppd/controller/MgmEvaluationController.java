@@ -30,6 +30,8 @@ public class MgmEvaluationController {
 
     @PostMapping(path = "/mgm-evaluation-test/new", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public MgmEvaluationValidationResponse submitTestRequest(@RequestBody MgmEvaluationRequest request) {
+    	
+    	
         AmpUser ampUser = ampUserService.getCurrentUser();
         MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
         MgmScoringTool mst = mstRepo.findById(request.getMstId()).orElseThrow(() -> new StorageException("Mgm scoring tool <" + request.getMstId() + "> does not exist!"));
