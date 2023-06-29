@@ -6,6 +6,8 @@ import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -43,7 +45,8 @@ public abstract class Dataentity extends AmpObject {
 //    	this.description = description;
 //    }
 
-//  abstract public Long getAcUnitId();
+	@JsonIgnore
+    abstract public Long getAcUnitId();
     
 
 }

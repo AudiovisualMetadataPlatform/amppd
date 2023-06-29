@@ -9,6 +9,8 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Dataentity;
 import lombok.Data;
@@ -64,5 +66,11 @@ public class HmgmTask extends Dataentity {
 	 * In the future we could add a list of TaskAction to record the history of a task workflow; 
 	 * however, for now we can acquire the history via DB auditing tools which is sufficient for internal use.
 	 */
-	
+
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return null;
+    }
+
+
 }

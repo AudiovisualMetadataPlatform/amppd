@@ -37,7 +37,7 @@ public class CollectionSupplement extends Supplement {
     private Collection collection;
 	
 	@JsonIgnore
-    public Long getUnitId() {
+    public Long getAcUnitId() {
     	return collection.getAcUnitId();
     }
 

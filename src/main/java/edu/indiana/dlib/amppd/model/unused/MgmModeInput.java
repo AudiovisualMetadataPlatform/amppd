@@ -5,6 +5,8 @@ import javax.persistence.EntityListeners;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -20,5 +22,11 @@ import lombok.ToString;
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
 public class MgmModeInput extends MgmModeIo {
+
+	@JsonIgnore
+	public Long getAcUnitId() {
+		return null;
+	}
+
 
 }
