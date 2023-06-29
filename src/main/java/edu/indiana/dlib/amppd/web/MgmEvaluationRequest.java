@@ -10,4 +10,16 @@ public class MgmEvaluationRequest {
     private Long mstId;
     private ArrayList<MgmEvaluationParameterObj> parameters;
     private ArrayList<MgmEvaluationFilesObj> files;
+    
+    @Override
+    public String toString() {
+    	String str = "MgmEvaluationRequest<";
+    	str += " categoryId: " + categoryId;
+    	str += ", mstId: " + mstId;
+    	str += ", # of parameters: " + parameters.size();
+    	str += ", # of WorkflowResult-Groundtruth paris: " + files.size();
+		str += " >";
+		return str;
+    }
+    
 }

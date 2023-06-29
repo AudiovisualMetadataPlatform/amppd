@@ -65,14 +65,20 @@ public class WorkflowResultController {
 	
 	
 	/**
-	 * Get a list of all workflow results satisfying the given query.
+	 * Retrieve a list of workflow results satisfying the given query, for the purpose of the given action 
+	 * if specified, defaults to Read WorkflowResult otherwise.
 	 * @param query the search query for workflow results
+	 * @param actionType actionType of the given action
+	 * @param targetType targetType of the given action
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
 	@PostMapping(path = "/workflow-results/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public WorkflowResultResponse filterWorkflowResults(@RequestBody WorkflowResultSearchQuery query){
+	public WorkflowResultResponse filterWorkflowResults(
+			@RequestBody WorkflowResultSearchQuery query,
+			@RequestParam(required = false) ActionType actionType, 
+			@RequestParam(required = false) TargetType targetType) {
 		// AC prefilter on WorkflowResultSearchQuery to restrict unit filters to only accessible ones by current user
-		Set<Long> accessibleUnits = permissionService.prefilter(query);
+		Set<Long> accessibleUnits = permissionService.prefilter(query, actionType, targetType);
 		
 		// Note:
 		// This should better be a GET request instead of POST, according to REST API standards.
@@ -99,10 +105,11 @@ public class WorkflowResultController {
 			@RequestParam(required = false) String mediaType, 
 			@RequestParam(required = false) String keyword, 
 			@RequestParam List<String> outputTypes) {
-		// get accessible units for Read WorkflowResult (if none, access denied exception will be thrown)
-		// otherwise if accessibleUnits is null, i.e. user is admin, then no AC prefilter is needed; 
+		// get accessible units for Create WorkflowResult, as this API is only used for the purpose of workflow submission;
+		// if none returned, access denied exception will be thrown;
+		// otherwise if accessibleUnits is null, i.e. user is admin, no AC prefilter is needed; 
 		// otherwise, all queries on WorkflowResult below are limited within the accessible units
-		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.WorkflowResult);
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Create, TargetType.WorkflowResult);
 		ItemSearchResponse response = new ItemSearchResponse();		
 				
 		// ensure that keyword has a value for below query
@@ -296,7 +303,7 @@ public class WorkflowResultController {
 	@PostMapping(path = "/workflow-results/export", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
 		// AC prefilter on WorkflowResultSearchQuery to restrict unit filters to only accessible ones by current user
-		permissionService.prefilter(query);
+		permissionService.prefilter(query, ActionType.Read, TargetType.WorkflowResult);
 		
 		response.setContentType("text/csv");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");

@@ -37,7 +37,7 @@ public class PrimaryfileSupplement extends Supplement {
     private Primaryfile primaryfile;
     
 	@JsonIgnore
-    public Long getUnitId() {
+    public Long getAcUnitId() {
     	return primaryfile.getAcUnitId();
     }
     

@@ -5,6 +5,8 @@ import javax.persistence.EntityListeners;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.indiana.dlib.amppd.model.Dataentity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,5 +40,11 @@ public class InputBag extends Dataentity {
 //    
 //    @OneToMany(mappedBy="bag")
 //    private Set<Job> jobs;        
-    
+  
+	@JsonIgnore
+	public Long getAcUnitId() {
+		return null;
+	}
+
+ 
 }

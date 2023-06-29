@@ -11,6 +11,8 @@ import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
+import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
+import edu.indiana.dlib.amppd.web.MgmEvaluationTestResponse;
 import edu.indiana.dlib.amppd.web.UnitActions;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
@@ -85,12 +87,23 @@ public interface PermissionService {
 	public Set<Long> getAccessibleUnitIds(ActionType actionType, TargetType targetType);
 	
 	/**
-	 * Apply access control prefilter to the given WorkflowResultSearchQuery.
+	 * Get the unit ID the given object belongs for the purpose of access control.
+	 * @param id ID of the given object
+	 * @param clazz class of the given object
+	 * @return the access control unit ID of the object
+	 */
+	public Long getAcUnitId(Long id, Class clazz);
+	
+	/**
+	 * Apply access control prefilter to the given WorkflowResultSearchQuery for the given action.
+	 * If action is not specified, it defaults to Read WorkflowResult.
 	 * @param query the given WorkflowResultSearchQuery
+	 * @param actionType actionType of the given action
+	 * @param targetType targetType of the given action
 	 * @return the set of IDs of accessible units for the current user on WorkflowResult Search
 	 * @throws AccessDeniedException if the current user is not allowed to view WorkflowResult in any unit or for the user defined unit filters
 	 */
-	public Set<Long> prefilter(WorkflowResultSearchQuery query);
+	public Set<Long> prefilter(WorkflowResultSearchQuery query, ActionType actionType, TargetType targetType);
 	
 	/**
 	 * Apply access control postfilter to the given WorkflowResultResponse with the given accessible units.
@@ -99,5 +112,19 @@ public interface PermissionService {
 	 */
 	public void postfilter(WorkflowResultResponse response, Set<Long> acUnitIds);
 	
-
+	/**
+	 * Apply access control prefilter to the given MgmEvaluationSearchQuery.
+	 * @param query the given MgmEvaluationSearchQuery
+	 * @return the set of IDs of accessible units for the current user on MgmEvaluationTest Search
+	 * @throws AccessDeniedException if the current user is not allowed to view MgmEvaluationTest in any unit or for the user defined unit filters
+	 */
+	public Set<Long> prefilter(MgmEvaluationSearchQuery query);
+	
+	/**
+	 * Apply access control postfilter to the given MgmEvaluationTestResponse with the given accessible units.
+	 * @param response the given MgmEvaluationTestResponse
+	 * @param acUnitIds the set of IDs of the given accessible units
+	 */
+	public void postfilter(MgmEvaluationTestResponse response, Set<Long> acUnitIds);
+	
 }

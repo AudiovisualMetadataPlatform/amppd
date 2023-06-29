@@ -10,6 +10,8 @@ import javax.persistence.OneToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.indiana.dlib.amppd.model.Dataentity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -42,4 +44,11 @@ public class MgmMode extends Dataentity {
     private Mgm mgm;
   
     // TODO relations with routeLink, workflow?
+    
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return null;
+    }
+
+
 }

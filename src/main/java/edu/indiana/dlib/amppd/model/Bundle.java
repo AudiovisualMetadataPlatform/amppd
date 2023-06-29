@@ -10,6 +10,8 @@ import javax.persistence.ManyToMany;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -41,6 +43,11 @@ public class Bundle extends Dataentity {
     
 //    @ManyToMany(mappedBy = "bundles")
 //    private Set<InputBag> bags;
+
+	@JsonIgnore
+    public Long getAcUnitId() {
+    	return null;
+    }
 
 }
   

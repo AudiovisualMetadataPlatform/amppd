@@ -31,8 +31,9 @@ public abstract class Supplement extends Asset {
 	@EnumConfig(property = "supplementCategories")	
 	private String category;
 	
-	// In batch manifest the types are indicated as U or "Unit", C or "Collection", I or "Item", P or "Primaryfile"
-	// Note: PFILE is not a Supplement type per se, but refers to Primaryfile as one special Asset type 
+	// In batch manifest the supplement types are indicated as U or "Unit", C or "Collection", I or "Item", P or "Primaryfile".
+	// Note: PFILE is not a Supplement type per se, but refers to Primaryfile as one special Asset type;
+	// while PRIMARYFILE refers to PrimaryfileSupplement
 	public enum SupplementType { PFILE, UNIT, COLLECTION, ITEM, PRIMARYFILE }
 	
 	// TODO double check the relationship
