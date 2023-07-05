@@ -386,7 +386,7 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(MgmEvaluationSearchQuery)
 	 */
 	public Set<Long> prefilter(MgmEvaluationSearchQuery query) {
-		// get accessible units for Read WorkflowResult, if none, access denied exception will be thrown
+		// get accessible units for Read MgmEvaluationTest, if none, access denied exception will be thrown
 		Set<Long> acUnitIds = getAccessibleUnitIds(ActionType.Read, TargetType.MgmEvaluationTest);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
