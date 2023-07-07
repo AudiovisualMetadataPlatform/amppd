@@ -55,7 +55,7 @@ public class MgmScoringParameter extends MgmMeta {
     private MgmScoringParameter dependency;
 
     
-    // category of the associated MGM, corresponding to the tool panel section in Galaxy
+    // the associated MGM scoring tool
 	@NotNull
 	@ManyToOne
 	@EqualsAndHashCode.Exclude
