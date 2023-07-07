@@ -87,7 +87,7 @@ public interface PermissionService {
 	public Set<Long> getAccessibleUnitIds(ActionType actionType, TargetType targetType);
 	
 	/**
-	 * Get the unit ID the given object belongs for the purpose of access control.
+	 * Get the unit ID the given object belongs to for the purpose of access control.
 	 * @param id ID of the given object
 	 * @param clazz class of the given object
 	 * @return the access control unit ID of the object

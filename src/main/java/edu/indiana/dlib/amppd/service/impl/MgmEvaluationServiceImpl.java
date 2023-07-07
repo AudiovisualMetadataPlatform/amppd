@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
@@ -115,7 +116,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                         if (primaryFile == null) {
                             errors.add("Primary File is required for evaluation test.");
                         } else{
-                            log.info("Rimsha test ----> " + wfr.get().getStatus());
                             if(!wfr.get().getStatus().toString().contains("COMPLETE")) {
                                 errors.add("Workflow Result status should be complete. " + wfr.get().getStatus()  +" status for primary file: " + primaryFile.getName());
                             }
@@ -176,7 +176,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
                 cmd.add(wfr.getOutputPath());
                 cmd.add("-o");
                 cmd.add(Paths.get(config.getDropboxRoot(), "mgm_scoring_tools").toString());
-                if (mst.getUseCase() != null && mst.getUseCase() != "") {
+                if (StringUtils.isNotBlank(mst.getUseCase())) {
                     cmd.add("--use-case");
                     cmd.add(mst.getUseCase());
                 }
