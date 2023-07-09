@@ -65,11 +65,12 @@ public class MgmEvaluationController {
 		log.info("Submitting Mgm Evaluation Tests: " + request);
         AmpUser ampUser = ampUserService.getCurrentUser();
         MgmEvaluationValidationResponse response = new MgmEvaluationValidationResponse();
-        MgmScoringTool mst = mstRepo.findById(request.getMstId()).orElseThrow(() -> new StorageException("Mgm scoring tool <" + request.getMstId() + "> does not exist!"));
+        Long mstId = request.getMstId();
+        MgmScoringTool mst = mstRepo.findById(mstId).orElseThrow(() -> new StorageException("Mgm scoring tool <" + request.getMstId() + "> does not exist!"));
         if (mst != null) {
-            return mgmEvalService.process(mst, request, ampUser);
+            response = mgmEvalService.process(mst, request, ampUser);
         } else {
-            response.addError("Mgm Scoring Tool is required.");
+            response.addError("Failed to process evaluation request: Mgm Scoring Tool " + mstId + " is not found.");
         }
         return response;
     }

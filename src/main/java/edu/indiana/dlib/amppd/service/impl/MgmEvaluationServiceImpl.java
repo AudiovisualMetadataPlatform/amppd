@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -134,10 +135,10 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     				if (wfr.get().getStatus() != GalaxyJobState.COMPLETE) {
     					errors.add("Workflow Result " + wrId + " status is " + wfr.get().getStatus() + ", need to be COMPLETE");
     				}
-//    				String url = mediaService.getWorkflowResultOutputSymlinkUrl(wfr.get().getId());
-//    				if (url == null){
-//    					errors.add("No output file exists for Workflow Result " + wrId );
-//    				}
+    				String url = mediaService.getWorkflowResultOutputSymlinkUrl(wfr.get().getId());
+    				if (url == null){
+    					errors.add("No output file exists for Workflow Result " + wrId );
+    				}
     			}
     		}
     	}
@@ -199,7 +200,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     			String newJsonData = mapper.writeValueAsString(params);
     			mgmEvalTest.setParameters(newJsonData);
     		} catch (Exception e) {
-    			String error = "Failed to set parameters while creating evaluation test for groundtruth " + gtId + " - workflowResult " + wrId;
+    			String error = "Failed to set test parameters for groundtruth " + gtId + " - workflowResult " + wrId;
     			response.addError(error);
     			log.error(error, e);
     			continue;
@@ -263,10 +264,10 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     				mgmEvalTest.setScores(jsonObject.toJSONString());
     				mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.SUCCESS);
     				resultCount++;
-    				log.info("Successfully ran evaluation for groundtruth " + gtId + " - workflowResult " + wrId + " with result: " + output);
+    				log.info("Successfully ran test for groundtruth " + gtId + " - workflowResult " + wrId + " with result: " + output);
     			} catch(Exception e) {
     				String errmsg = "failed to read output";
-        			String error = "Successfully ran evaluations but " + errmsg + " " + output + " for groundtruth " + gtId + " - workflowResult " + wrId;
+        			String error = "Successfully ran test but " + errmsg + " " + output + " for groundtruth " + gtId + " - workflowResult " + wrId;
     				mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.OUTPUT_ERROR);
         			mgmEvalTest.setMstErrorMsg(errmsg);
         			response.addError(error);    				
@@ -275,7 +276,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		} else {
     			mgmEvalTest.setStatus(MgmEvaluationTest.TestStatus.RUNTIME_ERROR);
     			mgmEvalTest.setMstErrorMsg(result);
-    			String error = "Failed to run evaluation for groundtruth " + gtId + " - workflowResult " + wrId + ":\n" + result;
+    			String error = "Failed to run test for groundtruth " + gtId + " - workflowResult " + wrId + ":\n" + result;
     			response.addError(error);    				
     			log.error(error);
     		}
@@ -328,7 +329,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     			result += builder.toString();
     		}			
     	} catch (Exception e) {
-    		result += e.getStackTrace();    		
+    		result += ExceptionUtils.getStackTrace(e);    		
     	}
 		
 		return result;
