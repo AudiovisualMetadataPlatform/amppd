@@ -260,7 +260,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 				mgmEvalTest.setScorePath(output);
     			try {
     				JSONParser parser = new JSONParser();
-    				while (!Files.exists(Paths.get(output))) {
+    				if (!Files.exists(Paths.get(output))) {
     					Thread.sleep(1000);
     					log.trace("waiting for output..." + output); 
     				}
