@@ -260,9 +260,9 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 				mgmEvalTest.setScorePath(output);
     			try {
     				JSONParser parser = new JSONParser();
-    				while (!Files.exists(Paths.get(output))) {
-    					Thread.sleep(1000);
-    					log.trace("waiting for output..."); 
+    				if (!Files.exists(Paths.get(output))) {
+    					Thread.sleep(5000);
+    					log.trace("waiting for output..." + output); 
     				}
     				Object obj = parser.parse(new FileReader(output));
     				JSONObject jsonObject = (JSONObject)obj;
@@ -294,7 +294,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     	int testCount = mgmEvaluationTests.size();
     	response.setTestCount(testCount);
     	response.setResultCount(resultCount);
-    	response.setSuccess(true);
+    	response.setSuccess(!response.hasErrors());
     	
     	// return response
     	log.info("Successfully created " + testCount + " evaluation tests and " + resultCount + " of them completed in success.");
