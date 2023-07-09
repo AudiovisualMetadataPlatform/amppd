@@ -42,6 +42,7 @@ public class MgmEvaluationTest {
 		INVALID_PARAMETERS,
 		SCRIPT_NOT_FOUND,
 		RUNTIME_ERROR,
+		OUTPUT_ERROR
 	}
 	
     @Id

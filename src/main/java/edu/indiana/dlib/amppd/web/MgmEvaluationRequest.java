@@ -17,7 +17,7 @@ public class MgmEvaluationRequest {
     	str += " categoryId: " + categoryId;
     	str += ", mstId: " + mstId;
     	str += ", # of parameters: " + parameters.size();
-    	str += ", # of WorkflowResult-Groundtruth paris: " + files.size();
+    	str += ", # of WorkflowResult-Groundtruth pairs: " + files.size();
 		str += " >";
 		return str;
     }

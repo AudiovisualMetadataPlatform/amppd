@@ -302,7 +302,7 @@ public class DataentityController {
 		}
 		primaryfileSupplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(primaryfileSupplement, mediaFile);
 		
-    	log.info("Successfully addedprimaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
+    	log.info("Successfully added primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
     	return primaryfileSupplement;
     }	
 	

@@ -1,9 +1,10 @@
 package edu.indiana.dlib.amppd.web;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.Data;
 
 @Data
 public class MgmEvaluationParameterObj {
