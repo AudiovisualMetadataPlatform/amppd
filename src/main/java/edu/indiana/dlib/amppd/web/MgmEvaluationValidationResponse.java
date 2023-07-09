@@ -1,15 +1,16 @@
 package edu.indiana.dlib.amppd.web;
 
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+
 @Data
 public class MgmEvaluationValidationResponse {
-    private boolean success;
-    private Integer mgmEvaluationTestCount;
-    private List<String> validationErrors;
+    private boolean success;	// true if validation pass and tests are created, disregarding the result status 
+    private Integer testCount;	// count of successfully created tests
+    private Integer resultCount;	// count of successfully run tests
+    private List<String> validationErrors;	// validation or runtime errors for all tests
 
     public MgmEvaluationValidationResponse() {
         validationErrors = new ArrayList<String>();

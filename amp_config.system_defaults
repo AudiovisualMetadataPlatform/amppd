@@ -3,6 +3,7 @@ rest:
     logging_path: logs
     storage_path: media
     dropbox_path: dropbox
+    mgm_evaluation_results_root: evaluation
     mgm_evaluation_scripts_root: mgm_scoring_tools
     
     # mediaprobe directory name (relative to amp:data_root)

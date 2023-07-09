@@ -112,6 +112,7 @@ def main():
             'amppd.fileStorageRoot': (['rest', 'storage_path'], 'media', 'path_rel', ['amp', 'data_root']),
             'amppd.dropboxRoot': (['rest', 'dropbox_path'], 'dropbox', 'path_rel', ['amp', 'data_root']),
             'amppd.mediaprobeDir': (['rest', 'mediaprobe_dir'], 'MediaProbe', 'path_rel', ['amp', 'data_root']),
+            'amppd.mgmEvaluationResultsRoot': (['rest', 'mgm_evaluation_results_root'], 'evaluation', 'path_rel', ['amp', 'data_root']),
             'amppd.mgmEvaluationScriptsRoot': (['rest', 'mgm_evaluation_scripts_root'], 'mgm_scoring_tools', 'path_rel', ['amp', 'amp_root']),
             # Avalon integration
             "avalon.url": (['rest', 'avalon_url'], 'https://avalon.example.edu'),
