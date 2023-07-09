@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
@@ -259,6 +260,10 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 				mgmEvalTest.setScorePath(output);
     			try {
     				JSONParser parser = new JSONParser();
+    				while (!Files.exists(Paths.get(output))) {
+    					Thread.sleep(1000);
+    					log.trace("waiting for output..."); 
+    				}
     				Object obj = parser.parse(new FileReader(output));
     				JSONObject jsonObject = (JSONObject)obj;
     				mgmEvalTest.setScores(jsonObject.toJSONString());
@@ -319,7 +324,8 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 			
     		// capture errors from executing the command, which would be exceptions not captured by the MST script,
     		// and the stacktrace would be sent by python running the script to stderr 
-    		if (status != 0) {		    	
+    		if (status != 0) {		
+    			log.trace("cmd failed with status " + status);
     			reader = new BufferedReader(new InputStreamReader(ps.getErrorStream()));
     			builder = new StringBuilder();
     			while ( (line = reader.readLine()) != null) {
