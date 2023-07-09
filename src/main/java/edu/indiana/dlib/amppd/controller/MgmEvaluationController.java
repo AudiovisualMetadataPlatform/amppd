@@ -70,7 +70,7 @@ public class MgmEvaluationController {
         if (mst != null) {
             response = mgmEvalService.process(mst, request, ampUser);
         } else {
-            response.addError("Failed to process evaluation request: Mgm Scoring Tool " + mstId + " is not found.");
+            response.addError("Failed to process evaluation request: Mgm Scoring Tool " + mstId + " does not exist.");
         }
         return response;
     }
