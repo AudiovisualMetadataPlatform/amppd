@@ -220,7 +220,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		
     		// generate test command
     		List<String> cmd = new ArrayList<>();
-    		cmd.add("amp_python.sif");
+//    		cmd.add("amp_python.sif");
     		cmd.add(Paths.get(config.getMgmEvaluationScriptsRoot(), mst.getScriptPath()).toString());
     		cmd.add("-g");
     		String gtFilePath = Paths.get(config.getFileStorageRoot(), groundtruthFile.getPathname()).toString();
@@ -252,17 +252,18 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		
     		// run test
     		log.info("Running MGM scoring tool with command: " + cmd.toString());
-    		String result = runCMD((String[]) cmd.toArray(new String[0]));
+    		String result = runCMD((String[])cmd.toArray(new String[0]));
+//    		log.trace(">>>>>>>>>>>>> Result = " + result);
     		
     		// record test result
     		if (result.startsWith("success:")) {
-				String output = result.split("success:")[1];
+				String output = StringUtils.trim(result.split("success:")[1]);
 				mgmEvalTest.setScorePath(output);
     			try {
     				JSONParser parser = new JSONParser();
     				if (!Files.exists(Paths.get(output))) {
     					Thread.sleep(1000);
-    					log.trace("waiting for output..." + output); 
+    					log.trace("waiting for output... <" + output + ">"); 
     				}
     				Object obj = parser.parse(new FileReader(output));
     				JSONObject jsonObject = (JSONObject)obj;
@@ -301,6 +302,11 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     	return response;
     }
 
+    /**
+     * Run the given command and return the command output, or stderr errors if command failed.
+     * @param cmd
+     * @return
+     */
     private String runCMD(String[] cmd) {
 		String result = "";
 
@@ -323,7 +329,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 			
     		// capture errors from executing the command, which would be exceptions not captured by the MST script,
     		// and the stacktrace would be sent by python running the script to stderr 
-//    		if (status != 0) {		
+    		if (status != 0) {		
 //    			log.trace("cmd failed with status " + status);
     			reader = new BufferedReader(new InputStreamReader(ps.getErrorStream(), StandardCharsets.UTF_8));
     			builder = new StringBuilder();
@@ -332,7 +338,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     				builder.append(System.getProperty("line.separator"));
     			}
     			result += builder.toString();
-//    		}			
+    		}			
     	} catch (Exception e) {
     		result += ExceptionUtils.getStackTrace(e);    		
     	}
