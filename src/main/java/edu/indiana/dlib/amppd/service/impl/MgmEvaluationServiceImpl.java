@@ -324,8 +324,8 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 			
     		// capture errors from executing the command, which would be exceptions not captured by the MST script,
     		// and the stacktrace would be sent by python running the script to stderr 
-    		if (status != 0) {		
-    			log.trace("cmd failed with status " + status);
+//    		if (status != 0) {		
+//    			log.trace("cmd failed with status " + status);
     			reader = new BufferedReader(new InputStreamReader(ps.getErrorStream()));
     			builder = new StringBuilder();
     			while ( (line = reader.readLine()) != null) {
@@ -333,7 +333,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     				builder.append(System.getProperty("line.separator"));
     			}
     			result += builder.toString();
-    		}			
+//    		}			
     	} catch (Exception e) {
     		result += ExceptionUtils.getStackTrace(e);    		
     	}
