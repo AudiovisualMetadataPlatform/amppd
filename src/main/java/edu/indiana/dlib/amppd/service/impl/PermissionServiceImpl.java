@@ -106,14 +106,26 @@ public class PermissionServiceImpl implements PermissionService {
 			roleIds.add(role.getId());
 		}
 		
-		// check if the current user is assigned to one of the above roles
-		// the only case when role assignment unit is null is for AMP Admin, who has permission for all actions;
-		// otherwise the role assignment must be associated with some unit
-		boolean has = roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitIdIsNull(user.getId(), roleIds);
-		has = has || roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitId(user.getId(), roleIds, unitId);
-		
+		boolean has = false;
+		String ustr = "";
+
+		// if unitId is provided, check permission within that unit
+		if (unitId != null) {
+			// check if the current user is assigned to one of the above roles
+			// the only case when role assignment unit is null is for AMP Admin, who has permission for all actions;
+			// otherwise the role assignment must be associated with some unit
+			has = roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitIdIsNull(user.getId(), roleIds);
+			has = has || roleAssignmentRepository.existsByUserIdAndRoleIdInAndUnitId(user.getId(), roleIds, unitId);
+			ustr = " in unit " + unitId + ".";
+		}
+		// otherwise check if user has such roles in any unit at all 
+		else {
+			has = roleAssignmentRepository.existsByUserIdAndRoleIdIn(user.getId(), roleIds);
+			ustr = " in at least one of the units.";
+		}
+
 		String hasstr = has ? "has" : "has no";
-		log.info("Current user " + user.getUsername() + " " + hasstr + " permission to perform action " + action.getName() +" in unit " + unitId);				
+		log.info("Current user " + user.getUsername() + " " + hasstr + " permission to perform action " + action.getName() + ustr);				
 		return has;
 	}
 	

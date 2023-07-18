@@ -31,12 +31,13 @@ public class PermissionController {
 	
 	
 	/**
-	 * Check if the current user has permission to perform the given action or issue the given request in the given unit.
+	 * Check if the current user has permission to perform the given action or issue the given request in the given unit 
+	 * or at least one of the units.
 	 * @param actionType type of the given action
 	 * @param targetType type of the given target
 	 * @param httpMethod HTTP method of the given request
 	 * @param urlPattern URL pattern of the given request
-	 * @param unitId ID of the given unit
+	 * @param unitId ID of the given unit; null means at least one of the units
 	 * @return true if the user has the permission; false otherwise
 	 */
 	@GetMapping("/permissions/has")
@@ -128,5 +129,5 @@ public class PermissionController {
 		log.info("Successfully retrieved " + units.size() + " units in which the current user has access to " + action);
 		return units;
 	}
-	
+		
 }

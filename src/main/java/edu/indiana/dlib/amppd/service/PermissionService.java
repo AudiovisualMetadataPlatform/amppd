@@ -24,27 +24,30 @@ import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 public interface PermissionService {
 
 	/**
-	 * Check if the current user has permission to perform the given action on the given target in the given unit.
+	 * Check if the current user has permission to perform the given action on the given target in the given unit 
+	 * or at least one of the units.
 	 * @param actionType type of the given action
 	 * @param targetType type of the given target
-	 * @param unitId ID of the given unit
+	 * @param unitId ID of the given unit; null means at least one of the units
 	 * @return true if the user has the permission; false otherwise
 	 */
 	public boolean hasPermsion(ActionType actionType, TargetType targetType, Long unitId);
 	
 	/**
-	 * Check if the current user has permission to issue the given request with the given URL in the given unit.
+	 * Check if the current user has permission to issue the given request with the given URL in the given unit 
+	 * or at least one of the units.
 	 * @param httpMethod HTTP method of the given request
 	 * @param urlPattern URL pattern of the given request
-	 * @param unitId ID of the given unit
+	 * @param unitId ID of the given unit; null means at least one of the units
 	 * @return true if the user has the permission; false otherwise
 	 */
 	public boolean hasPermsion(HttpMethod httpMethod, String urlPattern, Long unitId);
 	
 	/**
-	 * Check if the current user has permission to perform the given action in the given unit.
+	 * Check if the current user has permission to perform the given action in the given unit 
+	 * or at least one of the units.
 	 * @param action the given action
-	 * @param unitId ID of the given unit
+	 * @param unitId ID of the given unit; null means at least one of the units
 	 * @return true if the user has the permission; false otherwise
 	 */
 	public boolean hasPermission(Action action, Long unitId);
