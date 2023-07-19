@@ -6,7 +6,7 @@ import edu.indiana.dlib.amppd.model.unused.HmgmTask;
 import edu.indiana.dlib.amppd.repository.DataentityRepository;
 
 //@CrossOrigin(origins = "*")
-@RepositoryRestResource(collectionResourceRel = "hmgmTasks", path = "hmgmTasks")
-public interface HmgmTaskRepository extends DataentityRepository<HmgmTask> {
+//@RepositoryRestResource(collectionResourceRel = "hmgmTasks", path = "hmgmTasks")
+public interface HmgmTaskRepository /*extends DataentityRepository<HmgmTask>*/ {
 
 }
