@@ -17,7 +17,7 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Entity
+//@Entity
 @Data
 @EqualsAndHashCode(exclude={"fromMgmMode", "toMgmMode", "workflow"})
 @ToString(exclude={"fromMgmMode", "toMgmMode", "workflow"})

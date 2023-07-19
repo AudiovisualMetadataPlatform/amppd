@@ -18,9 +18,9 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Entity
-@EntityListeners(AuditingEntityListener.class)
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@Entity
+//@EntityListeners(AuditingEntityListener.class)
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Data
 @EqualsAndHashCode(callSuper=true, exclude="mgmMode")
 @ToString(callSuper=true, exclude="mgmMode")

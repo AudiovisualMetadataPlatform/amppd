@@ -19,8 +19,8 @@ import lombok.NoArgsConstructor;
  * @author yingfeng
  *
  */
-@Entity
-@EntityListeners(AuditingEntityListener.class)
+//@Entity
+//@EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 public class HmgmNote {
