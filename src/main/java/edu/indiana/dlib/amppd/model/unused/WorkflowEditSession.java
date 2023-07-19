@@ -13,7 +13,7 @@ import lombok.Data;
  * Information related to a workflow edit session by an authenticated AMP user on a particular workflow.
  * @author yingfeng
  */
-@Entity
+//@Entity
 @Data
 public class WorkflowEditSession {
 	// TODO This class currently not in use, move to unused package

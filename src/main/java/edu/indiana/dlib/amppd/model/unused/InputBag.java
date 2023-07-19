@@ -22,8 +22,8 @@ import lombok.ToString;
  * @author yingfeng
  *
  */
-@Entity
-@EntityListeners(AuditingEntityListener.class)
+//@Entity
+//@EntityListeners(AuditingEntityListener.class)
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
