@@ -67,7 +67,7 @@ rest:
         spring.mail.properties.mail.smtp.writetimeout: 5000
 
         # Logging
-        logging.level.edu.indiana.dlib.amppd: TRACE
+        logging.level.edu.indiana.dlib.amppd: INFO
         
         # symlink directory and python path name 
         amppd.symlinkDir: symlinks
