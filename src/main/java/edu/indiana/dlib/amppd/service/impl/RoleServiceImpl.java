@@ -159,7 +159,7 @@ public class RoleServiceImpl implements RoleService {
 				// verify that the action exist, 
 				Action action = actionRepository.findById(actionId).orElse(null);				
 				
-				// if current action doesn't, abandon the rest of the actions to skip the role with no update
+				// if current action doesn't exist, abandon the rest of the actions to skip the role with no update
 				if (action == null) {
 					log.error("Failed to update " + roleStr + ": Action not found: actionId = " + actionId);				
 					break;					
