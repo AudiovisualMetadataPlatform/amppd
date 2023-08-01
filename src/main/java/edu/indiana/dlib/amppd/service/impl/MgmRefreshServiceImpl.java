@@ -208,7 +208,8 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 				
 				// populate MGM name/description from the tool name/description
 				mgm.setName(tool.getName());
-				mgm.setDescription(tool.getDescription());			
+				mgm.setDescription(tool.getDescription());	
+				log.trace("mgm.name = " + mgm.getName());
 			} catch (Exception e) {
 //				throw new RuntimeException("Failed to refresh MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);
 				log.error("Error while refreshing MgmTool table: Invalid MGM with non-existing tool ID in CSV: " + mgm);				
@@ -238,6 +239,7 @@ public class MgmRefreshServiceImpl implements MgmRefreshService {
 			if (existMgm != null) {
 				mgm.setId(existMgm.getId());				
 			}
+			log.trace("mgm.name = " + mgm.getName());
 			mgmToolRepository.save(mgm);	
 		}		
 		

@@ -217,6 +217,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     				// add param with valid ID to the params list
     				rp.setShortName(param.getShortName());
     				rp.setName(param.getName());
+    				log.trace("rp.name = " + rp.getName());
     				params.add(rp);
     				// add param with valid value to the cmd
     				if (rp.getValue() != null && !rp.getValue().isEmpty()) {
@@ -236,6 +237,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		ObjectMapper mapper = new ObjectMapper();
     		try {
     			String paramsJson = mapper.writeValueAsString(params);
+    			log.trace("paramsJson = " + paramsJson);
     			mgmEvalTest.setParameters(paramsJson);
     		} catch (Exception e) {
     			String error = "Failed to set test parameters for groundtruth " + gtId + " - workflowResult " + wrId;
