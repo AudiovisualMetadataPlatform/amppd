@@ -82,6 +82,7 @@ public class MgmEvaluationTest {
     
  	// path of the output JSON score file, relative to the score root directory
 	// could be null if the test failed
+    @Type(type="text")
     private String scorePath;   
 
     // JSON representation of the output scores, could be null if the test failed
