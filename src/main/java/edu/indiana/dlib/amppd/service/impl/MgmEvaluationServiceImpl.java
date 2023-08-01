@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -151,9 +150,9 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
         ArrayList<String> errors = new ArrayList<>();
         Set<MgmScoringParameter> mstParams = mst.getParameters();
         
+        // ensure all params required by the test are provided with non-empty values
         for (MgmScoringParameter p : mstParams) {
-            log.debug("Validating parameter " + p.getName() + " for MST " + mst.getName());
-            
+            log.debug("Validating parameter " + p.getName() + " for MST " + mst.getName());            
             if (p.isRequired()){
                 Optional<MgmEvaluationParameterObj> result = inputParams.stream().filter(obj -> obj.getId().equals(p.getId())).findFirst();
                 if (result == null || result.isEmpty() || 
@@ -192,14 +191,52 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		WorkflowResult wfr = wfRepo.findById(file.getWorkflowResultId()).orElse(null);
     		log.info("Processing evaluation test for groundtruth " + gtId + " - workflowResult " + wrId);
 
+    		// generate test command
+    		List<String> cmd = new ArrayList<>();
+    		cmd.add(Paths.get(config.getMgmEvaluationScriptsRoot(), mst.getScriptPath()).toString());
+    		cmd.add("-g");
+    		String gtFilePath = Paths.get(config.getFileStorageRoot(), groundtruthFile.getPathname()).toString();
+    		cmd.add(gtFilePath);
+    		cmd.add("-m");
+    		cmd.add(wfr.getOutputPath());
+    		cmd.add("-o");
+    		cmd.add(Paths.get(config.getMgmEvaluationResultsRoot()).toString());
+    		
+    		// process use-case
+    		if (StringUtils.isNotBlank(mst.getUseCase())) {
+    			cmd.add("--use-case");
+    			cmd.add(mst.getUseCase());
+    		}
+
+    		// process parameters
+    		ArrayList<MgmEvaluationParameterObj> rps = request.getParameters();
+    		ArrayList<MgmEvaluationParameterObj> params = new ArrayList<MgmEvaluationParameterObj>();
+    		for (MgmEvaluationParameterObj rp: rps) {
+    			MgmScoringParameter param = paramsRepo.findById(rp.getId()).orElse(null);
+    			if (param != null) {
+    				// add param with valid ID to the params list
+    				rp.setShortName(param.getShortName());
+    				rp.setName(param.getName());
+    				params.add(rp);
+    				// add param with valid value to the cmd
+    				if (rp.getValue() != null && !rp.getValue().isEmpty()) {
+        				cmd.add("--" + rp.getShortName());
+    					cmd.add(String.join(",", rp.getValue()));
+    				}
+    			} else {
+    				// skip invalid param
+    				log.warn("Skipping parameter with invalid ID" + rp.getId());
+    			}	
+    		}
+    		
+    		// create evaluation test record
     		MgmEvaluationTest mgmEvalTest = new MgmEvaluationTest();
     		
     		// serialize parameters into json string for DB storage, skip the test in case of exception
-    		ArrayList<MgmEvaluationParameterObj> params = request.getParameters();
     		ObjectMapper mapper = new ObjectMapper();
     		try {
-    			String newJsonData = mapper.writeValueAsString(params);
-    			mgmEvalTest.setParameters(newJsonData);
+    			String paramsJson = mapper.writeValueAsString(params);
+    			mgmEvalTest.setParameters(paramsJson);
     		} catch (Exception e) {
     			String error = "Failed to set test parameters for groundtruth " + gtId + " - workflowResult " + wrId;
     			response.addError(error);
@@ -217,39 +254,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
     		Primaryfile primaryFile = pfRepository.findById(wfr.getPrimaryfileId()).orElse(null);
     		mgmEvalTest.setPrimaryFile(primaryFile);
-    		
-    		// generate test command
-    		List<String> cmd = new ArrayList<>();
-//    		cmd.add("amp_python.sif");
-    		cmd.add(Paths.get(config.getMgmEvaluationScriptsRoot(), mst.getScriptPath()).toString());
-    		cmd.add("-g");
-    		String gtFilePath = Paths.get(config.getFileStorageRoot(), groundtruthFile.getPathname()).toString();
-    		cmd.add(gtFilePath);
-    		cmd.add("-m");
-    		cmd.add(wfr.getOutputPath());
-    		cmd.add("-o");
-    		cmd.add(Paths.get(config.getMgmEvaluationResultsRoot()).toString());
-    		
-    		// process use-case
-    		if (StringUtils.isNotBlank(mst.getUseCase())) {
-    			cmd.add("--use-case");
-    			cmd.add(mst.getUseCase());
-    		}
-
-    		// process parameters
-    		for (MgmEvaluationParameterObj pp: params) {
-    			// skip the param if its value is null or empty
-    			if (pp.getValue() == null || pp.getValue().isEmpty()) continue;
-    			
-    			MgmScoringParameter obj = paramsRepo.findById(pp.getId()).orElse(null);
-    			if (obj != null) {
-    				pp.setShortName(obj.getShortName());
-    				pp.setName(obj.getName());
-    				cmd.add("--" + obj.getShortName());
-    				cmd.add(String.join(",", pp.getValue()));
-    			}
-    		}
-    		
+    		    		
     		// run test
     		log.info("Running MGM scoring tool with command: " + cmd.toString());
     		String result = runCMD((String[])cmd.toArray(new String[0]));
