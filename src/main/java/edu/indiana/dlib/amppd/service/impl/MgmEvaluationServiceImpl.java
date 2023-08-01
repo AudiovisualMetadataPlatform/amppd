@@ -162,8 +162,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
             }
         }
         
-        // ensure all passed in parameters 
-        
         return errors;
     }
 
