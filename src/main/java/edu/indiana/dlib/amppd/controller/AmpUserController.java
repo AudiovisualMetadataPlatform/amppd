@@ -64,32 +64,31 @@ public class AmpUserController {
 
 	@PostMapping(path = "/account/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse register(@RequestBody AmpUser user) { 
-		log.info("Registration for User=> Name:"+ user.getUsername());	
-		log.info("Registration for User=> Email:"+ user.getEmail());	
+		log.info("Registrating user => Username: "+ user.getUsername() + ", Email:"+ user.getEmail());	
 		AuthResponse res = ampUserService.registerAmpUser(user);
-		log.info(" Registration result: " + res);
+		log.info(" user registration result: " + res);
 		return res;
 	}
 
 	@PostMapping(path = "/account/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse forgotPassword(@RequestBody AuthRequest request) { 
-		log.info("Forgot Password for User=> Email:"+ request.getEmailid());	
+		log.info("Forgot Password for User => Email:"+ request.getEmailid());	
 		AuthResponse res = ampUserService.emailResetPasswordToken(request.getEmailid());
-		log.info(" Forgot Password result: " + res);
+		log.info("Forgot Password result: " + res);
 		return res;
 	}
 
 	@PostMapping(path = "/account/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse resetPassword(@RequestBody AuthRequest request) { 
-		log.info("Reset Password for User=> Email:"+ request.getEmailid());	
+		log.info("Reset Password for User => Email:"+ request.getEmailid());	
 		AuthResponse res = ampUserService.resetPassword(request.getEmailid(), request.getPassword(), request.getToken());
-		log.info(" Reset Password result: " + res);
+		log.info(" reset Password result: " + res);
 		return res;
 	}
 
 	@PostMapping(path = "/account/approve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse approveUser(@RequestBody AuthRequest request) { 
-		log.info("Approve User=> id:"+ request.getUserId());	
+		log.info("Approve User => id:"+ request.getUserId());	
 		AuthResponse res = ampUserService.accountAction(request.getUserId(), "approve");
 		log.info(" approve user result: " + res);
 		return res;
@@ -97,7 +96,7 @@ public class AmpUserController {
 
 	@PostMapping(path = "/account/reject", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse rejectUser(@RequestBody AuthRequest request) { 
-		log.info("Reject User=> id:"+ request.getUserId());	
+		log.info("Reject User => id:"+ request.getUserId());	
 		AuthResponse res = ampUserService.accountAction(request.getUserId(), "reject");
 		log.info(" reject user result: " + res);
 		return res;
@@ -121,7 +120,7 @@ public class AmpUserController {
 
 	@GetMapping(path="/account/{Id}")
 	public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
-		log.info("User=> id:"+ Id);
+		log.info("User => id:"+ Id);
 		AmpUser ampuser= ampUserService.getUserById(Id);
 		log.info("Fetched User for given Id using getUserById()"+ampuser.getId());
 		return ampuser;

@@ -28,6 +28,7 @@ import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.AmpUser.Status;
 import edu.indiana.dlib.amppd.model.TimedToken;
 import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
@@ -118,10 +119,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
 	  @Override
 	  @Transactional	
-	  public AuthResponse registerAmpUser(AmpUser user) { 
-		  
+	  public AuthResponse registerAmpUser(AmpUser user) { 		  
 		  AuthResponse response = new AuthResponse();
-		  		  
+		  response.setEmailid(user.getEmail());
+
+		  // validate user registration info
 		  if(!usernameAcceptableLength(user.getUsername())) {
 			  response.addError("Username must be " + MIN_USERNAME_LENGTH + " characters");
 		  }		  
@@ -140,31 +142,42 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		  if(!passwordAcceptableLength(user.getPassword())) {
 			  response.addError("Password must be " + MIN_PASSWORD_LENGTH + " characters");
 		  }
-
 		  if(!validEmailAddress(user.getEmail())) {
 			  response.addError("Invalid email address");
 		  }
-		  
-		  if(!response.hasErrors()) {
-			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
-			  user = ampUserRepository.save(user);
-			  if(user!=null && user.getId() > 0) 
-			  {
-				  log.info("User validated successfully. Registration email being sent");
-				  try {
-					  mailSender.send(constructEmailAttributes(uiUrl, user, "account requested"));
-					} 
-				  catch (MailException e) {
-					  e.printStackTrace();
-				  	}
-					response.setSuccess(true);
-			  }
-			  else {
-				  response.addError("Error creating user account");
-				  log.error("User validation unsuccessful so not registering the user: "+user.getEmail());
-			  }
+
+		  // return error response if validation failed
+		  if (response.hasErrors()) {
+			  log.error("Failed to validate user registration info and no account was created for user: " + user.getEmail());			  
+			  return response;
 		  }
 		  
+		  // otherwise, continue with registration process
+		  try {
+			  // encrypt password and save user
+			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
+			  user = ampUserRepository.save(user);
+			  log.info("Successfully created user account <" + user.getId() + ">: " + user.getEmail());
+			  
+			  try {
+				  // send email to AMP admin for account approval
+				  mailSender.send(constructEmailAttributes(uiUrl, user, "account requested"));
+				  response.setSuccess(true);
+				  log.info("Successflly sent registration approval email for user " + user.getId());
+			  } 
+			  catch (MailException e) {
+				  // in case email fails to be sent
+				  response.setSuccess(false);
+				  response.addError("Failed to send registration approval email for user " + user.getId());
+				  log.warn("Failed to send registration approval email for user " + user.getId(), e);
+			  }
+		  }
+		  catch (Exception e) {
+			  // in case user account fails to be saved to DB
+			  response.addError("Failed to create account for user " + user.getEmail());
+			  log.error("Failed to create account for user " + user.getEmail(), e);
+		  }
+
 		  return response;
 	  }
 	  	  
@@ -231,35 +244,64 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	@Override 
 	@Transactional
 	public AuthResponse accountAction(Long userId, String action){
+		// retrieve user
 		AuthResponse response = new AuthResponse();
-		AmpUser user = ampUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found: " + userId));
-		if(user == null){
-			response.addError("Unauthorized Link");
+		AmpUser user = ampUserRepository.findById(userId).orElse(null);
+		
+		// if user not found, return in error
+		if (user == null){
+			response.addError("Failed to " + action + " user account registration: invalid userId " + userId);
 			response.setSuccess(false);
+			log.error("Failed to " + action + " user account registration: invalid userId " + userId);
+			return response;
 		}
-		if(!response.hasErrors()) {
-			try {
-				if(action.contentEquals("approve")){
-					user.setStatus(AmpUser.Status.ACCEPTED);
-					mailSender.send(constructTokenEmail(uiUrl, user, "account approval"));
-				}
-				else if(action.contentEquals("reject")){
-					mailSender.send(constructEmailAttributes(uiUrl, user, "account rejection"));
-					user.setStatus(AmpUser.Status.REJECTED);
-				}
+		
+		// otherwise check account action
+		response.setEmailid(user.getEmail());
+		Status status = null;
+		String notice = ""; 
+		
+		// for account approval
+		if (action.equalsIgnoreCase("approve")){
+			status = Status.ACCEPTED;
+			notice = "account approval";
+		}
+		// for account rejection
+		else if (action.equalsIgnoreCase("reject")){
+			status = Status.REJECTED;
+			notice = "account rejection";
+		}
+		// for invalid action, return in error
+		else {
+			response.addError("Failed to take action on user account " + userId + ": invalid action: " + action);
+			response.setSuccess(false);
+			log.error("Failed to take action on user account " + userId + ": invalid action: " + action);
+			return response;
+		}
+		
+		// for valid action, continue account action
+		try {
+			// update user account status and send email notification to user
+			user.setStatus(status);
+			ampUserRepository.updateStatus(userId, status);		
+			mailSender.send(constructEmailAttributes(uiUrl, user, notice));
+			response.setSuccess(true);
+			log.info("Successfully " + action + "ed account registration for useer " + userId);			
+		}
+		catch (MailException e) {
+			// in case user notice email fails to be sent
+			response.setSuccess(false);
+			response.addError("Failed to send " + notice + " email for user " + user.getId());
+			log.warn("Failed to send " + notice + " email for user " + user.getId(), e);
+		}
+		catch (Exception e) {
+			// in case any other exception
+			response.addError("Failed to " + action + " account registration for useer " + userId);
+			response.setSuccess(false);
+			log.error("Failed to " + action + " account registration for useer " + userId, e);			
+		}
 				
-			}
-			catch (Exception e) {
-				response.addError("Account action:"+action+" could not be completed");
-				response.setSuccess(false);
-				return response;
-			}
-			int rows = ampUserRepository.updateStatus(userId, user.getStatus());
-			if(rows > 0){
-				response.setSuccess(true);
-			}
-		}
-		return response;
+		return response;		
 	}
 	
 	@Override
@@ -391,36 +433,36 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String message = null;
 		String url = null;
 		if (type.equalsIgnoreCase("account requested")){
-			log.info("constructing Email for User account request:"+user.getUsername());
+			log.debug("Constructing email for user account request: " + user.getUsername());
 			url = contextPath + "/account/approve/" + user.getId();
-			message = "A new user has registered and waiting approval. \n\n User Name:"+ user.getUsername()+"\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
+			message = "A new user has registered and waiting approval. \n\n User Name: " + user.getUsername() + "\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
 					"\n\n Click the link below to view and approve the new user. \n";
 			subject = amppdPropertyConfig.getEnvironment() + ": New User account request: " + user.getUsername();
 			emailTo = adminEmail;
 		}
-		else if(type.contentEquals("reset password"))
+		else if (type.contentEquals("reset password"))
 		{
-			log.info("constructing Email for reset password request:"+user.getUsername());
+			log.debug("Constructing Email for reset password request: " + user.getUsername());
 			url = contextPath;
 			message = "Please click the link to reset the password. The link  will be valid only for a limited time.";
 			subject = "Reset Account Password";
 			emailTo = user.getEmail();			
 		}
 		else if (type.equalsIgnoreCase("account rejection")){
-			log.info("constructing Email for User account rejection notification:"+user.getUsername());
+			log.debug("Constructing Email for User account rejection notification: " + user.getUsername());
 			url = "" ;
 			message = "Sign up rejected. Please reply to this email if you think this was done in error.";
 			subject = "Sign up rejected";
 			emailTo = user.getEmail();
 		}
 		else if (type.equalsIgnoreCase("account approval")){
-			log.info("Constructing email for User account activation"+user.getEmail());
+			log.debug("Constructing email for User account activation: " + user.getUsername());
 			url = contextPath;
 			message = "Your registration request has been reviewed and accepted. \n Click the link below to activate your AMP account";
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
-		log.debug("Sending email from email id:"+adminEmail);
+		log.debug("Sending " + type + " email from " + adminEmail + " to " + emailTo);
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
@@ -459,7 +501,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	    email.setText(body);
 	    email.setTo(toEmailID);
 	    email.setFrom(adminEmail);
-	    log.info("Constructed Email Object with all the information packed.");
+	    log.debug("Constructed Email Object with all the information packed: ");
 	    return email;
 	}  
 
