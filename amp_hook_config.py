@@ -182,7 +182,7 @@ def main():
         # datasource configuration
         f.write(f"spring.datasource.url = jdbc:postgresql://{config['rest']['db_host']}:{config['rest'].get('db_port', 5432)}/{config['rest']['db_name']}\n")
         # amppdui.url and amppd.url -- where we can find the UI and ourselves.
-        if config['amp'].get('use_https', False):
+        if config['amp'].get('https', False):
             f.write(f"amppdui.url = https://{config['amp']['host']}/#\n")
             f.write(f"amppd.url = https://{config['amp']['host']}/rest\n")
         else:

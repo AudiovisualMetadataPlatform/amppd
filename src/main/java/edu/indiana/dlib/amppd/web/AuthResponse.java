@@ -23,4 +23,5 @@ public class AuthResponse {
 	public boolean hasErrors() {
 		return !errors.isEmpty();
 	}
+	
 }
