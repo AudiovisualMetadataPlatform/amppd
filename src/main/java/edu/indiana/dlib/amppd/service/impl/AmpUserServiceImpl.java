@@ -262,12 +262,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String notice = ""; 
 		
 		// for account approval
-		if (action.equalsIgnoreCase("approve")){
+		if (action.equalsIgnoreCase("approve")) {
 			status = Status.ACCEPTED;
 			notice = "account approval";
 		}
 		// for account rejection
-		else if (action.equalsIgnoreCase("reject")){
+		else if (action.equalsIgnoreCase("reject")) {
 			status = Status.REJECTED;
 			notice = "account rejection";
 		}
@@ -281,10 +281,18 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		
 		// for valid action, continue account action
 		try {
-			// update user account status and send email notification to user
+			// update user account status 
 			user.setStatus(status);
-			ampUserRepository.updateStatus(userId, status);		
-			mailSender.send(constructEmailAttributes(uiUrl, user, notice));
+			ampUserRepository.updateStatus(userId, status);	
+			
+			// send email notification to user
+			if (action.equalsIgnoreCase("approve")) {
+				mailSender.send(constructTokenEmail(uiUrl, user, notice));
+			}
+			else {
+				mailSender.send(constructEmailAttributes(uiUrl, user, notice));
+			}
+			
 			response.setSuccess(true);
 			log.info("Successfully " + action + "ed account registration for useer " + userId);			
 		}
@@ -381,7 +389,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 				AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
 				if(user!= null) {
 					if(user.getStatus() == AmpUser.Status.ACCEPTED){
-						log.info("Corresponding amp user was found.");
+						log.debug("Corresponding amp user was approved for activation.");
 						try {
 							ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
 							response.setSuccess(true);
@@ -417,12 +425,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
     	if (type.equalsIgnoreCase("reset password")) {
     		String token = createTimedToken(user, amppdPropertyConfig.getResetPasswordMinutes());
     		url = contextPath + "/account/reset-password/" + token;
-    		log.info("Constructed reset token url, constructing email attributes");
+    		log.debug("Constructed reset token url, constructing email attributes");
     	}
     	else if (type.equalsIgnoreCase("account approval")) {
     		String token = createTimedToken(user, amppdPropertyConfig.getActivateAccountDays() * 24);
     		url = contextPath + "/account/activate/" + token;
-    		log.info("Constructed activation token url, constructing email attributes");
+    		log.debug("Constructed activation token url, constructing email attributes");
     	}	
 	    return constructEmailAttributes(url, user, type);
 	}
@@ -462,7 +470,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
-		log.debug("Sending " + type + " email from " + adminEmail + " to " + emailTo);
+		log.info("Sending " + type + " email from " + adminEmail + " to " + emailTo);
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
