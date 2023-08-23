@@ -522,9 +522,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	@Override
 	public AmpUser getUserById(Long userId) {
-		 AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
-		 log.info("User fetched Successfully");
-		 return user;		
+		AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
+		log.info("User fetched Successfully");
+		return user;		
 	}
 
 	public AmpUser getUserByEmail(String email) {
