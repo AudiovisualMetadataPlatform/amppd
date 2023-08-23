@@ -38,6 +38,7 @@ retrieve bag,retrieve bag contents at various levels,Read,Bag,GET,/bags/units|co
 deliver bag,deliver bag contents to Avalon at various levels,Create,Bag,POST,/deliver/avalon/[collections|items]/{id},TRUE
 run evaluation,run MGM evaluation tests,Create,MgmEvaluationTest,POST,/mgm*,TRUE
 view evaluation,list/view/visualize MGM evaluation tools/tests/results,Read,MgmEvaluationTest,GET,/mgm*,TRUE
+view user,view info of user(s) other than self (the current user),Read,AmpUser,GET,/users/[id|active],FALSE
 approve user,approve/reject user account registration,Update,AmpUser,POST,/account/[approve|reject],FALSE
 view permission,list/view role_action permission configuration,Read,Role,GET,/roles/config,TRUE
 config global permission,config permission settings on actions for global roles,Update,Role,POST,/roles/config,FALSE

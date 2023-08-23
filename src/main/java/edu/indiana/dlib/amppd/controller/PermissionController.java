@@ -50,11 +50,11 @@ public class PermissionController {
 		boolean has = false;
 		
 		if (actionType != null && targetType != null) {
-			has = permissionService.hasPermsion(actionType, targetType, unitId);
+			has = permissionService.hasPermission(actionType, targetType, unitId);
 			log.info("Checking current user permission to perform action " + actionType + " on target " + targetType + " in unit " + unitId);
 		}
 		else if (httpMethod != null && urlPattern != null) {
-			has = permissionService.hasPermsion(httpMethod, urlPattern, unitId);
+			has = permissionService.hasPermission(httpMethod, urlPattern, unitId);
 			log.info("Checking current user permission to issue request " + httpMethod + " " + urlPattern + " in unit " +  + unitId);
 		} 
 		

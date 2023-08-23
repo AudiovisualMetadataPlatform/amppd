@@ -72,20 +72,20 @@ public class PermissionServiceImpl implements PermissionService {
 		
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(ActionType, TargetType, Long)
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermission(ActionType, TargetType, Long)
 	 */
 	@Override
-	public boolean hasPermsion(ActionType actionType, TargetType targetType, Long unitId) {
+	public boolean hasPermission(ActionType actionType, TargetType targetType, Long unitId) {
 		Action action = actionRepository.findFirstByActionTypeAndTargetType(actionType, targetType);		
 		boolean has = hasPermission(action, unitId);
 		return has;
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermsion(HttpMethod, String, Long)
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermission(HttpMethod, String, Long)
 	 */
 	@Override
-	public boolean hasPermsion(HttpMethod httpMethod, String urlPattern, Long unitId) {
+	public boolean hasPermission(HttpMethod httpMethod, String urlPattern, Long unitId) {
 		Action action = actionRepository.findFirstByHttpMethodAndUrlPattern(httpMethod, urlPattern);		
 		boolean has = hasPermission(action, unitId);
 		return has;

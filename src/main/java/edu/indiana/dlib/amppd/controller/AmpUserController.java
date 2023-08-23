@@ -18,9 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.AmpUser.Status;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 import edu.indiana.dlib.amppd.repository.AmpUserRepository;
 import edu.indiana.dlib.amppd.security.JwtRequest;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.impl.AmpUserServiceImpl;
 import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
@@ -42,6 +45,10 @@ public class AmpUserController {
 
 	@Autowired
 	private AmpUserRepository ampUserRepository;
+
+	@Autowired
+	private PermissionService permissionService;
+	
 
 	@RequestMapping(value = "/account/authenticate", method = RequestMethod.POST)
 	public ResponseEntity<?> authenticate(@RequestBody JwtRequest authenticationRequest) throws Exception {
@@ -74,6 +81,14 @@ public class AmpUserController {
 		return res;
 	}
 
+	@PostMapping(path = "/account/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse activateUser(@RequestBody AuthRequest request) {
+		log.info("Activate User");	
+		AuthResponse res = ampUserService.activateAccount(request.getToken());
+		log.info(" activate user result: " + res);
+		return res;
+	}
+
 	@PostMapping(path = "/account/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse forgotPassword(@RequestBody AuthRequest request) { 
 		log.info("Forgot Password for User => Email:"+ request.getEmailid());	
@@ -90,31 +105,6 @@ public class AmpUserController {
 		return res;
 	}
 
-	@PostMapping(path = "/account/approve", produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse approveUser(@RequestParam Long userId, @RequestParam Boolean approve) { 
-		String action = approve ? "approve" : "reject";
-		log.info(action + " User => id: " + userId);	
-		AuthResponse res = ampUserService.approveAccount(userId, approve);
-		log.info(action + " User result: " + res);
-		return res;
-	}
-
-//	@PostMapping(path = "/account/reject", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-//	public @ResponseBody AuthResponse rejectUser(@RequestBody AuthRequest request) { 
-//		log.info("Reject User => id:"+ request.getUserId());	
-//		AuthResponse res = ampUserService.approveAccount(request.getUserId(), "reject");
-//		log.info(" reject user result: " + res);
-//		return res;
-//	}
-
-	@PostMapping(path = "/account/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse activateUser(@RequestBody AuthRequest request) {
-		log.info("Activate User");	
-		AuthResponse res = ampUserService.activateAccount(request.getToken());
-		log.info(" activate user result: " + res);
-		return res;
-	}
-
 	@PostMapping(path = "/account/reset-password-getEmail", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse resetPasswordGetEmail(@RequestBody AuthRequest request) {
 		log.info("Calling get email for a token using resetPasswordGetEmail()");	
@@ -123,8 +113,23 @@ public class AmpUserController {
 		return res;
 	}
 
-	@GetMapping(path="/account/{Id}")
+	@PostMapping(path = "/account/approve", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse approveAccount(@RequestParam Long userId, @RequestParam Boolean approve) { 
+		String action = approve ? "approve" : "reject";
+		log.info(action + " User => id: " + userId);	
+		AuthResponse res = ampUserService.approveAccount(userId, approve);
+		log.info(action + " User result: " + res);
+		return res;
+	}
+
+	@GetMapping(path="/users/{Id}")
 	public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
+		// TODO 
+		// We currently don't have an action for Read AmpUser, and this API is only called to approve/reject account registration;
+		// so it's fine to use Update AmpUser action here; however, if other use cases for Read User comes up we should use that.
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.AmpUser, null);
+		
+		
 		log.info("User => id:"+ Id);
 		AmpUser ampuser= ampUserService.getUserById(Id);
 		log.info("Fetched User for given Id using getUserById()"+ampuser.getId());
