@@ -59,6 +59,10 @@ public class AmpUserController {
 
 	@RequestMapping(value = "/account/validate", method = RequestMethod.POST)
 	public ResponseEntity<?> validateToken() throws Exception {
+		// TODO
+		// this API simply returns 200 status if the token in the request is valid,
+		// the only purpose is for frontend to verify if its locally stored auth token is valid (not compromised)
+		// before forwarding any route. there ise better way to achieve this without an extra API call
 		return ResponseEntity.ok("Success");
 	}
 
@@ -86,21 +90,22 @@ public class AmpUserController {
 		return res;
 	}
 
-	@PostMapping(path = "/account/approve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse approveUser(@RequestBody AuthRequest request) { 
-		log.info("Approve User => id:"+ request.getUserId());	
-		AuthResponse res = ampUserService.accountAction(request.getUserId(), "approve");
-		log.info(" approve user result: " + res);
+	@PostMapping(path = "/account/approve", produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse approveUser(@RequestParam Long userId, @RequestParam Boolean approve) { 
+		String action = approve ? "approve" : "reject";
+		log.info(action + " User => id: " + userId);	
+		AuthResponse res = ampUserService.approveAccount(userId, approve);
+		log.info(action + " User result: " + res);
 		return res;
 	}
 
-	@PostMapping(path = "/account/reject", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse rejectUser(@RequestBody AuthRequest request) { 
-		log.info("Reject User => id:"+ request.getUserId());	
-		AuthResponse res = ampUserService.accountAction(request.getUserId(), "reject");
-		log.info(" reject user result: " + res);
-		return res;
-	}
+//	@PostMapping(path = "/account/reject", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//	public @ResponseBody AuthResponse rejectUser(@RequestBody AuthRequest request) { 
+//		log.info("Reject User => id:"+ request.getUserId());	
+//		AuthResponse res = ampUserService.approveAccount(request.getUserId(), "reject");
+//		log.info(" reject user result: " + res);
+//		return res;
+//	}
 
 	@PostMapping(path = "/account/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse activateUser(@RequestBody AuthRequest request) {

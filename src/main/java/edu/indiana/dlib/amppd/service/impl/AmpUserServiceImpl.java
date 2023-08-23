@@ -243,10 +243,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	@Override 
 	@Transactional
-	public AuthResponse accountAction(Long userId, String action){
+	public AuthResponse approveAccount(Long userId, Boolean approve) {
 		// retrieve user
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findById(userId).orElse(null);
+		String action = approve ? "approve" : "reject";
 		
 		// if user not found, return in error
 		if (user == null){
