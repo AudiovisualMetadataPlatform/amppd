@@ -38,6 +38,7 @@ Collection Staff,retrieve bag
 Collection Staff,deliver bag
 Collection Staff,run evaluation
 Collection Staff,view evaluation
+Unit Manager,view user
 AMP Admin,approve user
 Unit Viewer,view permission
 AMP Admin,config global permission

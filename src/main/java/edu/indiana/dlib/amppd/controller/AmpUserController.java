@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -115,6 +116,11 @@ public class AmpUserController {
 
 	@PostMapping(path = "/account/approve", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse approveAccount(@RequestParam Long userId, @RequestParam Boolean approve) { 
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.AmpUser, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot approve/reject user account registration.");
+		}		
+		
 		String action = approve ? "approve" : "reject";
 		log.info(action + " User => id: " + userId);	
 		AuthResponse res = ampUserService.approveAccount(userId, approve);
@@ -124,11 +130,10 @@ public class AmpUserController {
 
 	@GetMapping(path="/users/{Id}")
 	public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
-		// TODO 
-		// We currently don't have an action for Read AmpUser, and this API is only called to approve/reject account registration;
-		// so it's fine to use Update AmpUser action here; however, if other use cases for Read User comes up we should use that.
-		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.AmpUser, null);
-		
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.AmpUser, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot view details of other users.");
+		}
 		
 		log.info("User => id:"+ Id);
 		AmpUser ampuser= ampUserService.getUserById(Id);
@@ -144,6 +149,11 @@ public class AmpUserController {
 	 */
 	@GetMapping("/users/active")
 	public List<AmpUserBrief> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluding) {
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.AmpUser, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot view details of other users.");
+		}		
+		
 		List<AmpUserBrief> users = null;
 		
 		// if users to exclude is not provided, skip the exclude-user criteria 
