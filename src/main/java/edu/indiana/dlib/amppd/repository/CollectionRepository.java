@@ -10,6 +10,7 @@ import edu.indiana.dlib.amppd.model.projection.CollectionBrief;
 
 @RepositoryRestResource(excerptProjection = CollectionBrief.class)
 public interface CollectionRepository extends ContentRepository<Collection> {
+	Collection findFirstByUnitNameAndName(String unitName, String name);
 	
 	List<Collection> findByUnitNameAndName(String unitName, String name);
 	List<Collection> findByUnitIdAndName(Long unitId, String name);

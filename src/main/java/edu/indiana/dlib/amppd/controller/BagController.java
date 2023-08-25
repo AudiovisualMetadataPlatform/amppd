@@ -2,15 +2,24 @@ package edu.indiana.dlib.amppd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.CollectionBag;
 import edu.indiana.dlib.amppd.model.ItemBag;
+import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.ItemRepository;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.BagService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,7 +32,20 @@ import lombok.extern.slf4j.Slf4j;
 public class BagController {
 
 	@Autowired
+	private PrimaryfileRepository primaryfileRepository;
+	
+	@Autowired
+	private ItemRepository itemRepository;
+	
+	@Autowired
+	private CollectionRepository collectionRepository;
+	
+	@Autowired
 	private BagService bagService;
+
+	@Autowired
+	private PermissionService permissionService;
+	
 
 	/**
 	 * Gets the PrimaryfileBag associated with the given primaryfile.
@@ -32,6 +54,13 @@ public class BagController {
 	 */
 	@GetMapping(path = "/bags/primaryfile/{primaryfileId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public PrimaryfileBag getPrimaryfileBag(@PathVariable Long primaryfileId) {
+//		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    		
+//		Long acUnitId = primaryfile.getAcUnitId();
+//		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, null);
+//		if (!can) {
+//			throw new AccessDeniedException("The current user cannot view details of other users.");
+//		}
+		
 		log.info("Getting PrimaryfileBag for primaryfileId " + primaryfileId + " ... " );
 		return bagService.getPrimaryfileBag(primaryfileId);		
 	}

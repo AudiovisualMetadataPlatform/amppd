@@ -11,17 +11,17 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.BagContent;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionBag;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ItemBag;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileBag;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.BagService;
-import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,16 +44,18 @@ public class BagServiceImpl implements BagService {
 	@Autowired
 	private MediaService mediaService;
 		
+	
 	@Autowired
 	private WorkflowResultService workflowResultService;
 		
-	/**
-	 * @see edu.indiana.dlib.amppd.service.BagService.getPrimaryfileBag(Long)
-	 */
-	public PrimaryfileBag getPrimaryfileBag(Long primaryfileId) {
-		PrimaryfileBag pbag = new PrimaryfileBag();			
-		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    
 		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.BagService.getPrimaryfileBag(Primaryfile)
+	 */
+	public PrimaryfileBag getPrimaryfileBag(Primaryfile primaryfile) {
+		PrimaryfileBag pbag = new PrimaryfileBag();			
+		
+		Long primaryfileId = primaryfile.getId();
 		pbag.setPrimaryfileId(primaryfileId);
 		pbag.setPrimaryfileName(primaryfile.getName());
 		List<BagContent> bcontents = new ArrayList<BagContent>();
@@ -82,14 +84,22 @@ public class BagServiceImpl implements BagService {
 		log.info("Successfully retrieved PrimaryfileBag for primaryfileId " + primaryfileId + " with " + bcontents.size() + " BagContents.");
 		return pbag;
 	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.BagService.getPrimaryfileBag(Long)
+	 */
+	public PrimaryfileBag getPrimaryfileBag(Long primaryfileId) {		
+		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    		
+		return getPrimaryfileBag(primaryfile);
+	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.BagService.getItemBag(Long)
+	 * @see edu.indiana.dlib.amppd.service.BagService.getItemBag(Item)
 	 */
-	public ItemBag getItemBag(Long itemId) {
+	public ItemBag getItemBag(Item item) {
 		ItemBag ibag = new ItemBag();			
-		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));    
-		
+
+		Long itemId = item.getId();
 		ibag.setItemId(itemId);
 		ibag.setItemName(item.getName());
 		ibag.setExternalSource(item.getExternalSource());
@@ -108,6 +118,14 @@ public class BagServiceImpl implements BagService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.BagService.getItemBag(Long)
+	 */
+	public ItemBag getItemBag(Long itemId) {			
+		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));    
+		return getItemBag(item);
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.BagService.getItemBag(String, String)
 	 */
 	public ItemBag getItemBag(String externalSource, String externalId) {
@@ -117,19 +135,16 @@ public class BagServiceImpl implements BagService {
 		}
 		
 		Item item = items.get(0);
-		ItemBag ibag = getItemBag(item.getId());					
-				
-		log.info("Successfully retrieved ItemBag for external source-id " + externalSource + "-" + externalId + " with " + ibag.getPrimaryfileBags().size() + " PrimaryfileBags.");
-		return ibag;
+		return getItemBag(item);
 	}
 	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.BagService.getCollectionBag(Long)
+	 * @see edu.indiana.dlib.amppd.service.BagService.getCollectionBag(Collection)
 	 */
-	public CollectionBag getCollectionBag(Long collectionId) {
+	public CollectionBag getCollectionBag(Collection collection) {
 		CollectionBag cbag = new CollectionBag();			
-		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));    
 		
+		Long collectionId = collection.getId();
 		cbag.setCollectionId(collectionId);
 		cbag.setCollectionName(collection.getName());
 		cbag.setUnitName(collection.getUnit().getName());
@@ -147,6 +162,14 @@ public class BagServiceImpl implements BagService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.BagService.getCollectionBag(Long)
+	 */
+	public CollectionBag getCollectionBag(Long collectionId) {
+		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));    		
+		return getCollectionBag(collection);
+	}
+	
+	/**
 	 * @see edu.indiana.dlib.amppd.service.BagService.getCollectionBag(String, String)
 	 */
 	public CollectionBag getCollectionBag(String unitName, String collectionName) {
@@ -156,10 +179,7 @@ public class BagServiceImpl implements BagService {
 		}
 		
 		Collection collection = collections.get(0);
-		CollectionBag cbag = getCollectionBag(collection.getId());					
-				
-		log.info("Successfully retrieved CollectionBag for unitName-collectionName " + unitName + "-" + collectionName + " with " + cbag.getItemBags().size() + " ItemBags.");
-		return cbag;
+		return  getCollectionBag(collection);
 	}
 	
 	

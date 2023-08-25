@@ -14,6 +14,7 @@ import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 
 @RepositoryRestResource(excerptProjection = ItemBrief.class)
 public interface ItemRepository extends ContentRepository<Item> {
+	Item findFirstByExternalSourceAndExternalId(String externalSource, String externalId);
 	
 	List<Item> findByCollectionUnitNameAndCollectionNameAndName(String collectionUnitName, String collectionName, String name);
 	List<Item> findByCollectionIdAndName(Long collectionId, String name);
