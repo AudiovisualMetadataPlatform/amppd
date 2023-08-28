@@ -31,7 +31,7 @@ public interface PermissionService {
 	 * @param unitId ID of the given unit; null means at least one of the units
 	 * @return true if the user has the permission; false otherwise
 	 */
-	public boolean hasPermsion(ActionType actionType, TargetType targetType, Long unitId);
+	public boolean hasPermission(ActionType actionType, TargetType targetType, Long unitId);
 	
 	/**
 	 * Check if the current user has permission to issue the given request with the given URL in the given unit 
@@ -41,7 +41,7 @@ public interface PermissionService {
 	 * @param unitId ID of the given unit; null means at least one of the units
 	 * @return true if the user has the permission; false otherwise
 	 */
-	public boolean hasPermsion(HttpMethod httpMethod, String urlPattern, Long unitId);
+	public boolean hasPermission(HttpMethod httpMethod, String urlPattern, Long unitId);
 	
 	/**
 	 * Check if the current user has permission to perform the given action in the given unit 

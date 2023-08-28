@@ -243,10 +243,11 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	@Override 
 	@Transactional
-	public AuthResponse accountAction(Long userId, String action){
+	public AuthResponse approveAccount(Long userId, Boolean approve) {
 		// retrieve user
 		AuthResponse response = new AuthResponse();
 		AmpUser user = ampUserRepository.findById(userId).orElse(null);
+		String action = approve ? "approve" : "reject";
 		
 		// if user not found, return in error
 		if (user == null){
@@ -509,7 +510,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	    email.setText(body);
 	    email.setTo(toEmailID);
 	    email.setFrom(adminEmail);
-	    log.debug("Constructed Email Object with all the information packed: ");
+	    log.debug("Constructed Email Object with all the information packed: " + body);
 	    return email;
 	}  
 
@@ -521,9 +522,9 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	@Override
 	public AmpUser getUserById(Long userId) {
-		 AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
-		 log.info("User fetched Successfully");
-		 return user;		
+		AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
+		log.info("User fetched Successfully");
+		return user;		
 	}
 
 	public AmpUser getUserByEmail(String email) {

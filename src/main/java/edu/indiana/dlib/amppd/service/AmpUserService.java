@@ -49,11 +49,12 @@ public interface AmpUserService {
 	public AuthResponse emailResetPasswordToken(String emailid);
 	
 	/**
-	 * Generates an account verification email for the new and sets the approve_status flag to the specified action in the database. 
-	 * @param user id
+	 * Approve/reject account registration for the given user, update account status and sends user approval/rejection email notice. 
+	 * @param userID ID of the given user account
+	 * @param approve whether or not to approve the account
 	 * @return the response object consisting of the database update result and errors, if any.
 	 */
-	public AuthResponse accountAction(Long userID, String action);
+	public AuthResponse approveAccount(Long userID, Boolean approve);
 
 	/**
 	 * Fetches the user id from the database for a given token if it is not expired. 

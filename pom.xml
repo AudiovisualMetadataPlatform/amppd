@@ -6,7 +6,7 @@
 
 	<groupId>edu.indiana.dlib</groupId>
 	<artifactId>amppd</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>war</packaging>
 	<name>amppd</name>
 	<description>Audiovisual Metadata Platform</description>
