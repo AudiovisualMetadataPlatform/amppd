@@ -14,7 +14,8 @@ import edu.indiana.dlib.amppd.model.AmpUser.Status;
 import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 
 
-@RepositoryRestResource(excerptProjection = AmpUserBrief.class, collectionResourceRel = "users", path = "users")
+//@RepositoryRestResource(excerptProjection = AmpUserBrief.class, collectionResourceRel = "users", path = "users")
+@RepositoryRestResource(exported = false)
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 
 	AmpUser findFirstByUsername(String username);

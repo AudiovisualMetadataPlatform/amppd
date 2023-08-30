@@ -24,6 +24,12 @@ public class ConfigController {
 	@Autowired
 	private ConfigService configService;
 
+	
+	// Note:
+	// Configuration info provided in this controller are needed by UI and available to every one,
+	// thus no authorization is needed.
+	
+	
 	/**
 	 * Return the requested configuration properties.
 	 * @param properties name of the properties requested; null means all client visible properties.

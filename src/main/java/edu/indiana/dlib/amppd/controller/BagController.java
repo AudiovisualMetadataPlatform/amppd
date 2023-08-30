@@ -59,7 +59,7 @@ public class BagController {
 		Long acUnitId = primaryfile.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
-			throw new AccessDeniedException("The current user cannot retrieve primaryfile bags.");
+			throw new AccessDeniedException("The current user cannot retrieve primaryfile bags in unit " + acUnitId);
 		}
 		
 		log.info("Getting PrimaryfileBag for primaryfileId " + primaryfileId + " ... " );
@@ -77,7 +77,7 @@ public class BagController {
 		Long acUnitId = item.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
-			throw new AccessDeniedException("The current user cannot retrieve item bags.");
+			throw new AccessDeniedException("The current user cannot retrieve item bags in unit " + acUnitId);
 		}
 		
 		log.info("Getting ItemBag for itemId " + itemId + " ... " );
@@ -108,7 +108,7 @@ public class BagController {
 		Long acUnitId = collection.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
-			throw new AccessDeniedException("The current user cannot retrieve collection bags.");
+			throw new AccessDeniedException("The current user cannot retrieve collection bags in unit " + acUnitId);
 		}
 		
 		log.info("Getting CollectionBag for collectionId " + collectionId + " ... " );

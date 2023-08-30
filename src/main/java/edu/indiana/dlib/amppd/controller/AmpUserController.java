@@ -50,6 +50,11 @@ public class AmpUserController {
 	@Autowired
 	private PermissionService permissionService;
 	
+	
+	// Note:
+	// Currently AMP user accounts are created via self registration, and the involved APIs which involves
+	// user initiated actions are available to every one, i.e. no authorization required.
+	// The APIs requiring authorization are those involving approving accounts and querying users.
 
 	@RequestMapping(value = "/account/authenticate", method = RequestMethod.POST)
 	public ResponseEntity<?> authenticate(@RequestBody JwtRequest authenticationRequest) throws Exception {

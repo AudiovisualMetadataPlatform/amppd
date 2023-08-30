@@ -2,6 +2,8 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.List;
 
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.dto.AvalonMediaObject;
 import edu.indiana.dlib.amppd.model.dto.AvalonRelatedItems;
 
@@ -14,18 +16,33 @@ public interface DeliverService {
 	/**
 	 * Deliver final results associated with the given item to Avalon as related items of the corresponding media object,
 	 * providing the given externalID of the collection containing the given item.
-	 * @param itemId ID of the given item
-	 * @param collectionExternalId externalID of the collection containing the given item
+	 * @param item the given item
 	 * @return the AvalonRelatedItems delivered
 	 */
-	public AvalonRelatedItems deliverAvalonItem(Long itemId, String collectionExternalId);
+	public AvalonRelatedItems deliverAvalonItem(Item item);
+	
+//	/**
+//	 * Deliver final results associated with the given item to Avalon as related items of the corresponding media object,
+//	 * providing the given externalID of the collection containing the given item.
+//	 * @param itemId ID of the given item
+//	 * @param collectionExternalId externalID of the collection containing the given item
+//	 * @return the AvalonRelatedItems delivered
+//	 */
+//	public AvalonRelatedItems deliverAvalonItem(Long itemId, String collectionExternalId);
 	
 	/**
 	 * Deliver final results associated with the items within the given collection to target system Avalon.
-	 * @param collectionId ID of the given collection
+	 * @param collection the given collection
 	 * @return the list of AvalonRelatedItems delivered
 	 */
-	public List<AvalonRelatedItems> deliverAvalonCollection(Long collectionId);
+	public List<AvalonRelatedItems> deliverAvalonCollection(Collection collection);
+
+//	/**
+//	 * Deliver final results associated with the items within the given collection to target system Avalon.
+//	 * @param collectionId ID of the given collection
+//	 * @return the list of AvalonRelatedItems delivered
+//	 */
+//	public List<AvalonRelatedItems> deliverAvalonCollection(Long collectionId);
 	
 	/**
 	 * Put (link) the AMP outputs contained in the AvalonRelatedItems to the Avalon media object corresponding to the given AMP item.

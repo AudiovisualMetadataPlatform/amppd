@@ -62,9 +62,10 @@ public class BatchController {
 		if (unit == null) {
 			throw new StorageException("Failed to find unit with name " + unitName);
 		}
-		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Batch, unit.getAcUnitId());
+		Long acUnitId = unit.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Batch, acUnitId);
 		if (!can) {
-			throw new AccessDeniedException("The current user cannot ingest batch.");
+			throw new AccessDeniedException("The current user cannot ingest batch in unit " + acUnitId);
 		}
 		
 		// the user submitting the batch shall be the current user logged in and should be recorded in the user session

@@ -16,7 +16,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import edu.indiana.dlib.amppd.config.AvalonPropertyConfig;
-import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.BagContent;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Item;
@@ -25,7 +24,6 @@ import edu.indiana.dlib.amppd.model.PrimaryfileBag;
 import edu.indiana.dlib.amppd.model.dto.AvalonMediaObject;
 import edu.indiana.dlib.amppd.model.dto.AvalonRelatedItems;
 import edu.indiana.dlib.amppd.model.dto.AvalonRelatedItems.AvalonRelatedItemsFields;
-import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.service.BagService;
 import edu.indiana.dlib.amppd.service.DeliverService;
 import edu.indiana.dlib.amppd.service.MediaService;
@@ -53,27 +51,40 @@ public class DeliverServiceImpl implements DeliverService {
 	private AvalonPropertyConfig avalonPropertyConfig;
 	
 	@Autowired
-	private CollectionRepository collectionRepository;
-	
-	@Autowired
 	private BagService bagService;
 
 	@Autowired
 	private MediaService mediaService;
 	
+	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DeliverService.deliverAvalonItem(Long, String)
+	 * @see edu.indiana.dlib.amppd.service.DeliverService.deliverAvalonItem(Item)
 	 */
-	public AvalonRelatedItems deliverAvalonItem(Long itemId, String collectionExternalId) {
-		ItemBag itemBag = bagService.getItemBag(itemId);		
+	public AvalonRelatedItems deliverAvalonItem(Item item) {
+		Long itemId = item.getId();
+		String collectionExternalId = null;
+		Collection collection = item.getCollection();
+
+		// verify that the item has a valid externalId for Avalon
+		if (!AVALON.equalsIgnoreCase(item.getExternalSource()) || StringUtils.isEmpty(item.getExternalId())) {
+			throw new RuntimeException("Item " + itemId + " has invalid external source or ID for Avalon");
+		}
+		
+		// verify that the item's collection has a valid externalId for Avalon
+		if (collection == null) {
+			throw new RuntimeException("Collection for item " + itemId + " is null");
+		}
+		else {
+			collectionExternalId = collection.getExternalId();    
+			if (!AVALON.equalsIgnoreCase(collection.getExternalSource()) || StringUtils.isEmpty(collectionExternalId)) {
+				throw new RuntimeException("Collection " + collection.getId() + " for item " + itemId + " has invalid external source or ID for Avalon");
+			}
+		}		
+
+		ItemBag itemBag = bagService.getItemBag(item);		
 		List<String> urls = new ArrayList<String>();		
 		List<String> labels = new ArrayList<String>();	
 		AvalonRelatedItems aris = new AvalonRelatedItems(collectionExternalId, new AvalonRelatedItemsFields(urls, labels));	
-		
-		// verify that the item has a valid externalId for Avalon
-		if (!AVALON.equalsIgnoreCase(itemBag.getExternalSource()) || StringUtils.isEmpty(itemBag.getExternalId())) {
-			throw new RuntimeException("Item " + itemId + " has invalid external source or ID for Avalon");
-		}
 		
 		// go through each PrimaryfileBag contained in the itemBag
 		for (PrimaryfileBag pb : itemBag.getPrimaryfileBags()) {
@@ -97,26 +108,25 @@ public class DeliverServiceImpl implements DeliverService {
 		else {
 			log.error("Failed to deliver " + labels.size() + " final results for item " + itemId + " to Avalon media object " + itemBag.getExternalId());			
 			return null;
-		}
-		
+		}		
 	}
-	
+		
 	/**
-	 * @see edu.indiana.dlib.amppd.service.DeliverService.deliverAvalonCollection(Long)
+	 * @see edu.indiana.dlib.amppd.service.DeliverService.deliverAvalonCollection(Collection)
 	 */
-	public List<AvalonRelatedItems> deliverAvalonCollection(Long collectionId) {
+	public List<AvalonRelatedItems> deliverAvalonCollection(Collection collection) {
 		List<AvalonRelatedItems> ariss = new ArrayList<AvalonRelatedItems>();
-		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));    
+		Long collectionId = collection.getId();
+		String collectionExternalId = collection.getExternalId();  
 
-		// verify that the collection has a valid externalId for Avalon
-		String collectionExternalId = collection.getExternalId();    
+		// verify that the collection has a valid externalId for Avalon		
 		if (!DeliverServiceImpl.AVALON.equalsIgnoreCase(collection.getExternalSource()) || StringUtils.isEmpty(collectionExternalId)) {
 			throw new RuntimeException("Collection " + collection.getId() + " has invalid external source or ID for Avalon");
 		}
 
 		// deliver final results for each item in the collection to Avalon
 		for (Item item : collection.getItems()) {
-			AvalonRelatedItems aris = deliverAvalonItem(item.getId(), collectionExternalId);
+			AvalonRelatedItems aris = deliverAvalonItem(item);
 			if (aris != null) {
 				ariss.add(aris);
 			}
