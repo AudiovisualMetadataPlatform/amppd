@@ -90,7 +90,7 @@ public class BagController {
 	 * @param externalId externalId of the given item
 	 * @return the ItemBag retrieved
 	 */
-	// Disable unused Endpoint
+	// Disable unused endpoint
 //	@GetMapping(path = "/bags/item", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemBag getItemBag(@RequestParam String externalSource, @RequestParam String externalId) {
 		log.info("Getting ItemBag for external source-id " + externalSource + "-" + externalId + " ...");
@@ -121,7 +121,7 @@ public class BagController {
 	 * @param collectionName name of the given collection
 	 * @return the CollectionBag retrieved
 	 */
-	// Disable unused Endpoint
+	// Disable unused endpoint
 //	@GetMapping(path = "/bags/item", produces = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/bags/collection", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CollectionBag getCollectionBag(@RequestParam String unitName, @RequestParam String collectionName) {

@@ -89,7 +89,7 @@ public class BatchController {
 	 * @param (optional) primaryfileId, if provispecifiedded, preprocess only this primaryfile, otherwise preprocess all as needed
 	 * @return the list of primaryfiles failed to be preprocessed
 	 */
-	// Disable unused Endpoint
+	// Disable unused endpoint
 //	@PostMapping(path = "/batch/preprocess")
 	public List<Primaryfile> preprocessPrimaryfilesMissingMediaInfo(@RequestParam(required = false) Long primaryfileId) {
 		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();

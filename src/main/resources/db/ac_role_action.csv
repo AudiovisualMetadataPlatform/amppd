@@ -33,6 +33,10 @@ Unit Viewer,view workflow
 Collection Manager,edit workflow
 Collection Manager,restrict workflow
 Collection Manager,delete workflow
+Collection Helper,create bundle
+Unit Viewer,view bundle
+Collection Helper,edit bundle
+Collection Staff,delete bundle
 Collection Staff,ingest batch
 Collection Staff,retrieve bag
 Collection Staff,deliver bag

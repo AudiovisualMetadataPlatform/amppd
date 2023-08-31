@@ -1,16 +1,24 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.service.BundleService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,28 +31,56 @@ import lombok.extern.slf4j.Slf4j;
 public class BundleController {
 
 	@Autowired
-	private BundleService bundleService;
+	private BundleRepository bundleRepository;
 
+	@Autowired
+	private BundleService bundleService;
+	
+	@Autowired
+	private PermissionService permissionService;
+	
+
+	/**
+	 * Find bundles satisfying the combined criteria of name, keyword and creator, if provided.
+	 * Note: If name is provided, other fields will be ignored, since name is unique and serves as ID.
+	 * @param name name of bundle
+	 * @param keyword keyword in the bundle name 
+	 * @param creator username of the bundle creator
+	 * @return bundles satisfying the criteria
+	 */
+	@GetMapping("/bundles/search")
+	public List<Bundle> findNamedByCurrentUser(
+			@RequestParam(required = false) String name, 
+			@RequestParam(required = false) String keyword, 
+			@RequestParam(required = false) String creator) {
+		log.info("Finding bundle matching: name = " + name + ", keyword = " + keyword + ", creator = " + creator);		
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Bundle);
+		List<Bundle> bundles = bundleService.findByNameKeywordCreator(name, keyword, creator);
+		List<Bundle> bundlesF = bundleService.filterBundles(bundles, acUnitIds);
+		return bundlesF;
+	}
+	
 	/**
 	 * Find all named bundles, i.e. bundles with non-empty name and non-empty primaryfiles.
 	 * @return all named bundles
 	 */
-	@GetMapping("/bundles/search/findAllNamed")
+	// Disable unused endpoint
+//	@GetMapping("/bundles/search/findAllNamed")
 	public List<Bundle> findAllNamed() {
 		log.info("Finding all named bundles ... " );
 		return bundleService.findAllNamed();		
 	}
 	
-	/**
-	 * Find the bundle with the given name created by the current user.
-	 * @param name name of the bundle
-	 * @return the matching bundle if found, or null otherwise
-	 */
-	@GetMapping("/bundles/search/findNamedByCurrentUser")
-	public Bundle findNamedByCurrentUser(@RequestParam("name") String name) {
-		log.info("Finding bundle with name " + name + " for the current user ...");
-		return bundleService.findNamedByCurrentUser(name);
-	}
+//	/**
+//	 * Find the bundle with the given name created by the current user.
+//	 * @param name name of the bundle
+//	 * @return the matching bundle if found, or null otherwise
+//	 */
+//	@GetMapping("/bundles/search/findNamedByCurrentUser")
+//	public Bundle findNamedByCurrentUser(@RequestParam("name") String name) {
+//		log.info("Finding bundle with name " + name + " for the current user ...");
+//		return bundleService.findNamedByCurrentUser(name);
+//	}
 
 	/**
 	 * Add the given primaryfile to the given bundle.
@@ -52,7 +88,8 @@ public class BundleController {
 	 * @param primaryfileId ID of the given primaryfile
 	 * @return the updated bundle
 	 */
-	@PostMapping("/bundles/{bundleId}/addPrimaryfile")
+	// Disable unused endpoint
+//	@PostMapping("/bundles/{bundleId}/addPrimaryfile")
 	public Bundle addPrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
 		log.info("Adding primaryfile " + primaryfileId + " to bundle " + bundleId);
 		return bundleService.addPrimaryfile(bundleId, primaryfileId);
@@ -64,7 +101,8 @@ public class BundleController {
 	 * @param primaryfileId ID of the given primaryfile
 	 * @return the updated bundle
 	 */
-	@PostMapping("/bundles/{bundleId}/deletePrimaryfile")
+	// Disable unused endpoint
+//	@PostMapping("/bundles/{bundleId}/deletePrimaryfile")
 	public Bundle deletePrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
 		log.info("Deleteing primaryfile " + primaryfileId + " from bundle " + bundleId);
 		return bundleService.deletePrimaryfile(bundleId, primaryfileId);
@@ -76,7 +114,8 @@ public class BundleController {
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the updated bundle
 	 */
-	@PostMapping("/bundles/{bundleId}/addPrimaryfiles")
+	// Disable unused endpoint
+//	@PostMapping("/bundles/{bundleId}/addPrimaryfiles")
 	public Bundle addPrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
 		log.info("Adding primaryfiles " + primaryfileIds + " to bundle " + bundleId);
 		return bundleService.addPrimaryfiles(bundleId, primaryfileIds);
@@ -88,36 +127,64 @@ public class BundleController {
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the updated bundle
 	 */
-	@PostMapping("/bundles/{bundleId}/deletePrimaryfiles")
+	// Disable unused endpoint
+//	@PostMapping("/bundles/{bundleId}/deletePrimaryfiles")
 	public Bundle deletePrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
 		log.info("Deleteing primaryfiles " + primaryfileIds + " from bundle " + bundleId);
 		return bundleService.deletePrimaryfiles(bundleId, primaryfileIds);
 	}
 
 	/**
-	 * Update the given bundle with the given description and set of primaryfiles.
-	 * @param bundleId ID of the given bundle
-	 * @param description description of the given bundle
-	 * @param primaryfileIds IDs of the given primaryfiles
+	 * Update the given bundle with the given name, description and set of primaryfiles.
+	 * @param bundleId ID of the bundle to be updated
+	 * @param name new name of the bundle
+	 * @param description new description of the bundle
+	 * @param primaryfileIds IDs of the new set of primaryfiles
 	 * @return the updated bundle
 	 */
-	@PostMapping("/bundles/{bundleId}/update")
-	public Bundle updateBundle(@PathVariable Long bundleId, @RequestParam String description, @RequestParam Long[] primaryfileIds) {		
-		log.info("Updating bundle " + bundleId + " with description " + description + " and prifmaryfiles " + primaryfileIds);
-		return bundleService.updateBundle(bundleId, description, primaryfileIds);
+	@PatchMapping("/bundles/{bundleId}")
+	public Bundle updateBundle(
+			@PathVariable Long bundleId, 
+			@RequestParam(required = false) String name, 
+			@RequestParam(required = false) String description, 
+			@RequestParam Long[] primaryfileIds) {		
+		// only allow update if all primaryfiles of the bundle are within accessible units, i.e. intact after filter
+		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Update, TargetType.Bundle);
+		boolean can = bundleService.filterBundle(bundle, acUnitIds);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update the bundle across all units of the contained primaryfiles!");
+		}
+		
+		log.info("Updating bundle " + bundleId + " with name: " + name + ", description: " + description + ", primaryfiles: " + primaryfileIds);
+		return bundleService.updateBundle(bundle, name, description, primaryfileIds);
 	}
 
 	/**
-	 * Create a new bundle with the given name and prifmaryfiles.
+	 * Create a new bundle with the given name, description and primaryfiles.
 	 * @param name name of the new bundle
 	 * @param description description of the new bundle
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the newly created bundle
 	 */
-	@PostMapping("/bundles/create")
+	@PostMapping("/bundles")
 	public Bundle createBundle(@RequestParam String name, @RequestParam String description, @RequestParam Long[] primaryfileIds) {
-		log.info("Creating new bundle with name " + name + " and prifmaryfiles " + primaryfileIds);		
-		return bundleService.createBundle(name, description, primaryfileIds);
+		log.info("Creating new bundle with name: " + name + ", description: " + description + ", primaryfiles: " + primaryfileIds);		
+		
+		// create a new bundle instance populated with data
+		Bundle bundle = bundleService.createBundle(name, description, primaryfileIds);
+
+		// only allow create if all primaryfiles of the bundle are within accessible units, i.e. intact after filter
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Create, TargetType.Bundle);
+		boolean can = bundleService.filterBundle(bundle, acUnitIds);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create the bundle across all units of the contained primaryfiles!");
+		}
+		
+		// persist new bundle
+		bundle = bundleRepository.save(bundle);
+		log.info("Peristed new bundle " + bundle.getId() + " with name: " + name + ", description: " + description  + ", and " + bundle.getPrimaryfiles().size() + " prifmaryfiles.");			
+		return bundle;
 	}
 
 

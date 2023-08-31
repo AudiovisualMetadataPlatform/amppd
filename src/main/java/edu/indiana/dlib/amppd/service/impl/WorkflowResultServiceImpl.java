@@ -265,7 +265,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Override
 	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
 		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
-		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search  query " + query);
+		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search query " + query);
 		return response;
 	}
 	

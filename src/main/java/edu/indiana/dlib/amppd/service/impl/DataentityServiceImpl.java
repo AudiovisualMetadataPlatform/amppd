@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Dataentity;
@@ -26,6 +27,7 @@ import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
+import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemRepository;
@@ -77,6 +79,9 @@ public class DataentityServiceImpl implements DataentityService {
 
 	@Autowired
 	private PrimaryfileSupplementRepository primaryfileSupplementRepository;
+	
+	@Autowired
+	private BundleRepository bundleRepository;
 	
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -320,6 +325,9 @@ public class DataentityServiceImpl implements DataentityService {
 			Primaryfile primaryfile = ((PrimaryfileSupplement)dataentity).getPrimaryfile();
 			if (primaryfile == null) return desFound;		
 			desFound = primaryfileSupplementRepository.findByPrimaryfileIdAndName(primaryfile.getId(), name);
+		}
+		else if (dataentity instanceof Bundle) {
+			desFound = bundleRepository.findByName(name);		
 		}
 		else {
 			// dataentity must be one of the above types applicable for UniqueName validation
