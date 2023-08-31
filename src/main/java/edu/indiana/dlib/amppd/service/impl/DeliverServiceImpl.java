@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class DeliverServiceImpl implements DeliverService {
 		
 	// external source for Avalon
-	public static final String AVALON = "avalon"; 
+	public static final String AVALON = "MCO"; 
 	
 	// Avalon media objects URL path
 	public static final String AVALON_MEDIA_OBJECTS = "media_objects"; 

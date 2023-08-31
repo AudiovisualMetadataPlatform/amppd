@@ -40,7 +40,7 @@ public class UniqueNameValidator implements ConstraintValidator<UniqueName, Data
 		if (desFound.size() == 0) return true;
 		
 		// otherwise, if only itself is found (during update), it's also valid
-		if (desFound.size() == 1 &&  dataentity.getId() != null && dataentity.getId().equals(desFound.get(0).getId())) return true;
+		if (desFound.size() == 1 && dataentity.getId() != null && dataentity.getId().equals(desFound.get(0).getId())) return true;
 		
 		// otherwise, it's invalid
 		return false;
