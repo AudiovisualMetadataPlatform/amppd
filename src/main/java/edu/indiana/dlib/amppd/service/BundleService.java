@@ -84,7 +84,7 @@ public interface BundleService {
 	public Bundle deletePrimaryfiles(Long bundleId, Long[] primaryfileIds);
 
 	/**
-	 * Update (with persistence to DB) the given bundle with the given name, description and set of primaryfiles.
+	 * Update (without persistence to DB) the given bundle with the given name, description and set of primaryfiles.
 	 * @param bundle the bundle to be updated
 	 * @param name new name of the bundle
 	 * @param description new description of the bundle
@@ -94,7 +94,7 @@ public interface BundleService {
 	public Bundle updateBundle(Bundle bundle, String name, String description, Long[] primaryfileIds);
 
 	/**
-	 * Update the given bundle with the given name, description and set of primaryfiles.
+	 * Update (without persistence to DB) the given bundle with the given name, description and set of primaryfiles.
 	 * @param bundleId ID of the bundle to be updated
 	 * @param name new name of the bundle
 	 * @param description new description of the bundle
@@ -104,7 +104,7 @@ public interface BundleService {
 	public Bundle updateBundle(Long bundleId, String name, String description, Long[] primaryfileIds);
 
 	/**
-	 * Create (without persistence to DB) a new bundle instance with the given name, description, and prifmaryfiles.
+	 * Create (without persistence to DB) a new bundle with the given name, description, and prifmaryfiles.
 	 * @param name name of the new bundle
 	 * @param description description of the new bundle
 	 * @param primaryfileIds IDs of the given primaryfiles

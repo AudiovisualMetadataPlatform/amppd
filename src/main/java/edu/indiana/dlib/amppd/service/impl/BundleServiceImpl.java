@@ -48,7 +48,7 @@ public class BundleServiceImpl implements BundleService {
 			bundles = bundleRepository.findByName(name);
 		}		
 		// otherwise, if both keyword and creator not empty, match both
-		else if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(creator)) {
+		else if (StringUtils.isNotBlank(keyword) && StringUtils.isNotBlank(creator)) {
 			bundles = bundleRepository.findByNameContainingIgnoreCaseAndCreatedBy(keyword, creator);
 		}		
 		// otherwise, if keyword not empty (creator is), match keyword
@@ -214,7 +214,6 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.updatePrimaryfiles(Long, String, String, Long[])
 	 */
 	@Override
-	@Transactional
 	public Bundle updateBundle(Bundle bundle, String name, String description, Long[] primaryfileIds) {
 		if (primaryfileIds == null) {
 			throw new RuntimeException("The given primaryfileIds is empty.");
@@ -243,8 +242,7 @@ public class BundleServiceImpl implements BundleService {
 			bundle.setDescription(description);
 		}
 		
-		bundle = bundleRepository.save(bundle);				
-		log.info("Updated bundle " + bundle.getId() + " with name: " + name + ", description: " + description + " and " + primaryfiles.size() + " prifmaryfiles.");			
+		log.info("Updated bundle instance " + bundle.getId() + " with name: " + name + ", description: " + description + " and " + primaryfiles.size() + " prifmaryfiles.");			
 		return bundle;		
 	}
 	
@@ -252,7 +250,6 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.updatePrimaryfiles(Long, String, Long[])
 	 */
 	@Override
-	@Transactional
 	public Bundle updateBundle(Long bundleId, String name, String description, Long[] primaryfileIds) {
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
 		return updateBundle(bundle, name, description, primaryfileIds);
@@ -262,7 +259,6 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.createBundle(String, String, Long[])
 	 */	
 	@Override
-	@Transactional
 	public Bundle createBundle(String name, String description, Long[] primaryfileIds) {
 		if (name == null) {
 			throw new RuntimeException("The given bundle name is null.");
@@ -290,7 +286,6 @@ public class BundleServiceImpl implements BundleService {
 		}
 
 		bundle.setPrimaryfiles(primaryfiles);		
-//		bundle = bundleRepository.save(bundle);
 		log.info("Created bundle instance " + bundle.getId() + " with name " + name + " and " + primaryfiles.size() + " prifmaryfiles.");			
 		return bundle;
 	}
@@ -299,6 +294,9 @@ public class BundleServiceImpl implements BundleService {
 	 * @see edu.indiana.dlib.amppd.service.BundleService.filterBundle(Bundle, Set<Long>)
 	 */
 	public boolean filterBundle(Bundle bundle, Set<Long> acUnitIds) {
+		// for AMP admin, no need to filter for AC
+		if (acUnitIds == null) return true;
+		
 		Set<Primaryfile> pfs = bundle.getPrimaryfiles();
 		Set<Primaryfile> pfsF = new HashSet<Primaryfile>(); 
 
@@ -324,6 +322,7 @@ public class BundleServiceImpl implements BundleService {
 		List<Bundle> bundlesF = new ArrayList<Bundle>(); 
 		
 		// filter each bundle
+		// note that even for AMP admin, we still need to filter out empty bundle returned by query
 		for (Bundle bundle : bundles) {			
 			filterBundle(bundle, acUnitIds);
 			
@@ -333,7 +332,7 @@ public class BundleServiceImpl implements BundleService {
 			}
 		}
 		
-		log.info("Filtered " + bundles.size() + " bundles into " + bundlesF.size() + " non-empty ones within " + acUnitIds.size() + " accessible units");
+		log.info("Filtered " + bundles.size() + " bundles into " + bundlesF.size() + " non-empty ones.");
 		return bundlesF;
 	}
 	

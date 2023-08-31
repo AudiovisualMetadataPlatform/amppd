@@ -3,6 +3,10 @@ package edu.indiana.dlib.amppd.controller;
 import java.util.List;
 import java.util.Set;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 public class BundleController {
 
 	@Autowired
+	private Validator validator;
+	
+	@Autowired
 	private BundleRepository bundleRepository;
 
 	@Autowired
@@ -48,11 +55,12 @@ public class BundleController {
 	 * @param creator username of the bundle creator
 	 * @return bundles satisfying the criteria
 	 */
+	// TODO use BundleBrief in response
 	@GetMapping("/bundles/search")
 	public List<Bundle> findNamedByCurrentUser(
 			@RequestParam(required = false) String name, 
 			@RequestParam(required = false) String keyword, 
-			@RequestParam(required = false) String creator) {
+			@RequestParam(required = false) String creator) {	
 		log.info("Finding bundle matching: name = " + name + ", keyword = " + keyword + ", creator = " + creator);		
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Bundle);
 		List<Bundle> bundles = bundleService.findByNameKeywordCreator(name, keyword, creator);
@@ -148,16 +156,33 @@ public class BundleController {
 			@RequestParam(required = false) String name, 
 			@RequestParam(required = false) String description, 
 			@RequestParam Long[] primaryfileIds) {		
-		// only allow update if all primaryfiles of the bundle are within accessible units, i.e. intact after filter
+		log.info("Updating bundle " + bundleId + " with name: " + name + ", description: " + description + ", primaryfiles: " + primaryfileIds);
 		Bundle bundle = bundleRepository.findById(bundleId).orElseThrow(() -> new StorageException("bundle <" + bundleId + "> does not exist!"));    		
+
+		// get unit IDs within which current user can Update Bundle
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Update, TargetType.Bundle);
+		// check if original primaryfiles in the bundle are accessible, i.e. intact after filter
 		boolean can = bundleService.filterBundle(bundle, acUnitIds);
+		// if yes, also check if the updated primaryfiles in the bundle are accessible, i.e. intact after filter
+		if (can) {
+			bundle = bundleService.updateBundle(bundle, name, description, primaryfileIds);
+			can = bundleService.filterBundle(bundle, acUnitIds);
+		}
+		// only allow update if all primaryfiles in the bundle before & after update are within accessible units
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot update the bundle across all units of the contained primaryfiles!");
-		}
+		} 
 		
-		log.info("Updating bundle " + bundleId + " with name: " + name + ", description: " + description + ", primaryfiles: " + primaryfileIds);
-		return bundleService.updateBundle(bundle, name, description, primaryfileIds);
+		// validate bundle before persistence
+    	Set<ConstraintViolation<Bundle>> violations = validator.validate(bundle);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+
+		// persist updated bundle
+		bundle = bundleRepository.save(bundle);				
+		log.info("Peristed updated bundle " + bundle.getId() + " with name: " + name + ", description: " + description + " and " + bundle.getPrimaryfiles().size() + " prifmaryfiles.");			
+		return bundle;
 	}
 
 	/**
@@ -181,9 +206,15 @@ public class BundleController {
 			throw new AccessDeniedException("The current user cannot create the bundle across all units of the contained primaryfiles!");
 		}
 		
+		// validate bundle after before persistence
+    	Set<ConstraintViolation<Bundle>> violations = validator.validate(bundle);
+    	if (!violations.isEmpty()) {
+          throw new ConstraintViolationException(violations);
+        }
+
 		// persist new bundle
 		bundle = bundleRepository.save(bundle);
-		log.info("Peristed new bundle " + bundle.getId() + " with name: " + name + ", description: " + description  + ", and " + bundle.getPrimaryfiles().size() + " prifmaryfiles.");			
+		log.info("Peristed created bundle " + bundle.getId() + " with name: " + name + ", description: " + description  + ", and " + bundle.getPrimaryfiles().size() + " prifmaryfiles.");			
 		return bundle;
 	}
 

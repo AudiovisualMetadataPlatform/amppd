@@ -12,7 +12,7 @@ import edu.indiana.dlib.amppd.model.Bundle;
 @RepositoryRestResource(exported = false)
 public interface BundleRepository extends DataentityRepository<Bundle> {
 		
-	Bundle findFirstByName();
+	Bundle findFirstByName(String name);
 	
 	List<Bundle> findBy();
 	List<Bundle> findByName(String name);

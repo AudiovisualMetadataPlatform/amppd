@@ -36,7 +36,7 @@ delete workflow,delete a workflow and all its associated data,Delete,Workflow,DE
 create bundle,create a bundle containing primaryfiles,Create,Bundle,POST,/bundles,TRUE
 view bundle,list/query bundles,Read,Bundle,GET,/bundles/search,TRUE
 edit bundle,update name/description or primaryfiles of a bundle,Update,Bundle,PATCH,/bundles/{bundleId},TRUE
-delete  bundle,delete a bundle (but not the primaryfiles contained),Delete,Bundle,DELETE,/bundles/{bundleId},TRUE
+delete bundle,delete a bundle (but not the primaryfiles contained),Delete,Bundle,DELETE,/bundles/{bundleId},TRUE
 ingest batch,run batch ingest process to create content data,Create,Batch,POST,/batch/ingest,TRUE
 retrieve bag,retrieve bag contents at various levels,Read,Bag,GET,/bags/units|collections|items|primaryfiles/{id},TRUE
 deliver bag,deliver bag contents to Avalon at various levels,Create,Bag,POST,/deliver/avalon/[collections|items]/{id},TRUE
