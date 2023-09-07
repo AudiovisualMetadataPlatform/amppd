@@ -62,6 +62,8 @@ public class BatchController {
 		if (unit == null) {
 			throw new StorageException("Failed to find unit with name " + unitName);
 		}
+
+		// check permission
 		Long acUnitId = unit.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Batch, acUnitId);
 		if (!can) {

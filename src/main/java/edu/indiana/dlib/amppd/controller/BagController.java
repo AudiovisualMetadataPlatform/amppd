@@ -56,6 +56,8 @@ public class BagController {
 	@GetMapping(path = "/bags/primaryfile/{primaryfileId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public PrimaryfileBag getPrimaryfileBag(@PathVariable Long primaryfileId) {
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    		
+
+		// check permission
 		Long acUnitId = primaryfile.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
@@ -74,6 +76,8 @@ public class BagController {
 	@GetMapping(path = "/bags/item/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemBag getItemBag(@PathVariable Long itemId) {
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));    
+
+		// check permission
 		Long acUnitId = item.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
@@ -105,6 +109,8 @@ public class BagController {
 	@GetMapping(path = "/bags/collection/{collectionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CollectionBag getCollectionBag(@PathVariable Long collectionId) {
 		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));    		
+
+		// check permission
 		Long acUnitId = collection.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {

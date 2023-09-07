@@ -51,6 +51,8 @@ public class DeliverController {
 	@PostMapping(path = "/deliver/avalon/item/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public AvalonRelatedItems deliverAvalonItem(@PathVariable Long itemId) {
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
+
+		// check permission
 		Long acUnitId = item.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Bag, acUnitId);
 		if (!can) {
@@ -69,6 +71,8 @@ public class DeliverController {
 	@PostMapping(path = "/deliver/avalon/collection/{collectionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<AvalonRelatedItems> deliverAvalonCollection(@PathVariable Long collectionId) {
 		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));    
+
+		// check permission
 		Long acUnitId = collection.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Bag, acUnitId);
 		if (!can) {
