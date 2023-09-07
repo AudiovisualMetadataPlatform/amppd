@@ -496,7 +496,7 @@ public class DataentityController {
 			@PathVariable Long unitSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
-		// check permission is done inside service layer to minimize duplicate code
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving unitSupplement " + unitSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(unitSupplementId, SupplementType.UNIT, parentId, parentType);    	
     	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new parent " + parentType + " "  + parentId);
@@ -514,7 +514,7 @@ public class DataentityController {
 			@PathVariable Long collectionSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
-		// check permission is done inside service layer to minimize duplicate code
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving collectionSupplement " + collectionSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(collectionSupplementId, SupplementType.COLLECTION, parentId, parentType);    	
     	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new parent " + parentType + " "  + parentId);
@@ -532,7 +532,7 @@ public class DataentityController {
 			@PathVariable Long itemSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
-		// check permission is done inside service layer to minimize duplicate code
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving itemSupplement " + itemSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(itemSupplementId, SupplementType.ITEM, parentId, parentType);    	
     	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new parent " + parentType + " "  + parentId);
@@ -550,7 +550,7 @@ public class DataentityController {
 			@PathVariable Long primaryfileSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
-		// check permission is done inside service layer to minimize duplicate code
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(primaryfileSupplementId, SupplementType.PRIMARYFILE, parentId, parentType);    	
     	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new parent " + parentType + " "  + parentId);
