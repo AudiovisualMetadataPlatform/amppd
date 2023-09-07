@@ -10,6 +10,7 @@ import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -27,6 +28,8 @@ import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
@@ -39,6 +42,7 @@ import edu.indiana.dlib.amppd.repository.UnitSupplementRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -88,6 +92,9 @@ public class DataentityServiceImpl implements DataentityService {
 
 	@Autowired
 	private MediaService mediaService;
+
+	@Autowired
+	private PermissionService permissionService;
 
 //	@Autowired
 //	private EntityManager entityManager;
@@ -494,6 +501,13 @@ public class DataentityServiceImpl implements DataentityService {
     	// retrieve supplement from DB
     	Supplement supplement = (Supplement)findAsset(supplementId, supplementType);
 		
+		// check permission inside service layer in this case 
+		Long acUnitId = supplement.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Supplement, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update supplements in unit " + acUnitId);
+		}
+
     	// if parentType not provided, then it defaults to the same as the current type 
     	SupplementType newType = StringUtils.isEmpty(parentType) ? supplementType : Supplement.getSupplementType(parentType);
 		if (newType == null) {
