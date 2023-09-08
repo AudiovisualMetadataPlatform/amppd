@@ -177,7 +177,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 		TargetType targetType = type == SupplementType.PFILE ? TargetType.Primaryfile : TargetType.Supplement;
 		boolean can = permissionService.hasPermission(ActionType.Update, targetType, acUnitId);
 		if (!can) {
-			throw new AccessDeniedException("The current user cannot update supplements in unit " + acUnitId);
+			throw new AccessDeniedException("The current user cannot update " + targetType + " in unit " + acUnitId);
 		}
 		
     	asset = uploadAsset(asset, file);

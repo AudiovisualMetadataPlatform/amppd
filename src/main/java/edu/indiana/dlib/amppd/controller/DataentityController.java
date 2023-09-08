@@ -131,7 +131,7 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
 
-		// check permission after validation in this case so that it item is null validation will catch that
+		// check permission after validation so that if parent item is null validation will catch that
 		Long acUnitId = primaryfile.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Primaryfile, acUnitId);
 		if (!can) {
@@ -178,7 +178,7 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	
-		// check permission after validation in this case so that it unit is null validation will catch that
+		// check permission after validation so that if parent unit is null validation will catch that
 		Long acUnitId = unitSupplement.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
 		if (!can) {
@@ -225,7 +225,7 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	
-		// check permission after validation in this case so that it unit is null validation will catch that
+		// check permission after validation so that if parent collection is null validation will catch that
 		Long acUnitId = collectionSupplement.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
 		if (!can) {
@@ -273,7 +273,7 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	    	
-		// check permission after validation in this case so that it unit is null validation will catch that
+		// check permission after validation so that if parent item is null validation will catch that
 		Long acUnitId = itemSupplement.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
 		if (!can) {
@@ -321,7 +321,7 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	    	
-		// check permission after validation in this case so that it unit is null validation will catch that
+		// check permission after validation so that if parent primaryfile is null validation will catch that
 		Long acUnitId = primaryfileSupplement.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
 		if (!can) {

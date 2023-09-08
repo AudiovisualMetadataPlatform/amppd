@@ -501,13 +501,6 @@ public class DataentityServiceImpl implements DataentityService {
     	// retrieve supplement from DB
     	Supplement supplement = (Supplement)findAsset(supplementId, supplementType);
 		
-		// check permission inside service layer in this case 
-		Long acUnitId = supplement.getAcUnitId();
-		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Supplement, acUnitId);
-		if (!can) {
-			throw new AccessDeniedException("The current user cannot update supplements in unit " + acUnitId);
-		}
-
     	// if parentType not provided, then it defaults to the same as the current type 
     	SupplementType newType = StringUtils.isEmpty(parentType) ? supplementType : Supplement.getSupplementType(parentType);
 		if (newType == null) {
@@ -516,6 +509,16 @@ public class DataentityServiceImpl implements DataentityService {
 
     	// retrieve new parent from DB
 		Dataentity parent =	findParentDataEntity(parentId, newType);
+
+		// check permission inside service layer in this case: for moving supplement,
+    	// user needs to have permission to delete supplement from source unit and create supplement in target unit
+		Long acUnitIdSrc = supplement.getAcUnitId();
+		Long acUnitIdTgt = parent.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Supplement, acUnitIdSrc);
+		can &= permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitIdTgt);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot move supplements from unit " + acUnitIdSrc + " to unit " + acUnitIdTgt);
+		}
 
     	// if parent doesn't change, no action
     	if (supplementType == newType && getParentDataentity(supplement).getId().equals(parent.getId())) {
