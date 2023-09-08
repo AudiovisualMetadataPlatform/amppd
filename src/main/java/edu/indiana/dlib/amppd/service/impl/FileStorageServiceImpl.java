@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
@@ -34,10 +35,13 @@ import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DataentityService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,9 +69,13 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Autowired
 	private DataentityService dataentityService;
 	
+	@Autowired
+	private PermissionService permissionService;
+
 	private AmppdPropertyConfig config; 	
 	private Path root;
 
+	
 	@Autowired
 	public FileStorageServiceImpl(AmppdPropertyConfig amppdconfig) {
 		// initialize Amppd file system 
@@ -162,7 +170,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 	@Override
 	@Transactional
 	public Asset uploadAsset(Long id, MultipartFile file, SupplementType type) {		
-    	Asset asset = dataentityService.findAsset(id, type);        	
+    	Asset asset = dataentityService.findAsset(id, type);      
+    	
+		// check permission inside service layer in this case 
+		Long acUnitId = asset.getAcUnitId();
+		TargetType targetType = type == SupplementType.PFILE ? TargetType.Primaryfile : TargetType.Supplement;
+		boolean can = permissionService.hasPermission(ActionType.Update, targetType, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update " + targetType + " in unit " + acUnitId);
+		}
+		
     	asset = uploadAsset(asset, file);
     	return asset;
 	}

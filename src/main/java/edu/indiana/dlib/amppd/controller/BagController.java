@@ -56,6 +56,8 @@ public class BagController {
 	@GetMapping(path = "/bags/primaryfile/{primaryfileId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public PrimaryfileBag getPrimaryfileBag(@PathVariable Long primaryfileId) {
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));    		
+
+		// check permission
 		Long acUnitId = primaryfile.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
@@ -74,6 +76,8 @@ public class BagController {
 	@GetMapping(path = "/bags/item/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemBag getItemBag(@PathVariable Long itemId) {
 		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));    
+
+		// check permission
 		Long acUnitId = item.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
@@ -90,7 +94,7 @@ public class BagController {
 	 * @param externalId externalId of the given item
 	 * @return the ItemBag retrieved
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@GetMapping(path = "/bags/item", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemBag getItemBag(@RequestParam String externalSource, @RequestParam String externalId) {
 		log.info("Getting ItemBag for external source-id " + externalSource + "-" + externalId + " ...");
@@ -105,6 +109,8 @@ public class BagController {
 	@GetMapping(path = "/bags/collection/{collectionId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CollectionBag getCollectionBag(@PathVariable Long collectionId) {
 		Collection collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));    		
+
+		// check permission
 		Long acUnitId = collection.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Bag, acUnitId);
 		if (!can) {
@@ -121,7 +127,7 @@ public class BagController {
 	 * @param collectionName name of the given collection
 	 * @return the CollectionBag retrieved
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@GetMapping(path = "/bags/item", produces = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(path = "/bags/collection", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CollectionBag getCollectionBag(@RequestParam String unitName, @RequestParam String collectionName) {

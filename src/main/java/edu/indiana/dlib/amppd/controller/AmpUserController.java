@@ -121,6 +121,7 @@ public class AmpUserController {
 
 	@PostMapping(path = "/account/approve", produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse approveAccount(@RequestParam Long userId, @RequestParam Boolean approve) { 
+		// check permission
 		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.AmpUser, null);
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot approve/reject user account registration.");
@@ -135,6 +136,7 @@ public class AmpUserController {
 
 	@GetMapping(path="/users/{Id}")
 	public @ResponseBody AmpUser getUser(@PathVariable Long Id) {
+		// check permission
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.AmpUser, null);
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot view details of other users.");
@@ -154,6 +156,7 @@ public class AmpUserController {
 	 */
 	@GetMapping("/users/active")
 	public List<AmpUserBrief> findActiveUsersByNameStartingIdsExcluding(@RequestParam String nameStarting, @RequestParam(required = false) List<Long> idsExcluding) {
+		// check permission
 		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.AmpUser, null);
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot view details of other users.");

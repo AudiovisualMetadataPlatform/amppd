@@ -72,7 +72,7 @@ public class BundleController {
 	 * Find all named bundles, i.e. bundles with non-empty name and non-empty primaryfiles.
 	 * @return all named bundles
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@GetMapping("/bundles/search/findAllNamed")
 	public List<Bundle> findAllNamed() {
 		log.info("Finding all named bundles ... " );
@@ -96,7 +96,7 @@ public class BundleController {
 	 * @param primaryfileId ID of the given primaryfile
 	 * @return the updated bundle
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@PostMapping("/bundles/{bundleId}/addPrimaryfile")
 	public Bundle addPrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
 		log.info("Adding primaryfile " + primaryfileId + " to bundle " + bundleId);
@@ -109,7 +109,7 @@ public class BundleController {
 	 * @param primaryfileId ID of the given primaryfile
 	 * @return the updated bundle
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@PostMapping("/bundles/{bundleId}/deletePrimaryfile")
 	public Bundle deletePrimaryfile(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileId") Long primaryfileId) {		
 		log.info("Deleteing primaryfile " + primaryfileId + " from bundle " + bundleId);
@@ -122,7 +122,7 @@ public class BundleController {
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the updated bundle
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@PostMapping("/bundles/{bundleId}/addPrimaryfiles")
 	public Bundle addPrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
 		log.info("Adding primaryfiles " + primaryfileIds + " to bundle " + bundleId);
@@ -135,7 +135,7 @@ public class BundleController {
 	 * @param primaryfileIds IDs of the given primaryfiles
 	 * @return the updated bundle
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@PostMapping("/bundles/{bundleId}/deletePrimaryfiles")
 	public Bundle deletePrimaryfiles(@PathVariable("bundleId") Long bundleId, @RequestParam("primaryfileIds") Long[] primaryfileIds) {		
 		log.info("Deleteing primaryfiles " + primaryfileIds + " from bundle " + bundleId);

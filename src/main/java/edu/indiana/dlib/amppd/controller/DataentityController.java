@@ -121,7 +121,7 @@ public class DataentityController {
     	else if ((pid = primaryfile.getItem().getId()) != itemId) {
     		log.warn("Primaryfile's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
     	}
-    	
+
 //    	// validate with WithReference constraints, which were not invoked on primaryfile from RequestPart
 //    	Set<ConstraintViolation<Primaryfile>> violations = validator.validate(primaryfile, WithReference.class);
         
@@ -130,6 +130,13 @@ public class DataentityController {
     	if (!violations.isEmpty()) {
           throw new ConstraintViolationException(violations);
         }
+
+		// check permission after validation so that if parent item is null validation will catch that
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Primaryfile, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create primaryfiles in unit " + acUnitId);
+		}
 
     	// save primaryfile to DB 
 		primaryfile = primaryfileRepository.save(primaryfile);
@@ -171,6 +178,13 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	
+		// check permission after validation so that if parent unit is null validation will catch that
+		Long acUnitId = unitSupplement.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create supplements in unit " + acUnitId);
+		}
+
 		// save unitSupplement to DB 
     	unitSupplement = unitSupplementRepository.save(unitSupplement);
 		
@@ -211,6 +225,13 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	
+		// check permission after validation so that if parent collection is null validation will catch that
+		Long acUnitId = collectionSupplement.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create supplements in unit " + acUnitId);
+		}
+
 		// save collectionSupplement to DB 
     	collectionSupplement = collectionSupplementRepository.save(collectionSupplement);
 		
@@ -252,6 +273,13 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	    	
+		// check permission after validation so that if parent item is null validation will catch that
+		Long acUnitId = itemSupplement.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create supplements in unit " + acUnitId);
+		}
+
 		// save itemSupplement to DB 
     	itemSupplement = itemSupplementRepository.save(itemSupplement);
 		
@@ -293,6 +321,13 @@ public class DataentityController {
           throw new ConstraintViolationException(violations);
         }
     	    	
+		// check permission after validation so that if parent primaryfile is null validation will catch that
+		Long acUnitId = primaryfileSupplement.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Supplement, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create supplements in unit " + acUnitId);
+		}
+
 		// save primaryfileSupplement to DB 
     	primaryfileSupplement = primaryfileSupplementRepository.save(primaryfileSupplement);
 		
@@ -319,7 +354,8 @@ public class DataentityController {
 	 * @param unitId ID of the given parent unit
 	 * @return the updated collection
 	 */
-	@PostMapping(path = "/collections/{collectionId}/move")
+	// Disable endpoint not in use
+//	@PostMapping(path = "/collections/{collectionId}/move")
 	public Collection moveCollection(@PathVariable Long collectionId, @RequestParam Long unitId) {		
     	log.info("Moving collection " + collectionId + " to new unit " + unitId);
     	
@@ -369,7 +405,8 @@ public class DataentityController {
 	 * @param collectionId ID of the given parent collection
 	 * @return the updated item
 	 */
-	@PostMapping(path = "/items/{itemId}/move")
+	// Disable endpoint not in use
+//	@PostMapping(path = "/items/{itemId}/move")
 	public Item moveItem(@PathVariable Long itemId, @RequestParam Long collectionId) {		
     	log.info("Moving item " + itemId + " to new collection " + collectionId);
     	
@@ -410,7 +447,8 @@ public class DataentityController {
 	 * @param itemId ID of the given parent item
 	 * @return the updated primaryfile
 	 */
-	@PostMapping(path = "/primaryfiles/{primaryfileId}/move")
+	// Disable endpoint not in use
+//	@PostMapping(path = "/primaryfiles/{primaryfileId}/move")
 	public Primaryfile movePrimaryfile(@PathVariable Long primaryfileId, @RequestParam Long itemId) {		
     	log.info("Moving primaryfile " + primaryfileId + " to new item " + itemId);
     	
@@ -458,6 +496,7 @@ public class DataentityController {
 			@PathVariable Long unitSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving unitSupplement " + unitSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(unitSupplementId, SupplementType.UNIT, parentId, parentType);    	
     	log.info("Successfully moved unitSupplement " + unitSupplementId + " to new parent " + parentType + " "  + parentId);
@@ -475,6 +514,7 @@ public class DataentityController {
 			@PathVariable Long collectionSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving collectionSupplement " + collectionSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(collectionSupplementId, SupplementType.COLLECTION, parentId, parentType);    	
     	log.info("Successfully moved collectionSupplement " + collectionSupplementId + " to new parent " + parentType + " "  + parentId);
@@ -492,6 +532,7 @@ public class DataentityController {
 			@PathVariable Long itemSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving itemSupplement " + itemSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(itemSupplementId, SupplementType.ITEM, parentId, parentType);    	
     	log.info("Successfully moved itemSupplement " + itemSupplementId + " to new parent " + parentType + " "  + parentId);
@@ -509,6 +550,7 @@ public class DataentityController {
 			@PathVariable Long primaryfileSupplementId, 
 			@RequestParam Long parentId, 
 			@RequestParam(required = false) String parentType) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Moving primaryfileSupplement " + primaryfileSupplementId + " to new parent " + parentType + " " + parentId);
     	Supplement supplement = dataentityService.moveSupplement(primaryfileSupplementId, SupplementType.PRIMARYFILE, parentId, parentType);    	
     	log.info("Successfully moved primaryfileSupplement " + primaryfileSupplementId + " to new parent " + parentType + " "  + parentId);

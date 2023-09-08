@@ -62,6 +62,8 @@ public class BatchController {
 		if (unit == null) {
 			throw new StorageException("Failed to find unit with name " + unitName);
 		}
+
+		// check permission
 		Long acUnitId = unit.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Batch, acUnitId);
 		if (!can) {
@@ -89,7 +91,7 @@ public class BatchController {
 	 * @param (optional) primaryfileId, if provispecifiedded, preprocess only this primaryfile, otherwise preprocess all as needed
 	 * @return the list of primaryfiles failed to be preprocessed
 	 */
-	// Disable unused endpoint
+	// Disable endpoint not in use
 //	@PostMapping(path = "/batch/preprocess")
 	public List<Primaryfile> preprocessPrimaryfilesMissingMediaInfo(@RequestParam(required = false) Long primaryfileId) {
 		List<Primaryfile> primaryfiles = new ArrayList<Primaryfile>();

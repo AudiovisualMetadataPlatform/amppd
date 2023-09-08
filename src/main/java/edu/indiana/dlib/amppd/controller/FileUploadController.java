@@ -38,6 +38,7 @@ public class FileUploadController {
 	 */
 	@PostMapping("/primaryfiles/{id}/upload")
 	public Primaryfile uploadPrimaryfile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for primaryfile ID " + id);
     	return (Primaryfile)fileStorageService.uploadAsset(id, file, SupplementType.PFILE);
     }
@@ -50,6 +51,7 @@ public class FileUploadController {
 	 */
     @PostMapping("/unitSupplements/{id}/upload")
     public UnitSupplement uploadUnitSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for unitSupplement ID " + id);
     	return (UnitSupplement)fileStorageService.uploadAsset(id, file, SupplementType.UNIT);
     }
@@ -62,6 +64,7 @@ public class FileUploadController {
 	 */
     @PostMapping("/collectionSupplements/{id}/upload")
     public CollectionSupplement uploadCollectionSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for collectionSupplement ID " + id);
     	return (CollectionSupplement)fileStorageService.uploadAsset(id, file, SupplementType.COLLECTION);
     }
@@ -74,6 +77,7 @@ public class FileUploadController {
 	 */
     @PostMapping("/itemSupplements/{id}/upload")
     public ItemSupplement uploadItemSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for itemSupplement ID " + id);
     	return (ItemSupplement)fileStorageService.uploadAsset(id, file, SupplementType.ITEM);
     }
@@ -86,6 +90,7 @@ public class FileUploadController {
 	 */
     @PostMapping("/primaryfileSupplements/{id}/upload")
     public PrimaryfileSupplement uploadPrimaryfileSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
+		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for primaryfileSupplement ID " + id);
     	return (PrimaryfileSupplement)fileStorageService.uploadAsset(id, file, SupplementType.PRIMARYFILE);
     }
