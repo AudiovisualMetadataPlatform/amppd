@@ -8,14 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.indiana.dlib.amppd.exception.StorageException;
+import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.web.ItemSearchResponse;
@@ -31,6 +37,12 @@ import lombok.extern.slf4j.Slf4j;
 public class MediaController {
 
 	@Autowired
+	private PrimaryfileRepository primaryfileRepository;
+
+	@Autowired
+	private WorkflowResultRepository workflowResultRepository;
+	
+	@Autowired
     private MediaService mediaService;
 	
 	@Autowired
@@ -43,9 +55,19 @@ public class MediaController {
 	 * @return the binary content of the media file
 	 */
 	@GetMapping("/primaryfiles/{id}/media")
-	public ResponseEntity<Object> servePrimaryfile(@PathVariable("id") Long id) {		
-    	log.info("Serving media file for primaryfile ID " + id);
-    	String url = mediaService.getPrimaryfileSymlinkUrl(id);
+	public ResponseEntity<Object> servePrimaryfile(@PathVariable("id") Long id) {
+		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
+
+		// check permission 
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Primaryfile_Media, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot play primaryfile media in unit " + acUnitId);
+		}
+		
+		log.info("Serving media file for primaryfile ID " + id);
+
+		String url = mediaService.getPrimaryfileSymlinkUrl(primaryfile);
     	HttpHeaders httpHeaders = new HttpHeaders();
     	try {
     		httpHeaders.setLocation(new URI(url));
@@ -53,7 +75,8 @@ public class MediaController {
     	catch (URISyntaxException e) {
     		new RuntimeException("Invalid media symlink URL: " + url, e);
     	}
-        return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
+        
+    	return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
     }
 
 	/**
@@ -63,8 +86,18 @@ public class MediaController {
 	 */
 	@GetMapping("/workflow-results/{id}/output")
 	public ResponseEntity<Object> serveWorkflowOutput(@PathVariable("id") Long id) {		
+		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
+		
+		// check permission 
+		Long acUnitId = workflowResult.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.WorkflowResult_Output, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot view workflow result output in unit " + acUnitId);
+		}
+		
     	log.info("Serving output for workflowResult ID " + id);
-    	String url = mediaService.getWorkflowResultOutputSymlinkUrl(id);
+    	
+    	String url = mediaService.getWorkflowResultOutputSymlinkUrl(workflowResult);
     	HttpHeaders httpHeaders = new HttpHeaders();
     	try {
     		httpHeaders.setLocation(new URI(url));
@@ -72,7 +105,8 @@ public class MediaController {
     	catch (URISyntaxException e) {
     		new RuntimeException("Invalid output symlink URL: " + url, e);
     	}
-        return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
+        
+    	return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
     }
 		
 	
