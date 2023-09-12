@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.WorkflowResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +31,10 @@ public class WorkflowController {
 
 	@Autowired
 	private WorkflowService workflowService;
+
+	@Autowired
+	private PermissionService permissionService;
+	
 	
 	/**
 	 * List all workflows currently existing in Galaxy.
@@ -42,6 +50,13 @@ public class WorkflowController {
 			@RequestParam(required = false) String[] annotations,
 			@RequestParam(required = false) String[] creator,
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date[] dateRange) {
+		// check permission 
+		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Workflow, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot view workflow in any unit.");
+		}
+		
 		try {
 			String published = showPublished == null ? "null" : showPublished.toString();
 			String hidden = showHidden == null ? "null" : showHidden.toString();
@@ -70,18 +85,20 @@ public class WorkflowController {
 			@RequestParam(required = false) Boolean instance,
 			@RequestParam(required = false) Boolean includeToolName,	
 			@RequestParam(required = false) Boolean includeInputDetails) {	
-		WorkflowDetails workflow = null;
-	
+		// check permission 
+		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Workflow, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot view workflow in any unit.");
+		}
+
 		try {
 			log.info("Retrieving workflow details with ID: " +  workflowId + ", instance: " + instance + ", includeToolName: " + includeToolName);
-			workflow = workflowService.showWorkflow(workflowId, instance, includeToolName, includeInputDetails);
+			return workflowService.showWorkflow(workflowId, instance, includeToolName, includeInputDetails);
 		}
 		catch (Exception e) {
 			throw new GalaxyWorkflowException("Unable to retrieve workflow details with ID " + workflowId + " from Galaxy.", e);
 		}
-
-		return workflow;
 	}
-	
 	
 }
