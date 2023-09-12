@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -178,7 +179,17 @@ public class WorkflowResultController {
 	 * @return list of workflow results grouped by output types for the primaryfile
 	 */
 	@GetMapping(path = "/workflow-results/intermediate/outputs", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfileOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {
+	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfileOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {		
+		// check permission 
+		// note that Create instead of Read WorkflowResult permission is checked, because 
+		// this API is only called for the purpose of submitting partial workflow result to workflows  
+		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.WorkflowResult, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot run partial workflow with results in unit " + acUnitId);
+		}
+
 		List<List<WorkflowResult>> resultss = new ArrayList<List<WorkflowResult>>();
 		for (String outputType : outputTypes) {
 			List<WorkflowResult> results = workflowResultRepository.findByPrimaryfileIdAndOutputTypeAndStatus(primaryfileId, outputType, GalaxyJobState.COMPLETE);			
@@ -210,10 +221,10 @@ public class WorkflowResultController {
 	 * @param lumpsum whether to refresh the table in the lumpsum mode
 	 * @return the number of WorkflowResult refreshed
 	 */	
-	@PostMapping("/workflow-results/refresh")
+	// Disable endpoint not in use
+//	@PostMapping("/workflow-results/refresh")
 	public int refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
-		// TODO This API can be disabled or accessible to only ADMIN 
-
+		// This API can be disabled or accessible to only ADMIN 
 		if (lumpsum != null && lumpsum) {
 			log.info("Refreshing Workflow Results in a lump sum manner ... ");
 			return workflowResultService.refreshWorkflowResultsLumpsum().size();
@@ -229,10 +240,10 @@ public class WorkflowResultController {
 	 * Note that this is a one-time operation to back-fill existing data. We don't need this endpoint on-going.
 	 * @return the list of WorkflowResults updated
 	 */
-	@PostMapping("/workflow-results/output-type")
+	// Disable endpoint not in use
+//	@PostMapping("/workflow-results/output-type")
 	public int fixWorkflowResultsOutputType() {
-		// TODO This API can be disabled or accessible to only ADMIN 
-
+		// This API can be disabled or accessible to only ADMIN 
 		log.info("Fixing workflow results with obsolete output types ...");
 		return workflowResultService.fixWorkflowResultsOutputType().size();
 	}
@@ -244,11 +255,11 @@ public class WorkflowResultController {
 	 * when refresh table job is not running) when somehow irrelevant outputs failed to be set as invisible in Galaxy.
 	 * @return the number of WorkflowResults updated
 	 */
+	// Disable endpoint not in use
+//	@PostMapping("/workflow-results/hide")
 	@Deprecated
-	@PostMapping("/workflow-results/hide")
 	public int hideIrrelevantWorkflowResults() {
-		// TODO This API can be disabled or accessible to only ADMIN 
-
+		// This API can be disabled or accessible to only ADMIN 
 		log.info("Hiding irrelevant workflow results ...");
 		return workflowResultService.hideIrrelevantWorkflowResults().size();
 	}
@@ -261,10 +272,10 @@ public class WorkflowResultController {
 	 * @param relevant indicator on whether or not to set WorkflowResults as relevant
 	 * @return the number of WorkflowResults updated
 	 */
-	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
+	// Disable endpoint not in use
+//	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int setRelevantWorkflowResults(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
-		// TODO This API can be disabled or accessible to only ADMIN 
-
+		// This API can be disabled or accessible to only ADMIN 
 		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
 		return workflowResultService.setRelevantWorkflowResults(workflowStepOutputs, relevant).size();
 	}
@@ -279,8 +290,17 @@ public class WorkflowResultController {
 	 */
 	@PatchMapping(path = "/workflow-results/{workflowResultId}")
 	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
+		
+		// check permission 
+		Long acUnitId = result.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.WorkflowResult, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update workflow result in unit " + acUnitId);
+		}
+
 		log.info("Updating workflow result "  + workflowResultId + ": outputLabel + " + outputLabel + "  isfinal = " + isFinal);
-		return workflowResultService.updateWorkflowResult(workflowResultId, outputLabel, isFinal);
+		return workflowResultService.updateWorkflowResult(result, outputLabel, isFinal);
 	}
 
 	/**
@@ -290,8 +310,17 @@ public class WorkflowResultController {
 	 */
 	@DeleteMapping(path = "/workflow-results/{workflowResultId}")
 	public WorkflowResult deleteWorkflowResult(@PathVariable Long workflowResultId) {
+		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
+		
+		// check permission 
+		Long acUnitId = result.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.WorkflowResult, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot delete workflow result in unit " + acUnitId);
+		}
+				
 		log.info("Deleting workflow result "  + workflowResultId + workflowResultId);
-		return workflowResultService.deleteWorkflowResult(workflowResultId);		
+		return workflowResultService.deleteWorkflowResult(result);		
 	}
 	
 	/**

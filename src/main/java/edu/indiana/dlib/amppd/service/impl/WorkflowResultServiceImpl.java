@@ -1008,32 +1008,42 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Override
 	@Transactional	
 	public WorkflowResult updateWorkflowResult(Long workflowResultId, String outputLabel, Boolean isFinal) {		
-		boolean updated = false;
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
+		return updateWorkflowResult(result, outputLabel, isFinal);
+	}
+	
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.updateWorkflowResult(WorkflowResult, String, Boolean)
+	 */
+	@Override
+	@Transactional	
+	public WorkflowResult updateWorkflowResult(WorkflowResult workflowResult, String outputLabel, Boolean isFinal) {		
+		boolean updated = false;
+		Long id = workflowResult.getId();
 		
 		// update outputLabel if provided and different from current value
 		// Note that this is the label defined by AMP users via AMP UI, not to be confused with dataset tags or annotation
-		if (outputLabel != null && !outputLabel.equals(result.getOutputLabel())) {
-			result.setOutputLabel(outputLabel);		
+		if (outputLabel != null && !outputLabel.equals(workflowResult.getOutputLabel())) {
+			workflowResult.setOutputLabel(outputLabel);		
 			updated = true;
 		}
 		
 		// update isFinal if provided and different from current value
-		if (isFinal != null && !isFinal.equals(result.getIsFinal())) { 
-			result.setIsFinal(isFinal);
+		if (isFinal != null && !isFinal.equals(workflowResult.getIsFinal())) { 
+			workflowResult.setIsFinal(isFinal);
 			updated = true;
 		}
 		
 		// only need to save to DB if the result has been updated
 		if (updated) {
-			workflowResultRepository.save(result);	
-			log.info("Successfully updated output label and/or final status for workflow result: " + workflowResultId);
+			workflowResultRepository.save(workflowResult);	
+			log.info("Successfully updated output label and/or final status for workflow result: " + id);
 		}
 		else {
-			log.info("No update needs to be made on output label and/or final status for workflow result: " + workflowResultId);
+			log.info("No update needs to be made on output label and/or final status for workflow result: " + id);
 		}
 		
-		return result;
+		return workflowResult;
 	}
 	
 	/**
@@ -1043,24 +1053,32 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Transactional
 	public WorkflowResult deleteWorkflowResult(Long workflowResultId) {
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
+		return deleteWorkflowResult(result);
+	}
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.deleteWorkflowResult(WorkflowResult)
+	 */
+	@Override
+	@Transactional
+	public WorkflowResult deleteWorkflowResult(WorkflowResult workflowResult) {
 		// delete from Galaxy history
 		try {
 			HistoriesClient historiesClient = jobService.getHistoriesClient();
-			Dataset dataset = historiesClient.showDataset(result.getHistoryId(), result.getOutputId());
+			Dataset dataset = historiesClient.showDataset(workflowResult.getHistoryId(), workflowResult.getOutputId());
 			dataset.setDeleted(true);
-			historiesClient.updateDataset(result.getHistoryId(), dataset);		
-			log.info("Successfully deleted dataset for workflowResult in Galaxy: " + result);
+			historiesClient.updateDataset(workflowResult.getHistoryId(), dataset);		
+			log.info("Successfully deleted dataset for workflowResult in Galaxy: " + workflowResult);
 		} 
 		catch (Exception e) {
-			throw new GalaxyWorkflowException("Failed to delete dataset for workflowResult in Galaxy: " + result, e);
+			throw new GalaxyWorkflowException("Failed to delete dataset for workflowResult in Galaxy: " + workflowResult, e);
 		}	
 
 		// delete result from AMP table
-		workflowResultRepository.delete(result);
-		log.info("Successfully deleted workflowResult from AMP table: " + result);
+		workflowResultRepository.delete(workflowResult);
+		log.info("Successfully deleted workflowResult from AMP table: " + workflowResult);
 		
-		return result;
+		return workflowResult;
 	}
 	
 	/**
