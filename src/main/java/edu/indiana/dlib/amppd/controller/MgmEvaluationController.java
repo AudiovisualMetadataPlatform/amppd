@@ -42,8 +42,8 @@ public class MgmEvaluationController {
     private PermissionService permissionService;
 
     
-    @PostMapping(path = "/mgm-evaluation-test/new", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public MgmEvaluationValidationResponse submitTestRequest(@RequestBody MgmEvaluationRequest request) {
+    @PostMapping(path = "/mgm-evaluation-test/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public MgmEvaluationValidationResponse createMgmEvalTest(@RequestBody MgmEvaluationRequest request) {
 		// get accessible units for Create MgmEvaluationTest
 		// if none returned, access denied exception will be thrown;
 		// otherwise if accessibleUnits is null, i.e. user is admin, no AC prefilter is needed; 
