@@ -259,9 +259,17 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String getPrimaryfileSymlinkUrl(Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
+		return getPrimaryfileSymlinkUrl(primaryfile);
+	}
+
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getPrimaryfileSymlink(Primaryfile)
+	 */
+	@Override
+	public String getPrimaryfileSymlinkUrl(Primaryfile primaryfile) {
 		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
 		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(primaryfile);
-		log.info("Media symlink URL for primaryfile <" + id + "> is: " + url);
+		log.info("Media symlink URL for primaryfile <" + primaryfile.getId() + "> is: " + url);
 		return url;
 	}
 
@@ -271,9 +279,17 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public String getWorkflowResultOutputSymlinkUrl(Long id) {
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
+		return getWorkflowResultOutputSymlinkUrl(workflowResult);
+	}
+		
+	/**
+	 * @see edu.indiana.dlib.amppd.service.MediaService.getWorkflowResultOutputSymlinkUrl(WorkflowResult)
+	 */
+	@Override
+	public String getWorkflowResultOutputSymlinkUrl(WorkflowResult workflowResult) {
 		String serverUrl = StringUtils.removeEnd(amppdUiPropertyConfig.getUrl(), "/#"); // exclude /# for static contents
 		String url = serverUrl + "/" + amppdPropertyConfig.getSymlinkDir() + "/" + createSymlink(workflowResult);
-		log.info("Output symlink URL for workflowResult <" + id + "> is: " + url);
+		log.info("Output symlink URL for workflowResult <" + workflowResult.getId() + "> is: " + url);
 		return url;
 	}
 		

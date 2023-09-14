@@ -99,6 +99,14 @@ public interface MediaService {
 	public String getPrimaryfileSymlinkUrl(Long id);
 
 	/**
+	 * Get the media symlink URL for the given primaryfile:
+	 * create a new one if not existing yet; or reuse the existing symlink if already created.
+	 * @param primaryfile the given primaryfile
+	 * @return the absolute path of the media symlink
+	 */
+	public String getPrimaryfileSymlinkUrl(Primaryfile primaryfile);
+
+	/**
 	 * Get the output symlink URL for the given WorkflowResult:
 	 * create a new one if not existing yet; or reuse the existing symlink if already created.
 	 * @param id ID of the given WorkflowResult
@@ -106,6 +114,14 @@ public interface MediaService {
 	 */
 	public String getWorkflowResultOutputSymlinkUrl(Long id);
 	
+	/**
+	 * Get the output symlink URL for the given WorkflowResult:
+	 * create a new one if not existing yet; or reuse the existing symlink if already created.
+	 * @param workflowResult of the given WorkflowResult
+	 * @return the absolute path of the output symlink
+	 */
+	public String getWorkflowResultOutputSymlinkUrl(WorkflowResult workflowResult);
+
 	/**
 	 * Reset the symlink of the given asset to null, delete the symlink from the symlink directoy,
 	 * and persist the updated asset if indicated.

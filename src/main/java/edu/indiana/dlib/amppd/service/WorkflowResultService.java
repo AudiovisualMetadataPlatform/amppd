@@ -104,11 +104,28 @@ public interface WorkflowResultService {
 	public WorkflowResult updateWorkflowResult(Long workflowResultId, String outputLabel, Boolean isFinal);
 
 	/**
+	 * Update the specified WorkflowResult according to the specified output label and final status;
+	 * if outputLabel or isFinal is not provided, then no update on the corresponding field. 
+	 * @param workflowResult the specified WorkflowResult
+	 * @param outputLabel the specified output label
+	 * @param isFinal the specified final status
+	 * @return WorkflowResult updated
+	 */
+	public WorkflowResult updateWorkflowResult(WorkflowResult workflowResult, String outputLabel, Boolean isFinal);
+
+	/**
 	 * Delete the specified WorkflowResult from AMP table and Galaxy history.
 	 * @param workflowResultId id of the specified WorkflowResult
 	 * @return WorkflowResult deleted
 	 */
 	public WorkflowResult deleteWorkflowResult(Long workflowResultId);
+
+	/**
+	 * Delete the specified WorkflowResult from AMP table and Galaxy history.
+	 * @param workflowResult the specified WorkflowResult
+	 * @return WorkflowResult deleted
+	 */
+	public WorkflowResult deleteWorkflowResult(WorkflowResult workflowResult);
 
 	/**
 	 * Set and export workflow result csv file as part of reponse

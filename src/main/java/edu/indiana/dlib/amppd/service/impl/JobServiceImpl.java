@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,6 +41,8 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
@@ -49,6 +52,7 @@ import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.CreateJobParameters;
@@ -113,6 +117,10 @@ public class JobServiceImpl implements JobService {
 	@Getter
 	private HistoriesClient historiesClient;
 		
+	@Autowired
+	private PermissionService permissionService;
+
+	
 	/**
 	 * Initialize the JobServiceImpl bean.
 	 */
@@ -267,6 +275,14 @@ public class JobServiceImpl implements JobService {
 			Long id = primaryfileId; 
 			primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));
 			
+			// check permission now that primaryfile has been retrieved based on resultIds,
+			// this means that it wasn't provided in the call parameter and thus AC hasn't been checked previously  
+			Long acUnitId = primaryfile.getAcUnitId();
+			boolean can = permissionService.hasPermission(ActionType.Create, TargetType.WorkflowResult, acUnitId);
+			if (!can) {
+				throw new AccessDeniedException("The current user cannot run workflow in unit " + acUnitId);
+			}
+
 			// update job creation response with primaryfile names
 			response.setNames(primaryfile); // use an invalid primaryfileId since no primaryfile was retrieved
 
@@ -545,6 +561,13 @@ public class JobServiceImpl implements JobService {
     			// retrieve primaryfile via ID
     			primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
         		
+    			// check permission now if primaryfile is provided
+    			Long acUnitId = primaryfile.getAcUnitId();
+    			boolean can = permissionService.hasPermission(ActionType.Create, TargetType.WorkflowResult, acUnitId);
+    			if (!can) {
+    				throw new AccessDeniedException("The current user cannot run workflow in unit " + acUnitId);
+    			}
+
     			// update name fields with primaryfile info in job creation response
         		response.setNames(primaryfile);
         		

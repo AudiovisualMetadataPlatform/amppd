@@ -75,11 +75,6 @@ public class MgmEvaluationController {
         return response;
     }
 
-    @PostMapping(path = "/mgm-evaluation-test/test")
-    public String TestRequest() {
-        return "hello world";
-    }
-
     /**
      * Retrieve a list of all mgm evaluation tests satisfying the given query.
      * @param query the search query for mgm evaluation test

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,7 +63,8 @@ public class JobController {
 	 * @param parameterss the dynamic parameterss to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping(path = "/jobs/submitBundle", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	// Disable endpoint not in use
+//	@PostMapping(path = "/jobs/submitBundle", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam Long bundleId, 
@@ -107,7 +107,8 @@ public class JobController {
 	 * @param parameterss the dynamic parameterss to use for the steps in the workflow as a map {stepId: {paramName; paramValue}}
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
-	@PostMapping(path = "/jobs/submitCsv", produces = MediaType.APPLICATION_JSON_VALUE)
+	// Disable endpoint not in use
+//	@PostMapping(path = "/jobs/submitCsv", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,
@@ -124,7 +125,8 @@ public class JobController {
 	 * List all AMP jobs with step details, i.e. all workflow invocations submitted via AMPPD UI to Galaxy.
 	 * @return a list of Invocations each containing basic information of an AMP job.
 	 */
-	@GetMapping("/jobs/details")
+	// Disable endpoint not in use
+//	@GetMapping("/jobs/details")
 	public List<InvocationDetails> listJobsDetails() {
 		log.info("Listing all AMP jobs with step details: ");		
 		/* Note: 
@@ -139,7 +141,8 @@ public class JobController {
 	 * List all AMP jobs run on the specified workflow against the specified primaryfile.
 	 * @return a list of Invocations each containing basic information of an AMP job.
 	 */
-	@GetMapping("/jobs")
+	// Disable endpoint not in use
+//	@GetMapping("/jobs")
 	public List<Invocation> listJobs(
 			@RequestParam String workflowId, 
 			@RequestParam Long primaryfileId) {
@@ -153,7 +156,8 @@ public class JobController {
 	 * @param invocationId the ID of the Galaxy workflow invocation corresponding to the inquired AMP job
 	 * @return an instance of InvocationBriefs containing brief information of the inquired AMP job 
 	 */
-	@GetMapping("/jobs/{invocationId}")
+	// Disable endpoint not in use
+//	@GetMapping("/jobs/{invocationId}")
 	public InvocationBriefs showJob(
 			@RequestParam String workflowId, 
 			@PathVariable String invocationId) {
@@ -168,7 +172,8 @@ public class JobController {
 	 * @param stepId the ID of the inquired Galaxy workflow invocation step within the AMP job
 	 * @return an instance of InvocationStepDetails containing detailed information of the inquired AMP job step
 	 */
-	@GetMapping("/jobs/{invocationId}/steps/{stepId}")
+	// Disable endpoint not in use
+//	@GetMapping("/jobs/{invocationId}/steps/{stepId}")
 	public InvocationStepDetails showJobStep(
 			@RequestParam String workflowId, 
 			@PathVariable String invocationId,
@@ -185,7 +190,8 @@ public class JobController {
 	 * @param datasetId the ID of the inquired Galaxy workflow invocation step output dataset
 	 * @return an instance of Dataset containing detailed information of the inquired AMP job step output
 	 */
-	@GetMapping("/jobs/{invocationId}/steps/{stepId}/outputs/{datasetId}")
+	// Disable endpoint not in use
+//	@GetMapping("/jobs/{invocationId}/steps/{stepId}/outputs/{datasetId}")
 	public Dataset showJobStepOutput(
 			@RequestParam String workflowId, 
 			@PathVariable String invocationId,

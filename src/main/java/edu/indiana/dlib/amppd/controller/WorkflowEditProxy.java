@@ -1,24 +1,11 @@
 package edu.indiana.dlib.amppd.controller;
 
-import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
-import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
-import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.security.JwtTokenUtil;
-import edu.indiana.dlib.amppd.service.AmpUserService;
-import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
-import edu.indiana.dlib.amppd.web.GalaxyUpdateWorkflowRequest;
-import edu.indiana.dlib.amppd.web.GalaxyWorkflowRequest;
-import edu.indiana.dlib.amppd.web.GalaxyWorkflowResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -26,12 +13,44 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.net.HttpCookie;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
+import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
+import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
+import edu.indiana.dlib.amppd.service.AmpUserService;
+import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.web.GalaxyLoginRequest;
+import edu.indiana.dlib.amppd.web.GalaxyUpdateWorkflowRequest;
+import edu.indiana.dlib.amppd.web.GalaxyWorkflowRequest;
+import edu.indiana.dlib.amppd.web.GalaxyWorkflowResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Proxy between AMP client and AMP servr for requests related to workflow edit between AMP UI and Galaxy workflow editor.
@@ -77,13 +96,17 @@ public class WorkflowEditProxy {
 //	@Autowired
 	private RestTemplate restTemplate = new RestTemplate();
 	
+	@Autowired
+	private AmpUserService ampUserService;
+
+	@Autowired
+	private PermissionService permissionService;
+
 	private String csrfToken = null;
 	private String galaxySession = null;
 	private HttpCookie galaxySessionCookie = null;
 
-	@Autowired
-	private AmpUserService ampUserService;
-
+	
 	/**
 	 *  Upon initialization of the controller, 
 	 *  login to galaxy as AMP workflow edit user and set up galaxy session for workflow edit.
@@ -192,6 +215,13 @@ public class WorkflowEditProxy {
 	 */
 	@PostMapping("/workflows/create")
 	public ResponseEntity<String> create(@RequestHeader("Authorization") String authHeader) {
+		// check permission 
+		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Workflow, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create workflow in any unit.");
+		}
+		
 		String workflowId = null;
 		
 		// create workflow in Galaxy
@@ -252,6 +282,13 @@ public class WorkflowEditProxy {
 	 */
 	@PostMapping("/workflows/{workflowId}/editStart")
 	public ResponseEntity<String> startEdit(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
+		// check permission 
+		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update workflow in any unit.");
+		}
+		
 		// generate the workflow edit cookie, provided the current AMP request authHeader and workflowId
 		ResponseCookie rc = generateWorkflowEditCookie(authHeader, workflowId);
 		
@@ -272,6 +309,13 @@ public class WorkflowEditProxy {
 	 */
 	@PostMapping("/workflows/{workflowId}/editEnd")
 	public ResponseEntity<String> endEdit(@PathVariable("workflowId") String workflowId, HttpServletResponse response) {		
+		// check permission 
+		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update workflow in any unit.");
+		}
+		
     	// unset the workflow edit cookie 
 		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, null);
 	    cookie.setSecure(true);
@@ -307,6 +351,13 @@ public class WorkflowEditProxy {
 			@RequestHeader HttpHeaders headers,
 			@RequestBody(required = false) byte[] body,
 			HttpServletRequest request) {
+		// check permission 
+		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update workflow in any unit.");
+		}
+		
 	    log.debug("Proxying workflow edit request " + method + " " + request.getRequestURL() + "...");
 	    
 		// retrieve workflow edit cookie and validate it 
