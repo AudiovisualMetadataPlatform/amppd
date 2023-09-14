@@ -181,11 +181,12 @@ public class WorkflowResultController {
 	@GetMapping(path = "/workflow-results/intermediate/outputs", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfileOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {		
 		// check permission 
-		// note that Create instead of Read WorkflowResult permission is checked, because 
-		// this API is only called for the purpose of submitting partial workflow result to workflows  
+		// the API itself only requires Read WorkflowResult permission, however,
+		// if this API is called for the purpose of submitting partial workflow result to workflows,
+		// Create WorkflowResult permission would be required at that point
 		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("Primaryfile <" + primaryfileId + "> does not exist!"));
 		Long acUnitId = primaryfile.getAcUnitId();
-		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.WorkflowResult, acUnitId);
+		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.WorkflowResult, acUnitId);
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot run partial workflow with results in unit " + acUnitId);
 		}
