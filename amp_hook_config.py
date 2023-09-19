@@ -190,8 +190,8 @@ def main():
             f.write(f"amppd.url = http://{config['amp']['host']}:{config['amp']['port']}/rest\n")
         #  amppdui.documentRoot -- this should be somewhere in the tomcat tree.
         f.write(f"amppdui.documentRoot = {amp_root}/tomcat/webapps/ROOT\n")
-        #  amppd.symlinkRoot is data_root, and synlinkDir is symlinks, as defined in tomcat config
-        f.write(f"amppd.symlinkRoot = {data_root}\n")
+        #  amppd.dataRoot is data_root, and synlinkDir is symlinks, as defined in tomcat config
+        f.write(f"amppd.dataRoot = {data_root}\n")
         f.write(f"amppd.symlinkDir = symlinks\n")
                         
         f.write("# boilerplate properties\n")

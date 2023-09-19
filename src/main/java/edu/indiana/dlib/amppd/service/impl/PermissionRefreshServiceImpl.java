@@ -1,6 +1,9 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	
 	public static final String DIR = "db";
+	public static final String CONFIG = "config";
 	public static final String ROLE = "ac_role";
 	public static final String ACTION = "ac_action";
 	public static final String ROLE_ACTION = "ac_role_action";
@@ -203,13 +207,16 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		log.info("Start refreshing RoleAction table with depth of role hierarchy = " + roleDepth);
 		
 		// open ac_role_action.csv
-		String filename = DIR + "/" + ROLE_ACTION + ".csv"; 
+		File file = new File(amppdPropertyConfig.getDataRoot() + File.separator + CONFIG + File.separator + ROLE_ACTION + ".csv"); // custom AC config
+		String filename = DIR + File.separator + ROLE_ACTION + ".csv";	// default AC config
 		BufferedReader breader = null;
 		try {
-			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
+			// if external custom AC config file exists, use that; otherwise use the default one from repository
+			InputStream in = file.exists() ? new FileInputStream(file) : new ClassPathResource(filename).getInputStream();
+			breader = new BufferedReader(new InputStreamReader(in));
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to refresh Role table: unable to open " + filename, e);
+			throw new RuntimeException("Failed to refresh RoleAction table: unable to open " + breader, e);
 		}		
 		
 		// parse the csv into list of RoleAction objects
@@ -218,7 +225,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 			roleActions = new CsvToBeanBuilder<RoleAction>(breader).withType(RoleAction.class).build().parse();
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to refresh RoleAction table: invalid CSV format with " + filename, e);
+			throw new RuntimeException("Failed to refresh RoleAction table: invalid CSV format with " + breader, e);
 		}
 		
 		// initialize roles records
@@ -290,7 +297,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		 * all associated permissions, so no further deletion on role_action table is needed here.		
 		 */
 		
-		log.info("Successfully refreshed " + roleActions.size() + " roleActions for " + roleDepth + " roles from " + filename);
+		log.info("Successfully refreshed " + roleActions.size() + " roleActions for " + roleDepth + " roles from " + breader);
 		return roleActions;
 	}
 

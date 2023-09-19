@@ -22,9 +22,9 @@ import lombok.Setter;
 public class AmppdPropertyConfig {
 
     @NotNull private String environment;
+    @NotNull private String dataRoot;
     @NotNull private String fileStorageRoot;
     @NotNull private String dropboxRoot;
-    @NotNull private String symlinkRoot;
     @NotNull private String symlinkDir;
     @NotNull private String mgmEvaluationResultsRoot;
     @NotNull private String mgmEvaluationScriptsRoot;
