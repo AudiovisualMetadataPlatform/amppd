@@ -1,20 +1,6 @@
 # AMPPD (Audiovisual Metadata Platform Pilot Development)
-The latest information about project can be found on the [Wiki](https://wiki.dlib.indiana.edu/display/AMP)
+AMPPD is the back-end server that provides REST API end-points for AMP clients. It communicates with AMP UI and the underline AMP Galaxy instance. It handles authentication and authorization, user management, content navigation and manipulation, workflow operations, as well as delivery of workflow results to external target systems. 
 
+AMPPD is a Java application built on top of Spring Boot framework. It can be run as a separate server independent of AMP UI, but it does rely on the AMP-customized Galaxy instance to start and do anything related to workflow. Detailed information about the AMPPD back-end component in relation to other AMP components is described in [AMP System Architecture](https://uisapp2.iu.edu/confluence-prd/display/AMP/System+Architecture?src=contextnavpagetreemode).
 
-
-`master:` [![CircleCI](https://circleci.com/gh/AudiovisualMetadataPlatform/amppd/tree/master.svg?style=svg)](https://circleci.com/gh/AudiovisualMetadataPlatform/amppd/tree/master)
-
-
-# Quick Start
-
-[Setup Development Environment](https://github.com/AudiovisualMetadataPlatform/amppd/wiki/Set-up-dev-environment)
-
-## Run tests
-`mvn integration-test`
-
-## Build War
-`mvn clean install`
-
-## Deploy on Tomcat
-http://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html#Deploy_A_New_Application_Remotely
+To install, config, run AMPPD, as well as contribute to the AMP project, please refer to the instructions on [AMP Bootstrap](https://github.com/AudiovisualMetadataPlatform/amp_bootstrap)
