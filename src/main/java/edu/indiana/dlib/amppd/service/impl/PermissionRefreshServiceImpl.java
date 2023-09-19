@@ -1,6 +1,9 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
@@ -37,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	
 	public static final String DIR = "db";
+	public static final String CONFIG = "config";
 	public static final String ROLE = "ac_role";
 	public static final String ACTION = "ac_action";
 	public static final String ROLE_ACTION = "ac_role_action";
@@ -202,14 +206,21 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 	public List<RoleAction> refreshRoleAction(int roleDepth) {
 		log.info("Start refreshing RoleAction table with depth of role hierarchy = " + roleDepth);
 		
-		// open ac_role_action.csv
-		String filename = DIR + "/" + ROLE_ACTION + ".csv"; 
+		// check existence of custom role_action.csv
+		String customRa = amppdPropertyConfig.getDataRoot() + File.separator + CONFIG + File.separator + ROLE_ACTION + ".csv";	// custom role_action
+		String defaultRa = DIR + File.separator + ROLE_ACTION + ".csv";	// default role_action
+		File customRaF = new File(customRa); 
+		String filename = customRaF.exists() ? customRa : defaultRa;
 		BufferedReader breader = null;
+		
+		// open ac_role_action.csv
 		try {
-			breader = new BufferedReader(new InputStreamReader(new ClassPathResource(filename).getInputStream()));
+			// if external custom AC config file exists, use that; otherwise use the default one from repository
+			InputStream in = customRaF.exists() ? new FileInputStream(customRaF) : new ClassPathResource(defaultRa).getInputStream();
+			breader = new BufferedReader(new InputStreamReader(in));
 		}
 		catch(Exception e) {
-			throw new RuntimeException("Failed to refresh Role table: unable to open " + filename, e);
+			throw new RuntimeException("Failed to refresh RoleAction table: unable to open " + filename, e);
 		}		
 		
 		// parse the csv into list of RoleAction objects

@@ -102,7 +102,7 @@ public class MediaServiceImpl implements MediaService {
 	public MediaServiceImpl(AmppdPropertyConfig amppdPropertyConfig) {
 		// initialize Tomcat server static content folder for symlinks to media files 
 		try {
-			root = Paths.get(amppdPropertyConfig.getSymlinkRoot(), amppdPropertyConfig.getSymlinkDir());
+			root = Paths.get(amppdPropertyConfig.getDataRoot(), amppdPropertyConfig.getSymlinkDir());
 			Files.createDirectories(root);	// creates root directory if not already exists
 			log.info("Media symlink root directory " + root + " has been created." );
 		}
