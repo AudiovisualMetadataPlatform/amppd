@@ -11,7 +11,7 @@ import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetail;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 
 
-@RepositoryRestResource()
+@RepositoryRestResource(exported = false)
 public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssignment> {
 
 	boolean existsByUserIdAndRoleIdIn(Long userId, List<Long> roleIds);

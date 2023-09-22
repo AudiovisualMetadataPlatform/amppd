@@ -4,10 +4,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import edu.indiana.dlib.amppd.model.MgmVersion;
 
+@RepositoryRestResource(exported = false)
 public interface MgmVersionRepository extends AmpObjectRepository<MgmVersion> {
 	
 	// find all versions of the given MGM

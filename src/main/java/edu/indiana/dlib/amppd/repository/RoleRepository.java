@@ -10,7 +10,8 @@ import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.projection.RoleBrief;
 import edu.indiana.dlib.amppd.model.projection.RoleBriefActions;
 
-@RepositoryRestResource(excerptProjection = RoleBrief.class)
+//@RepositoryRestResource(excerptProjection = RoleBrief.class)
+@RepositoryRestResource(exported = false)
 public interface RoleRepository extends AmpObjectRepository<Role> {
 
 	Role findFirstByNameAndUnitId(String name, Long unitId);

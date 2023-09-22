@@ -7,11 +7,13 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
+@RepositoryRestResource(exported = false)
 public interface WorkflowResultRepository extends PagingAndSortingRepository<WorkflowResult, Long>, WorkflowResultRepositoryCustom {	
 		
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);

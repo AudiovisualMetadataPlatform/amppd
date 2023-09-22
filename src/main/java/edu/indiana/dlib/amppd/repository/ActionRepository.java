@@ -10,7 +10,8 @@ import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 
-@RepositoryRestResource(excerptProjection = ActionBrief.class)
+//@RepositoryRestResource(excerptProjection = ActionBrief.class)
+@RepositoryRestResource(exported = false)
 public interface ActionRepository extends AmpObjectRepository<Action> {
 
 	Action findFirstByName(String name);
