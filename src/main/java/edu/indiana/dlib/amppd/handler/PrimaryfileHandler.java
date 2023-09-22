@@ -10,11 +10,15 @@ import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -30,6 +34,10 @@ public class PrimaryfileHandler {
     
 	@Autowired
 	private FileStorageService fileStorageService;	
+
+	@Autowired
+	private PermissionService permissionService;
+
 	
     @HandleBeforeCreate
 //    @Validated({WithReference.class, WithoutReference.class})
@@ -55,6 +63,13 @@ public class PrimaryfileHandler {
     @HandleBeforeSave
 //    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
+		// check permission
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Primaryfile, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update primaryfiles in unit " + acUnitId);
+		}
+
     	log.info("Updating primaryfile " + primaryfile.getId() + " ...");
 
         // Below file system operations should be done before the data entity is updated, 
@@ -83,6 +98,13 @@ public class PrimaryfileHandler {
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Primaryfile primaryfile){
+		// check permission
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Primaryfile, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot delete primaryfiles in unit " + acUnitId);
+		}
+    	
         log.info("Deleting primaryfile " + primaryfile.getId() + " ...");
 
         // Below file system operations should be done before the data entity is deleted, so that 
