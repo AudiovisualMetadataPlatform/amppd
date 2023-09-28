@@ -56,6 +56,10 @@ rest:
         # serialization
         spring.jackson.serialization.FAIL_ON_EMPTY_BEANS: false
         
+        # REST endpoints exposure
+        spring.data.rest.detection-strategy: annotated
+        management.endpoints.web.exposure.include: '*'        
+        
         # Mail
         spring.mail.host: localhost
         spring.mail.port: 25
@@ -91,7 +95,6 @@ rest:
         amppd.environment: dev
         amppd.auth: true
         amppd.corsOriginPattern: http://localhost:8080        
-        management.endpoints.web.exposure.include: '*'
         
         # misc
         amppd.externalSources: MCO,DarkAvalon,NYPL

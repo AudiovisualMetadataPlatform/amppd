@@ -4,13 +4,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.ac.Role;
 import edu.indiana.dlib.amppd.model.projection.RoleBrief;
 import edu.indiana.dlib.amppd.model.projection.RoleBriefActions;
 
-@RepositoryRestResource(excerptProjection = RoleBrief.class)
+
 public interface RoleRepository extends AmpObjectRepository<Role> {
 
 	Role findFirstByNameAndUnitId(String name, Long unitId);

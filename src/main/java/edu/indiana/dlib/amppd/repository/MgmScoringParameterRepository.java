@@ -1,10 +1,15 @@
 package edu.indiana.dlib.amppd.repository;
 
-import edu.indiana.dlib.amppd.model.MgmScoringParameter;
-
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+
+import edu.indiana.dlib.amppd.model.MgmScoringParameter;
+import edu.indiana.dlib.amppd.model.projection.MgmScoringParameterBrief;
+
+
+@RepositoryRestResource(excerptProjection = MgmScoringParameterBrief.class)
 public interface MgmScoringParameterRepository extends MgmMetaRepository<MgmScoringParameter> {
 	
 	// find all parameters of the given scoring tool
