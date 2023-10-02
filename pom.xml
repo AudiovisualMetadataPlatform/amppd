@@ -230,11 +230,6 @@
 			<artifactId>blend4j</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>com.github.AudiovisualMetadataPlatform</groupId>
-			<artifactId>galaxy-bootstrap</artifactId>
-			<version>master-SNAPSHOT</version>
-		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.junit.vintage</groupId>-->
 <!--			<artifactId>junit-vintage-engine</artifactId>-->
