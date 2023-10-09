@@ -64,8 +64,7 @@ public class RestConfig implements RepositoryRestConfigurer {
 	    		.disable(HttpMethod.PUT)
 	    		.disable(HttpMethod.PATCH)
 	    		.disable(HttpMethod.DELETE));         
-     
-        
+             
         config.forDomainType(Primaryfile.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
@@ -75,8 +74,7 @@ public class RestConfig implements RepositoryRestConfigurer {
 	    		.disable(HttpMethod.PUT)
 	    		.disable(HttpMethod.PATCH)
 	    		.disable(HttpMethod.DELETE));         
-  
-        
+       
         config.forDomainType(UnitSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
@@ -97,8 +95,7 @@ public class RestConfig implements RepositoryRestConfigurer {
 	    		.disable(HttpMethod.PUT)
 	    		.disable(HttpMethod.PATCH)
 	    		.disable(HttpMethod.DELETE));         
-  
-        
+          
         config.forDomainType(ItemSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
@@ -118,8 +115,7 @@ public class RestConfig implements RepositoryRestConfigurer {
 	    		.disable(HttpMethod.PUT)
 	    		.disable(HttpMethod.PATCH)
 	    		.disable(HttpMethod.DELETE));         
-             
-        
+   
         /* For MGM related classes:
          * GET on collection is needed only for retrieving the top level instances - MgmCategory,
          * while all other lower level MGM instances can be obtained from its parent's detail view.
