@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
@@ -14,26 +15,41 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
 @RepositoryRestResource(excerptProjection = PrimaryfileBrief.class)
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
+	@RestResource(exported = false)
 	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
+
+	@RestResource(exported = false)
 	List<Primaryfile> findByItemIdAndName(Long itemId, String name);
 	
+	@RestResource(exported = false)
 	List<Primaryfile> findByItemCollectionActiveTrueAndHistoryIdNotNull();	
+	
+	@RestResource(exported = false)
 	List<Primaryfile> findByHistoryIdNotNull();	
+	
+	@RestResource(exported = false)
 	List<Primaryfile> findByHistoryId(String historyId); 
 	
+	@RestResource(exported = false)
 	List<Primaryfile> findByMediaInfoNull(); 
 
+	@RestResource(exported = false)
 	@Query(value = "select p from Primaryfile p where lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.description) like lower(concat('%', :keyword,'%'))")
 	List<Primaryfile> findByKeyword(@Param("keyword") String keyword); 
 		
+	@RestResource(exported = false)
 	@Query(value = "select p from Primaryfile p where (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByItemOrFileName(@Param("keyword") String keyword);
 	
+	@RestResource(exported = false)
 	@Query(value = "select p from Primaryfile p where (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findByCollectionOrItemOrFileName(@Param("keyword") String keyword);
 
+	@RestResource(exported = false)
 	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
 	List<Primaryfile> findActiveByKeyword(String keyword);
+	
+	@RestResource(exported = false)
 	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) and p.item.collection.unit.id in :acUnitIds order by p.item.id")
 	List<Primaryfile> findActiveByKeywordAC(String keyword, Set<Long> acUnitIds);
 
