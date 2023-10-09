@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.AmpUser.Status;
@@ -15,7 +14,7 @@ import edu.indiana.dlib.amppd.model.projection.AmpUserBrief;
 
 
 //@RepositoryRestResource(excerptProjection = AmpUserBrief.class, collectionResourceRel = "users", path = "users")
-@RepositoryRestResource(exported = false)
+//@RepositoryRestResource(exported = false)
 public interface AmpUserRepository extends PagingAndSortingRepository<AmpUser, Long>{
 
 	AmpUser findFirstByUsername(String username);

@@ -3,13 +3,11 @@ package edu.indiana.dlib.amppd.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import edu.indiana.dlib.amppd.model.Bundle;
 
 
 //@RepositoryRestResource(collectionResourceRel = "bundles", path = "bundles")
-@RepositoryRestResource(exported = false)
 public interface BundleRepository extends DataentityRepository<Bundle> {
 		
 	Bundle findFirstByName(String name);

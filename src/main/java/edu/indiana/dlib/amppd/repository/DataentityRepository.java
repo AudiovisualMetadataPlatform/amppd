@@ -6,8 +6,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import edu.indiana.dlib.amppd.model.Dataentity;
 
+
 @NoRepositoryBean
-//@RepositoryRestResource(excerptProjection = DataentityBrief.class)
 public interface DataentityRepository<S extends Dataentity> extends AmpObjectRepository<S> {
 	
 	List<S> findByName(String name);

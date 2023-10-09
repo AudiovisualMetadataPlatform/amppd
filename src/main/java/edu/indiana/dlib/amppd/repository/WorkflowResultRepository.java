@@ -12,6 +12,7 @@ import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
+
 public interface WorkflowResultRepository extends PagingAndSortingRepository<WorkflowResult, Long>, WorkflowResultRepositoryCustom {	
 		
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
