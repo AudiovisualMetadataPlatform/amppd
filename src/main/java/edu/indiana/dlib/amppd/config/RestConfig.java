@@ -17,6 +17,7 @@ import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
 
 /**
@@ -29,44 +30,95 @@ public class RestConfig implements RepositoryRestConfigurer {
     public void configureRepositoryRestConfiguration(RepositoryRestConfiguration restConfig, CorsRegistry cors) {
         ExposureConfiguration config = restConfig.getExposureConfiguration();
         
+        /* For all exposed repositories:
+         * CUD should be disabled on association
+         */
+        
         /* For Dataentity subclasses:
          * GET on collection is not needed, as listing of the top level entity Unit is implemented in controller, 
          * while all other lower level entities can be obtained from its parent's detail view.
          * Meanwhile, Creation of Assets is also implemented in controller.
          */     
         
+        config.forDomainType(Unit.class)
+    		.withAssociationExposure((metadata, httpMethods) -> httpMethods
+    			.disable(HttpMethod.POST)
+    			.disable(HttpMethod.PUT)
+    			.disable(HttpMethod.PATCH)
+    			.disable(HttpMethod.DELETE));      
+        
         config.forDomainType(Collection.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
-    			.disable(HttpMethod.GET));      
+    			.disable(HttpMethod.GET))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+    			.disable(HttpMethod.POST)
+    			.disable(HttpMethod.PUT)
+    			.disable(HttpMethod.PATCH)
+    			.disable(HttpMethod.DELETE));         
         
-        config.forDomainType(Item.class)
+		config.forDomainType(Item.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
-    			.disable(HttpMethod.GET));      
+    			.disable(HttpMethod.GET))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+	    		.disable(HttpMethod.POST)
+	    		.disable(HttpMethod.PUT)
+	    		.disable(HttpMethod.PATCH)
+	    		.disable(HttpMethod.DELETE));         
+     
         
         config.forDomainType(Primaryfile.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
-                .disable(HttpMethod.POST));      
+                .disable(HttpMethod.POST))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+	    		.disable(HttpMethod.POST)
+	    		.disable(HttpMethod.PUT)
+	    		.disable(HttpMethod.PATCH)
+	    		.disable(HttpMethod.DELETE));         
+  
         
         config.forDomainType(UnitSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
-                .disable(HttpMethod.POST));      
+                .disable(HttpMethod.POST))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+	    		.disable(HttpMethod.POST)
+	    		.disable(HttpMethod.PUT)
+	    		.disable(HttpMethod.PATCH)
+	    		.disable(HttpMethod.DELETE));         
+  
         
         config.forDomainType(CollectionSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
-                .disable(HttpMethod.POST));      
+                .disable(HttpMethod.POST))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+	    		.disable(HttpMethod.POST)
+	    		.disable(HttpMethod.PUT)
+	    		.disable(HttpMethod.PATCH)
+	    		.disable(HttpMethod.DELETE));         
+  
         
         config.forDomainType(ItemSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
-                .disable(HttpMethod.POST));      
+                .disable(HttpMethod.POST))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+	    		.disable(HttpMethod.POST)
+	    		.disable(HttpMethod.PUT)
+	    		.disable(HttpMethod.PATCH)
+	    		.disable(HttpMethod.DELETE));              
         
         config.forDomainType(PrimaryfileSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)
-                .disable(HttpMethod.POST));              
+                .disable(HttpMethod.POST))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+	    		.disable(HttpMethod.POST)
+	    		.disable(HttpMethod.PUT)
+	    		.disable(HttpMethod.PATCH)
+	    		.disable(HttpMethod.DELETE));         
+             
         
         /* For MGM related classes:
          * GET on collection is needed only for retrieving the top level instances - MgmCategory,
@@ -80,7 +132,12 @@ public class RestConfig implements RepositoryRestConfigurer {
         	.withItemExposure((metadata, httpMethods) -> httpMethods
         		.disable(HttpMethod.PUT)
         		.disable(HttpMethod.PATCH)
-        		.disable(HttpMethod.DELETE));
+        		.disable(HttpMethod.DELETE))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+		    	.disable(HttpMethod.POST)
+		    	.disable(HttpMethod.PUT)
+		    	.disable(HttpMethod.PATCH)
+		    	.disable(HttpMethod.DELETE));         
         
         config.forDomainType(MgmScoringParameter.class)
         	.withCollectionExposure((metadata, httpMethods) -> httpMethods
@@ -89,7 +146,12 @@ public class RestConfig implements RepositoryRestConfigurer {
         	.withItemExposure((metadata, httpMethods) -> httpMethods
         		.disable(HttpMethod.PUT)
         		.disable(HttpMethod.PATCH)
-        		.disable(HttpMethod.DELETE));
+        		.disable(HttpMethod.DELETE))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+		    	.disable(HttpMethod.POST)
+		    	.disable(HttpMethod.PUT)
+		    	.disable(HttpMethod.PATCH)
+		    	.disable(HttpMethod.DELETE));         
         
         config.forDomainType(MgmScoringTool.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
@@ -98,8 +160,13 @@ public class RestConfig implements RepositoryRestConfigurer {
         	.withItemExposure((metadata, httpMethods) -> httpMethods
         		.disable(HttpMethod.PUT)
         		.disable(HttpMethod.PATCH)
-        		.disable(HttpMethod.DELETE));
-        
+        		.disable(HttpMethod.DELETE))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+		    	.disable(HttpMethod.POST)
+		    	.disable(HttpMethod.PUT)
+		    	.disable(HttpMethod.PATCH)
+		    	.disable(HttpMethod.DELETE));         
+
         config.forDomainType(MgmTool.class)
         	.withCollectionExposure((metadata, httpMethods) -> httpMethods
                 .disable(HttpMethod.GET)
@@ -107,9 +174,12 @@ public class RestConfig implements RepositoryRestConfigurer {
         	.withItemExposure((metadata, httpMethods) -> httpMethods
         		.disable(HttpMethod.PUT)
         		.disable(HttpMethod.PATCH)
-        		.disable(HttpMethod.DELETE));
-        
-        
+        		.disable(HttpMethod.DELETE))   
+			.withAssociationExposure((metadata, httpMethods) -> httpMethods
+		    	.disable(HttpMethod.POST)
+		    	.disable(HttpMethod.PUT)
+		    	.disable(HttpMethod.PATCH)
+		    	.disable(HttpMethod.DELETE));         
     }
     
 }
