@@ -13,10 +13,6 @@ import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
 @RepositoryRestResource(excerptProjection = CollectionSupplementBrief.class)
 public interface CollectionSupplementRepository extends SupplementRepository<CollectionSupplement> {
 
-//	@Override
-//	@RestResource(exported = false)
-//	List<CollectionSupplement> findAll();
-
 	@RestResource(exported = false)
 	List<CollectionSupplementBrief> findBy();
 

@@ -17,10 +17,6 @@ import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 @RepositoryRestResource(excerptProjection = ItemBrief.class)
 public interface ItemRepository extends ContentRepository<Item> {
 	
-//	@Override
-//	@RestResource(exported = false)
-//	List<Item> findAll();
-
 	@RestResource(exported = false)
 	Item findFirstByExternalSourceAndExternalId(String externalSource, String externalId);
 	

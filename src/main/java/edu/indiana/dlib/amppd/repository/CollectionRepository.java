@@ -12,10 +12,6 @@ import edu.indiana.dlib.amppd.model.projection.CollectionBrief;
 @RepositoryRestResource(excerptProjection = CollectionBrief.class)
 public interface CollectionRepository extends ContentRepository<Collection> {
 
-//	@Override
-//	@RestResource(exported = false)
-//	List<Collection> findAll();
-
 	@RestResource(exported = false)
 	Collection findFirstByUnitNameAndName(String unitName, String name);
 	
