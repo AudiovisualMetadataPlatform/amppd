@@ -10,11 +10,15 @@ import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -30,9 +34,20 @@ public class ItemHandler {
 
 	@Autowired
 	private FileStorageService fileStorageService;
-    
+
+	@Autowired
+	private PermissionService permissionService;
+
+
     @HandleBeforeCreate
     public void handleBeforeCreate(@Valid Item item) {
+		// check permission
+		Long acUnitId = item.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Item, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create items in unit " + acUnitId);
+		}
+		
     	// This method is needed to invoke validation before DB persistence.   	        
         log.info("Creating item " + item.getName() + " ...");
     }
@@ -44,7 +59,14 @@ public class ItemHandler {
     
     @HandleBeforeSave
     public void handleBeforeUpdate(@Valid Item item) {
-        log.info("Updating item " + item.getName() + " ...");
+		// check permission
+		Long acUnitId = item.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Item, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update items in unit " + acUnitId);
+		}
+		
+		log.info("Updating item " + item.getName() + " ...");
     	 
         // Below file system operations should be done before the data entity is updated, 
     	// as we need the values stored in the old entity
@@ -63,6 +85,13 @@ public class ItemHandler {
         
     @HandleBeforeDelete
     public void handleBeforeDelete(Item item) {
+		// check permission
+		Long acUnitId = item.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Item, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot delete items in unit " + acUnitId);
+		}
+		
         log.info("Deleting item " + item.getId() + " ...");
 
         // Below file system operations should be done before the data entity is deleted, so that 

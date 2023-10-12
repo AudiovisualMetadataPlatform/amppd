@@ -11,13 +11,17 @@ import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,8 +45,19 @@ public class CollectionHandler {
 	@Autowired
 	private DropboxService dropboxService;
 
-    @HandleBeforeCreate
+	@Autowired
+	private PermissionService permissionService;
+
+	
+	@HandleBeforeCreate
     public void handleBeforeCreate(@Valid Collection collection) {
+		// check permission
+		Long acUnitId = collection.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Collection, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot create collections in unit " + acUnitId);
+		}
+		
         log.info("Creating collection " + collection.getName() + " ...");
 
         // create dropbox subdir for the collection to be created, assume collection name has been validated
@@ -56,6 +71,13 @@ public class CollectionHandler {
     
     @HandleBeforeSave
     public void handleBeforeUpdate(@Valid Collection collection) {
+		// check permission
+		Long acUnitId = collection.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Collection, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update collections in unit " + acUnitId);
+		}
+		
     	log.info("Updating collection " + collection.getId() + " ...");
  
         // Below file system operations should be done before the data entity is updated, 
@@ -86,6 +108,13 @@ public class CollectionHandler {
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Collection collection) {
+		// check permission
+		Long acUnitId = collection.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Collection, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot delete collections in unit " + acUnitId);
+		}
+		
         log.info("Deleting collection " + collection.getId() + " ...");
 
         // Below file system operations should be done before the data entity is deleted, so that 

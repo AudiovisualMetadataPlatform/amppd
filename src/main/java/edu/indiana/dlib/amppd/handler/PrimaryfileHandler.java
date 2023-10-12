@@ -3,18 +3,20 @@ package edu.indiana.dlib.amppd.handler;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleAfterDelete;
 import org.springframework.data.rest.core.annotation.HandleAfterSave;
-import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
+import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -31,30 +33,43 @@ public class PrimaryfileHandler {
 	@Autowired
 	private FileStorageService fileStorageService;	
 	
-    @HandleBeforeCreate
-//    @Validated({WithReference.class, WithoutReference.class})
-    public void handleBeforeCreate(@Valid Primaryfile primaryfile) {
-    	// This method is needed to invoke validation before DB persistence.
-    	log.info("Creating primaryfile " + primaryfile.getName() + "...");
-    }
+	@Autowired
+	private PermissionService permissionService;
+	
+	
+	// This method is not needed anymore since the corresponding API is disabled.
+//    @HandleBeforeCreate
+////    @Validated({WithReference.class, WithoutReference.class})
+//    public void handleBeforeCreate(@Valid Primaryfile primaryfile) {
+//    	// This method is needed to invoke validation before DB persistence.
+//    	log.info("Creating primaryfile " + primaryfile.getName() + "...");
+//    }
 
-    @HandleAfterCreate
-    public void handleAfterCreate(Primaryfile primaryfile){
-		// ingest media file after primaryfile is saved
-    	if (primaryfile.getMediaFile() != null) {
-    		fileStorageService.uploadAsset(primaryfile, primaryfile.getMediaFile());
-    	}
-    	else {
-//    		throw new RuntimeException("No media file is provided for the primaryfile to be created.");
-    		log.warn("No media file is provided for the primaryfile to be created.");
-    	}
-    	
-    	log.info("Successfully created primaryfile " + primaryfile.getId());
-    }
+	// This method is not needed anymore since the corresponding API is disabled.
+//    @HandleAfterCreate
+//    public void handleAfterCreate(Primaryfile primaryfile){
+//		// ingest media file after primaryfile is saved
+//    	if (primaryfile.getMediaFile() != null) {
+//    		fileStorageService.uploadAsset(primaryfile, primaryfile.getMediaFile());
+//    	}
+//    	else {
+////    		throw new RuntimeException("No media file is provided for the primaryfile to be created.");
+//    		log.warn("No media file is provided for the primaryfile to be created.");
+//    	}
+//    	
+//    	log.info("Successfully created primaryfile " + primaryfile.getId());
+//    }
 
     @HandleBeforeSave
 //    @Validated({WithReference.class, WithoutReference.class})
     public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
+		// check permission
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Primaryfile, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot update primaryfiles in unit " + acUnitId);
+		}
+		
     	log.info("Updating primaryfile " + primaryfile.getId() + " ...");
 
         // Below file system operations should be done before the data entity is updated, 
@@ -83,6 +98,13 @@ public class PrimaryfileHandler {
     
     @HandleBeforeDelete
     public void handleBeforeDelete(Primaryfile primaryfile){
+		// check permission
+		Long acUnitId = primaryfile.getAcUnitId();
+		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Primaryfile, acUnitId);
+		if (!can) {
+			throw new AccessDeniedException("The current user cannot delete primaryfiles in unit " + acUnitId);
+		}
+		
         log.info("Deleting primaryfile " + primaryfile.getId() + " ...");
 
         // Below file system operations should be done before the data entity is deleted, so that 
