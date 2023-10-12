@@ -84,8 +84,7 @@ public class RestConfig implements RepositoryRestConfigurer {
 	    		.disable(HttpMethod.PUT)
 	    		.disable(HttpMethod.PATCH)
 	    		.disable(HttpMethod.DELETE));         
-  
-        
+          
         config.forDomainType(CollectionSupplement.class)
     		.withCollectionExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.GET)

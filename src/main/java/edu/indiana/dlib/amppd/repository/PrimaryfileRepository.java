@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,8 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
 
 @RepositoryRestResource(excerptProjection = PrimaryfileBrief.class)
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
+	
+//	Optional<Primaryfile> findById(Long id);
 	
 	@RestResource(exported = false)
 	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
