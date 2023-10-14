@@ -140,21 +140,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()
 			// Below two lines are for access media or output files;
-			// auth is bypassed possibly due to the need to allow users to access these links without login;
-			// however, we probably should not allow such.
-			.antMatchers(HttpMethod.GET, "/primaryfiles/*/media").permitAll()
-			.antMatchers(HttpMethod.GET, "/workflow-results/*/output").permitAll()			
-			// TODO remove below hmgm paths after we done development with HMGM
-			.anyRequest().authenticated().and().
-			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+			// auth was bypassed temporarily to allow users to access these links without login;
+//			.antMatchers(HttpMethod.GET, "/primaryfiles/*/media").permitAll()
+//			.antMatchers(HttpMethod.GET, "/workflow-results/*/output").permitAll()		
+			.anyRequest().authenticated().and()
+			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 		// otherwise permit all requests
 		else {
 			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers("/**").permitAll()
-			.anyRequest().authenticated().and().
-			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+			.anyRequest().authenticated().and()
+			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
