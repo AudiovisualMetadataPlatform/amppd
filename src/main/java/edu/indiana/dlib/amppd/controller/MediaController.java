@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
  * Controller to handle requests for serving media files for primaryfiles and supplements.
  * @author yingfeng
  */
-//@CrossOrigin(origins = "*")
 @RestController
 @Slf4j
 public class MediaController {
@@ -49,6 +48,48 @@ public class MediaController {
 	private PermissionService permissionService;
 
 	
+//	/**
+//	 * Serve the media file of the given primaryfile by redirecting the request to the AMPPD UI Tomcat server.
+//	 * @param id ID of the given primaryfile
+//	 * @return the binary content of the media file
+//	 */
+//	@GetMapping("/primaryfiles/{id}/media")
+//	public String servePrimaryfile(@PathVariable("id") Long id) {
+//		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
+//
+//		// check permission 
+//		Long acUnitId = primaryfile.getAcUnitId();
+//		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.Primaryfile_Media, acUnitId);
+//		if (!can) {
+//			throw new AccessDeniedException("The current user cannot play primaryfile media in unit " + acUnitId);
+//		}
+//		
+//		log.info("Serving media file for primaryfile ID " + id);
+//		String url = mediaService.getPrimaryfileSymlinkUrl(primaryfile);
+//		return url;
+//    }
+//
+//	/**
+//	 * Serve the output file of the given workflowResult by redirecting the request to the AMPPD UI Tomcat server.
+//	 * @param id ID of the given workflowResult
+//	 * @return the content of the output file
+//	 */
+//	@GetMapping("/workflow-results/{id}/output")
+//	public String serveWorkflowOutput(@PathVariable("id") Long id) {		
+//		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
+//		
+//		// check permission 
+//		Long acUnitId = workflowResult.getAcUnitId();
+//		boolean can = permissionService.hasPermission(ActionType.Read, TargetType.WorkflowResult_Output, acUnitId);
+//		if (!can) {
+//			throw new AccessDeniedException("The current user cannot view workflow result output in unit " + acUnitId);
+//		}
+//		
+//    	log.info("Serving output for workflowResult ID " + id);    	
+//    	String url = mediaService.getWorkflowResultOutputSymlinkUrl(workflowResult);
+//    	return url;
+//    }
+
 	/**
 	 * Serve the media file of the given primaryfile by redirecting the request to the AMPPD UI Tomcat server.
 	 * @param id ID of the given primaryfile
@@ -66,8 +107,8 @@ public class MediaController {
 		}
 		
 		log.info("Serving media file for primaryfile ID " + id);
-
-		String url = mediaService.getPrimaryfileSymlinkUrl(primaryfile);
+		
+		String url = mediaService.getPrimaryfileSymlinkUrl(primaryfile);		
     	HttpHeaders httpHeaders = new HttpHeaders();
     	try {
     		httpHeaders.setLocation(new URI(url));
@@ -97,7 +138,7 @@ public class MediaController {
 		
     	log.info("Serving output for workflowResult ID " + id);
     	
-    	String url = mediaService.getWorkflowResultOutputSymlinkUrl(workflowResult);
+    	String url = mediaService.getWorkflowResultOutputSymlinkUrl(workflowResult);    	
     	HttpHeaders httpHeaders = new HttpHeaders();
     	try {
     		httpHeaders.setLocation(new URI(url));
@@ -108,7 +149,6 @@ public class MediaController {
         
     	return new ResponseEntity<>(httpHeaders, HttpStatus.PERMANENT_REDIRECT);
     }
-		
 	
 	/**
 	 * Find items and/or primaryfiles with names containing the given keyword, and with media of the given media type,

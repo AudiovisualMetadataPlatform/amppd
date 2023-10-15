@@ -107,7 +107,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	    }
 	    
 	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
-	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
+	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE"));
 
 	    // 'Location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
 	    // "Authorization" header is needed by most AMP UI requests;
@@ -140,21 +140,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()
 			// Below two lines are for access media or output files;
-			// auth is bypassed possibly due to the need to allow users to access these links without login;
-			// however, we probably should not allow such.
-			.antMatchers(HttpMethod.GET, "/primaryfiles/*/media").permitAll()
-			.antMatchers(HttpMethod.GET, "/workflow-results/*/output").permitAll()			
-			// TODO remove below hmgm paths after we done development with HMGM
-			.anyRequest().authenticated().and().
-			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+			// auth was bypassed temporarily to allow users to access these links without login;
+//			.antMatchers(HttpMethod.GET, "/primaryfiles/*/media").permitAll()
+//			.antMatchers(HttpMethod.GET, "/workflow-results/*/output").permitAll()		
+			.anyRequest().authenticated().and()
+			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 		// otherwise permit all requests
 		else {
 			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers("/**").permitAll()
-			.anyRequest().authenticated().and().
-			exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+			.anyRequest().authenticated().and()
+			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
