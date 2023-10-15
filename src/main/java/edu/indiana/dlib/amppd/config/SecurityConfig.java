@@ -107,7 +107,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	    }
 	    
 	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
-	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"));
+	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE"));
 
 	    // 'Location' header is checked by HMGM NER editor (Timeliner), if not exposed, browser may throw error
 	    // "Authorization" header is needed by most AMP UI requests;
