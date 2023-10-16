@@ -1,10 +1,9 @@
 package edu.indiana.dlib.amppd.repository;
 
 import java.util.List;
+import java.util.Set;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
@@ -19,7 +18,7 @@ public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<
 
 	List<MgmEvaluationTest> findByCategoryId(Long categoryId);
 
-	@Query(value = "SELECT met FROM MgmEvaluationTest met WHERE id in :ids")
-	List<MgmEvaluationTest> findByIds(@Param("ids") List<Long> idList);
+	List<MgmEvaluationTest> findByIdIn(List<Long> ids);		
+	List<MgmEvaluationTest> findByIdInAndWorkflowResultUnitIdIn(List<Long> ids, Set<Long> acUnitIds);
 
 }

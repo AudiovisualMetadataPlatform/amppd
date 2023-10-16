@@ -6,16 +6,20 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringToolRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
@@ -29,11 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 public class MgmEvaluationController {
-    @Autowired
-    private MgmEvaluationService mgmEvalService;
-
+	
     @Autowired
     MgmScoringToolRepository mstRepo;
+
+    @Autowired
+    MgmEvaluationTestRepository metRepo;
+
+    @Autowired
+    private MgmEvaluationService mgmEvalService;
 
     @Autowired
     private AmpUserService ampUserService;
@@ -42,6 +50,26 @@ public class MgmEvaluationController {
     private PermissionService permissionService;
 
     
+	/**
+	 * Get MGM evaluation tests with the given list of IDs.
+	 * @param ids the given MGM evaluation test IDs
+	 * @return the list of MGM evaluation tests found
+	 */
+	@GetMapping(path = "/mgmEvaluationTests")
+	public List<MgmEvaluationTest> findByIds(@RequestParam List<Long> ids) {
+		// get accessible units for Read MgmEvaluationTest, if none, access denied exception will be thrown
+		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.MgmEvaluationTest);
+
+		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
+		// otherwise apply AC prefilter to query criteria	
+		List<MgmEvaluationTest> mets = acUnitIds == null ?
+				metRepo.findByIdIn(ids) :
+				metRepo.findByIdInAndWorkflowResultUnitIdIn(ids, acUnitIds);
+
+		log.info("Successfully found " + mets.size() + " MGM evaluation tests for the given " + ids.size() + " IDs.");		
+		return mets;
+	}
+
     @PostMapping(path = "/mgmEvaluationTests/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public MgmEvaluationValidationResponse createMgmEvalTest(@RequestBody MgmEvaluationRequest request) {
 		// get accessible units for Create MgmEvaluationTest
