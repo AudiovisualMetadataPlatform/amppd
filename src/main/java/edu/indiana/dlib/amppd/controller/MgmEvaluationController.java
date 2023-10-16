@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.model.projection.MgmEvaluationTestDetail;
 import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringToolRepository;
 import edu.indiana.dlib.amppd.service.AmpUserService;
@@ -56,13 +56,13 @@ public class MgmEvaluationController {
 	 * @return the list of MGM evaluation tests found
 	 */
 	@GetMapping(path = "/mgmEvaluationTests")
-	public List<MgmEvaluationTest> findByIds(@RequestParam List<Long> ids) {
+	public List<MgmEvaluationTestDetail> findByIds(@RequestParam List<Long> ids) {
 		// get accessible units for Read MgmEvaluationTest, if none, access denied exception will be thrown
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.MgmEvaluationTest);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		// otherwise apply AC prefilter to query criteria	
-		List<MgmEvaluationTest> mets = acUnitIds == null ?
+		List<MgmEvaluationTestDetail> mets = acUnitIds == null ?
 				metRepo.findByIdIn(ids) :
 				metRepo.findByIdInAndWorkflowResultUnitIdIn(ids, acUnitIds);
 

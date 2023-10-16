@@ -7,6 +7,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
+import edu.indiana.dlib.amppd.model.projection.MgmEvaluationTestDetail;
 
 
 public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<MgmEvaluationTest, Long>, MgmEvaluationTestRepositoryCustom {
@@ -15,10 +16,9 @@ public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<
 	List<MgmEvaluationTest> findByMstId(Long mstId);
 	List<MgmEvaluationTest> findByGroundtruthSupplementId(Long supplementId);
 	List<MgmEvaluationTest> findByWorkflowResultId(Long workflowResultId);
-
 	List<MgmEvaluationTest> findByCategoryId(Long categoryId);
 
-	List<MgmEvaluationTest> findByIdIn(List<Long> ids);		
-	List<MgmEvaluationTest> findByIdInAndWorkflowResultUnitIdIn(List<Long> ids, Set<Long> acUnitIds);
+	List<MgmEvaluationTestDetail> findByIdIn(List<Long> ids);		
+	List<MgmEvaluationTestDetail> findByIdInAndWorkflowResultUnitIdIn(List<Long> ids, Set<Long> acUnitIds);
 
 }
