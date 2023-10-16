@@ -44,12 +44,12 @@ public class MediaController {
 
 	
 	/**
-	 * Serve the media file of the given primaryfile by redirecting the request to the AMPPD UI Tomcat server.
+	 * Get the media file symlink of the given primaryfile, which AMP clients can access without authentication.
 	 * @param id ID of the given primaryfile
-	 * @return the binary content of the media file
+	 * @return the media file symlink
 	 */
 	@GetMapping("/primaryfiles/{id}/media")
-	public String servePrimaryfile(@PathVariable("id") Long id) {
+	public String getPrimaryfileSymlink(@PathVariable("id") Long id) {
 		Primaryfile primaryfile = primaryfileRepository.findById(id).orElseThrow(() -> new StorageException("Primaryfile <" + id + "> does not exist!"));   
 
 		// check permission 
@@ -65,12 +65,12 @@ public class MediaController {
     }
 
 	/**
-	 * Serve the output file of the given workflowResult by redirecting the request to the AMPPD UI Tomcat server.
+	 * Get the output file symlink of the given workflowResult, which AMP clients can access without authentication.
 	 * @param id ID of the given workflowResult
-	 * @return the content of the output file
+	 * @return the output file symlink
 	 */
 	@GetMapping("/workflow-results/{id}/output")
-	public String serveWorkflowOutput(@PathVariable("id") Long id) {		
+	public String getWorkflowOutputSymlink(@PathVariable("id") Long id) {		
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
 		
 		// check permission 
