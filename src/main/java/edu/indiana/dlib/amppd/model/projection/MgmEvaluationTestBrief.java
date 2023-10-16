@@ -9,4 +9,6 @@ public interface MgmEvaluationTestBrief {
     public Long getId();
     public String getStatus();
     public Date getDateSubmitted();
+    public String getSubmitter();
+    
 }

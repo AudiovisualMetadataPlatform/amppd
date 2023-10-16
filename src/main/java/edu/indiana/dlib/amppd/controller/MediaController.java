@@ -69,7 +69,7 @@ public class MediaController {
 	 * @param id ID of the given workflowResult
 	 * @return the output file symlink
 	 */
-	@GetMapping("/workflow-results/{id}/output")
+	@GetMapping("/workflowResults/{id}/output")
 	public String getWorkflowOutputSymlink(@PathVariable("id") Long id) {		
 		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
 		
@@ -120,7 +120,7 @@ public class MediaController {
 //	 * @param id ID of the given workflowResult
 //	 * @return the content of the output file
 //	 */
-//	@GetMapping("/workflow-results/{id}/output")
+//	@GetMapping("/workflowResults/{id}/output")
 //	public ResponseEntity<Object> serveWorkflowOutput(@PathVariable("id") Long id) {		
 //		WorkflowResult workflowResult = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("workflowResultId <" + id + "> does not exist!"));   
 //		

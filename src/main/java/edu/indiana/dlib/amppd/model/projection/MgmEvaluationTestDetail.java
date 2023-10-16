@@ -7,20 +7,24 @@ import org.springframework.data.rest.core.config.Projection;
 
 @Projection(name = "detail", types = {MgmEvaluationTest.class})
 public interface MgmEvaluationTestDetail extends MgmEvaluationTestBrief {
-    @Value("#{target.groundtruthSupplement.name}")
-    public String getGroundtruthFilename();
-    public String getSubmitter();
-    @Value("#{target.groundtruthSupplement.primaryfile.name}")
-    public String getPrimaryFilename();
     @Value("#{target.category.name}")
     public String getCategoryName();
+    
     @Value("#{target.mst.name}")
     public String getMstName();
+    
+    @Value("#{target.groundtruthSupplement.name}")
+    public String getGroundtruthFilename();
+    
+    @Value("#{target.groundtruthSupplement.primaryfile.name}")
+    public String getPrimaryFilename();
+    
+    @Value("#{target.primaryFile.originalFilename}")
+    public String getPrimaryFileMedia();
+
     public WorkflowResult getWorkflowResult();
     public String getScorePath();
     public String getScores();
     public String getParameters();
 
-    @Value("#{target.primaryFile.originalFilename}")
-    public String getPrimaryFileMedia();
 }
