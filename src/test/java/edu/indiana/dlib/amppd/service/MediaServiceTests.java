@@ -139,7 +139,7 @@ public class MediaServiceTests {
     public void shouldReturnWorkflowResultOutputUrl() {    	      
 		String url = mediaService.getWorkflowResultOutputUrl(1L);
 		Assert.assertTrue(url.startsWith("http://"));
-		Assert.assertTrue(url.contains("/workflow-results/" + 1));
+		Assert.assertTrue(url.contains("/workflowResults/" + 1));
 		Assert.assertTrue(url.endsWith("/output"));
 	}
     	

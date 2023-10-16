@@ -73,7 +73,7 @@ public class WorkflowResultController {
 	 * @param targetType targetType of the given action
 	 * @return the WorkflowResultResponse containing the list of queried workflow results
 	 */
-	@PostMapping(path = "/workflow-results/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/workflowResults/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public WorkflowResultResponse filterWorkflowResults(
 			@RequestBody WorkflowResultSearchQuery query,
 			@RequestParam(required = false) ActionType actionType, 
@@ -101,7 +101,7 @@ public class WorkflowResultController {
 	 * @param outputTypes the given outputTypes
 	 * @return itemSearchResponse a list of items containing primaryfiles satisfying above criteria
 	 */
-	@GetMapping(path = "/workflow-results/intermediate/primaryfiles", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/workflowResults/intermediate/primaryfiles", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ItemSearchResponse getPrimaryfilesForPartialWorkflow(
 			@RequestParam(required = false) String mediaType, 
 			@RequestParam(required = false) String keyword, 
@@ -178,7 +178,7 @@ public class WorkflowResultController {
 	 * @param outputTypes the given outputTypes list
 	 * @return list of workflow results grouped by output types for the primaryfile
 	 */
-	@GetMapping(path = "/workflow-results/intermediate/outputs", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(path = "/workflowResults/intermediate/outputs", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<List<WorkflowResult>> getCompleteWorkflowResultsForPrimaryfileOutputTypes(@RequestParam Long primaryfileId, @RequestParam List<String> outputTypes) {		
 		// check permission 
 		// the API itself only requires Read WorkflowResult permission, however,
@@ -223,7 +223,7 @@ public class WorkflowResultController {
 	 * @return the number of WorkflowResult refreshed
 	 */	
 	// Disable endpoint not in use
-//	@PostMapping("/workflow-results/refresh")
+//	@PostMapping("/workflowResults/refresh")
 	public int refreshWorkflowResults(@RequestParam(required = false) Boolean lumpsum) {
 		// This API can be disabled or accessible to only ADMIN 
 		if (lumpsum != null && lumpsum) {
@@ -242,7 +242,7 @@ public class WorkflowResultController {
 	 * @return the list of WorkflowResults updated
 	 */
 	// Disable endpoint not in use
-//	@PostMapping("/workflow-results/output-type")
+//	@PostMapping("/workflowResults/output-type")
 	public int fixWorkflowResultsOutputType() {
 		// This API can be disabled or accessible to only ADMIN 
 		log.info("Fixing workflow results with obsolete output types ...");
@@ -257,7 +257,7 @@ public class WorkflowResultController {
 	 * @return the number of WorkflowResults updated
 	 */
 	// Disable endpoint not in use
-//	@PostMapping("/workflow-results/hide")
+//	@PostMapping("/workflowResults/hide")
 	@Deprecated
 	public int hideIrrelevantWorkflowResults() {
 		// This API can be disabled or accessible to only ADMIN 
@@ -274,7 +274,7 @@ public class WorkflowResultController {
 	 * @return the number of WorkflowResults updated
 	 */
 	// Disable endpoint not in use
-//	@PostMapping(path = "/workflow-results/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
+//	@PostMapping(path = "/workflowResults/relevant", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int setRelevantWorkflowResults(@RequestBody List<Map<String, String>> workflowStepOutputs, @RequestParam Boolean relevant) {
 		// This API can be disabled or accessible to only ADMIN 
 		log.info("Setting workflow results relevant to " + relevant + " with given criteria ...");
@@ -289,7 +289,7 @@ public class WorkflowResultController {
 	 * @param isFinal the specified final status
 	 * @return WorkflowResult updated
 	 */
-	@PatchMapping(path = "/workflow-results/{workflowResultId}")
+	@PatchMapping(path = "/workflowResults/{workflowResultId}")
 	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
@@ -309,7 +309,7 @@ public class WorkflowResultController {
 	 * @param workflowResultId id of the specified WorkflowResult
 	 * @return WorkflowResult deleted
 	 */
-	@DeleteMapping(path = "/workflow-results/{workflowResultId}")
+	@DeleteMapping(path = "/workflowResults/{workflowResultId}")
 	public WorkflowResult deleteWorkflowResult(@PathVariable Long workflowResultId) {
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
@@ -330,7 +330,7 @@ public class WorkflowResultController {
 	 * @param query WorkflowResultSearchQuery
 	 * @return the number of WorkflowResults updated
 	 */	
-	@PostMapping(path = "/workflow-results/export", consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/workflowResults/export", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public int exportToCSV(HttpServletResponse response, @RequestBody WorkflowResultSearchQuery query) throws IOException {
 		// AC prefilter on WorkflowResultSearchQuery to restrict unit filters to only accessible ones by current user
 		permissionService.prefilter(query, ActionType.Read, TargetType.WorkflowResult);

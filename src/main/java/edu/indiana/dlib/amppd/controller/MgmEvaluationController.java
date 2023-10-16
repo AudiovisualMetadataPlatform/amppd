@@ -42,7 +42,7 @@ public class MgmEvaluationController {
     private PermissionService permissionService;
 
     
-    @PostMapping(path = "/mgm-evaluation-test/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/mgmEvaluationTests/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public MgmEvaluationValidationResponse createMgmEvalTest(@RequestBody MgmEvaluationRequest request) {
 		// get accessible units for Create MgmEvaluationTest
 		// if none returned, access denied exception will be thrown;
@@ -80,7 +80,7 @@ public class MgmEvaluationController {
      * @param query the search query for mgm evaluation test
      * @return the MgmEvaluationTestResponse containing the list of queried mgm evaluation test
      */
-    @PostMapping(path = "/mgm-evaluation-test/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/mgmEvaluationTests/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public MgmEvaluationTestResponse filterMgmEvaluationTest(@RequestBody MgmEvaluationSearchQuery query){
 		// AC prefilter on MgmEvaluationSearchQuery to restrict unit filters to only accessible ones by current user
 		Set<Long> accessibleUnits = permissionService.prefilter(query);

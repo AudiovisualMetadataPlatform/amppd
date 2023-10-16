@@ -25,6 +25,6 @@ public class BagContent {
 	private String toolInfo;	 
 	private String outputName;
 	private String outputType;
-	private String outputUrl;	// not stored in WorkflowResult but generated as {baseUrl}/workflow-results/{id}/output for WorkflowResult
+	private String outputUrl;	// not stored in WorkflowResult but generated as {baseUrl}/workflowResults/{id}/output for WorkflowResult
 	// primaryfile ID and name are kept in PrimaryfileBag as they are the same for each BagContent within PrimaryfileBag
 }

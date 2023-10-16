@@ -71,8 +71,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
 	
-//	@Value( "${amppdui.url}" )
-//	private String amppduiUrl;
 	
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -138,11 +136,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
-			.antMatchers("/galaxy/**").permitAll()
-			// Below two lines are for access media or output files;
-			// auth was bypassed temporarily to allow users to access these links without login;
-//			.antMatchers(HttpMethod.GET, "/primaryfiles/*/media").permitAll()
-//			.antMatchers(HttpMethod.GET, "/workflow-results/*/output").permitAll()		
+			.antMatchers("/galaxy/**").permitAll()	
 			.anyRequest().authenticated().and()
 			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
