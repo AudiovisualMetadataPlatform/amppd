@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.exception.PreprocessException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Asset;
@@ -215,7 +216,18 @@ public class FileStorageServiceImpl implements FileStorageService {
     	store(file, targetPathname);  
     	
     	// preprocess asset and save to DB
-    	asset = preprocessService.preprocess(asset, true);
+    	try {
+    		asset = preprocessService.preprocess(asset, true);
+    	}
+    	catch (PreprocessException e) {
+    		// in case of PreprocessException, delete both media file and info json file, as the media must be corrupted
+    		// the exception so the outer layer transaction won't go through and asset won't be saved either
+    		String jsonPathname = preprocessService.getMediaInfoJsonPath(targetPathname);   
+    		delete(jsonPathname); 
+    		delete(targetPathname);
+    		log.error("Error preprocessing asset " + asset.getId() + ", deleted asset media file " + targetPathname + " and info file " + jsonPathname);
+    		throw new RuntimeException(e);
+    	}
     	
     	String msg = "Successfully uploaded asset " + asset.getId() + " media file " + file.getOriginalFilename() + " to " + targetPathname;
     	log.info(msg);
