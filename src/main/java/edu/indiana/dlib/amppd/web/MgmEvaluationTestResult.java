@@ -1,26 +1,39 @@
 package edu.indiana.dlib.amppd.web;
 
-import lombok.Data;
 import java.util.Date;
+
+import lombok.Data;
 
 @Data
 public class MgmEvaluationTestResult {
-    private Long id;
+    // MgmEvaluationTest fields
+	private Long id;				// unique per MgmEvaluationTestResult
     private Date testDate;
-    private Date outputDate;
+    private String testSubmitter;
+    private String groundTruth;
+    private String scores;
+
+    // WorkflowResult fields
+    private Long workflowResultId;	// unique per WorkflowResult, but non-unique per MgmEvaluationTestResult
+    private Date dateCreated;
     private String submitter;
-    private String unitName;
+    private Long primaryfileId;
+    private Long itemId;
+    private Long collectionId;
+    private Long unitId;
+    private String primaryfileName;
+    private String itemName;
     private String collectionName;
+    private String unitName;
     private String externalSource;
     private String externalId;
-    private String itemName;
-    private String primaryfileName;
+    private String workflowId;
     private String workflowName;
     private String workflowStep;
+    private String outputId;
     private String outputName;
-    private String outputLabel;
-    private String groundTruth;
-    private String outputTest;
-    private String workflowId;
-    private Long primaryfileId;
+    private String outputLabel;    
+    
+    // Note: some WorkflowResult fields such as status and outputPath are not included, 
+    // as the UI doesn't need them, and the status would be COMPLETE in this case.
 }
