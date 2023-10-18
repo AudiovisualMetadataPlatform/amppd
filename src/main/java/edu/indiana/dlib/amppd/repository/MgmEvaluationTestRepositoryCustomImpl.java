@@ -230,24 +230,35 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         ArrayList<MgmEvaluationTestResult> datatable = new ArrayList<MgmEvaluationTestResult>();
         for(MgmEvaluationTest test: rows) {
             MgmEvaluationTestResult row = new MgmEvaluationTestResult();
+            
+        	// MgmEvaluationTest fields
             row.setId(test.getId());
             row.setTestDate(test.getDateSubmitted());
-            row.setOutputDate(test.getWorkflowResult().getDateCreated());
-            row.setSubmitter(test.getSubmitter());
+            row.setTestSubmitter(test.getSubmitter());
+            row.setGroundTruth(test.getGroundtruthSupplement().getName());
+            row.setScores("scoresMET"); // TODO put some meaningful value per test result here
+            
+            // WorkflowResult fields
+            row.setWorkflowResultId(test.getWorkflowResult().getId());
+            row.setDateCreated(test.getWorkflowResult().getDateCreated());
+            row.setSubmitter(test.getWorkflowResult().getSubmitter());
+            row.setPrimaryfileId(test.getWorkflowResult().getPrimaryfileId());
+            row.setItemId(test.getWorkflowResult().getItemId());
+            row.setCollectionId(test.getWorkflowResult().getCollectionId());
+            row.setUnitId(test.getWorkflowResult().getUnitId());
             row.setUnitName(test.getWorkflowResult().getUnitName());
             row.setCollectionName(test.getWorkflowResult().getCollectionName());
             row.setExternalSource(test.getWorkflowResult().getExternalSource());
             row.setExternalId(test.getWorkflowResult().getExternalId());
             row.setItemName(test.getWorkflowResult().getItemName());
             row.setPrimaryfileName(test.getWorkflowResult().getPrimaryfileName());
+            row.setWorkflowId(test.getWorkflowResult().getWorkflowId());
             row.setWorkflowName(test.getWorkflowResult().getWorkflowName());
             row.setWorkflowStep(test.getWorkflowResult().getWorkflowStep());
+            row.setOutputId(test.getWorkflowResult().getId().toString());
             row.setOutputName(test.getWorkflowResult().getOutputName());
             row.setOutputLabel(test.getWorkflowResult().getOutputLabel());
-            row.setGroundTruth(test.getGroundtruthSupplement().getName());
-            row.setOutputTest("amp_evaluation");
-            row.setWorkflowId(test.getWorkflowResult().getId().toString());
-            row.setPrimaryfileId(test.getWorkflowResult().getPrimaryfileId());
+            
             datatable.add(row);
         }
         return datatable;
