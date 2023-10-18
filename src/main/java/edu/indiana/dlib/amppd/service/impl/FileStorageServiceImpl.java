@@ -188,6 +188,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.uploadAsset(Asset, MultipartFile)
 	 */
 	@Override
+	@Transactional
 	public Asset uploadAsset(Asset asset, MultipartFile file) {		
     	if (asset == null || file == null) {
     		throw new IllegalArgumentException("The given asset or file for uploading media file is null.");
@@ -299,6 +300,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.unloadAsset(Asset, boolean)
 	 */
 	@Override
+	@Transactional
 	public Asset moveAsset(Asset asset, boolean persist) {
 		// get the un-updated media/info file pathnames 
 		String oldmedia = asset.getPathname();

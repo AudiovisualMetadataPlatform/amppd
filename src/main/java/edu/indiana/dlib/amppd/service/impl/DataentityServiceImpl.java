@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
@@ -51,8 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Service
 @Slf4j
-public class DataentityServiceImpl implements DataentityService {
-	
+public class DataentityServiceImpl implements DataentityService {	
 	
 	@Autowired
 	private Validator validator;
@@ -497,6 +497,7 @@ public class DataentityServiceImpl implements DataentityService {
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.moveSupplement(Supplement, Dataentity)
 	 */
 	@Override
+	@Transactional
 	public Supplement moveSupplement(Long supplementId, SupplementType supplementType, Long parentId, String parentType) {
     	// retrieve supplement from DB
     	Supplement supplement = (Supplement)findAsset(supplementId, supplementType);
