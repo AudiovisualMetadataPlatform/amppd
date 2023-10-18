@@ -225,8 +225,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     		String jsonPathname = preprocessService.getMediaInfoJsonPath(targetPathname);   
     		delete(jsonPathname); 
     		delete(targetPathname);
-    		log.error("Error preprocessing asset " + asset.getId() + ", deleted asset media file " + targetPathname + " and info file " + jsonPathname);
-    		throw new RuntimeException(e);
+    		throw new StorageException("Failed to upload asset " + asset.getId() + ", deleted asset media file " + targetPathname + " and info file " + jsonPathname, e);
     	}
     	
     	String msg = "Successfully uploaded asset " + asset.getId() + " media file " + file.getOriginalFilename() + " to " + targetPathname;
