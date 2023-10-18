@@ -11,6 +11,7 @@ import javax.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -109,6 +110,7 @@ public class DataentityController {
 	 * @return the added primaryfile
 	 */
 	@PostMapping(path = "/items/{itemId}/addPrimaryfile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Transactional
 //	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
 	public Primaryfile addPrimaryfile(@PathVariable Long itemId, @RequestPart Primaryfile primaryfile, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfile " + primaryfile.getName() + " under item " + itemId);
@@ -159,6 +161,7 @@ public class DataentityController {
 	 * @return the added unit supplement
 	 */
 	@PostMapping(path = "/units/{unitId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Transactional
 //	public UnitSupplement addUnitSupplement(@PathVariable Long unitId, @Validated(WithoutReference.class) @RequestPart UnitSupplement unitSupplement, @RequestPart MultipartFile mediaFile) {		
 	public UnitSupplement addUnitSupplement(@PathVariable Long unitId, @RequestPart UnitSupplement unitSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding unitSupplement " + unitSupplement.getName() + " under unit " + unitId);
@@ -206,6 +209,7 @@ public class DataentityController {
 	 * @return the added collection supplement
 	 */
 	@PostMapping(path = "/collections/{collectionId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Transactional
 //	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @Validated(WithoutReference.class) @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
 	public CollectionSupplement addCollectionSupplement(@PathVariable Long collectionId, @RequestPart CollectionSupplement collectionSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding collectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
@@ -253,6 +257,7 @@ public class DataentityController {
 	 * @return the added item supplement
 	 */
 	@PostMapping(path = "/items/{itemId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Transactional
 //	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @Validated(WithoutReference.class) @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
 	public ItemSupplement addItemSupplement(@PathVariable Long itemId, @RequestPart ItemSupplement itemSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding itemSupplement " + itemSupplement.getName() + " under item " + itemId);
@@ -301,6 +306,7 @@ public class DataentityController {
 	 * @return the added primaryfile supplement
 	 */
 	@PostMapping(path = "/primaryfiles/{primaryfileId}/addSupplement", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Transactional
 //	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @Validated(WithoutReference.class) @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
 	public PrimaryfileSupplement addPrimaryfileSupplement(@PathVariable Long primaryfileId, @RequestPart PrimaryfileSupplement primaryfileSupplement, @RequestPart MultipartFile mediaFile) {		
     	log.info("Adding primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
@@ -356,6 +362,7 @@ public class DataentityController {
 	 */
 	// Disable endpoint not in use
 //	@PostMapping(path = "/collections/{collectionId}/move")
+	@Transactional
 	public Collection moveCollection(@PathVariable Long collectionId, @RequestParam Long unitId) {		
     	log.info("Moving collection " + collectionId + " to new unit " + unitId);
     	
@@ -407,6 +414,7 @@ public class DataentityController {
 	 */
 	// Disable endpoint not in use
 //	@PostMapping(path = "/items/{itemId}/move")
+	@Transactional
 	public Item moveItem(@PathVariable Long itemId, @RequestParam Long collectionId) {		
     	log.info("Moving item " + itemId + " to new collection " + collectionId);
     	
@@ -449,6 +457,7 @@ public class DataentityController {
 	 */
 	// Disable endpoint not in use
 //	@PostMapping(path = "/primaryfiles/{primaryfileId}/move")
+	@Transactional
 	public Primaryfile movePrimaryfile(@PathVariable Long primaryfileId, @RequestParam Long itemId) {		
     	log.info("Moving primaryfile " + primaryfileId + " to new item " + itemId);
     	
