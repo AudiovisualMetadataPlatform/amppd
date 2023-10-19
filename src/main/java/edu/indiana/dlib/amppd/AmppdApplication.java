@@ -35,5 +35,4 @@ public class AmppdApplication {
         }
     }	
 
-    compiler error for testing failing case of amp-ci
 }
