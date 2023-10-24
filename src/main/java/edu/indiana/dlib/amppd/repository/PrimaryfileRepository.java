@@ -16,7 +16,7 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
 @RepositoryRestResource(excerptProjection = PrimaryfileBrief.class)
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
-//	Optional<Primaryfile> findById(Long id);
+////	Optional<Primaryfile> findById(Long id);
 	
 	@RestResource(exported = false)
 	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
