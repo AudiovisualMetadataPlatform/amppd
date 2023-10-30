@@ -102,7 +102,8 @@ public class DeliverController {
 	}
 
 	/**
-	 * 
+	 * Deliver results within the specified collection IDs and output types to Clio,
+	 * by creating symlinks to the output files in the export directory.
 	 */
 	@PostMapping(path = "/deliver/clio", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<String> deliverClioCollections(@RequestParam List<Long> collectionIds, @RequestParam List<String> outputTypes) {
