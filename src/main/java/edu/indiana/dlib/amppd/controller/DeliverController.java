@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
@@ -112,7 +113,7 @@ public class DeliverController {
 			// make sure the output file exists
 			Path path = Paths.get(result.getOutputPath());
 			if (!Files.exists(path)) {
-//				throw new StorageException("Can't export output for result " + result.getId() + ": the file " + path + " doesn't exist");	
+				throw new StorageException("Can't export output for result " + result.getId() + ": the file " + path + " doesn't exist");	
 			}
 			
 			// make sure export directory is created
@@ -124,8 +125,14 @@ public class DeliverController {
 				throw new RuntimeException("Error creating export root dir " + exportDir, e);		    	
 			}
 			
+			// if getExternalId is empty give warning and use item id instead
+			String id = result.getExternalId();
+			if (StringUtils.isEmpty(id)) {
+				id = result.getItemId().toString();
+			}
+			
 			// use externalId-primaryfileName.type as the target symlink name
-			String symlink = result.getExternalId() + "-" + result.getPrimaryfileName() + "." + result.getOutputType();
+			String symlink = id + "-" + result.getPrimaryfileName() + "." + result.getOutputType();
 			Path link = exportDir.resolve(symlink);
 						
 			// if export symlink already created for this output, skip it
@@ -135,12 +142,12 @@ public class DeliverController {
 			}
 			
 			// otherwise, create the export symbolic link for the output file 
-//			try {
-//				Files.createSymbolicLink(link, path);
-//			}
-//			catch (IOException e) {
-//				throw new RuntimeException("Error creating export symlink " + link + " for result " + result.getId(), e);		    	
-//			}
+			try {
+				Files.createSymbolicLink(link, path);
+			}
+			catch (IOException e) {
+				throw new RuntimeException("Error creating export symlink " + link + " for result " + result.getId(), e);		    	
+			}
 			
 			exports.add(symlink);
 		}
