@@ -32,7 +32,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	Set<WorkflowResult> findByWorkflowStepAndOutputNameAndRelevant(String workflowStep, String outputName, Boolean relevant);
 	Set<WorkflowResult> findByWorkflowIdAndWorkflowStepAndOutputNameAndRelevant(String workflowId, String workflowStep, String outputName, Boolean relevant);
 
-	List<WorkflowResult> findByCollectionIdInAndOutputTypeInAndStatusEquals(List<Long> collectionIds, List<String> outputTypes, GalaxyJobState status);
+	List<WorkflowResult> findByCollectionIdInAndOutputTypeInAndStatusEqualsOrderByDateCreatedDesc(List<Long> collectionIds, List<String> outputTypes, GalaxyJobState status);
 	
 	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);	
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);

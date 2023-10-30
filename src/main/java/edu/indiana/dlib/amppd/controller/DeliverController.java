@@ -108,8 +108,14 @@ public class DeliverController {
 	@PostMapping(path = "/deliver/clio", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<String> deliverClioCollections(@RequestParam List<Long> collectionIds, @RequestParam List<String> outputTypes) {
 		List<String> exports = new ArrayList<String>();
-		List<WorkflowResult> results = workflowResultRepository.findByCollectionIdInAndOutputTypeInAndStatusEquals(collectionIds, outputTypes, GalaxyJobState.COMPLETE);
+
+		// only retrieve successful result
+		List<WorkflowResult> results = workflowResultRepository.findByCollectionIdInAndOutputTypeInAndStatusEqualsOrderByDateCreatedDesc(collectionIds, outputTypes, GalaxyJobState.COMPLETE);
 		
+		// export root dir
+		Path exportDir = Paths.get(config.getDataRoot() + File.separator + "export");
+		
+		// create export symlink for each result
 		for (WorkflowResult result : results) {
 			// make sure the output file exists
 			Path path = Paths.get(result.getOutputPath());
@@ -117,13 +123,13 @@ public class DeliverController {
 				throw new StorageException("Can't export output for result " + result.getId() + ": the file " + path + " doesn't exist");	
 			}
 			
-			// make sure export directory is created
-			Path exportDir = Paths.get(config.getDataRoot() + File.separator + "export");
+			// make sure the collection export subdir is created
+			Path coldir = exportDir.resolve(result.getCollectionName());
 			try {
-				Files.createDirectories(exportDir);
+				Files.createDirectories(coldir);
 			}
 			catch (IOException e) {
-				throw new RuntimeException("Error creating export root dir " + exportDir, e);		    	
+				throw new RuntimeException("Error creating collection export subdir " + coldir, e);		    	
 			}
 			
 			// if getExternalId is empty give warning and use item id instead
@@ -134,7 +140,7 @@ public class DeliverController {
 			
 			// use externalId-primaryfileName.type as the target symlink name
 			String symlink = id + "-" + result.getPrimaryfileName() + "." + result.getOutputType();
-			Path link = exportDir.resolve(symlink);
+			Path link = coldir.resolve(symlink);
 						
 			// if export symlink already created for this output, skip it
 			if (Files.exists(link)) {
@@ -145,6 +151,7 @@ public class DeliverController {
 			// otherwise, create the export symbolic link for the output file 
 			try {
 				Files.createSymbolicLink(link, path);
+				log.debug("Created export symlink " + link + " for result " + result.getId());
 			}
 			catch (IOException e) {
 				throw new RuntimeException("Error creating export symlink " + link + " for result " + result.getId(), e);		    	
