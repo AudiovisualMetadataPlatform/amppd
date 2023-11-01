@@ -142,14 +142,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()	
 			// GET dataentity by ID AC is checked below; all other AC is checked inside APIs
-			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Unit))")
-			.antMatchers(HttpMethod.GET, "/collections/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Collection))")
-			.antMatchers(HttpMethod.GET, "/items/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Item))")
-			.antMatchers(HttpMethod.GET, "/primaryfiles/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Primaryfile))")
-			.antMatchers(HttpMethod.GET, "/unitSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.UnitSupplement))")
-			.antMatchers(HttpMethod.GET, "/collectionSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.CollectionSupplement))")
-			.antMatchers(HttpMethod.GET, "/itemSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.ItemSupplement))")
-			.antMatchers(HttpMethod.GET, "/primaryfileSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.PrimaryfileSupplement))")
+			.antMatchers(HttpMethod.GET, "/units/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Unit))")
+			.antMatchers(HttpMethod.GET, "/collections/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Collection))")
+			.antMatchers(HttpMethod.GET, "/items/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Item))")
+			.antMatchers(HttpMethod.GET, "/primaryfiles/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Primaryfile))")
+			.antMatchers(HttpMethod.GET, "/unitSupplements/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.UnitSupplement))")
+			.antMatchers(HttpMethod.GET, "/collectionSupplements/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.CollectionSupplement))")
+			.antMatchers(HttpMethod.GET, "/itemSupplements/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.ItemSupplement))")
+			.antMatchers(HttpMethod.GET, "/primaryfileSupplements/{id:[0-9]+}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.PrimaryfileSupplement))")
 			.anyRequest().authenticated().and()
 			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
