@@ -32,8 +32,6 @@ import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
-import edu.indiana.dlib.amppd.repository.CollectionRepository;
-import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
@@ -59,12 +57,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PermissionServiceImpl implements PermissionService {	
 	@Autowired
 	private UnitRepository unitRepository;
-
-	@Autowired
-	private CollectionRepository collectionRepository;
-
-	@Autowired
-	private ItemRepository itemRepository;
 
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
