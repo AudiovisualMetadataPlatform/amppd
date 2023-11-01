@@ -386,6 +386,37 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findDataentity(Long, Class)
+	 */
+	@Override
+	public Dataentity findDataentity(Long id, Class clazz) {
+		// class type must be a subclass of Dataentity		
+		if (!Dataentity.class.isAssignableFrom(clazz)) {
+			throw new IllegalArgumentException("Invalid class type " + clazz + ": must a subclass of Dataentity");
+		}
+		
+		// handle Asset subtypes
+		if (clazz == PrimaryfileSupplement.class) {
+			return findAsset(id, SupplementType.PRIMARYFILE);
+		}		
+		if (clazz == ItemSupplement.class) {
+			return findAsset(id, SupplementType.ITEM);
+		}
+		if (clazz == CollectionSupplement.class) {
+			return findAsset(id, SupplementType.COLLECTION);
+		}
+		if (clazz == UnitSupplement.class) {
+			return findAsset(id, SupplementType.UNIT);
+		}
+		if (clazz == Primaryfile.class) {
+			return findAsset(id, SupplementType.PFILE);
+		}
+		
+		// handle non-asset subtypes
+		return findNonAssetDataentity(id, clazz);
+	}
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.findAsset(Long, SupplementType)
 	 */
 	@Override

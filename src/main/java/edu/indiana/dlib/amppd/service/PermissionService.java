@@ -100,7 +100,7 @@ public interface PermissionService {
 	/**
 	 * Get the unit ID the given object belongs to for the purpose of access control.
 	 * @param id ID of the given object
-	 * @param clazz class of the given object
+	 * @param clazz class of the given object, must be WorkflowResult or a subclass of Dataentity
 	 * @return the access control unit ID of the object
 	 */
 	public Long getAcUnitId(Long id, Class clazz);

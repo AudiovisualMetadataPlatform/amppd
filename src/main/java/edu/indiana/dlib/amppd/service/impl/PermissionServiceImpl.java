@@ -14,15 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Dataentity;
-import edu.indiana.dlib.amppd.model.ItemSupplement;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
-import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
@@ -314,42 +307,15 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAcUnitId(Long, Class)
 	 */
 	public Long getAcUnitId(Long id, Class clazz) {
-		if (clazz == PrimaryfileSupplement.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.PRIMARYFILE);
-			return asset.getAcUnitId();
-		}
-		
-		if (clazz == ItemSupplement.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.ITEM);
-			return asset.getAcUnitId();
-		}
-		
-		if (clazz == CollectionSupplement.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.COLLECTION);
-			return asset.getAcUnitId();
-		}
-		
-		if (clazz == UnitSupplement.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.UNIT);
-			return asset.getAcUnitId();
-		}
-		
-		if (clazz == Primaryfile.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
-			return asset.getAcUnitId();
-		}
-		
-		if (Dataentity.class.isAssignableFrom(clazz)) {
-			Dataentity entity = dataentityService.findNonAssetDataentity(id, clazz);
-			return entity.getAcUnitId();
-		}		
-				
+		// handle WorkflowResult, which is not subtype of Dataentity
 		if (clazz == WorkflowResult.class) {
 			WorkflowResult result = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("WorkflowResult <" + id + "> does not exist!"));
 			return result.getAcUnitId();
 		}
 		
-		return null;			
+		// handle all subclasses of Dataentity		
+		Dataentity entity = dataentityService.findDataentity(id, clazz);
+		return entity.getAcUnitId();			
 	}
 	
 	/**

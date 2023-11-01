@@ -73,6 +73,14 @@ public interface DataentityService {
 	public Dataentity findNonAssetDataentity(Long id, Class clazz);
 
 	/**
+	 * Find the dataentity with the given ID and type from DB.
+	 * @param id ID of the queried dataentity
+	 * @param clazz class of the queried dataentity, must be a subclass of Dataentity
+	 * @return the dataentity with the given ID and type
+	 */
+	public Dataentity findDataentity(Long id, Class clazz);
+
+	/**
 	 * Find the asset with the given ID and type from DB.
 	 * @param id ID of the given asset
 	 * @param type SupplementType of the given asset
