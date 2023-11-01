@@ -141,8 +141,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()	
-//			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasPermission(T(edu.indiana.dlib.amppd.model.ac.Action$ActionType).Read, T(edu.indiana.dlib.amppd.model.ac.Action$TargetType).Unit, #id)")
-			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasReadPermission(#id, Unit.class)")
+			// GET dataentity by ID AC is checked below; all other AC is checked inside APIs
+			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Unit))")
+			.antMatchers(HttpMethod.GET, "/collections/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Collection))")
+			.antMatchers(HttpMethod.GET, "/items/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Item))")
+			.antMatchers(HttpMethod.GET, "/primaryfiles/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Primaryfile))")
+			.antMatchers(HttpMethod.GET, "/unitSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.UnitSupplement))")
+			.antMatchers(HttpMethod.GET, "/collectionSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.CollectionSupplement))")
+			.antMatchers(HttpMethod.GET, "/itemSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.ItemSupplement))")
+			.antMatchers(HttpMethod.GET, "/primaryfileSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.PrimaryfileSupplement))")
 			.anyRequest().authenticated().and()
 			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

@@ -20,6 +20,7 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
@@ -91,9 +92,9 @@ public class PermissionServiceImpl implements PermissionService {
 	@Transactional
 	public boolean hasReadPermission(Long id, Class clazz) {
 		Long acUnitId = getAcUnitId(id, clazz);
-		TargetType targetType = Action.TargetType.valueOf(clazz.getSimpleName());
+		TargetType targetType = Supplement.class.isAssignableFrom(clazz) ? TargetType.Supplement : Action.TargetType.valueOf(clazz.getSimpleName());
 		boolean has = hasPermission(ActionType.Read, targetType, acUnitId);
-		return false;
+		return has;
 	}
 	
 	/**
@@ -358,45 +359,6 @@ public class PermissionServiceImpl implements PermissionService {
 		
 		return null;			
 	}
-//	public ImmutablePair<Long, TargetType> getAcUnitId(Long id, Class clazz) {
-//		if (clazz == PrimaryfileSupplement.class) {
-//			Asset asset = dataentityService.findAsset(id, SupplementType.PRIMARYFILE);
-//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
-//		}
-//		
-//		if (clazz == ItemSupplement.class) {
-//			Asset asset = dataentityService.findAsset(id, SupplementType.ITEM);
-//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
-//		}
-//		
-//		if (clazz == CollectionSupplement.class) {
-//			Asset asset = dataentityService.findAsset(id, SupplementType.COLLECTION);
-//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
-//		}
-//		
-//		if (clazz == UnitSupplement.class) {
-//			Asset asset = dataentityService.findAsset(id, SupplementType.UNIT);
-//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
-//		}
-//		
-//		if (clazz == Primaryfile.class) {
-//			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
-//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Primaryfile);
-//		}
-//		
-//		if (Dataentity.class.isAssignableFrom(clazz)) {
-//			Dataentity entity = dataentityService.findNonAssetDataentity(id, clazz);
-//			TargetType type = 
-//			return ImmutablePair.of(entity.getAcUnitId(), TargetType);
-//		}		
-//				
-//		if (clazz == WorkflowResult.class) {
-//			WorkflowResult result = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("WorkflowResult <" + id + "> does not exist!"));
-//			return ImmutablePair.of(result.getAcUnitId(), TargetType);
-//		}
-//		
-//		return null;			
-//	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(WorkflowResultSearchQuery, ActionType, TargetType)
