@@ -48,6 +48,7 @@ import com.google.common.net.HttpHeaders;
 
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -70,6 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
+	
+	@Autowired
+	private PermissionService permissionService;	
 	
 	
 	@Autowired
@@ -137,6 +141,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()	
+//			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasPermission(T(edu.indiana.dlib.amppd.model.ac.Action$ActionType).Read, T(edu.indiana.dlib.amppd.model.ac.Action$TargetType).Unit, #id)")
+			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasReadPermission(#id, Unit.class)")
 			.anyRequest().authenticated().and()
 			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

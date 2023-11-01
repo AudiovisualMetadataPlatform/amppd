@@ -24,6 +24,14 @@ import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 public interface PermissionService {
 
 	/**
+	 * Check if the current user can Read the dataentity with the given ID and type.
+	 * @param id ID of the dataentity
+	 * @param clazz class of the dataentity
+	 * @return true if the user has the permission; false otherwise
+	 */
+	public boolean hasReadPermission(Long id, Class clazz);
+	
+	/**
 	 * Check if the current user has permission to perform the given action on the given target in the given unit 
 	 * or at least one of the units.
 	 * @param actionType type of the given action

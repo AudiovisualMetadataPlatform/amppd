@@ -65,6 +65,14 @@ public interface DataentityService {
 	public List<? extends Dataentity> findDuplicateDataentitiesByExternalSrcAndId(Dataentity dataentity);
 
 	/**
+	 * Find the non-asset dataentity with the given ID and type from DB.
+	 * @param id ID of the queried dataentity
+	 * @param clazz class of the queried dataentity
+	 * @return the non-asset dataentity with the given ID and type
+	 */
+	public Dataentity findNonAssetDataentity(Long id, Class clazz);
+
+	/**
 	 * Find the asset with the given ID and type from DB.
 	 * @param id ID of the given asset
 	 * @param type SupplementType of the given asset

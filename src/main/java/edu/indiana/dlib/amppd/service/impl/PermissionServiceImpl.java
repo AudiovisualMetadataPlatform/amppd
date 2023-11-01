@@ -10,13 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.Asset;
+import edu.indiana.dlib.amppd.model.CollectionSupplement;
+import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.ItemSupplement;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
@@ -26,6 +31,8 @@ import edu.indiana.dlib.amppd.model.projection.ActionBrief;
 import edu.indiana.dlib.amppd.model.projection.RoleAssignmentDetailActions;
 import edu.indiana.dlib.amppd.model.projection.UnitBrief;
 import edu.indiana.dlib.amppd.repository.ActionRepository;
+import edu.indiana.dlib.amppd.repository.CollectionRepository;
+import edu.indiana.dlib.amppd.repository.ItemRepository;
 import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
@@ -46,11 +53,17 @@ import lombok.extern.slf4j.Slf4j;
  * Implementation of PermissionService.
  * @author yingfeng
  */
-@Service
+@Service("permissionService")
 @Slf4j
 public class PermissionServiceImpl implements PermissionService {	
 	@Autowired
 	private UnitRepository unitRepository;
+
+	@Autowired
+	private CollectionRepository collectionRepository;
+
+	@Autowired
+	private ItemRepository itemRepository;
 
 	@Autowired
 	private WorkflowResultRepository workflowResultRepository;
@@ -71,6 +84,18 @@ public class PermissionServiceImpl implements PermissionService {
 	private DataentityService dataentityService;
 		
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasReadPermission(Long, Class)
+	 */
+	@Override
+	@Transactional
+	public boolean hasReadPermission(Long id, Class clazz) {
+		Long acUnitId = getAcUnitId(id, clazz);
+		TargetType targetType = Action.TargetType.valueOf(clazz.getSimpleName());
+		boolean has = hasPermission(ActionType.Read, targetType, acUnitId);
+		return false;
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermission(ActionType, TargetType, Long)
 	 */
@@ -296,25 +321,82 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAcUnitId(Long, Class)
 	 */
 	public Long getAcUnitId(Long id, Class clazz) {
-		if (clazz == Primaryfile.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
-			return asset.getAcUnitId();
-		}
-		
 		if (clazz == PrimaryfileSupplement.class) {
 			Asset asset = dataentityService.findAsset(id, SupplementType.PRIMARYFILE);
 			return asset.getAcUnitId();
 		}
 		
+		if (clazz == ItemSupplement.class) {
+			Asset asset = dataentityService.findAsset(id, SupplementType.ITEM);
+			return asset.getAcUnitId();
+		}
+		
+		if (clazz == CollectionSupplement.class) {
+			Asset asset = dataentityService.findAsset(id, SupplementType.COLLECTION);
+			return asset.getAcUnitId();
+		}
+		
+		if (clazz == UnitSupplement.class) {
+			Asset asset = dataentityService.findAsset(id, SupplementType.UNIT);
+			return asset.getAcUnitId();
+		}
+		
+		if (clazz == Primaryfile.class) {
+			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
+			return asset.getAcUnitId();
+		}
+		
+		if (Dataentity.class.isAssignableFrom(clazz)) {
+			Dataentity entity = dataentityService.findNonAssetDataentity(id, clazz);
+			return entity.getAcUnitId();
+		}		
+				
 		if (clazz == WorkflowResult.class) {
 			WorkflowResult result = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("WorkflowResult <" + id + "> does not exist!"));
 			return result.getAcUnitId();
 		}
-				
-		// TODO handle other class types
 		
 		return null;			
 	}
+//	public ImmutablePair<Long, TargetType> getAcUnitId(Long id, Class clazz) {
+//		if (clazz == PrimaryfileSupplement.class) {
+//			Asset asset = dataentityService.findAsset(id, SupplementType.PRIMARYFILE);
+//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
+//		}
+//		
+//		if (clazz == ItemSupplement.class) {
+//			Asset asset = dataentityService.findAsset(id, SupplementType.ITEM);
+//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
+//		}
+//		
+//		if (clazz == CollectionSupplement.class) {
+//			Asset asset = dataentityService.findAsset(id, SupplementType.COLLECTION);
+//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
+//		}
+//		
+//		if (clazz == UnitSupplement.class) {
+//			Asset asset = dataentityService.findAsset(id, SupplementType.UNIT);
+//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Supplement);
+//		}
+//		
+//		if (clazz == Primaryfile.class) {
+//			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
+//			return ImmutablePair.of(asset.getAcUnitId(), TargetType.Primaryfile);
+//		}
+//		
+//		if (Dataentity.class.isAssignableFrom(clazz)) {
+//			Dataentity entity = dataentityService.findNonAssetDataentity(id, clazz);
+//			TargetType type = 
+//			return ImmutablePair.of(entity.getAcUnitId(), TargetType);
+//		}		
+//				
+//		if (clazz == WorkflowResult.class) {
+//			WorkflowResult result = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("WorkflowResult <" + id + "> does not exist!"));
+//			return ImmutablePair.of(result.getAcUnitId(), TargetType);
+//		}
+//		
+//		return null;			
+//	}
 	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.prefilter(WorkflowResultSearchQuery, ActionType, TargetType)

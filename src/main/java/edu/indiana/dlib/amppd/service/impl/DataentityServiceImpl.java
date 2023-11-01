@@ -370,6 +370,22 @@ public class DataentityServiceImpl implements DataentityService {
 	}
 		
 	/**
+	 * @see edu.indiana.dlib.amppd.service.DataentityService.findNonAssetDataentity(Long, Class)
+	 */
+	@Override
+	public Dataentity findNonAssetDataentity(Long id, Class clazz) {
+		Dataentity entity = null;
+		try {
+			entity = (Dataentity)clazz.getDeclaredConstructor().newInstance();
+		}
+		catch (Exception e) {
+			throw new RuntimeException("Can't create new instance of " + clazz);
+		}
+		entity.setId(id);
+		return findOriginalDataentity(entity);
+	}
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.DataentityService.findAsset(Long, SupplementType)
 	 */
 	@Override
