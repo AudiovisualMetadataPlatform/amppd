@@ -48,6 +48,7 @@ import com.google.common.net.HttpHeaders;
 
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
+import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -70,6 +71,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
+	
+	@Autowired
+	private PermissionService permissionService;	
 	
 	
 	@Autowired
@@ -137,6 +141,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()	
+			// GET dataentity by ID AC is checked below; all other AC is checked inside APIs
+			.antMatchers(HttpMethod.GET, "/units/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Unit))")
+			.antMatchers(HttpMethod.GET, "/collections/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Collection))")
+			.antMatchers(HttpMethod.GET, "/items/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Item))")
+			.antMatchers(HttpMethod.GET, "/primaryfiles/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.Primaryfile))")
+			.antMatchers(HttpMethod.GET, "/unitSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.UnitSupplement))")
+			.antMatchers(HttpMethod.GET, "/collectionSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.CollectionSupplement))")
+			.antMatchers(HttpMethod.GET, "/itemSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.ItemSupplement))")
+			.antMatchers(HttpMethod.GET, "/primaryfileSupplements/{id}/**").access("@permissionService.hasReadPermission(#id, T(edu.indiana.dlib.amppd.model.PrimaryfileSupplement))")
 			.anyRequest().authenticated().and()
 			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

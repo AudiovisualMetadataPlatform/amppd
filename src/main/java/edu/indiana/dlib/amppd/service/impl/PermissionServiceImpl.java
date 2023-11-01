@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Asset;
-import edu.indiana.dlib.amppd.model.Primaryfile;
-import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
-import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
+import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
@@ -46,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
  * Implementation of PermissionService.
  * @author yingfeng
  */
-@Service
+@Service("permissionService")
 @Slf4j
 public class PermissionServiceImpl implements PermissionService {	
 	@Autowired
@@ -71,6 +70,18 @@ public class PermissionServiceImpl implements PermissionService {
 	private DataentityService dataentityService;
 		
 
+	/**
+	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasReadPermission(Long, Class)
+	 */
+	@Override
+	@Transactional
+	public boolean hasReadPermission(Long id, Class clazz) {
+		Long acUnitId = getAcUnitId(id, clazz);
+		TargetType targetType = Supplement.class.isAssignableFrom(clazz) ? TargetType.Supplement : Action.TargetType.valueOf(clazz.getSimpleName());
+		boolean has = hasPermission(ActionType.Read, targetType, acUnitId);
+		return has;
+	}
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.hasPermission(ActionType, TargetType, Long)
 	 */
@@ -296,24 +307,15 @@ public class PermissionServiceImpl implements PermissionService {
 	 * @see edu.indiana.dlib.amppd.service.PermissionService.getAcUnitId(Long, Class)
 	 */
 	public Long getAcUnitId(Long id, Class clazz) {
-		if (clazz == Primaryfile.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.PFILE);
-			return asset.getAcUnitId();
-		}
-		
-		if (clazz == PrimaryfileSupplement.class) {
-			Asset asset = dataentityService.findAsset(id, SupplementType.PRIMARYFILE);
-			return asset.getAcUnitId();
-		}
-		
+		// handle WorkflowResult, which is not subtype of Dataentity
 		if (clazz == WorkflowResult.class) {
 			WorkflowResult result = workflowResultRepository.findById(id).orElseThrow(() -> new StorageException("WorkflowResult <" + id + "> does not exist!"));
 			return result.getAcUnitId();
 		}
-				
-		// TODO handle other class types
 		
-		return null;			
+		// handle all subclasses of Dataentity		
+		Dataentity entity = dataentityService.findDataentity(id, clazz);
+		return entity.getAcUnitId();			
 	}
 	
 	/**
