@@ -196,7 +196,8 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
 			if(user.getStatus() == AmpUser.Status.ACTIVATED){
 				log.info("Activated user account found with entered email id");
-				mailSender.send(constructTokenEmail(uiUrl, user, "reset password"));
+				SimpleMailMessage email =  constructTokenEmail(uiUrl, user, "reset password");
+//				mailSender.send(email);
 				log.info("Token email sent successfully");
 			}
 		    else {
@@ -206,6 +207,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			response.setSuccess(true);
 		}
 		catch(Exception e){
+			log.error("Failed to update reset password token for user " + emailid, e);
 			response.addError(e.getMessage());
 			response.setSuccess(false);
 		}
@@ -220,25 +222,32 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
 		if ((passToken == null) || (user == null) || (!passToken.getUser().getId().equals(user.getId()))) {
 			log.error("Error occurred as token and email id do not match");
-			response.addError("Incorrect Link");
+			response.addError("Invalid reset password link!");
 			response.setSuccess(false);
-		    }
+			return response;
+		}
+		
 		Calendar cal = Calendar.getInstance();
-	    if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-	    	log.error("Error occurred as link has expired");
-	    	log.trace("passToken.getExpiryDate().getTime():"+passToken.getExpiryDate().getTime()+","+cal.getTime().getTime());
-	    	response.addError("Link Expired");
+		if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+			log.error("Error occurred as reset password link has expired");
+			log.trace("passToken.getExpiryDate().getTime():"+passToken.getExpiryDate().getTime()+","+cal.getTime().getTime());
+			response.addError("Reset password link has expired!");
 			response.setSuccess(false);
-	    }		
-	    if(!response.hasErrors()) {
-			  String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
-			  int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
-			  log.error("Errors occurred in the password reset process");
-			  if(rows > 0){
-				  response.setSuccess(true);
-			  }
-		  }
-		  return response;
+			return response;
+		}	
+		
+		String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
+		int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
+
+		if(rows > 0){
+			response.setSuccess(true);
+		}
+		else {
+			response.addError("Failed to reset password!");
+			log.error("Error occurred while updating new password.");		  
+		}
+		
+		return response;
 	}
 	
 	@Override 
@@ -422,16 +431,15 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	
 	private SimpleMailMessage constructTokenEmail(String contextPath, AmpUser user, String type) {
 		String url = new String();
-    	log.info("Password reset token created successfully");
     	if (type.equalsIgnoreCase("reset password")) {
     		String token = createTimedToken(user, amppdPropertyConfig.getResetPasswordMinutes());
     		url = contextPath + "/account/reset-password/" + token;
-    		log.debug("Constructed reset token url, constructing email attributes");
+    		log.debug("Constructed reset password token url: " + url);
     	}
     	else if (type.equalsIgnoreCase("account approval")) {
-    		String token = createTimedToken(user, amppdPropertyConfig.getActivateAccountDays() * 24);
+    		String token = createTimedToken(user, amppdPropertyConfig.getActivateAccountDays() * 24 * 60);
     		url = contextPath + "/account/activate/" + token;
-    		log.debug("Constructed activation token url, constructing email attributes");
+    		log.debug("Constructed account activation token url: " + url);
     	}	
 	    return constructEmailAttributes(url, user, type);
 	}
@@ -471,7 +479,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
-		log.info("Sending " + type + " email from " + adminEmail + " to " + emailTo);
+		log.debug("Constructed email attributes: type: " + type + ", from: " + adminEmail + ", to: " + emailTo);
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
 	
@@ -479,29 +487,24 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	public String createTimedToken(AmpUser user, int expireMinutes) {
 		int res = 0;
 		String token = UUID.randomUUID().toString();
-		TimedToken myToken=new TimedToken();
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.MINUTE, expireMinutes);
-		int userTokenExists = timedTokenRepository.ifExists(user.getId());
-		log.info("User token exists status is:"+userTokenExists+" for user id:"+user.getId());
-		if(userTokenExists >= 1){
-			log.info("User token exists so updating token info");
-			res = timedTokenRepository.updateToken(token, user.getId(), calendar.getTime());
+		
+		// retrieve existing token if any
+		TimedToken tt  = timedTokenRepository.findFirstByUserId(user.getId());
+		
+		if (tt == null) {
+			tt = new TimedToken();
+			tt.setUser(user);
 		}
-		else {
-			log.info("User token does not exist so creating new token");
-			myToken.setUser(user);
-			myToken.setToken(token);
-			myToken.setExpiryDate(calendar.getTime());
-			myToken = timedTokenRepository.save(myToken);
-			if(myToken != null)
-				res = 1;
-		}
-		log.info("The result of creating a token is (1:true/0:false):"+res);
-		if(res > 0)
-			return token;
-		else
-			return null;
+		
+		// save token
+		tt.setToken(token);
+		tt.setExpiryDate(calendar.getTime());
+		tt = timedTokenRepository.save(tt);
+		
+		log.debug("Generated timed token for user " + user.getUsername());
+		return token;
 	}
 	
 	private SimpleMailMessage constructEmail(String subject, String body, String toEmailID) {
