@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +28,7 @@ import edu.indiana.dlib.amppd.web.AuthRequest;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 import lombok.extern.slf4j.Slf4j;
 
+
 /**
  * Controller for REST operations on Login.
  * 
@@ -40,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 public class AmpUserController {
-	
+
 	@Autowired
 	private AmpUserServiceImpl ampUserService;
 
@@ -49,16 +48,17 @@ public class AmpUserController {
 
 	@Autowired
 	private PermissionService permissionService;
-	
-	
+
+
 	// Note:
 	// Currently AMP user accounts are created via self registration, and the involved APIs which involves
 	// user initiated actions are available to every one, i.e. no authorization required.
 	// The APIs requiring authorization are those involving approving accounts and querying users.
 
-	@RequestMapping(value = "/account/authenticate", method = RequestMethod.POST)
+	@PostMapping(path = "/account/authenticate")
 	public ResponseEntity<?> authenticate(@RequestBody JwtRequest authenticationRequest) throws Exception {
 		String username = authenticationRequest.getUsername();
+		log.info("Authenticating login for user: " + username);
 		AuthResponse response = ampUserService.authenticate(username, authenticationRequest.getPassword());
 
 		// if authentication failed, respond with status 401
@@ -70,7 +70,7 @@ public class AmpUserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@RequestMapping(value = "/account/validate", method = RequestMethod.POST)
+	@PostMapping(path = "/account/validate")
 	public ResponseEntity<?> validateToken() throws Exception {
 		// TODO
 		// this API simply returns 200 status if the token in the request is valid,
@@ -81,41 +81,8 @@ public class AmpUserController {
 
 	@PostMapping(path = "/account/register", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody AuthResponse register(@RequestBody AmpUser user) { 
-		log.info("Registrating user => Username: "+ user.getUsername() + ", Email:"+ user.getEmail());	
+		log.info("Registering user account: " + user.getUsername());	
 		AuthResponse res = ampUserService.registerAmpUser(user);
-		log.info(" user registration result: " + res);
-		return res;
-	}
-
-	@PostMapping(path = "/account/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse activateUser(@RequestBody AuthRequest request) {
-		log.info("Activate User");	
-		AuthResponse res = ampUserService.activateAccount(request.getToken());
-		log.info(" activate user result: " + res);
-		return res;
-	}
-
-	@PostMapping(path = "/account/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse forgotPassword(@RequestBody AuthRequest request) { 
-		log.info("Forgot Password for User => Email:"+ request.getEmailid());	
-		AuthResponse res = ampUserService.emailResetPasswordToken(request.getEmailid());
-		log.info("Forgot Password result: " + res);
-		return res;
-	}
-
-	@PostMapping(path = "/account/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse resetPassword(@RequestBody AuthRequest request) { 
-		log.info("Reset Password for User => Email:"+ request.getEmailid());	
-		AuthResponse res = ampUserService.resetPassword(request.getEmailid(), request.getPassword(), request.getToken());
-		log.info(" reset Password result: " + res);
-		return res;
-	}
-
-	@PostMapping(path = "/account/reset-password-getEmail", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody AuthResponse resetPasswordGetEmail(@RequestBody AuthRequest request) {
-		log.info("Calling get email for a token using resetPasswordGetEmail()");	
-		AuthResponse res = ampUserService.resetPasswordGetEmail(request.getToken());
-		log.info(" Fetched Email id for a token using resetPasswordGetEmail():"+res.getEmailid());
 		return res;
 	}
 
@@ -126,11 +93,40 @@ public class AmpUserController {
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot approve/reject user account registration.");
 		}		
-		
+
 		String action = approve ? "approve" : "reject";
-		log.info(action + " User => id: " + userId);	
+		log.info(action + "ing user account: " + userId);	
 		AuthResponse res = ampUserService.approveAccount(userId, approve);
-		log.info(action + " User result: " + res);
+		return res;
+	}
+
+	@PostMapping(path = "/account/activate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse activateUser(@RequestBody AuthRequest request) {
+		log.info("Activating user account with token: " + request.getToken());	
+		AuthResponse res = ampUserService.activateAccount(request.getToken());
+		return res;
+	}
+
+	@PostMapping(path = "/account/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse forgotPassword(@RequestBody AuthRequest request) { 
+		log.info("Sending reset-password email to user: " + request.getEmailid());	
+		AuthResponse res = ampUserService.emailResetPasswordToken(request.getEmailid());
+		return res;
+	}
+
+	// TODO 
+	// This should be GET, or it should be combined with resetPassword API
+	@PostMapping(path = "/account/reset-password-getEmail", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse resetPasswordGetEmail(@RequestBody AuthRequest request) {
+		log.info("Retrieving email for reset-password token:" + request.getToken());
+		AuthResponse res = ampUserService.resetPasswordGetEmail(request.getToken());
+		return res;
+	}
+
+	@PostMapping(path = "/account/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody AuthResponse resetPassword(@RequestBody AuthRequest request) { 
+		log.info("Resetting password for user:" + request.getEmailid());	
+		AuthResponse res = ampUserService.resetPassword(request.getEmailid(), request.getPassword(), request.getToken());
 		return res;
 	}
 
@@ -141,10 +137,9 @@ public class AmpUserController {
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot view details of other users.");
 		}
-		
-		log.info("User => id:"+ Id);
-		AmpUser ampuser= ampUserService.getUserById(Id);
-		log.info("Fetched User for given Id using getUserById()"+ampuser.getId());
+
+		AmpUser ampuser = ampUserService.getUserById(Id);
+		log.info("Successfully retrieved user with ID " + ampuser.getId());
 		return ampuser;
 	}
 
@@ -161,9 +156,9 @@ public class AmpUserController {
 		if (!can) {
 			throw new AccessDeniedException("The current user cannot view details of other users.");
 		}		
-		
+
 		List<AmpUserBrief> users = null;
-		
+
 		// if users to exclude is not provided, skip the exclude-user criteria 
 		if (idsExcluding == null || idsExcluding.isEmpty()) {
 			users = ampUserRepository.findByStatusAndNameStartsOrderByName(Status.ACTIVATED, nameStarting);
@@ -173,7 +168,7 @@ public class AmpUserController {
 			users = ampUserRepository.findByStatusAndNameStartsAndIdNotInOrderByName(Status.ACTIVATED, nameStarting, idsExcluding);
 			log.info("Successfully found " + users.size() + " active users with name starting with " + nameStarting + ", excluding the " + idsExcluding.size() + " users in the given list.");
 		}
-		
+
 		return users;
 	}
 

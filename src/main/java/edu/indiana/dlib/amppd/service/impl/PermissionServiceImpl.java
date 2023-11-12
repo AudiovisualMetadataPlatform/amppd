@@ -392,7 +392,7 @@ public class PermissionServiceImpl implements PermissionService {
 			log.info("WorkflowResultResponse has been postfiltered with only accessible units.");
 		}
 		else {
-			log.info("WorkflowResultResponse reamins the same after AC units postfilter.");				
+			log.info("WorkflowResultResponse remains the same after AC units postfilter.");				
 		}			
 	}
 	

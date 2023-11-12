@@ -40,6 +40,7 @@ import edu.indiana.dlib.amppd.util.MD5Encryption;
 import edu.indiana.dlib.amppd.web.AuthResponse;
 import lombok.extern.slf4j.Slf4j;
 
+
 /**
  * Implementation of AmpUserService.
  */ 
@@ -47,140 +48,45 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 
-	  public static final int MIN_PASSWORD_LENGTH = 8;
-	  public static final int MIN_USERNAME_LENGTH = 3;
-	  public static final int MIN_NAME_LENGTH = 1;
-	  public static final String ADMIN_FIRST_NAME = "ADMIN";
-	  public static final String ADMIN_LAST_NAME = "AMP";	  
+	public static final int MIN_PASSWORD_LENGTH = 8;
+	public static final int MIN_USERNAME_LENGTH = 3;
+	public static final int MIN_NAME_LENGTH = 1;
+	public static final String ADMIN_FIRST_NAME = "ADMIN";
+	public static final String ADMIN_LAST_NAME = "AMP";	  
 
-	  @Autowired
-	  private AmppdPropertyConfig amppdPropertyConfig;		
+	@Autowired
+	private AmppdPropertyConfig amppdPropertyConfig;		
 
-	  @Autowired
-	  private AmppdUiPropertyConfig amppdUiPropertyConfig;
-		
-	  @Autowired
-	  private AmpUserRepository ampUserRepository;
-	  
-	  @Autowired
-	  private TimedTokenRepository timedTokenRepository;		
-	  
-	  @Autowired
-	  private JwtTokenUtil jwtTokenUtil;
-	  
-	  @Autowired
-	  private JavaMailSender mailSender;
-	  
-	  @Autowired
-	  private RoleAssignService roleAssignService;
+	@Autowired
+	private AmppdUiPropertyConfig amppdUiPropertyConfig;
 
-	  private String adminEmail;
-	  private String uiUrl;	  
-	  
-	  
-	  @PostConstruct
-	  public void init() {
-		  adminEmail = amppdPropertyConfig.getAdminEmail();
-		  log.trace("Fetched AMP admin email id from property file: "+ adminEmail);
-		  uiUrl = amppdUiPropertyConfig.getUrl();
-		  
-		  // Note: bootstrap of AMP admin user is now moved to AmppdStartupRunner.run;
-	  } 
+	@Autowired
+	private AmpUserRepository ampUserRepository;
 
-	  @Override
-	  public AuthResponse authenticate(String username, String password) { 
-		  AuthResponse response = new AuthResponse();
-		  
-		  // password must be of valid format
-		  if(!passwordAcceptableLength(password)) {
-			  response.addError("Username and password do not match");
-		  }
-		  
-		  // find user with credentials
-		  String encryptedPswd = MD5Encryption.getMd5(password);
-		  AmpUserBrief user = ampUserRepository.findFirstByUsernameAndPasswordAndStatus(username, encryptedPswd, AmpUser.Status.ACTIVATED);  
-		  
-		  // if user found, generate JWT token and authentication succeeded
-		  if (user != null) {
-				final String token = jwtTokenUtil.generateToken(username);
-				response.setToken(token);
-				response.setUser(user);
-				response.setSuccess(true);
-				log.info("User " + username + " login succeeded.");
-		  }
-		  // otherwise authentication failed
-		  else {
-			  response.setSuccess(false);
-			  log.error("User " + username + " login failed.");
-		  }
-		  
-		  return response;
-	  }
+	@Autowired
+	private TimedTokenRepository timedTokenRepository;		
 
-	  @Override
-	  @Transactional	
-	  public AuthResponse registerAmpUser(AmpUser user) { 		  
-		  AuthResponse response = new AuthResponse();
-		  response.setEmailid(user.getEmail());
+	@Autowired
+	private JwtTokenUtil jwtTokenUtil;
 
-		  // validate user registration info
-		  if(!usernameAcceptableLength(user.getUsername())) {
-			  response.addError("Username must be " + MIN_USERNAME_LENGTH + " characters");
-		  }		  
-		  if(!nameAcceptableLength(user.getLastName())) {
-			  response.addError("Last name must be " + MIN_USERNAME_LENGTH + " characters");
-		  }	  
-		  if(!nameAcceptableLength(user.getFirstName())) {
-			  response.addError("First name must be " + MIN_USERNAME_LENGTH + " characters");
-		  }	  
-		  if(!emailUnique(user.getEmail())) {
-			  response.addError("Email already exists");
-		  }
-		  if(!usernameUnique(user.getUsername())) {
-			  response.addError("Username already exists");
-		  }
-		  if(!passwordAcceptableLength(user.getPassword())) {
-			  response.addError("Password must be " + MIN_PASSWORD_LENGTH + " characters");
-		  }
-		  if(!validEmailAddress(user.getEmail())) {
-			  response.addError("Invalid email address");
-		  }
+	@Autowired
+	private JavaMailSender mailSender;
 
-		  // return error response if validation failed
-		  if (response.hasErrors()) {
-			  log.error("Failed to validate user registration info and no account was created for user: " + user.getEmail());			  
-			  return response;
-		  }
-		  
-		  // otherwise, continue with registration process
-		  try {
-			  // encrypt password and save user
-			  user.setPassword(MD5Encryption.getMd5(user.getPassword()));
-			  user = ampUserRepository.save(user);
-			  log.info("Successfully created user account <" + user.getId() + ">: " + user.getEmail());
-			  
-			  try {
-				  // send email to AMP admin for account approval
-				  mailSender.send(constructEmailAttributes(uiUrl, user, "account requested"));
-				  response.setSuccess(true);
-				  log.info("Successflly sent registration approval email for user " + user.getId());
-			  } 
-			  catch (MailException e) {
-				  // in case email fails to be sent
-				  response.setSuccess(false);
-				  response.addError("Failed to send registration approval email for user " + user.getId());
-				  log.warn("Failed to send registration approval email for user " + user.getId(), e);
-			  }
-		  }
-		  catch (Exception e) {
-			  // in case user account fails to be saved to DB
-			  response.addError("Failed to create account for user " + user.getEmail());
-			  log.error("Failed to create account for user " + user.getEmail(), e);
-		  }
+	@Autowired
+	private RoleAssignService roleAssignService;
 
-		  return response;
-	  }
-	  	  
+	private String adminEmail;
+	private String uiUrl;	  
+
+
+	@PostConstruct
+	public void init() {
+		adminEmail = amppdPropertyConfig.getAdminEmail();
+		uiUrl = amppdUiPropertyConfig.getUrl();
+
+		// Note: bootstrap of AMP admin user is now moved to AmppdStartupRunner.run;
+	} 
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
@@ -188,164 +94,25 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), Arrays.asList(authority));
 	}
 
-	@Override
-	public AuthResponse emailResetPasswordToken(String emailid) {
-		AuthResponse response = new AuthResponse();
-		log.info("Executing emailToken() for user:"+emailid);
-		try {
-			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found"));
-			if(user.getStatus() == AmpUser.Status.ACTIVATED){
-				log.info("Activated user account found with entered email id");
-				SimpleMailMessage email =  constructTokenEmail(uiUrl, user, "reset password");
-//				mailSender.send(email);
-				log.info("Token email sent successfully");
-			}
-		    else {
-		    	response.addError("User account status is invalid");
-		    	response.setSuccess(false);
-		    }
-			response.setSuccess(true);
-		}
-		catch(Exception e){
-			log.error("Failed to update reset password token for user " + emailid, e);
-			response.addError(e.getMessage());
-			response.setSuccess(false);
-		}
-		return response;
+	public AmpUser getUser(String username) {
+		Optional<AmpUser> userOpt = ampUserRepository.findByUsername(username);
+		if(userOpt.isPresent()) return userOpt.get();		
+		return null;
 	}
-	
-	@Override
-	@Transactional
-	public AuthResponse resetPassword(String emailid, String new_password, String token) {
-		AuthResponse response = new AuthResponse();
-		AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User not found: " + emailid));
-		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
-		if ((passToken == null) || (user == null) || (!passToken.getUser().getId().equals(user.getId()))) {
-			log.error("Error occurred as token and email id do not match");
-			response.addError("Invalid reset password link!");
-			response.setSuccess(false);
-			return response;
-		}
-		
-		Calendar cal = Calendar.getInstance();
-		if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-			log.error("Error occurred as reset password link has expired");
-			log.trace("passToken.getExpiryDate().getTime():"+passToken.getExpiryDate().getTime()+","+cal.getTime().getTime());
-			response.addError("Reset password link has expired!");
-			response.setSuccess(false);
-			return response;
-		}	
-		
-		String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
-		int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
 
-		if(rows > 0){
-			response.setSuccess(true);
-		}
-		else {
-			response.addError("Failed to reset password!");
-			log.error("Error occurred while updating new password.");		  
-		}
-		
-		return response;
-	}
-	
-	@Override 
-	@Transactional
-	public AuthResponse approveAccount(Long userId, Boolean approve) {
-		// retrieve user
-		AuthResponse response = new AuthResponse();
-		AmpUser user = ampUserRepository.findById(userId).orElse(null);
-		String action = approve ? "approve" : "reject";
-		
-		// if user not found, return in error
-		if (user == null){
-			response.addError("Failed to " + action + " user account registration: invalid userId " + userId);
-			response.setSuccess(false);
-			log.error("Failed to " + action + " user account registration: invalid userId " + userId);
-			return response;
-		}
-		
-		// otherwise check account action
-		response.setEmailid(user.getEmail());
-		Status status = null;
-		String notice = ""; 
-		
-		// for account approval
-		if (action.equalsIgnoreCase("approve")) {
-			status = Status.ACCEPTED;
-			notice = "account approval";
-		}
-		// for account rejection
-		else if (action.equalsIgnoreCase("reject")) {
-			status = Status.REJECTED;
-			notice = "account rejection";
-		}
-		// for invalid action, return in error
-		else {
-			response.addError("Failed to take action on user account " + userId + ": invalid action: " + action);
-			response.setSuccess(false);
-			log.error("Failed to take action on user account " + userId + ": invalid action: " + action);
-			return response;
-		}
-		
-		// for valid action, continue account action
-		try {
-			// update user account status 
-			user.setStatus(status);
-			ampUserRepository.updateStatus(userId, status);	
-			
-			// send email notification to user
-			if (action.equalsIgnoreCase("approve")) {
-				mailSender.send(constructTokenEmail(uiUrl, user, notice));
-			}
-			else {
-				mailSender.send(constructEmailAttributes(uiUrl, user, notice));
-			}
-			
-			response.setSuccess(true);
-			log.info("Successfully " + action + "ed account registration for useer " + userId);			
-		}
-		catch (MailException e) {
-			// in case user notice email fails to be sent
-			response.setSuccess(false);
-			response.addError("Failed to send " + notice + " email for user " + user.getId());
-			log.warn("Failed to send " + notice + " email for user " + user.getId(), e);
-		}
-		catch (Exception e) {
-			// in case any other exception
-			response.addError("Failed to " + action + " account registration for useer " + userId);
-			response.setSuccess(false);
-			log.error("Failed to " + action + " account registration for useer " + userId, e);			
-		}
-				
-		return response;		
-	}
-	
 	@Override
-	public AuthResponse resetPasswordGetEmail(String token){
-		AuthResponse response = new AuthResponse();
-		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
-		if ((passToken == null)) {
-			log.error("incorrect Link in resetPasswordGetEmail");
-			response.addError("Incorrect Link");
-			response.setSuccess(false);
-		    }
-		else {
-			AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
-			if(user!= null && user.getStatus() == AmpUser.Status.ACTIVATED){
-				response.setEmailid(user.getEmail());
-				response.setSuccess(true);
-				log.info("Email fetched successfully");
-			}
-			else {
-				response.addError("User doesn't exist");
-				response.setSuccess(false);
-			}
-		}
-		return response;
+	public AmpUser getUserById(Long userId) {
+		AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
+		log.info("Successfully retrieved user " + userId);
+		return user;		
 	}
-	
+
+	public AmpUser getUserByEmail(String email) {
+		Optional<AmpUser> userOpt = ampUserRepository.findByEmail(email);
+		if(userOpt.isPresent()) return userOpt.get();
+		return null;
+	}
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.AmpUserService.getCurrentUsername()
 	 */
@@ -374,81 +141,368 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		}
 		return currentUser;
 	}
-	
+
 	@Override
-	@Transactional
-	public AuthResponse activateAccount(String token)
-	{
-		AuthResponse response = new AuthResponse();
-		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElseThrow(() -> new RuntimeException("token not found: " + token));
-		if ((passToken == null)) {
-			log.error("incorrect token for account activation");
-			response.addError("Expired Url");
-			response.setSuccess(false);
+	public AuthResponse authenticate(String username, String password) { 
+		AuthResponse response = new AuthResponse(username);		  
+
+		// find user with credentials
+		String encryptedPswd = MD5Encryption.getMd5(password);
+		AmpUserBrief user = ampUserRepository.findFirstByUsernameAndPasswordAndStatus(username, encryptedPswd, AmpUser.Status.ACTIVATED);  
+
+		// if user found, generate JWT token and authentication succeeds
+		if (user != null) {
+			final String token = jwtTokenUtil.generateToken(username);
+			response.setToken(token);
+			response.setUser(user);
+			response.setSuccess(true);
+			log.info("Successfully login user " + username);
 		}
+		// otherwise authentication fails
 		else {
-			log.info("Matching token found.");
-			Calendar cal = Calendar.getInstance();
-		    if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
-		    	log.error("Token expired!!");
-		    	response.addError("Link Expired");
-				response.setSuccess(false);
-		    }
-		    else {
-		    	log.info("Token expiration validated.");
-				AmpUser user = ampUserRepository.findById(passToken.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found: " + passToken.getId()));
-				if(user!= null) {
-					if(user.getStatus() == AmpUser.Status.ACCEPTED){
-						log.debug("Corresponding amp user was approved for activation.");
-						try {
-							ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
-							response.setSuccess(true);
-							log.info("User activated successfully");
-						}
-						catch (Exception ex) {
-							log.error(ex.getMessage());
-							response.setSuccess(false);
-							response.addError("System encountered error");
-						}
-					}
-					else if(user.getStatus() == AmpUser.Status.ACTIVATED) {
-						log.error("User account already active");
-						response.setSuccess(false);
-						response.addError("User account already active");
-					}
-				}
-				else {
-					log.error("user not found for the activation token received");
-					response.addError("User doesn't exist");
-					response.setSuccess(false);
-				}
-		    }
+			response.setSuccess(false);
+			response.addError("Failed to login user: invalid username or password.");
+			log.error("Failed to login user " + username + ": invalid username or password.");
 		}
+
+		log.debug(response.toString());
 		return response;
 	}
-	
-	//HELPER FUNCTIONS FOLLOW ---->
-	
-	private SimpleMailMessage constructTokenEmail(String contextPath, AmpUser user, String type) {
-		String url = new String();
-    	if (type.equalsIgnoreCase("reset password")) {
-    		String token = createTimedToken(user, amppdPropertyConfig.getResetPasswordMinutes());
-    		url = contextPath + "/account/reset-password/" + token;
-    		log.debug("Constructed reset password token url: " + url);
-    	}
-    	else if (type.equalsIgnoreCase("account approval")) {
-    		String token = createTimedToken(user, amppdPropertyConfig.getActivateAccountDays() * 24 * 60);
-    		url = contextPath + "/account/activate/" + token;
-    		log.debug("Constructed account activation token url: " + url);
-    	}	
-	    return constructEmailAttributes(url, user, type);
+
+	@Override
+	@Transactional	
+	public AuthResponse registerAmpUser(AmpUser user) { 		  
+		AuthResponse response = new AuthResponse(user.getUsername());
+
+		// validate user registration info
+		if(!usernameAcceptableLength(user.getUsername())) {
+			response.addError("Username must be " + MIN_USERNAME_LENGTH + " characters");
+		}		  
+		if(!nameAcceptableLength(user.getLastName())) {
+			response.addError("Last name must be " + MIN_USERNAME_LENGTH + " characters");
+		}	  
+		if(!nameAcceptableLength(user.getFirstName())) {
+			response.addError("First name must be " + MIN_USERNAME_LENGTH + " characters");
+		}	  
+		if(!emailUnique(user.getEmail())) {
+			response.addError("Email already exists");
+		}
+		if(!usernameUnique(user.getUsername())) {
+			response.addError("Username already exists");
+		}
+		if(!passwordAcceptableLength(user.getPassword())) {
+			response.addError("Password must be " + MIN_PASSWORD_LENGTH + " characters");
+		}
+		if(!validEmailAddress(user.getEmail())) {
+			response.addError("Invalid email address");
+		}
+
+		// return error response if validation failed
+		if (response.hasErrors()) {
+			response.setSuccess(false);
+			log.error("Cannot create account with invalid registration info for user: " + user.getUsername());			  
+			log.debug(response.toString());
+			return response;
+		}
+
+		// otherwise, continue with registration process
+		try {
+			// encrypt password and save user
+			user.setPassword(MD5Encryption.getMd5(user.getPassword()));
+			user = ampUserRepository.save(user);
+			log.info("Successfully created user account <" + user.getId() + "> for user: " + user.getUsername());
+
+			try {
+				// send email to AMP admin for account approval
+				mailSender.send(constructEmailAttributes(uiUrl, user, "account requested"));
+				response.setSuccess(true);
+				log.info("Successflly sent Admin registration request email for user " + user.getUsername());
+			} 
+			catch (MailException e) {
+				// in case email fails to be sent
+				response.setSuccess(false);
+				response.addError("Error occurred while sending Admin registration request email!");
+				log.error("Failed to send Admin registration request email for user " + user.getUsername(), e);
+			}
+		}
+		catch (Exception e) {
+			// in case user account fails to be saved to DB
+			response.setSuccess(false);
+			response.addError("Error occurred while creating user account!");
+			log.error("Failed to create account for user " + user.getUsername(), e);
+		}
+
+		log.debug(response.toString());
+		return response;
+	}
+
+	@Override 
+	@Transactional
+	public AuthResponse approveAccount(Long userId, Boolean approve) {
+		// retrieve user
+		AuthResponse response = new AuthResponse();
+		AmpUser user = ampUserRepository.findById(userId).orElse(null);
+		String action = approve ? "approve" : "reject";
+
+		// if user not found, return in error
+		if (user == null){
+			response.setEmailid(userId.toString());
+			response.setSuccess(false);
+			response.addError("Cannot " + action + " user account: invalid userId!");
+			log.error("Cannot " + action + " user account: invalid userId " + userId);
+			log.debug(response.toString());
+			return response;
+		}
+
+		// otherwise check account action
+		response.setEmailid(user.getEmail());
+		Status status = null;
+		String notice = ""; 
+
+		// for account approval
+		if (action.equalsIgnoreCase("approve")) {
+			status = Status.ACCEPTED;
+			notice = "account approval";
+		}
+		// for account rejection
+		else if (action.equalsIgnoreCase("reject")) {
+			status = Status.REJECTED;
+			notice = "account rejection";
+		}
+		// for invalid action, return in error
+		else {
+			response.setSuccess(false);
+			response.addError("Cannot take action on user account: invalid action!");
+			log.error("Cannot take action on user account " + userId + ": invalid action: " + action);
+			log.debug(response.toString());
+			return response;
+		}
+
+		// for valid action, continue account action
+		try {
+			// update user account status 
+			user.setStatus(status);
+			ampUserRepository.updateStatus(userId, status);	
+			log.info("Successfully updated account status: " + action + " user " + userId);	
+			
+			// send email notification to user
+			if (action.equalsIgnoreCase("approve")) {
+				mailSender.send(constructTokenEmail(uiUrl, user, notice));
+			}
+			else {
+				mailSender.send(constructEmailAttributes(uiUrl, user, notice));
+			}
+
+			response.setSuccess(true);
+			log.info("Successfully sent " + notice + " email to user " + user.getEmail());			
+		}
+		catch (MailException e) {
+			// in case user notice email fails to be sent
+			response.setSuccess(false);
+			response.addError("Error occurred while sending " + notice + " email to user!");
+			log.error("Failed to send " + notice + " email to user " + user.getEmail(), e);
+		}
+		catch (Exception e) {
+			// in case any other exception
+			response.setSuccess(false);
+			response.addError("Error occurred while " + action + "ing account for useer!");
+			log.error("Failed to " + action + " account for useer " + userId, e);			
+		}
+
+		log.debug(response.toString());
+		return response;		
+	}
+
+	@Override
+	@Transactional
+	public AuthResponse activateAccount(String token) {
+		AuthResponse response = new AuthResponse();
+		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElse(null);
+
+		if ((passToken == null)) {
+			response.setToken(token);
+			response.setSuccess(false);
+			response.addError("Cannot activate account: invalid token!");
+			log.error("Cannot activate account: no matching token found: " + token);
+		}
+		else {
+			Calendar cal = Calendar.getInstance();
+			AmpUser user = passToken.getUser();	// user won't be null as it's linked to token
+			response.setEmailid(user.getUsername());
+
+			if (passToken.getExpiryDate().getTime() - cal.getTime().getTime() <= 0) {
+				response.setSuccess(false);
+				response.addError("Cannot activate account: token expired!");
+				log.error("Cannot activate account: token expired: " + token);
+				log.trace("Token expiration time: " + passToken.getExpiryDate().getTime() + ", Current time: " + cal.getTime().getTime());
+			}
+			else if (user.getStatus() == AmpUser.Status.ACTIVATED) {
+				response.setSuccess(false);
+				response.addError("Cannot activate user account: it's already activated!");
+				log.error("Cannot activate user account: it's already activated: " + user.getUsername());
+			}
+			else if (user.getStatus() == AmpUser.Status.ACCEPTED) {
+				try {
+					ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
+					response.setSuccess(true);
+					log.info("Successfully updated user account status to ACTIVATED: " + user.getUsername());
+				}
+				catch (Exception e) {
+					response.setSuccess(false);
+					response.addError("Error occurred while updating user account status to ACTIVATED!");
+					log.error("Failed to update user account status to ACTIVATED: " + user.getUsername(), e);
+				}
+			}
+		}
+		
+		log.debug(response.toString());		
+		return response;
+	}
+
+	// TODO: This method is not used except by tests and can be removed
+	@Transactional
+	public boolean activateUser(String username) {
+		try {
+			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
+			ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
+		}
+		catch(Exception ex) {
+			log.error(username);
+			return false;
+		}
+		return true;		    
 	}
 	
+	@Override
+	public AuthResponse emailResetPasswordToken(String emailid) {
+		AuthResponse response = new AuthResponse(emailid);
+
+		try {
+			AmpUser user = ampUserRepository.findByEmail(emailid).orElseThrow(() -> new RuntimeException("User " + emailid + " not found"));
+			if (user.getStatus() == AmpUser.Status.ACTIVATED) {
+				SimpleMailMessage email =  constructTokenEmail(uiUrl, user, "reset password");
+				mailSender.send(email);
+				response.setSuccess(true);
+				log.info("Successflly sent reset-password email to active user " + emailid);
+			}
+			else {
+				response.setSuccess(false);
+				response.addError("Cannot send reset-password email to user not yet activated!");
+				log.error("Cannot send reset-password email to user not yet activated: " + emailid);
+			}
+		}
+		catch (MailException e) {
+			// in case reset-password email fails to be sent
+			response.setSuccess(false);
+			response.addError("Error occurred while sending reset-password email to user!");
+			log.error("Failed to send reset-password email to user " + emailid, e);
+		}
+		catch(Exception e){
+			response.setSuccess(false);
+			response.addError("Error occurred while creating/updating reset-password token!");
+			log.error("Failed to create/update reset-password token for user " + emailid, e);
+		}
+
+		log.debug(response.toString());
+		return response;
+	}
+
+	@Override
+	public AuthResponse resetPasswordGetEmail(String token){
+		AuthResponse response = new AuthResponse();
+		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElse(null);
+
+		if ((passToken == null)) {
+			response.setSuccess(false);
+			response.setToken(token);
+			response.addError("Cannot retrieve reset-password email for user: invalid token");
+			log.error("Cannot retrieve reset-password email for user: invalid token " + token);
+		}
+		else {
+			// user won't be null here as it's a PK
+			AmpUser user = passToken.getUser();
+			response.setEmailid(user.getEmail());
+
+			if (user.getStatus() == AmpUser.Status.ACTIVATED) {
+				response.setSuccess(true);
+				log.info("Successfully retrieved reset-password email for user " + user.getEmail());
+			}
+			else {
+				response.setSuccess(false);
+				response.addError("Cannot retrieve reset-password email: user account is not activated!");
+				log.error("Cannot retrieve reset-password email: user account is not activated: " + user.getEmail());
+			}
+		}
+
+		log.debug(response.toString());
+		return response;
+	}
+
+	@Override
+	@Transactional
+	public AuthResponse resetPassword(String emailid, String new_password, String token) {
+		AuthResponse response = new AuthResponse(emailid);
+		AmpUser user = ampUserRepository.findByEmail(emailid).orElse(null);
+		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElse(null);
+
+		if ((passToken == null) || (user == null) || (!passToken.getUser().getId().equals(user.getId()))) {
+			response.setSuccess(false);
+			response.addError("\"Cannot reset password: invalid reset password link!");
+			log.error("Cannot reset password for user + " + emailid + ": token and email id do not exist or do not match!");
+			log.debug(response.toString());
+			return response;
+		}
+
+		Calendar cal = Calendar.getInstance();
+		if ((passToken.getExpiryDate().getTime() - cal.getTime().getTime()) <= 0) {
+			response.setSuccess(false);
+			response.addError("Cannot reset password: reset password link has expired!");
+			log.error("Cannot reset password for user + " + emailid + ":  reset password link has expired");
+			log.trace("Token expiration time: " + passToken.getExpiryDate().getTime() + ", Current time: " + cal.getTime().getTime());
+			log.debug(response.toString());
+			return response;
+		}	
+
+		String new_encrypted_pswd = MD5Encryption.getMd5(new_password);
+		int rows = ampUserRepository.updatePassword(user.getUsername(), new_encrypted_pswd, user.getId()); 
+
+		if (rows > 0) {
+			response.setSuccess(true);
+			log.info("Successfully updated reset password for user + " + emailid);		  
+		}
+		else {
+			response.setSuccess(false);
+			response.addError("Error occurred while updating reset password!");
+			log.error("Failed to update reset password for user + " + emailid);		  
+		}
+
+		log.debug(response.toString());
+		return response;
+	}
+
+	//HELPER FUNCTIONS FOLLOW ---->
+
+	private SimpleMailMessage constructTokenEmail(String contextPath, AmpUser user, String type) {
+		String url = new String();
+		if (type.equalsIgnoreCase("reset password")) {
+			String token = createTimedToken(user, amppdPropertyConfig.getResetPasswordMinutes());
+			url = contextPath + "/account/reset-password/" + token;
+			log.debug("Constructed reset password token url: " + url);
+		}
+		else if (type.equalsIgnoreCase("account approval")) {
+			String token = createTimedToken(user, amppdPropertyConfig.getActivateAccountDays() * 24 * 60);
+			url = contextPath + "/account/activate/" + token;
+			log.debug("Constructed account activation token url: " + url);
+		}	
+		return constructEmailAttributes(url, user, type);
+	}
+
 	private SimpleMailMessage constructEmailAttributes(String contextPath, AmpUser user, String type) {
 		String subject = null;
 		String emailTo = null;
 		String message = null;
 		String url = null;
+		
 		if (type.equalsIgnoreCase("account requested")){
 			log.debug("Constructing email for user account request: " + user.getUsername());
 			url = contextPath + "/account/approve/" + user.getId();
@@ -479,77 +533,45 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			subject = "Activate your account";
 			emailTo = user.getEmail();
 		}
+		
 		log.debug("Constructed email attributes: type: " + type + ", from: " + adminEmail + ", to: " + emailTo);
 		return constructEmail(subject, message + " \r\n" + url, emailTo);
 	}
-	
+
 	@Transactional
 	public String createTimedToken(AmpUser user, int expireMinutes) {
 		int res = 0;
 		String token = UUID.randomUUID().toString();
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.MINUTE, expireMinutes);
-		
+
 		// retrieve existing token if any
 		TimedToken tt  = timedTokenRepository.findFirstByUserId(user.getId());
-		
+
 		if (tt == null) {
 			tt = new TimedToken();
 			tt.setUser(user);
 		}
-		
+
 		// save token
 		tt.setToken(token);
 		tt.setExpiryDate(calendar.getTime());
 		tt = timedTokenRepository.save(tt);
-		
+
 		log.debug("Generated timed token for user " + user.getUsername());
 		return token;
 	}
-	
+
 	private SimpleMailMessage constructEmail(String subject, String body, String toEmailID) {
-	    SimpleMailMessage email = new SimpleMailMessage();
-	    email.setSubject(subject);
-	    email.setText(body);
-	    email.setTo(toEmailID);
-	    email.setFrom(adminEmail);
-	    log.debug("Constructed Email Object with all the information packed: " + body);
-	    return email;
+		SimpleMailMessage email = new SimpleMailMessage();
+		email.setSubject(subject);
+		email.setText(body);
+		email.setTo(toEmailID);
+		email.setFrom(adminEmail);
+		log.debug("Constructed Email Object with all the information packed: " + body);
+		return email;
 	}  
 
-	public AmpUser getUser(String username) {
-		Optional<AmpUser> userOpt = ampUserRepository.findByUsername(username);
-		if(userOpt.isPresent()) return userOpt.get();		
-		return null;
-	}
-	
-	@Override
-	public AmpUser getUserById(Long userId) {
-		AmpUser user= ampUserRepository.findById(userId).orElseThrow(() -> new StorageException("User not found: " + userId));
-		log.info("User fetched Successfully");
-		return user;		
-	}
-
-	public AmpUser getUserByEmail(String email) {
-		Optional<AmpUser> userOpt = ampUserRepository.findByEmail(email);
-		if(userOpt.isPresent()) return userOpt.get();
-		return null;
-	}
-	  
-	@Transactional
-	public boolean activateUser(String username) {
-		try {
-			AmpUser user = ampUserRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found: " + username));
-			if(user!=null)
-				ampUserRepository.updateStatus(user.getId(), AmpUser.Status.ACTIVATED);
-		}
-		catch(Exception ex) {
-			  System.out.println(ex.toString());
-			  return false;
-		}
-		return true;		    
-	}
-	
 	private boolean emailUnique(String email) {
 		return !ampUserRepository.emailExists(email);  
 	}
@@ -557,36 +579,36 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	private boolean usernameUnique(String username) {
 		return !ampUserRepository.usernameExists(username);  
 	}
-	
+
 	private boolean usernameAcceptableLength(String username) {
 		return username.length() >= MIN_USERNAME_LENGTH;
 	}
-	
+
 	private boolean nameAcceptableLength(String name) {
 		return name.length() >= MIN_NAME_LENGTH;
 	}
-	  
+
 	private boolean passwordAcceptableLength(String password) {
 		return password.length() >= MIN_PASSWORD_LENGTH;
 	}
-	  
+
 	private boolean validEmailAddress(String email) {
 		Pattern pattern = Pattern.compile("(?:(?:\\r\\n)?[ \\t])*(?:(?:(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*\\<(?:(?:\\r\\n)?[ \\t])*(?:@(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*(?:,@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*)*:(?:(?:\\r\\n)?[ \\t])*)?(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*\\>(?:(?:\\r\\n)?[ \\t])*)|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*:(?:(?:\\r\\n)?[ \\t])*(?:(?:(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*\\<(?:(?:\\r\\n)?[ \\t])*(?:@(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*(?:,@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*)*:(?:(?:\\r\\n)?[ \\t])*)?(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*\\>(?:(?:\\r\\n)?[ \\t])*)(?:,\\s*(?:(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*|(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)*\\<(?:(?:\\r\\n)?[ \\t])*(?:@(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*(?:,@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*)*:(?:(?:\\r\\n)?[ \\t])*)?(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\"(?:[^\\\"\\r\\\\]|\\\\.|(?:(?:\\r\\n)?[ \\t]))*\"(?:(?:\\r\\n)?[ \\t])*))*@(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*)(?:\\.(?:(?:\\r\\n)?[ \\t])*(?:[^()<>@,;:\\\\\".\\[\\] \\000-\\031]+(?:(?:(?:\\r\\n)?[ \\t])+|\\Z|(?=[\\[\"()<>@,;:\\\\\".\\[\\]]))|\\[([^\\[\\]\\r\\\\]|\\\\.)*\\](?:(?:\\r\\n)?[ \\t])*))*\\>(?:(?:\\r\\n)?[ \\t])*))*)?;\\s*)");     
 		Matcher matcher = pattern.matcher(email);		  
 		return matcher.matches();
 	}
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.AmpUserService.bootstrapAdminUser()
 	 */
 	@Override
-    @Transactional
+	@Transactional
 	public AmpUser bootstrapAdmin() {
 		String username = amppdPropertyConfig.getUsername();
 		String password = amppdPropertyConfig.getPassword();
 		String encryppw = MD5Encryption.getMd5(password);
 		AmpUser admin = getUser(username);
-		
+
 		// create admin user if not existing yet
 		if (admin == null) {
 			admin = new AmpUser();
@@ -613,7 +635,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 				log.warn("The AMP admin user account already exists, but its password, email, or name is different from the configuration. Please verify/update your configuration to be consistent with the database.");			
 			}			
 		}
-		
+
 		// for new admin or existing admin account which somehow didn't get activated, update the status and save to repository
 		if (admin.getStatus() != AmpUser.Status.ACTIVATED) {
 			admin.setStatus(AmpUser.Status.ACTIVATED);
@@ -623,10 +645,10 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		else {
 			log.info("AMP admin alaredy exists and has been activated.");
 		}
-		
+
 		// assign AMP Admin role 
 		roleAssignService.assignAdminRole(admin);
 		return admin;
 	}
-	
+
 }
