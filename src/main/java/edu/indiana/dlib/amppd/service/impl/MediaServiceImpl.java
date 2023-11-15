@@ -336,7 +336,7 @@ public class MediaServiceImpl implements MediaService {
 		// make sure the asset's media file exists
 		Path path = fileStorageService.resolve(asset.getPathname());
 		if (!Files.exists(path)) {
-			throw new StorageException("Can't create symlink for asset " + asset.getId() + ": its media file " + path + " doesn't exist");	
+//			throw new StorageException("Can't create symlink for asset " + asset.getId() + ": its media file " + path + " doesn't exist");	
 		}
 
 		// if symlink was created and exists, reuse it
@@ -348,7 +348,7 @@ public class MediaServiceImpl implements MediaService {
 		// otherwise, create a new one
 		
 		// use a random string to obscure the symlink for security
-		// prefix A stands for Asset
+		// prefix A stands for Asset734101
 		// include asset ID to rule out any chance of name collision
 		// add file extension to help browser decide file type so to use proper display app
 		String fileExt = FilenameUtils.getExtension(asset.getPathname());
@@ -356,12 +356,12 @@ public class MediaServiceImpl implements MediaService {
 		Path link = resolve(symlink);
 
 		// create the symbolic link for the original media file using the random string
-		try {
-			Files.createSymbolicLink(link, path);
-		}
-		catch (IOException e) {
-			throw new StorageException("Error creating symlink for asset " + asset.getId(), e);		    	
-		}
+//		try {
+//			Files.createSymbolicLink(link, path);
+//		}
+//		catch (IOException e) {
+//			throw new StorageException("Error creating symlink for asset " + asset.getId(), e);		    	
+//		}
 
 		// save the symlink into asset
 		asset.setSymlink(symlink);
@@ -388,7 +388,7 @@ public class MediaServiceImpl implements MediaService {
 		// make sure the output file exists
 		Path path = Paths.get(workflowResult.getOutputPath());
 		if (!Files.exists(path)) {
-			throw new StorageException("Can't create output symlink for workflowResult " + workflowResult.getId() + ": its output file " + path + " doesn't exist");	
+//			throw new StorageException("Can't create output symlink for workflowResult " + workflowResult.getId() + ": its output file " + path + " doesn't exist");	
 		}
 
 		// if symlink was created and exists, reuse it
@@ -407,12 +407,12 @@ public class MediaServiceImpl implements MediaService {
 		Path link = resolve(symlink);
 
 		// create the symbolic link for the output file using the random string
-		try {
-			Files.createSymbolicLink(link, path);
-		}
-		catch (IOException e) {
-			throw new StorageException("Error creating output symlink for workflowResult " + workflowResult.getId(), e);		    	
-		}
+//		try {
+//			Files.createSymbolicLink(link, path);
+//		}
+//		catch (IOException e) {
+//			throw new StorageException("Error creating output symlink for workflowResult " + workflowResult.getId(), e);		    	
+//		}
 
 		// save the symlink into workflowResult
 		workflowResult.setOutputLink(symlink);

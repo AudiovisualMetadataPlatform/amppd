@@ -17,5 +17,11 @@ public interface CollectionSupplementBrief extends SupplementBrief {
 	
 	@Value("#{target.collection.unit.name}")
 	public String getUnitName();
+
+	@Value("#{target.collection.id}")
+	public String getCollectionId();
 	
+	@Value("#{target.collection.unit.id}")
+	public String getUnitId();
+
 }

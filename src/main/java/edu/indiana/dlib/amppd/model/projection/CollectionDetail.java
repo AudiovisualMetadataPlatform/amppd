@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model.projection;
 
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.Collection;
@@ -17,8 +16,5 @@ public interface CollectionDetail extends CollectionBrief, ContentDetail {
 
 	public Set<ItemBrief> getItems();
 	public Set<CollectionSupplementBrief> getSupplements();
-	
-	@Value("#{target.unit.id}")
-	public String getUnitId();
 	
 }

@@ -1,8 +1,9 @@
 package edu.indiana.dlib.amppd.model.projection;
 
-import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
+
+import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 
 @Projection(name = "detail", types = {MgmScoringParameter.class})
 public interface MgmScoringParameterDetail extends MgmScoringParameterBrief {
