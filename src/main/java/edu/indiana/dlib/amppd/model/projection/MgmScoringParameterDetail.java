@@ -6,7 +6,7 @@ import org.springframework.data.rest.core.config.Projection;
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 
 @Projection(name = "detail", types = {MgmScoringParameter.class})
-public interface MgmScoringParameterDetail extends MgmScoringParameterBrief {
+public interface MgmScoringParameterDetail extends MgmScoringParameterBrief, MgmMetaDetail {
     @Value("#{target.mst.id}")
     public Long getMstId();
 
