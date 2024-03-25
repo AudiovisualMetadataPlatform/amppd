@@ -1,9 +1,10 @@
 package edu.indiana.dlib.amppd.model.projection;
 
-import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
-import edu.indiana.dlib.amppd.model.WorkflowResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
+
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 
 @Projection(name = "detail", types = {MgmEvaluationTest.class})
 public interface MgmEvaluationTestDetail extends MgmEvaluationTestBrief {

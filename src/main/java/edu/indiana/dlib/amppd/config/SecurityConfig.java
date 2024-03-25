@@ -133,11 +133,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //			httpSecurity.cors().and().csrf().disable().headers().frameOptions().sameOrigin().and().authorizeRequests()
 			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/forgot-password").permitAll()
-			.antMatchers(HttpMethod.POST, "/account/reset-password").permitAll()
-			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/reset-password-getEmail").permitAll()
+			.antMatchers(HttpMethod.POST, "/account/reset-password").permitAll()
 			.antMatchers(HttpMethod.GET, "/hmgm/authorize-editor").permitAll()
 			// bypass /galaxy/* requests, which will be handled by the galaxy workflow edit proxy
 			.antMatchers("/galaxy/**").permitAll()	

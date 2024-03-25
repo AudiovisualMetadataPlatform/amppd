@@ -17,5 +17,8 @@ public interface CollectionBrief extends ContentBrief {
 	
 	@Value("#{target.unit.name}")
 	public String getUnitName();
+
+	@Value("#{target.unit.id}")
+	public String getUnitId();
 	
 }

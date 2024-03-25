@@ -24,5 +24,17 @@ public interface PrimaryfileSupplementBrief extends SupplementBrief {
 	@Value("#{target.primaryfile.item.collection.unit.name}")
 	public String getUnitName();
 		
+	@Value("#{target.primaryfile.id}")
+	public String getPrimaryfileId();
+	
+	@Value("#{target.primaryfile.item.id}")
+	public String getItemId();
+	
+	@Value("#{target.primaryfile.item.collection.id}")
+	public String getCollectionId();	
+	
+	@Value("#{target.primaryfile.item.collection.unit.id}")
+	public String getUnitId();
+			
 }
 

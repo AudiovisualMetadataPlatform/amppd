@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.model.projection;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 import edu.indiana.dlib.amppd.model.UnitSupplement;
@@ -11,8 +10,5 @@ import edu.indiana.dlib.amppd.model.UnitSupplement;
  */
 @Projection(name = "detail", types = {UnitSupplement.class}) 
 public interface UnitSupplementDetail extends UnitSupplementBrief, SupplementDetail {
-
-	@Value("#{target.unit.id}")
-	public String getUnitId();
 	
 }
