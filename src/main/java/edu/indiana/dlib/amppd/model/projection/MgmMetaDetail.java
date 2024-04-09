@@ -10,6 +10,6 @@ import edu.indiana.dlib.amppd.model.MgmMeta;
  * @author yingfeng
  */
 @Projection(name = "detail", types = {MgmMeta.class}) 
-public interface MgmMetaDetail extends MgmMetaBrief, AmpObjectBrief {
+public interface MgmMetaDetail extends MgmMetaBrief, AmpObjectDetail {
 	
 }
