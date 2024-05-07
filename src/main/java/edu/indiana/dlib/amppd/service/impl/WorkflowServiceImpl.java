@@ -14,7 +14,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.jmchilton.blend4j.galaxy.ToolsClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
+import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputDefinition;
@@ -50,6 +52,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 	
 	@Getter
 	private WorkflowsClient workflowsClient;
+
+	@Getter
+	private ToolsClient toolsClient;
 		
 	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
@@ -63,6 +68,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	@PostConstruct
 	public void init() {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
+		toolsClient = galaxyApiService.getGalaxyInstance().getToolsClient();
 	}	
 	
 	/**
@@ -340,24 +346,34 @@ public class WorkflowServiceImpl implements WorkflowService {
 	 */
 	private void populateToolNames(WorkflowDetails workflowDetails ) {
 		Collection<WorkflowStepDefinition> steps = workflowDetails.getSteps().values();
+		
+		// populate tool name for each step
 		for (WorkflowStepDefinition step : steps) {
 			String toolId = step.getToolId();
-			if (!StringUtils.isEmpty(toolId)) {
-				// it's more efficient to get tool name from MgmTool table (now that we have it) than querying Galaxy
-				MgmTool mgm = mgmToolRepository.findFirstByToolId(toolId);
+			
+			// skip the input nodes/steps for which toolId is null 
+			if (StringUtils.isEmpty(toolId)) continue;
+
+			// it's more efficient to get tool name from MgmTool table than querying Galaxy
+			MgmTool mgm = mgmToolRepository.findFirstByToolId(toolId);	
+
+			// most likely, the MGM should exist in AMP table, use its name then
+			if (mgm != null) {
+				step.setToolName(mgm.getName());
+			}
+			// otherwise, retrieve it from Galaxy as a safeguard
+			else {
+				log.warn("Couldn't find MGM with toolId " + toolId + " in MgmTool table, retrieving from Galaxy instead ...");	
 				
-				if (mgm != null) {
-					String toolName = mgm.getName();
-					// use tool name if not empty, otherwise use tool ID as name
-					if (!StringUtils.isEmpty(toolName)) {
-						step.setToolName(toolName);
-					}
-					else {
-						step.setToolName(toolId);
-					}					
+				// note that Galaxy throws exception if tool not found by ID, instead of returning null
+				try {
+					Tool tool = toolsClient.showTool(toolId);	
+					step.setToolName(tool.getName());
+				} catch (Exception e) {
+					throw new RuntimeException("Couldn't find MGM with toolId " + toolId + " in Galaxy ");										
 				}
 			}
-		}
+		}		
 	}
 	
 	private Boolean filterTags(Workflow workflow, String[] tags) {
