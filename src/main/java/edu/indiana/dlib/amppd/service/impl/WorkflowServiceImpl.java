@@ -273,8 +273,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 	protected boolean isPartial(WorkflowDetails workflowDetails) {
 		int idx = workflowDetails.getInputPrimaryfileIndex();
 		int n = workflowDetails.getInputWprkflowResultLabels().size();
+		// if the workflow has no input, it's invalid for submission, the error will be logged but no exception shall be thrown,
+		// because this method is called when just displaying a workflow, not actually submitting yet. 
 		if (n == 0 && idx < 0) {
-			throw new GalaxyWorkflowException("Invalid workflow " + workflowDetails.getId() + ": has no valid input!"); 
+			log.warn("Invalid workflow " + workflowDetails.getId() + " for submission: has no valid input!");
+			return false;
+//			throw new GalaxyWorkflowException("Invalid workflow " + workflowDetails.getId() + ": has no valid input!"); 
 		}
 		return !(n == 0 && idx == 0);
 	}
