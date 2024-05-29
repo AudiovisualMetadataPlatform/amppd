@@ -108,7 +108,7 @@ public class JobController {
 	 * @return CreateJobResponse containing detailed information for the workflow submission on the inputs
 	 */
 	// Disable endpoint not in use
-//	@PostMapping(path = "/jobs/submitCsv", produces = MediaType.APPLICATION_JSON_VALUE)
+//	@PostMapping(path = "/jobs/submitCsv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<CreateJobResponse> createJobs(
 			@RequestParam String workflowId, 
 			@RequestParam MultipartFile inputCsv,

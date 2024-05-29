@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,7 +37,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the primaryfile with media uploaded
 	 */
-	@PostMapping("/primaryfiles/{id}/upload")
+	@PostMapping(path = "/primaryfiles/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public Primaryfile uploadPrimaryfile(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
 		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for primaryfile ID " + id);
@@ -49,7 +50,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the unitSupplement with media uploaded
 	 */
-    @PostMapping("/unitSupplements/{id}/upload")
+    @PostMapping(path = "/unitSupplements/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UnitSupplement uploadUnitSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
 		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for unitSupplement ID " + id);
@@ -62,7 +63,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the collectionSupplement with media uploaded
 	 */
-    @PostMapping("/collectionSupplements/{id}/upload")
+    @PostMapping(path = "/collectionSupplements/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CollectionSupplement uploadCollectionSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
 		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for collectionSupplement ID " + id);
@@ -75,7 +76,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the itemSupplement with media uploaded
 	 */
-    @PostMapping("/itemSupplements/{id}/upload")
+    @PostMapping(path = "/itemSupplements/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ItemSupplement uploadItemSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
 		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for itemSupplement ID " + id);
@@ -88,7 +89,7 @@ public class FileUploadController {
 	 * @param file the media file content to be uploaded
 	 * @return the primaryfileSupplement with media uploaded
 	 */
-    @PostMapping("/primaryfileSupplements/{id}/upload")
+    @PostMapping(path = "/primaryfileSupplements/{id}/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public PrimaryfileSupplement uploadPrimaryfileSupplement(@PathVariable("id") Long id, @RequestParam("file") MultipartFile file) {		
 		// permission is checked inside service layer to minimize duplicate code
     	log.info("Uploading media file " + file.getName() + " for primaryfileSupplement ID " + id);
