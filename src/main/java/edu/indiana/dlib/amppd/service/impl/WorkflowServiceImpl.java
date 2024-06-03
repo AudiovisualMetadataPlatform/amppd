@@ -40,28 +40,28 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class WorkflowServiceImpl implements WorkflowService {
-	
+
 	// tag for published workflow
 	public static String PUBLISHED = "published";
-	
+
 	@Autowired
 	private MgmToolRepository mgmToolRepository;	
-	
+
 	@Autowired
 	private GalaxyApiService galaxyApiService;
-	
+
 	@Getter
 	private WorkflowsClient workflowsClient;
 
 	@Getter
 	private ToolsClient toolsClient;
-		
+
 	// use hashmap to cache workflow names to avoid frequent query request to Galaxy in cases such as refreshing workflow results
 	private Map<String, String> workflowNames = new HashMap<String, String>();
 
 	// use following list to cache result of workflow for listing and once it is loaded we use it for filtering
 	private List<Workflow> workflowCache = new ArrayList<Workflow>();
-			
+
 	/**
 	 * Initialize the WorkflowServiceImpl bean.
 	 */
@@ -70,7 +70,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		workflowsClient = galaxyApiService.getGalaxyInstance().getWorkflowsClient();
 		toolsClient = galaxyApiService.getGalaxyInstance().getToolsClient();
 	}	
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.hasWorkflowTag(Workflow, String)
 	 */
@@ -97,16 +97,31 @@ public class WorkflowServiceImpl implements WorkflowService {
 	 */	
 	@Override
 	public WorkflowResponse listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted,
-										  String[] tag, String[] name, String[] annotations, String[] creators, Date[] dateRange) {
-		// TODO 
-		// Below is a temporary work-around to address the Galaxy bug in get_workflows_list.
-		// We can replace it with the commented code at the end of the method once the Galaxy bug is fixed;
-		// provided that special care is taken to handle the case when the published tag is used.
+			String[] tag, String[] name, String[] annotations, String[] creators, Date[] dateRange) {		
 		WorkflowResponse response = new WorkflowResponse();
 
+		/* Note:
+		 * It appears that workflowCache was introduced when workflow search filters were added. 
+		 * The purpose was to avoid redundant Galaxy API calls each time a search is initiated by AMP UI.
+		 * Because Galaxy API call to list workflows doesn't handle extra filters used in AMP, 
+		 * these filters are handled by AMP; thus, it make sense to not call Galaxy again once 
+		 * the initial retrieval of workflows with Galaxy criteria is done and saved in cache.
+		 * Below code assumes when AMP filters exist in the request, the initial Galaxy call would have occurred.
+		 * This is true only if AMP UI always list all workflows for Galaxy-only filters before doing search.
+		 * So far this is how AMP UI works: users would need to go to Workflow List page first, 
+		 * which list all workflows, before they can do any search on workflows.  
+		 * However, if UI changes in the future, below code will need update.
+		 * Also, note that the Galaxy filters should not be included in below condition for clearing cache,
+		 * because there're use cases where workflows are listed outside of the Workflow List page,
+		 * i.e. on Run Workflow page, where showPublished is not null and the cache should be cleared.
+		 * TODO:
+		 * In case AMP UI does change in the future, and above assumption won't hold true, 
+		 * a better way to maintain the workflowCache might be to clear it anytime any workflow is changed, i.e. 
+		 * created, edited, deleted, which can be achieved by calling clearWorkflowsCache in WorkflowEditProxy APIs.
+		 * However, even this approach won't detect workflow changes made directly in Galaxy.
+		 */
 		// if all filtering values are null then we will clear cache and load new data from galaxy api call
-		if(showPublished == null &&
-				(tag == null || tag.length <= 0) &&
+		if ((tag == null || tag.length <= 0) &&
 				(name == null || name.length <= 0) &&
 				(annotations == null || annotations.length <= 0) &&
 				(creators == null || creators.length <= 0) &&
@@ -117,19 +132,28 @@ public class WorkflowServiceImpl implements WorkflowService {
 		// refreshing workflow cache data
 		if (workflowCache.size() <= 0) {
 			workflowCache = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
+			// TODO 
+			// In above code  null is passed instead of showPublished,
+			// as a temporary work-around to address the Galaxy bug in get_workflows_list.
+			// We can replace it with the commented code below once the Galaxy bug is fixed;
+			// provided that special care is taken to handle the case when the published tag is used.
+//			return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);			
 		}
+
 		List <Workflow> filterWorkflows = filters(workflowCache, showPublished, tag, name, annotations, creators, dateRange);
 		WorkflowFilterValues filterBy = prepareFilters(filterWorkflows);
+
 		String published = showPublished == null ? "" : (showPublished ? "published " : "unpublished ");
 		String hidden = showHidden != null && showHidden ? "hidden " : ""; 
 		String deleted = showDeleted != null && showDeleted ? "deleted " : ""; 
 		log.info("Successfully listed " + filterWorkflows.size() + " " + published + hidden + deleted + "workflows currently existing in Galaxy.");
+
 		response.setRows(filterWorkflows);
 		response.setTotalResults(filterWorkflows.size());
 		response.setFilters(filterBy);
 		return response;
 	}
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.showWorkflow(String, Boolean, Boolean)
 	 */	
@@ -144,7 +168,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		if (includeToolName == null) {
 			includeToolName = true;
 		}		
-		
+
 		// by default, include input detail
 		if (includeInputDetails == null) {
 			includeInputDetails = true;
@@ -162,25 +186,25 @@ public class WorkflowServiceImpl implements WorkflowService {
 		else {
 			workflowDetails = workflowsClient.showWorkflow(workflowId);
 		}
-		
+
 		if (workflowDetails == null) {
 			throw new GalaxyWorkflowException("Failed to retriev workflow with " + store + "ID " + workflowId + withtn + " tool name and " +  withid + " input details.");		
 		}
-		
+
 		// retrieve tool name by tool ID for each tool in the workflow steps
 		if (includeToolName) {
 			populateToolNames(workflowDetails);
 		}
-		
+
 		// populate input details such as data type, and whether the input is a primaryfile or an intermediate workflow result
 		if (includeInputDetails) {
 			populateInputDetails(workflowDetails);
 		}
-		
+
 		log.info("Successfully retrieved workflow with " + store + "ID " + workflowId + withtn + " tool name, " +  withid + " input details ");
 		return workflowDetails;
 	}
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflow(String)
 	 */	
@@ -193,14 +217,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		return null;
 	}
-		
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflowName(String)
 	 */
 	public String getWorkflowName(String workflowId) {
 		String workflowName = workflowNames.get(workflowId);		
 		if (workflowName != null) return workflowName;
-		
+
 		try {
 			/* Note: 
 			 * It appears that when calling showWorkflowInstance, i.e. getting Workflow with supposedly storedWorkflowId
@@ -211,8 +235,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 			 * That's not the case anymore: we now use the workflow ID returned from workflow index, which is always the real ID.
 			 * Thus, we should use showWorkflow instead of showWorkflowInstance, or we'd get wrong workflow or exception.
 			 */
-//			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
-			
+			//			WorkflowDetails workflow = workflowsClient.showWorkflowInstance(workflowId);
+
 			WorkflowDetails workflow = workflowsClient.showWorkflow(workflowId);
 			if (workflow != null) {
 				workflowName = workflow.getName();
@@ -229,12 +253,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 			workflowName = workflowId;
 			log.warn("Can't find workflow " + workflowId + " in Galaxy; will use the ID as its name\n" + e.getMessage());
 		}
-		
+
 		workflowNames.put(workflowId, workflowName);
 		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		return workflowName;
 	}		
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowNamesCache()
 	 */
@@ -242,7 +266,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		workflowNames.clear();
 		log.info("Workflow names cache has been cleared up.");
 	}
-	
+
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.workflowNamesCacheSize()
 	 */
@@ -265,7 +289,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		// we don't require format to be specified for primaryfile input, so null format indicates primaryfile
 		return StringUtils.isBlank(format) || "av".equals(format) || "audio".equals(format) || "video".equals(format);
 	}
-	
+
 	/**
 	 * Return true if the given workflowDetails is a partial one; 
 	 * false otherwise, i.e. there is one and only one primaryfile input.
@@ -278,11 +302,11 @@ public class WorkflowServiceImpl implements WorkflowService {
 		if (n == 0 && idx < 0) {
 			log.warn("Invalid workflow " + workflowDetails.getId() + " for submission: has no valid input!");
 			return false;
-//			throw new GalaxyWorkflowException("Invalid workflow " + workflowDetails.getId() + ": has no valid input!"); 
+			//			throw new GalaxyWorkflowException("Invalid workflow " + workflowDetails.getId() + ": has no valid input!"); 
 		}
 		return !(n == 0 && idx == 0);
 	}
-	
+
 	/**
 	 * Populate input details for the specified workflowDetails retrieved from Galaxy.
 	 */
@@ -295,18 +319,18 @@ public class WorkflowServiceImpl implements WorkflowService {
 		workflowDetails.setInputPrimaryfileIndex(-1); // -1 indicate no primaryfile input
 		workflowDetails.setInputPrimaryfileFormat("");
 		int n = workflowDetails.getInputs().size();
-		
+
 		// iterate through all input nodes, indices of these steps range from 0 to (n-1) 
 		for (Integer i=0; i<n; i++) {
 			String stepMsg = "Invalid workflow " + workflowDetails.getId() + ": step " + i;
 			String inputMsg = "Invalid workflow " + workflowDetails.getId() + ": input " + i;
-			
+
 			// verify that the step corresponding to the input index exists
 			WorkflowStepDefinition step = workflowDetails.getSteps().get(i.toString());
 			if (step == null) {
 				throw new GalaxyWorkflowException(stepMsg + " doesn't exist!");
 			}
-			
+
 			// verify that the step is an input node
 			String type = (String)step.getType();
 			if (!"data_input".equals(type)) {
@@ -340,21 +364,21 @@ public class WorkflowServiceImpl implements WorkflowService {
 				formats.add(format);
 			}			
 		}
-		
+
 		// decide if workflow is partial
 		workflowDetails.setPartial(isPartial(workflowDetails));
 	}
-		
+
 	/**
 	 * Populate tool names for the specified workflowDetails retrieved from Galaxy.
 	 */
 	private void populateToolNames(WorkflowDetails workflowDetails ) {
 		Collection<WorkflowStepDefinition> steps = workflowDetails.getSteps().values();
-		
+
 		// populate tool name for each step
 		for (WorkflowStepDefinition step : steps) {
 			String toolId = step.getToolId();
-			
+
 			// skip the input nodes/steps for which toolId is null 
 			if (StringUtils.isEmpty(toolId)) continue;
 
@@ -368,7 +392,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 			// otherwise, retrieve it from Galaxy as a safeguard
 			else {
 				log.warn("Couldn't find MGM with toolId " + toolId + " in MgmTool table, retrieving from Galaxy instead ...");	
-				
+
 				// note that Galaxy throws exception if tool not found by ID, instead of returning null
 				try {
 					Tool tool = toolsClient.showTool(toolId);	
@@ -379,7 +403,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 			}
 		}		
 	}
-	
+
 	private Boolean filterTags(Workflow workflow, String[] tags) {
 		if (tags == null || tags.length <= 0){
 			return true;
@@ -455,12 +479,12 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	private List<Workflow> filters(List<Workflow> workflows,
-								   Boolean showPublished,
-								   String[] tag,
-								   String[] name,
-								   String[] annotations,
-								   String[] creators,
-								   Date[] dateRange) {
+			Boolean showPublished,
+			String[] tag,
+			String[] name,
+			String[] annotations,
+			String[] creators,
+			Date[] dateRange) {
 		if(showPublished == null && tag == null && name == null && annotations == null && dateRange == null && creators == null) {
 			return workflows;
 		}
