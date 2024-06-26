@@ -339,7 +339,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			else if (user.getStatus() == AmpUser.Status.ACTIVATED) {
 				response.setSuccess(false);
 				response.addError("Cannot activate user account: it's already activated!");
-				log.error("Cannot activate user account: it's already activated: " + user.getUsername());
+				log.error("No need to activate user account: it's already activated: " + user.getUsername());
 			}
 			else if (user.getStatus() == AmpUser.Status.ACCEPTED) {
 				try {
