@@ -72,7 +72,9 @@ public class BatchController {
 		
 		// the user submitting the batch shall be the current user logged in and should be recorded in the user session
 		AmpUser ampUser = ampUserService.getCurrentUser();
+		log.info("Start batch ingest with manifest " + file.getName() + " by user " + ampUser.getUsername() + " in unit " + unitName);
 		
+		// validate batch, if succeeds, process batch
 		BatchResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
 		if (response.isSuccess()) {
 			response = batchService.processBatch(response, ampUser.getUsername());

@@ -84,6 +84,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			response = new BatchResponse();
 			response.addValidationError("Unable to parse batch ingest manifest " + file.getName());
 			response.setSuccess(false);
+			log.error("Failed to parse batch ingest manifest " + file.getName(), e);
 			return response;
 		}
 		return validate(unitName, file.getOriginalFilename(), user, textBuilder.toString());
@@ -192,6 +193,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		// If we have no rows, quit now
 		if(lines.size()<=1) {
 			response.addValidationError("Invalid file. No rows supplied.");
+			response.setSuccess(false);  
 			return response;
 		}
 
@@ -203,6 +205,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		
     	// If we have an invalid unit, no point on continuing with validation
 		if(unitErrors.size()>0) {
+			response.setSuccess(false);  
 			return response;
 		}
 				
@@ -246,7 +249,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     		}
         }
         
-        // if there're validation errors, set response with failure
+        // if there're validation errors, log them
         if (response.hasValidationErrors()) {
         	response.setSuccess(false);  
         	log.error("Failed to validate batch ingest manifest " + filename);
@@ -254,7 +257,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 				log.error(error);
 			}
         }
-        // otherwise, save the batch and set response with success
+        // otherwise, save the batch
         else {
         	batchRepository.save(batch);
         	batchFileRepository.saveAll(batch.getBatchFiles());

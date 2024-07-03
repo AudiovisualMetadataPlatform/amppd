@@ -83,8 +83,8 @@ public class BatchServiceImpl implements BatchService {
 				}
 			}
 			catch(Exception ex) {
-				log.error("BATCH PROCESSING : Batch processing exception: ", ex);
-				response.addProcessingError("Error processing batch file line #" + batchFile.getRowNum() + ": " + ex);
+				log.error("Batch processing exception on line #" + batchFile.getRowNum(), ex);
+				response.addProcessingError("Error processing batch on line #" + batchFile.getRowNum() + ": " + ex);
 			}
 		}	
 		
@@ -95,7 +95,7 @@ public class BatchServiceImpl implements BatchService {
 		}
 		else {
 			log.error("Failed to process batch ingest " + response.getBatch());
-			for (String error : response.getValidationErrors()) {
+			for (String error : response.getProcessingErrors()) {
 				log.error(error);
 			}
 		}
@@ -108,32 +108,32 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private void createItem(Unit unit, BatchFile batchFile, String username, List<String> errors) throws Exception {
 		// Get the collection
-		log.info("BATCH PROCESSING : getting the updated collection");
+		log.debug("BATCH PROCESSING : getting the updated collection");
 		Collection collection = getUpdatedCollection(batchFile.getCollection().getId());
 		collection.setUnit(unit);
 		
 		// Set the source directory based on dropbox, unit name and collection name
-		log.info("BATCH PROCESSING : Set the source directory based on dropbox, unit name and collection name");
+		log.debug("BATCH PROCESSING : Set the source directory based on dropbox, unit name and collection name");
 		String sourceDir = getSourceDir(unit, collection);
 
 		// Get an existing item if found in this collection, otherwise create a new one. 
-		log.info("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
+		log.debug("BATCH PROCESSING : Get an existing item if found in this collection, otherwise create a new one");
 		Item item = getItem(collection, batchFile.getItemName(), batchFile.getItemDescription(), username, batchFile.getExternalId(), batchFile.getExternalSource());
 		if (item == null) throw new Exception("item with same name already existed");
 		collection.addItem(item);
-		log.info("BATCH PROCESSING : The item found was added to the collection");
+		log.debug("BATCH PROCESSING : The item found was added to the collection");
 		
 		// Process the files based on the supplement type
 		if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE || batchFile.getSupplementType()==null) {
 			// Either get an existing or create a primaryfile
-			log.info("BATCH PROCESSING : Get an existing primaryfile otherwise create a new one");
+			log.debug("BATCH PROCESSING : Get an existing primaryfile otherwise create a new one");
 			Primaryfile primaryfile = createPrimaryfile(collection, item, batchFile, username, sourceDir, errors);
 			if (errors.size()>0)
 				return;
 	    	
 			if(batchFile.getSupplementType()==SupplementType.PRIMARYFILE) {
 				// For each primaryfile supplememnt, create the object and then move the file to it's destination
-				log.info("BATCH PROCESSING : For each primaryfile supplememnt, create the object and then move the file to it's destination");
+				log.debug("BATCH PROCESSING : For each primaryfile supplememnt, create the object and then move the file to it's destination");
 				for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 					createPrimaryfileSupplement(primaryfile, batchSupplementFile, username, sourceDir, errors);
 					if(errors.size()>0 )
@@ -142,13 +142,13 @@ public class BatchServiceImpl implements BatchService {
 			}
 		}
 		else if(batchFile.getSupplementType()==SupplementType.COLLECTION && errors.size()==0 ) {
-			log.info("BATCH PROCESSING : For each collection supplememnt, create the object and then move the file to it's destination");
+			log.debug("BATCH PROCESSING : For each collection supplememnt, create the object and then move the file to it's destination");
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				createCollectionSupplement(collection, batchSupplementFile, username, sourceDir, errors);
 			}
 		}
 		else if(batchFile.getSupplementType()==SupplementType.ITEM && errors.size()==0 ) {
-			log.info("BATCH PROCESSING : For each item supplememnt, create the object and then move the file to it's destination");
+			log.debug("BATCH PROCESSING : For each item supplememnt, create the object and then move the file to it's destination");
 			for(BatchSupplementFile batchSupplementFile : batchFile.getBatchSupplementFiles()) {
 				createItemSupplement(item, batchSupplementFile, username, sourceDir, errors);
 			}
@@ -182,7 +182,7 @@ public class BatchServiceImpl implements BatchService {
 				// so that in case preprocess fails, no primaryfile will be created with empty media info
 				preprocessService.preprocess(primaryfile, true);
 				
-				log.debug("BATCH PROCESSING : Move the primaryfile from the dropbox to amppd file storage");
+				log.debug("BATCH PROCESSING : Move the primaryfile " +  primaryfile.getOriginalFilename() + " from the dropbox to amppd media storage");
 		    	primaryfile.setPathname(fileStorageService.getFilePathname(primaryfile));		    	
 				
 				// Move the file from the dropbox to amppd file storage:

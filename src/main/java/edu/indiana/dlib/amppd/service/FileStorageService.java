@@ -105,7 +105,7 @@ public interface FileStorageService {
 	 * If the source doesn't exist, no action will be taken; if the target already exists, it will be replaced.
 	 * @param sourcePathname the specified source pathname
 	 * @param targetPathname the specified target pathname
-	 * @return the path of the target path if moved, null otherwise
+	 * @return the path of the target if moved, null otherwise
 	 */
 	public Path move(String sourcePathname, String targetPathname);
 	
