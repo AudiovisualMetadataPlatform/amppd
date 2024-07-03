@@ -22,7 +22,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
-import edu.indiana.dlib.amppd.exception.PreprocessException;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.exception.StorageFileNotFoundException;
 import edu.indiana.dlib.amppd.model.Asset;
@@ -436,28 +435,38 @@ public class FileStorageServiceImpl implements FileStorageService {
 	}
 	
 	/**
+	 * @see edu.indiana.dlib.amppd.service.FileStorageService.move(Path, Path)
+	 */    
+	@Override
+    public Path move(Path sourcePath, Path targetPath) {
+    	try {
+    		if (!Files.exists(sourcePath)) {
+    			// return null instead of throwing exception, because in some use case when moving an entity, 
+    			// the source directory may not exist yet if the entity doesn't contain any child 
+    			return null;
+    		}    		
+    		if (Files.exists(targetPath)) {
+    	    	log.warn("Target directory/file " + targetPath + " already exists and will be replaced.");    			
+    		}    		
+    		else {
+    			// make sure target path's parent dir exists
+    			Files.createDirectories(targetPath.getParent());
+    		}
+	    	return Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);  		
+    	}
+    	catch (IOException e) {
+    		throw new StorageException("Failed to move directory/file from " + sourcePath + " to " + targetPath, e);
+    	}    		    	
+    }
+
+	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.move(String, String)
 	 */    
 	@Override
     public Path move(String sourcePathname, String targetPathname) {
-    	try {
-    		Path srcpath = resolve(sourcePathname);
-    		Path tgtpath = resolve(targetPathname);
-    		if (!Files.exists(srcpath)) {
-    			return null;
-    		}    		
-    		if (Files.exists(tgtpath)) {
-    	    	log.warn("Target directory/file " + targetPathname + " already exists and will be replaced.");    			
-    		}    		
-    		else {
-    			// make sure targat path's parent dir exists
-    			Files.createDirectories(tgtpath.getParent());
-    		}
-	    	return Files.move(srcpath, tgtpath, StandardCopyOption.REPLACE_EXISTING);  		
-    	}
-    	catch (IOException e) {
-    		throw new StorageException("Failed to move directory/file from " + sourcePathname + " to " + targetPathname, e);
-    	}
+		Path sourcePath = resolve(sourcePathname);
+		Path targetPath = resolve(targetPathname);
+		return move(sourcePath, targetPath);
     }
 
 	/**
@@ -477,26 +486,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     	catch (IOException e) {
     		throw new StorageException("Failed to delete directory/file " + pathname, e);
     	}
-    }
-    
-	/**
-	 * @see edu.indiana.dlib.amppd.service.FileStorageService.linkFile(Path, Path)
-	 */
-	@Override
-	public Path linkFile(Path sourcePath, Path targetPath) {
-		try {
-			// create a hard link
-			Files.createLink(targetPath, sourcePath);
-
-			// delete original file
-			Files.delete(sourcePath);
-
-			return targetPath;
-		}
-		catch (IOException e) {
-			throw new StorageException("Failed to link directory/file from " + sourcePath + " to " + targetPath, e);
-		}
-	}
+    }    
 
 	/**
 	 * @see edu.indiana.dlib.amppd.service.FileStorageService.readTextFile(String)

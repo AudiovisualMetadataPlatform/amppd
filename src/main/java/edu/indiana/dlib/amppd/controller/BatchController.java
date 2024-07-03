@@ -26,7 +26,7 @@ import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchResponse;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,7 +57,7 @@ public class BatchController {
 		
 	
 	@PostMapping(path = "/batch/ingest", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody BatchValidationResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {
+	public @ResponseBody BatchResponse batchIngest(@RequestPart MultipartFile file, @RequestPart String unitName) {
 		Unit unit = unitRepository.findFirstByName(unitName);
 		if (unit == null) {
 			throw new StorageException("Failed to find unit with name " + unitName);
@@ -73,16 +73,11 @@ public class BatchController {
 		// the user submitting the batch shall be the current user logged in and should be recorded in the user session
 		AmpUser ampUser = ampUserService.getCurrentUser();
 		
-		BatchValidationResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
-		log.info("Batch validation success : "+response.isSuccess());
-		if(response.isSuccess()) {
+		BatchResponse response = batchValidationService.validateBatch(unitName, ampUser, file);
+		if (response.isSuccess()) {
 			response = batchService.processBatch(response, ampUser.getUsername());
-			boolean batchSuccess = (!response.hasProcessingErrors());
-			log.info("  errors:"+ response.getProcessingErrors().size());
-			response.setSuccess(batchSuccess);
-			log.info("Batch processing success : "+batchSuccess+" processing errors:"+response.getProcessingErrors());
 		}
-		
+
 		return response;
 	}
 

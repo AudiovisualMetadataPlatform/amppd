@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ import edu.indiana.dlib.amppd.service.BatchService;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.PreprocessService;
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -70,27 +69,38 @@ public class BatchServiceImpl implements BatchService {
 	int currRow;
 	
 	@Transactional
-	public BatchValidationResponse processBatch(BatchValidationResponse batchValidation, String username) {
+	public BatchResponse processBatch(BatchResponse response, String username) {
 		List<String> errors = new ArrayList<String>();
-		Batch batch = batchValidation.getBatch();
+		Batch batch = response.getBatch();
 
-		for(BatchFile batchFile : batch.getBatchFiles()) {
+		for (BatchFile batchFile : batch.getBatchFiles()) {
 			errors = new ArrayList<String>();
 			currRow = batchFile.getRowNum();
 			try {
 				createItem(batch.getUnit(), batchFile, username, errors);
-				if(errors.size()>0) {
-					batchValidation.addProcessingErrors(errors);
+				if (errors.size()>0) {
+					response.addProcessingErrors(errors);
 				}
 			}
 			catch(Exception ex) {
-				log.error("BATCH PROCESSING : Batch processing exception: " + ex);
-				batchValidation.addProcessingError("Error processing file #" + batchFile.getRowNum() + ". " + ex.toString());
+				log.error("BATCH PROCESSING : Batch processing exception: ", ex);
+				response.addProcessingError("Error processing batch file line #" + batchFile.getRowNum() + ": " + ex);
 			}
 		}	
 		
-		log.info("BATCH PROCESSING : Check if there were processing errors");	
-		return batchValidation;
+		boolean success = !response.hasProcessingErrors();
+		response.setSuccess(success);
+		if (success) {
+			log.info("Successfully processed batch ingest " + response.getBatch());
+		}
+		else {
+			log.error("Failed to process batch ingest " + response.getBatch());
+			for (String error : response.getValidationErrors()) {
+				log.error(error);
+			}
+		}
+		
+		return response;
 	}
 	
 	/*
@@ -173,14 +183,13 @@ public class BatchServiceImpl implements BatchService {
 				preprocessService.preprocess(primaryfile, true);
 				
 				log.debug("BATCH PROCESSING : Move the primaryfile from the dropbox to amppd file storage");
-				String targetDir = fileStorageService.getDirPathname(item);	
 		    	primaryfile.setPathname(fileStorageService.getFilePathname(primaryfile));		    	
 				
 				// Move the file from the dropbox to amppd file storage:
 				// need to use originalFilename instead of batchFile.getPrimaryfileFilename() for source filename,
 				// as the latter might have been converted from flac to wav during preprocess,
 				// while the former would have been updated to the generated wav file in this case
-				Path targetPath = moveFile(sourceDir, targetDir, primaryfile.getOriginalFilename(), primaryfile.getPathname());
+				Path targetPath = moveFile(sourceDir, primaryfile.getOriginalFilename(), primaryfile.getPathname());
 				
 				// save primaryfile after files are moved
 		    	primaryfile = primaryfileRepository.save(primaryfile);
@@ -190,8 +199,8 @@ public class BatchServiceImpl implements BatchService {
 			
 	    	return primaryfile;
 		}
-		catch(IOException ex) {			
-			throw new Exception(String.format("Error creating primaryfile %s: %s", batchFile.getPrimaryfileFilename(), ex.toString()), ex);
+		catch(Exception ex) {			
+			throw new RuntimeException("Error creating primaryfile " + batchFile.getPrimaryfileFilename(), ex);
 		}
 	}
 	
@@ -200,7 +209,6 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private void createPrimaryfileSupplement(Primaryfile primaryfile, BatchSupplementFile batchSupplementFile, String username, String sourceDir, List<String> errors) throws Exception {
 		try {
-			String targetDir = fileStorageService.getDirPathname(primaryfile);
 			PrimaryfileSupplement supplement = createPrimaryfileSupplement(primaryfile, batchSupplementFile, username, errors);
 			
 			if(errors.size()==0 && supplement != null) {
@@ -218,7 +226,7 @@ public class BatchServiceImpl implements BatchService {
 				// as the latter might have been converted from flac to wav during preprocess,
 				// while the former would have been updated to the generated wav file in this case
 				supplement.setPathname(fileStorageService.getFilePathname(supplement));				
-				Path targetSuppPath = moveFile(sourceDir, targetDir, supplement.getOriginalFilename(), supplement.getPathname());
+				Path targetSuppPath = moveFile(sourceDir, supplement.getOriginalFilename(), supplement.getPathname());
 
 				// save supplement after files are moved
 				primaryfileSupplementRepository.save(supplement);
@@ -237,8 +245,7 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private void createCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username, String sourceDir, List<String> errors) throws Exception {
 		try {
-			// For collection supplements, create supplements and then move the files to their destination
-			String targetDir = fileStorageService.getDirPathname(collection);			
+			// For collection supplements, create supplements and then move the files to their destination	
 			CollectionSupplement supplement = getCollectionSupplement(collection, batchSupplementFile, username, errors);
 			
 			if(supplement != null && errors.size()==0) {
@@ -256,7 +263,7 @@ public class BatchServiceImpl implements BatchService {
 				// as the latter might have been converted from flac to wav during preprocess,
 				// while the former would have been updated to the generated wav file in this case
 				supplement.setPathname(fileStorageService.getFilePathname(supplement));				
-				Path targetSuppPath = moveFile(sourceDir, targetDir, supplement.getOriginalFilename(), supplement.getPathname());
+				Path targetSuppPath = moveFile(sourceDir, supplement.getOriginalFilename(), supplement.getPathname());
 
 				// save supplement after files are moved
 				collectionSupplementRepository.save(supplement);
@@ -275,7 +282,6 @@ public class BatchServiceImpl implements BatchService {
 	 */
 	private void createItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username, String sourceDir, List<String> errors) throws Exception {
 		try {
-			String targetDir = fileStorageService.getDirPathname(item);
 			ItemSupplement supplement = getItemSupplement(item, batchSupplementFile, username, errors);
 			
 			if(supplement != null && errors.size()==0) {
@@ -293,7 +299,7 @@ public class BatchServiceImpl implements BatchService {
 				// as the latter might have been converted from flac to wav during preprocess,
 				// while the former would have been updated to the generated wav file in this case
 				supplement.setPathname(fileStorageService.getFilePathname(supplement));				
-				Path targetSuppPath = moveFile(sourceDir, targetDir, supplement.getOriginalFilename(), supplement.getPathname());
+				Path targetSuppPath = moveFile(sourceDir, supplement.getOriginalFilename(), supplement.getPathname());
 
 				// save supplement after files are moved
 				itemSupplementRepository.save(supplement);
@@ -536,27 +542,25 @@ public class BatchServiceImpl implements BatchService {
 	}
 	
 	/*
-	 * Move the file using hard links
+	 * Move the media and info files from dropbox to corresponding media directory.
 	 */
-	private Path moveFile(String sourceDir, String targetDir, String sourceFilename, String targetFilename) throws IOException {		
-		// Check to see if the folder exists on the file system.  If not, create it.
-		if(!Files.exists(Paths.get(propertyConfig.getFileStorageRoot(), targetDir))){
-			Files.createDirectories(Paths.get(propertyConfig.getFileStorageRoot(), targetDir));
-		}
+	private Path moveFile(String sourceDir, String sourceFilename, String targetFilename) throws IOException {		
+		// get source/target paths for media file /{root}/{unit}/{collection}/{filename}
+		Path sourceMedia = Paths.get(sourceDir, sourceFilename);	
+		Path targetMedia = fileStorageService.resolve(targetFilename);	
+
+		// get source/target paths for media info json file
+		Path sourceJson = Paths.get(preprocessService.getMediaInfoJsonPath(sourceMedia.toString()));
+		Path targetJson = Paths.get(preprocessService.getMediaInfoJsonPath(targetMedia.toString()));		
 		
-		// Create paths from /{root}/{unit}/{collection}/{filename}
-		Path existingFile = Paths.get(sourceDir, sourceFilename);	
-		Path newLink = Paths.get(propertyConfig.getFileStorageRoot(), targetFilename);	
+		// move the media and info files
+		// Note: 
+		// At this point both source media and info files must exist, otherwise there would have been exception during preprocess.
+		// If the original file is .flac, the converted .wav file will be moved instead
+		targetMedia = fileStorageService.move(sourceMedia, targetMedia);
+		targetJson = fileStorageService.move(sourceJson, sourceJson);
 		
-		String existingJson = preprocessService.getMediaInfoJsonPath(existingFile.toString());
-		String newJson = preprocessService.getMediaInfoJsonPath(newLink.toString());
-		
-		// Move/link the files
-		// Note: if the original file is .flac, the converted .wav file will be moved instead
-		fileStorageService.linkFile(existingFile, newLink);
-		fileStorageService.linkFile(Paths.get(existingJson), Paths.get(newJson));
-		
-		return newLink;
+		return targetMedia;
 	}
 	
 	/*

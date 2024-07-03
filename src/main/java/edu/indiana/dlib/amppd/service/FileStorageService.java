@@ -92,28 +92,29 @@ public interface FileStorageService {
 	public Path store(MultipartFile sourceFile, String targetPathname);
 
 	/**
+	 * Move a file or directory from the specified source path to the specified target path.
+	 * If the source doesn't exist, no action will be taken; if the target already exists, it will be replaced.
+	 * @param sourcePath the specified source path
+	 * @param targetPath the specified target path
+	 * @return the path of the target if moved, null otherwise
+	 */
+	public Path move(Path sourcePath, Path targetPath);
+
+	/**
 	 * Move a file or directory from the specified source pathname to the specified target pathname.
 	 * If the source doesn't exist, no action will be taken; if the target already exists, it will be replaced.
 	 * @param sourcePathname the specified source pathname
 	 * @param targetPathname the specified target pathname
-	 * @return the path of the target pathname if moved, null otherwise
+	 * @return the path of the target path if moved, null otherwise
 	 */
 	public Path move(String sourcePathname, String targetPathname);
-
+	
 	/**
 	 * Delete the file/directory recursively with the specified pathname if exists, no action otherwise.
 	 * @param pathname the specified pathname
 	 * @return the path of the file/directory if deleted, null otherwise
 	 */
 	public Path delete(String pathname);
-	
-	/**
-	 * Link a file from the source to the destination by creating a hard link and then deleting the original file.  
-	 * @param sourcePath Source file path
-	 * @param targetPath Destination file path
-	 * @return the destination file path
-	 */
-	public Path linkFile(Path sourcePath, Path targetPath);
 	
 	/**
 	 * Read all content from the given text file to a string using UTF-8 encoding.
@@ -147,6 +148,7 @@ public interface FileStorageService {
 	 * Clean up all files under the file storage root.
 	 */
 	public void cleanup();
+	
 		
 //	/**
 //	 * Upload the given file for the given primaryfile.
