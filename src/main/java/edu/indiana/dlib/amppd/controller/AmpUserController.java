@@ -74,8 +74,8 @@ public class AmpUserController {
 	public ResponseEntity<?> validateToken() throws Exception {
 		// TODO
 		// this API simply returns 200 status if the token in the request is valid,
-		// the only purpose is for frontend to verify if its locally stored auth token is valid (not compromised)
-		// before forwarding any route. there ise better way to achieve this without an extra API call
+		// the only purpose is for frontend to verify if its locally stored auth token is valid (not compromised/expired)
+		// before forwarding any route. there is better way to achieve this without an extra API call
 		return ResponseEntity.ok("Success");
 	}
 

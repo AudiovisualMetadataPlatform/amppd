@@ -39,12 +39,14 @@ import edu.indiana.dlib.amppd.repository.CollectionRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.service.BatchValidationService;
 import edu.indiana.dlib.amppd.service.DropboxService;
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of BatchValidationService.
  */ 
 @Service
+@Slf4j
 public class BatchValidationServiceImpl implements BatchValidationService {
 	
 	@Autowired
@@ -66,8 +68,8 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	private DropboxService dropboxService;
 
 	@Transactional	
-	public BatchValidationResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
-		BatchValidationResponse response;
+	public BatchResponse validateBatch(String unitName, AmpUser user, MultipartFile file) {
+		BatchResponse response;
 		StringBuilder textBuilder = new StringBuilder();
 		try (InputStream inputStream = file.getInputStream()) {
 		    try (Reader reader = new BufferedReader(new InputStreamReader
@@ -79,8 +81,10 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		    }
 		   
 		} catch (IOException e) {
-			response = new BatchValidationResponse();
-			response.addError("Unable to parse CSV file");
+			response = new BatchResponse();
+			response.addValidationError("Unable to parse batch ingest manifest " + file.getName());
+			response.setSuccess(false);
+			log.error("Failed to parse batch ingest manifest " + file.getName(), e);
 			return response;
 		}
 		return validate(unitName, file.getOriginalFilename(), user, textBuilder.toString());
@@ -180,15 +184,16 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the CSV
 	 */
-	public BatchValidationResponse validate(String unitName, String filename, AmpUser user, String fileContent) {
-		BatchValidationResponse response = new BatchValidationResponse();
+	public BatchResponse validate(String unitName, String filename, AmpUser user, String fileContent) {
+		BatchResponse response = new BatchResponse();
 		
 		// Turn the string into a list of string arrays representing rows
 		List<String[]> lines = parse(fileContent);
 		
 		// If we have no rows, quit now
 		if(lines.size()<=1) {
-			response.addError("Invalid file. No rows supplied.");
+			response.addValidationError("Invalid file. No rows supplied.");
+			response.setSuccess(false);  
 			return response;
 		}
 
@@ -196,17 +201,18 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		
 		// Validate supplied unit name
 		List<String> unitErrors = validateUnit(batch.getUnit());
-    	response.addErrors(unitErrors);
+    	response.addValidationErrors(unitErrors);
 		
     	// If we have an invalid unit, no point on continuing with validation
 		if(unitErrors.size()>0) {
+			response.setSuccess(false);  
 			return response;
 		}
 				
         for(BatchFile batchFile : batch.getBatchFiles()) {        	
     		// Validate supplied collection name
     		List<String> collectionNameErrors = validateCollection(batch.getUnit(), batchFile.getCollection(), batchFile.getRowNum(), batchFile.getCollectionName());
-        	response.addErrors(collectionNameErrors);
+        	response.addValidationErrors(collectionNameErrors);
 
         	// If we have an invalid collection, no point on continuing with validation
     		if(collectionNameErrors.size()>0) {
@@ -216,35 +222,43 @@ public class BatchValidationServiceImpl implements BatchValidationService {
     		
     		// validate item fields
         	List<String> itemErrors = validateItem( batchFile.getItemName(), batchFile.getSupplementType(), batchFile.getRowNum());
-        	response.addErrors(itemErrors);
+        	response.addValidationErrors(itemErrors);
 
 			// validate external id and source
 			List<String> externalSrcIdErrors = validateExternalSrcAndId( batchFile.getExternalSource(), batchFile.getExternalId(), batchFile.getRowNum());
-			response.addErrors(externalSrcIdErrors);
+			response.addValidationErrors(externalSrcIdErrors);
         	
         	// validate primaryfile fields
         	List<String> primaryfileErrors = validatePrimaryfile(batch.getUnit(), batchFile.getCollection(), batchFile.getPrimaryfileFilename(), batchFile.getPrimaryfileName(), batchFile.getSupplementType(), batchFile.getRowNum());
-        	response.addErrors(primaryfileErrors);
+        	response.addValidationErrors(primaryfileErrors);
         	
         	// Check for duplicate primaryfiles if ingesting primaryfile
         	SupplementType supplementType = batchFile.getSupplementType();
         	if(supplementType == null || (supplementType==SupplementType.PRIMARYFILE && !batchFile.getPrimaryfileFilename().isBlank())) {
             	List<String> duplicatePrimaryfileErrors = validateUniquePrimaryfile(batch, batchFile);
-            	response.addErrors(duplicatePrimaryfileErrors);
+            	response.addValidationErrors(duplicatePrimaryfileErrors);
         	}
         	
         	// For each supplement, validate the values and make sure there are no duplicates
     		for(BatchSupplementFile supplement : batchFile.getBatchSupplementFiles()) {
     			List<String> supplementErrors = validateSupplement(batch.getUnit(), batchFile.getCollection(),  supplement.getSupplementFilename(), supplement.getSupplementName(), batchFile.getSupplementType(), batchFile.getRowNum());
-    			response.addErrors(supplementErrors);
+    			response.addValidationErrors(supplementErrors);
     			
     			List<String> duplicateSupplementErrors = validateUniqueSupplement(batch, batchFile, supplement);
-    			response.addErrors(duplicateSupplementErrors);
+    			response.addValidationErrors(duplicateSupplementErrors);
     		}
         }
         
-        // If we have no errors, save the batch and add it to the response
-        if(!response.hasErrors()) {
+        // if there're validation errors, log them
+        if (response.hasValidationErrors()) {
+        	response.setSuccess(false);  
+        	log.error("Failed to validate batch ingest manifest " + filename);
+			for (String error : response.getValidationErrors()) {
+				log.error(error);
+			}
+        }
+        // otherwise, save the batch
+        else {
         	batchRepository.save(batch);
         	batchFileRepository.saveAll(batch.getBatchFiles());
         	
@@ -252,10 +266,11 @@ public class BatchValidationServiceImpl implements BatchValidationService {
         		batchSupplementFileRepository.saveAll(batchFile.getBatchSupplementFiles());
         	}
         	
-        	response.setBatch(batch);        	
         	response.setSuccess(true);
+        	log.info("Successfully validated batch ingest manifest " + filename);
         }
         
+       	response.setBatch(batch);        	
         return response;
 	}
 	

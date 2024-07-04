@@ -40,7 +40,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileSupplementRepository;
 import edu.indiana.dlib.amppd.repository.UnitRepository;
 import edu.indiana.dlib.amppd.util.TestHelper;
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchResponse;
 
 @Ignore
 @RunWith(SpringRunner.class)
@@ -184,7 +184,7 @@ public class BatchServiceTests {
         
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
 
         if(response.getValidationErrors()!=null) {
             for(String s : response.getValidationErrors()) {
@@ -192,7 +192,7 @@ public class BatchServiceTests {
             }
         }
         
-        Assert.assertFalse(response.hasErrors());
+        Assert.assertFalse(response.hasValidationErrors());
         
         response = batchService.processBatch(response, ampUsername);
         
@@ -213,9 +213,9 @@ public class BatchServiceTests {
         
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertFalse(response.hasErrors());
+        Assert.assertFalse(response.hasValidationErrors());
 	}
 	
 	/*
@@ -233,9 +233,9 @@ public class BatchServiceTests {
                 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Invalid Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Invalid Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 	
 	/*
@@ -253,9 +253,9 @@ public class BatchServiceTests {
                 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Invalid Collection", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Invalid Collection", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 
 	/*
@@ -276,9 +276,9 @@ public class BatchServiceTests {
 
 		Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
 
-		BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+		BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
 
-		Assert.assertTrue(response.hasErrors());
+		Assert.assertTrue(response.hasValidationErrors());
 
 		if(response.getValidationErrors()!=null) {
 			Boolean deactivatedErrorMessage = false;
@@ -305,9 +305,9 @@ public class BatchServiceTests {
                 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 
 	/*
@@ -323,9 +323,9 @@ public class BatchServiceTests {
                         
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 	
 	/*
@@ -341,9 +341,9 @@ public class BatchServiceTests {
                         
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 	
 	/*
@@ -359,9 +359,9 @@ public class BatchServiceTests {
 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 	
 	@Test
@@ -374,9 +374,9 @@ public class BatchServiceTests {
 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertFalse(response.hasErrors());
+        Assert.assertFalse(response.hasValidationErrors());
 	}
 	
 	/*
@@ -392,9 +392,9 @@ public class BatchServiceTests {
 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 	
 	/*
@@ -410,9 +410,9 @@ public class BatchServiceTests {
 
         Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
         
-        BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+        BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
         
-        Assert.assertTrue(response.hasErrors());
+        Assert.assertTrue(response.hasValidationErrors());
 	}
 
 	@Ignore
@@ -427,7 +427,7 @@ public class BatchServiceTests {
 
 		Optional<AmpUser> users = ampUserRepository.findByUsername(ampUsername);
 
-		BatchValidationResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
+		BatchResponse response = manifestService.validate("Test Unit", "Test File", users.get(), content);
 
 		if(response.getValidationErrors()!=null) {
 			for(String s : response.getValidationErrors()) {
@@ -435,7 +435,7 @@ public class BatchServiceTests {
 			}
 		}
 
-		Assert.assertFalse(response.hasErrors());
+		Assert.assertFalse(response.hasValidationErrors());
 
 		response = batchService.processBatch(response, ampUsername);
 

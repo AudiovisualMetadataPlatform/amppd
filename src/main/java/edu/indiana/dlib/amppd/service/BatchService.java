@@ -1,6 +1,6 @@
 package edu.indiana.dlib.amppd.service;
 
-import edu.indiana.dlib.amppd.web.BatchValidationResponse;
+import edu.indiana.dlib.amppd.web.BatchResponse;
 /**
  * Handles the processing of a Batch once it has been validated.  Processing includes creating all database
  * objects and moving files to the destination directory
@@ -16,5 +16,5 @@ public interface BatchService {
 	 * @param username
 	 * @return
 	 */
-	BatchValidationResponse processBatch(BatchValidationResponse batchValidation, String username);
+	BatchResponse processBatch(BatchResponse batchValidation, String username);
 }
