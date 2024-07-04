@@ -558,7 +558,7 @@ public class BatchServiceImpl implements BatchService {
 		// At this point both source media and info files must exist, otherwise there would have been exception during preprocess.
 		// If the original file is .flac, the converted .wav file will be moved instead
 		targetMedia = fileStorageService.move(sourceMedia, targetMedia);
-		targetJson = fileStorageService.move(sourceJson, sourceJson);
+		targetJson = fileStorageService.move(sourceJson, targetJson);
 		
 		return targetMedia;
 	}
