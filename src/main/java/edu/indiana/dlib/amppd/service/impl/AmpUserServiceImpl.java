@@ -608,36 +608,41 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String password = amppdPropertyConfig.getPassword();
 		String encryppw = MD5Encryption.getMd5(password);
 		AmpUser admin = getUser(username);
+		boolean update = false;
 
 		// create admin user if not existing yet
 		if (admin == null) {
 			admin = new AmpUser();
 			admin.setUsername(username);
+			update = true;
+			log.info("Initializing the new AMP admin account ...");
+		}
+		// otherwise verify the existing admin account info
+		// Note:
+		// For usual AMP users, the username is the same as the email address;
+		// For AMP admin, we intentionally configure the username not in email address pattern, 
+		// so as to avoid possible conflict with user registration.
+		// However, if the admin account info is changed manually in DB i.e. not by AMP app (strongly recommended against), 
+		// the inconsistency could cause potential issues, in which case, a warning is given below.
+		// The alternative is to override DB info with config info, but we chose not to do so for now.			
+		else if (!StringUtils.equals(encryppw, admin.getPassword()) ||
+					!StringUtils.equals(adminEmail, admin.getEmail()) ||
+					!StringUtils.equals(ADMIN_FIRST_NAME, admin.getFirstName()) ||
+					!StringUtils.equals(ADMIN_LAST_NAME, admin.getLastName())) {
+			update = true;
+			log.warn("The AMP admin user account already exists, but its password, email, and/or name are different from the current configuration; the old values will be updated.");							
+		}
+
+		// update admin account info as needed and reset status
+		if (update) {
 			admin.setPassword(encryppw);
 			admin.setEmail(adminEmail);
 			admin.setFirstName(ADMIN_FIRST_NAME);
 			admin.setLastName(ADMIN_LAST_NAME);
-			log.info("Initializing the new AMP admin account ...");
 		}
-		// otherwise verify the existing admin account info
-		else {
-			// Note:
-			// For usual AMP users, the username is the same as the email address;
-			// For AMP admin, we intentionally configure the username not in email address pattern, 
-			// so as to avoid possible conflict with user registration.
-			// However, if the admin account info is changed manually in DB i.e. not by AMP app (strongly recommended against), 
-			// the inconsistency could cause potential issues, in which case, a warning is given below.
-			// The alternative is to override DB info with config info, but we chose not to do so for now.			
-			if (!StringUtils.equals(encryppw, admin.getPassword()) ||
-					!StringUtils.equals(adminEmail, admin.getEmail()) ||
-					!StringUtils.equals(ADMIN_FIRST_NAME, admin.getFirstName()) ||
-					!StringUtils.equals(ADMIN_LAST_NAME, admin.getLastName())) {
-				log.warn("The AMP admin user account already exists, but its password, email, or name is different from the configuration. Please verify/update your configuration to be consistent with the database.");			
-			}			
-		}
-
+		
 		// for new admin or existing admin account which somehow didn't get activated, update the status and save to repository
-		if (admin.getStatus() != AmpUser.Status.ACTIVATED) {
+		if (update || admin.getStatus() != AmpUser.Status.ACTIVATED) {
 			admin.setStatus(AmpUser.Status.ACTIVATED);
 			ampUserRepository.save(admin);
 			log.info("Activated the new or existing AMP admin account to be ready for use.");
