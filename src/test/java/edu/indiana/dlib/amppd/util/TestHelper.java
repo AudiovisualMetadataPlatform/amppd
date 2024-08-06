@@ -585,12 +585,13 @@ public class TestHelper {
 		}
 
 		// otherwise, prepare the parent hierarchy as needed by file upload file path calculation
-    	Collection collection = null;
+		Unit unit = null;
+		Collection collection = null;
     	Item item = null;
     	Primaryfile primaryfile = null;
     	
     	if (type == SupplementType.UNIT || type == SupplementType.COLLECTION || type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
-    		Unit unit = new Unit();
+    		unit = new Unit();
     		unit.setName("Unit for " + name);
     		unit.setDescription("unit for tests");	  
     		unit.setTaskManager(TASK_MANAGER);  	
