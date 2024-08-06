@@ -226,6 +226,7 @@ public class TestHelper {
 		unit = new Unit();
     	unit.setName(name);
     	unit.setDescription("unit for tests");	  
+    	unit.setTaskManager("Jira");
     	unit = unitRepository.save(unit);
 		return unit;
 	}
@@ -256,7 +257,6 @@ public class TestHelper {
     	collection.setUnit(unit);
     	collection.setName(name);
     	collection.setDescription("collection for tests");
-    	collection.setTaskManager("Jira");
     	collection = collectionRepository.save(collection);
 		return collection;
 	}
@@ -288,7 +288,6 @@ public class TestHelper {
     	collection.setName(name);
 		collection.setActive(false);
     	collection.setDescription("collection for tests");
-    	collection.setTaskManager("Jira");
     	collection = collectionRepository.save(collection);
 		return collection;
 	}
@@ -586,40 +585,43 @@ public class TestHelper {
 		}
 
 		// otherwise, prepare the parent hierarchy as needed by file upload file path calculation
-		Unit unit = new Unit();
-    	unit.setName("Unit for " + name);
-    	unit.setDescription("unit for tests");	  
-    	unit = unitRepository.save(unit);
     	Collection collection = null;
     	Item item = null;
     	Primaryfile primaryfile = null;
     	
-    	if (type == SupplementType.COLLECTION || type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
-			collection = new Collection();
-			collection.setName("Collection for " + name);
-			collection.setDescription("collection for tests");  	
-			collection.setTaskManager(TASK_MANAGER);  	
-	    	collection.setUnit(unit);
-	    	collection = collectionRepository.save(collection);
-    	
-	    	if (type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
-	    		item = new Item();
-	    		item.setName("Item for " + name);
-	    		item.setDescription("item for tests");  
-	    		item.setExternalSource(TEST_EXTERNAL_SOURCE);
-	    		item.setExternalSource(TEST_EXTERNAL_ID);
-	    		item.setCollection(collection);
-	    		item = itemRepository.save(item);
+    	if (type == SupplementType.UNIT || type == SupplementType.COLLECTION || type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
+    		Unit unit = new Unit();
+    		unit.setName("Unit for " + name);
+    		unit.setDescription("unit for tests");	  
+    		unit.setTaskManager(TASK_MANAGER);  	
+    		unit = unitRepository.save(unit);
 
-	    		if (type == SupplementType.PRIMARYFILE) {
-	    			primaryfile = new Primaryfile();
-	    			primaryfile.setName("Primaryfile for " + name);
-	    			primaryfile.setDescription("primaryfile for tests");			
-	    	    	primaryfile.setItem(item);
-	    			primaryfile = primaryfileRepository.save(primaryfile);
-	    		}
-	    	}
-    	}    	
+    		if (type == SupplementType.COLLECTION || type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
+    			collection = new Collection();
+    			collection.setName("Collection for " + name);
+    			collection.setDescription("collection for tests");  	
+    			collection.setUnit(unit);
+    			collection = collectionRepository.save(collection);
+
+    			if (type == SupplementType.ITEM || type == SupplementType.PRIMARYFILE) {
+    				item = new Item();
+    				item.setName("Item for " + name);
+    				item.setDescription("item for tests");  
+    				item.setExternalSource(TEST_EXTERNAL_SOURCE);
+    				item.setExternalSource(TEST_EXTERNAL_ID);
+    				item.setCollection(collection);
+    				item = itemRepository.save(item);
+
+    				if (type == SupplementType.PRIMARYFILE) {
+    					primaryfile = new Primaryfile();
+    					primaryfile.setName("Primaryfile for " + name);
+    					primaryfile.setDescription("primaryfile for tests");			
+    					primaryfile.setItem(item);
+    					primaryfile = primaryfileRepository.save(primaryfile);
+    				}
+    			}
+    		}    	
+    	}
 		
 		// and prepare the resource file with the above filename 
     	MultipartFile file = null;

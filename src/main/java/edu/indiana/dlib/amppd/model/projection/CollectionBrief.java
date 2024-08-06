@@ -13,7 +13,6 @@ import edu.indiana.dlib.amppd.model.Collection;
 public interface CollectionBrief extends ContentBrief {
 
 	public Boolean getActive();	
-	public String getTaskManager();
 	
 	@Value("#{target.unit.name}")
 	public String getUnitName();
