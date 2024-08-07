@@ -28,7 +28,7 @@ public class DataEntityTemplate implements TemplateLoader {
 	@Override
 	public void load() {
 //		String[] supplementCategories = dataentityService.getSupplementCategories();
-//		String[] taskManagers = dataentityService.getExternalSources();
+//		String[] taskManagers = dataentityService.getTaskManagers();
 //		String[] externalSources = dataentityService.getExternalSources();
 //		
 //		Unit unit = testHelper.ensureUnit("Test Unit");
@@ -60,16 +60,13 @@ public class DataEntityTemplate implements TemplateLoader {
 			add("description", "Description for ${name}");	
 			add("externalSource", regex(EXTERNAL_SOURCE));
 			add("externalId", regex("external-" + idRegex));
-			add("taskManager", regex(TASK_MANAGER));
 //			add("externalSource", externalSources[rand.nextInt(externalSources.length)]);
-//			add("taskManager", taskManagers[rand.nextInt(taskManagers.length)]);
 //			add("unit", unitUrl);
 		}}); 
 			
 		Fixture.of(Collection.class).addTemplate("invalid", new Rule() {{
 			add("name", "");
 			add("externalSource", "FakeExternalSource");
-			add("taskManager", "FakeTaskManager");
 		}}); 
 
 		Fixture.of(Item.class).addTemplate("valid", new Rule() {{			

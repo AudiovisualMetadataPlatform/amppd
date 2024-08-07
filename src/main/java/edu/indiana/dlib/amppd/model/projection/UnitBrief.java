@@ -11,4 +11,6 @@ import edu.indiana.dlib.amppd.model.Unit;
 @Projection(name = "brief", types = {Unit.class}) 
 public interface UnitBrief extends DataentityBrief {
 
+	public String getTaskManager();
+
 }
