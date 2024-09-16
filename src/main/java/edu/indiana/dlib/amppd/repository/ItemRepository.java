@@ -53,7 +53,7 @@ public interface ItemRepository extends ContentRepository<Item> {
 			" c.name as collectionName, u.name as unitName, c.id as collectionId, u.id as unitId" + 
 			" from item i, collection c, unit u, websearch_to_tsquery(:keyword) q" +
 			" where i.collection_id = c.id and c.unit_id = u.id" +
-			" and q @@ to_tsvector(i.name || ' ' || coalesce(i.description, '') || ' ' || coalesce(i.external_id, ''))" + 
+			" and q @@ to_tsvector(concat(i.name, ' ', i.description, ' ', i.external_id))" + 
 			" order by i.name")
 	List<ItemInfo> findByKeyword(String keyword);
 	
@@ -65,7 +65,7 @@ public interface ItemRepository extends ContentRepository<Item> {
 			" c.name as collectionName, u.name as unitName, c.id as collectionId, u.id as unitId" + 
 			" from item i, collection c, unit u, websearch_to_tsquery(:keyword) q" +
 			" where i.collection_id = c.id and c.unit_id = u.id and u.id in :acUnitIds" +
-			" and q @@ to_tsvector(i.name || ' ' || coalesce(i.description, '') || ' ' || coalesce(i.external_id, ''))" + 
+			" and q @@ to_tsvector(concat(i.name, ' ', i.description, ' ', i.external_id))" + 
 			" order by i.name")
 	List<ItemInfo> findByKeywordAC(String keyword, Set<Long> acUnitIds);		
 		
