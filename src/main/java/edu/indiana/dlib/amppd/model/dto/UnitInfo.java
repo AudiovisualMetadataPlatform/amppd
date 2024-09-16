@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Class for Unit brief DTO.
+ * @author yingfeng
+ */
 @Data
 @NoArgsConstructor 
 @AllArgsConstructor

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 
@@ -100,10 +101,10 @@ public class PreprocessServiceImpl implements PreprocessService {
 			String originalFilename = FilenameUtils.getBaseName(asset.getOriginalFilename()) + ".wav";
 			asset.setOriginalFilename(originalFilename);
 			asset.setPathname(targetFilePath);
-			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getId());		
+			log.info("Updated media file path after flac->wav conversion for asset: " + asset.getName());		
 		}
 		else {
-			log.info("No conversion is needed for asset: " + asset.getId());
+			log.info("No conversion is needed for asset: " + asset.getName());
 		}
 		
 		return asset;
@@ -143,11 +144,11 @@ public class PreprocessServiceImpl implements PreprocessService {
 				// capture the error outputs into log
 				log.error(fileStorageService.readTextFile(jsonpath));
 		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
+//				// workaround for local debugging in case ffmpeg/ffprobe is not available
+//				// fake a the json file by writing some string to it
+//				Files.write(fileStorageService.resolve(jsonpath), "{\"tags\": \"fake media info\"}".getBytes());
 		    }
 
-//			// workaround for local debugging in case ffmpeg/ffprobe is not available
-//			// fake a the json file by writing some string to it
-//			Files.write(fileStorageService.resolve(jsonpath), "{\"tags\": \"fake media info\"}".getBytes());
 		}
 		catch (IOException e) {
 			throw new PreprocessException("Error while retrieving media info for " + filepath, e);
@@ -176,11 +177,11 @@ public class PreprocessServiceImpl implements PreprocessService {
 	public Asset retrieveMediaInfo(Asset asset) {
 		String mediaInfo = retrieveMediaInfo(asset.getPathname());
 		if (StringUtils.isEmpty(mediaInfo)) {
-			throw new PreprocessException("Error retrieving media info for Asset " + asset.getId() + ": the result is empty");
+			throw new PreprocessException("Error retrieving media info for Asset " + asset.getName() + ": the result is empty");
 		}
 
 		asset.setMediaInfo(mediaInfo);
-		log.info("Retrieved media info for asset: " + asset.getId());
+		log.info("Retrieved media info for asset: " + asset.getName());
 		return asset;
 	}
 	
@@ -195,7 +196,7 @@ public class PreprocessServiceImpl implements PreprocessService {
 		if (persist) {
 			asset = dataentityService.saveAsset(asset); 
 		}
-		log.info("Successfully preprocessed asset: " + asset.getId());
+		log.info("Successfully preprocessed asset: " + asset.getName());
 		return asset;
 	}
 	

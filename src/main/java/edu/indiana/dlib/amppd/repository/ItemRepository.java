@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import edu.indiana.dlib.amppd.model.CollectionSupplement;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.dto.ItemInfo;
 import edu.indiana.dlib.amppd.model.projection.ItemBrief;
 
 
@@ -35,14 +35,40 @@ public interface ItemRepository extends ContentRepository<Item> {
 	//	@Query(value = "select i from Item i where lower(i.name) like %:keyword.toLowerCase()% or lower(i.description) like %:keyword.toLowerCase()%")
 	//	@Query(value = "select i from Item i where lower(i.name) like %:#{keyword.toLowerCase()}% or lower(i.description) like %:#{keyword.toLowerCase()}%")
 	
-	@RestResource(exported = false)
-	@Query(value = "select i from Item i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
-	List<ItemBrief> findByKeyword(@Param("keyword") String keyword);		
-
-	@RestResource(exported = false)
-	@Query(value = "select i from Item i where (lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))) and i.collection.unit.id in :acUnitIds")
-	List<ItemBrief> findByKeywordAC(@Param("keyword") String keyword, Set<Long> acUnitIds);		
+//	@Deprecated
+//	@RestResource(exported = false)
+//	@Query(value = "select i from Item i where lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))")
+//	List<ItemBrief> findByKeyword(@Param("keyword") String keyword);		
+//
+//	@Deprecated
+//	@RestResource(exported = false)
+//	@Query(value = "select i from Item i where (lower(i.name) like lower(concat('%', :keyword,'%')) or lower(i.description) like lower(concat('%', :keyword,'%'))) and i.collection.unit.id in :acUnitIds")
+//	List<ItemBrief> findByKeywordAC(@Param("keyword") String keyword, Set<Long> acUnitIds);		
 	
+	// full text search on item using native PostgreSql search tools, without AC	
+	@RestResource(exported = false)
+	@Query(nativeQuery = true,
+	value = "select i.id, i.name, i.description, i.external_id as externalId, i.external_source as externalSource," + 
+			" i.created_date as createdDate, i.modified_date as modifiedDate, i.created_by as createdBy, i.modified_by as modifiedBy," +
+			" c.name as collectionName, u.name as unitName, c.id as collectionId, u.id as unitId" + 
+			" from item i, collection c, unit u, websearch_to_tsquery(:keyword) q" +
+			" where i.collection_id = c.id and c.unit_id = u.id" +
+			" and q @@ to_tsvector(concat(i.name, ' ', i.description, ' ', i.external_id))" + 
+			" order by i.name")
+	List<ItemInfo> findByKeyword(String keyword);
+	
+	// full text search on item using native PostgreSql search tools, , with AC
+	@RestResource(exported = false)
+	@Query(nativeQuery = true,
+	value = "select i.id, i.name, i.description, i.external_id as externalId, i.external_source as externalSource," + 
+			" i.created_date as createdDate, i.modified_date as modifiedDate, i.created_by as createdBy, i.modified_by as modifiedBy," +
+			" c.name as collectionName, u.name as unitName, c.id as collectionId, u.id as unitId" + 
+			" from item i, collection c, unit u, websearch_to_tsquery(:keyword) q" +
+			" where i.collection_id = c.id and c.unit_id = u.id and u.id in :acUnitIds" +
+			" and q @@ to_tsvector(concat(i.name, ' ', i.description, ' ', i.external_id))" + 
+			" order by i.name")
+	List<ItemInfo> findByKeywordAC(String keyword, Set<Long> acUnitIds);		
+		
 	@RestResource(exported = false)
 	@Modifying
 	@Query(value = "update Item set name = :name where id = :id") 

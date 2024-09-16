@@ -4,6 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+/**
+ * Class for Primaryfile brief DTO.
+ * @author yingfeng
+ */
 @Data
 @NoArgsConstructor 
 @AllArgsConstructor 

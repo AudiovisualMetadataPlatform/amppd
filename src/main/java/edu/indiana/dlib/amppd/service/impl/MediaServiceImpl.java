@@ -27,7 +27,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.model.dto.ItemInfo;
+import edu.indiana.dlib.amppd.model.dto.ItemFileInfo;
 import edu.indiana.dlib.amppd.model.dto.PrimaryfileInfo;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
@@ -470,14 +470,14 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public ItemSearchResponse searchItemFiles(String keyword, String mediaType, Set<Long> acUnitIds) {	
 		ItemSearchResponse response = new ItemSearchResponse();
-		List<ItemInfo> iteminfos = new ArrayList<ItemInfo>();
+		List<ItemFileInfo> iteminfos = new ArrayList<ItemFileInfo>();
 
 		try {
 			List<Primaryfile> matchedFiles = acUnitIds == null ?
 					primaryfileRepository.findActiveByKeyword(keyword) :
 					primaryfileRepository.findActiveByKeywordAC(keyword, acUnitIds);
 					
-			ItemInfo iteminfo = new ItemInfo();
+			ItemFileInfo iteminfo = new ItemFileInfo();
 			List<PrimaryfileInfo> primaryfileinfos = new ArrayList<PrimaryfileInfo>();
 			long curr_item_id = 0;
 			
@@ -488,7 +488,7 @@ public class MediaServiceImpl implements MediaService {
 					log.trace("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
 					iteminfo.setPrimaryfiles(primaryfileinfos);
 					iteminfos.add(iteminfo);
-					iteminfo = new ItemInfo();
+					iteminfo = new ItemFileInfo();
 					primaryfileinfos = new ArrayList<PrimaryfileInfo>();					
 				}
 				String mime_type = p.getMimeType();

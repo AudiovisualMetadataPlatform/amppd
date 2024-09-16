@@ -30,7 +30,7 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
-import edu.indiana.dlib.amppd.model.dto.ItemInfo;
+import edu.indiana.dlib.amppd.model.dto.ItemFileInfo;
 import edu.indiana.dlib.amppd.model.dto.PrimaryfileInfo;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -132,8 +132,8 @@ public class WorkflowResultController {
 		List<PrimaryfileIdInfo> pidis = acUnitIds == null ?
 				workflowResultRepository.findPrimaryfileIdsByOutputType(keyword, outputTypes) :
 				workflowResultRepository.findPrimaryfileIdsByOutputTypeAC(keyword, outputTypes, acUnitIds);
-		List<ItemInfo> itemis = response.getItems();	
-		ItemInfo itemi = null;	// current item 
+		List<ItemFileInfo> itemis = response.getItems();	
+		ItemFileInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
 		
 //		// if primaryfile is not used as one input or the required input media type is AV, return above primaryfiles list
@@ -150,7 +150,7 @@ public class WorkflowResultController {
 			Item item = primaryfile.getItem();
 			Collection collection = item.getCollection();
 			if (itemi == null || itemi.getItemId().longValue() != item.getId().longValue()) {
-				itemi = new ItemInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
+				itemi = new ItemFileInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
 			}
 			
 			// if current primaryfile MIME type matches the required media type, add it to the current item 
