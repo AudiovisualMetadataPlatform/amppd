@@ -143,10 +143,10 @@ public class PreprocessServiceImpl implements PreprocessService {
 		    if (status != 0) {		    	
 				// capture the error outputs into log
 				log.error(fileStorageService.readTextFile(jsonpath));
-//		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
-				// workaround for local debugging in case ffmpeg/ffprobe is not available
-				// fake a the json file by writing some string to it
-				Files.write(fileStorageService.resolve(jsonpath), "{\"tags\": \"fake media info\"}".getBytes());
+		    	throw new PreprocessException("Error while retrieving media info for " + filepath + ": MediaProbe exited with status " + status);
+//				// workaround for local debugging in case ffmpeg/ffprobe is not available
+//				// fake a the json file by writing some string to it
+//				Files.write(fileStorageService.resolve(jsonpath), "{\"tags\": \"fake media info\"}".getBytes());
 		    }
 
 		}
