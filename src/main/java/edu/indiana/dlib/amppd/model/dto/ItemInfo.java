@@ -1,20 +1,14 @@
 package edu.indiana.dlib.amppd.model.dto;
 
-import java.util.List;
+import edu.indiana.dlib.amppd.model.projection.ContentBrief;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor 
-@AllArgsConstructor
-public class ItemInfo {
-	private Long collectionId;
-	private String collectionName;
-	private Long itemId;
-	private String itemName;
-	private String externalSource;
-	private String externalId;
-	private List<PrimaryfileInfo> primaryfiles;
+/**
+ * Interface for ItemBrief fields without referring to parent chain objects.
+ * @author yingfeng
+ */
+public interface ItemInfo extends ContentBrief {	
+	public String getCollectionName();	
+	public String getUnitName();
+	public Long getCollectionId();	
+	public Long getUnitId();		
 }
