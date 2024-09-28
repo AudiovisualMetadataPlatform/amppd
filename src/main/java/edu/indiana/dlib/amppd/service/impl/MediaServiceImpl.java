@@ -500,7 +500,7 @@ public class MediaServiceImpl implements MediaService {
 					itemFiless.add(itemFiles);
 				}
 				// create/add child primaryfileInfo instance for the current item  
-				String mime_type = pfile.getMimeType();
+				String mime_type = Asset.getMimeType(pfile.getMediaInfo());
 				PrimaryfileInfo pfileInfo = new PrimaryfileInfo(pfile.getId(), pfile.getName(), mime_type, pfile.getOriginalFilename());
 				pfileInfos.add(pfileInfo);
 			}

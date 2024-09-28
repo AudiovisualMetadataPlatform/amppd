@@ -15,7 +15,9 @@ public interface AssetDetail extends AssetBrief, DataentityDetail {
     public String getPathname();
     public String getSymlink();
     public String getMediaInfo();	
-    public String getAbsolutePathname();	
-    public String getMimeType();	
+    
+    // below 2 transient fields won't be mapped by Spring Data and will return null from DB queries
+//    public String getAbsolutePathname();	
+//    public String getMimeType();	
 
 }
