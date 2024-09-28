@@ -129,11 +129,11 @@ public class WorkflowResultController {
 		}
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
-		List<PrimaryfileIdChain> pidcs = acUnitIds == null ?
+		List<PrimaryfileIdChain> idChains = acUnitIds == null ?
 				workflowResultRepository.findPrimaryfileIdsByOutputType(keyword, outputTypes) :
 				workflowResultRepository.findPrimaryfileIdsByOutputTypeAC(keyword, outputTypes, acUnitIds);
-		List<ItemFilesInfo> ifis = response.getItems();	
-		ItemFilesInfo ifi = null;	// current item 
+		List<ItemFilesInfo> itemFiless = response.getItems();	
+		ItemFilesInfo itemFile = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
 		
 //		// if primaryfile is not used as one input or the required input media type is AV, return above primaryfiles list
@@ -142,19 +142,19 @@ public class WorkflowResultController {
 //		}		
 		
 		// only include primaryfiles with matching media type
-		for (PrimaryfileIdChain pidc : pidcs) {	
-			Long pid = pidc.getPrimaryfileId();
+		for (PrimaryfileIdChain idChain : idChains) {	
+			Long pid = idChain.getPrimaryfileId();
 			Primaryfile primaryfile = primaryfileRepository.findById(pid).orElseThrow(() -> new StorageException("Primaryfile <" + pid + "> does not exist!"));
 			
 			// if current primaryfile belongs to another item than the current item, start a new item as the current item
 			Item item = primaryfile.getItem();
 			Collection collection = item.getCollection();
-			if (ifi == null || ifi.getItemId().longValue() != item.getId().longValue()) {
-				ifi = new ItemFilesInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
+			if (itemFile == null || itemFile.getItemId().longValue() != item.getId().longValue()) {
+				itemFile = new ItemFilesInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
 			}
 			
 			// if current primaryfile MIME type matches the required media type, add it to the current item 
-			List<PrimaryfileInfo> pfileis = ifi.getPrimaryfiles();
+			List<PrimaryfileInfo> pfileis = itemFile.getPrimaryfiles();
 			String mimeType = primaryfile.getMimeType();
 			if (mediaService.isMediaTypeMatched(mimeType, mediaType)) {
 				PrimaryfileInfo pfilei = new PrimaryfileInfo(pid, primaryfile.getName(), mimeType, primaryfile.getOriginalFilename());
@@ -163,7 +163,7 @@ public class WorkflowResultController {
 
 				// add the current item to the item list when its first primaryfile is added 
 				if (pfileis.size() == 1) {
-					ifis.add(ifi);				
+					itemFiless.add(itemFile);				
 				}	
 			}
 		}
