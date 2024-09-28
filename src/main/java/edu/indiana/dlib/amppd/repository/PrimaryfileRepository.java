@@ -10,6 +10,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileBrief;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileDeref;
 
 
 @RepositoryRestResource(excerptProjection = PrimaryfileBrief.class)
@@ -46,12 +47,40 @@ public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	List<Primaryfile> findByCollectionOrItemOrFileName(@Param("keyword") String keyword);
 
 	@RestResource(exported = false)
-	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
-	List<Primaryfile> findActiveByKeyword(String keyword);
+	@Query(nativeQuery = true,
+	value = "select p.id, p.name, p.description, " +
+			"p.original_filename as originalFilename, p.pathname, p.symlink, cast(p.media_info as varchar) as mediaInfo, " + 
+			"p.created_date as createdDate, p.modified_date as modifiedDate, p.created_by as createdBy, p.modified_by as modifiedBy, " +
+			"i.id as itemId, i.name as itemName, i.external_id as externalId, i.external_source as externalSource, " + 
+			"c.id as collectionId, c.name as collectionName, u.id as unitId, u.name as unitName " +
+			"from primaryfile p, item i, collection c, unit u, websearch_to_tsquery(:keyword) q " +
+			"where p.item_id = i.id and i.collection_id = c.id and c.unit_id = u.id and c.active = true " +
+			"and q @@ to_tsvector(concat(p.name, ' ', p.description, ' ', p.original_filename, ' ', " +
+			"i.name, ' ', i.description, ' ', i.external_id, ' ', c.name, ' ', c.description))" +
+			"order by i.id, p.name")
+	List<PrimaryfileDeref> findActiveByKeyword(String keyword);
 	
 	@RestResource(exported = false)
-	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) and p.item.collection.unit.id in :acUnitIds order by p.item.id")
-	List<Primaryfile> findActiveByKeywordAC(String keyword, Set<Long> acUnitIds);
+	@Query(nativeQuery = true,
+	value = "select p.id, p.name, p.description, " +
+			"p.original_filename as originalFilename, p.pathname, p.symlink, cast(p.media_info as varchar) as mediaInfo, " + 
+			"p.created_date as createdDate, p.modified_date as modifiedDate, p.created_by as createdBy, p.modified_by as modifiedBy, " +
+			"i.id as itemId, i.name as itemName, i.external_id as externalId, i.external_source as externalSource, " + 
+			"c.id as collectionId, c.name as collectionName, u.id as unitId, u.name as unitName " +
+			"from primaryfile p, item i, collection c, unit u, websearch_to_tsquery(:keyword) q " +
+			"where p.item_id = i.id and i.collection_id = c.id and c.unit_id = u.id and c.active = true and u.id in :acUnitIds " +
+			"and q @@ to_tsvector(concat(p.name, ' ', p.description, ' ', p.original_filename, ' ', " +
+			"i.name, ' ', i.description, ' ', i.external_id, ' ', c.name, ' ', c.description))" +
+			"order by i.id, p.name")
+	List<PrimaryfileDeref> findActiveByKeywordAC(String keyword, Set<Long> acUnitIds);
+
+//	@RestResource(exported = false)
+//	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) order by p.item.id")
+//	List<Primaryfile> findActiveByKeyword(String keyword);
+//	
+//	@RestResource(exported = false)
+//	@Query(value = "select p from Primaryfile p where p.item.collection.active = true and (lower(p.name) like lower(concat('%', :keyword,'%')) or lower(p.item.name) like lower(concat('%', :keyword,'%')) or lower(p.item.collection.name) like lower(concat('%', :keyword,'%'))) and p.item.collection.unit.id in :acUnitIds order by p.item.id")
+//	List<Primaryfile> findActiveByKeywordAC(String keyword, Set<Long> acUnitIds);
 
 
 	/* TODO 

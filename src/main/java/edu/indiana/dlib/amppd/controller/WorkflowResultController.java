@@ -30,9 +30,9 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
-import edu.indiana.dlib.amppd.model.dto.ItemFileInfo;
+import edu.indiana.dlib.amppd.model.dto.ItemFilesInfo;
 import edu.indiana.dlib.amppd.model.dto.PrimaryfileInfo;
-import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdChain;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.MediaService;
@@ -129,11 +129,11 @@ public class WorkflowResultController {
 		}
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
-		List<PrimaryfileIdInfo> pidis = acUnitIds == null ?
+		List<PrimaryfileIdChain> pidis = acUnitIds == null ?
 				workflowResultRepository.findPrimaryfileIdsByOutputType(keyword, outputTypes) :
 				workflowResultRepository.findPrimaryfileIdsByOutputTypeAC(keyword, outputTypes, acUnitIds);
-		List<ItemFileInfo> itemis = response.getItems();	
-		ItemFileInfo itemi = null;	// current item 
+		List<ItemFilesInfo> itemis = response.getItems();	
+		ItemFilesInfo itemi = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
 		
 //		// if primaryfile is not used as one input or the required input media type is AV, return above primaryfiles list
@@ -142,7 +142,7 @@ public class WorkflowResultController {
 //		}		
 		
 		// only include primaryfiles with matching media type
-		for (PrimaryfileIdInfo pidi : pidis) {	
+		for (PrimaryfileIdChain pidi : pidis) {	
 			Long pid = pidi.getPrimaryfileId();
 			Primaryfile primaryfile = primaryfileRepository.findById(pid).orElseThrow(() -> new StorageException("Primaryfile <" + pid + "> does not exist!"));
 			
@@ -150,7 +150,7 @@ public class WorkflowResultController {
 			Item item = primaryfile.getItem();
 			Collection collection = item.getCollection();
 			if (itemi == null || itemi.getItemId().longValue() != item.getId().longValue()) {
-				itemi = new ItemFileInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
+				itemi = new ItemFilesInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
 			}
 			
 			// if current primaryfile MIME type matches the required media type, add it to the current item 

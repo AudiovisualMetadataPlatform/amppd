@@ -27,8 +27,9 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.Supplement.SupplementType;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.model.dto.ItemFileInfo;
+import edu.indiana.dlib.amppd.model.dto.ItemFilesInfo;
 import edu.indiana.dlib.amppd.model.dto.PrimaryfileInfo;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileDeref;
 import edu.indiana.dlib.amppd.repository.CollectionSupplementRepository;
 import edu.indiana.dlib.amppd.repository.ItemSupplementRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
@@ -220,7 +221,7 @@ public class MediaServiceImpl implements MediaService {
 	 */
 	@Override
 	public String getWorkflowResultOutputUrl(Long workflowResultId) {
-		String url = amppdPropertyConfig.getUrl() + "/workflow-iteminfos/" + workflowResultId + "/output";
+		String url = amppdPropertyConfig.getUrl() + "/workflow-ifInfos/" + workflowResultId + "/output";
 		return url;
 	}
 	
@@ -470,50 +471,50 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public ItemSearchResponse searchItemFiles(String keyword, String mediaType, Set<Long> acUnitIds) {	
 		ItemSearchResponse response = new ItemSearchResponse();
-		List<ItemFileInfo> iteminfos = new ArrayList<ItemFileInfo>();
+		List<ItemFilesInfo> ifInfos = new ArrayList<ItemFilesInfo>();
 
 		try {
-			List<Primaryfile> matchedFiles = acUnitIds == null ?
+			List<PrimaryfileDeref> matchedFiles = acUnitIds == null ?
 					primaryfileRepository.findActiveByKeyword(keyword) :
 					primaryfileRepository.findActiveByKeywordAC(keyword, acUnitIds);
 					
-			ItemFileInfo iteminfo = new ItemFileInfo();
+			ItemFilesInfo ifInfo = new ItemFilesInfo();
 			List<PrimaryfileInfo> primaryfileinfos = new ArrayList<PrimaryfileInfo>();
-			long curr_item_id = 0;
+			long itemId = 0;
 			
-			// TODO refactor below code and add logic to handle mediaType criteria, reuse logic in getPrimaryfilesForPartialWorkflow
-			for(Primaryfile p : matchedFiles) {
-				//reset if the current item is a new entry
-				if(p.getItem().getId() != curr_item_id && primaryfileinfos.size()>0) {
-					log.trace("Now new item id:"+p.getItem().getId()+" curr item id:"+curr_item_id);
-					iteminfo.setPrimaryfiles(primaryfileinfos);
-					iteminfos.add(iteminfo);
-					iteminfo = new ItemFileInfo();
+			// TODO mediaType is currently not used as search criteria and may be removed from parameters; otherwise,
+			// refactor below code and add logic to handle mediaType criteria, reuse logic in getPrimaryfilesForPartialWorkflow
+			for (PrimaryfileDeref p : matchedFiles) {
+				// reset if the current item is a new entry
+				if (p.getItemId() != itemId && primaryfileinfos.size() > 0) {
+					ifInfo.setPrimaryfiles(primaryfileinfos);
+					ifInfos.add(ifInfo);
+					ifInfo = new ItemFilesInfo();
 					primaryfileinfos = new ArrayList<PrimaryfileInfo>();					
 				}
 				String mime_type = p.getMimeType();
-				curr_item_id = p.getItem().getId();
-				iteminfo.setCollectionId(p.getItem().getCollection().getId());
-				iteminfo.setCollectionName(p.getItem().getCollection().getName());
-				iteminfo.setItemId(p.getItem().getId());
-				iteminfo.setItemName(p.getItem().getName());
-				iteminfo.setExternalSource(p.getItem().getExternalSource());
-				iteminfo.setExternalId(p.getItem().getExternalId());
+				itemId = p.getItemId();
+				ifInfo.setCollectionId(p.getCollectionId());
+				ifInfo.setCollectionName(p.getCollectionName());
+				ifInfo.setItemId(p.getId());
+				ifInfo.setItemName(p.getItemName());
+				ifInfo.setExternalSource(p.getExternalSource());
+				ifInfo.setExternalId(p.getExternalId());
 				PrimaryfileInfo primaryfileinfo = new PrimaryfileInfo(p.getId(), p.getName(), mime_type, p.getOriginalFilename());
 				primaryfileinfos.add(primaryfileinfo);
 			}
 			
-			//add the last item to the iteminfos
-			if(primaryfileinfos.size()>0) {
-				iteminfo.setPrimaryfiles(primaryfileinfos);
-				iteminfos.add(iteminfo);
-				response.setItems(iteminfos);
+			// add the last item to ifInfos
+			if (primaryfileinfos.size() > 0) {
+				ifInfo.setPrimaryfiles(primaryfileinfos);
+				ifInfos.add(ifInfo);
+				response.setItems(ifInfos);
 			}
 			else {
 				response.setError("No primary file found");
 			}
 			response.setSuccess(true);
-			log.info("Successfully found " + iteminfos.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
+			log.info("Successfully found " + ifInfos.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
 		} catch (Exception e) {
 			response.setError(e.getMessage());
 			response.setSuccess(false);

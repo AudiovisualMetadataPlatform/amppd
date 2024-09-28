@@ -157,7 +157,7 @@ public class MediaController {
 	@GetMapping(path = "/primaryfiles/search/findByKeywordMediaType")
 	public @ResponseBody ItemSearchResponse searchItemFiles(
 			@RequestParam("keyword") String keyword, 
-			@RequestParam("mediaType") String mediaType,
+			@RequestParam(required = false) String mediaType,
 			@RequestParam(required = false) ActionType actionType, 
 			@RequestParam(required = false) TargetType targetType) {							
 		// if action not specified, default to Read WorkflowResult
@@ -170,9 +170,9 @@ public class MediaController {
 		}
 		
 		/* Note: 
-		 * Create WorkflowResult instead of Read Item/Primaryfile permission is used here,
-		 * because this search action is solely used for submitting PFiles to a workflow; 
-		 * if AC defined properly, the former is a stronger privilege than the latter.
+		 * Create WorkflowResult instead of Read Item/Primaryfile permission should be used
+		 * if this search action is used for submitting PFiles to a workflow; 
+		 * if AC is defined properly, the former is a stronger privilege than the latter.
 		 * We need to make sure the search results are all good for workflow submission.
 		 */		
 		// get accessible units for Create WorkflowResult (if none, access denied exception will be thrown)
@@ -180,6 +180,7 @@ public class MediaController {
 		// otherwise, all queries below are limited within the accessible units
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(actionType, targetType);
 
+		// TODO mediaType is currently not used by frontend as search criteria and may be removed from parameters
 		log.info("Searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);
 		ItemSearchResponse res = new ItemSearchResponse();
 		res = mediaService.searchItemFiles(keyword, mediaType, acUnitIds);
