@@ -471,53 +471,46 @@ public class MediaServiceImpl implements MediaService {
 	@Override
 	public ItemSearchResponse searchItemFiles(String keyword, String mediaType, Set<Long> acUnitIds) {	
 		ItemSearchResponse response = new ItemSearchResponse();
-		List<ItemFilesInfo> ifInfos = new ArrayList<ItemFilesInfo>();
-
+		List<ItemFilesInfo> itemFiless = new ArrayList<ItemFilesInfo>();
+		long itemId = 0;	// Id of the current item
+		List<PrimaryfileInfo> pfileInfos = null;	// PrimaryfileInfo list of the current item
+		
 		try {
 			List<PrimaryfileDeref> matchedFiles = acUnitIds == null ?
 					primaryfileRepository.findActiveByKeyword(keyword) :
 					primaryfileRepository.findActiveByKeywordAC(keyword, acUnitIds);
-					
-			ItemFilesInfo ifInfo = new ItemFilesInfo();
-			List<PrimaryfileInfo> primaryfileinfos = new ArrayList<PrimaryfileInfo>();
-			long itemId = 0;
-			
+			log.info("Found " + matchedFiles.size() + " matching primaryfiles: keywowrd = " + keyword);			
+								
 			// TODO mediaType is currently not used as search criteria and may be removed from parameters; otherwise,
 			// refactor below code and add logic to handle mediaType criteria, reuse logic in getPrimaryfilesForPartialWorkflow
-			for (PrimaryfileDeref p : matchedFiles) {
-				// reset if the current item is a new entry
-				if (p.getItemId() != itemId && primaryfileinfos.size() > 0) {
-					ifInfo.setPrimaryfiles(primaryfileinfos);
-					ifInfos.add(ifInfo);
-					ifInfo = new ItemFilesInfo();
-					primaryfileinfos = new ArrayList<PrimaryfileInfo>();					
+
+			for (PrimaryfileDeref pfile : matchedFiles) {
+				// start/add a new ItemFilesInfo if the current itemId is different from previous ones 
+				if (pfile.getItemId() != itemId) {
+					ItemFilesInfo itemFiles = new ItemFilesInfo();
+					itemId = pfile.getItemId();
+					itemFiles.setItemId(itemId);
+					itemFiles.setItemName(pfile.getItemName());
+					itemFiles.setExternalSource(pfile.getExternalSource());
+					itemFiles.setExternalId(pfile.getExternalId());
+					itemFiles.setCollectionId(pfile.getCollectionId());
+					itemFiles.setCollectionName(pfile.getCollectionName());
+					pfileInfos = new ArrayList<PrimaryfileInfo>();
+					itemFiles.setPrimaryfiles(pfileInfos);
+					itemFiless.add(itemFiles);
 				}
-				String mime_type = p.getMimeType();
-				itemId = p.getItemId();
-				ifInfo.setCollectionId(p.getCollectionId());
-				ifInfo.setCollectionName(p.getCollectionName());
-				ifInfo.setItemId(p.getId());
-				ifInfo.setItemName(p.getItemName());
-				ifInfo.setExternalSource(p.getExternalSource());
-				ifInfo.setExternalId(p.getExternalId());
-				PrimaryfileInfo primaryfileinfo = new PrimaryfileInfo(p.getId(), p.getName(), mime_type, p.getOriginalFilename());
-				primaryfileinfos.add(primaryfileinfo);
+				// create/add child primaryfileInfo instance for the current item  
+				String mime_type = pfile.getMimeType();
+				PrimaryfileInfo pfileInfo = new PrimaryfileInfo(pfile.getId(), pfile.getName(), mime_type, pfile.getOriginalFilename());
+				pfileInfos.add(pfileInfo);
 			}
 			
-			// add the last item to ifInfos
-			if (primaryfileinfos.size() > 0) {
-				ifInfo.setPrimaryfiles(primaryfileinfos);
-				ifInfos.add(ifInfo);
-				response.setItems(ifInfos);
-			}
-			else {
-				response.setError("No primary file found");
-			}
 			response.setSuccess(true);
-			log.info("Successfully found " + ifInfos.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
+			response.setItems(itemFiless);
+			log.info("Successfully found " + itemFiless.size() + " items containing primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType);			
 		} catch (Exception e) {
-			response.setError(e.getMessage());
 			response.setSuccess(false);
+			response.setError(e.getMessage());
 			log.error("Error searching for items/primaryfiles: keywowrd = " + keyword + ", mediaType = " + mediaType, e);			
 		}
 		return response;
