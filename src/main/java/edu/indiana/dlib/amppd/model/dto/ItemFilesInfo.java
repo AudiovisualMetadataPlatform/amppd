@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 
 
 /**
- * Class for Item/File info.
+ * Class for Item and its Primaryfiles info.
  * @author yingfeng
  */
 @Data
 @NoArgsConstructor 
 @AllArgsConstructor
-public class ItemFileInfo {
+public class ItemFilesInfo {
 	private Long collectionId;
 	private String collectionName;
 	private Long itemId;

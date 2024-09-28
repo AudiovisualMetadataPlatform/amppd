@@ -33,8 +33,8 @@ import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.UnitSupplement;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
-import edu.indiana.dlib.amppd.model.dto.ItemInfo;
 import edu.indiana.dlib.amppd.model.projection.CollectionSupplementBrief;
+import edu.indiana.dlib.amppd.model.projection.ItemDeref;
 import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
 import edu.indiana.dlib.amppd.model.projection.SupplementBrief;
@@ -648,13 +648,13 @@ public class DataentityController {
 	 * @return list of items found
 	 */
 	@GetMapping(path = "/items/search")
-	public List<ItemInfo> findItems(@RequestParam String keyword) {
+	public List<ItemDeref> findItems(@RequestParam String keyword) {
 		// get accessible units for Read Item, if none, access denied exception will be thrown
 		Set<Long> acUnitIds = permissionService.getAccessibleUnitIds(ActionType.Read, TargetType.Item);
 
 		// otherwise if acUnitIds is null, i.e. user is admin, then no AC prefilter is needed;  
 		// otherwise apply AC prefilter to query criteria	
-		List<ItemInfo> items = acUnitIds == null ?
+		List<ItemDeref> items = acUnitIds == null ?
 				itemRepository.findByKeyword(keyword) :
 				itemRepository.findByKeywordAC(keyword, acUnitIds);
 

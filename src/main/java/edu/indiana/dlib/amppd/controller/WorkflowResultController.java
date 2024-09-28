@@ -30,9 +30,9 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
-import edu.indiana.dlib.amppd.model.dto.ItemFileInfo;
+import edu.indiana.dlib.amppd.model.dto.ItemFilesInfo;
 import edu.indiana.dlib.amppd.model.dto.PrimaryfileInfo;
-import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdChain;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.MediaService;
@@ -129,11 +129,11 @@ public class WorkflowResultController {
 		}
 		
 		// otherwise retrieve the primaryfiles with outputs for all of the given types
-		List<PrimaryfileIdInfo> pidis = acUnitIds == null ?
+		List<PrimaryfileIdChain> idChains = acUnitIds == null ?
 				workflowResultRepository.findPrimaryfileIdsByOutputType(keyword, outputTypes) :
 				workflowResultRepository.findPrimaryfileIdsByOutputTypeAC(keyword, outputTypes, acUnitIds);
-		List<ItemFileInfo> itemis = response.getItems();	
-		ItemFileInfo itemi = null;	// current item 
+		List<ItemFilesInfo> itemFiless = response.getItems();	
+		ItemFilesInfo itemFile = null;	// current item 
 		int countp = 0;	// count of matching primaryfiles
 		
 //		// if primaryfile is not used as one input or the required input media type is AV, return above primaryfiles list
@@ -142,19 +142,19 @@ public class WorkflowResultController {
 //		}		
 		
 		// only include primaryfiles with matching media type
-		for (PrimaryfileIdInfo pidi : pidis) {	
-			Long pid = pidi.getPrimaryfileId();
+		for (PrimaryfileIdChain idChain : idChains) {	
+			Long pid = idChain.getPrimaryfileId();
 			Primaryfile primaryfile = primaryfileRepository.findById(pid).orElseThrow(() -> new StorageException("Primaryfile <" + pid + "> does not exist!"));
 			
 			// if current primaryfile belongs to another item than the current item, start a new item as the current item
 			Item item = primaryfile.getItem();
 			Collection collection = item.getCollection();
-			if (itemi == null || itemi.getItemId().longValue() != item.getId().longValue()) {
-				itemi = new ItemFileInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
+			if (itemFile == null || itemFile.getItemId().longValue() != item.getId().longValue()) {
+				itemFile = new ItemFilesInfo(collection.getId(), collection.getName(), item.getId(), item.getName(), item.getExternalSource(), item.getExternalId(), new ArrayList<PrimaryfileInfo>());
 			}
 			
 			// if current primaryfile MIME type matches the required media type, add it to the current item 
-			List<PrimaryfileInfo> pfileis = itemi.getPrimaryfiles();
+			List<PrimaryfileInfo> pfileis = itemFile.getPrimaryfiles();
 			String mimeType = primaryfile.getMimeType();
 			if (mediaService.isMediaTypeMatched(mimeType, mediaType)) {
 				PrimaryfileInfo pfilei = new PrimaryfileInfo(pid, primaryfile.getName(), mimeType, primaryfile.getOriginalFilename());
@@ -163,7 +163,7 @@ public class WorkflowResultController {
 
 				// add the current item to the item list when its first primaryfile is added 
 				if (pfileis.size() == 1) {
-					itemis.add(itemi);				
+					itemFiless.add(itemFile);				
 				}	
 			}
 		}

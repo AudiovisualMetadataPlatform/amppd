@@ -9,7 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdInfo;
+import edu.indiana.dlib.amppd.model.projection.PrimaryfileIdChain;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
 
@@ -79,7 +79,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			") " + 
 			"order by p.collectionId, p.itemId, p.primaryfileId "
 	)
-	List<PrimaryfileIdInfo> findPrimaryfileIdsByOutputType(String keyword, List<String> outputTypes);
+	List<PrimaryfileIdChain> findPrimaryfileIdsByOutputType(String keyword, List<String> outputTypes);
 	@Query(value = 
 			"select distinct p.unitId as unitId, p.collectionId as collectionId, p.itemId as itemId, p.primaryfileId as primaryfileId " + 
 			"from WorkflowResult p " + 
@@ -99,7 +99,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 			") " + 
 			"order by p.collectionId, p.itemId, p.primaryfileId "
 	)
-	List<PrimaryfileIdInfo> findPrimaryfileIdsByOutputTypeAC(String keyword, List<String> outputTypes, Set<Long> acUnitIds);
+	List<PrimaryfileIdChain> findPrimaryfileIdsByOutputTypeAC(String keyword, List<String> outputTypes, Set<Long> acUnitIds);
 
 //	// find primaryfiles with existing outputs for each of the given outputTypes, if each of the outputTypes exist in the table
 //	// Mote: if keyword is empty, the SQL below will ignore keyword matching, which is the desired behavior for our use case

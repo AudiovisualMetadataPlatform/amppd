@@ -6,11 +6,11 @@ import edu.indiana.dlib.amppd.model.WorkflowResult;
 
 
 /**
- * Projection for a brief view of a primaryfile.
+ * Projection for a primaryfile with IDs of itself and its parent chain.
  * @author yingfeng
  */
 @Projection(name = "primaryfileId", types = {WorkflowResult.class}) 
-public interface PrimaryfileIdInfo {
+public interface PrimaryfileIdChain {
 	
 	public Long getUnitId();
 //	public String getUnitName();	

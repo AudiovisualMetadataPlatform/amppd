@@ -10,8 +10,8 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.dto.ItemInfo;
 import edu.indiana.dlib.amppd.model.projection.ItemBrief;
+import edu.indiana.dlib.amppd.model.projection.ItemDeref;
 
 
 @RepositoryRestResource(excerptProjection = ItemBrief.class)
@@ -55,7 +55,7 @@ public interface ItemRepository extends ContentRepository<Item> {
 			" where i.collection_id = c.id and c.unit_id = u.id" +
 			" and q @@ to_tsvector(concat(i.name, ' ', i.description, ' ', i.external_id))" + 
 			" order by i.name")
-	List<ItemInfo> findByKeyword(String keyword);
+	List<ItemDeref> findByKeyword(String keyword);
 	
 	// full text search on item using native PostgreSql search tools, , with AC
 	@RestResource(exported = false)
@@ -67,7 +67,7 @@ public interface ItemRepository extends ContentRepository<Item> {
 			" where i.collection_id = c.id and c.unit_id = u.id and u.id in :acUnitIds" +
 			" and q @@ to_tsvector(concat(i.name, ' ', i.description, ' ', i.external_id))" + 
 			" order by i.name")
-	List<ItemInfo> findByKeywordAC(String keyword, Set<Long> acUnitIds);		
+	List<ItemDeref> findByKeywordAC(String keyword, Set<Long> acUnitIds);		
 		
 	@RestResource(exported = false)
 	@Modifying

@@ -36,6 +36,8 @@ public abstract class Asset extends Dataentity {
     private String pathname;			// path name relative to storage root for the file associated with the asset
     private String symlink;				// the symlink under the static content directory used for serving large media file
     
+    // TODO JsonType.class can be used as #Type and JsonNode can be used instead of String, 
+    // so that Hibernate will map jsonb column to JSON field automatically
     // Note: mediaInfo must be a valid json string
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
@@ -62,12 +64,19 @@ public abstract class Asset extends Dataentity {
 //    }
     
     /**
-     * Get the MIME type of the asset based on the MIME and streams from its media info, for ex. audio/mp3, video/mp4.
+     * Get the MIME type of the asset based on its mediaInfo.
      */
-	public String getMimeType() {		
+	public String getMimeType() {	
+		return Asset.getMimeType(mediaInfo);
+	}
+	
+    /**
+     * Get the MIME type for the specified mediaInfo JSON based on its MIME and streams fields, for ex. audio/mp3, video/mp4.
+     */
+	public static String getMimeType(String mediaInfo) {		
 		// media info should never be null; otherwise pre-process must have failed and the asset wasn't ingested/uploaded properly
 		if (mediaInfo == null) {
-			log.error("Empty media info JSON for asset " + getId());		
+			log.error("Empty media info JSON: " + mediaInfo);		
 			return null;
 		}
 		
@@ -85,7 +94,7 @@ public abstract class Asset extends Dataentity {
 			// otherwise return the MIME type as identified by ffmpeg during preprocessing
 			return mime;
 		} catch (JSONException e) {
-			log.error("Invalid media info JSON for asset " + getId());
+			log.error("Invalid media info JSON: " + mediaInfo);
 			return null;
 		}
 	}
