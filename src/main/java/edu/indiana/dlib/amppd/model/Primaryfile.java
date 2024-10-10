@@ -18,6 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import edu.indiana.dlib.amppd.handler.DataentityListener;
 import edu.indiana.dlib.amppd.validator.UniqueName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -29,7 +30,7 @@ import lombok.ToString;
  *
  */
 @Entity
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, DataentityListener.class})
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UniquePrimaryfileNamePerItem", columnNames = {"item_id", "name"})})
 @UniqueName(message="primaryfile name must be unique within its parent item")
 //@UniqueName(message="primaryfile name must be unique within its parent item", groups = {WithReference.class})
@@ -77,6 +78,7 @@ public class Primaryfile extends Asset {
     public Long getAcUnitId() {
     	return item.getAcUnitId();
     }    
+    
     
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<Job> jobs;        
