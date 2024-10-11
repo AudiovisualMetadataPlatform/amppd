@@ -15,6 +15,15 @@ import edu.indiana.dlib.amppd.web.GalaxyJobState;
 
 public interface WorkflowResultRepository extends PagingAndSortingRepository<WorkflowResult, Long>, WorkflowResultRepositoryCustom {	
 		
+	@Query(value = "select case when count(*)>0 then true else false end from WorkflowResult i where i.invocationId = :invocationId")
+	boolean invocationExists(@Param("invocationId") String invocationId);
+	
+	// check incomplete status at various entity levels	
+	Boolean existsByUnitIdAndStatusIn(Long unitId, List<GalaxyJobState> statuses);
+	Boolean existsByCollectionIdAndStatusIn(Long collectionId, List<GalaxyJobState> statuses);
+	Boolean existsByItemIdAndStatusIn(Long itemId, List<GalaxyJobState> statuses);
+	Boolean existsByPrimaryfileIdAndStatusIn(Long primaryfileId, List<GalaxyJobState> statuses);
+	
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
 	List<WorkflowResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
 	List<WorkflowResult> findByOutputId(String outputId);
@@ -33,15 +42,11 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	Set<WorkflowResult> findByWorkflowIdAndWorkflowStepAndOutputNameAndRelevant(String workflowId, String workflowStep, String outputName, Boolean relevant);
 
 	List<WorkflowResult> findByCollectionIdInAndOutputTypeInAndStatusEqualsOrderByDateCreatedDesc(List<Long> collectionIds, List<String> outputTypes, GalaxyJobState status);
-	
 	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);	
+	
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
-
 	List<WorkflowResult> deleteByCollectionId(Long id);
-	
-	@Query(value = "select case when count(*)>0 then true else false end from WorkflowResult i where i.invocationId = :invocationId")
-	boolean invocationExists(@Param("invocationId") String invocationId);
 	
 	@Query(value = "select min(dateRefreshed) from WorkflowResult d where d.primaryfileId = :primaryfileId")
 	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);

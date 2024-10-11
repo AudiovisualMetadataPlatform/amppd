@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -73,10 +74,15 @@ public class Primaryfile extends Asset {
 	@ToString.Exclude
     private Set<Bundle> bundles;  
     
+	// true if there aren't any incomplete workflow invocation on it
+    @Formula("not exists (select w.id from workflow_result w where w.primaryfile_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    private Boolean deletable;     
+    
 	@JsonIgnore
     public Long getAcUnitId() {
     	return item.getAcUnitId();
     }    
+    
     
 //    @OneToMany(mappedBy="primaryfile")
 //    private Set<Job> jobs;        

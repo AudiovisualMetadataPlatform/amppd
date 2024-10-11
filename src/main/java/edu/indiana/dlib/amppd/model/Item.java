@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -58,6 +59,10 @@ public class Item extends Content {
 	@Index
 	@ManyToOne
 	private Collection collection;	
+    
+	// true if there aren't any incomplete workflow invocation on it
+    @Formula("not exists (select w.id from workflow_result w where w.item_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    private Boolean deletable;     
     
 	@JsonIgnore
     public Long getAcUnitId() {

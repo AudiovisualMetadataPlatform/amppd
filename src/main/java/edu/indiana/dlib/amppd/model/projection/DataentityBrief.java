@@ -14,5 +14,6 @@ public interface DataentityBrief extends AmpObjectBrief {
 	
 	public String getName();
 	public String getDescription();
+	public Boolean getDeletable();
 	
 }

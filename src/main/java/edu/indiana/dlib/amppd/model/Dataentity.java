@@ -2,6 +2,7 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.jdo.annotations.Index;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
