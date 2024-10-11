@@ -33,10 +33,6 @@ public abstract class Dataentity extends AmpObject {
     @Type(type="text")
     private String description;
 
-	// computed based on whether there are incomplete workflow invocations on the PFiles contained
-    @Transient
-    private Boolean deletable; 
-    
     // TODO:
     // Uncomment @NotNull in all model classes after we fix unit tests to populate all non-null fields when saving to DB.
     

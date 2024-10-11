@@ -11,6 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotBlank;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -73,7 +74,11 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<RoleAssignment> roleAssignments;
 	
-	@JsonIgnore
+	// true if there aren't any incomplete workflow invocation on it
+    @Formula("not exists (select w.id from workflow_result w where w.unit_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    private Boolean deletable;     
+
+    @JsonIgnore
     public Long getAcUnitId() {
     	return getId();
     }
