@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,6 +36,14 @@ public class PrimaryfileSupplement extends Supplement {
 	@Index
 	@ManyToOne
     private Primaryfile primaryfile;
+	
+	// true if there aren't any incomplete workflow invocation on its parent
+    @Formula("not exists (select w.id from workflow_result w where w.primaryfile_id = primaryfile_id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    private Boolean deletable;     	
+    
+	// true if it's a groundtruth used in some MGM evaluation tests
+    @Formula("starts_with(lower(category), 'groundtruth') and exists (select m.id from mgm_evaluation_test m where m.groundtruth_supplement_id = id")
+    private Boolean evaluated;     	
     
 	@JsonIgnore
     public Long getAcUnitId() {

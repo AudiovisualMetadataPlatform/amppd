@@ -6,7 +6,6 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.validation.constraints.NotBlank;
 
-import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import edu.indiana.dlib.amppd.service.impl.ConfigServiceImpl;
@@ -30,11 +29,7 @@ public abstract class Supplement extends Asset {
 
 	@NotBlank
 	@EnumConfig(property = "supplementCategories")	
-	private String category;
-	
-	// true if there aren't any incomplete workflow invocation on it
-    @Formula("false")
-    private Boolean deletable;    
+	private String category;	  
 	
 	// In batch manifest the supplement types are indicated as U or "Unit", C or "Collection", I or "Item", P or "Primaryfile".
 	// Note: PFILE is not a Supplement type per se, but refers to Primaryfile as one special Asset type;
