@@ -42,13 +42,13 @@ public class Collection extends Content {
 	@Index
 	private Boolean active = true;	// newly created collection is active by default
 	
-	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="items")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Item> items; 
 	
-	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="collection", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="supplements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

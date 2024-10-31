@@ -74,7 +74,7 @@ public class MgmTool extends MgmMeta {
      */    
 
     // version upgrade info for the main dependency module
-	@OneToMany(mappedBy="mgm", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="mgm", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="versions")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

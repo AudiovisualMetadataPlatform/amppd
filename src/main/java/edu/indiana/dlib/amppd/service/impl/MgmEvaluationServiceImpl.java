@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
+import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
@@ -366,9 +367,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     	if (!supplement.getEvaluated()) return mets;
     	
     	// otherwise retrieve the evaluation tests associated with it 
-    	StringBuilder errpaths = new StringBuilder();
     	mets = mgmEvalRepo.findByGroundtruthSupplementId(supplement.getId());
-    	log.info("Deleting output files for MgmEvaluationTests assoicated with supplement " + supplement.getId());
     	
     	// delete all of the output files for the retrieved tests
     	for (MgmEvaluationTest met : mets) {
@@ -380,17 +379,11 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     				log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());  
     			}
     		} catch (IOException e) {
-		    	// in case of IO exception, add the file path in error and continue the process on other files
-    			errpaths.append(path);)
-    			log.error("Failed to remove output file " + path + " for MGM evaluation test " + met.getId());  	
+    			throw new StorageException("Failed to remove output file " + path + " for MGM evaluation test " + met.getId());  	
     		}    		
     	}
 
-    	log.info("Completed deletion of output files for " + mets.size() + " MgmEvaluationTests assoicated with supplement " + supplement.getId());
-    	if (!errpaths.isEmpty()) {
-    		log.error("The following output files encounter errors during deletion, please review and manually delete them as needed:" + errpaths);
-    	}
-    			
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with supplement " + supplement.getId());    			
     	return mets;
     }
     
