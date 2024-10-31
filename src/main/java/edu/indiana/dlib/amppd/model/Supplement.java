@@ -40,6 +40,11 @@ public abstract class Supplement extends Asset {
 //	@ManyToMany
 //	private Set<InputBag> bags;
 	
+	// true only if it's a groundtruth used in some MGM evaluation tests; false otherwise
+	// note that we can't define the field here because there is no easy way to overwrite @Formula annotation in subclasses;
+	// but it's convenient to define an abstract getter for the field to allow calling on super class type
+	abstract public Boolean getEvaluated();     	
+	
 	/**
 	 * Convert the given supplemental file type string to the corresponding SupplementType enum.
 	 */

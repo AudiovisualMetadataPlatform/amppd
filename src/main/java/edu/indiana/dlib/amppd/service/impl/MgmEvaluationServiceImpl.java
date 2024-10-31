@@ -2,9 +2,11 @@ package edu.indiana.dlib.amppd.service.impl;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +21,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
@@ -28,6 +31,7 @@ import edu.indiana.dlib.amppd.model.MgmScoringParameter;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
+import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringParameterRepository;
@@ -51,6 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     @Autowired
     private MgmEvaluationTestRepository mgmEvalRepo;
+    
     @Autowired
     private PrimaryfileSupplementRepository supplementRepository;
 
@@ -351,4 +356,42 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 		return result;
     }
 
+    /**
+     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.removeEvaluationResult(Supplement)
+     */
+    @Override
+    public List<MgmEvaluationTest> deleteEvaluationOutputs(Supplement supplement) {    	
+    	// return empty list if the supplement is not associated with evaluation
+    	List<MgmEvaluationTest> mets = new ArrayList<MgmEvaluationTest>();
+    	if (!supplement.getEvaluated()) return mets;
+    	
+    	// otherwise retrieve the evaluation tests associated with it 
+    	StringBuilder errpaths = new StringBuilder();
+    	mets = mgmEvalRepo.findByGroundtruthSupplementId(supplement.getId());
+    	log.info("Deleting output files for MgmEvaluationTests assoicated with supplement " + supplement.getId());
+    	
+    	// delete all of the output files for the retrieved tests
+    	for (MgmEvaluationTest met : mets) {
+    		Path path = Paths.get(met.getScorePath());
+    		try {
+    			if (FileSystemUtils.deleteRecursively(path)) {
+    				log.info("Removed output file " + path + " for MGM evaluation test " + met.getId());  		
+    			} else {
+    				log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());  
+    			}
+    		} catch (IOException e) {
+		    	// in case of IO exception, add the file path in error and continue the process on other files
+    			errpaths.append(path);)
+    			log.error("Failed to remove output file " + path + " for MGM evaluation test " + met.getId());  	
+    		}    		
+    	}
+
+    	log.info("Completed deletion of output files for " + mets.size() + " MgmEvaluationTests assoicated with supplement " + supplement.getId());
+    	if (!errpaths.isEmpty()) {
+    		log.error("The following output files encounter errors during deletion, please review and manually delete them as needed:" + errpaths);
+    	}
+    			
+    	return mets;
+    }
+    
 }

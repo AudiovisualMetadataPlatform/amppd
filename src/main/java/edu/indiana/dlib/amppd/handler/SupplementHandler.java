@@ -16,6 +16,7 @@ import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +33,9 @@ public class SupplementHandler {
 
 	@Autowired
 	private FileStorageService fileStorageService;
+	
+	@Autowired
+	private MgmEvaluationService mgmEvaluationService;
 
 	@Autowired
 	private PermissionService permissionService;
@@ -106,6 +110,9 @@ public class SupplementHandler {
          
         // delete media/info files of the supplement 
         fileStorageService.unloadAsset(supplement); 	        
+
+        // delete associated MGM evaluation test result files associated with the supplement if applicable 
+        mgmEvaluationService.deleteEvaluationOutputs(supplement); 	        
     }
     
     @HandleAfterDelete
