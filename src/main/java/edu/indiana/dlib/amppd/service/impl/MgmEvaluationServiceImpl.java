@@ -26,6 +26,9 @@ import org.springframework.util.FileSystemUtils;
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.AmpUser;
+import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
 import edu.indiana.dlib.amppd.model.MgmScoringParameter;
@@ -33,6 +36,7 @@ import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.PrimaryfileSupplement;
 import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.repository.MgmEvaluationTestRepository;
 import edu.indiana.dlib.amppd.repository.MgmScoringParameterRepository;
@@ -358,7 +362,34 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     }
 
     /**
-     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.removeEvaluationResult(Supplement)
+     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutput(MgmEvaluationTest)
+     */
+    @Override
+    public Path deleteEvaluationOutput(MgmEvaluationTest met) {
+		Path path = Paths.get(met.getScorePath());
+		
+		try {
+			if (FileSystemUtils.deleteRecursively(path)) {
+				log.info("Deleted output file " + path + " for MGM evaluation test " + met.getId());  
+				return path;
+			} else {
+				// for non-existing output, no action is needed, a warning message is good enough 
+				log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());
+				return null;
+			}
+		} catch (IOException e) {
+			// in case of I/O error, it's better to abandon the deletion process, which prevents the further DB action,  
+			// and allows user to trigger another deletion on supplement and evaluation tests later on, 
+			// and any outputs already deleted prior to the error will be ignored in later deletion process;
+			// otherwise, the files in error might still remain in the system, but the supplement and tests are deleted
+			// and there is no easy way to trace these files and manually clean them up.
+			throw new StorageException("Failed to delete output file " + path + " for MGM evaluation test " + met.getId());  	
+		}   
+		
+    }
+    
+    /**
+     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(Supplement)
      */
     @Override
     public List<MgmEvaluationTest> deleteEvaluationOutputs(Supplement supplement) {    	
@@ -371,20 +402,41 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     	
     	// delete all of the output files for the retrieved tests
     	for (MgmEvaluationTest met : mets) {
-    		Path path = Paths.get(met.getScorePath());
-    		try {
-    			if (FileSystemUtils.deleteRecursively(path)) {
-    				log.info("Removed output file " + path + " for MGM evaluation test " + met.getId());  		
-    			} else {
-    				log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());  
-    			}
-    		} catch (IOException e) {
-    			throw new StorageException("Failed to remove output file " + path + " for MGM evaluation test " + met.getId());  	
-    		}    		
+    		deleteEvaluationOutput(met);
     	}
 
     	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with supplement " + supplement.getId());    			
     	return mets;
     }
+    
+    /**
+     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(Dataentity)
+     */
+    @Override
+    public List<MgmEvaluationTest> deleteEvaluationOutputs(Dataentity dataentity) {    
+    	List<MgmEvaluationTest> mets = null;
+    	
+		if (dataentity instanceof Unit) {
+			mets = mgmEvalRepo.findByUnitId(dataentity.getId());
+		}
+		else if (dataentity instanceof Collection) {
+			mets = mgmEvalRepo.findByCollectionId(dataentity.getId());
+		}
+		else if (dataentity instanceof Item) {
+			mets = mgmEvalRepo.findByItemId(dataentity.getId());
+		}
+		else if (dataentity instanceof Primaryfile) {
+			mets = mgmEvalRepo.findByPrimaryfileId(dataentity.getId());
+		}
+    	
+    	// delete all of the output files for the retrieved tests
+    	for (MgmEvaluationTest met : mets) {
+    		deleteEvaluationOutput(met);
+    	}
+
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with groundtruth under dataentity" + dataentity.getId());    			
+    	return mets;
+    }
+    
     
 }

@@ -19,8 +19,10 @@ import org.springframework.validation.annotation.Validated;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
@@ -28,16 +30,19 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Event handler for Collection related requests.
- * @collection yingfeng
+ * @author yingfeng
  */
 @RepositoryEventHandler(Collection.class)
 @Component
 @Validated
 @Slf4j
 public class CollectionHandler {    
+    
+    @Autowired
+	private WorkflowResultService workflowResultService;
 
 	@Autowired
-	private WorkflowResultService workflowResultService;
+	private MgmEvaluationService mgmEvaluationService;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -109,6 +114,7 @@ public class CollectionHandler {
     @HandleBeforeDelete
     public void handleBeforeDelete(Collection collection) {
 		// check permission
+    	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
 		Long acUnitId = collection.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Collection, acUnitId);
 		if (!can) {
@@ -120,11 +126,18 @@ public class CollectionHandler {
         // Below file system operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
          
+        // delete evaluation output files associated with groundtruth supplements under the collection as applicable
+        mgmEvaluationService.deleteEvaluationOutputs(collection);
+
         // delete media subdir (if exists) of the collection
+        // which also takes care of deleting all descendants' subdirs and media files 
         fileStorageService.deleteEntityDir(collection);
 
         // delete dropbox subdir (if exists) of the collection
         dropboxService.deleteSubdir(collection);
+        
+        // delete workflow results associated with the collection if any
+        workflowResultService.deleteWorkflowResults(collection);        
     }
         
     @HandleAfterDelete

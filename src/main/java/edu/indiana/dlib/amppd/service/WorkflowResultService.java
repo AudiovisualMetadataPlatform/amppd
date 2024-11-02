@@ -10,6 +10,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
 import edu.indiana.dlib.amppd.model.Collection;
+import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
@@ -120,7 +121,14 @@ public interface WorkflowResultService {
 	 */
 	public WorkflowResult deleteWorkflowResult(Long workflowResultId);
 
-	/**
+    /**
+	 * Delete the WorkflowResults associated with the specified Dataentity from AMP table and Galaxy.
+     * @param entity the specified Dataentity
+     * @return the list of WorkflowResults deleted
+     */
+    public List<WorkflowResult> deleteWorkflowResults(Dataentity dataentity);
+    
+    /**
 	 * Delete the specified WorkflowResult from AMP table and Galaxy history.
 	 * @param workflowResult the specified WorkflowResult
 	 * @return WorkflowResult deleted

@@ -19,19 +19,27 @@ import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * Event handler for Unit related requests.
- * @unit yingfeng
+ * @author yingfeng
  */
 @RepositoryEventHandler(Unit.class)
 @Component
 @Validated
 @Slf4j
 public class UnitHandler {    
+
+    @Autowired
+	private WorkflowResultService workflowResultService;
+
+	@Autowired
+	private MgmEvaluationService mgmEvaluationService;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -92,6 +100,7 @@ public class UnitHandler {
     @HandleBeforeDelete
     public void handleBeforeDelete(Unit unit) {
 		// check permission
+    	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
 		Long acUnitId = unit.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Unit, acUnitId);
 		if (!can) {
@@ -103,11 +112,18 @@ public class UnitHandler {
         // Below file system operations should be done before the data entity is deleted, so that
         // in case of exception, the process can be repeated instead of manual operations.
 
+        // delete evaluation output files associated with groundtruth supplements under the unit as applicable
+        mgmEvaluationService.deleteEvaluationOutputs(unit);
+
         // delete media subdir (if exists) of the unit
+        // which also takes care of deleting all descendants' subdirs and media files 
         fileStorageService.deleteEntityDir(unit);
         
         // delete dropbox subdir (if exists) of the unit 
         dropboxService.deleteSubdir(unit);        
+        
+        // delete workflow results associated with the unit if any
+        workflowResultService.deleteWorkflowResults(unit);               
     }
     
     @HandleAfterDelete
