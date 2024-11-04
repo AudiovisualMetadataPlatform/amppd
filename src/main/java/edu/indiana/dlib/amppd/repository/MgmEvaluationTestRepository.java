@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
-import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest.TestStatus;
 import edu.indiana.dlib.amppd.model.projection.MgmEvaluationTestDetail;
 
