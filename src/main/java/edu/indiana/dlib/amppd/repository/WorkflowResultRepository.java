@@ -44,26 +44,19 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	List<WorkflowResult> findByCollectionIdInAndOutputTypeInAndStatusEqualsOrderByDateCreatedDesc(List<Long> collectionIds, List<String> outputTypes, GalaxyJobState status);
 	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);	
 	
-	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
-	List<WorkflowResult> findObsolete(Date dateObsolete);
-	
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
 	
-	@Query(value = "delete from WorkflowResult w where w.unitId = :unitId")
-	int deleteByUnitId(Long unitId);
-
-	@Query(value = "delete from WorkflowResult w where w.collectionId = :collectionId")
-	int deleteByCollectionId(Long collectionId);
-
-	@Query(value = "delete from WorkflowResult w where w.itemId = :itemId")
-	int deleteByItemId(Long itemId);
-	
-	@Query(value = "delete from WorkflowResult w where w.primaryfileId = :primaryfileId")
-	int deleteByPrimaryfileId(Long primaryfileId);
+	List<WorkflowResult> deleteByUnitId(Long id);
+	List<WorkflowResult> deleteByCollectionId(Long id);
+	List<WorkflowResult> deleteByItemId(Long id);
+	List<WorkflowResult> deleteByPrimaryfileId(Long id);
 	
 	@Query(value = "select min(dateRefreshed) from WorkflowResult d where d.primaryfileId = :primaryfileId")
 	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);
+	
+	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
+	List<WorkflowResult> findObsolete(Date dateObsolete);
 	
 	// find results of the given primaryfile, outputType, and status
 	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);

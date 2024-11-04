@@ -21,6 +21,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.FileSystemUtils;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
@@ -55,6 +56,10 @@ import edu.indiana.dlib.amppd.web.MgmEvaluationValidationResponse;
 import lombok.extern.slf4j.Slf4j;
 
 
+/**
+ * Implementation of MgmEvaluationService.
+ * @author yingfeng
+ */
 @Service
 @Slf4j
 public class MgmEvaluationServiceImpl implements MgmEvaluationService {
@@ -262,8 +267,6 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		mgmEvalTest.setDateSubmitted(new Date());
     		mgmEvalTest.setStatus(TestStatus.RUNNING);
     		mgmEvalTest.setGroundtruthSupplement(groundtruthFile);
-    		Primaryfile primaryFile = pfRepository.findById(wfr.getPrimaryfileId()).orElse(null);
-    		mgmEvalTest.setPrimaryFile(primaryFile);
     		    		
     		// run test
     		log.info("Running MGM scoring tool with command: " + cmd.toString());
@@ -365,17 +368,17 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
      * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutput(MgmEvaluationTest)
      */
     @Override
+	@Transactional	
     public Path deleteEvaluationOutput(MgmEvaluationTest met) {
 		Path path = Paths.get(met.getScorePath());
 		
 		try {
 			if (FileSystemUtils.deleteRecursively(path)) {
 				log.info("Deleted output file " + path + " for MGM evaluation test " + met.getId());  
-				return path;
 			} else {
 				// for non-existing output, no action is needed, a warning message is good enough 
 				log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());
-				return null;
+				path = null;
 			}
 		} catch (IOException e) {
 			// in case of I/O error, it's better to abandon the deletion process, which prevents the further DB action,  
@@ -384,14 +387,38 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 			// otherwise, the files in error might still remain in the system, but the supplement and tests are deleted
 			// and there is no easy way to trace these files and manually clean them up.
 			throw new StorageException("Failed to delete output file " + path + " for MGM evaluation test " + met.getId());  	
-		}   
+		}   		
+
+    	// TODO below is a tmp workaround as @OnDelete(CASCADE) doesn't work on unidirectional ManyToOne relationship 
+    	// delete MgmEvaluationTest from DB
+    	mgmEvalRepo.delete(met);
 		
+    	return path;
+    }
+    
+    /**
+     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(WorkflowResult)
+     */
+    @Override
+	@Transactional	
+    public List<MgmEvaluationTest> deleteEvaluationOutputs(WorkflowResult workflowResult) {    	
+    	// retrieve the evaluation tests associated with the workflowResult 
+    	List<MgmEvaluationTest> mets = mgmEvalRepo.findByWorkflowResultId(workflowResult.getId());
+    	
+    	// delete all of the output files for the retrieved tests
+    	for (MgmEvaluationTest met : mets) {
+    		deleteEvaluationOutput(met);
+    	}
+    	
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with workflowResult " + workflowResult.getId());    			
+    	return mets;
     }
     
     /**
      * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(Supplement)
      */
     @Override
+	@Transactional	
     public List<MgmEvaluationTest> deleteEvaluationOutputs(Supplement supplement) {    	
     	// return empty list if the supplement is not associated with evaluation
     	List<MgmEvaluationTest> mets = new ArrayList<MgmEvaluationTest>();
@@ -404,7 +431,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     	for (MgmEvaluationTest met : mets) {
     		deleteEvaluationOutput(met);
     	}
-
+    	
     	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with supplement " + supplement.getId());    			
     	return mets;
     }
@@ -413,6 +440,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
      * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(Dataentity)
      */
     @Override
+	@Transactional	
     public List<MgmEvaluationTest> deleteEvaluationOutputs(Dataentity dataentity) {    
     	List<MgmEvaluationTest> mets = null;
     	
@@ -433,7 +461,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     	for (MgmEvaluationTest met : mets) {
     		deleteEvaluationOutput(met);
     	}
-
+    	
     	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with groundtruth supplements under dataentity" + dataentity.getId());    			
     	return mets;
     }

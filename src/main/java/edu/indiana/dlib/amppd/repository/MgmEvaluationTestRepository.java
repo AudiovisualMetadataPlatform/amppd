@@ -35,21 +35,18 @@ public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<
 	List<MgmEvaluationTest> findByUnitId(Long unitId);
 
 	@Query(value = "delete from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.id = :primaryfileId")
-	int deleteByPrimaryfileId(Long primaryfileId);
+	List<MgmEvaluationTest> deleteByPrimaryfileId(Long primaryfileId);
 
 	@Query(value = "delete from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.item.id = :itemId")
-	int deleteByItemId(Long itemId);
+	List<MgmEvaluationTest> deleteByItemId(Long itemId);
 
 	@Query(value = "delete from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.item.collection.id = :collectionId")
-	int deleteByCollectionId(Long collectionId);
+	List<MgmEvaluationTest> deleteByCollectionId(Long collectionId);
 
 	@Query(value = "delete from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.item.collection.unit.id = :unitId")
-	int deleteByUnitId(Long unitId);
+	List<MgmEvaluationTest> deleteByUnitId(Long unitId);
 	
-	@Query(value = "delete from MgmEvaluationTest m where m.groundtruthSupplementId = :groundtruthSupplementId")
-	int deleteByGroundtruthSupplementId(Long groundtruthSupplementId);
-
-	@Query(value = "delete from MgmEvaluationTest m where m.workflowResultId = :workflowResultId")
-	int deleteByWorkflowResultId(Long workflowResultId);
+	List<MgmEvaluationTest> deleteByGroundtruthSupplementId(Long groundtruthSupplementId);
+	List<MgmEvaluationTest> deleteByWorkflowResultId(Long workflowResultId);
 	
 }

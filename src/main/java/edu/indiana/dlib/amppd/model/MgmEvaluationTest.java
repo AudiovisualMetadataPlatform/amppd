@@ -84,13 +84,15 @@ public class MgmEvaluationTest {
 	// primaryfileSupplement used by this test as the groundtruth 
 	@NotNull
 	@ManyToOne
-	@OnDelete(action = OnDeleteAction.CASCADE)
+	// TODO below @OnDelete doesn't work, see workaround in MgmEvaluationService  
+	@OnDelete(action = OnDeleteAction.CASCADE)	
     private PrimaryfileSupplement groundtruthSupplement;	
     
 	// workflow result evaluated by this test
 	@NotNull
 	@ManyToOne
-	@OnDelete(action = OnDeleteAction.CASCADE)
+	// TODO below @OnDelete doesn't work, see workaround in WorkflowResultService
+	@OnDelete(action = OnDeleteAction.CASCADE)	
     private WorkflowResult workflowResult; 
 
     // status of the test: running, success or failure with error code

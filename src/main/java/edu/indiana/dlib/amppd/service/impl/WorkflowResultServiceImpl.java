@@ -37,6 +37,7 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.MgmVersion;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -48,6 +49,7 @@ import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.JobService;
 import edu.indiana.dlib.amppd.service.MediaService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.GalaxyJobState;
@@ -258,6 +260,9 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	private WorkflowService workflowService;
 	
 	@Autowired
+	private MgmEvaluationService mgmEvaluationService;
+	
+	@Autowired
 	private MediaService mediaService;
 	
 	/**
@@ -415,7 +420,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		}
 		
 		return result;		
-	}
+ 	}
 			
 	/**
 	 * Refresh status of the specified WorkflowResults by retrieving corresponding output status from Galaxy.
@@ -1063,7 +1068,10 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Override
 	@Transactional
 	public WorkflowResult deleteWorkflowResult(WorkflowResult workflowResult) {
-		// delete from Galaxy history
+		// delete associated MgmEvaluationTests output files
+		List<MgmEvaluationTest> mets = mgmEvaluationService.deleteEvaluationOutputs(workflowResult);
+		
+		// delete workflow output datasets from Galaxy history
 		try {
 			HistoriesClient historiesClient = jobService.getHistoriesClient();
 			Dataset dataset = historiesClient.showDataset(workflowResult.getHistoryId(), workflowResult.getOutputId());
@@ -1090,6 +1098,12 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
     public List<WorkflowResult> deleteWorkflowResults(Dataentity dataentity) {
 		List<WorkflowResult> wfrs = null; 
 		
+		// no need to delete MgmEvaluationTests associated with workflowResults for the dataentity,
+		// as this method is only called when the dataentity itself is deleted, in which case 
+		// all MgmEvaluationTests associated the children groundtruth supplements will also be deleted
+		
+		// TODO delete associated histories along with all their contents from Galaxy
+
 		if (dataentity instanceof Unit) {
 	        wfrs = workflowResultRepository.deleteByUnitId(dataentity.getId());
 		}
@@ -1102,8 +1116,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else if (dataentity instanceof Primaryfile) {
 	        wfrs = workflowResultRepository.deleteByPrimaryfileId(dataentity.getId());
 		}
-
-		// TODO delete associated histories along with all their contents from Galaxy
 		
         log.info("Deleted " + wfrs.size() + " WorkflowResults assoicated with Dataentity " + dataentity.getId());
         return wfrs;

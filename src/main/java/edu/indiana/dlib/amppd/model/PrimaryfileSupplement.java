@@ -42,7 +42,7 @@ public class PrimaryfileSupplement extends Supplement {
     private Boolean deletable;     	
     
 	// true if it's a groundtruth used in some MGM evaluation tests
-    @Formula("starts_with(lower(category), 'groundtruth') and exists (select m.id from mgm_evaluation_test m where m.groundtruth_supplement_id = id")
+    @Formula("starts_with(lower(category), 'groundtruth') and exists (select m.id from mgm_evaluation_test m where m.groundtruth_supplement_id = id)")
     private Boolean evaluated;     	
     
 	@JsonIgnore

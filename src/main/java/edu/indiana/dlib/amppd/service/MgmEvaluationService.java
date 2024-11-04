@@ -8,6 +8,7 @@ import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmScoringTool;
 import edu.indiana.dlib.amppd.model.Supplement;
+import edu.indiana.dlib.amppd.model.WorkflowResult;
 import edu.indiana.dlib.amppd.web.MgmEvaluationRequest;
 import edu.indiana.dlib.amppd.web.MgmEvaluationSearchQuery;
 import edu.indiana.dlib.amppd.web.MgmEvaluationTestResponse;
@@ -31,6 +32,13 @@ public interface MgmEvaluationService {
      */
     public Path deleteEvaluationOutput(MgmEvaluationTest met);
 
+    /**
+     * Delete all MgmEvaluationTest output files associated with the specified workflowResult if any.
+     * @param workflowResult the specified workflowResult
+     * @return the list of MgmEvaluationTests associated with the workflowResult 
+     */
+    public List<MgmEvaluationTest> deleteEvaluationOutputs(WorkflowResult workflowResult);
+    
     /**
      * Delete all MgmEvaluationTest output files associated with the specified supplement if applicable, i.e.
      * if the supplement is a groundtruth associated with MgmEvaluationTests.
