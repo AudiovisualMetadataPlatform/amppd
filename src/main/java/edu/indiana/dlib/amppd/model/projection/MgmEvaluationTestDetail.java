@@ -15,13 +15,13 @@ public interface MgmEvaluationTestDetail extends MgmEvaluationTestBrief {
     public String getMstName();
     
     @Value("#{target.groundtruthSupplement.name}")
-    public String getGroundtruthFilename();
+    public String getGroundtruthName();
     
     @Value("#{target.groundtruthSupplement.primaryfile.name}")
-    public String getPrimaryFilename();
+    public String getPrimaryfileName();
     
-    @Value("#{target.primaryFile.originalFilename}")
-    public String getPrimaryFileMedia();
+    @Value("#{target.groundtruthSupplement.primaryFile.originalFilename}")
+    public String getPrimaryfileMedia();
 
     public WorkflowResult getWorkflowResult();
     public String getScorePath();

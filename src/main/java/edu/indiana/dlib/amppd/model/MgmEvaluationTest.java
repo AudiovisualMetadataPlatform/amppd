@@ -128,8 +128,4 @@ public class MgmEvaluationTest {
 	@ToString.Exclude
 	private Map<String, Object> parametersMap;
 
-	@NotNull
-	@ManyToOne
-	private Primaryfile primaryFile;
-
 }
