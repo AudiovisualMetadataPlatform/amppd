@@ -57,7 +57,7 @@ public class Batch {
 	private Unit unit;
 	
 	// the following info come from batch manifest
-	@OneToMany(mappedBy="batch", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="batch", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private List<BatchFile> batchFiles;

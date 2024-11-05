@@ -46,7 +46,11 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
+	
+	List<WorkflowResult> deleteByUnitId(Long id);
 	List<WorkflowResult> deleteByCollectionId(Long id);
+	List<WorkflowResult> deleteByItemId(Long id);
+	List<WorkflowResult> deleteByPrimaryfileId(Long id);
 	
 	@Query(value = "select min(dateRefreshed) from WorkflowResult d where d.primaryfileId = :primaryfileId")
 	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);

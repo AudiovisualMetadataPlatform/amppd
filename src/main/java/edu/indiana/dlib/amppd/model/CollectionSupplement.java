@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -36,7 +37,15 @@ public class CollectionSupplement extends Supplement {
 	@ManyToOne
     private Collection collection;
 	
-	@JsonIgnore
+	// true if there aren't any incomplete workflow invocation on its parent
+    @Formula("not exists (select w.id from workflow_result w where w.collection_id = collection_id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    private Boolean deletable;     	
+	
+	// it is never a groundtruth to be involved in MGM evaluation
+    @Formula("false")
+    private Boolean evaluated; 
+
+    @JsonIgnore
     public Long getAcUnitId() {
     	return collection.getAcUnitId();
     }

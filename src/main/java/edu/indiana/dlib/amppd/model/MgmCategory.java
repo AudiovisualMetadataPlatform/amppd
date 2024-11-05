@@ -58,13 +58,13 @@ public class MgmCategory extends MgmMeta {
     @Type(type="text")
     private String help;	
 
-    @OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="category", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="mgms")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<MgmTool> mgms;
 	
-	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="msts")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

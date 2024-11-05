@@ -16,13 +16,14 @@ import edu.indiana.dlib.amppd.model.Supplement;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * Event handler for Supplement related requests.
- * @Supplement yingfeng
+ * @author yingfeng
  */
 @RepositoryEventHandler(Supplement.class)
 @Component
@@ -31,8 +32,11 @@ import lombok.extern.slf4j.Slf4j;
 public class SupplementHandler {    
 
 	@Autowired
-	private FileStorageService fileStorageService;
+	private MgmEvaluationService mgmEvaluationService;
 
+	@Autowired
+	private FileStorageService fileStorageService;
+	
 	@Autowired
 	private PermissionService permissionService;
 	
@@ -93,6 +97,7 @@ public class SupplementHandler {
     @HandleBeforeDelete
     public void handleBeforeDelete(Supplement supplement) {
 		// check permission
+    	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
 		Long acUnitId = supplement.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Supplement, acUnitId);
 		if (!can) {
@@ -103,7 +108,12 @@ public class SupplementHandler {
 
         // Below file system operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
-         
+
+        // delete associated MGM evaluation test output files associated with the supplement as applicable;
+        // do this before deleting supplement file itself, so that in case error occurs during this step,
+        // the process can be aborted without further impact
+        mgmEvaluationService.deleteEvaluationOutputs(supplement); 	        
+
         // delete media/info files of the supplement 
         fileStorageService.unloadAsset(supplement); 	        
     }

@@ -18,19 +18,27 @@ import edu.indiana.dlib.amppd.model.Item;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * Event handler for Item related requests.
- * @item yingfeng
+ * @author yingfeng
  */
 @RepositoryEventHandler(Item.class)
 @Component
 @Validated
 @Slf4j
 public class ItemHandler {    
+
+    @Autowired
+    private WorkflowResultService workflowResultService;
+
+    @Autowired
+	private MgmEvaluationService mgmEvaluationService;
 
 	@Autowired
 	private FileStorageService fileStorageService;
@@ -86,6 +94,7 @@ public class ItemHandler {
     @HandleBeforeDelete
     public void handleBeforeDelete(Item item) {
 		// check permission
+    	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
 		Long acUnitId = item.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Item, acUnitId);
 		if (!can) {
@@ -94,10 +103,17 @@ public class ItemHandler {
 		
         log.info("Deleting item " + item.getId() + " ...");
 
-        // Below file system operations should be done before the data entity is deleted, so that 
+        // Below file system and Galaxy operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
          
+        // delete evaluation output files associated with groundtruth supplements under the item as applicable
+        mgmEvaluationService.deleteEvaluationOutputs(item);
+                
+        // delete workflow results associated with the item if any
+        workflowResultService.deleteWorkflowResults(item);
+
         // delete media subdir (if exists) of the item
+        // which also takes care of deleting all descendants' subdirs and media files 
         fileStorageService.deleteEntityDir(item);    	
     }
     

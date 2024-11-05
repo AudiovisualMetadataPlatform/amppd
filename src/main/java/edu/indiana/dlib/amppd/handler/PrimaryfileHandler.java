@@ -16,13 +16,15 @@ import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
 import edu.indiana.dlib.amppd.service.FileStorageService;
+import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import lombok.extern.slf4j.Slf4j;
 
 
 /**
  * Event handler for Primaryfile related requests.
- * @Primaryfile yingfeng
+ * @author yingfeng
  */
 @RepositoryEventHandler(Primaryfile.class)
 @Component
@@ -30,6 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PrimaryfileHandler {    
     
+    @Autowired
+    private WorkflowResultService workflowResultService;
+
+	@Autowired
+	private MgmEvaluationService mgmEvaluationService;
+
 	@Autowired
 	private FileStorageService fileStorageService;	
 	
@@ -99,6 +107,7 @@ public class PrimaryfileHandler {
     @HandleBeforeDelete
     public void handleBeforeDelete(Primaryfile primaryfile){
 		// check permission
+    	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
 		Long acUnitId = primaryfile.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Delete, TargetType.Primaryfile, acUnitId);
 		if (!can) {
@@ -107,12 +116,19 @@ public class PrimaryfileHandler {
 		
         log.info("Deleting primaryfile " + primaryfile.getId() + " ...");
 
-        // Below file system operations should be done before the data entity is deleted, so that 
+        // Below file system and Galaxy operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
          
+        // delete evaluation output files associated with groundtruth supplements under the primaryfile as applicable
+        mgmEvaluationService.deleteEvaluationOutputs(primaryfile);
+        
+        // delete workflow results associated with the primaryfile if any
+        workflowResultService.deleteWorkflowResults(primaryfile);
+
         // delete media/info files and subdir (if exists) of the primaryfile 
+        // the latter also takes care of deleting all descendants' media files 
         fileStorageService.unloadAsset(primaryfile);
-        fileStorageService.deleteEntityDir(primaryfile);    	
+        fileStorageService.deleteEntityDir(primaryfile);    
     }
     
     @HandleAfterDelete

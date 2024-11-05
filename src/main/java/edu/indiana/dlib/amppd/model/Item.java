@@ -43,13 +43,13 @@ import lombok.ToString;
 @ToString(callSuper=true)
 public class Item extends Content {
     
-	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="primaryfiles")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Primaryfile> primaryfiles;
 
-	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE)
+	@OneToMany(mappedBy="item", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	@JsonBackReference(value="supplements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
