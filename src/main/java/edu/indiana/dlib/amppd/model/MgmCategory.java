@@ -65,6 +65,7 @@ public class MgmCategory extends MgmMeta {
 	@ToString.Exclude
     private Set<MgmTool> mgms;
 	
+//	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
 	@OneToMany(mappedBy="category", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="msts")
 	@EqualsAndHashCode.Exclude
