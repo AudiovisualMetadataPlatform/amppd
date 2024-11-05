@@ -123,11 +123,14 @@ public class CollectionHandler {
 		
         log.info("Deleting collection " + collection.getId() + " ...");
 
-        // Below file system operations should be done before the data entity is deleted, so that 
+        // Below file system and Galaxy operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
          
         // delete evaluation output files associated with groundtruth supplements under the collection as applicable
         mgmEvaluationService.deleteEvaluationOutputs(collection);
+        
+        // delete workflow results associated with the collection if any
+        workflowResultService.deleteWorkflowResults(collection);        
 
         // delete media subdir (if exists) of the collection
         // which also takes care of deleting all descendants' subdirs and media files 
@@ -135,9 +138,6 @@ public class CollectionHandler {
 
         // delete dropbox subdir (if exists) of the collection
         dropboxService.deleteSubdir(collection);
-        
-        // delete workflow results associated with the collection if any
-        workflowResultService.deleteWorkflowResults(collection);        
     }
         
     @HandleAfterDelete

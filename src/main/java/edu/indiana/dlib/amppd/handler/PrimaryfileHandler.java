@@ -116,19 +116,19 @@ public class PrimaryfileHandler {
 		
         log.info("Deleting primaryfile " + primaryfile.getId() + " ...");
 
-        // Below file system operations should be done before the data entity is deleted, so that 
+        // Below file system and Galaxy operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
          
         // delete evaluation output files associated with groundtruth supplements under the primaryfile as applicable
         mgmEvaluationService.deleteEvaluationOutputs(primaryfile);
         
+        // delete workflow results associated with the primaryfile if any
+        workflowResultService.deleteWorkflowResults(primaryfile);
+
         // delete media/info files and subdir (if exists) of the primaryfile 
         // the latter also takes care of deleting all descendants' media files 
         fileStorageService.unloadAsset(primaryfile);
         fileStorageService.deleteEntityDir(primaryfile);    
-        
-        // delete workflow results associated with the primaryfile if any
-        workflowResultService.deleteWorkflowResults(primaryfile);
     }
     
     @HandleAfterDelete

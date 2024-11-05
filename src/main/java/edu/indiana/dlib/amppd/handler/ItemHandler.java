@@ -103,18 +103,18 @@ public class ItemHandler {
 		
         log.info("Deleting item " + item.getId() + " ...");
 
-        // Below file system operations should be done before the data entity is deleted, so that 
+        // Below file system and Galaxy operations should be done before the data entity is deleted, so that 
         // in case of exception, the process can be repeated instead of manual operations.
          
         // delete evaluation output files associated with groundtruth supplements under the item as applicable
         mgmEvaluationService.deleteEvaluationOutputs(item);
-        
+                
+        // delete workflow results associated with the item if any
+        workflowResultService.deleteWorkflowResults(item);
+
         // delete media subdir (if exists) of the item
         // which also takes care of deleting all descendants' subdirs and media files 
         fileStorageService.deleteEntityDir(item);    	
-        
-        // delete workflow results associated with the item if any
-        workflowResultService.deleteWorkflowResults(item);
     }
     
     @HandleAfterDelete

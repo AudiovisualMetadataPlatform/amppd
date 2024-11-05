@@ -109,11 +109,14 @@ public class UnitHandler {
 		
         log.info("Deleting unit " + unit.getId() + " ...");
 
-        // Below file system operations should be done before the data entity is deleted, so that
+        // Below file system and Galaxy operations should be done before the data entity is deleted, so that
         // in case of exception, the process can be repeated instead of manual operations.
 
         // delete evaluation output files associated with groundtruth supplements under the unit as applicable
         mgmEvaluationService.deleteEvaluationOutputs(unit);
+        
+        // delete workflow results associated with the unit if any
+        workflowResultService.deleteWorkflowResults(unit);               
 
         // delete media subdir (if exists) of the unit
         // which also takes care of deleting all descendants' subdirs and media files 
@@ -121,9 +124,6 @@ public class UnitHandler {
         
         // delete dropbox subdir (if exists) of the unit 
         dropboxService.deleteSubdir(unit);        
-        
-        // delete workflow results associated with the unit if any
-        workflowResultService.deleteWorkflowResults(unit);               
     }
     
     @HandleAfterDelete
