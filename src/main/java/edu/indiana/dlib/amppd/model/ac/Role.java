@@ -80,7 +80,7 @@ public class Role extends AmpObject {
 	private Set<Action> actions;
 	
 	// role-entity-user assignment
-	@OneToMany(mappedBy="role", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="role", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

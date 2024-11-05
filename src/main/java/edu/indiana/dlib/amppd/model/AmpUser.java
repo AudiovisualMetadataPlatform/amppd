@@ -65,7 +65,7 @@ public class AmpUser extends AmpObject {
 	@Enumerated(EnumType.STRING)
 	private Status status = Status.REQUESTED;
 	
-	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

@@ -50,25 +50,25 @@ public class Unit extends Dataentity {
 	@EnumConfig(property = "taskManagers")
 	private String taskManager;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="collections")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Collection> collections;
 
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<UnitSupplement> supplements;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roles")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Role> roles;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignments")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
