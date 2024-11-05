@@ -80,7 +80,7 @@ public class BatchFile {
 	@Index
 	private SupplementType supplementType; 
 	
-	@OneToMany(mappedBy="batchFile", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy="batchFile", cascade = CascadeType.REMOVE)
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
 	private List<BatchSupplementFile> batchSupplementFiles;	

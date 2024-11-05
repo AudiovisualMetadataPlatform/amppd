@@ -81,7 +81,7 @@ public class MgmScoringTool extends MgmMeta {
     private String groundtruthFormat; 
 
     // static info of the parameters
-	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy="mst", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="parameters")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
@@ -97,7 +97,7 @@ public class MgmScoringTool extends MgmMeta {
 	// when not null, the groundtruthSubcategory is a map JSON.
 	// Note that the parameter must be one of those associated with this scoring tool    
     @OneToOne
-//    @OneToOne(mappedBy = "mst", cascade = CascadeType.REMOVE, orphanRemoval = true)
+//    @OneToOne(mappedBy = "mst", cascade = CascadeType.REMOVE)
 	private MgmScoringParameter dependencyParameter;
 
 	// temporary storage of name of the dependency parameter for CSV parsing purpose

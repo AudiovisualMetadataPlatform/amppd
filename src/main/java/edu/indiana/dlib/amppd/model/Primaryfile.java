@@ -56,7 +56,7 @@ public class Primaryfile extends Asset {
 	// via Supplement MGM, no need to load into Galaxy library, thus no need for datasetId.
 	private String datasetId;			// ID of the dataset as a result of upload to Galaxy
 
-	@OneToMany(mappedBy="primaryfile", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy="primaryfile", cascade = CascadeType.REMOVE)
 	@JsonBackReference(value="supplements")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
