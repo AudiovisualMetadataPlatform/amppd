@@ -12,7 +12,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -310,7 +312,7 @@ public class WorkflowResultController {
 	 * @return WorkflowResult deleted
 	 */
 	@DeleteMapping(path = "/workflowResults/{workflowResultId}")
-	public WorkflowResult deleteWorkflowResult(@PathVariable Long workflowResultId) {
+	public ResponseEntity<String> deleteWorkflowResult(@PathVariable Long workflowResultId) {
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
 		// check permission 
@@ -321,7 +323,8 @@ public class WorkflowResultController {
 		}
 				
 		log.info("Deleting workflow result "  + workflowResultId + workflowResultId);
-		return workflowResultService.deleteWorkflowResult(result);		
+		workflowResultService.deleteWorkflowResult(result);		
+		return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
 	}
 	
 	/**
