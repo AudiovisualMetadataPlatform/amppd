@@ -1,8 +1,9 @@
-package edu.indiana.dlib.amppd.model.dto;
+package edu.indiana.dlib.amppd.model.unused;
+
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import edu.indiana.dlib.amppd.model.Dataentity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor 
 @AllArgsConstructor
-public class UnitInfo extends Dataentity  {
+public class UnitInfo {
 
+	private Long id;
+    private Date createdDate;
+    private Date modifiedDate;
+    private String createdBy;
+    private String modifiedBy;   
+    private String name;   
+    private String description;
 	private String taskManager;
 
 	@JsonIgnore
