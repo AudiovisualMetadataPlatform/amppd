@@ -462,7 +462,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		deleteEvaluationOutput(met);
     	}
     	
-    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with groundtruth supplements under dataentity" + dataentity.getId());    			
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with groundtruth supplements under dataentity " + dataentity.getId());    			
     	return mets;
     }
     
