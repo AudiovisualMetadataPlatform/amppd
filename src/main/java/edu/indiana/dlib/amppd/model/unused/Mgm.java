@@ -2,15 +2,11 @@ package edu.indiana.dlib.amppd.model.unused;
 
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.OneToMany;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.AmpObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -25,7 +21,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, exclude="modes")
 @ToString(callSuper=true, exclude="modes")
-public class Mgm extends Dataentity {
+public class Mgm extends AmpObject {
     
     private String version;
     private String platform;    

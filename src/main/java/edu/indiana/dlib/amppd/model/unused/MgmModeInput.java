@@ -1,10 +1,5 @@
 package edu.indiana.dlib.amppd.model.unused;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;

@@ -1,13 +1,8 @@
 package edu.indiana.dlib.amppd.model.unused;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.AmpObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,7 +22,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
-public class InputBag extends Dataentity {
+public class InputBag extends AmpObject {
 	
 //	  @ManyToOne
 //    private Primaryfile primaryfile;	

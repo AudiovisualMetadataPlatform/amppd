@@ -1,14 +1,8 @@
 package edu.indiana.dlib.amppd.model.unused;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.ManyToOne;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.AmpObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -24,7 +18,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, exclude="mgmMode")
 @ToString(callSuper=true, exclude="mgmMode")
-public abstract class MgmModeIo extends Dataentity {
+public abstract class MgmModeIo extends AmpObject {
    
     private Integer seqNo;
     
