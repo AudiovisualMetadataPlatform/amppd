@@ -38,7 +38,7 @@ public class ItemSupplement extends Supplement {
     private Item item;
 	
 	// true if there aren't any incomplete workflow invocation on its parent
-    @Formula("not exists (select w.id from workflow_result w where w.item_id = item_id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    @Formula("not exists (select w.id from workflow_result w where w.item_id = item_id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     	
 	
 	// it is never a groundtruth to be involved in MGM evaluation

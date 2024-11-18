@@ -10,6 +10,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Formula;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -49,6 +50,10 @@ public class Bundle extends Dataentity {
 //    @ManyToMany(mappedBy = "bundles")
 //    private Set<InputBag> bags;
 
+	// TODO for now deleting bundle is not used or implemented
+    @Formula("false")
+    private Boolean deletable; 
+    
 	@JsonIgnore
     public Long getAcUnitId() {
     	return null;

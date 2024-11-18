@@ -60,7 +60,7 @@ public class Collection extends Content {
 	private Unit unit;
 	
 	// true if there aren't any incomplete workflow invocation on it
-    @Formula("not exists (select w.id from workflow_result w where w.collection_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    @Formula("not exists (select w.id from workflow_result w where w.collection_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     
 	
 	public void addItem(Item item) {

@@ -61,7 +61,7 @@ public class Item extends Content {
 	private Collection collection;	
     
 	// true if there aren't any incomplete workflow invocation on it
-    @Formula("not exists (select w.id from workflow_result w where w.item_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    @Formula("not exists (select w.id from workflow_result w where w.item_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     
     
 	@JsonIgnore

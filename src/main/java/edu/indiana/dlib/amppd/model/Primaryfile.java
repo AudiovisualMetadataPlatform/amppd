@@ -75,7 +75,7 @@ public class Primaryfile extends Asset {
     private Set<Bundle> bundles;  
     
 	// true if there aren't any incomplete workflow invocation on it
-    @Formula("not exists (select w.id from workflow_result w where w.primaryfile_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    @Formula("not exists (select w.id from workflow_result w where w.primaryfile_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     
     
 	@JsonIgnore

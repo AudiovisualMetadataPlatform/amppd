@@ -104,6 +104,11 @@ public class SupplementHandler {
 			throw new AccessDeniedException("The current user cannot delete supplements in unit " + acUnitId);
 		}
 		
+		// check if supplement is deletable
+		if (!supplement.getDeletable()) {
+			throw new RuntimeException("Supplement " + supplement.getId() + " is not deletable!");
+		}
+		
         log.info("Deleting supplement " + supplement.getId() + " ...");
 
         // Below file system operations should be done before the data entity is deleted, so that 

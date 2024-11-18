@@ -107,6 +107,11 @@ public class UnitHandler {
 			throw new AccessDeniedException("The current user cannot delete unit " + acUnitId);
 		}
 		
+		// check if unit is deletable
+		if (!unit.getDeletable()) {
+			throw new RuntimeException("Unit " + unit.getId() + " is not deletable!");
+		}
+				
         log.info("Deleting unit " + unit.getId() + " ...");
 
         // Below file system and Galaxy operations should be done before the data entity is deleted, so that
