@@ -75,7 +75,7 @@ public class Unit extends Dataentity {
     private Set<RoleAssignment> roleAssignments;
 	
 	// true if there aren't any incomplete workflow invocation on it
-    @Formula("not exists (select w.id from workflow_result w where w.unit_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    @Formula("not exists (select w.id from workflow_result w where w.unit_id = id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     
 
     @JsonIgnore

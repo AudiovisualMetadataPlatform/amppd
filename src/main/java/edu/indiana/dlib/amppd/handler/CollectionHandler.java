@@ -19,7 +19,6 @@ import org.springframework.validation.annotation.Validated;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
-import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
@@ -83,6 +82,11 @@ public class CollectionHandler {
 			throw new AccessDeniedException("The current user cannot update collections in unit " + acUnitId);
 		}
 		
+		// check if collection is deletable
+		if (!collection.getDeletable()) {
+			throw new RuntimeException("Collection " + collection.getId() + " is not deletable!");
+		}
+				
     	log.info("Updating collection " + collection.getId() + " ...");
  
         // Below file system operations should be done before the data entity is updated, 

@@ -2,7 +2,6 @@ package edu.indiana.dlib.amppd.model;
 
 import javax.jdo.annotations.Index;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.Type;
@@ -49,5 +48,8 @@ public abstract class Dataentity extends AmpObject {
 	@JsonIgnore
     abstract public Long getAcUnitId();
     
-
+	// note that we can't define the deletable field here because there is no easy way to overwrite @Formula annotation in subclasses;
+	// but it's convenient to define an abstract getter for the field to allow calling on super class type
+	abstract public Boolean getDeletable();  
+	
 }

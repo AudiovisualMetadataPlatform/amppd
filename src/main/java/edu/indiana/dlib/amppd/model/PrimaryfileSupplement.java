@@ -38,7 +38,7 @@ public class PrimaryfileSupplement extends Supplement {
     private Primaryfile primaryfile;
 	
 	// true if there aren't any incomplete workflow invocation on its parent
-    @Formula("not exists (select w.id from workflow_result w where w.primaryfile_id = primaryfile_id and w.status in ('SCHEDULED', 'IN_PROGRESS', 'PAUSED'))")
+    @Formula("not exists (select w.id from workflow_result w where w.primaryfile_id = primaryfile_id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     	
     
 	// true if it's a groundtruth used in some MGM evaluation tests

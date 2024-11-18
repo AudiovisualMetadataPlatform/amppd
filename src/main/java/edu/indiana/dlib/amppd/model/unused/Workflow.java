@@ -2,16 +2,10 @@ package edu.indiana.dlib.amppd.model.unused;
 
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.AmpObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -26,7 +20,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, onlyExplicitlyIncluded=true)
 @ToString(callSuper=true, onlyExplicitlyIncluded=true)
-public class Workflow extends Dataentity {
+public class Workflow extends AmpObject {
     
 	// TODO double check the relationship
 	@ManyToOne
@@ -46,10 +40,10 @@ public class Workflow extends Dataentity {
 //    @ManyToOne
 //    private Unit unit;
     
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return null;
-    }
+//	@JsonIgnore
+//    public Long getAcUnitId() {
+//    	return null;
+//    }
 
 
 }

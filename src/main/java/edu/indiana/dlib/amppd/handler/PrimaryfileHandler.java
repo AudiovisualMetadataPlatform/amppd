@@ -114,6 +114,11 @@ public class PrimaryfileHandler {
 			throw new AccessDeniedException("The current user cannot delete primaryfiles in unit " + acUnitId);
 		}
 		
+		// check if primaryfile is deletable
+		if (!primaryfile.getDeletable()) {
+			throw new RuntimeException("Primaryfile " + primaryfile.getId() + " is not deletable!");
+		}
+		
         log.info("Deleting primaryfile " + primaryfile.getId() + " ...");
 
         // Below file system and Galaxy operations should be done before the data entity is deleted, so that 

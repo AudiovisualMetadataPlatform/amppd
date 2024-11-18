@@ -3,16 +3,12 @@ package edu.indiana.dlib.amppd.model.unused;
 import java.util.HashMap;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import edu.indiana.dlib.amppd.model.Dataentity;
+import edu.indiana.dlib.amppd.model.AmpObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -27,7 +23,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper=true, exclude={"mgmModeInputs", "mgmModeOutputs", "mgm"})
 @ToString(callSuper=true, exclude= {"mgmModeInputs", "mgmModeOutputs", "mgm"})
-public class MgmMode extends Dataentity {
+public class MgmMode extends AmpObject {
     
     private HashMap<String, String> defaultParams;
     private String condition;	// TODO this can be a single String of compound boolean expression, or array of simple boolean expressions

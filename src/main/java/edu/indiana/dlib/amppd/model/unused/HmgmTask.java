@@ -2,17 +2,11 @@ package edu.indiana.dlib.amppd.model.unused;
 
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import edu.indiana.dlib.amppd.model.AmpObject;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.model.Dataentity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -30,7 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper=true)
 @ToString(callSuper=true)
-public class HmgmTask extends Dataentity {
+public class HmgmTask extends AmpObject {
 	
 	public enum Type {TRANSCRIPT, NER, STRUCTURE};
 	public enum Status {OPEN, READY, ASSIGNED, PROGRESS, REVIEW, COMPLETED};
@@ -66,11 +60,6 @@ public class HmgmTask extends Dataentity {
 	 * In the future we could add a list of TaskAction to record the history of a task workflow; 
 	 * however, for now we can acquire the history via DB auditing tools which is sufficient for internal use.
 	 */
-
-	@JsonIgnore
-    public Long getAcUnitId() {
-    	return null;
-    }
 
 
 }
