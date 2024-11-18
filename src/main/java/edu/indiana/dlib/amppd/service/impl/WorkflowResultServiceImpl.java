@@ -269,7 +269,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowResultService.getWorkflowResults(WorkflowResultSearchQuery)
 	 */
 	@Override
-	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query){
+	public WorkflowResultResponse getWorkflowResults(WorkflowResultSearchQuery query) {
 		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
 		log.info("Successfully retrieved " + response.getTotalResults() + " WorkflowResults for search query " + query);
 		return response;
@@ -533,7 +533,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	@Override
 	@Deprecated
-	public List<WorkflowResult> refreshWorkflowResultsLumpsum(){
+	public List<WorkflowResult> refreshWorkflowResultsLumpsum() {
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 
 		// clear up workflow names cache in case they have been changed on galaxy side since last refresh 

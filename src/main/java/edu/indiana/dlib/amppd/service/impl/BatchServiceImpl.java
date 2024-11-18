@@ -316,7 +316,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Create an item supplememt if it does not already exists
 	 */
-	private ItemSupplement getItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username, List<String>errors){
+	private ItemSupplement getItemSupplement(Item item, BatchSupplementFile batchSupplementFile, String username, List<String>errors) {
 		ItemSupplement itemSupplement = null;
 		if(item.getSupplements() != null) {
 			log.info("BATCH PROCESSING : looping through the existing item supplement");
@@ -349,7 +349,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Create a collection supplement if it does not already exists
 	 */
-	private CollectionSupplement getCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username, List<String>errors){
+	private CollectionSupplement getCollectionSupplement(Collection collection, BatchSupplementFile batchSupplementFile, String username, List<String>errors) {
 		//check if the supplement exists
 		CollectionSupplement collectionSupplement = null;
 		if(collection.getSupplements() != null) {
@@ -384,7 +384,7 @@ public class BatchServiceImpl implements BatchService {
 	/*
 	 * Create a primaryfile supplement
 	 */
-	private PrimaryfileSupplement createPrimaryfileSupplement(Primaryfile primaryfile, BatchSupplementFile batchSupplementFile, String username, List<String> errors){
+	private PrimaryfileSupplement createPrimaryfileSupplement(Primaryfile primaryfile, BatchSupplementFile batchSupplementFile, String username, List<String> errors) {
 		//check if the supplement exists
 		PrimaryfileSupplement primaryfileSupplement = null;
 		if(primaryfile.getSupplements() != null) {
@@ -487,9 +487,9 @@ public class BatchServiceImpl implements BatchService {
 						// TODO: we are updating item name when not match but not updating when
 						if(!i.getName().contentEquals(itemName) && !i.getName().contentEquals(expectedName)) {
 							log.info("BATCH PROCESSING : External Item id already exists");
-							if(itemRepository.findByCollectionIdAndName(collection.getId(), itemName).size() == 0){
+							if(itemRepository.findByCollectionIdAndName(collection.getId(), itemName).size() == 0) {
 								itemRepository.updateName(itemName,i.getId());
-							} else if(itemRepository.findByCollectionIdAndName(collection.getId(), expectedName).size() == 0){
+							} else if(itemRepository.findByCollectionIdAndName(collection.getId(), expectedName).size() == 0) {
 								itemRepository.updateName(expectedName,i.getId());
 							} else {
 								log.error("BATCH PROCESSING : Item with same names " + itemName +" and " + expectedName +" already existed");
@@ -528,7 +528,7 @@ public class BatchServiceImpl implements BatchService {
 			item.setCreatedDate(new Date());
 			item.setModifiedDate(new Date());
 			item.setCollection(collection);
-			if(itemRepository.findByCollectionIdAndName(collection.getId(), newItemName).size() == 0){
+			if(itemRepository.findByCollectionIdAndName(collection.getId(), newItemName).size() == 0) {
 				itemRepository.save(item);
 			} else {
 				log.error("BATCH PROCESSING : Item with same name (" + newItemName +") already existed");

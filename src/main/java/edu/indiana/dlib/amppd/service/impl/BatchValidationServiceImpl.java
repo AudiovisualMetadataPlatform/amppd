@@ -342,11 +342,11 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			
 			// below rule should not be used, we should allow multiple supplements share same physical filename
 			// especially, these files may even come from different collection directories
-//			if(testRow.containsSupplementFilename(batchSupplementFile.getSupplementFilename(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
+//			if(testRow.containsSupplementFilename(batchSupplementFile.getSupplementFilename(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())) {
 //	    		errors.add(String.format("Row: %s: Duplicate supplement file %s", batchFile.getRowNum(), batchSupplementFile.getSupplementFilename()));
 //			}
 			
-			if(testRow.containsSupplementName(batchSupplementFile.getSupplementName(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())){
+			if(testRow.containsSupplementName(batchSupplementFile.getSupplementName(), batchFile.getRowNum(), batchSupplementFile.getSupplementNum())) {
 	    		errors.add(String.format("Row: %s: Duplicate supplement name %s", batchFile.getRowNum(), batchSupplementFile.getSupplementName()));
 			}
 			if(errors.size()>0) break;
@@ -358,7 +358,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the primaryfile values
 	 */
-	private List<String> validatePrimaryfile(Unit unit, Collection collection, String primaryfileFilename, String primaryfileName, SupplementType supplementType, int lineNum){
+	private List<String> validatePrimaryfile(Unit unit, Collection collection, String primaryfileFilename, String primaryfileName, SupplementType supplementType, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 
 		// If no supplement is supplied, i.e. this is for primaryfile, make sure primaryfile values are supplied
@@ -419,7 +419,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the supplement
 	 */
-	private List<String> validateSupplement(Unit unit, Collection collection, String supplementFilename, String supplementName, SupplementType supplementType, int lineNum){
+	private List<String> validateSupplement(Unit unit, Collection collection, String supplementFilename, String supplementName, SupplementType supplementType, int lineNum) {
 		List<String> errors = new ArrayList<String>();
 		if(supplementType==null && supplementFilename.isBlank() && supplementName.isBlank()) {
 			return errors;
@@ -428,7 +428,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 			if(!supplementFilename.isBlank()) {
 	    		errors.add(String.format("Row: %s: Supplement filename supplied without a supplement type", lineNum));
 			}
-			if(!supplementName.isBlank()){
+			if(!supplementName.isBlank()) {
 	    		errors.add(String.format("Row: %s: Supplement label supplied without a supplement type", lineNum));
 			}
 		}
@@ -444,12 +444,12 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 		    		errors.add(String.format("Row: %s: Primaryfile Supplement file %s does not exist in the dropbox", lineNum, supplementFilename));
 				}				
 			}
-			else if(supplementType==SupplementType.ITEM){
+			else if(supplementType==SupplementType.ITEM) {
 				if(!fileExists(unit.getName(), collection.getName(), supplementFilename)) {
 		    		errors.add(String.format("Row: %s: Item Supplement file %s does not exist in the dropbox", lineNum, supplementFilename));
 				}
 			}
-			else if(supplementType==SupplementType.COLLECTION){
+			else if(supplementType==SupplementType.COLLECTION) {
 				if(!fileExists(unit.getName(), collection.getName(), supplementFilename)) {
 			    	errors.add(String.format("Row: %s: Collection Supplement file %s does not exist in the dropbox", lineNum, supplementFilename));
 				}
@@ -463,7 +463,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the unit
 	 */
-	private List<String> validateUnit(Unit unit){
+	private List<String> validateUnit(Unit unit) {
 		String unitName = unit!=null ? unit.getName() : "";
 		List<String> errors = new ArrayList<String>();
 		if(unitName==null || unitName.isBlank()) {
@@ -478,7 +478,7 @@ public class BatchValidationServiceImpl implements BatchValidationService {
 	/*
 	 * Validate the collection
 	 */
-	private List<String> validateCollection(Unit unit, Collection collection, int lineNum, String collectionNameFromManifest){
+	private List<String> validateCollection(Unit unit, Collection collection, int lineNum, String collectionNameFromManifest) {
 		List<String> errors = new ArrayList<String>();
 		String collectionName = collection!=null ? collection.getName() : "";
 		if(collectionNameFromManifest == null || collectionNameFromManifest.isBlank()) {

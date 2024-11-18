@@ -7,7 +7,7 @@ import java.util.Date;
 
 @Data
 public class MgmEvaluationSearchQuery {
-    public MgmEvaluationSearchQuery(){
+    public MgmEvaluationSearchQuery() {
         pageNum = 1;
         sortRule = new WorkflowResultSortRule();
         sortRule.setColumnName("id");

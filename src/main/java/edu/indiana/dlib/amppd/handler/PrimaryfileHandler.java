@@ -55,7 +55,7 @@ public class PrimaryfileHandler {
 
 	// This method is not needed anymore since the corresponding API is disabled.
 //    @HandleAfterCreate
-//    public void handleAfterCreate(Primaryfile primaryfile){
+//    public void handleAfterCreate(Primaryfile primaryfile) {
 //		// ingest media file after primaryfile is saved
 //    	if (primaryfile.getMediaFile() != null) {
 //    		fileStorageService.uploadAsset(primaryfile, primaryfile.getMediaFile());
@@ -70,7 +70,7 @@ public class PrimaryfileHandler {
 
     @HandleBeforeSave
 //    @Validated({WithReference.class, WithoutReference.class})
-    public void handleBeforeUpdate(@Valid Primaryfile primaryfile){
+    public void handleBeforeUpdate(@Valid Primaryfile primaryfile) {
 		// check permission
 		Long acUnitId = primaryfile.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Primaryfile, acUnitId);
@@ -95,7 +95,7 @@ public class PrimaryfileHandler {
     }
 
     @HandleAfterSave
-    public void handleAfterUpdate(Primaryfile primaryfile){
+    public void handleAfterUpdate(Primaryfile primaryfile) {
 		// ingest media file after primaryfile is saved
     	if (primaryfile.getMediaFile() != null) {
     		fileStorageService.uploadAsset(primaryfile, primaryfile.getMediaFile());
@@ -105,7 +105,7 @@ public class PrimaryfileHandler {
     }
     
     @HandleBeforeDelete
-    public void handleBeforeDelete(Primaryfile primaryfile){
+    public void handleBeforeDelete(Primaryfile primaryfile) {
 		// check permission
     	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
 		Long acUnitId = primaryfile.getAcUnitId();
@@ -137,7 +137,7 @@ public class PrimaryfileHandler {
     }
     
     @HandleAfterDelete
-    public void handleAfterDelete(Primaryfile primaryfile){
+    public void handleAfterDelete(Primaryfile primaryfile) {
     	log.info("Successfully deleted primaryfile " + primaryfile.getId());           
     }
     

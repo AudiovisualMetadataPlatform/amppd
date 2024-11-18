@@ -90,7 +90,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			String userToken = parts[1];
 			String authString = parts[2];
 			
-			if(authService.compareAuthStrings(authString, userToken, editorInput)){
+			if(authService.compareAuthStrings(authString, userToken, editorInput)) {
 				createAnonymousAuth(request);
 				logger.debug("Auth string is valid. Creating anonymous auth for HMGM editors");
 			}

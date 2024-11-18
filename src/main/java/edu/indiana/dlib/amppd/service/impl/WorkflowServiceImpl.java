@@ -405,7 +405,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	private Boolean filterTags(Workflow workflow, String[] tags) {
-		if (tags == null || tags.length <= 0){
+		if (tags == null || tags.length <= 0) {
 			return true;
 		}
 		for (String t : tags) {
@@ -417,7 +417,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	private Boolean filterCreators(Workflow workflow, String[] creators) {
-		if(creators == null || creators.length <= 0){
+		if(creators == null || creators.length <= 0) {
 			return true;
 		}
 		for(String creator: creators) {
@@ -429,7 +429,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	private Boolean filterWFName(Workflow workflow, String[] names) {
-		if (names == null || names.length <= 0){
+		if (names == null || names.length <= 0) {
 			return true;
 		}
 		for (String name : names) {
@@ -454,7 +454,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	private Boolean filterAnnotations(Workflow workflow, String[] annotations) {
-		if (annotations == null || annotations.length <= 0){
+		if (annotations == null || annotations.length <= 0) {
 			return true;
 		}
 		for(String term: annotations) {
@@ -510,7 +510,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		List<String> creators = new ArrayList<String>();
 		for(Workflow wf: workflows) {
 			names.add(wf.getName());
-			if(wf.getCreator() == null || wf.getCreator() == ""){
+			if(wf.getCreator() == null || wf.getCreator() == "") {
 				creators.add(wf.getOwner());
 			}else{
 				creators.add(wf.getCreator());
