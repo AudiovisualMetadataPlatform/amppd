@@ -292,7 +292,7 @@ public class WorkflowResultController {
 	 * @return WorkflowResult updated
 	 */
 	@PatchMapping(path = "/workflowResults/{workflowResultId}")
-	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal){
+	public WorkflowResult updateWorkflowResult(@PathVariable Long workflowResultId, @RequestParam(required = false) String outputLabel, @RequestParam(required = false) Boolean isFinal) {
 		WorkflowResult result = workflowResultRepository.findById(workflowResultId).orElseThrow(() -> new StorageException("WorkflowResult <" + workflowResultId + "> does not exist!"));		
 		
 		// check permission 

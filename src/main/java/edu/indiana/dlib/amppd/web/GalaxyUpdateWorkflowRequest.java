@@ -10,13 +10,13 @@ public class GalaxyUpdateWorkflowRequest {
     private String workflow_name;
     private String annotation;
 
-    public GalaxyUpdateWorkflowRequest(String creator, String workflow, String annotation){
+    public GalaxyUpdateWorkflowRequest(String creator, String workflow, String annotation) {
         this.creator_name = creator;
         this.workflow_name = workflow;
         this.annotation = annotation;
     }
 
-    public String params(){
+    public String params() {
         JSONObject request =new JSONObject();
         JSONObject workflow =new JSONObject();
         JSONArray creators =new JSONArray();

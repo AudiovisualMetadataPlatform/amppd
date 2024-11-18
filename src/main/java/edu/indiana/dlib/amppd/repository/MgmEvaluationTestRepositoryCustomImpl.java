@@ -37,7 +37,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
 
     public static String DATE_PROPERTY = "dateCreated";
 
-    public MgmEvaluationTestResponse findByQuery(MgmEvaluationSearchQuery mesq){
+    public MgmEvaluationTestResponse findByQuery(MgmEvaluationSearchQuery mesq) {
         MgmEvaluationTestResponse response = new MgmEvaluationTestResponse();
         MgmEvaluationTestFilters filters = getFilterValues(mesq);
         response.setFilters(filters);
@@ -48,7 +48,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         return response;
     }
 
-    private List<MgmEvaluationTest> getMgmEvaluationTestRows(MgmEvaluationSearchQuery mesq){
+    private List<MgmEvaluationTest> getMgmEvaluationTestRows(MgmEvaluationSearchQuery mesq) {
         int firstResult = ((mesq.getPageNum() - 1) * mesq.getResultsPerPage());
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<MgmEvaluationTest> cq = cb.createQuery(MgmEvaluationTest.class);
@@ -226,7 +226,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         return preds;
     }
 
-    private List<MgmEvaluationTestResult> prepareRows(List<MgmEvaluationTest> rows){
+    private List<MgmEvaluationTestResult> prepareRows(List<MgmEvaluationTest> rows) {
         ArrayList<MgmEvaluationTestResult> datatable = new ArrayList<MgmEvaluationTestResult>();
         for(MgmEvaluationTest test: rows) {
             MgmEvaluationTestResult row = new MgmEvaluationTestResult();
@@ -279,7 +279,7 @@ public class MgmEvaluationTestRepositoryCustomImpl implements MgmEvaluationTestR
         }
 
         List<String> values;
-        if (is_workflow_search == true){
+        if (is_workflow_search == true) {
             cq.orderBy(cb.asc(rt.get("workflowResult").get(field)));
             values = em.createQuery(cq.select(rt.get("workflowResult").get(field)).distinct(true)).getResultList();
 

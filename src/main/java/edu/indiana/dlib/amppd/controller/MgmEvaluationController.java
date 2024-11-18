@@ -109,7 +109,7 @@ public class MgmEvaluationController {
      * @return the MgmEvaluationTestResponse containing the list of queried mgm evaluation test
      */
     @PostMapping(path = "/mgmEvaluationTests/query", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public MgmEvaluationTestResponse filterMgmEvaluationTest(@RequestBody MgmEvaluationSearchQuery query){
+    public MgmEvaluationTestResponse filterMgmEvaluationTest(@RequestBody MgmEvaluationSearchQuery query) {
 		// AC prefilter on MgmEvaluationSearchQuery to restrict unit filters to only accessible ones by current user
 		Set<Long> accessibleUnits = permissionService.prefilter(query);
     	

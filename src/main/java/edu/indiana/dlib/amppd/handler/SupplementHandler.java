@@ -44,14 +44,14 @@ public class SupplementHandler {
 	// This method is not needed anymore since the corresponding API is disabled.
 //    @HandleBeforeCreate
 ////    @Validated({WithReference.class, WithoutReference.class})
-//    public void handleBeforeCreate(@Valid Supplement supplement){
+//    public void handleBeforeCreate(@Valid Supplement supplement) {
 //    	// This method is needed to invoke validation before DB persistence.   	        
 //    	log.info("Creating supplement " + supplement.getName() + "...");
 //    }
 
 	// This method is not needed anymore since the corresponding API is disabled.
 //    @HandleAfterCreate
-//    public void handleAfterCreate(Supplement supplement){
+//    public void handleAfterCreate(Supplement supplement) {
 //		// ingest media file after supplement is saved
 //    	if (supplement.getMediaFile() != null) {
 //    		fileStorageService.uploadAsset(supplement, supplement.getMediaFile());
@@ -66,7 +66,7 @@ public class SupplementHandler {
     
     @HandleBeforeSave
 //    @Validated({WithReference.class, WithoutReference.class})
-    public void handleBeforeUpdate(@Valid Supplement supplement){
+    public void handleBeforeUpdate(@Valid Supplement supplement) {
 		// check permission
 		Long acUnitId = supplement.getAcUnitId();
 		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Supplement, acUnitId);
@@ -85,7 +85,7 @@ public class SupplementHandler {
     }
     
     @HandleAfterSave
-    public void handleAfterUpdate(Supplement supplement){
+    public void handleAfterUpdate(Supplement supplement) {
 		// ingest media file after supplement is saved
     	if (supplement.getMediaFile() != null) {
     		fileStorageService.uploadAsset(supplement, supplement.getMediaFile());
@@ -124,7 +124,7 @@ public class SupplementHandler {
     }
     
     @HandleAfterDelete
-    public void handleAfterDelete(Supplement supplement){
+    public void handleAfterDelete(Supplement supplement) {
     	log.info("Successfully deleted supplement " + supplement.getId());           
     }
         

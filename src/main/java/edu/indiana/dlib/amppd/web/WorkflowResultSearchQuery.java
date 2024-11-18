@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class WorkflowResultSearchQuery {
-	public WorkflowResultSearchQuery(){
+	public WorkflowResultSearchQuery() {
 		filterOnly = false;
 		pageNum = 1;
 		sortRule = new WorkflowResultSortRule();

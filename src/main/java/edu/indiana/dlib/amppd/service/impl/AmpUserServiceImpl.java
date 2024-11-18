@@ -245,7 +245,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String action = approve ? "approve" : "reject";
 
 		// if user not found, return in error
-		if (user == null){
+		if (user == null) {
 			response.setEmailid(userId.toString());
 			response.setSuccess(false);
 			response.addError("Cannot " + action + " user account: invalid userId!");
@@ -397,7 +397,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			response.addError("Error occurred while sending reset-password email to user!");
 			log.error("Failed to send reset-password email to user " + emailid, e);
 		}
-		catch(Exception e){
+		catch(Exception e) {
 			response.setSuccess(false);
 			response.addError("Error occurred while creating/updating reset-password token!");
 			log.error("Failed to create/update reset-password token for user " + emailid, e);
@@ -408,7 +408,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 	}
 
 	@Override
-	public AuthResponse resetPasswordGetEmail(String token){
+	public AuthResponse resetPasswordGetEmail(String token) {
 		AuthResponse response = new AuthResponse();
 		TimedToken passToken = (timedTokenRepository.findByToken(token)).orElse(null);
 
@@ -503,7 +503,7 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		String message = null;
 		String url = null;
 		
-		if (type.equalsIgnoreCase("account requested")){
+		if (type.equalsIgnoreCase("account requested")) {
 			log.debug("Constructing email for user account request: " + user.getUsername());
 			url = contextPath + "/account/approve/" + user.getId();
 			message = "A new user has registered and waiting approval. \n\n User Name: " + user.getUsername() + "\n User Email: "+user.getEmail()+ "\n User ID: "+user.getId()+
@@ -519,14 +519,14 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 			subject = "Reset Account Password";
 			emailTo = user.getEmail();			
 		}
-		else if (type.equalsIgnoreCase("account rejection")){
+		else if (type.equalsIgnoreCase("account rejection")) {
 			log.debug("Constructing Email for User account rejection notification: " + user.getUsername());
 			url = "" ;
 			message = "Sign up rejected. Please reply to this email if you think this was done in error.";
 			subject = "Sign up rejected";
 			emailTo = user.getEmail();
 		}
-		else if (type.equalsIgnoreCase("account approval")){
+		else if (type.equalsIgnoreCase("account approval")) {
 			log.debug("Constructing email for User account activation: " + user.getUsername());
 			url = contextPath;
 			message = "Your registration request has been reviewed and accepted. \n Click the link below to activate your AMP account";

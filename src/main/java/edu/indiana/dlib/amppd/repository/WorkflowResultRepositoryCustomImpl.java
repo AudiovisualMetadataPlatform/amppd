@@ -60,7 +60,7 @@ public class WorkflowResultRepositoryCustomImpl implements WorkflowResultReposit
         return response;
     }
 
-	private List<WorkflowResult> getWorkflowResultRows(WorkflowResultSearchQuery wrsq){
+	private List<WorkflowResult> getWorkflowResultRows(WorkflowResultSearchQuery wrsq) {
 		int firstResult = ((wrsq.getPageNum() - 1) * wrsq.getResultsPerPage());
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<WorkflowResult> cq = cb.createQuery(WorkflowResult.class);

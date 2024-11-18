@@ -91,7 +91,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
         return response;
     }
 
-    private List<String> validate(ArrayList<MgmEvaluationFilesObj> files, ArrayList<MgmEvaluationParameterObj> inputParams, MgmScoringTool mst){        
+    private List<String> validate(ArrayList<MgmEvaluationFilesObj> files, ArrayList<MgmEvaluationParameterObj> inputParams, MgmScoringTool mst) {        
         ArrayList<String> errors = new ArrayList<>();
         if (files.size() <= 0) {
             errors.add("No Primary and Groundtruth files selected.");     
@@ -151,7 +151,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     					errors.add("Workflow Result " + wrId + " status is " + wfr.get().getStatus() + ", need to be COMPLETE");
     				}
     				String url = mediaService.getWorkflowResultOutputSymlinkUrl(wfr.get().getId());
-    				if (url == null){
+    				if (url == null) {
     					errors.add("No output file exists for Workflow Result " + wrId );
     				}
     			}
@@ -168,7 +168,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
         // ensure all params required by the test are provided with non-empty values
         for (MgmScoringParameter p : mstParams) {
             log.debug("Validating parameter " + p.getName() + " for MST " + mst.getName());            
-            if (p.isRequired()){
+            if (p.isRequired()) {
                 Optional<MgmEvaluationParameterObj> result = inputParams.stream().filter(obj -> obj.getId().equals(p.getId())).findFirst();
                 if (result == null || result.isEmpty() || 
                 	result.get().getValue() == null || result.get().getValue().isEmpty()) {
@@ -462,7 +462,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		deleteEvaluationOutput(met);
     	}
     	
-    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with groundtruth supplements under dataentity" + dataentity.getId());    			
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with groundtruth supplements under dataentity " + dataentity.getId());    			
     	return mets;
     }
     
