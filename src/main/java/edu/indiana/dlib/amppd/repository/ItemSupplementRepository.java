@@ -17,7 +17,7 @@ public interface ItemSupplementRepository extends SupplementRepository<ItemSuppl
 	int countByItemCollectionUnitId(Long unitId);
 	
 	@RestResource(exported = false)
-	int countByItemCollectionId(Long CollectionId);
+	int countByItemCollectionId(Long collectionId);
 	
 	@RestResource(exported = false)
 	int countByItemId(Long itemId);

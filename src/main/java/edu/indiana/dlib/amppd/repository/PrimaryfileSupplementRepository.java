@@ -17,7 +17,7 @@ public interface PrimaryfileSupplementRepository extends SupplementRepository<Pr
 	int countByPrimaryfileItemCollectionUnitId(Long unitId);
 	
 	@RestResource(exported = false)
-	int countByPrimaryfileItemCollectionId(Long CollectionId);
+	int countByPrimaryfileItemCollectionId(Long collectionId);
 	
 	@RestResource(exported = false)
 	int countByPrimaryfileItemId(Long itemId);

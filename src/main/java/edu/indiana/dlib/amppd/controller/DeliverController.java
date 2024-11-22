@@ -96,7 +96,7 @@ public class DeliverController {
 	/**
 	 * Get the DataentityStatistics about all children within the given unit.
 	 * @param id ID of the given unit
-	 * @return the DataentityStatistics for the give unit
+	 * @return the DataentityStatistics for the given unit
 	 */
 	@GetMapping(path = "/units/{id}/statistics")
 	public DataentityStatistics getUnitStatistics(@PathVariable Long id) {
@@ -130,7 +130,7 @@ public class DeliverController {
 	/**
 	 * Get the DataentityStatistics about all children within the given collection.
 	 * @param id ID of the given collection
-	 * @return the DataentityStatistics for the give collection
+	 * @return the DataentityStatistics for the given collection
 	 */
 	@GetMapping(path = "/collections/{id}/statistics")
 	public DataentityStatistics getCollectionStatistics(@PathVariable Long id) {
@@ -163,7 +163,7 @@ public class DeliverController {
 	/**
 	 * Get the DataentityStatistics about all children within the given item.
 	 * @param id ID of the given item
-	 * @return the DataentityStatistics for the give item
+	 * @return the DataentityStatistics for the given item
 	 */
 	@GetMapping(path = "/items/{id}/statistics")
 	public DataentityStatistics getItemStatistics(@PathVariable Long id) {
@@ -194,7 +194,7 @@ public class DeliverController {
 	/**
 	 * Get the DataentityStatistics about all children within the given primaryfile.
 	 * @param id ID of the given primaryfile
-	 * @return the DataentityStatistics for the give primaryfile
+	 * @return the DataentityStatistics for the given primaryfile
 	 */
 	@GetMapping(path = "/primaryfiles/{id}/statistics")
 	public DataentityStatistics getPrimaryfileStatistics(@PathVariable Long id) {
@@ -223,7 +223,7 @@ public class DeliverController {
 	/**
 	 * Get the DataentityStatistics about all children within the given primaryfileSupplement.
 	 * @param id ID of the given primaryfileSupplement
-	 * @return the DataentityStatistics for the give primaryfileSupplement
+	 * @return the DataentityStatistics for the given primaryfileSupplement
 	 */
 	@GetMapping(path = "/primaryfileSupplements/{id}/statistics")
 	public DataentityStatistics getPrimaryfileSupplementStatistics(@PathVariable Long id) {

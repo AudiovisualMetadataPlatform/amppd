@@ -17,7 +17,7 @@ public interface CollectionSupplementRepository extends SupplementRepository<Col
 	int countByCollectionUnitId(Long unitId);
 	
 	@RestResource(exported = false)
-	int countByCollectionId(Long CollectionId);
+	int countByCollectionId(Long collectionId);
 
 	@RestResource(exported = false)
 	List<CollectionSupplementBrief> findBy();

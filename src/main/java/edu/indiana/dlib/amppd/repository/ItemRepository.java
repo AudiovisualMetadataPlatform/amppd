@@ -21,7 +21,7 @@ public interface ItemRepository extends ContentRepository<Item> {
 	int countByCollectionUnitId(Long unitId);
 	
 	@RestResource(exported = false)
-	int countByCollectionId(Long CollectionId);
+	int countByCollectionId(Long collectionId);
 	
 	@RestResource(exported = false)
 	Item findFirstByExternalSourceAndExternalId(String externalSource, String externalId);
