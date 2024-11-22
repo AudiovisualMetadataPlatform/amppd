@@ -17,6 +17,15 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileDeref;
 public interface PrimaryfileRepository extends AssetRepository<Primaryfile> {
 	
 	@RestResource(exported = false)
+	int countByItemCollectionUnitId(Long unitId);
+	
+	@RestResource(exported = false)
+	int countByItemCollectionId(Long collectionId);
+	
+	@RestResource(exported = false)
+	int countByItemId(Long itemId);
+	
+	@RestResource(exported = false)
 	List<Primaryfile> findByItemCollectionUnitNameAndItemCollectionNameAndItemNameAndName(String itemCollectionUnitName, String itemCollectionName, String itemName, String name);
 
 	@RestResource(exported = false)

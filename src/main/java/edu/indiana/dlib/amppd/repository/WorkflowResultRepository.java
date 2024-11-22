@@ -19,10 +19,10 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	boolean invocationExists(@Param("invocationId") String invocationId);
 	
 	// check incomplete status at various entity levels	
-	Boolean existsByUnitIdAndStatusIn(Long unitId, List<GalaxyJobState> statuses);
-	Boolean existsByCollectionIdAndStatusIn(Long collectionId, List<GalaxyJobState> statuses);
-	Boolean existsByItemIdAndStatusIn(Long itemId, List<GalaxyJobState> statuses);
-	Boolean existsByPrimaryfileIdAndStatusIn(Long primaryfileId, List<GalaxyJobState> statuses);
+	boolean existsByUnitIdAndStatusIn(Long unitId, List<GalaxyJobState> statuses);
+	boolean existsByCollectionIdAndStatusIn(Long collectionId, List<GalaxyJobState> statuses);
+	boolean existsByItemIdAndStatusIn(Long itemId, List<GalaxyJobState> statuses);
+	boolean existsByPrimaryfileIdAndStatusIn(Long primaryfileId, List<GalaxyJobState> statuses);
 	
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
 	List<WorkflowResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
@@ -47,10 +47,15 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
 	
-	List<WorkflowResult> deleteByUnitId(Long id);
-	List<WorkflowResult> deleteByCollectionId(Long id);
-	List<WorkflowResult> deleteByItemId(Long id);
-	List<WorkflowResult> deleteByPrimaryfileId(Long id);
+	List<WorkflowResult> deleteByUnitId(Long unitId);
+	List<WorkflowResult> deleteByCollectionId(Long collectionId);
+	List<WorkflowResult> deleteByItemId(Long itemId);
+	List<WorkflowResult> deleteByPrimaryfileId(Long primaryfileId);
+	
+	int countByUnitId(Long unitId);
+	int countByCollectionId(Long collectionId);
+	int countByItemId(Long itemId);
+	int countByPrimaryfileId(Long primaryfileId);
 	
 	@Query(value = "select min(dateRefreshed) from WorkflowResult d where d.primaryfileId = :primaryfileId")
 	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);

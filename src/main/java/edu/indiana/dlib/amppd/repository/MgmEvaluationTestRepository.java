@@ -21,6 +21,21 @@ public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<
 
 	List<MgmEvaluationTestDetail> findByIdIn(List<Long> ids);		
 	List<MgmEvaluationTestDetail> findByIdInAndWorkflowResultUnitIdIn(List<Long> ids, Set<Long> acUnitIds);
+	
+	int countByGroundtruthSupplementId(Long groundtruthSupplementId);
+	int countByWorkflowResultId(Long workflowResultId);
+	
+	@Query(value = "select count(m) from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.id = :primaryfileId")
+	int countByPrimaryfileId(Long primaryfileId);
+
+	@Query(value = "select count(m) from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.item.id = :itemId")
+	int countByItemId(Long itemId);
+
+	@Query(value = "select count(m) from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.item.collection.id = :collectionId")
+	int countByCollectionId(Long collectionId);
+
+	@Query(value = "select count(m) from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.item.collection.unit.id = :unitId")
+	int countByUnitId(Long unitId);
 
 	@Query(value = "select m from MgmEvaluationTest m where m.groundtruthSupplement.primaryfile.id = :primaryfileId")
 	List<MgmEvaluationTest> findByPrimaryfileId(Long primaryfileId);

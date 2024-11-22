@@ -14,6 +14,15 @@ import edu.indiana.dlib.amppd.model.projection.ItemSupplementBrief;
 public interface ItemSupplementRepository extends SupplementRepository<ItemSupplement> {
 
 	@RestResource(exported = false)
+	int countByItemCollectionUnitId(Long unitId);
+	
+	@RestResource(exported = false)
+	int countByItemCollectionId(Long collectionId);
+	
+	@RestResource(exported = false)
+	int countByItemId(Long itemId);
+	
+	@RestResource(exported = false)
 	List<ItemSupplementBrief> findBy();
 
 	@RestResource(exported = false)

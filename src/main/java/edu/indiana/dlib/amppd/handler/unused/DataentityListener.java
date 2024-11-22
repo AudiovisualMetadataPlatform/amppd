@@ -30,7 +30,7 @@ public class DataentityListener {
 	
 	@PostLoad
 	private void afterLoad(Primaryfile primaryfile) {
-		Boolean deletable = !workflowResultRepository.existsByPrimaryfileIdAndStatusIn(primaryfile.getId(), INCOMPLETE_STATUSES);
+		boolean deletable = !workflowResultRepository.existsByPrimaryfileIdAndStatusIn(primaryfile.getId(), INCOMPLETE_STATUSES);
 		primaryfile.setDeletable(deletable);   
 	}
 	

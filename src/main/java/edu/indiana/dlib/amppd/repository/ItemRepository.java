@@ -18,6 +18,12 @@ import edu.indiana.dlib.amppd.model.projection.ItemDeref;
 public interface ItemRepository extends ContentRepository<Item> {
 	
 	@RestResource(exported = false)
+	int countByCollectionUnitId(Long unitId);
+	
+	@RestResource(exported = false)
+	int countByCollectionId(Long collectionId);
+	
+	@RestResource(exported = false)
 	Item findFirstByExternalSourceAndExternalId(String externalSource, String externalId);
 	
 	@RestResource(exported = false)
