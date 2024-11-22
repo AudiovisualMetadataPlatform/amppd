@@ -13,6 +13,9 @@ import edu.indiana.dlib.amppd.model.projection.CollectionBrief;
 public interface CollectionRepository extends ContentRepository<Collection> {
 
 	@RestResource(exported = false)
+	int countByUnitId(Long unitId);
+	
+	@RestResource(exported = false)
 	Collection findFirstByUnitNameAndName(String unitName, String name);
 	
 	@RestResource(exported = false)

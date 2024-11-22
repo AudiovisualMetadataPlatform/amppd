@@ -14,6 +14,18 @@ import edu.indiana.dlib.amppd.model.projection.PrimaryfileSupplementBrief;
 public interface PrimaryfileSupplementRepository extends SupplementRepository<PrimaryfileSupplement> {
 
 	@RestResource(exported = false)
+	int countByPrimaryfileItemCollectionUnitId(Long unitId);
+	
+	@RestResource(exported = false)
+	int countByPrimaryfileItemCollectionId(Long CollectionId);
+	
+	@RestResource(exported = false)
+	int countByPrimaryfileItemId(Long itemId);
+	
+	@RestResource(exported = false)
+	int countByPrimaryfileId(Long primaryfileId);
+	
+	@RestResource(exported = false)
 	List<PrimaryfileSupplementBrief> findBy();
 	
 	@RestResource(exported = false)
