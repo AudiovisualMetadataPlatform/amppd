@@ -41,9 +41,17 @@ public class ItemSupplement extends Supplement {
     @Formula("not exists (select w.id from workflow_result w where w.item_id = item_id and w.status in ('SCHEDULED', 'IN_PROGRESS'))")
     private Boolean deletable;     	
 	
-	// it is never a groundtruth to be involved in MGM evaluation
-    @Formula("false")
-    private Boolean evaluated; 
+//	// it is never a groundtruth to be involved in MGM evaluation
+//    @Formula("false")
+//    private Boolean evaluated; 
+    
+    /**
+     * @see edu.indiana.dlib.amppd.model.Supplement.isGroundtruth()
+     */
+    @Override
+    public Boolean isGroundtruth() {
+    	return false;
+    }
     
 	@JsonIgnore
     public Long getAcUnitId() {
