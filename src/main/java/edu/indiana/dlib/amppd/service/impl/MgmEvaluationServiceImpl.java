@@ -422,7 +422,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     public List<MgmEvaluationTest> deleteEvaluationOutputs(Supplement supplement) {    	
     	// return empty list if the supplement is not associated with evaluation
     	List<MgmEvaluationTest> mets = new ArrayList<MgmEvaluationTest>();
-    	if (!supplement.isGroundtruth()) return mets;
+    	if (!supplement.getIsGroundtruth()) return mets;
     	
     	// otherwise retrieve the evaluation tests associated with it 
     	mets = mgmEvalRepo.findByGroundtruthSupplementId(supplement.getId());

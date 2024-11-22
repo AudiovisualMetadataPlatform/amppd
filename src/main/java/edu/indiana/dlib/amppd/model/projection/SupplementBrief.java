@@ -12,6 +12,6 @@ import edu.indiana.dlib.amppd.model.Supplement;
 public interface SupplementBrief extends AssetBrief {
 	
 	public String getCategory();	
-	public Boolean getEvaluated();
+	public Boolean getIsGroundTruth();
 	
 }
