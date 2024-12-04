@@ -1,30 +1,8 @@
 package edu.indiana.dlib.amppd.config;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-/*
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
-@Configuration
-@EnableWebSecurity 
-
-public class SecurityConfig extends WebSecurityConfigurerAdapter {  
-
-	@Override
-	protected void configure(HttpSecurity http) throws Exception 
-	{
-		http.authorizeRequests().antMatchers("/").permitAll().and().authorizeRequests().antMatchers("/console/**").permitAll();
-		http.authorizeRequests()
-	    	.anyRequest()
-	        .permitAll()
-	        .and().csrf().disable();
-		http.headers().frameOptions().disable();
-	}
-}
-*/
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -95,18 +73,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration config = new CorsConfiguration();
-
-	    // only allow AMP UI as origin, can add target systems as needed
-	    String origin = StringUtils.substringBeforeLast(amppduiPropertyConfig.getUrl(), "/");
-	    config.setAllowedOrigins(Arrays.asList(origin));
 	    
 	    // allow clients other than the AMP UI for CORS requests;
 	    // one use case is for AMP frontend development, we allow AMP local UI to point to AMP Rest Test.
-	    String origins = amppdPropertyConfig.getCorsOriginPattern();
-	    if (StringUtils.isNotBlank(origins)) {
-	    	config.addAllowedOriginPattern(origins);
-		    log.info("Added " + origins + " to allowed origins for CORS requests");
-	    }
+	    List<String> origins = amppdPropertyConfig.getCorsOriginPatterns();
+	    
+	    // add AMP UI to the allowed list
+	    String origin = StringUtils.substringBeforeLast(amppduiPropertyConfig.getUrl(), "/");
+	    origins.add(origin);
+	    
+	    config.setAllowedOriginPatterns(origins);
+		log.info("Allowed CORS origins: " + origins);
 	    
 	    // all AMP update requests use PATCH instead of PUT, but PUT is still needed as Galaxy workflow editor requests
 	    config.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PATCH", "DELETE"));

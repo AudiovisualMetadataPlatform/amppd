@@ -94,7 +94,7 @@ rest:
         # environment / web 
         amppd.environment: dev
         amppd.auth: true
-        amppd.corsOriginPattern: http://localhost:8080        
+        amppd.corsOriginPatterns: http://localhost:8080        
         
         # misc
         amppd.externalSources: MCO,DarkAvalon,NYPL
