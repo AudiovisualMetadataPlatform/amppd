@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -71,7 +72,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	
 	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
+	CorsConfigurationSource corsConfigurationSource() {
 	    CorsConfiguration config = new CorsConfiguration();
 	    
 	    // allow clients other than the AMP UI for CORS requests;
@@ -107,8 +108,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		if (amppdPropertyConfig.getAuth() == null || amppdPropertyConfig.getAuth()) {
 			// TODO recover X-Frame-Options to sameOrigin
 			// below is a temp tweak to remove X-Frame-Options to allow local AMP UI to connect to AMP Test Workflow Editor
-//			httpSecurity.cors().and().csrf().disable().headers().frameOptions().sameOrigin().and().authorizeRequests()
-			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
+			httpSecurity.cors(Customizer.withDefaults()).csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
