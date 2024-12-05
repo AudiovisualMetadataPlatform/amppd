@@ -109,7 +109,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			// TODO recover X-Frame-Options to sameOrigin
 			// below is a temp tweak to remove X-Frame-Options to allow local AMP UI to connect to AMP Test Workflow Editor
 			httpSecurity.cors(Customizer.withDefaults()).csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
-//			httpSecurity.cors().and().csrf().disable().headers().frameOptions().disable().and().authorizeRequests()
 			.antMatchers(HttpMethod.POST, "/account/register").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/activate").permitAll()
 			.antMatchers(HttpMethod.POST, "/account/authenticate").permitAll()
