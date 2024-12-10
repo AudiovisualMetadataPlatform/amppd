@@ -474,8 +474,16 @@ public class FileStorageServiceImpl implements FileStorageService {
 	 */    
 	@Override
     public Path delete(String pathname) {
+    	// check if scorePath is populated, return null if empty
+		// note that null checking on pathname is necessary as calling resolve with null pathname would return root itself,
+		// which could result in deleting the root, which is definitely not intended
+    	if (!StringUtils.hasLength(pathname)) {
+    		return null;
+    	}
+
+    	Path path = resolve(pathname);
+    	
     	try {
-    		Path path = resolve(pathname);
     		if (FileSystemUtils.deleteRecursively(path)) {
     			return path;
     		}
@@ -483,7 +491,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         		return null;
     		}
     	}
-    	catch (IOException e) {
+    	catch (Exception e) {
     		throw new StorageException("Failed to delete directory/file " + pathname, e);
     	}
     }    
