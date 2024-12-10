@@ -369,25 +369,37 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
      */
     @Override
 	@Transactional	
-    public Path deleteEvaluationOutput(MgmEvaluationTest met) {
-		Path path = Paths.get(met.getScorePath());
+    public Path deleteEvaluationOutput(MgmEvaluationTest met) {  
+    	String pathname = met.getScorePath();
+		Path path = null;
 		
-		try {
-			if (FileSystemUtils.deleteRecursively(path)) {
-				log.info("Deleted output file " + path + " for MGM evaluation test " + met.getId());  
-			} else {
-				// for non-existing output, no action is needed, a warning message is good enough 
-				log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());
-				path = null;
-			}
-		} catch (IOException e) {
-			// in case of I/O error, it's better to abandon the deletion process, which prevents the further DB action,  
-			// and allows user to trigger another deletion on supplement and evaluation tests later on, 
-			// and any outputs already deleted prior to the error will be ignored in later deletion process;
-			// otherwise, the files in error might still remain in the system, but the supplement and tests are deleted
-			// and there is no easy way to trace these files and manually clean them up.
-			throw new StorageException("Failed to delete output file " + path + " for MGM evaluation test " + met.getId());  	
-		}   		
+    	// check if scorePath is populated
+		// note that null checking on pathname is necessary because of InvalidArgumentException when getting Path on null pathname
+    	if (StringUtils.isEmpty(pathname)) {
+        	// if empty, it's probably due to test in error status, in which case we just log a warning and bypass the file deletion
+    		log.warn("The output path for MGM evaluation test " + met.getId() + " is empty probably due to that the test ran into error.");
+    	}
+		else {
+	    	// otherwise get its Path and delete the file
+			path = Paths.get(pathname);
+			
+			try {
+				if (FileSystemUtils.deleteRecursively(path)) {
+					log.info("Deleted output file " + path + " for MGM evaluation test " + met.getId());  
+				} else {
+					// for non-existing output, no action is needed, a warning message is good enough 
+					log.warn("Output file " + path + " doesn't exist for MGM evaluation test " + met.getId());
+					path = null;
+				}
+			} catch (IOException e) {
+				// in case of I/O error, it's better to abandon the deletion process, which prevents the further DB action,  
+				// and allows user to trigger another deletion on supplement and evaluation tests later on, 
+				// and any outputs already deleted prior to the error will be ignored in later deletion process;
+				// otherwise, the files in error might still remain in the system, but the supplement and tests are deleted
+				// and there is no easy way to trace these files and manually clean them up.
+				throw new StorageException("Failed to delete output file " + path + " for MGM evaluation test " + met.getId());  	
+			}   
+		}
 
     	// TODO below is a tmp workaround as @OnDelete(CASCADE) doesn't work on unidirectional ManyToOne relationship 
     	// delete MgmEvaluationTest from DB
