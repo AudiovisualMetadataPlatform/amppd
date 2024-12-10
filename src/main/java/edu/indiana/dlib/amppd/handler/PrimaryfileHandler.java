@@ -1,5 +1,7 @@
 package edu.indiana.dlib.amppd.handler;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +14,11 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
 import edu.indiana.dlib.amppd.service.PermissionService;
@@ -32,6 +36,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PrimaryfileHandler {    
     
+    @Autowired
+    private PrimaryfileRepository primaryfileRepository;
+
     @Autowired
     private WorkflowResultService workflowResultService;
 
@@ -133,7 +140,17 @@ public class PrimaryfileHandler {
         // delete media/info files and subdir (if exists) of the primaryfile 
         // the latter also takes care of deleting all descendants' media files 
         fileStorageService.unloadAsset(primaryfile);
-        fileStorageService.deleteEntityDir(primaryfile);    
+        fileStorageService.deleteEntityDir(primaryfile); 
+        
+        // delete all bundle associations for the primaryfile
+        // note: need to delete prmaryfile from all containing bundles to avoid FK violation upon PFile deletion 
+        Set<Bundle> bundles = primaryfile.getBundles();
+        log.info("Deleting " + bundles.size() + " bundle assoications for primaryfile " + primaryfile.getId() + " ...");
+        for (Bundle bundle : bundles) {
+        	bundle.getPrimaryfiles().remove(primaryfile);
+        }
+        // delete bundles from primaryfile side appears to be optional
+        bundles.clear();
     }
     
     @HandleAfterDelete
