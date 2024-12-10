@@ -374,9 +374,9 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
 		Path path = null;
 		
     	// check if scorePath is populated
-		// note that null checking on pathname is necessary as InvalidArgumentException when getting Path on null pathname
+		// note that null checking on pathname is necessary because of InvalidArgumentException when getting Path on null pathname
     	if (StringUtils.isEmpty(pathname)) {
-        	// if empty, it's probably due to test in error status, in which case we can just log a warning and bypass the file deletion
+        	// if empty, it's probably due to test in error status, in which case we just log a warning and bypass the file deletion
     		log.warn("The output path for MGM evaluation test " + met.getId() + " is empty probably due to that the test ran into error.");
     	}
 		else {
