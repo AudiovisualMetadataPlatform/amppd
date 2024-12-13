@@ -44,5 +44,5 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	
 	// delete RoleAssignments within a unit
 	List<RoleAssignmentBrief> deleteByUnitId(Long unitId);
-	
+
 }

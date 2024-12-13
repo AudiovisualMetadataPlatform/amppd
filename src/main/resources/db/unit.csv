@@ -2,3 +2,5 @@ name,description,taskManager
 AMP Phase III,for Phase III,Jira
 AMP Pilot,for Phase I & II,Jira
 AMP Test,for testing only,Trello
+Test Unit Deletion,testing deletion,Jira
+Test Unit Deletion 1,testing deletion 1,Trello

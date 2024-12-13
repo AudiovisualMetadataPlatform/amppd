@@ -116,6 +116,7 @@ public class CollectionHandler {
     }
     
     @HandleBeforeDelete
+    @Transactional
     public void handleBeforeDelete(Collection collection) {
 		// check permission
     	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.

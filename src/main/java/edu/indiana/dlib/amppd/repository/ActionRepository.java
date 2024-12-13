@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.repository;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpMethod;
 
@@ -30,11 +31,15 @@ public interface ActionRepository extends AmpObjectRepository<Action> {
 	List<ActionBrief> findByHttpMethodInAndUrlPatternIn(List<HttpMethod> httpMethods, List<String> urlPatterns);
 	
 	// delete action with the given actionId from all roles it's associated with
-	@Query(value = "delete from role_action where action_id = :actionId")
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action where action_id = :actionId")
 	void deleteActionFromRoles(Long actionId);
 
 	// delete role_action associations for obsolete actions
-	@Query(value = "delete from role_action ra join action a on ra.action_id = a.id where a.modified_date < :date")
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action ra using action a where ra.action_id = a.id and a.modified_date < :date")
 	void deleteObsoleteActionsRoles(Date date);
 	
 	
