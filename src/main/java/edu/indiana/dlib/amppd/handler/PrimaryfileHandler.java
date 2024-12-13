@@ -146,6 +146,7 @@ public class PrimaryfileHandler {
         // note: need to delete prmaryfile from all containing bundles to avoid FK violation upon PFile deletion 
         Set<Bundle> bundles = primaryfile.getBundles();
         log.info("Deleting " + bundles.size() + " bundle assoications for primaryfile " + primaryfile.getId() + " ...");
+        // TODO alternatively and more efficiently, call bundleRepository.deletePrimaryfileFromBundles
         for (Bundle bundle : bundles) {
         	bundle.getPrimaryfiles().remove(primaryfile);
         }
