@@ -17,6 +17,8 @@ import org.springframework.validation.annotation.Validated;
 import edu.indiana.dlib.amppd.model.Unit;
 import edu.indiana.dlib.amppd.model.ac.Action.ActionType;
 import edu.indiana.dlib.amppd.model.ac.Action.TargetType;
+import edu.indiana.dlib.amppd.repository.RoleAssignmentRepository;
+import edu.indiana.dlib.amppd.repository.RoleRepository;
 import edu.indiana.dlib.amppd.service.DropboxService;
 import edu.indiana.dlib.amppd.service.FileStorageService;
 import edu.indiana.dlib.amppd.service.MgmEvaluationService;
@@ -35,6 +37,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UnitHandler {    
 
+	@Autowired
+	private RoleAssignmentRepository roleAssignmentRepository;
+	
+	@Autowired
+	private RoleRepository roleRepository;
+	
     @Autowired
 	private WorkflowResultService workflowResultService;
 
@@ -129,6 +137,22 @@ public class UnitHandler {
         
         // delete dropbox subdir (if exists) of the unit 
         dropboxService.deleteSubdir(unit);        
+        
+        /* Note: 
+         * Due to inter-related multiple -to-Many AC-related relationships within Unit, 
+         * it's not safe to use CascadeType.REMOVE to delete AC-related children of a unit, 
+         * as FK violation likely would occur depending on the order or removal, and more data than wanted could be removed;
+         * rather, we better remove these relationships in the right order as below
+         */
+        
+        // 1. delete roleAssignments within the unit
+        roleAssignmentRepository.deleteByUnitId(acUnitId);    
+        
+        // 2. delete role_action associations within the unit
+        roleRepository.deleteUnitRolesActions(acUnitId);    
+        
+        // 3. delete roles within the unit
+        roleRepository.deleteByUnitId(acUnitId);            
     }
     
     @HandleAfterDelete

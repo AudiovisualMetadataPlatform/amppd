@@ -62,13 +62,13 @@ public class Unit extends Dataentity {
 	@ToString.Exclude
     private Set<UnitSupplement> supplements;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="unit", fetch = FetchType.LAZY)
 	@JsonBackReference(value="roles")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude
     private Set<Role> roles;
 	
-	@OneToMany(mappedBy="unit", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="unit", fetch = FetchType.LAZY)
 	@JsonBackReference(value="roleAssignments")
 	@EqualsAndHashCode.Exclude
 	@ToString.Exclude

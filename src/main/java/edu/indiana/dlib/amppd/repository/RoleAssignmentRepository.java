@@ -42,4 +42,7 @@ public interface RoleAssignmentRepository extends AmpObjectRepository<RoleAssign
 	// un-assign user role
 	RoleAssignmentBrief deleteByUserIdAndRoleIdAndUnitId(Long userId, Long roleId, Long unitId);
 	
+	// delete RoleAssignments within a unit
+	List<RoleAssignmentBrief> deleteByUnitId(Long unitId);
+	
 }
