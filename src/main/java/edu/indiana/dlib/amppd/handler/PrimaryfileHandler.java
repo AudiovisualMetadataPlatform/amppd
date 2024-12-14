@@ -12,6 +12,7 @@ import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Bundle;
@@ -112,6 +113,7 @@ public class PrimaryfileHandler {
     }
     
     @HandleBeforeDelete
+    @Transactional
     public void handleBeforeDelete(Primaryfile primaryfile) {
 		// check permission
     	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.
@@ -146,6 +148,7 @@ public class PrimaryfileHandler {
         // note: need to delete prmaryfile from all containing bundles to avoid FK violation upon PFile deletion 
         Set<Bundle> bundles = primaryfile.getBundles();
         log.info("Deleting " + bundles.size() + " bundle assoications for primaryfile " + primaryfile.getId() + " ...");
+        // TODO alternatively and more efficiently, call bundleRepository.deletePrimaryfileFromBundles
         for (Bundle bundle : bundles) {
         	bundle.getPrimaryfiles().remove(primaryfile);
         }

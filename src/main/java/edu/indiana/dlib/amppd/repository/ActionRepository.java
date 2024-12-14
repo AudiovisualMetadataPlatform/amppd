@@ -1,7 +1,10 @@
 package edu.indiana.dlib.amppd.repository;
 
+import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpMethod;
 
 import edu.indiana.dlib.amppd.model.ac.Action;
@@ -26,6 +29,19 @@ public interface ActionRepository extends AmpObjectRepository<Action> {
 	// find actions by actionType-targetType, httpMethod-UrlPattern 
 	List<ActionBrief> findByActionTypeInAndTargetTypeIn(List<ActionType> actionTypes, List<TargetType> targetTypes);	
 	List<ActionBrief> findByHttpMethodInAndUrlPatternIn(List<HttpMethod> httpMethods, List<String> urlPatterns);
+	
+	// delete action with the given actionId from all roles it's associated with
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action where action_id = :actionId")
+	void deleteActionFromRoles(Long actionId);
+
+	// delete role_action associations for obsolete actions
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action ra using action a where ra.action_id = a.id and a.modified_date < :date")
+	void deleteObsoleteActionsRoles(Date date);
+	
 	
 //	// find the actions for which the role permissions are not configurable, i.e.
 //	// Create/Delete Unit, update Role or RoleAssignment 

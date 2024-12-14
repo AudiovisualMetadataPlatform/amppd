@@ -131,6 +131,8 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		
 		// delete all obsolete global roles, i.e. those with null unitId and not updated during this pass of refresh;
 		// based on the assumption that the csv file includes all the roles we want to keep 
+		// Note: role_action associations involved with these roles must be deleted first to avoid FK violation
+		roleRepository.deleteObsoleteGLobalRolesActions(refreshStart);
 		List<Role> deletedRoles = roleRepository.deleteByUnitIdIsNullAndModifiedDateBefore(refreshStart);
 		log.info("Deleted " + deletedRoles.size() + " obsolete global roles older than current refresh start time at " + refreshStart);			
 		
@@ -191,6 +193,8 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		
 		// delete all obsolete actions, i.e. those not updated during this pass of refresh;
 		// based on the assumption that the csv file includes all the actions we want to keep 
+		// Note: role_action associations involved with these actions must be deleted first to avoid FK violation
+		actionRepository.deleteObsoleteActionsRoles(refreshStart);
 		List<Action> deletedActions = actionRepository.deleteByModifiedDateBefore(refreshStart);
 		log.info("Deleted " + deletedActions.size() + " obsolete actions older than current refresh start time at " + refreshStart);			
 				
