@@ -24,6 +24,9 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	boolean existsByItemIdAndStatusIn(Long itemId, List<GalaxyJobState> statuses);
 	boolean existsByPrimaryfileIdAndStatusIn(Long primaryfileId, List<GalaxyJobState> statuses);
 	
+	// check incomplete status per workflow
+	boolean existsByWorkflowIdAndStatusIn(String workflkowId, List<GalaxyJobState> statuses);
+	
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
 	List<WorkflowResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);
 	List<WorkflowResult> findByOutputId(String outputId);
