@@ -20,12 +20,14 @@ import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputDefinition;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowMetadata;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
 import edu.indiana.dlib.amppd.exception.GalaxyWorkflowException;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
+import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.WorkflowFilterValues;
@@ -43,6 +45,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	// tag for published workflow
 	public static String PUBLISHED = "published";
+
+	@Autowired
+	private WorkflowResultRepository workflowResultRepository;	
 
 	@Autowired
 	private MgmToolRepository mgmToolRepository;	
@@ -188,7 +193,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 
 		if (workflowDetails == null) {
-			throw new GalaxyWorkflowException("Failed to retriev workflow with " + store + "ID " + workflowId + withtn + " tool name and " +  withid + " input details.");		
+			throw new GalaxyWorkflowException("Failed to retrieve workflow with " + store + "ID " + workflowId + withtn + " tool name and " +  withid + " input details.");		
 		}
 
 		// retrieve tool name by tool ID for each tool in the workflow steps
@@ -258,7 +263,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		log.info("Storing workflow name in local cache: " + workflowId + ": " + workflowName);
 		return workflowName;
 	}		
-
+	
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowNamesCache()
 	 */
@@ -273,11 +278,36 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public Integer workflowNamesCacheSize() {
 		return workflowNames.size();
 	}
-
+	
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowService.clearWorkflowsCache()
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.updateWorkflow(String, Boolean, Boolean)
 	 */
-	public void clearWorkflowsCache() {
+	public WorkflowDetails updateWorkflow(String workflowId, Boolean publish, Boolean activate) {
+		// check if the workflow is involved in any on-going invocation
+		// if yes, throw GalaxyWorkflowException to inform caller of the method
+		Boolean processing = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultServiceImpl.PROCESSING_STATUSES);	
+		if (processing) {
+			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated as it is involved in some on-going invocations.");
+		}
+		
+		// otherwise, update workflow
+		WorkflowMetadata wfmd = new WorkflowMetadata();
+		if (publish != null) {
+			wfmd.setPublished(publish);
+		}
+		if (activate != null) {
+			wfmd.setHidden(!activate);
+		}
+		WorkflowDetails workflow = workflowsClient.updateWorkflow(workflowId, wfmd);
+		
+		// clear workflow list cache since the list might need refresh due to this update
+		clearWorkflowsCache();		
+		
+		log.info("Successfully updated workflow " + workflowId + ", publish: " + publish + ", activate: " + activate);		
+		return workflow;
+	}
+
+	protected void clearWorkflowsCache() {
 		workflowCache.clear();
 		log.info("Workflows cache has been cleared up.");
 	}

@@ -18,11 +18,14 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	@Query(value = "select case when count(*)>0 then true else false end from WorkflowResult i where i.invocationId = :invocationId")
 	boolean invocationExists(@Param("invocationId") String invocationId);
 	
-	// check incomplete status at various entity levels	
+	// check processing status at various entity levels	
 	boolean existsByUnitIdAndStatusIn(Long unitId, List<GalaxyJobState> statuses);
 	boolean existsByCollectionIdAndStatusIn(Long collectionId, List<GalaxyJobState> statuses);
 	boolean existsByItemIdAndStatusIn(Long itemId, List<GalaxyJobState> statuses);
 	boolean existsByPrimaryfileIdAndStatusIn(Long primaryfileId, List<GalaxyJobState> statuses);
+	
+	// check processing status per workflow
+	boolean existsByWorkflowIdAndStatusIn(String workflkowId, List<GalaxyJobState> statuses);
 	
 	List<WorkflowResult> findByPrimaryfileId(Long primaryfileId);
 	List<WorkflowResult> findByPrimaryfileIdAndIsFinalTrue(Long primaryfileId);

@@ -65,6 +65,11 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public static final String WILD_CARD = "*";
 
+	public static final List<GalaxyJobState> PROCESSING_STATUSES = Arrays.asList(
+			GalaxyJobState.SCHEDULED,
+			GalaxyJobState.IN_PROGRESS
+	);
+	
 	/* Note: 
 	 * The STANDARD_* maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
 	 * Their values are based on current WorkflowResult table data. 
