@@ -291,8 +291,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		
 		// otherwise, update workflow
-//		WorkflowDetails workflow = workflowsClient.showWorkflow(workflowId);
-//		WorkflowDetails workflow = new WorkflowDetails();
 		WorkflowMetadata wfmd = new WorkflowMetadata();
 		if (publish != null) {
 			wfmd.setPublished(publish);
