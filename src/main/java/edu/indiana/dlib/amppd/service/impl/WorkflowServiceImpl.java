@@ -20,6 +20,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.Tool;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputDefinition;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowMetadata;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowStepDefinition;
 import com.sun.jersey.api.client.UniformInterfaceException;
 
@@ -290,14 +291,16 @@ public class WorkflowServiceImpl implements WorkflowService {
 		}
 		
 		// otherwise, update workflow
-		WorkflowDetails workflow = workflowsClient.showWorkflow(workflowId);
+//		WorkflowDetails workflow = workflowsClient.showWorkflow(workflowId);
+//		WorkflowDetails workflow = new WorkflowDetails();
+		WorkflowMetadata wfmd = new WorkflowMetadata();
 		if (publish != null) {
-			workflow.setPublished(publish);
+			wfmd.setPublished(publish);
 		}
 		if (activate != null) {
-			workflow.setHidden(!activate);
+			wfmd.setHidden(!activate);
 		}
-		workflow = workflowsClient.updateWorkflow(workflowId, workflow);
+		WorkflowDetails workflow = workflowsClient.updateWorkflow(workflowId, wfmd);
 		
 		// clear workflow list cache since the list might need refresh due to this update
 		clearWorkflowsCache();		
