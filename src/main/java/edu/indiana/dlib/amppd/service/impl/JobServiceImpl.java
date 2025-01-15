@@ -385,9 +385,43 @@ public class JobServiceImpl implements JobService {
 		// we store context in StringBuffer instead of String because foreach doesn't allow updating local variable defined outside its scope
 		StringBuffer context = new StringBuffer(); 
 		
-		// IDs of the steps for which parameters are added/changed
-		List<String> stepsChanged = new ArrayList<String>();		
+		// IDs of the steps for which parameters are added/changed	
+		Set<String> stepsChanged = new HashSet<String>();
+
+		/*
+		 * Provide context to any MGM that desires it by replacing __name__ parameters
+		 * with values.  Galaxy will ignore parameters that aren's used by the tools
+		 * so we can safely add whatever we want.
+		 * TODO: The AMP UI shouldn't show these fields.
+		 */
+		Map<String, String> baseContext = new HashMap<String, String>();
+		baseContext.put("__hmgm_context__", getHmgmContext(workflowDetails, primaryfile));
+		baseContext.put("__ampuser__", ampUserService.getCurrentUsername());
+		baseContext.put("__unit_id__", primaryfile.getItem().getCollection().getUnit().getId().toString());
+		baseContext.put("__unit_name__", primaryfile.getItem().getCollection().getUnit().getName());
+		baseContext.put("__collection_id__", primaryfile.getItem().getCollection().getId().toString());
+		baseContext.put("__collection_name__", primaryfile.getItem().getCollection().getName());
+		baseContext.put("__item_id__", primaryfile.getItem().getId().toString());		
+		baseContext.put("__item_name__", primaryfile.getItem().getName());
+		baseContext.put("__primary_file_id__", primaryfile.getId().toString());
+		baseContext.put("__primary_file_name__", primaryfile.getName());
+		baseContext.put("__primary_file_path__", primaryfile.getPathname());
+		baseContext.put("__primary_file_url__", mediaService.getPrimaryfileMediaUrl(primaryfile));
+		baseContext.put("__primary_file_media_info__", mediaService.getAssetMediaInfoPath(primaryfile));
+		baseContext.put("__workflow_id__", workflowDetails.getId());		
+		baseContext.put("__workflow_name__", workflowDetails.getName());			
+		baseContext.put("__original_filename__", primaryfile.getOriginalFilename());
 		
+		log.info("Updating parameters for workflow " + workflowDetails.getName());		
+		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
+			if(!parameters.containsKey(stepId)) {
+				parameters.put(stepId, new HashMap<String, Object>());
+			}
+			Map<String, Object> stepParams = parameters.get(stepId);
+			stepParams.putAll(baseContext);
+			stepsChanged.add(stepId);
+		});
+
 		workflowDetails.getSteps().forEach((stepId, stepDef) -> {
 			if (StringUtils.startsWith(stepDef.getToolId(), HMGM_TOOL_ID_PREFIX) || MGM_TOOL_IDS.contains(stepDef.getToolId())) {
 				// since all HMGMs in the workflow share the same context, we only need to compute it once when first needed, then reuse it
@@ -462,7 +496,7 @@ public class JobServiceImpl implements JobService {
 		});
 
 		log.info("Successfully updated parameters for " + stepsChanged.size() + " steps in workflow " + workflowDetails.getId() + " running on primaryfile " + primaryfile.getId());
-		return stepsChanged;	
+		return new ArrayList<String>(stepsChanged);	
 	}
 	
 	/**
