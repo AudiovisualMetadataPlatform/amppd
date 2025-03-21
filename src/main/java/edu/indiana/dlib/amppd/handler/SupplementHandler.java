@@ -10,6 +10,7 @@ import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import edu.indiana.dlib.amppd.model.Supplement;
@@ -95,6 +96,7 @@ public class SupplementHandler {
     }
     
     @HandleBeforeDelete
+    @Transactional
     public void handleBeforeDelete(Supplement supplement) {
 		// check permission
     	// Note: It's assumed that a role with permission to delete a parent entity can also delete all its descendants' data.

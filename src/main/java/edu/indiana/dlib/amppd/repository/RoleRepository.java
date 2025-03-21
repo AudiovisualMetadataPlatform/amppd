@@ -3,6 +3,7 @@ package edu.indiana.dlib.amppd.repository;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import edu.indiana.dlib.amppd.model.ac.Role;
@@ -30,7 +31,28 @@ public interface RoleRepository extends AmpObjectRepository<Role> {
 	@Query(value = "select r from Role r where r.name <> 'AMP Admin' and r.level > :level and (r.unit is null or r.unit.id = :unitId) order by r.level")
 	List<RoleBrief> findAssignableRolesInUnit(Integer level, Long unitId);
 	
-	// delete unrefreshed global roles
+	// delete roles within the unit of the given unitId
+	List<Role> deleteByUnitId(Long unitId);
+	
+	// delete obsolete global roles
 	List<Role> deleteByUnitIdIsNullAndModifiedDateBefore(Date date);
+	
+	// delete role with the given roleId from all actions it's associated with
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action where role_id = :roleId")
+	void deleteRoleFromActions(Long roleId);
+	
+	// delete role_action associations for obsolete global roles
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action ra using role r where ra.role_id = r.id and r.unit_id is null and r.modified_date < :date")
+	void deleteObsoleteGLobalRolesActions(Date date);
+	
+	// delete role_action associations within the unit of the given unitId
+	@Modifying
+	@Query(nativeQuery = true,
+		value = "delete from role_action ra using role r where ra.role_id = r.id and r.unit_id = :unitId")
+	void deleteUnitRolesActions(Long unitId);
 	
 }

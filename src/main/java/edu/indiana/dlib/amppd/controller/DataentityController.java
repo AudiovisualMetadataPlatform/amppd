@@ -662,22 +662,26 @@ public class DataentityController {
 		return items;
 	}
 	
-	/**
-	 * Get all the units readable by the current user.
-	 * @return the list of readable units
-	 */
-	@GetMapping("/units")
-	public Set<UnitBrief> getUnits() {
-		// get accessible units for Read Unit, empty list indicates no unit readable
-		Set<UnitBrief> units = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit).right;
-		
-		// if units is null, i.e. user is admin, return all units
-		if (units == null) {
-			units = unitRepository.findBy();
-		}
-	
-		log.info("Successfully retrieved " + units.size() + " units.");
-		return units;
-	}
+	/* Note:
+	 * Below API cause request mapping conflict with POST /units for creating unit.
+	 * It's also not necessary as it can be replaced by GET /permissions/units with Read-Unit action parameters 
+	 */	
+//	/**
+//	 * Get all the units readable by the current user.
+//	 * @return the list of readable units
+//	 */
+//	@GetMapping("/units")
+//	public Set<UnitBrief> getUnits() {
+//		// get accessible units for Read Unit, empty list indicates no unit readable
+//		Set<UnitBrief> units = permissionService.getAccessibleUnits(ActionType.Read, TargetType.Unit).right;
+//		
+//		// if units is null, i.e. user is admin, return all units
+//		if (units == null) {
+//			units = unitRepository.findBy();
+//		}
+//	
+//		log.info("Successfully retrieved " + units.size() + " units.");
+//		return units;
+//	}
 	
 }

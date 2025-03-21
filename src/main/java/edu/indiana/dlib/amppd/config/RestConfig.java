@@ -41,6 +41,8 @@ public class RestConfig implements RepositoryRestConfigurer {
          */     
         
         config.forDomainType(Unit.class)
+			.withCollectionExposure((metadata, httpMethods) -> httpMethods
+    			.disable(HttpMethod.GET)) 
     		.withAssociationExposure((metadata, httpMethods) -> httpMethods
     			.disable(HttpMethod.POST)
     			.disable(HttpMethod.PUT)

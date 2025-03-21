@@ -34,3 +34,7 @@ HELP.md
 application-*.properties
 *MyController.java
 /.pydevproject
+
+# make sure not to include compiled things.
+/bin/
+*.class

@@ -78,7 +78,7 @@ rest:
         amppd.pythonPath: python3
 
         # timeouts
-        amppd.jwtExpireMinutes: 120
+        amppd.jwtExpireMinutes: 720
         amppd.workflowEditMinutes: 60
         amppd.resetPasswordMinutes: 10
         amppd.activateAccountDays: 7
