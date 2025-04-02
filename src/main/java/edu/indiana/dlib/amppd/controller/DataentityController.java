@@ -118,7 +118,7 @@ public class DataentityController {
     	// populate primaryfile.item in case it's not specified in RequestPart
     	Long pid; // parent's ID
     	if (primaryfile.getItem() == null) {
-    		primaryfile.setItem(itemRepository.findById(itemId).orElse(null));
+    		primaryfile.setItem(itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!")));
     	}
     	else if ((pid = primaryfile.getItem().getId()) != itemId) {
     		log.warn("Primaryfile's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
@@ -149,6 +149,10 @@ public class DataentityController {
 		}
 		primaryfile = (Primaryfile)fileStorageService.uploadAsset(primaryfile, mediaFile);
 		
+		// Note: Populating below fields are needed as the object returned from save doesn't include fields computed via @Formula.
+		// set deletable to true as newly added primaryfile should be deletable
+		primaryfile.setDeletable(true);
+		
     	log.info("Successfully added primaryfile " + primaryfile.getName() + " under item " + itemId);
     	return primaryfile;
     }
@@ -168,10 +172,12 @@ public class DataentityController {
     	
     	// populate unitSupplement.unit in case it's not specified in RequestPart
     	Long pid; // parent's ID
-    	if (unitSupplement.getUnit() == null) {
-    		unitSupplement.setUnit(unitRepository.findById(unitId).orElse(null));
+    	Unit unit = unitSupplement.getUnit();
+    	if (unit == null) {
+    		unit = unitRepository.findById(unitId).orElseThrow(() -> new StorageException("unit <" + unitId + "> does not exist!"));
+    		unitSupplement.setUnit(unit);
     	}
-    	else if ((pid = unitSupplement.getUnit().getId()) != unitId) {
+    	else if ((pid = unit.getId()) != unitId) {
     		log.warn("UnitSupplement's unit ID " + pid + " is different from the specified unit ID " + unitId + ", will use the former.");    		
     	}
     	
@@ -197,6 +203,12 @@ public class DataentityController {
 		}
 		unitSupplement = (UnitSupplement)fileStorageService.uploadAsset(unitSupplement, mediaFile);
 		
+		// Note: Populating below fields are needed as the object returned from save doesn't include fields computed via @Formula.
+		// set deletable to the same as its parent
+		unitSupplement.setDeletable(unit.getDeletable());
+		// set isGroundtruth to false for UnitSupplement
+		unitSupplement.setIsGroundtruth(false);
+				
     	log.info("Successfully addedunitSupplement " + unitSupplement.getName() + " under unit " + unitId);
     	return unitSupplement;
     }
@@ -216,10 +228,12 @@ public class DataentityController {
     	
     	// populate collectionSupplement.collection in case it's not specified in RequestPart
     	Long pid; // parent's ID
-    	if (collectionSupplement.getCollection() == null) {
-    		collectionSupplement.setCollection(collectionRepository.findById(collectionId).orElse(null));
+    	Collection collection = collectionSupplement.getCollection();
+    	if (collection == null) {
+    		collection = collectionRepository.findById(collectionId).orElseThrow(() -> new StorageException("collection <" + collectionId + "> does not exist!"));
+    		collectionSupplement.setCollection(collection);
     	}
-    	else if ((pid = collectionSupplement.getCollection().getId()) != collectionId) {
+    	else if ((pid = collection.getId()) != collectionId) {
     		log.warn("CollectionSupplement's collection ID " + pid + " is different from the specified collection ID " + collectionId + ", will use the former.");    		
     	}
     	
@@ -245,6 +259,12 @@ public class DataentityController {
 		}
 		collectionSupplement = (CollectionSupplement)fileStorageService.uploadAsset(collectionSupplement, mediaFile);
 		
+		// Note: Populating below fields are needed as the object returned from save doesn't include fields computed via @Formula.
+		// set deletable to the same as its parent
+		collectionSupplement.setDeletable(collection.getDeletable());
+		// set isGroundtruth to false for CollectionSupplement
+		collectionSupplement.setIsGroundtruth(false);
+		
     	log.info("Successfully addedcollectionSupplement " + collectionSupplement.getName() + " under collection " + collectionId);
     	return collectionSupplement;
     }
@@ -264,11 +284,12 @@ public class DataentityController {
     	
     	// populate itemSupplement.item in case it's not specified in RequestPart
     	Long pid; // parent's ID
-    	if (itemSupplement.getItem() == null) {
-    		Item item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
+    	Item item = itemSupplement.getItem();
+    	if (item == null) {
+    		item = itemRepository.findById(itemId).orElseThrow(() -> new StorageException("item <" + itemId + "> does not exist!"));
     		itemSupplement.setItem(item);
     	}
-    	else if ((pid = itemSupplement.getItem().getId()) != itemId) {
+    	else if ((pid = item.getId()) != itemId) {
     		log.warn("ItemSupplement's item ID " + pid + " is different from the specified item ID " + itemId + ", will use the former.");    		
     	}
     	
@@ -294,6 +315,12 @@ public class DataentityController {
 		}
 		itemSupplement = (ItemSupplement)fileStorageService.uploadAsset(itemSupplement, mediaFile);
 		
+		// Note: Populating below fields are needed as the object returned from save doesn't include fields computed via @Formula.
+		// set deletable to the same as its parent
+		itemSupplement.setDeletable(item.getDeletable());
+		// set isGroundtruth to false for ItemSupplement
+		itemSupplement.setIsGroundtruth(false);
+
     	log.info("Successfully addeditemSupplement " + itemSupplement.getName() + " under item " + itemId);
     	return itemSupplement;
     }
@@ -313,11 +340,12 @@ public class DataentityController {
     	
     	// populate primaryfileSupplement.primaryfile in case it's not specified in RequestPart
     	Long pid; // parent's ID
-    	if (primaryfileSupplement.getPrimaryfile() == null) {
-    		Primaryfile primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));
+    	Primaryfile primaryfile = primaryfileSupplement.getPrimaryfile();
+    	if (primaryfile == null) {
+    		primaryfile = primaryfileRepository.findById(primaryfileId).orElseThrow(() -> new StorageException("primaryfile <" + primaryfileId + "> does not exist!"));
     		primaryfileSupplement.setPrimaryfile(primaryfile);
     	}
-    	else if ((pid = primaryfileSupplement.getPrimaryfile().getId()) != primaryfileId) {
+    	else if ((pid = primaryfile.getId()) != primaryfileId) {
     		log.warn("PrimaryfileSupplement's primaryfile ID " + pid + " is different from the specified primaryfile ID " + primaryfileId + ", will use the former.");    		
     	}
     	
@@ -342,6 +370,13 @@ public class DataentityController {
 			throw new RuntimeException("No media file is provided for the primaryfileSupplement to be added.");
 		}
 		primaryfileSupplement = (PrimaryfileSupplement)fileStorageService.uploadAsset(primaryfileSupplement, mediaFile);
+				
+		// Note: Populating below fields are needed as the object returned from save doesn't include fields computed via @Formula.
+		// set deletable to the same as its parent
+		primaryfileSupplement.setDeletable(primaryfile.getDeletable());
+		// set isGroundtruth based on its category
+		boolean isGroundtruth = primaryfileSupplement.getCategory().toLowerCase().startsWith("groundtruth");
+		primaryfileSupplement.setIsGroundtruth(isGroundtruth);
 		
     	log.info("Successfully added primaryfileSupplement " + primaryfileSupplement.getName() + " under primaryfile " + primaryfileId);
     	return primaryfileSupplement;
