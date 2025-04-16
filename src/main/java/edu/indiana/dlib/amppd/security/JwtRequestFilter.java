@@ -76,6 +76,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		final String requestTokenHeader = request.getHeader("authorization");
 				
 		// If it is for the HMGM NER editor with a valid referrer, create anonymous auth
+		// TODO this is incomplete solution; better provide NER editor an API which returns a symlink to the input file
 		if (validRefUrl(request)) {
 			logger.debug("Valid referer for URL. Creating anonymous auth for HMGM NER editor.");
 			createAnonymousAuth(request);
@@ -85,12 +86,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			logger.debug("Request token starts with AMPPD, authenticating via HMGM password token");
 			
 			String authToken = requestTokenHeader.substring(6);
-			String[] parts = authToken.split(";;;;");
+			String[] parts = authToken.split(AuthService.AUTH_SEPARATOR);
 			String editorInput = parts[0];
 			String userToken = parts[1];
 			String authString = parts[2];
 			
-			if(authService.compareAuthStrings(authString, userToken, editorInput)) {
+			if (authService.validateAuthStrings(authString, userToken, editorInput) != null) {
 				createAnonymousAuth(request);
 				logger.debug("Auth string is valid. Creating anonymous auth for HMGM editors");
 			}

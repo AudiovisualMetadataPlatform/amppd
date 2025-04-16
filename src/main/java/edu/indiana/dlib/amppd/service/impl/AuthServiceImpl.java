@@ -19,17 +19,28 @@ public class AuthServiceImpl implements AuthService {
 	@Autowired
 	private AmppdUiPropertyConfig amppdUiPropertyConfig;
 	
-	
 	@Override
-	public boolean compareAuthStrings(String authString, String userToken, String editorInput) {
+	public String validateAuthStrings(String editorInput, String userToken, String authString) {
+		/* The original method returns true/false on validation instead of the token, and requires the frontend to generate the token.
+		 * This is not best practice. We should eliminate/minimize mutual dependencies between frontend/backend code,
+		 * and leave business logic to the backend only. This is especially necessary in the case of authentication.
+		 */
+		String token = null;
 		try {
 			String hash = hashValues(userToken, editorInput);
-			return hash.equals(authString);
+			if (hash.equals(authString)) {
+				token = editorInput + AUTH_SEPARATOR + userToken + AUTH_SEPARATOR + authString;
+				log.info("Authentication succeeded for HMGM editor input file " + editorInput);
+			}
+			else {
+				log.error(hash);
+				log.info("Authentication failed for HMGM editor input file " + editorInput);
+			}
 		}
 		catch(Exception ex) {
-			log.error("Error comparing auth string: " + ex);
+			log.error("Exception while comparing auth string for HMGM editor input file " + editorInput, ex);
 		}
-		return false;
+		return token;
 	}
 	
 	private String hashValues(String userToken, String editorInput) throws NoSuchAlgorithmException {
