@@ -21,6 +21,7 @@ import edu.indiana.dlib.amppd.service.AuthService;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+	public static String HMGM_AUTH_PREFIX = "HMGM";
 	
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -82,21 +83,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			createAnonymousAuth(request);
 		}
 		// otherwise, for HMGM related requests
-		else if (requestTokenHeader != null && requestTokenHeader.startsWith("AMPPD ")) {
-			logger.debug("Request token starts with AMPPD, authenticating via HMGM password token");
+		else if (requestTokenHeader != null && requestTokenHeader.startsWith(HMGM_AUTH_PREFIX)) {
+			logger.debug("Request token starts with " + HMGM_AUTH_PREFIX + ", authenticating via HMGM password ... ");
 			
 			String authToken = requestTokenHeader.substring(6);
 			String[] parts = authToken.split(AuthService.AUTH_SEPARATOR);
 			String editorInput = parts[0];
-			String userToken = parts[1];
+			String userPass = parts[1];
 			String authString = parts[2];
 			
-			if (authService.validateAuthStrings(authString, userToken, editorInput) != null) {
+			if (authService.validateAuthStrings(authString, userPass, editorInput) != null) {
 				createAnonymousAuth(request);
 				logger.debug("Auth string is valid. Creating anonymous auth for HMGM editors");
 			}
 			else {
-				logger.warn("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " HMGM editor input: " + editorInput);
+				logger.warn("Auth string " + authString + " is invalid: HMGM editor input: " + editorInput + ", userPass: " + userPass);
 			}			
 		}
 		// otherwise, for AMP user authentication with JWT token

@@ -26,8 +26,8 @@ public class HmgmController {
 	@Autowired AuthService authService;
 	
 	@GetMapping(path = "/hmgm/authorize-editor")
-	public String authorizeEditor(@RequestParam String authString, @RequestParam String userToken, @RequestParam String editorInput) {	
-		return authService.validateAuthStrings(authString, userToken, editorInput);
+	public String authorizeEditor(@RequestParam String editorInput, @RequestParam String userPass, @RequestParam String authString) {	
+		return authService.validateAuthStrings(editorInput, userPass, authString);
 	}
 	
 	@GetMapping(path = "/hmgm/transcript-editor", produces = MediaType.APPLICATION_JSON_VALUE)

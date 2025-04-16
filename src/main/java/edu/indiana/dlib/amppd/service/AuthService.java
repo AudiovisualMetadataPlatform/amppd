@@ -5,14 +5,14 @@ public interface AuthService {
 
 	/**
 	 * Validate authentication info for HMGM editors, by comparing the client supplied authString to the 
-	 * sha-256 authString pre-generated based on the given userToken and given HMGM editor input path.
-	 * if valid, return a token generated with the authentication info; otherwise return null.
-	 * @param editorInput user supplied editor input file path
-	 * @param userToken user supplied token
-	 * @param authString the supplied authString to compare against the pre-generated authString
-	 * @return the generated token for HMGM editor authentication if valid; null otherwise
+	 * sha-256 authString pre-generated based on the given HMGM editor input file path and user entered password.
+	 * if valid, return the HMGM token generated with the authentication info; otherwise return null.
+	 * @param editorInput client supplied editor input file path
+	 * @param userPass user entered password specific to the HMGM task
+	 * @param authString client supplied authString to compare against the pre-generated authString
+	 * @return the generated HMGM token for HMGM editor authentication if valid; null otherwise
 	 */
-	public String validateAuthStrings(String editorInput, String userToken, String authString);
+	public String validateAuthStrings(String editorInput, String userPass, String authString);
 	
 
 }

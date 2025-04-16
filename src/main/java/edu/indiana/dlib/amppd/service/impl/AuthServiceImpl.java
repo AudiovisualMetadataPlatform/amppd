@@ -20,16 +20,16 @@ public class AuthServiceImpl implements AuthService {
 	private AmppdUiPropertyConfig amppdUiPropertyConfig;
 	
 	@Override
-	public String validateAuthStrings(String editorInput, String userToken, String authString) {
-		/* The original method returns true/false on validation instead of the token, and requires the frontend to generate the token.
+	public String validateAuthStrings(String editorInput, String userPass, String authString) {
+		/* The original method returns boolean on validation instead of the HMGM token, so the frontend has to generate the token.
 		 * This is not best practice. We should eliminate/minimize mutual dependencies between frontend/backend code,
-		 * and leave business logic to the backend only. This is especially necessary in the case of authentication.
+		 * and leave business logic to the backend only. This is especially desirable in the case of authentication.
 		 */
 		String token = null;
 		try {
-			String hash = hashValues(userToken, editorInput);
+			String hash = hashValues(userPass, editorInput);
 			if (hash.equals(authString)) {
-				token = editorInput + AUTH_SEPARATOR + userToken + AUTH_SEPARATOR + authString;
+				token = editorInput + AUTH_SEPARATOR + userPass + AUTH_SEPARATOR + authString;
 				log.info("Authentication succeeded for HMGM editor input file " + editorInput);
 			}
 			else {
@@ -43,8 +43,8 @@ public class AuthServiceImpl implements AuthService {
 		return token;
 	}
 	
-	private String hashValues(String userToken, String editorInput) throws NoSuchAlgorithmException {
-		String originalString = userToken + editorInput + amppdUiPropertyConfig.getHmgmSecretKey();
+	private String hashValues(String userPass, String editorInput) throws NoSuchAlgorithmException {
+		String originalString = userPass + editorInput + amppdUiPropertyConfig.getHmgmSecretKey();
 		return org.apache.commons.codec.digest.DigestUtils.sha256Hex(originalString);
 	}
 }
