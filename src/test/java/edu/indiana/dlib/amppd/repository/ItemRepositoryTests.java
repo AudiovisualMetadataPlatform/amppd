@@ -26,6 +26,7 @@ import br.com.six2six.fixturefactory.Fixture;
 import br.com.six2six.fixturefactory.loader.FixtureFactoryLoader;
 import edu.indiana.dlib.amppd.fixture.DataentityProcessor;
 import edu.indiana.dlib.amppd.model.Item;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.util.TestUtil;
 
@@ -58,7 +59,7 @@ public class ItemRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		itemRepository.deleteAll();
-		token = "Bearer " + testHelper.getToken();
+		token = JwtTokenUtil.JWT_AUTH_PREFIX + testHelper.getToken();
 	}
 
 	@Test

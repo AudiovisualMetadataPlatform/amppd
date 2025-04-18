@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -44,13 +45,13 @@ public class WorkflowControllerTests {
 	
     @Test
     public void shouldListWorkflows() throws Exception {    	
-    	mvc.perform(get("/workflows").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(get("/workflows").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
     			jsonPath("$.rows[0]").exists());
     }
 
     @Test
     public void shouldShowWorkflowDetails() throws Exception {    	
-    	mvc.perform(get("/workflows/{workflowId}", workflow.getId()).header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(get("/workflows/{workflowId}", workflow.getId()).header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
     			jsonPath("$.id").value(workflow.getId()));
     }
 

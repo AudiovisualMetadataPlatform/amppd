@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.indiana.dlib.amppd.service.AuthService;
+import edu.indiana.dlib.amppd.service.HmgmAuthService;
 import edu.indiana.dlib.amppd.service.HmgmNerService;
 import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
@@ -23,11 +23,40 @@ public class HmgmController {
 		
 	@Autowired HmgmTranscriptService hmgmTranscriptService;
 	@Autowired HmgmNerService hmgmNerService;
-	@Autowired AuthService authService;
+	@Autowired HmgmAuthService hmgmAuthService;
 	
+	/**
+	 * Authorize/reject HMGM editor authentication request based on the client supplied HMGM token if provided, or otherwise,
+	 * the combination of editor input file path, user entered editor password, and client supplied authentication string.   
+	 * @param hmgmToken client supplied HMGM token
+	 * @param editorInput editor input file path
+	 * @param userPass user entered editor password
+	 * @param authString client supplied authentication string
+	 * @return the generated HMGM token for HMGM editor authentication if valid; null otherwise
+	 */
 	@GetMapping(path = "/hmgm/authorize-editor")
-	public String authorizeEditor(@RequestParam String editorInput, @RequestParam String userPass, @RequestParam String authString) {	
-		return authService.validateAuthStrings(editorInput, userPass, authString);
+	public String authorizeEditor(
+			@RequestParam(required = false) String hmgmToken,
+			@RequestParam(required = false) String editorInput, 
+			@RequestParam(required = false) String userPass, 
+			@RequestParam(required = false) String authString) {	
+		// if only editor input plus user password plus auth string are provided, validate them for authentication
+		if (hmgmToken == null && editorInput != null && userPass != null && authString != null) {
+			return hmgmAuthService.validateAuthString(editorInput, userPass, authString);
+		}
+		
+		// otherwise if only HMGM token is provided, validate it for authentication
+		if (hmgmToken != null && editorInput == null && userPass == null && authString == null) {
+			return hmgmAuthService.validateHmgmToken(hmgmToken);
+		}
+		
+		// otherwise if HMGM token is provided along with editorInput and authString, validate them for authentication
+		if (hmgmToken != null && editorInput != null && userPass == null && authString != null) {
+			return hmgmAuthService.validateHmgmTokenAuthString(hmgmToken, editorInput, authString);
+		}
+
+		// otherwise authentication fails
+		return null;
 	}
 	
 	@GetMapping(path = "/hmgm/transcript-editor", produces = MediaType.APPLICATION_JSON_VALUE)

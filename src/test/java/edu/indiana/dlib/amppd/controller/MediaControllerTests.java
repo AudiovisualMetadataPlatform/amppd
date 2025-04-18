@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import edu.indiana.dlib.amppd.model.Primaryfile;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.MediaService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
@@ -53,7 +54,7 @@ public class MediaControllerTests {
 	
     @Test
     public void shouldServePrimaryfile() throws Exception {  	
-    	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId()).header("Authorization", "Bearer " + token)).andExpect(
+    	mvc.perform(get("/primaryfiles/{id}/media", primaryfile.getId()).header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(
     			status().is3xxRedirection()).andExpect(
     					redirectedUrlPattern("http://*:8500/symlink/*"));
     }
