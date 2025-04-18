@@ -79,11 +79,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		// TODO this is incomplete solution; better provide NER editor an API which returns a symlink to the input file
 		if (validRefUrl(request)) {
 			createAnonymousAuth(request);
-			logger.debug("Anonymous authentication created for HMGM NER editor with valid referer in URL.");
+			logger.debug("Anonymous authentication created for HMGM NER editor with valid referer.");
 		}
 		// otherwise, for HMGM related requests
 		else if (requestTokenHeader != null && requestTokenHeader.startsWith(JwtTokenUtil.HMGM_AUTH_PREFIX)) {
-			logger.debug("Request token starts with " + JwtTokenUtil.HMGM_AUTH_PREFIX + ", authenticating via HMGM password ... ");			
+			logger.debug("Request token starts with " + JwtTokenUtil.HMGM_AUTH_PREFIX + ", authenticating via HMGM token ... ");			
 			String hmgmToken = requestTokenHeader.substring(JwtTokenUtil.HMGM_AUTH_PREFIX.length());			
 			if (hmgmAuthService.validateHmgmToken(hmgmToken) != null) {
 				createAnonymousAuth(request);
