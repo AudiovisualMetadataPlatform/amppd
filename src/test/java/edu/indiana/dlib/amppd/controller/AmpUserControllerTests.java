@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.indiana.dlib.amppd.model.AmpUser;
 import edu.indiana.dlib.amppd.security.JwtRequest;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.service.AmpUserService;
 import edu.indiana.dlib.amppd.util.TestHelper;
 import edu.indiana.dlib.amppd.web.AuthRequest;
@@ -118,7 +119,7 @@ public class AmpUserControllerTests {
     	request.setUsername(user.getEmail());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
-    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
+    	mvc.perform(post(url).header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("token").isString());
@@ -147,7 +148,7 @@ public class AmpUserControllerTests {
     	request.setUsername(user.getUsername());
     	request.setPassword(user.getPassword());
     	String json = mapper.writeValueAsString(request);
-    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
+    	mvc.perform(post(url).header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -155,7 +156,7 @@ public class AmpUserControllerTests {
     	
     	ampUserService.activateUser(user.getUsername());
 
-    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
+    	mvc.perform(post(url).header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("token").isString());
@@ -173,7 +174,7 @@ public class AmpUserControllerTests {
     	request_login.setUsername(user.getEmail());
     	request_login.setPassword(user.getPassword());
     	String json1 = mapper.writeValueAsString(request_login);
-    	mvc.perform(post(url).header("Authorization", "Bearer " + token)
+    	mvc.perform(post(url).header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json1)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().is(HttpStatus.UNAUTHORIZED.value()));
@@ -213,7 +214,7 @@ public class AmpUserControllerTests {
     private void postRegister(AmpUser user, boolean expectSuccess) throws Exception{
     	String json = mapper.writeValueAsString(user);
     	
-    	mvc.perform(post("/account/register").header("Authorization", "Bearer " + token)
+    	mvc.perform(post("/account/register").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)
     		       .contentType(MediaType.APPLICATION_JSON)
     		       .content(json)
     		       .accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk()).andExpect(jsonPath("$.success").isBoolean()).andExpect(jsonPath("$.success").value(expectSuccess));

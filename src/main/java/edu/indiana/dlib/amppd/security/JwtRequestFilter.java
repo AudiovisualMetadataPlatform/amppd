@@ -17,11 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.service.AuthService;
+import edu.indiana.dlib.amppd.service.HmgmAuthService;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-	public static String HMGM_AUTH_PREFIX = "HMGM";
 	
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -30,7 +29,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private AmppdUiPropertyConfig amppdUIConfig;
 	
 	@Autowired
-	private AuthService authService;
+	private HmgmAuthService hmgmAuthService;
 	
 	
 	private void createAnonymousAuth(HttpServletRequest request) {
@@ -80,24 +79,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		// TODO this is incomplete solution; better provide NER editor an API which returns a symlink to the input file
 		if (validRefUrl(request)) {
 			createAnonymousAuth(request);
-			logger.debug("Valid referer for URL. Created anonymous auth for HMGM NER editor.");
+			logger.debug("Anonymous authentication created for HMGM NER editor with valid referer in URL.");
 		}
 		// otherwise, for HMGM related requests
-		else if (requestTokenHeader != null && requestTokenHeader.startsWith(HMGM_AUTH_PREFIX)) {
-			logger.debug("Request token starts with " + HMGM_AUTH_PREFIX + ", authenticating via HMGM password ... ");
-			
-			String authToken = requestTokenHeader.substring(6);
-			String[] parts = authToken.split(AuthService.AUTH_SEPARATOR);
-			String editorInput = parts[0];
-			String userPass = parts[1];
-			String authString = parts[2];
-			
-			if (authService.validateAuthStrings(authString, userPass, editorInput) != null) {
+		else if (requestTokenHeader != null && requestTokenHeader.startsWith(JwtTokenUtil.HMGM_AUTH_PREFIX)) {
+			logger.debug("Request token starts with " + JwtTokenUtil.HMGM_AUTH_PREFIX + ", authenticating via HMGM password ... ");			
+			String hmgmToken = requestTokenHeader.substring(JwtTokenUtil.HMGM_AUTH_PREFIX.length());			
+			if (hmgmAuthService.validateHmgmToken(hmgmToken) != null) {
 				createAnonymousAuth(request);
-				logger.debug("Auth string is valid. Created anonymous auth for HMGM editors");
+				logger.debug("Authentication succeeded with valid HMGM token.");
 			}
 			else {
-				logger.warn("Auth string " + authString + " is invalid: HMGM editor input: " + editorInput + ", userPass: " + userPass);
+				logger.error("Authentication failed with invalid HMGM token.");
 			}			
 		}
 		// otherwise, for AMP user authentication with JWT token
@@ -115,38 +108,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				logger.error("Authentication failed with invalid JWT.");
 			}		
 		}	
-//		else {
-//			if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-//				jwtToken = requestTokenHeader.substring(7);
-//				try {
-//					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-//				} catch (IllegalArgumentException e) {
-//					logger.warn("Unable to get JWT Token");
-//				} catch (ExpiredJwtException e) {
-//					logger.warn("JWT Token has expired");
-//				}
-//			} else {
-//				logger.warn("JWT Token does not begin with Bearer String");
-//			}
-//
-//			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-//				AmpUser userDetails = jwtUserDetailsService.getUser(username);
-//
-//				if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-//					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-//							userDetails, null, null);/*userDetails.getAuthorities()*/
-//
-//					usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//
-//					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-//					logger.debug("Authentication succeeded with valid token for user " + username);
-//				}
-//				else {
-//					logger.warn("Authentication failed with invalid token for user " + username);
-//				}		
-//
-//			}	
-//		}
 
 		chain.doFilter(request, response);
 	}
