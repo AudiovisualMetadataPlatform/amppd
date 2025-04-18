@@ -40,16 +40,21 @@ public class HmgmController {
 			@RequestParam(required = false) String editorInput, 
 			@RequestParam(required = false) String userPass, 
 			@RequestParam(required = false) String authString) {	
-		// if HMGM token is provided, authenticate with it 
-		if (hmgmToken != null) {
-			return hmgmAuthService.validateHmgmToken(hmgmToken);
-		}
-		
-		// otherwise, editor input, user password, and auth string must all be provided for authentication
-		if (editorInput != null && userPass != null && authString != null) {
+		// if only editor input plus user password plus auth string are provided, validate them for authentication
+		if (hmgmToken == null && editorInput != null && userPass != null && authString != null) {
 			return hmgmAuthService.validateAuthString(editorInput, userPass, authString);
 		}
 		
+		// otherwise if only HMGM token is provided, validate it for authentication
+		if (hmgmToken != null && editorInput == null && userPass == null && authString == null) {
+			return hmgmAuthService.validateHmgmToken(hmgmToken);
+		}
+		
+		// otherwise if HMGM token is provided along with editorInput and authString, validate them for authentication
+		if (hmgmToken != null && editorInput != null && userPass == null && authString != null) {
+			return hmgmAuthService.validateHmgmTokenAuthString(hmgmToken, editorInput, authString);
+		}
+
 		// otherwise authentication fails
 		return null;
 	}
