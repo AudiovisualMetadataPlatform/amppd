@@ -451,13 +451,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// when an ERROR job is rerun in Galaxy, a new job will be created and only picked up when result table is refreshed;
 		// PAUSED jobs should have status refreshed, as the status can change to running when the workflow is resumed in Galaxy.
 		List<WorkflowResult> results = workflowResultRepository.findByStatusIn(INCOMPLETE_STATUSES);
-		List<WorkflowResult> refreshedResults = refreshResultsStatus(results);
-
-//		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
-//		GalaxyJobState[] filterByStatuses = {GalaxyJobState.SCHEDULED, GalaxyJobState.IN_PROGRESS, GalaxyJobState.PAUSED};
-//		query.setFilterByStatuses(filterByStatuses);
-//		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
-//		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());		
+		List<WorkflowResult> refreshedResults = refreshResultsStatus(results);	
 		
 		log.info("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
 		return refreshedResults;
