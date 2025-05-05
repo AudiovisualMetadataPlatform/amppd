@@ -65,11 +65,6 @@ import lombok.extern.slf4j.Slf4j;
 public class WorkflowResultServiceImpl implements WorkflowResultService {
 	public static final String WILD_CARD = "*";
 
-	public static final List<GalaxyJobState> PROCESSING_STATUSES = Arrays.asList(
-			GalaxyJobState.SCHEDULED,
-			GalaxyJobState.IN_PROGRESS
-	);
-	
 	/* Note: 
 	 * The STANDARD_* maps below are used by the standardize method (which is called by the refreshWorkflowResults method).
 	 * Their values are based on current WorkflowResult table data. 
@@ -455,11 +450,15 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// for jobs that are finished (COMPLETE, ERROR), their status won't change, so no need to refresh; in particular, 
 		// when an ERROR job is rerun in Galaxy, a new job will be created and only picked up when result table is refreshed;
 		// PAUSED jobs should have status refreshed, as the status can change to running when the workflow is resumed in Galaxy.
-		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
-		GalaxyJobState[] filterByStatuses = {GalaxyJobState.SCHEDULED, GalaxyJobState.IN_PROGRESS, GalaxyJobState.PAUSED};
-		query.setFilterByStatuses(filterByStatuses);
-		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
-		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());
+		List<WorkflowResult> results = workflowResultRepository.findByStatusIn(INCOMPLETE_STATUSES);
+		List<WorkflowResult> refreshedResults = refreshResultsStatus(results);
+
+//		WorkflowResultSearchQuery query = new WorkflowResultSearchQuery();
+//		GalaxyJobState[] filterByStatuses = {GalaxyJobState.SCHEDULED, GalaxyJobState.IN_PROGRESS, GalaxyJobState.PAUSED};
+//		query.setFilterByStatuses(filterByStatuses);
+//		WorkflowResultResponse response = workflowResultRepository.findByQuery(query);
+//		List<WorkflowResult> refreshedResults = refreshResultsStatus(response.getRows());		
+		
 		log.info("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
 		return refreshedResults;
 	}
