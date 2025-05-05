@@ -140,7 +140,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		if (workflowCache.size() <= 0) {
 			workflowCache = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 			// TODO 
-			// In above code  null is passed instead of showPublished,
+			// In above code null is passed instead of showPublished,
 			// as a temporary work-around to address the Galaxy bug in get_workflows_list.
 			// We can replace it with the commented code below once the Galaxy bug is fixed;
 			// provided that special care is taken to handle the case when the published tag is used.
@@ -296,28 +296,28 @@ public class WorkflowServiceImpl implements WorkflowService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.updateWorkflow(String, Boolean, Boolean)
 	 */
-	public WorkflowDetails updateWorkflow(String workflowId, Boolean publish, Boolean activate) {
-		// check if the workflow is involved in any on-going invocation
+	public WorkflowDetails updateWorkflow(String workflowId, Boolean activate, Boolean publish) {
+		// check if the workflow is involved in any on-going invocation while deactivating or unpublishing;
 		// if yes, throw GalaxyWorkflowException to inform caller of the method
 		Boolean running = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultService.RUNNING_STATUSES);	
-		if (running) {
-			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated as it is involved in some on-going invocations.");
+		if (running && (activate != null && !activate || publish != null && !publish)) {
+			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated/unpublished as it is involved in some on-going invocations.");
 		}
 		
 		// otherwise, update workflow
 		WorkflowMetadata wfmd = new WorkflowMetadata();
-		if (publish != null) {
-			wfmd.setPublished(publish);
-		}
 		if (activate != null) {
 			wfmd.setHidden(!activate);
+		}
+		if (publish != null) {
+			wfmd.setPublished(publish);
 		}
 		WorkflowDetails workflow = workflowsClient.updateWorkflow(workflowId, wfmd);
 		
 		// clear workflow list cache since the list might need refresh due to this update
 		clearWorkflowsCache();		
 		
-		log.info("Successfully updated workflow " + workflowId + ", publish: " + publish + ", activate: " + activate);		
+		log.info("Successfully updated workflow " + workflowId + ", activate: " + activate + ", publish: " + publish);
 		return workflow;
 	}
 
