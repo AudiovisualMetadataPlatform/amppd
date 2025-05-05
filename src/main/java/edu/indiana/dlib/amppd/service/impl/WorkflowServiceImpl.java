@@ -140,7 +140,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		if (workflowCache.size() <= 0) {
 			workflowCache = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 			// TODO 
-			// In above code  null is passed instead of showPublished,
+			// In above code null is passed instead of showPublished,
 			// as a temporary work-around to address the Galaxy bug in get_workflows_list.
 			// We can replace it with the commented code below once the Galaxy bug is fixed;
 			// provided that special care is taken to handle the case when the published tag is used.
@@ -297,10 +297,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.updateWorkflow(String, Boolean, Boolean)
 	 */
 	public WorkflowDetails updateWorkflow(String workflowId, Boolean activate, Boolean publish) {
-		// check if the workflow is involved in any on-going invocation
+		// check if the workflow is involved in any on-going invocation while deactivating or unpublishing;
 		// if yes, throw GalaxyWorkflowException to inform caller of the method
 		Boolean running = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultService.RUNNING_STATUSES);	
-		if (running) {
+		if (running && (activate != null && !activate || publish != null && !publish)) {
 			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated/unpublished as it is involved in some on-going invocations.");
 		}
 		
