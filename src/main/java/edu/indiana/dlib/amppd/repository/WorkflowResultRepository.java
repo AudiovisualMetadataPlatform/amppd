@@ -69,7 +69,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	// find results of the given primaryfile, outputType, and status
 	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 	
-	// find results in the given list of statuses
+	// find results with the given list of statuses
 	List<WorkflowResult> findByStatusIn(List<GalaxyJobState> statuses);
 	
 	// find workflow IDs with results in the given list of statuses
