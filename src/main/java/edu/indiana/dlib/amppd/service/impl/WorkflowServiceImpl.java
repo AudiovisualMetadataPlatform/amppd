@@ -296,28 +296,28 @@ public class WorkflowServiceImpl implements WorkflowService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.updateWorkflow(String, Boolean, Boolean)
 	 */
-	public WorkflowDetails updateWorkflow(String workflowId, Boolean publish, Boolean activate) {
+	public WorkflowDetails updateWorkflow(String workflowId, Boolean activate, Boolean publish) {
 		// check if the workflow is involved in any on-going invocation
 		// if yes, throw GalaxyWorkflowException to inform caller of the method
 		Boolean running = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultService.RUNNING_STATUSES);	
 		if (running) {
-			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated as it is involved in some on-going invocations.");
+			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated/unpublished as it is involved in some on-going invocations.");
 		}
 		
 		// otherwise, update workflow
 		WorkflowMetadata wfmd = new WorkflowMetadata();
-		if (publish != null) {
-			wfmd.setPublished(publish);
-		}
 		if (activate != null) {
 			wfmd.setHidden(!activate);
+		}
+		if (publish != null) {
+			wfmd.setPublished(publish);
 		}
 		WorkflowDetails workflow = workflowsClient.updateWorkflow(workflowId, wfmd);
 		
 		// clear workflow list cache since the list might need refresh due to this update
 		clearWorkflowsCache();		
 		
-		log.info("Successfully updated workflow " + workflowId + ", publish: " + publish + ", activate: " + activate);		
+		log.info("Successfully updated workflow " + workflowId + ", activate: " + activate + ", publish: " + publish);
 		return workflow;
 	}
 
