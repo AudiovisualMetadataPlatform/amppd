@@ -175,7 +175,7 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		for (ActionDto actionCsv : actionsCsv) {			
 			/* Note: 
 			 * We can't just save all actions directly, as that would create new records in the table; instead,
-			 *  we need to find each existing record if any based on ID and update it, and create new one only if no existing one.  
+			 * we need to find each existing record if any based on ID and update it, and create new one only if no existing one.  
 			 */						
 			// find by action name first
 			Action action = actionRepository.findFirstByName(actionCsv.getName());			
