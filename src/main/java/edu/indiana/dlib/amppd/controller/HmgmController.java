@@ -16,6 +16,7 @@ import edu.indiana.dlib.amppd.service.HmgmTranscriptService;
 import edu.indiana.dlib.amppd.web.SaveTranscriptRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorRequest;
 import edu.indiana.dlib.amppd.web.TranscriptEditorResponse;
+import io.micrometer.core.instrument.util.StringUtils;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
@@ -41,17 +42,17 @@ public class HmgmController {
 			@RequestParam(required = false) String userPass, 
 			@RequestParam(required = false) String authString) {	
 		// if only editor input plus user password plus auth string are provided, validate them for authentication
-		if (hmgmToken == null && editorInput != null && userPass != null && authString != null) {
+		if (StringUtils.isEmpty(hmgmToken) && StringUtils.isNotEmpty(editorInput) && StringUtils.isNotEmpty(userPass) && StringUtils.isNotEmpty(authString)) {
 			return hmgmAuthService.validateAuthString(editorInput, userPass, authString);
 		}
 		
 		// otherwise if only HMGM token is provided, validate it for authentication
-		if (hmgmToken != null && editorInput == null && userPass == null && authString == null) {
+		if (StringUtils.isNotEmpty(hmgmToken) && StringUtils.isEmpty(editorInput) && StringUtils.isEmpty(userPass) && StringUtils.isEmpty(authString)) {
 			return hmgmAuthService.validateHmgmToken(hmgmToken);
 		}
 		
 		// otherwise if HMGM token is provided along with editorInput and authString, validate them for authentication
-		if (hmgmToken != null && editorInput != null && userPass == null && authString != null) {
+		if (StringUtils.isNotEmpty(hmgmToken) && StringUtils.isNotEmpty(editorInput) && StringUtils.isEmpty(userPass) && StringUtils.isNotEmpty(authString)) {
 			return hmgmAuthService.validateHmgmTokenAuthString(hmgmToken, editorInput, authString);
 		}
 
