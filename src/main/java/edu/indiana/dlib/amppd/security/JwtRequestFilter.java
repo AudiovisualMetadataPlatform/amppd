@@ -63,7 +63,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //		boolean valid = uri.equals(NER_EDITOR_PATH) && StringUtils.startsWith(nerReferer, referer);
 		
 		if (valid) {
-			logger.debug("Valida NER editor request URI and referer: URI: " + uri + ", Referer: " + referer);
+			logger.debug("Valid NER editor request URI and referer: URI: " + uri + ", Referer: " + referer);
 		}		
 		return valid;
 	}
