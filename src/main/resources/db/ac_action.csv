@@ -31,7 +31,7 @@ delete workflow result,delete a workflow result from dashboard and Galaxy,Delete
 create workflow,create a new workflow,Create,Workflow,POST,/workflows/create,TRUE
 view workflow,list/query workflows or view details of a workflow,Read,Workflow,GET,/workflows/{id},TRUE
 edit workflow,edit metadata and/or structure of a workflow,Update,Workflow,POST,/workflows/{id}/edit*,TRUE
-restrict workflow,set/unset restricted/published/active status on a workflow,Restrict,Workflow,PATCH,/workflows/{id},TRUE
+activate workflow,set/unset active/restricted status on a workflow,Activate,Workflow,PATCH,/workflows/{id},TRUE
 delete workflow,delete a workflow and all its associated data,Delete,Workflow,DELETE,/workflows/{id},TRUE
 create bundle,create a bundle containing primaryfiles,Create,Bundle,POST,/bundles,TRUE
 view bundle,list/query bundles,Read,Bundle,GET,/bundles/search,TRUE

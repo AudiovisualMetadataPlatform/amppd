@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 
@@ -43,7 +44,7 @@ public class BundleRepositoryTests {
 		// deleting all as below causes SQL FK violation when running the whole test suites, even though running this test class alone is fine,
 		// probably due to the fact that some other tests call TestHelper to create the complete hierarchy of data entities from unit down to primaryfile
 //		bundleRepository.deleteAll();
-		token = "Bearer " + testHelper.getToken();
+		token = JwtTokenUtil.JWT_AUTH_PREFIX + testHelper.getToken();
 	}
 
 	@Test

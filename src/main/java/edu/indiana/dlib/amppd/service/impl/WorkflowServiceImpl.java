@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +30,7 @@ import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
+import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
 import edu.indiana.dlib.amppd.web.WorkflowFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResponse;
@@ -134,20 +136,32 @@ public class WorkflowServiceImpl implements WorkflowService {
 			clearWorkflowsCache();
 		}
 
-		// refreshing workflow cache data
+		// refreshing workflow cache data with workflows retrieved from Galaxy
 		if (workflowCache.size() <= 0) {
 			workflowCache = workflowsClient.getWorkflows(null, showHidden, showDeleted, null);
 			// TODO 
-			// In above code  null is passed instead of showPublished,
+			// In above code null is passed instead of showPublished,
 			// as a temporary work-around to address the Galaxy bug in get_workflows_list.
 			// We can replace it with the commented code below once the Galaxy bug is fixed;
 			// provided that special care is taken to handle the case when the published tag is used.
 //			return workflowsClient.getWorkflows(showPublished, showHidden, showDeleted, null);			
 		}
 
+		// filter retrieved workflows with search criteria
 		List <Workflow> filterWorkflows = filters(workflowCache, showPublished, tag, name, annotations, creators, dateRange);
 		WorkflowFilterValues filterBy = prepareFilters(filterWorkflows);
 
+		/* Note
+		 * We populate running field only post-filtering because we don't care about the workflows filtered out.
+		 * Also, instead of checking the status in DB for each workflow, it's much more efficient to retrieve all 
+		 * running workflows from DB at once, and use that list to decide whether each workflow is running. 
+		 */ 
+		// set running field for each workflow in the list to return
+		Set<String> wfIds = this.workflowResultRepository.findWorkflowIdsByStatusIn(WorkflowResultService.RUNNING_STATUSES);
+		for (Workflow wf : filterWorkflows) {
+			wf.setRunning(wfIds.contains(wf.getId()));
+		}		
+		
 		String published = showPublished == null ? "" : (showPublished ? "published " : "unpublished ");
 		String hidden = showHidden != null && showHidden ? "hidden " : ""; 
 		String deleted = showDeleted != null && showDeleted ? "deleted " : ""; 
@@ -282,28 +296,28 @@ public class WorkflowServiceImpl implements WorkflowService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.WorkflowService.updateWorkflow(String, Boolean, Boolean)
 	 */
-	public WorkflowDetails updateWorkflow(String workflowId, Boolean publish, Boolean activate) {
-		// check if the workflow is involved in any on-going invocation
+	public WorkflowDetails updateWorkflow(String workflowId, Boolean activate, Boolean publish) {
+		// check if the workflow is involved in any on-going invocation while deactivating or unpublishing;
 		// if yes, throw GalaxyWorkflowException to inform caller of the method
-		Boolean processing = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultServiceImpl.PROCESSING_STATUSES);	
-		if (processing) {
-			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated as it is involved in some on-going invocations.");
+		Boolean running = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultService.RUNNING_STATUSES);	
+		if (running && (activate != null && !activate || publish != null && !publish)) {
+			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated/unpublished as it is involved in some on-going invocations.");
 		}
 		
 		// otherwise, update workflow
 		WorkflowMetadata wfmd = new WorkflowMetadata();
-		if (publish != null) {
-			wfmd.setPublished(publish);
-		}
 		if (activate != null) {
 			wfmd.setHidden(!activate);
+		}
+		if (publish != null) {
+			wfmd.setPublished(publish);
 		}
 		WorkflowDetails workflow = workflowsClient.updateWorkflow(workflowId, wfmd);
 		
 		// clear workflow list cache since the list might need refresh due to this update
 		clearWorkflowsCache();		
 		
-		log.info("Successfully updated workflow " + workflowId + ", publish: " + publish + ", activate: " + activate);		
+		log.info("Successfully updated workflow " + workflowId + ", activate: " + activate + ", publish: " + publish);
 		return workflow;
 	}
 

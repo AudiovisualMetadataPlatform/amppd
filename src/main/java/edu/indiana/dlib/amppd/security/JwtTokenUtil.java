@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j
 public class JwtTokenUtil {
+	public static String HMGM_AUTH_PREFIX = "HMGM ";
+	public static String JWT_AUTH_PREFIX = "Bearer ";
 	
 	// issuer for AMP user authentication token and workflow edit token
 	public static final String ISSUER_AMP_AUTH = "amppd";
@@ -132,7 +134,7 @@ public class JwtTokenUtil {
 	 * @param authHeader the given Authorization header
 	 */
 	public String retrieveToken(String authHeader) {
-		if (authHeader != null && authHeader.startsWith("Bearer ")) {
+		if (authHeader != null && authHeader.startsWith(JWT_AUTH_PREFIX)) {
 			return authHeader.substring(7);
 		}
 		else {

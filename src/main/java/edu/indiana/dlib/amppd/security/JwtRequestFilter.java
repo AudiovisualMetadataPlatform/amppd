@@ -15,12 +15,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.google.common.net.HttpHeaders;
+
 import edu.indiana.dlib.amppd.config.AmppdUiPropertyConfig;
 import edu.indiana.dlib.amppd.model.AmpUser;
-import edu.indiana.dlib.amppd.service.AuthService;
+import edu.indiana.dlib.amppd.service.HmgmAuthService;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+	
+	public static String NER_EDITOR_PATH = "/rest/hmgm/ner-editor";
+	public static String NER_EDITOR_REFERER = "timeliner.html";
 	
 	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
@@ -29,7 +34,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private AmppdUiPropertyConfig amppdUIConfig;
 	
 	@Autowired
-	private AuthService authService;
+	private HmgmAuthService hmgmAuthService;
 	
 	
 	private void createAnonymousAuth(HttpServletRequest request) {
@@ -49,53 +54,41 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	 * This is a temporary solution until the NER editor uses its own auth.  
 	 */
 	private boolean validRefUrl(HttpServletRequest request) {
-		// Get the referrer and URI
-		String referer = request.getHeader("referer");
 		String uri = request.getRequestURI();
-		logger.trace("referer: " + referer + ", uri: " + uri);	
+		String referer = request.getHeader(HttpHeaders.REFERER);
+		String nerReferer = amppdUIConfig.getUrl().replace("#", "") + NER_EDITOR_REFERER;
+		boolean valid = uri.equals(NER_EDITOR_PATH) && StringUtils.equals(referer, nerReferer);
 		
-		if (referer==null) return false;
+		// in local env, the refer URL does not include Timeliner path for some reason, just hostname. 
+//		boolean valid = uri.equals(NER_EDITOR_PATH) && StringUtils.startsWith(nerReferer, referer);
 		
-		// Only continue if it's the NER editor
-		if (!uri.equals("/rest/hmgm/ner-editor")) {
-			return false;
-		}
-		
-		// Standardize cleaning URLs to avoid oddities
-		String cleanedRef = referer.replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
-		String cleanedUiUrl = amppdUIConfig.getUrl().replace("https://", "").replace("http://", "").replace("#/", "").replace("#", "").replace("localhost", "127.0.0.1");
-		
-		boolean valid = cleanedRef.startsWith(cleanedUiUrl);
-		logger.trace("cleanedRef: " + cleanedRef + ", cleanedUiUrl: " + cleanedUiUrl + ", validRefUrl: " + valid);		
+		if (valid) {
+			logger.debug("Valid NER editor request URI and referer: URI: " + uri + ", Referer: " + referer);
+		}		
 		return valid;
 	}
 	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
 		// authorization header
-		final String requestTokenHeader = request.getHeader("authorization");
+		final String requestTokenHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 				
 		// If it is for the HMGM NER editor with a valid referrer, create anonymous auth
+		// TODO this is incomplete solution; better provide NER editor an API which returns a symlink to the input file
 		if (validRefUrl(request)) {
-			logger.debug("Valid referer for URL. Creating anonymous auth for HMGM NER editor.");
 			createAnonymousAuth(request);
+			logger.debug("Anonymous authentication created for HMGM NER editor with valid referer.");
 		}
 		// otherwise, for HMGM related requests
-		else if (requestTokenHeader != null && requestTokenHeader.startsWith("AMPPD ")) {
-			logger.debug("Request token starts with AMPPD, authenticating via HMGM password token");
-			
-			String authToken = requestTokenHeader.substring(6);
-			String[] parts = authToken.split(";;;;");
-			String editorInput = parts[0];
-			String userToken = parts[1];
-			String authString = parts[2];
-			
-			if(authService.compareAuthStrings(authString, userToken, editorInput)) {
+		else if (requestTokenHeader != null && requestTokenHeader.startsWith(JwtTokenUtil.HMGM_AUTH_PREFIX)) {
+			logger.debug("Request token starts with " + JwtTokenUtil.HMGM_AUTH_PREFIX + ", authenticating via HMGM token ... ");			
+			String hmgmToken = requestTokenHeader.substring(JwtTokenUtil.HMGM_AUTH_PREFIX.length());			
+			if (hmgmAuthService.validateHmgmToken(hmgmToken) != null) {
 				createAnonymousAuth(request);
-				logger.debug("Auth string is valid. Creating anonymous auth for HMGM editors");
+				logger.debug("Authentication succeeded with valid HMGM token.");
 			}
 			else {
-				logger.warn("Auth string is invalid for authstring: " + authString + " userToken: " + userToken + " HMGM editor input: " + editorInput);
+				logger.error("Authentication failed with invalid HMGM token.");
 			}			
 		}
 		// otherwise, for AMP user authentication with JWT token
@@ -113,38 +106,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				logger.error("Authentication failed with invalid JWT.");
 			}		
 		}	
-//		else {
-//			if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-//				jwtToken = requestTokenHeader.substring(7);
-//				try {
-//					username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-//				} catch (IllegalArgumentException e) {
-//					logger.warn("Unable to get JWT Token");
-//				} catch (ExpiredJwtException e) {
-//					logger.warn("JWT Token has expired");
-//				}
-//			} else {
-//				logger.warn("JWT Token does not begin with Bearer String");
-//			}
-//
-//			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-//				AmpUser userDetails = jwtUserDetailsService.getUser(username);
-//
-//				if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-//					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-//							userDetails, null, null);/*userDetails.getAuthorities()*/
-//
-//					usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//
-//					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-//					logger.debug("Authentication succeeded with valid token for user " + username);
-//				}
-//				else {
-//					logger.warn("Authentication failed with invalid token for user " + username);
-//				}		
-//
-//			}	
-//		}
 
 		chain.doFilter(request, response);
 	}

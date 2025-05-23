@@ -214,7 +214,7 @@ public class WorkflowEditProxy {
 	 * @return ID of the newly created workflow
 	 */
 	@PostMapping("/workflows/create")
-	public ResponseEntity<String> create(@RequestHeader("Authorization") String authHeader) {
+	public ResponseEntity<String> create(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
 		// check permission 
 		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
 		boolean can = permissionService.hasPermission(ActionType.Create, TargetType.Workflow, null);
@@ -281,7 +281,7 @@ public class WorkflowEditProxy {
 	 * @return empty body response upon success
 	 */
 	@PostMapping("/workflows/{workflowId}/editStart")
-	public ResponseEntity<String> startEdit(@RequestHeader("Authorization") String authHeader, @PathVariable("workflowId") String workflowId, HttpServletResponse response) {
+	public ResponseEntity<String> startEdit(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader, @PathVariable String workflowId, HttpServletResponse response) {
 		// check permission 
 		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
 		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);

@@ -106,32 +106,32 @@ public class WorkflowController {
 	}
 	
 	/**
-	 * Update the given workflow with the given publish/unpublish and/or activate/deactivate flags.
+	 * Update the given workflow with the given activate/deactivate and/or publish/unpublish flags.
 	 * @param workflowId ID of the given workflow
-	 * @param publish true to publish the workflow; false to unpublish the it; null for no change
 	 * @param activate true to activate the workflow; false to deactivate the it; null for no change
+	 * @param publish true to publish the workflow; false to unpublish the it; null for no change
 	 * @return the updated workflow	 
 	 */
 	@PatchMapping("/workflows/{workflowId}")
 	public WorkflowDetails updateWorkflow(
 			@PathVariable String workflowId, 
-			@RequestParam(required = false) Boolean publish,
-			@RequestParam(required = false) Boolean activate) {
+			@RequestParam(required = false) Boolean activate,
+			@RequestParam(required = false) Boolean publish) {
 		// check permission: Note: 
 		// Since workflow is not associated with any unit, the AC is checked against any unit;
-		// Also, Restrict-Workflow refers to updating metadata including published/active(hidden) fields on workflow.
-		boolean can = permissionService.hasPermission(ActionType.Restrict, TargetType.Workflow, null);
+		// Also, Activate-Workflow refers to updating metadata including active(hidden)/published fields on workflow.
+		boolean can = permissionService.hasPermission(ActionType.Activate, TargetType.Workflow, null);
 		if (!can) {
-			throw new AccessDeniedException("The current user cannot update metadata of workflow in any unit.");
+			throw new AccessDeniedException("The current user cannot update metadata of (activate/publish) workflow in any unit.");
 		}
 		
 		try {
-			log.info("Updating metadata of workflow with ID: " +  workflowId + ", publish: " + publish + ", activate: " + activate);
-			return workflowService.updateWorkflow(workflowId, publish, activate);
+			log.info("Updating metadata of workflow with ID: " + workflowId + ", activate: " + activate + ", publish: " + publish);
+			return workflowService.updateWorkflow(workflowId, activate, publish);
 		}
 		catch (GalaxyWorkflowException e) {
 			// in ccase of GalaxyWorkflowException, inform client about the cause and response with 409 Conflict error code
-			String reason = "Workflow " + workflowId + " can't be deactivated as it is involved in some on-going invocations.";
+			String reason = "Workflow " + workflowId + " can't be deactivated/unpublished as it is involved in some on-going invocations.";
 			throw new ResponseStatusException(HttpStatus.CONFLICT, reason, e);
 		}
 		catch (Exception e) {

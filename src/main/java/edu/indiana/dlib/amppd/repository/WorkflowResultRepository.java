@@ -69,6 +69,13 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	// find results of the given primaryfile, outputType, and status
 	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 	
+	// find results with the given list of statuses
+	List<WorkflowResult> findByStatusIn(List<GalaxyJobState> statuses);
+	
+	// find workflow IDs with results in the given list of statuses
+	@Query(value = "select workflowId from WorkflowResult where status in :statuses")
+	Set<String> findWorkflowIdsByStatusIn(List<GalaxyJobState> statuses);
+	
 	// count the distinct output types existing in the table within the given outputTypes list, and accessible units if not null
 	// Note: for some reason Spring JPA doesn't work correctly with count distinct, thus the query is provided
 	@Query(value = "select count(distinct outputType) from WorkflowResult where outputType in :outputTypes")

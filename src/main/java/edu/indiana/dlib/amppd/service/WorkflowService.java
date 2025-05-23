@@ -2,9 +2,6 @@ package edu.indiana.dlib.amppd.service;
 
 import java.util.Date;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
@@ -86,12 +83,12 @@ public interface WorkflowService {
 	public Integer workflowNamesCacheSize();
 
 	/**
-	 * Update the given workflow with the given publish/unpublish and/or activate/deactivate flags.
+	 * Update the given workflow with the given activate/deactivate and/or publish/unpublish flags.
 	 * @param workflowId ID of the given workflow
-	 * @param publish true to publish the workflow; false to unpublish the it; null for no change
 	 * @param activate true to activate the workflow; false to deactivate the it; null for no change
+	 * @param publish true to publish the workflow; false to unpublish the it; null for no change
 	 * @return the updated workflow	 
 	 */
-	public WorkflowDetails updateWorkflow(String workflowId, Boolean publish, Boolean activate);
+	public WorkflowDetails updateWorkflow(String workflowId, Boolean activate, Boolean publish);
 	
 }

@@ -22,6 +22,7 @@ import edu.indiana.dlib.amppd.model.Bundle;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.repository.BundleRepository;
 import edu.indiana.dlib.amppd.repository.PrimaryfileRepository;
+import edu.indiana.dlib.amppd.security.JwtTokenUtil;
 import edu.indiana.dlib.amppd.util.TestHelper;
 
 @RunWith(SpringRunner.class)
@@ -64,7 +65,7 @@ public class BundleControllerTests {
     	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
     	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle); 
     	
-    	mvc.perform(post("/bundles/1/addPrimaryfile?primaryfileId=1").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/1/addPrimaryfile?primaryfileId=1").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(1))).andExpect(	// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all
 						jsonPath("$.primaryfiles[0].id").value(1));
     }
@@ -87,7 +88,7 @@ public class BundleControllerTests {
     	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
     	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle); 
     	
-    	mvc.perform(post("/bundles/1/deletePrimaryfile?primaryfileId=1").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/1/deletePrimaryfile?primaryfileId=1").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(0))).andExpect( 
 						jsonPath("$.primaryfiles[0].id").doesNotExist());    	
     }
@@ -110,8 +111,8 @@ public class BundleControllerTests {
     	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
     	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle); 
     	
-    	mvc.perform(post("/bundles/1/addPrimaryfile?primaryfileId=1").header("Authorization", "Bearer " + token));
-    	mvc.perform(post("/bundles/1/addPrimaryfile?primaryfileId=1").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/1/addPrimaryfile?primaryfileId=1").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token));
+    	mvc.perform(post("/bundles/1/addPrimaryfile?primaryfileId=1").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(1))).andExpect( 
 				jsonPath("$.primaryfiles[0].id").value(1)).andExpect(
 						jsonPath("$.primaryfiles[1].id").doesNotExist());    	
@@ -137,7 +138,7 @@ public class BundleControllerTests {
     	Mockito.when(primaryfileRepository.findById(2l)).thenReturn(Optional.of(primaryfileDummy)); 
     	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
     	
-    	mvc.perform(post("/bundles/1/deletePrimaryfile?primaryfileId=2").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/1/deletePrimaryfile?primaryfileId=2").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(1))).andExpect( 
 				jsonPath("$.primaryfiles[0].id").value(1));    	
     }  
@@ -163,7 +164,7 @@ public class BundleControllerTests {
     	Mockito.when(bundleRepository.findById(0l)).thenReturn(Optional.of(bundle)); 
     	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle); 
     	
-    	mvc.perform(post("/bundles/0/addPrimaryfiles?primaryfileIds=1,2").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/0/addPrimaryfiles?primaryfileIds=1,2").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(1))).andExpect(	// TODO need to import org.hamcrest.Matchers.hasSize with added dependency hamcrest-all
 						jsonPath("$.primaryfiles[0].id").isNumber()).andExpect( // we can't test the actual value as we don't know the order in which the primaryfiles are added
 								jsonPath("$.primaryfiles[1].id").isNumber());
@@ -196,7 +197,7 @@ public class BundleControllerTests {
     	Mockito.when(bundleRepository.findById(0l)).thenReturn(Optional.of(bundle)); 
     	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle);     	
     	
-    	mvc.perform(post("/bundles/0/deletePrimaryfiles?primaryfileIds=1,2").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/0/deletePrimaryfiles?primaryfileIds=1,2").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(0))).andExpect( 
 						jsonPath("$.primaryfiles[0].id").doesNotExist());    	
     }
@@ -219,7 +220,7 @@ public class BundleControllerTests {
     	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
     	Mockito.when(bundleRepository.save(bundle)).thenReturn(bundle); 
     	
-    	mvc.perform(post("/bundles/1/addPrimaryfiles?primaryfileIds=1,1").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/1/addPrimaryfiles?primaryfileIds=1,1").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(1))).andExpect( 
 				jsonPath("$.primaryfiles[0].id").value(1)).andExpect(
 						jsonPath("$.primaryfiles[1].id").doesNotExist());    	
@@ -245,7 +246,7 @@ public class BundleControllerTests {
     	Mockito.when(primaryfileRepository.findById(2l)).thenReturn(Optional.of(primaryfileDummy)); 
     	Mockito.when(bundleRepository.findById(1l)).thenReturn(Optional.of(bundle)); 
     	
-    	mvc.perform(post("/bundles/1/deletePrimaryfiles?primaryfileIds=2,2").header("Authorization", "Bearer " + token)).andExpect(status().isOk()).andExpect(
+    	mvc.perform(post("/bundles/1/deletePrimaryfiles?primaryfileIds=2,2").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token)).andExpect(status().isOk()).andExpect(
 //				jsonPath("$.primaryfiles", hasSize(1))).andExpect( 
 				jsonPath("$.primaryfiles[0].id").value(1));    	
     }
