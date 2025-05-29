@@ -406,6 +406,7 @@ public class JobServiceImpl implements JobService {
 		baseContext.put("__primary_file_id__", primaryfile.getId().toString());
 		baseContext.put("__primary_file_name__", primaryfile.getName());
 		baseContext.put("__primary_file_path__", primaryfile.getPathname());
+		// TODO depend on how primary_file_url will be used, we might need to change getPrimaryfileMediaUrl to getPrimaryfileSymlinkUrl
 		baseContext.put("__primary_file_url__", mediaService.getPrimaryfileMediaUrl(primaryfile));
 		baseContext.put("__primary_file_media_info__", mediaService.getAssetMediaInfoPath(primaryfile));
 		baseContext.put("__workflow_id__", workflowDetails.getId());		
@@ -520,10 +521,15 @@ public class JobServiceImpl implements JobService {
 		context.put("itemName", sanitizeText(primaryfile.getItem().getName()));
 		context.put("primaryfileId", primaryfile.getId().toString());
 		context.put("primaryfileName", sanitizeText(primaryfile.getName()));
-		context.put("primaryfileUrl", mediaService.getPrimaryfileMediaUrl(primaryfile));
+		context.put("primaryfileUrl", mediaService.getPrimaryfileSymlinkUrl(primaryfile));
 		context.put("primaryfileMediaInfo", mediaService.getAssetMediaInfoPath(primaryfile));
 		context.put("workflowId", workflowDetails.getId());		
 		context.put("workflowName", sanitizeText(workflowDetails.getName()));	
+		/* Note
+		 * URL of media symlink instead of media API is passed to HMGM, as authentication would have been done outside of 
+		 * HMGM editors, but there is no easy way to pass the access token to HMGM editors, and access to media API from
+		 * within the editor would be rejected due to lack of access token.
+		 */
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		String contextJson = null;

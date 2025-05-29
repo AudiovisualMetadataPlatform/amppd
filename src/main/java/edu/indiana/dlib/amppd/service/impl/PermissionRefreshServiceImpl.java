@@ -173,20 +173,34 @@ public class PermissionRefreshServiceImpl implements PermissionRefreshService {
 		
 		// save each of the Action objects, either creating a new one or updating the existing one
 		for (ActionDto actionCsv : actionsCsv) {			
-			// note: we can't just save all actions directly, as that would create new records in the table; instead, 
-			// we need to find each existing record if any based on ID and update it, and create new one only if no existing one
+			/* Note: 
+			 * We can't just save all actions directly, as that would create new records in the table; instead,
+			 * we need to find each existing record if any based on ID and update it, and create new one only if no existing one.  
+			 */						
+			// find by action name first
 			Action action = actionRepository.findFirstByName(actionCsv.getName());			
+			// if not found, then find by action type and target type
+			if (action == null) {
+				action = actionRepository.findFirstByActionTypeAndTargetType(actionCsv.getActionType(), actionCsv.getTargetType());	
+			}
+			// if still not found, then find by HTTP method and URL pattern
+			if (action == null) {
+				action = actionRepository.findFirstByHttpMethodAndUrlPattern(actionCsv.getHttpMethod(), actionCsv.getUrlPattern());	
+			}
+			// if finally not found, create new action
 			if (action == null) {
 				action = new Action();			
 			}
+			
+			// copy data fields from csv object to the action
 			actionCsv.copyTo(action);
 			
-			// it appears that if saving the same object to DB without any field value changed, modifiedDate won't be updated by Spring Data
+			// if saving the same object to DB without any field value changed, modifiedDate won't be updated by Spring Data;
 			// thus, need to set it explicitly, in order to distinguish obsolete records.
 			action.setModifiedDate(new Date());
 
 			// add the saved action to actions list to return
-			// Note that actionCsv and action could be different, the former may not have ID populated if it's a new action not existing in DB
+			// Note: actionCsv and action could be different, the former may not have ID populated if it's a new action not existing in DB
 			action = actionRepository.save(action);
 			actions.add(action);
 		}		

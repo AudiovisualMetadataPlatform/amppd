@@ -117,12 +117,12 @@ public class BatchServiceTests {
 		testHelper.ensureCollection(unitName, collectionName);
 		
 //	 	String token = testHelper.getToken();
-//		mockMvc.perform(post("/units").header("Authorization", "Bearer " + token).content(
+//		mockMvc.perform(post("/units").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token).content(
 //				"{\"name\": \"" + unitName + "\", \"description\":\"For test\"}")).andExpect(
 //						status().isCreated()).andExpect(
 //								header().string("Location", containsString("units/")));
 //
-//		mockMvc.perform(post("/collections").header("Authorization", "Bearer " + token).content(
+//		mockMvc.perform(post("/collections").header("Authorization", JwtTokenUtil.JWT_AUTH_PREFIX + token).content(
 //				"{ \"name\": \"" + collectionName + "\", \"description\":\"For test\"}")).andExpect(
 //						status().isCreated()).andReturn();
 		

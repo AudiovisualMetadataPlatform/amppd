@@ -31,7 +31,7 @@ Collection Staff,delete workflow result
 Collection Manager,create workflow
 Unit Viewer,view workflow
 Collection Manager,edit workflow
-Collection Manager,restrict workflow
+Collection Manager,activate workflow
 Collection Manager,delete workflow
 Collection Helper,create bundle
 Unit Viewer,view bundle
