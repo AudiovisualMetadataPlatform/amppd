@@ -394,12 +394,12 @@ public class AmpUserServiceImpl implements AmpUserService, UserDetailsService {
 		catch (MailException e) {
 			// in case reset-password email fails to be sent
 			response.setSuccess(false);
-			response.addError("Error occurred while sending reset-password email to user!");
+			response.addError("Error occurred while sending reset-password email to user " + emailid + ": " + e.getMessage());
 			log.error("Failed to send reset-password email to user " + emailid, e);
 		}
 		catch(Exception e) {
 			response.setSuccess(false);
-			response.addError("Error occurred while creating/updating reset-password token!");
+			response.addError("Error occurred while creating/updating reset-password token for user " + emailid + ": " + e.getMessage());
 			log.error("Failed to create/update reset-password token for user " + emailid, e);
 		}
 

@@ -100,7 +100,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	/**
-	 * @see edu.indiana.dlib.amppd.service.WorkflowService.getWorkflows(Boolean, Boolean, Boolean)
+	 * @see edu.indiana.dlib.amppd.service.WorkflowService.listWorkflows(Boolean, Boolean, Boolean)
 	 */	
 	@Override
 	public WorkflowResponse listWorkflows(Boolean showPublished, Boolean showHidden, Boolean showDeleted,
