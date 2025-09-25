@@ -22,9 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
-import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.JobDetails;
+import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
@@ -151,17 +152,18 @@ public class JobServiceImpl implements JobService {
 		 */
 		if (primaryfile.getDatasetId() == null) {    	
 	    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
-	    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
+			String pathname = primaryfile.getPathname();
+	    	if (StringUtils.isEmpty(pathname)) {
 	    		throw new StorageException("Primaryfile " + primaryfile.getId() + " hasn't been uploaded to AMPPD file system");
 	    	}
 	    	
-	    	// upload the primaryfile into Galaxy data library, the returned result is a GalaxyObject containing the ID and URL of the dataset uploaded
-	    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
-	    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);	
-	    	
+	    	// upload the primaryfile into Galaxy data library, the returned result is a JobInputOutput containing the ID of the dataset uploaded
+	    	String fullpath = fileStorageService.absolutePathName(primaryfile.getPathname());
+	    	JobInputOutput uploadedData = galaxyDataService.uploadFileToGalaxy(fullpath);			  
+
 	    	// set flag to save the dataset ID in primaryfile for future reuse
-	    	primaryfile.setDatasetId(go.getId());
-	    	save = true;
+	    	primaryfile.setDatasetId(uploadedData.getId());
+	    	save = true;	
 		}
 		
 		// if the output history hasn't been created for this primaryfile, i.e. it's the first time any workflow is run against it, create a new history for it
@@ -170,7 +172,7 @@ public class JobServiceImpl implements JobService {
 			// thus, if the historyId is null, it means the output history for this primaryfile doesn't exist in Galaxy yet, and vice versa
 			History history = new History(primaryfile.getId() + ": " + primaryfile.getName());
 			try {
-				history = galaxyDataService.getHistoriesClient().create(history);
+				history = historiesClient.create(history);
 		    	primaryfile.setHistoryId(history.getId());		
 		    	save = true;
 				log.info("Initialized the Galaxy output history " + history.getId() + " for primaryfile " + primaryfile.getId());

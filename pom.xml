@@ -228,7 +228,7 @@
  		<dependency>
 			<groupId>com.github.AudiovisualMetadataPlatform</groupId>
 			<artifactId>blend4j</artifactId>
-			<version>master-SNAPSHOT</version>
+			<version>dev-SNAPSHOT</version>
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.junit.vintage</groupId>-->
