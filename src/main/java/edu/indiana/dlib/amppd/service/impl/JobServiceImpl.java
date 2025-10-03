@@ -24,13 +24,13 @@ import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
-import com.github.jmchilton.blend4j.galaxy.beans.JobDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInputValue;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -342,18 +342,18 @@ public class JobServiceImpl implements JobService {
 			// primaryfile is a required input, insert the input as the current one, and advance the current index by 1
 			if (index.intValue() == primaryfileIndex.intValue()) {
 				String inputId = (index++).toString();
-				WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+				WorkflowInput winput = new WorkflowInput(new WorkflowInputValue(datasetId, InputSourceType.LDDA));
 				winputs.setInput(inputId, winput);
 			}
 			// add result input
 			String inputId = (index++).toString();
-			WorkflowInput winput = new WorkflowInput(outputId, InputSourceType.HDA);
+			WorkflowInput winput = new WorkflowInput(new WorkflowInputValue(outputId, InputSourceType.HDA));
 			winputs.setInput(inputId, winput);		
 		}
 		// in case primaryfile input is the last input, add it after all results inputs
 		if (index.intValue() == primaryfileIndex.intValue()) {
 			String inputId = (index++).toString();
-			WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+			WorkflowInput winput = new WorkflowInput(new WorkflowInputValue(datasetId, InputSourceType.LDDA));
 			winputs.setInput(inputId, winput);
 		}
 		
@@ -647,14 +647,14 @@ public class JobServiceImpl implements JobService {
     		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		WorkflowOutputs woutputs = workflowsClient.runWorkflow(winputs);    		
-    		
+    		    		
     		// add workflow results to the table for the newly created invocation
     		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
     		
     		// update response with success job creation status
     		response.setStatus(true, "", woutputs);
     		log.info("Successfully created " + msg + msg_param);
-        	log.info("Galaxy workflow outputs: " + woutputs.getOutputIds());
+        	log.info("Workflow invocation ID: " + woutputs.getId());
     	}
     	catch (Exception e) {  
     		String error = "";

@@ -25,7 +25,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
 import com.github.jmchilton.blend4j.galaxy.beans.InvocationDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
-import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import com.jayway.jsonpath.JsonPath;
 
 import edu.indiana.dlib.amppd.model.Bundle;
@@ -185,13 +184,7 @@ public class JobControllerTests {
     	String stepId = null;
     	String datasetId = null;
     	
-    	if (invocation instanceof WorkflowOutputs) {
-        	// retrieve the stepId/outputId using the IDs contained in the workflow outputs after running the AMP job
-    		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
-    		stepId = woutputs.getSteps().get(2).getId();
-    		datasetId = woutputs.getOutputIds().get(1);
-    	}
-    	else {
+    	if (!(invocation instanceof InvocationDetails)) {
         	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
     		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
     		stepId = idetails.getSteps().get(2).getId();
