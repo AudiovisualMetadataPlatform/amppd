@@ -648,14 +648,14 @@ public class JobServiceImpl implements JobService {
     		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		WorkflowOutputs woutputs = workflowsClient.runWorkflow(winputs);    		
+    		log.info("Successfully created " + msg + msg_param);
+        	log.info("Workflow invocation ID: " + woutputs.getId());
     		    		
     		// add workflow results to the table for the newly created invocation
     		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
     		
     		// update response with success job creation status
     		response.setStatus(true, "", woutputs);
-    		log.info("Successfully created " + msg + msg_param);
-        	log.info("Workflow invocation ID: " + woutputs.getId());
     	}
     	catch (Exception e) {  
     		String error = "";

@@ -300,6 +300,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			InvocationDetails invocationDetails = invocation instanceof InvocationDetails ?
 				(InvocationDetails)invocation : 
 				(InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
+			log.info("Retrieved invocationDetails " + invocation.getId() + " with " + invocationDetails.getSteps().size() + " steps.");				
 
 			// add results to the table using info from the invocation
 			results = refreshWorkflowResults(invocationDetails, workflow, primaryfile);

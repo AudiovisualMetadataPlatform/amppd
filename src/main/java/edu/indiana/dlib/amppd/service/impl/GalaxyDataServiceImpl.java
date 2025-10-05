@@ -177,7 +177,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	    		JobDetails jobDetails = jobsClient.showJob(uploadJob.getId());
 		    	uploadedData = jobDetails.getOutputs().values().iterator().next();				
 				
-				msg = "Upload completed.";
+				msg = "Upload succeeded, upload file to dataset " + uploadedData.getId();
 				log.info(msg);
 			}
 			catch (Exception e) {
