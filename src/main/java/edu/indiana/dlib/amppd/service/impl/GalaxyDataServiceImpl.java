@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
+import com.github.jmchilton.blend4j.galaxy.JobsClient;
 import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
 import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.JobDetails;
+import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
@@ -47,6 +50,9 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	private HistoriesClient historiesClient;
 	
 	@Getter
+	private JobsClient jobsClient;
+		
+	@Getter
 	private Library sharedLibrary;
 
 	@Getter
@@ -60,6 +66,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		galaxyInstance = galaxyApiService.getGalaxyInstance();
 		librariesClient = galaxyInstance.getLibrariesClient();
 		historiesClient = galaxyInstance.getHistoriesClient();
+		jobsClient = galaxyInstance.getJobsClient();
 
 		// if the amppd shared data library already exists, don't create another one
 		Library library = getLibrary(SHARED_LIBARY_NAME);
@@ -149,8 +156,8 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)
 	 */
-	public GalaxyObject uploadFileToGalaxy(String filePath, String libraryName) {
-		GalaxyObject uploadData = null;
+	public JobInputOutput uploadFileToGalaxy(String filePath, String libraryName) {
+		JobInputOutput uploadedData = null;
 		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + ", Galaxy Library:" + libraryName;
 		log.info(msg);
 
@@ -160,11 +167,16 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		if (matchingLibrary != null) {
 			final LibraryContent rootFolder = librariesClient.getRootFolder(matchingLibrary.getId());
 			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
-			upload.setContent(filePath);
-			upload.setLinkData(true);
-			upload.setFolderId(rootFolder.getId());
+			upload.setContent(filePath);			// path to file to be uploaded
+			upload.setLinkData(true);				// use symlink instead of copying file into library folder
+			upload.setFolderId(rootFolder.getId());	// ID of the root folder of the library to upload file to
 			try {
-				uploadData = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
+		    	// note: since Galaxy 25.0, the returned GalaxyObject from upload is the upload job instead of the created dataset,
+		    	// the latter can be obtained as the only output of the job, with its details retrievable via the job ID
+				GalaxyObject uploadJob = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
+	    		JobDetails jobDetails = jobsClient.showJob(uploadJob.getId());
+		    	uploadedData = jobDetails.getOutputs().values().iterator().next();				
+				
 				msg = "Upload completed.";
 				log.info(msg);
 			}
@@ -179,13 +191,13 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			throw new GalaxyDataException(msg);
 		}
 
-		return uploadData;
+		return uploadedData;
 	}		
 			
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String)
 	 */
-	public GalaxyObject uploadFileToGalaxy(String filePath) {
+	public JobInputOutput uploadFileToGalaxy(String filePath) {
 		return uploadFileToGalaxy(filePath, SHARED_LIBARY_NAME);
 	}
 	
