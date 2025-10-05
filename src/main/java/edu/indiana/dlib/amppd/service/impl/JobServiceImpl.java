@@ -205,6 +205,7 @@ public class JobServiceImpl implements JobService {
 	 * @param primaryfile ID the given primaryfile, could be null
 	 * @param resultIds array of the IDs of the given workflow results, assumed not null but could be empty
 	 * @param outputIds list of the outputIds of the given workflow results. assumed to be initialized to empty list
+	 * @param response CreateJobResponse containing detailed information for the job submitted
 	 */
 	protected Primaryfile retrieveSharedPrimaryfileValidateOutputs(WorkflowDetails workflowDetails, Primaryfile primaryfile, Long[] resultIds, List<String> outputIds, CreateJobResponse response) {
 		Long primaryfileId = primaryfile == null ? null : primaryfile.getId();

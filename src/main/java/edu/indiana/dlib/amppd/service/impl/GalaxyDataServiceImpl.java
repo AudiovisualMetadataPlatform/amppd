@@ -66,7 +66,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		galaxyInstance = galaxyApiService.getGalaxyInstance();
 		librariesClient = galaxyInstance.getLibrariesClient();
 		historiesClient = galaxyInstance.getHistoriesClient();
-		jobsClient = galaxyApiService.getGalaxyInstance().getJobsClient();
+		jobsClient = galaxyInstance.getJobsClient();
 
 		// if the amppd shared data library already exists, don't create another one
 		Library library = getLibrary(SHARED_LIBARY_NAME);
