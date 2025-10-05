@@ -199,7 +199,7 @@ public class JobServiceImpl implements JobService {
 	 * if primaryfile is required as one input, its MIMI type must match the format specified in the workflow;  
 	 * all results exist and share the same primaryfileId and historyId, and share those with primaryfile is provided; 
 	 * furthermore, each result data type must match the corresponding input format.
-	 * If all results are valid, add their outputIds to the given list, and return the shared primaryfile; 
+	 * If all results are valid, add their outputIds to the given list, update create job response, and return the shared primaryfile; 
 	 * otherwise throw exception.
 	 * @param workflowDetails the given workflowDetails with input details
 	 * @param primaryfile ID the given primaryfile, could be null
