@@ -63,6 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class WorkflowResultServiceImpl implements WorkflowResultService {
+	public static final String INVOCATION_NEW = "new";
 	public static final String WILD_CARD = "*";
 
 	/* Note: 
@@ -296,13 +297,23 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		try {
 			// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs 
 			// instance, and we need to retrieve invocation details for the workflowOutputs, because even though 
-			// workflowOutputs contains most info we need including steps, it doesn't include details of the steps
-			InvocationDetails invocationDetails = invocation instanceof InvocationDetails ?
-				(InvocationDetails)invocation : 
-				(InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
-			log.info("Retrieved invocationDetails " + invocation.getId() + " with " + invocationDetails.getSteps().size() + " steps.");				
+			// workflowOutputs contains most info we need including steps, it doesn't include details of the steps			
+			// Note: Since Galaxy 25, workflow invocation is processed asynchronously, so calling showInvocationDetail 
+			// right after would return 0 steps. Thus we need to wait till the invocation status changes from new to scheduled.
+			InvocationDetails invocationDetails;
+			if (invocation instanceof InvocationDetails) {
+				invocationDetails = (InvocationDetails)invocation;
+			}
+			else {
+				while (INVOCATION_NEW.equalsIgnoreCase(invocation.getState())) {
+					Thread.sleep(1000);
+					invocation = jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), false);			
+				}
+				invocationDetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
+			}
 
 			// add results to the table using info from the invocation
+			log.info("InvocationDetails " + invocation.getId() + " has " + invocationDetails.getSteps().size() + " steps.");				
 			results = refreshWorkflowResults(invocationDetails, workflow, primaryfile);
 			log.info("Successfully added " + results.size() + " WorkflowResult for invocation " + invocation.getId() + ", workflow " + workflow.getId() + ", primaryfile " + primaryfile.getId());				
 		}
