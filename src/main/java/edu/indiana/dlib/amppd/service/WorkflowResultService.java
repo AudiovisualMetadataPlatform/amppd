@@ -19,7 +19,7 @@ import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 public interface WorkflowResultService {
-	
+	public static final String INVOCATION_STATE_NEW = "new";
 
 	public static final List<GalaxyJobState> RUNNING_STATUSES = Arrays.asList(
 			GalaxyJobState.SCHEDULED,

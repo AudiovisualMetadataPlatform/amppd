@@ -29,6 +29,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.InvocationStepDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Workflow;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 
 import edu.indiana.dlib.amppd.config.AmppdPropertyConfig;
 import edu.indiana.dlib.amppd.config.GalaxyPropertyConfig;
@@ -63,7 +64,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class WorkflowResultServiceImpl implements WorkflowResultService {
-	public static final String INVOCATION_NEW = "new";
 	public static final String WILD_CARD = "*";
 
 	/* Note: 
@@ -298,18 +298,26 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 			// this method is usually called when a new AMP job is created, in which case the passed-in invocation is a workflowOutputs 
 			// instance, and we need to retrieve invocation details for the workflowOutputs, because even though 
 			// workflowOutputs contains most info we need including steps, it doesn't include details of the steps			
-			// Note: Since Galaxy 25, workflow invocation is processed asynchronously, so calling showInvocationDetail 
-			// right after would return 0 steps. Thus we need to wait till the invocation status changes from new to scheduled.
 			InvocationDetails invocationDetails;
 			if (invocation instanceof InvocationDetails) {
 				invocationDetails = (InvocationDetails)invocation;
 			}
 			else {
-				while (INVOCATION_NEW.equalsIgnoreCase(invocation.getState())) {
+				// Note: Since Galaxy 25, workflow invocation is processed asynchronously, so calling showInvocationDetail 
+				// right after would return 0 steps. Thus we need to wait till the invocation status changes from new to scheduled.
+				while (INVOCATION_STATE_NEW.equalsIgnoreCase(invocation.getState())) {
 					Thread.sleep(1000);
 					invocation = jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), false);			
 				}
 				invocationDetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);
+				WorkflowDetails WorkflowDetails = (WorkflowDetails)workflow; 
+				
+				// Furthermore, it's possible that even when an invocation is scheduled, not all of its steps/jobs are 
+				// scheduled right away, in which case we'd need to wait further till all steps are scheduled
+				while (invocationDetails.getSteps().size() < WorkflowDetails.getSteps().size()) {
+					Thread.sleep(1000);
+					invocationDetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflow.getId(), invocation.getId(), true);			
+				}				
 			}
 
 			// add results to the table using info from the invocation
@@ -1136,22 +1144,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	protected GalaxyJobState getJobStatus(String jobStatus) {
 		GalaxyJobState status = GalaxyJobState.UNKNOWN;
-		if(jobStatus.equals("ok")) {
-			status = GalaxyJobState.COMPLETE;
-		}
-		else if(jobStatus.equals("running")) {
-			status = GalaxyJobState.IN_PROGRESS;
-		}
-		else if(jobStatus.equals("scheduled")||jobStatus.equals("new")||jobStatus.equals("queued")) {
+		if(jobStatus.equalsIgnoreCase("new") || jobStatus.equalsIgnoreCase("scheduled") || jobStatus.equalsIgnoreCase("queued")) {
 			status = GalaxyJobState.SCHEDULED;
 		}
-		else if(jobStatus.equals("error")) {
+		else if(jobStatus.equalsIgnoreCase("running")) {
+			status = GalaxyJobState.IN_PROGRESS;
+		}
+		else if(jobStatus.equalsIgnoreCase("ok") || jobStatus.equalsIgnoreCase("complete") || jobStatus.equalsIgnoreCase("done")) {
+			status = GalaxyJobState.COMPLETE;
+		}
+		else if(jobStatus.equalsIgnoreCase("error") || jobStatus.equalsIgnoreCase("failed")) {
 			status = GalaxyJobState.ERROR;
 		}
-		else if(jobStatus.equals("paused")) {
+		else if(jobStatus.equalsIgnoreCase("paused")) {
 			status = GalaxyJobState.PAUSED;
 		}
-		else if(jobStatus.equals("deleted") || jobStatus.equals("discarded")) {
+		else if(jobStatus.equalsIgnoreCase("deleted") || jobStatus.equalsIgnoreCase("discarded") || jobStatus.equalsIgnoreCase("cancelled")) {
 			status = GalaxyJobState.DELETED;
 		}
 		return status;
