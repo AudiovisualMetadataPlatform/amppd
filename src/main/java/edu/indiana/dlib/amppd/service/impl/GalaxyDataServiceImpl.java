@@ -12,8 +12,8 @@ import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.JobsClient;
 import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
-import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Job;
 import com.github.jmchilton.blend4j.galaxy.beans.JobDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
@@ -22,6 +22,7 @@ import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -172,11 +173,19 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			upload.setFolderId(rootFolder.getId());	// ID of the root folder of the library to upload file to
 			try {
 		    	// note: since Galaxy 25.0, the returned GalaxyObject from upload is the upload job instead of the created dataset,
-		    	// the latter can be obtained as the only output of the job, with its details retrievable via the job ID
-				GalaxyObject uploadJob = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
-	    		JobDetails jobDetails = jobsClient.showJob(uploadJob.getId());
-		    	uploadedData = jobDetails.getOutputs().values().iterator().next();				
+		    	// the latter can be obtained as the only output of the job, with its details retrievable via the job ID;
+				// however, since job is executed asynchronously, we need to wait till it's completed before returning the
+				// uploaded dataset ID; otherwise if upload fails, the primaryfile can be stuck with an invalid dataset ID.
 				
+				Job uploadJob = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
+				JobDetails jobDetails = jobsClient.showJob(uploadJob.getId());
+	    		
+				while (GalaxyJobState.getJobState(jobDetails.getState()) != GalaxyJobState.COMPLETE) {
+	    			Thread.sleep(1000);
+	    			jobDetails = jobsClient.showJob(uploadJob.getId());
+	    		}
+				
+		    	uploadedData = jobDetails.getOutputs().values().iterator().next();								
 				msg = "Upload succeeded, upload file to dataset " + uploadedData.getId();
 				log.info(msg);
 			}
