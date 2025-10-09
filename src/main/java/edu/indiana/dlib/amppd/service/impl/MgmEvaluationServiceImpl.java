@@ -440,7 +440,7 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     		deleteEvaluationOutput(met);
     	}
     	
-    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with " + workflowResultIds.size() +" workflowResults. ");    			
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with " + workflowResultIds.size() +" workflowResults.");    			
     	return mets;    	
     }
     
