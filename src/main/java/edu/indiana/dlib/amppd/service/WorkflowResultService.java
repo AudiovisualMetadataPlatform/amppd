@@ -1,6 +1,5 @@
 package edu.indiana.dlib.amppd.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,24 +13,12 @@ import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Primaryfile;
 import edu.indiana.dlib.amppd.model.WorkflowResult;
-import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import edu.indiana.dlib.amppd.web.WorkflowResultResponse;
 import edu.indiana.dlib.amppd.web.WorkflowResultSearchQuery;
 
 public interface WorkflowResultService {
 	public static final String INVOCATION_STATE_NEW = "new";
 
-	public static final List<GalaxyJobState> RUNNING_STATUSES = Arrays.asList(
-			GalaxyJobState.SCHEDULED,
-			GalaxyJobState.IN_PROGRESS
-	);
-	
-	public static final List<GalaxyJobState> INCOMPLETE_STATUSES = Arrays.asList(
-			GalaxyJobState.SCHEDULED,
-			GalaxyJobState.IN_PROGRESS,
-			GalaxyJobState.PAUSED
-	);	
-	
 	/**
 	 * Get a list of all workflow results satisfying the given query.
 	 * @param query the search query for workflow results

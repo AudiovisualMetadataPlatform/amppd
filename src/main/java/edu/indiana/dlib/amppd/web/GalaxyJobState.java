@@ -1,5 +1,8 @@
 package edu.indiana.dlib.amppd.web;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum GalaxyJobState {
 	UNKNOWN,		// 0
 	SCHEDULED,		// 1
@@ -8,6 +11,17 @@ public enum GalaxyJobState {
 	COMPLETE,		// 4
 	ERROR,			// 5
 	DELETED;		// 6
+	
+
+	public static final List<GalaxyJobState> INCOMPLETE_STATUSES = Arrays.asList(
+			SCHEDULED,
+			IN_PROGRESS,
+			PAUSED
+	);
+	public static final List<GalaxyJobState> RUNNING_STATUSES = Arrays.asList(
+			SCHEDULED,
+			IN_PROGRESS
+	);
 	
 	/**
 	 *  Map the given Galaxy job state to AMP representation as shown on the front end.
