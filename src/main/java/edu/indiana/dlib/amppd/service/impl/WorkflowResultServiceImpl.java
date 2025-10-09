@@ -38,7 +38,6 @@ import edu.indiana.dlib.amppd.exception.StorageException;
 import edu.indiana.dlib.amppd.model.Collection;
 import edu.indiana.dlib.amppd.model.Dataentity;
 import edu.indiana.dlib.amppd.model.Item;
-import edu.indiana.dlib.amppd.model.MgmEvaluationTest;
 import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.model.MgmVersion;
 import edu.indiana.dlib.amppd.model.Primaryfile;
@@ -447,16 +446,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	protected List<WorkflowResult> refreshResultsStatus(List<WorkflowResult> WorkflowResults) {
 		List<WorkflowResult> refreshedResults = new ArrayList<WorkflowResult>();
+		List<WorkflowResult> unrefreshedResults = new ArrayList<WorkflowResult>();
 		
 		for(WorkflowResult result : WorkflowResults) {
 			try {
 				refreshedResults.add(refreshResultStatus(result));
 			}
 			catch(Exception e) {
-				throw new RuntimeException("Failed to refresh the status from Galaxy for WorkflowResult " + result.getId(), e);
+				// catch error for failed result so other results may still get refreshed
+				unrefreshedResults.add(result);
+				log.error("Failed to refresh the status from Galaxy for WorkflowResult " + result.getId(), e);
 			}			
 		}
 		
+		if (!unrefreshedResults.isEmpty()) {
+			log.error("Failed to refresh status for " + unrefreshedResults.size() + " WorkflowResults.");				
+		}
 		return refreshedResults;
 	}
 	
@@ -483,6 +488,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Override
 	@Transactional	
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
+		// Note: It is possible that datasetId is populated but historyId not; to be sure, 
+		// the latter or both can be checked to decide if primaryfile has any workflow result.
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " active primaryfiles with Galaxy history ...");
@@ -827,16 +834,26 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// do not delete WorkflowResults that failed to be refreshed due to Galaxy exception, 
 		// as they might still be valid, and should be refreshed when the job is rerun
 		Date dateObsolete = DateUtils.addMinutes(new Date(), -amppdPropertyConfig.getRefreshResultsTableMinutes());		
-		List<WorkflowResult> deleteResults = null;
+		List<Long> deleteResultIds = null;
+		List<WorkflowResult> deleteResults = null;		
 		
 		try {
-			// if failedPrimaryfileIds is empty, delete without "PrimaryfileIdNotIn" phrase, as SQL doesn't work with "not in ()"  
+			// if failedPrimaryfileIds is empty, search without "PrimaryfileIdNotIn" phrase, as SQL doesn't work with "not in ()"  
 			if (failedPrimaryfileIds == null || failedPrimaryfileIds.isEmpty()) {
-				deleteResults = workflowResultRepository.deleteByDateRefreshedBefore(dateObsolete);					
+				deleteResultIds = workflowResultRepository.findObsolete(dateObsolete);					
 			}
 			else {
-				deleteResults = workflowResultRepository.deleteByPrimaryfileIdNotInAndDateRefreshedBefore(failedPrimaryfileIds, dateObsolete);
+				deleteResultIds = workflowResultRepository.findObsoleteExcludePrimaryfiles(failedPrimaryfileIds, dateObsolete);
 			}
+			
+			if (deleteResultIds != null && !deleteResultIds.isEmpty()) {
+				// delete MgmEvaluationTests associated with the workflowResults to be deleted
+				mgmEvaluationService.deleteEvaluationOutputs(deleteResultIds);
+
+				// delete workflowResults with IDs in deleteResultIds 
+				deleteResults = workflowResultRepository.deleteByIdIn(deleteResultIds);
+			}
+			
 			if (deleteResults != null && !deleteResults.isEmpty()) {
 				log.info("Successfully deleted " + deleteResults.size() + " obsolete WorkflowResults");
 				log.info("A sample of deleted WorkflowResults: " + deleteResults.get(0));
@@ -1087,7 +1104,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Transactional
 	public WorkflowResult deleteWorkflowResult(WorkflowResult workflowResult) {
 		// delete associated MgmEvaluationTests output files
-		List<MgmEvaluationTest> mets = mgmEvaluationService.deleteEvaluationOutputs(workflowResult);
+		mgmEvaluationService.deleteEvaluationOutputs(workflowResult);
 		
 		// delete workflow output datasets from Galaxy history
 		try {
@@ -1118,7 +1135,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
 		// no need to delete MgmEvaluationTests associated with workflowResults for the dataentity,
 		// as this method is only called when the dataentity itself is deleted, in which case 
-		// all MgmEvaluationTests associated the children groundtruth supplements will also be deleted
+		// all MgmEvaluationTests associated with the children groundtruth supplements will also be deleted
 		
 		// TODO delete associated histories along with all their contents from Galaxy
 

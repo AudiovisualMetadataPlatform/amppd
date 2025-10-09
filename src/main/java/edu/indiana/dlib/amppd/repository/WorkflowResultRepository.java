@@ -47,6 +47,7 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	List<WorkflowResult> findByCollectionIdInAndOutputTypeInAndStatusEqualsOrderByDateCreatedDesc(List<Long> collectionIds, List<String> outputTypes, GalaxyJobState status);
 	List<WorkflowResult> findByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);	
 	
+	List<WorkflowResult> deleteByIdIn(List<Long> ids);
 	List<WorkflowResult> deleteByPrimaryfileIdNotInAndDateRefreshedBefore(List<Long> primaryfileIds, Date dateObsolete);
 	List<WorkflowResult> deleteByDateRefreshedBefore(Date dateObsolete);
 	
@@ -60,12 +61,17 @@ public interface WorkflowResultRepository extends PagingAndSortingRepository<Wor
 	int countByItemId(Long itemId);
 	int countByPrimaryfileId(Long primaryfileId);
 	
-	@Query(value = "select min(dateRefreshed) from WorkflowResult d where d.primaryfileId = :primaryfileId")
+	@Query(value = "select min(dateRefreshed) from WorkflowResult w where w.primaryfileId = :primaryfileId")
 	Date findOldestDateRefreshedByPrimaryfileId(Long primaryfileId);
 	
-	@Query(value = "select d from WorkflowResult d where d.dateRefreshed < :dateObsolete")
-	List<WorkflowResult> findObsolete(Date dateObsolete);
+	// find IDs of results with refresh date older than the specified date, excluding those for the primaryfiles with the specified IDs
+	@Query(value = "select w.id from WorkflowResult w where w.dateRefreshed < :dateObsolete and w.primaryfileId not in :primaryfileIds")
+	List<Long> findObsoleteExcludePrimaryfiles(List<Long> primaryfileIds, Date dateObsolete);
 	
+	// find IDs of results with refresh date older than the specified date
+	@Query(value = "select w.id from WorkflowResult w where w.dateRefreshed < :dateObsolete")
+	List<Long> findObsolete(Date dateObsolete);
+
 	// find results of the given primaryfile, outputType, and status
 	List<WorkflowResult> findByPrimaryfileIdAndOutputTypeAndStatus(Long primaryfileId, String outputType, GalaxyJobState status);
 	

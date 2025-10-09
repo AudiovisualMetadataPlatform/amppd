@@ -17,6 +17,7 @@ public interface MgmEvaluationTestRepository extends PagingAndSortingRepository<
 	List<MgmEvaluationTest> findByMstId(Long mstId);
 	List<MgmEvaluationTest> findByGroundtruthSupplementId(Long groundtruthSupplementId);
 	List<MgmEvaluationTest> findByWorkflowResultId(Long workflowResultId);
+	List<MgmEvaluationTest> findByWorkflowResultIdIn(List<Long> workflowResultIds);	
 	List<MgmEvaluationTest> findByCategoryId(Long categoryId);
 
 	List<MgmEvaluationTestDetail> findByIdIn(List<Long> ids);		

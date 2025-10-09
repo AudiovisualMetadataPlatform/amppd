@@ -206,6 +206,10 @@ public class FileStorageServiceImpl implements FileStorageService {
     		if (workflowResultRepository.findByPrimaryfileId(primaryfile.getId()).size() > 0) {
 	    		throw new StorageException("Uploading new media file to primaryfile " + primaryfile.getId() + " is not allowed as it has been run against a workflow." );
 	    	}
+    		// TODO clean up old history and uploaded dataset if any
+    		// reset datasetId and historyId in case they were populated for old media file
+    		primaryfile.setDatasetId(null);
+    		primaryfile.setHistoryId(null);
     	}
     		
     	// store the media file and update asset path
