@@ -42,7 +42,7 @@ public interface MgmEvaluationService {
     /**
      * Delete all MgmEvaluationTest output files associated with the specified workflowResults if any.
      * @param workflowResultIds the list of IDs of the specified workflowResults
-     * @return the list of MgmEvaluationTests associated with the workflowResult 
+     * @return the list of MgmEvaluationTests associated with the workflowResults 
      */
     public List<MgmEvaluationTest> deleteEvaluationOutputs(List<Long> workflowResultIds);
 
