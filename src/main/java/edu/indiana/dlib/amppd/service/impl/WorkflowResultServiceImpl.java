@@ -483,6 +483,8 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	@Override
 	@Transactional	
 	public List<WorkflowResult> refreshWorkflowResultsIterative() {		
+		// Note: It is possible that datasetId is populated but historyId not; to be sure, 
+		// the latter or both can be checked to decide if primaryfile has any workflow result.
 		List<WorkflowResult> allResults = new ArrayList<WorkflowResult>();
 		List<Primaryfile> primaryfiles = primaryfileRepository.findByItemCollectionActiveTrueAndHistoryIdNotNull();
 		log.info("Found " + primaryfiles.size() + " active primaryfiles with Galaxy history ...");

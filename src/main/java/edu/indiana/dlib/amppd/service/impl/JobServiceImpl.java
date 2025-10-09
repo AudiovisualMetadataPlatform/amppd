@@ -166,6 +166,10 @@ public class JobServiceImpl implements JobService {
 	    	save = true;	
 		}
 		
+		// Note: It is possible that uploading primaryfile succeeds, but creating history fails, in which case
+		// the datasetId field will be populated, but the historyId field won't; to be sure, the latter or both 
+		// fields can be checked to decide if the primaryfile has been submitted for any workflow.
+		
 		// if the output history hasn't been created for this primaryfile, i.e. it's the first time any workflow is run against it, create a new history for it
 		if (primaryfile.getHistoryId() == null) {   
 			// since we use primaryfile ID in the output history name, we can assume that the name is unique, 
