@@ -415,7 +415,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		else {
 			// update status which might have changed since last update
 			String state = dataset.getState();
-			GalaxyJobState status = getJobStatus(state);			
+			GalaxyJobState status = GalaxyJobState.getJobState(state);			
 			result.setStatus(status);
 
 			// when a job is in unfinished status, Galaxy sets all of its outputs as visible;
@@ -470,7 +470,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		// for jobs that are finished (COMPLETE, ERROR), their status won't change, so no need to refresh; in particular, 
 		// when an ERROR job is rerun in Galaxy, a new job will be created and only picked up when result table is refreshed;
 		// PAUSED jobs should have status refreshed, as the status can change to running when the workflow is resumed in Galaxy.
-		List<WorkflowResult> results = workflowResultRepository.findByStatusIn(INCOMPLETE_STATUSES);
+		List<WorkflowResult> results = workflowResultRepository.findByStatusIn(GalaxyJobState.INCOMPLETE_STATUSES);
 		List<WorkflowResult> refreshedResults = refreshResultsStatus(results);	
 		
 		log.info("Successfully refreshed status for " + refreshedResults.size() + " WorkflowResults");
@@ -740,7 +740,7 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 				result.setSubmitter(galaxyPropertyConfig.getUsername());
 				result.setRelevant(isRelevant(result, dataset));
 //				result.setRelevant(dataset.getVisible()); // result is relevant if and only if its Galaxy dataset is visible
-				result.setStatus(getJobStatus(dataset.getState()));
+				result.setStatus(GalaxyJobState.getJobState(dataset.getState()));
 				result.setDateCreated(dataset.getCreateTime());
 				result.setDateUpdated(dataset.getUpdateTime());
 				result.setDateRefreshed(new Date());
@@ -1137,32 +1137,6 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 		
         log.info("Deleted " + wfrs.size() + " WorkflowResults assoicated with Dataentity " + dataentity.getId());
         return wfrs;
-	}
-
-	/**
-	 *  Map the status in Galaxy to what we want on the front end.
-	 */
-	protected GalaxyJobState getJobStatus(String jobStatus) {
-		GalaxyJobState status = GalaxyJobState.UNKNOWN;
-		if(jobStatus.equalsIgnoreCase("new") || jobStatus.equalsIgnoreCase("scheduled") || jobStatus.equalsIgnoreCase("queued")) {
-			status = GalaxyJobState.SCHEDULED;
-		}
-		else if(jobStatus.equalsIgnoreCase("running")) {
-			status = GalaxyJobState.IN_PROGRESS;
-		}
-		else if(jobStatus.equalsIgnoreCase("ok") || jobStatus.equalsIgnoreCase("complete") || jobStatus.equalsIgnoreCase("done")) {
-			status = GalaxyJobState.COMPLETE;
-		}
-		else if(jobStatus.equalsIgnoreCase("error") || jobStatus.equalsIgnoreCase("failed")) {
-			status = GalaxyJobState.ERROR;
-		}
-		else if(jobStatus.equalsIgnoreCase("paused")) {
-			status = GalaxyJobState.PAUSED;
-		}
-		else if(jobStatus.equalsIgnoreCase("deleted") || jobStatus.equalsIgnoreCase("discarded") || jobStatus.equalsIgnoreCase("cancelled")) {
-			status = GalaxyJobState.DELETED;
-		}
-		return status;
 	}
 	
 	/**

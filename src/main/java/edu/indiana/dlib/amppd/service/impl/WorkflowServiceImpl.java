@@ -30,8 +30,8 @@ import edu.indiana.dlib.amppd.model.MgmTool;
 import edu.indiana.dlib.amppd.repository.MgmToolRepository;
 import edu.indiana.dlib.amppd.repository.WorkflowResultRepository;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
-import edu.indiana.dlib.amppd.service.WorkflowResultService;
 import edu.indiana.dlib.amppd.service.WorkflowService;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import edu.indiana.dlib.amppd.web.WorkflowFilterValues;
 import edu.indiana.dlib.amppd.web.WorkflowResponse;
 import lombok.Getter;
@@ -157,7 +157,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 		 * running workflows from DB at once, and use that list to decide whether each workflow is running. 
 		 */ 
 		// set running field for each workflow in the list to return
-		Set<String> wfIds = this.workflowResultRepository.findWorkflowIdsByStatusIn(WorkflowResultService.RUNNING_STATUSES);
+		Set<String> wfIds = this.workflowResultRepository.findWorkflowIdsByStatusIn(GalaxyJobState.RUNNING_STATUSES);
 		for (Workflow wf : filterWorkflows) {
 			wf.setRunning(wfIds.contains(wf.getId()));
 		}		
@@ -299,7 +299,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 	public WorkflowDetails updateWorkflow(String workflowId, Boolean activate, Boolean publish) {
 		// check if the workflow is involved in any on-going invocation while deactivating or unpublishing;
 		// if yes, throw GalaxyWorkflowException to inform caller of the method
-		Boolean running = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, WorkflowResultService.RUNNING_STATUSES);	
+		Boolean running = workflowResultRepository.existsByWorkflowIdAndStatusIn(workflowId, GalaxyJobState.RUNNING_STATUSES);	
 		if (running && (activate != null && !activate || publish != null && !publish)) {
 			throw new GalaxyWorkflowException("Workflow " + workflowId + " can't be deactivated/unpublished as it is involved in some on-going invocations.");
 		}
