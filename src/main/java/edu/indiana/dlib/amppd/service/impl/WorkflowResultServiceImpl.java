@@ -446,16 +446,22 @@ public class WorkflowResultServiceImpl implements WorkflowResultService {
 	 */
 	protected List<WorkflowResult> refreshResultsStatus(List<WorkflowResult> WorkflowResults) {
 		List<WorkflowResult> refreshedResults = new ArrayList<WorkflowResult>();
+		List<WorkflowResult> unrefreshedResults = new ArrayList<WorkflowResult>();
 		
 		for(WorkflowResult result : WorkflowResults) {
 			try {
 				refreshedResults.add(refreshResultStatus(result));
 			}
 			catch(Exception e) {
-				throw new RuntimeException("Failed to refresh the status from Galaxy for WorkflowResult " + result.getId(), e);
+				// catch error for failed result so other results may still get refreshed
+				unrefreshedResults.add(result);
+				log.error("Failed to refresh the status from Galaxy for WorkflowResult " + result.getId(), e);
 			}			
 		}
 		
+		if (!unrefreshedResults.isEmpty()) {
+			log.error("Failed to refresh status for " + unrefreshedResults.size() + " WorkflowResults.");				
+		}
 		return refreshedResults;
 	}
 	
