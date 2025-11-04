@@ -164,6 +164,10 @@ public class JobServiceImpl implements JobService {
 	    	// set flag to save the dataset ID in primaryfile for future reuse
 	    	primaryfile.setDatasetId(uploadedData.getId());
 	    	save = true;	
+			log.info("Uploaded primaryfile " + primaryfile.getId() + " to Galaxy library as dataset " + primaryfile.getDatasetId());	    	
+		}
+		else {
+			log.info("Primaryfile " + primaryfile.getId() + " has already been uploaded to Galaxy library as dataset " + primaryfile.getDatasetId());			
 		}
 		
 		// Note: It is possible that uploading primaryfile succeeds, but creating history fails, in which case

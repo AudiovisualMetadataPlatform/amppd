@@ -177,6 +177,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 				Job uploadJob = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
 				JobDetails jobDetails = jobsClient.showJob(uploadJob.getId());
 				GalaxyJobState gjs = GalaxyJobState.getJobState(jobDetails.getState()); 
+				log.debug("Created upload job " + uploadJob.getId() + " with status " + gjs);
 				
 				// since job is executed asynchronously, we need to wait till it's done before returning the uploaded dataset;
 				// otherwise if upload fails, the primaryfile can be stuck with an invalid dataset ID.
@@ -186,9 +187,9 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	    			gjs = GalaxyJobState.getJobState(jobDetails.getState()); 
 	    		}
 				
-				// if upload fails, throw exception
-				if (gjs != GalaxyJobState.COMPLETE) {
-					throw new GalaxyDataException("Galaxy upload job " + uploadJob.getId() + " failed.");
+				// if upload job didn't complete or produce outputs, throw exception
+				if (gjs != GalaxyJobState.COMPLETE || jobDetails.getOutputs().isEmpty()) {
+					throw new GalaxyDataException("Galaxy upload job " + uploadJob.getId() + " failed or didn't produce outputs.");
 				}
 				
 				// otherwise return upload job output
