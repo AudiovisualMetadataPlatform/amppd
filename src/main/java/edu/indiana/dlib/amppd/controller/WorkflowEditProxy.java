@@ -301,7 +301,7 @@ public class WorkflowEditProxy {
 	}	
 	
 	/**
-	 * Start a workflow edit session within an authenticated AMP user session.
+	 * End a workflow edit session within an authenticated AMP user session.
 	 * @param authHeader Authorization header from the request
 	 * @param workflowId ID of the workflow for edit
 	 * @param response HTTP response to send back
@@ -568,6 +568,7 @@ public class WorkflowEditProxy {
 		}
 		
 		// all other requests are invalid 
+		log.error("Invalid workflow editor request " + method + " " + path + " on workflow " + workflowId);
 		return false;
 	}
 	
