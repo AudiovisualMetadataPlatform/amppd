@@ -67,7 +67,10 @@ public class WorkflowEditProxy {
 	public static final String GALAXY_ROOT = "/galaxy";
 	
 	// Galaxy workflow editor generic request paths relative to Galaxy root
-	private static final List<String> GALAXY_PATHS = Arrays.asList("/favicon.ico");
+	private static final List<String> GALAXY_PATHS = Arrays.asList(
+			"/history/current_history_json"
+//			"/favicon.ico"
+			);
 
 	// Galaxy static path relative to galaxy root path
 	public static final String GALAXY_STATIC = "/static";
@@ -76,7 +79,14 @@ public class WorkflowEditProxy {
 	public static final String GALAXY_API = "/api";
 	
 	// Galaxy workflow editor API request paths relative to Galaxy API path
-	private static final List<String> GALAXY_API_PATHS = Arrays.asList("/webhooks", "/licenses", "/datatypes/types_and_mapping");
+	private static final List<String> GALAXY_API_PATHS = Arrays.asList(
+			"/entry_points", 
+			"/licenses"
+//			"/workflows",
+//			"/histories",
+//			"/webhooks", 
+//			"/datatypes/types_and_mapping"
+			);
 	
 	// workflow edit cookie name
 	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
@@ -373,7 +383,7 @@ public class WorkflowEditProxy {
 		String workflowId = pair.getRight();
 //		if (!filterRequest(request, body, workflowId)) {
 		if (!filterRequest(request, workflowId)) {
-			log.error("Invalid workflow edit request: " + method + " " + request.getRequestURL());
+			log.error("Invalid request during workflow edit: " + method + " " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
 		}
 		
@@ -502,7 +512,7 @@ public class WorkflowEditProxy {
 		if (method.equals(HttpMethod.POST.toString())) {
 			// URL path must be /api/workflows/build_module
 			if (!path.equals(GALAXY_API + "/workflows/build_module")) {
-				log.error("Invalid path " + path + " for POST request to add an MGM to the workflow.");
+				log.error("Invalid path " + path + " for POST request to add an input or MGM to the workflow.");
 				return false;
 			}
 			// payload must be valid tool JSON: this will be handled by Galaxy
@@ -525,32 +535,38 @@ public class WorkflowEditProxy {
 		
 		// filter GET requests
 		if (method.equals(HttpMethod.GET.toString())) {
-			// filter the request initiated by the workflow edit session to load the editor
+			// filter the request initiated by the workflow edit session to retrieve the workflow json
 			if (path.equals("/workflow/editor")) {
 				// workflow ID in the request parameter must match the ID of the workflow currently being edited
-				return checkWorkflowId(request, workflowId, "load the editor for");
+				return checkWorkflowId(request, workflowId, "retrieve");
 			}
 			
-			// filter GET request for loading the workflow
+			// filter GET request for loading the workflow of a particular version
 			if (path.equals("/workflow/load_workflow")) {
 				// workflow ID in the request parameter must match the ID of the workflow currently being edited
 				return checkWorkflowId(request, workflowId, "load");
 			}
 			
-			// filter GET request for retrieving the workflow versions
-			if (path.startsWith(GALAXY_API + "/workflows/") && path.endsWith("/versions")) {
+			// filter GET request for retrieving the workflow versions/counts
+			if (path.startsWith(GALAXY_API + "/workflows/")) {
 				// workflow ID on the request path must match the ID of the workflow currently being edited
-				return checkWorkflowId(path, "/workflows/", "/versions", workflowId, "GET", "fetch the versios of");
+				if (path.endsWith("/versions")) {
+					return checkWorkflowId(path, "/workflows/", "/versions", workflowId, "GET", "fetch the versions of");
+				}
+				if (path.endsWith("/counts")) {
+					return checkWorkflowId(path, "/workflows/", "/counts", workflowId, "GET", "fetch the counts of");
+				}				
 			}
 
-			// filter GET requests on static info:
-			// various requests for static info are triggered during workflow loading and saving;
-			// since Galaxy client could change between releases, it's more flexible and robust 
-			// not to assume specific URLs, but allow a more generic URL patterns instead;
-			// for now, all GET static requests are allowed as they are public info 
-			if (path.startsWith(GALAXY_STATIC)) {
-				return true;
-			}
+			// As of Galaxy 25, no static info are requested during workflow edit
+//			// filter GET requests on static info:
+//			// various requests for static info are triggered during workflow loading and saving;
+//			// since Galaxy client could change between releases, it's more flexible and robust 
+//			// not to assume specific URLs, but allow a more generic URL patterns instead;
+//			// for now, all GET static requests are allowed as they are public info 
+//			if (path.startsWith(GALAXY_STATIC)) {
+//				return true;
+//			}
 			
 			// filter GET API requests during workflow loading/saving 
 			// check against the list of all allowed API requests (other than the workflow versions)
@@ -565,9 +581,11 @@ public class WorkflowEditProxy {
 			if (GALAXY_PATHS.contains(path)) {
 				return true;
 			}		
+
+//			log.error("Uncaptured GET request during workflow edit: " + request.getRequestURL());
 		}
 		
-		// all other requests are invalid 
+		// all other requests are invalid
 		return false;
 	}
 	
