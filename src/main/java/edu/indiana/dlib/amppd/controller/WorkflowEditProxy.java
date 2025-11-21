@@ -535,13 +535,19 @@ public class WorkflowEditProxy {
 		
 		// filter GET requests
 		if (method.equals(HttpMethod.GET.toString())) {
-			// filter the request initiated by the workflow edit session to retrieve the workflow json
+			// filter the request initiated by the workflow edit session to load the workflow editor
+			if (path.equals("/workflows/edit")) {
+				// workflow ID in the request parameter must match the ID of the workflow currently being edited
+				return checkWorkflowId(request, workflowId, "load editor for");
+			}
+			
+			// filter the request to retrieve the workflow json
 			if (path.equals("/workflow/editor")) {
 				// workflow ID in the request parameter must match the ID of the workflow currently being edited
 				return checkWorkflowId(request, workflowId, "retrieve");
 			}
 			
-			// filter GET request for loading the workflow of a particular version
+			// filter GET request to load the workflow of a particular version
 			if (path.equals("/workflow/load_workflow")) {
 				// workflow ID in the request parameter must match the ID of the workflow currently being edited
 				return checkWorkflowId(request, workflowId, "load");
