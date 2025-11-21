@@ -404,7 +404,7 @@ public class WorkflowEditProxy {
 		
 		// set up request to Galaxy
 		String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
-    	String url = galaxyPropertyConfig.getBaseUrl() + request.getRequestURI() + query;
+    	String url = galaxyPropertyConfig.getRootUrl() + request.getRequestURI() + query;
     	HttpEntity<byte[]> grequest = new HttpEntity<byte[]>(body, headers);    	
     	byte[] gbody;
     	HttpHeaders gheaders;
@@ -447,7 +447,7 @@ public class WorkflowEditProxy {
 	}	
 	
 	/**
-	 * Generates the workflow edit cookie for the the given AMP request authHeader and workflowId.
+	 * Generates the workflow edit cookie for the given AMP request authHeader and workflowId.
 	 */
 	private ResponseCookie generateWorkflowEditCookie(String authHeader, String workflowId) {
 		/* Note:
