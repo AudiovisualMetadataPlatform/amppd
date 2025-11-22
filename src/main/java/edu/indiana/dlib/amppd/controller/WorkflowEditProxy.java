@@ -60,34 +60,49 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WorkflowEditProxy {
 
+	public enum FilterStatus {
+		VALID,
+		INVALID,
+		IGNORE;
+	}
+	
 //	// galaxySession cookie name
 //	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
 
 	// Galaxy root path relative to AMP context path
 	public static final String GALAXY_ROOT = "/galaxy";
 	
-	// Galaxy workflow editor generic request paths relative to Galaxy root
-	private static final List<String> GALAXY_PATHS = Arrays.asList(
-			"/history/current_history_json"
-//			"/favicon.ico"
-			);
-
 	// Galaxy static path relative to galaxy root path
 	public static final String GALAXY_STATIC = "/static";
 			
 	// Galaxy API path relative to galaxy root path
 	public static final String GALAXY_API = "/api";
 	
+	// Galaxy workflow editor generic request paths relative to Galaxy root
+//	private static final List<String> GALAXY_PATHS = Arrays.asList();
+
 	// Galaxy workflow editor API request paths relative to Galaxy API path
 	private static final List<String> GALAXY_API_PATHS = Arrays.asList(
-			"/entry_points", 
-			"/licenses"
-//			"/workflows",
-//			"/histories",
-//			"/webhooks", 
-//			"/datatypes/types_and_mapping"
+			"/configuration",
+			"/webhooks", 
+			"/licenses",
+			"/tools",
+			"/tool_panels",
+			"/tool_panels/default",
+			"/datatypes",
+			"/datatypes/types_and_mapping",
+			"/histories",
+			"/histories/count"
 			);
 	
+	// paths of the requests triggered by Galaxy UI not relevant to workflow edit
+	private static final List<String> GALAXY_IGNORE_PATHS = Arrays.asList(
+			"/history/current_history_json",
+			"/api/entry_points",
+			"/api/unprivileged_tools",
+			"/api/genomes"
+			);
+
 	// workflow edit cookie name
 	public static final String WORKFLOW_EDIT_COOKIE = "workflowEdit";
 	
@@ -361,12 +376,16 @@ public class WorkflowEditProxy {
 			@RequestHeader HttpHeaders headers,
 			@RequestBody(required = false) byte[] body,
 			HttpServletRequest request) {
-		// check permission 
-		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
-		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);
-		if (!can) {
-			throw new AccessDeniedException("The current user cannot update workflow in any unit.");
-		}
+		/* Note: 
+		 * Permission checking here is unnecessary, because only authorized users could have 
+		 * gotten a WorkflowEdit token, which will be validated by filterRequest below.
+		 */ 
+//		// check permission 
+//		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
+//		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);
+//		if (!can) {
+//			throw new AccessDeniedException("The current user cannot update workflow in any unit.");
+//		}
 		
 	    log.debug("Proxying workflow edit request " + method + " " + request.getRequestURL() + "...");
 	    
@@ -378,13 +397,22 @@ public class WorkflowEditProxy {
 			log.error("Unauthorized workflow edit request: " + method + " " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}
-		
+	
 		// filter request on its URL, parameters, payload etc
+//		String workflowId = "b4fd9f04acb147ec";
 		String workflowId = pair.getRight();
-//		if (!filterRequest(request, body, workflowId)) {
-		if (!filterRequest(request, workflowId)) {
+		FilterStatus filterStatus = filterRequest(request, workflowId);
+
+		// return 403 for invalid request
+		if (filterStatus == FilterStatus.INVALID) {
 			log.error("Invalid request during workflow edit: " + method + " " + request.getRequestURL());
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+		}
+		
+		// return 200 with empty body for irrelevant request
+		if (filterStatus == FilterStatus.IGNORE) {
+			log.debug("Ignore irrelevant request during workflow edit: " + method + " " + request.getRequestURL());
+			return ResponseEntity.status(HttpStatus.OK).body(null);
 		}
 		
 		// replace the workflowEdit cookie with galaxySession cookie:
@@ -400,6 +428,7 @@ public class WorkflowEditProxy {
 				gcookies.add(cookie);
 			}
 	    });		
+//		gcookies.add(galaxySessionCookie.toString());
 		headers.put(HttpHeaders.COOKIE, gcookies);
 		
 //		// remove the Origin and Referer header to avoid cors request failure 
@@ -407,10 +436,7 @@ public class WorkflowEditProxy {
 //		headers.remove(HttpHeaders.ORIGIN);
 //		headers.remove(HttpHeaders.REFERER);
 		
-		log.debug("Galaxy request header " + headers);			
-//    	headers.forEach((key, value) -> {
-//			log.debug("Galaxy request header " + headers);
-//	    });    	
+		log.debug("Galaxy request headers " + headers);			   	
 		
 		// set up request to Galaxy
 		String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
@@ -437,13 +463,9 @@ public class WorkflowEditProxy {
 	    	log.error("Failed to process workflow edit request " + method + " " + url + " with error " + gstatus);
     	}
     	
-//    	gheaders.forEach((key, value) -> {
-//			log.debug("Galaxy response header " + key + ": " + value);
-//	    });    	
-//		log.debug("Galaxy response body length: " + gbody.length);
+		log.debug("Galaxy response headers: " + gheaders + ", body length: " + gbody.length);	
 //		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
 //		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
-		log.debug("Galaxy response header " + gheaders);	
 		
 		// remove CONTENT_LENGTH header as it could cause truncation of response body
 		// note that we can't directly modify gheaders as it's readonly
@@ -501,7 +523,7 @@ public class WorkflowEditProxy {
 	 * for the given workflow; false otherwise.
 	 */
 //	private boolean filterRequest(HttpServletRequest request, byte[] body, String workflowId) {
-	private boolean filterRequest(HttpServletRequest request, String workflowId) {
+	private FilterStatus filterRequest(HttpServletRequest request, String workflowId) {
 		String method = request.getMethod();		
 		String path = StringUtils.substringAfter(request.getServletPath(), GALAXY_ROOT);
 //		String payload = new String(body, StandardCharsets.UTF_8);
@@ -513,10 +535,10 @@ public class WorkflowEditProxy {
 			// URL path must be /api/workflows/build_module
 			if (!path.equals(GALAXY_API + "/workflows/build_module")) {
 				log.error("Invalid path " + path + " for POST request to add an input or MGM to the workflow.");
-				return false;
+				return FilterStatus.INVALID;
 			}
 			// payload must be valid tool JSON: this will be handled by Galaxy
-			return true;
+			return FilterStatus.VALID;
 		}
 		
 		// filter PUT requests:
@@ -526,7 +548,7 @@ public class WorkflowEditProxy {
 			// URL path must be /api/workflows/workflowId
 			if (!path.startsWith(GALAXY_API + "/workflows/")) {
 				log.error("Invalid path " + path + " for PUT request to save the workflow.");
-				return false;
+				return FilterStatus.INVALID;
 			}
 			// workflow ID on the request path must match the ID of the workflow currently being edited
 			return checkWorkflowId(path, "/workflows/", null, workflowId, "PUT", "save");
@@ -563,36 +585,47 @@ public class WorkflowEditProxy {
 					return checkWorkflowId(path, "/workflows/", "/counts", workflowId, "GET", "fetch the counts of");
 				}				
 			}
+			
+			// filter GET request for retrieving user info
+			if (path.startsWith(GALAXY_API + "/users/")) {
+				if (path.endsWith("/current")) {
+					return FilterStatus.VALID;
+				}
+				// user ID on the request path must match Galaxy admin ID, which is the current Galaxy user
+				String userId = StringUtils.substringAfter(path, GALAXY_API + "/users/");
+				String adminId = galaxyPropertyConfig.getUserId();
+				return StringUtils.equals(userId, adminId) ? FilterStatus.VALID : FilterStatus.INVALID;
+			}
 
-			// As of Galaxy 25, no static info are requested during workflow edit
-//			// filter GET requests on static info:
-//			// various requests for static info are triggered during workflow loading and saving;
-//			// since Galaxy client could change between releases, it's more flexible and robust 
-//			// not to assume specific URLs, but allow a more generic URL patterns instead;
-//			// for now, all GET static requests are allowed as they are public info 
-//			if (path.startsWith(GALAXY_STATIC)) {
-//				return true;
-//			}
+			// filter GET requests on static info:
+			// various requests for static info are triggered during workflow loading and saving;
+			// since Galaxy client could change between releases, it's more flexible and robust 
+			// not to assume specific URLs, but allow a more generic URL patterns instead;
+			// for now, all GET static requests are allowed as they are public info 
+			if (path.startsWith(GALAXY_STATIC)) {
+				return FilterStatus.VALID;
+			}
 			
 			// filter GET API requests during workflow loading/saving 
 			// check against the list of all allowed API requests (other than the workflow versions)
 			if (path.startsWith(GALAXY_API)) {
 				String apipath = StringUtils.substringAfter(path, GALAXY_API);
-				if (GALAXY_API_PATHS.contains(apipath)) {
-					return true;
+				if (GALAXY_API_PATHS.contains(apipath) ||
+						apipath.startsWith("/histories/") && apipath.endsWith("/contents")) {
+					return FilterStatus.VALID;
 				}
 			}
 
 			// filter other GET requests during workflow loading/saving 			
-			if (GALAXY_PATHS.contains(path)) {
-				return true;
+			if (GALAXY_IGNORE_PATHS.contains(path)) {
+				return FilterStatus.IGNORE;
 			}		
 
 //			log.error("Uncaptured GET request during workflow edit: " + request.getRequestURL());
 		}
 		
 		// all other requests are invalid
-		return false;
+		return FilterStatus.INVALID;
 	}
 	
 	/**
@@ -618,29 +651,29 @@ public class WorkflowEditProxy {
 	}
 		
 	/**
-	 * Return true if the workflow ID parameter in the given GET request for the given action matches the given workflow ID; 
-	 * false otherwise.
+	 * Return VALID if the workflow ID parameter in the given GET request for the given action matches the given workflow ID; 
+	 * INVALID otherwise.
 	 */
-	private boolean checkWorkflowId(HttpServletRequest request, String workflowId, String action) {
+	private FilterStatus checkWorkflowId(HttpServletRequest request, String workflowId, String action) {
 		String wfid = request.getParameter("id");
 		if (StringUtils.equals(wfid,  workflowId)) {
-			return true;
+			return FilterStatus.VALID;
 		}
 		log.error("Invalid workflow ID parameter " + wfid + " in GET request to " + action + " the workflow " + workflowId);
-		return false;
+		return FilterStatus.INVALID;
 	}
 
 	/**
 	 * Retrieve the workflow ID between the given start/end string in the given request path of the given method
-	 * for the given action, return true if it matches the given workflow ID; false otherwise.
+	 * for the given action, return VALID if it matches the given workflow ID; INVALID otherwise.
 	 */
-	private boolean checkWorkflowId(String path, String start, String end, String workflowId, String method, String action) {
+	private FilterStatus checkWorkflowId(String path, String start, String end, String workflowId, String method, String action) {
 		String wfid = end == null ? StringUtils.substringAfter(path, start) : StringUtils.substringBetween(path, start, end);
 		if (StringUtils.equals(wfid,  workflowId)) {
-			return true;
+			return FilterStatus.VALID;
 		}
 		log.error("Invalid workflow ID " + wfid + " in the path for " + method + " request to " + action + " the workflow " + workflowId);
-		return false;	
+		return FilterStatus.INVALID;	
 	}
 		
 }
