@@ -1,6 +1,7 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.net.HttpCookie;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,9 +67,6 @@ public class WorkflowEditProxy {
 		IGNORE;
 	}
 	
-//	// galaxySession cookie name
-//	public static final String GALAXY_SESSION_COOKIE = "galaxySession";
-
 	// Galaxy root path relative to AMP context path
 	public static final String GALAXY_ROOT = "/galaxy";
 	
@@ -78,9 +76,6 @@ public class WorkflowEditProxy {
 	// Galaxy API path relative to galaxy root path
 	public static final String GALAXY_API = "/api";
 	
-	// Galaxy workflow editor generic request paths relative to Galaxy root
-//	private static final List<String> GALAXY_PATHS = Arrays.asList();
-
 	// Galaxy workflow editor API request paths relative to Galaxy API path
 	private static final List<String> GALAXY_API_PATHS = Arrays.asList(
 			"/configuration",
@@ -118,9 +113,6 @@ public class WorkflowEditProxy {
 	@Autowired
 	private ServletContext context;
 	
-//	@Autowired
-	private RestTemplate restTemplate = new RestTemplate();
-	
 	@Autowired
 	private AmpUserService ampUserService;
 
@@ -130,6 +122,7 @@ public class WorkflowEditProxy {
 	private String csrfToken = null;
 	private String galaxySession = null;
 	private HttpCookie galaxySessionCookie = null;
+	private RestTemplate restTemplate = new RestTemplate();	
 
 	
 	/**
@@ -379,14 +372,7 @@ public class WorkflowEditProxy {
 		/* Note: 
 		 * Permission checking here is unnecessary, because only authorized users could have 
 		 * gotten a WorkflowEdit token, which will be validated by filterRequest below.
-		 */ 
-//		// check permission 
-//		// Note: Since workflow is not associated with any unit, the AC is checked against any unit
-//		boolean can = permissionService.hasPermission(ActionType.Update, TargetType.Workflow, null);
-//		if (!can) {
-//			throw new AccessDeniedException("The current user cannot update workflow in any unit.");
-//		}
-		
+		 */ 		
 	    log.debug("Proxying workflow edit request " + method + " " + request.getRequestURL() + "...");
 	    
 		// retrieve workflow edit cookie and validate it 
@@ -430,13 +416,8 @@ public class WorkflowEditProxy {
 	    });		
 //		gcookies.add(galaxySessionCookie.toString());
 		headers.put(HttpHeaders.COOKIE, gcookies);
-		
-//		// remove the Origin and Referer header to avoid cors request failure 
-//		// due to strict-origin-when-cross-origin Referrer Policy on Galaxy side
-//		headers.remove(HttpHeaders.ORIGIN);
-//		headers.remove(HttpHeaders.REFERER);
-		
-		log.debug("Galaxy request headers " + headers);			   	
+				
+		log.debug("Galaxy request headers: " + headers);			   	
 		
 		// set up request to Galaxy
 		String query = StringUtils.isEmpty(request.getQueryString()) ? "" : "?" + request.getQueryString();
@@ -459,13 +440,13 @@ public class WorkflowEditProxy {
     		gbody = ex.getResponseBodyAsByteArray();
     		gheaders = ex.getResponseHeaders();
     		gstatus = ex.getStatusCode();
-//    		gresponse = new ResponseEntity<String>(ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
 	    	log.error("Failed to process workflow edit request " + method + " " + url + " with error " + gstatus);
     	}
     	
-		log.debug("Galaxy response headers: " + gheaders + ", body length: " + gbody.length);	
-//		log.debug("Galaxy response body last line: " + gbody.substring(gbody.lastIndexOf("\n")));
-//		log.debug("response body START: \n" + response.getBody() + "\nresponse body END");
+		log.debug("Galaxy response headers: " + gheaders + ", body length: " + gbody.length);
+//		String gbodystr = new String(gbody, StandardCharsets.UTF_8);
+//		log.debug("Galaxy response body last line: " + gbodystr.substring(gbodystr.lastIndexOf("\n")));
+//		log.debug("response body START: \n" + gbodystr + "\nresponse body END");
 		
 		// remove CONTENT_LENGTH header as it could cause truncation of response body
 		// note that we can't directly modify gheaders as it's readonly
@@ -508,13 +489,6 @@ public class WorkflowEditProxy {
 		        .maxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60)
 		        .build();
 		        
-//		Cookie cookie = new Cookie(WORKFLOW_EDIT_COOKIE, wfeToken);
-//	    cookie.setSecure(true);	// TODO setting secure to true doesn't work on localhost, which uses http instead of https
-//	    cookie.setHttpOnly(true);
-//	    cookie.setPath(context.getContextPath() + GALAXY_ROOT);
-//	    cookie.setMaxAge(amppdPropertyConfig.getWorkflowEditMinutes() * 60);
-//		response.addCookie(cookie);
-
 		return rc;
 	}
 	
@@ -522,15 +496,12 @@ public class WorkflowEditProxy {
 	 * Return true if the given HTTP request is a legitimate one initiated during the workflow edit session
 	 * for the given workflow; false otherwise.
 	 */
-//	private boolean filterRequest(HttpServletRequest request, byte[] body, String workflowId) {
 	private FilterStatus filterRequest(HttpServletRequest request, String workflowId) {
 		String method = request.getMethod();		
 		String path = StringUtils.substringAfter(request.getServletPath(), GALAXY_ROOT);
-//		String payload = new String(body, StandardCharsets.UTF_8);
 				
 		// filter POST requests:
-		// the only POST request occurs when adding a tool to the workflow,
-		// and the payload contains the tool JSON
+		// the only POST request occurs when adding a tool to the workflow, and the payload contains the tool JSON
 		if (method.equals(HttpMethod.POST.toString())) {
 			// URL path must be /api/workflows/build_module
 			if (!path.equals(GALAXY_API + "/workflows/build_module")) {
@@ -542,8 +513,7 @@ public class WorkflowEditProxy {
 		}
 		
 		// filter PUT requests:
-		// the only PUT request occurs when saving the workflow,
-		// and the payload contains the workflow  JSON
+		// the only PUT request occurs when saving the workflow, and the payload contains the workflow JSON
 		if (method.equals(HttpMethod.PUT.toString())) {
 			// URL path must be /api/workflows/workflowId
 			if (!path.startsWith(GALAXY_API + "/workflows/")) {
@@ -620,8 +590,6 @@ public class WorkflowEditProxy {
 			if (GALAXY_IGNORE_PATHS.contains(path)) {
 				return FilterStatus.IGNORE;
 			}		
-
-//			log.error("Uncaptured GET request during workflow edit: " + request.getRequestURL());
 		}
 		
 		// all other requests are invalid
@@ -634,10 +602,6 @@ public class WorkflowEditProxy {
 	private boolean isWorkflowEditCookie(String cookie) {
 		return cookie.startsWith(WORKFLOW_EDIT_COOKIE);
 	}
-
-//	private boolean isHeaderWorkflowEditCookie(String key, List<String> value) {
-//		return key.equalsIgnoreCase(HttpHeaders.COOKIE) && value.size() == 1 && value.get(0).contains(WORKFLOW_EDIT_COOKIE);
-//	}
 	
 	/**
 	 * Return true if the given WFE cookie contains valid JWT token for AMP user workflow edit session; false otherwise.
