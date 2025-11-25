@@ -451,7 +451,7 @@ public class WorkflowEditProxy {
 		// note that we can't directly modify gheaders as it's readonly
     	HttpHeaders rheaders = new HttpHeaders();
     	rheaders.addAll(gheaders);
-    	rheaders.remove(HttpHeaders.CONTENT_LENGTH);
+//    	rheaders.remove(HttpHeaders.CONTENT_LENGTH);
 
     	// return workflow edit response
     	ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(gbody, rheaders, gstatus);    	
