@@ -1,7 +1,6 @@
 package edu.indiana.dlib.amppd.controller;
 
 import java.net.HttpCookie;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
