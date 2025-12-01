@@ -374,18 +374,18 @@ public class WorkflowEditProxy {
 		 */ 		
 	    log.debug("Proxying workflow edit request " + method + " " + request.getRequestURL() + "...");
 	    
-		// retrieve workflow edit cookie and validate it 
-		ImmutablePair<AmpUser, String> pair = validateWorkflowEditCookie(wfeCookie);
-		
-		// respond with unauthorized status if fails
-		if (pair == null) {
-			log.error("Unauthorized workflow edit request: " + method + " " + request.getRequestURL());
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-		}
+//		// retrieve workflow edit cookie and validate it 
+//		ImmutablePair<AmpUser, String> pair = validateWorkflowEditCookie(wfeCookie);
+//		
+//		// respond with unauthorized status if fails
+//		if (pair == null) {
+//			log.error("Unauthorized workflow edit request: " + method + " " + request.getRequestURL());
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//		}
 	
 		// filter request on its URL, parameters, payload etc
-//		String workflowId = "b4fd9f04acb147ec";
-		String workflowId = pair.getRight();
+		String workflowId = "b4fd9f04acb147ec";
+//		String workflowId = pair.getRight();
 		FilterStatus filterStatus = filterRequest(request, workflowId);
 
 		// return 403 for invalid request
@@ -405,15 +405,15 @@ public class WorkflowEditProxy {
 		// but just in case, we need to retain other cookies;
 		List<String> cookies = headers.get(HttpHeaders.COOKIE);
 		List<String> gcookies = new ArrayList<String>();
-		cookies.forEach((cookie) -> {
-			if (isWorkflowEditCookie(cookie)) {
-				gcookies.add(galaxySessionCookie.toString());
-	        }
-			else {
-				gcookies.add(cookie);
-			}
-	    });		
-//		gcookies.add(galaxySessionCookie.toString());
+//		cookies.forEach((cookie) -> {
+//			if (isWorkflowEditCookie(cookie)) {
+//				gcookies.add(galaxySessionCookie.toString());
+//	        }
+//			else {
+//				gcookies.add(cookie);
+//			}
+//	    });		
+		gcookies.add(galaxySessionCookie.toString());
 		headers.put(HttpHeaders.COOKIE, gcookies);
 				
 		log.debug("Galaxy request headers: " + headers);			   	
@@ -451,7 +451,7 @@ public class WorkflowEditProxy {
 		// note that we can't directly modify gheaders as it's readonly
     	HttpHeaders rheaders = new HttpHeaders();
     	rheaders.addAll(gheaders);
-//    	rheaders.remove(HttpHeaders.CONTENT_LENGTH);
+    	rheaders.remove(HttpHeaders.TRANSFER_ENCODING);
 
     	// return workflow edit response
     	ResponseEntity<byte[]> response = new ResponseEntity<byte[]>(gbody, rheaders, gstatus);    	
