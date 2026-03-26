@@ -6,19 +6,21 @@ HELP.md
 .apt_generated
 .classpath
 .factorypath
-.project
-.settings
 .springBeans
 .sts4-cache
-.metadata
 
 .DS_Store
 
-### IntelliJ IDEA ###
+### IDE ###
 .idea
 *.iws
 *.iml
 *.ipr
+/.vscode/
+/.settings
+/.project
+/.metadata
+/.pydevproject
 
 ### NetBeans ###
 /nbproject/private/
@@ -33,7 +35,6 @@ HELP.md
 ### application-env.properties shall not be included in VCS as it contains sensitive info
 application-*.properties
 *MyController.java
-/.pydevproject
 
 # make sure not to include compiled things.
 /bin/
