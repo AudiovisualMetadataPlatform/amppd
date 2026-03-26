@@ -44,7 +44,7 @@ def main():
     try:
         if args.clean:
             subprocess.run(['mvn', 'clean'], check=True)
-        subprocess.run(['mvn', 'install', '-DskipTests'], check=True)
+        subprocess.run(['mvn', 'install', '-DskipTests', 'U'], check=True)
     except Exception as e:
         logging.error(f"Maven build failed: {e}")
         exit(1)
