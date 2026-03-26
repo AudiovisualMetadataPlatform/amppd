@@ -34,7 +34,6 @@ HELP.md
 
 ### application-env.properties shall not be included in VCS as it contains sensitive info
 application-*.properties
-*MyController.java
 
 # make sure not to include compiled things.
 /bin/
