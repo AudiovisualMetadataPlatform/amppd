@@ -1,4 +1,5 @@
 package edu.indiana.dlib.amppd.config;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -9,15 +10,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -27,14 +27,13 @@ import com.google.common.net.HttpHeaders;
 
 import edu.indiana.dlib.amppd.security.JwtAuthenticationEntryPoint;
 import edu.indiana.dlib.amppd.security.JwtRequestFilter;
-import edu.indiana.dlib.amppd.service.PermissionService;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Slf4j
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
 	@Autowired
 	private AmppdUiPropertyConfig amppduiPropertyConfig;	
@@ -46,29 +45,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	
 	@Autowired
-	private UserDetailsService jwtUserDetailsService;
-	
-	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
 	
-	@Autowired
-	private PermissionService permissionService;	
-	
-	
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-	}
+	/*
+	 * Note: configureGlobal(AuthenticationManagerBuilder auth) is no longer required.
+	 * Spring Security 2.7+ automatically detects UserDetailsService and PasswordEncoder beans.
+	 */
 	
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 	
+	/* 
+	 * Replaced authenticationManagerBean() override with a Bean that uses 
+	 * AuthenticationConfiguration to expose the AuthenticationManager.
+	 */
 	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+		return authConfig.getAuthenticationManager();
 	}
 	
 	@Bean
@@ -102,8 +97,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	    return source;
 	}
 	
-	@Override
-	protected void configure(HttpSecurity httpSecurity) throws Exception {
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		// if authentication is turned on (either auth property is not defined or is true), add JWT token filter
 		if (amppdPropertyConfig.getAuth() == null || amppdPropertyConfig.getAuth()) {
 			// TODO recover X-Frame-Options to sameOrigin
@@ -140,6 +136,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 			.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		}
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		
+		return httpSecurity.build();
 	}
 
 }

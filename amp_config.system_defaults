@@ -5,7 +5,7 @@ rest:
     dropbox_path: dropbox
     mgm_evaluation_results_root: evaluation
     mgm_evaluation_scripts_root: mgm_scoring_tools
-    
+
     # mediaprobe directory name (relative to amp:data_root)
     mediaprobe_dir: MediaProbe
 
@@ -52,14 +52,20 @@ rest:
         spring.servlet.multipart.max-file-size: 5GB
         spring.servlet.multipart.max-request-size: 5GB
         spring.servlet.multipart.enabled: true
-        
+
         # serialization
         spring.jackson.serialization.FAIL_ON_EMPTY_BEANS: false
-        
+
+        # allow circular reference among beans in Spring Boot 2.7
+        spring.main.allow-circular-references: true
+
+        # handle Spring Boot 2.7 changes in default strategy for matching trailing slashes and wildcards
+        spring.mvc.pathmatch.matching-strategy: ANT_PATH_MATCHER
+
         # REST endpoints exposure
         spring.data.rest.detection-strategy: annotated
-        management.endpoints.web.exposure.include: '*'        
-        
+        management.endpoints.web.exposure.include: '*'
+
         # Mail
         spring.mail.host: localhost
         spring.mail.port: 25
@@ -72,7 +78,7 @@ rest:
 
         # Logging
         logging.level.edu.indiana.dlib.amppd: INFO
-        
+
         # symlink directory and python path name 
         amppd.symlinkDir: symlinks
         amppd.pythonPath: python3
@@ -95,7 +101,7 @@ rest:
         amppd.environment: dev
         amppd.auth: true
         amppd.corsOriginPatterns: http://localhost:8080        
-        
+
         # misc
         amppd.externalSources: MCO,DarkAvalon,NYPL
         amppd.taskManagers: Jira,Trello
@@ -103,4 +109,3 @@ rest:
         amppd.groundtruthSubcategories: segment_timecodes_labels,applause_timecodes_labels,stt_transcript,ner_all,ner_all-aws,ner_all_spacy,ner_unique,ner_unique_aws,ner_unique_spacy,shots_timecodes_labels,face_timecodes,face_labels,vocr_timecodes_texts,vocr_timecodes,vocr_texts,vocr_unique_texts,ner_all_common,ner_unique_common
         amppd.unitRoles: Unit Staff,Unit Helper
         amppd.roleAssignmentMaxLevel: 2 
-
