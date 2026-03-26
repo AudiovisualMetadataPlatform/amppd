@@ -172,7 +172,7 @@ public class JobServiceTests {
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
     	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
-    	Assert.assertNotNull(woutputs.getOutputIds());
+    	Assert.assertNotNull(woutputs.getId());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
     	jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
@@ -197,7 +197,7 @@ public class JobServiceTests {
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
     	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
-    	Assert.assertNotNull(woutputs.getOutputIds());    
+    	Assert.assertNotNull(woutputs.getId());    
     }
     
     @Test(expected = StorageException.class)
@@ -274,13 +274,7 @@ public class JobServiceTests {
     	String stepId = null;
     	String datasetId = null;
     	
-    	if (invocation instanceof WorkflowOutputs) {
-        	// retrieve the stepId/outputId using the IDs contained in the workflow outputs after running the AMP job
-    		WorkflowOutputs woutputs = (WorkflowOutputs)invocation;
-    		stepId = woutputs.getSteps().get(2).getId();
-    		datasetId = woutputs.getOutputIds().get(1);
-    	}
-    	else {
+    	if (!(invocation instanceof InvocationDetails)) {
         	// retrieve the stepId/outputId using the IDs contained in the invocation details returned by querying the AMP job
     		InvocationDetails idetails = (InvocationDetails)jobService.getWorkflowsClient().showInvocation(workflowDetails.getId(), invocation.getId(), true);
     		stepId = idetails.getSteps().get(2).getId();

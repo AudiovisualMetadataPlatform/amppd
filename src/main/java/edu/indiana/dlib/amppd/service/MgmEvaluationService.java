@@ -40,6 +40,13 @@ public interface MgmEvaluationService {
     public List<MgmEvaluationTest> deleteEvaluationOutputs(WorkflowResult workflowResult);
     
     /**
+     * Delete all MgmEvaluationTest output files associated with the specified workflowResults if any.
+     * @param workflowResultIds the list of IDs of the specified workflowResults
+     * @return the list of MgmEvaluationTests associated with the workflowResults 
+     */
+    public List<MgmEvaluationTest> deleteEvaluationOutputs(List<Long> workflowResultIds);
+
+    /**
      * Delete all MgmEvaluationTest output files associated with the specified supplement if applicable, i.e.
      * if the supplement is a groundtruth associated with MgmEvaluationTests.
      * @param supplement the specified supplement

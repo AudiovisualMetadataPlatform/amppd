@@ -36,15 +36,15 @@ public class GalaxyPropertyConfig {
      * Get the base URL of Galaxy application at the original root ("/")
      * @return
      */
-    public String getBaseUrl() {
+    public String getRootUrl() {
     	return "http://" + host + ':' + port;
     }
 
     /**
-     * Get the base URL of Galaxy application at the mounted root.
+     * Get the base URL of Galaxy application at the mounted root with URL path prefix.
      * @return
      */
-    public String getRootUrl() {
+    public String getBaseUrl() {
     	return "http://" + host + ':' + port + root;
     }
     

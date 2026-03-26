@@ -427,6 +427,24 @@ public class MgmEvaluationServiceImpl implements MgmEvaluationService {
     }
     
     /**
+     * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(List<Long>)
+     */
+    @Override
+	@Transactional	
+    public List<MgmEvaluationTest> deleteEvaluationOutputs(List<Long> workflowResultIds) {
+    	// retrieve the evaluation tests associated with the list of workflowResults by their IDs 
+    	List<MgmEvaluationTest> mets = mgmEvalRepo.findByWorkflowResultIdIn(workflowResultIds);
+    	
+    	// delete all of the output files for the retrieved tests
+    	for (MgmEvaluationTest met : mets) {
+    		deleteEvaluationOutput(met);
+    	}
+    	
+    	log.info("Successfully deleted output files for " + mets.size() + " MgmEvaluationTests assoicated with " + workflowResultIds.size() +" workflowResults.");    			
+    	return mets;    	
+    }
+    
+    /**
      * @see edu.indiana.dlib.amppd.service.MgmEvaluationService.deleteEvaluationOutputs(Supplement)
      */
     @Override

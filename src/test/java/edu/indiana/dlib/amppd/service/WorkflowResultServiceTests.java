@@ -84,7 +84,7 @@ public class WorkflowResultServiceTests {
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
     	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
-    	Assert.assertNotNull(woutputs.getOutputIds());
+    	Assert.assertNotNull(woutputs.getId());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
     	jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
@@ -106,8 +106,7 @@ public class WorkflowResultServiceTests {
 	@Test
 	public void shouldReturnRows() {
 
-		CreateJobResponse r = 
-    			jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
+		CreateJobResponse r = jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());
 
 		WorkflowOutputs woutputs = r.getOutputs();
     	// now the dataset ID and history ID shall be set
@@ -119,7 +118,7 @@ public class WorkflowResultServiceTests {
     	Assert.assertNotNull(woutputs);
     	Assert.assertNotNull(woutputs.getHistoryId());
     	Assert.assertEquals(woutputs.getHistoryId(), pf.getHistoryId());
-    	Assert.assertNotNull(woutputs.getOutputIds());
+    	Assert.assertNotNull(woutputs.getId());
     	
     	// on subsequence workflow invocation on this primaryfile, the same uploaded dataset shall be reused
     	jobService.createJob(workflowDetails, primaryfile.getId(), new HashMap<String, Map<String, String>>());

@@ -22,14 +22,15 @@ import org.springframework.web.multipart.MultipartFile;
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
 import com.github.jmchilton.blend4j.galaxy.WorkflowsClient;
 import com.github.jmchilton.blend4j.galaxy.beans.Dataset;
-import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.Invocation;
+import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowDetails;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.ExistingHistory;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.InputSourceType;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInput;
+import com.github.jmchilton.blend4j.galaxy.beans.WorkflowInputs.WorkflowInputValue;
 import com.github.jmchilton.blend4j.galaxy.beans.WorkflowOutputs;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -151,18 +152,23 @@ public class JobServiceImpl implements JobService {
 		 */
 		if (primaryfile.getDatasetId() == null) {    	
 	    	// at this point the primaryfile shall have been created and its media file uploaded into Amppd file system
-	    	if (primaryfile.getPathname() == null || primaryfile.getPathname().isEmpty()) {
+			String pathname = primaryfile.getPathname();
+	    	if (StringUtils.isEmpty(pathname)) {
 	    		throw new StorageException("Primaryfile " + primaryfile.getId() + " hasn't been uploaded to AMPPD file system");
 	    	}
 	    	
-	    	// upload the primaryfile into Galaxy data library, the returned result is a GalaxyObject containing the ID and URL of the dataset uploaded
-	    	String pathname = fileStorageService.absolutePathName(primaryfile.getPathname());
-	    	GalaxyObject go = galaxyDataService.uploadFileToGalaxy(pathname);	
-	    	
+	    	// upload the primaryfile into Galaxy data library, the returned result is a JobInputOutput containing the ID of the dataset uploaded
+	    	String fullpath = fileStorageService.absolutePathName(primaryfile.getPathname());
+	    	JobInputOutput uploadedData = galaxyDataService.uploadFileToGalaxy(fullpath);			  
+
 	    	// set flag to save the dataset ID in primaryfile for future reuse
-	    	primaryfile.setDatasetId(go.getId());
-	    	save = true;
+	    	primaryfile.setDatasetId(uploadedData.getId());
+	    	save = true;	
 		}
+		
+		// Note: It is possible that uploading primaryfile succeeds, but creating history fails, in which case
+		// the datasetId field will be populated, but the historyId field won't; to be sure, the latter or both 
+		// fields can be checked to decide if the primaryfile has been submitted for any workflow.
 		
 		// if the output history hasn't been created for this primaryfile, i.e. it's the first time any workflow is run against it, create a new history for it
 		if (primaryfile.getHistoryId() == null) {   
@@ -170,7 +176,7 @@ public class JobServiceImpl implements JobService {
 			// thus, if the historyId is null, it means the output history for this primaryfile doesn't exist in Galaxy yet, and vice versa
 			History history = new History(primaryfile.getId() + ": " + primaryfile.getName());
 			try {
-				history = galaxyDataService.getHistoriesClient().create(history);
+				history = historiesClient.create(history);
 		    	primaryfile.setHistoryId(history.getId());		
 		    	save = true;
 				log.info("Initialized the Galaxy output history " + history.getId() + " for primaryfile " + primaryfile.getId());
@@ -197,12 +203,13 @@ public class JobServiceImpl implements JobService {
 	 * if primaryfile is required as one input, its MIMI type must match the format specified in the workflow;  
 	 * all results exist and share the same primaryfileId and historyId, and share those with primaryfile is provided; 
 	 * furthermore, each result data type must match the corresponding input format.
-	 * If all results are valid, add their outputIds to the given list, and return the shared primaryfile; 
+	 * If all results are valid, add their outputIds to the given list, update create job response, and return the shared primaryfile; 
 	 * otherwise throw exception.
 	 * @param workflowDetails the given workflowDetails with input details
 	 * @param primaryfile ID the given primaryfile, could be null
 	 * @param resultIds array of the IDs of the given workflow results, assumed not null but could be empty
 	 * @param outputIds list of the outputIds of the given workflow results. assumed to be initialized to empty list
+	 * @param response CreateJobResponse containing detailed information for the job submitted
 	 */
 	protected Primaryfile retrieveSharedPrimaryfileValidateOutputs(WorkflowDetails workflowDetails, Primaryfile primaryfile, Long[] resultIds, List<String> outputIds, CreateJobResponse response) {
 		Long primaryfileId = primaryfile == null ? null : primaryfile.getId();
@@ -340,18 +347,18 @@ public class JobServiceImpl implements JobService {
 			// primaryfile is a required input, insert the input as the current one, and advance the current index by 1
 			if (index.intValue() == primaryfileIndex.intValue()) {
 				String inputId = (index++).toString();
-				WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+				WorkflowInput winput = new WorkflowInput(new WorkflowInputValue(datasetId, InputSourceType.LDDA));
 				winputs.setInput(inputId, winput);
 			}
 			// add result input
 			String inputId = (index++).toString();
-			WorkflowInput winput = new WorkflowInput(outputId, InputSourceType.HDA);
+			WorkflowInput winput = new WorkflowInput(new WorkflowInputValue(outputId, InputSourceType.HDA));
 			winputs.setInput(inputId, winput);		
 		}
 		// in case primaryfile input is the last input, add it after all results inputs
 		if (index.intValue() == primaryfileIndex.intValue()) {
 			String inputId = (index++).toString();
-			WorkflowInput winput = new WorkflowInput(datasetId, InputSourceType.LDDA);
+			WorkflowInput winput = new WorkflowInput(new WorkflowInputValue(datasetId, InputSourceType.LDDA));
 			winputs.setInput(inputId, winput);
 		}
 		
@@ -645,14 +652,14 @@ public class JobServiceImpl implements JobService {
     		populateMgmParameters(workflowDetails, primaryfile, winputs.getParameters());
     		msg_param = ", parameters (system updated): " + winputs.getParameters();
     		WorkflowOutputs woutputs = workflowsClient.runWorkflow(winputs);    		
-    		
+    		log.info("Successfully created " + msg + msg_param);
+        	log.info("Workflow invocation ID: " + woutputs.getId());
+    		    		
     		// add workflow results to the table for the newly created invocation
     		workflowResultService.addWorkflowResults(woutputs, workflowDetails, primaryfile);
     		
     		// update response with success job creation status
     		response.setStatus(true, "", woutputs);
-    		log.info("Successfully created " + msg + msg_param);
-        	log.info("Galaxy workflow outputs: " + woutputs.getOutputIds());
     	}
     	catch (Exception e) {  
     		String error = "";

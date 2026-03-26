@@ -9,16 +9,20 @@ import org.springframework.stereotype.Service;
 
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
+import com.github.jmchilton.blend4j.galaxy.JobsClient;
 import com.github.jmchilton.blend4j.galaxy.LibrariesClient;
 import com.github.jmchilton.blend4j.galaxy.beans.FilesystemPathsLibraryUpload;
-import com.github.jmchilton.blend4j.galaxy.beans.GalaxyObject;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
+import com.github.jmchilton.blend4j.galaxy.beans.Job;
+import com.github.jmchilton.blend4j.galaxy.beans.JobDetails;
+import com.github.jmchilton.blend4j.galaxy.beans.JobInputOutput;
 import com.github.jmchilton.blend4j.galaxy.beans.Library;
 import com.github.jmchilton.blend4j.galaxy.beans.LibraryContent;
 
 import edu.indiana.dlib.amppd.exception.GalaxyDataException;
 import edu.indiana.dlib.amppd.service.GalaxyApiService;
 import edu.indiana.dlib.amppd.service.GalaxyDataService;
+import edu.indiana.dlib.amppd.web.GalaxyJobState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,6 +51,9 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	private HistoriesClient historiesClient;
 	
 	@Getter
+	private JobsClient jobsClient;
+		
+	@Getter
 	private Library sharedLibrary;
 
 	@Getter
@@ -60,6 +67,7 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		galaxyInstance = galaxyApiService.getGalaxyInstance();
 		librariesClient = galaxyInstance.getLibrariesClient();
 		historiesClient = galaxyInstance.getHistoriesClient();
+		jobsClient = galaxyInstance.getJobsClient();
 
 		// if the amppd shared data library already exists, don't create another one
 		Library library = getLibrary(SHARED_LIBARY_NAME);
@@ -149,8 +157,8 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String,String)
 	 */
-	public GalaxyObject uploadFileToGalaxy(String filePath, String libraryName) {
-		GalaxyObject uploadData = null;
+	public JobInputOutput uploadFileToGalaxy(String filePath, String libraryName) {
+		JobInputOutput uploadedData = null;
 		String msg = "Uploading file from Amppd file system to Galaxy data library... File path: " + filePath + ", Galaxy Library:" + libraryName;
 		log.info(msg);
 
@@ -160,16 +168,36 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 		if (matchingLibrary != null) {
 			final LibraryContent rootFolder = librariesClient.getRootFolder(matchingLibrary.getId());
 			final FilesystemPathsLibraryUpload upload = new FilesystemPathsLibraryUpload();
-			upload.setContent(filePath);
-			upload.setLinkData(true);
-			upload.setFolderId(rootFolder.getId());
+			upload.setContent(filePath);			// path to file to be uploaded
+			upload.setLinkData(true);				// use symlink instead of copying file into library folder
+			upload.setFolderId(rootFolder.getId());	// ID of the root folder of the library to upload file to
 			try {
-				uploadData = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
-				msg = "Upload completed.";
+		    	// since Galaxy 25.0, the returned GalaxyObject from upload is the upload job instead of the created dataset,
+		    	// the latter can be obtained as the only output of the job, with its details retrievable via the job ID				
+				Job uploadJob = librariesClient.uploadFilesystemPaths(matchingLibrary.getId(), upload);
+				JobDetails jobDetails = jobsClient.showJob(uploadJob.getId());
+				GalaxyJobState gjs = GalaxyJobState.getJobState(jobDetails.getState()); 
+				
+				// since job is executed asynchronously, we need to wait till it's done before returning the uploaded dataset;
+				// otherwise if upload fails, the primaryfile can be stuck with an invalid dataset ID.
+				while (GalaxyJobState.RUNNING_STATUSES.contains(gjs)) {
+	    			Thread.sleep(1000);
+	    			jobDetails = jobsClient.showJob(uploadJob.getId());
+	    			gjs = GalaxyJobState.getJobState(jobDetails.getState()); 
+	    		}
+				
+				// if upload fails, throw exception
+				if (gjs != GalaxyJobState.COMPLETE) {
+					throw new GalaxyDataException("Galaxy upload job " + uploadJob.getId() + " failed.");
+				}
+				
+				// otherwise return upload job output
+		    	uploadedData = jobDetails.getOutputs().values().iterator().next();								
+				msg = "Upload succeeded, upload file to dataset " + uploadedData.getId();
 				log.info(msg);
 			}
 			catch (Exception e) {
-				msg = "Upload failed. " + e.getMessage();
+				msg = "Upload failed due to error: " + e.getMessage();
 				log.error(msg);
 				throw new GalaxyDataException(msg, e);
 			}
@@ -179,13 +207,13 @@ public class GalaxyDataServiceImpl implements GalaxyDataService {
 			throw new GalaxyDataException(msg);
 		}
 
-		return uploadData;
+		return uploadedData;
 	}		
 			
 	/**
 	 * @see edu.indiana.dlib.amppd.service.GalaxyDataService.uploadFileToGalaxy(String)
 	 */
-	public GalaxyObject uploadFileToGalaxy(String filePath) {
+	public JobInputOutput uploadFileToGalaxy(String filePath) {
 		return uploadFileToGalaxy(filePath, SHARED_LIBARY_NAME);
 	}
 	
